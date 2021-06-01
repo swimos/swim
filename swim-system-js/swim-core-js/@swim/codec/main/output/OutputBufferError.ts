@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,9 @@ import {OutputBuffer} from "./OutputBuffer";
 
 /** @hidden */
 export class OutputBufferError extends OutputBuffer<never> {
+  /** @hidden */
+  readonly error!: Error;
+
   constructor(error: Error, settings: OutputSettings) {
     super();
     Object.defineProperty(this, "error", {
@@ -30,35 +33,35 @@ export class OutputBufferError extends OutputBuffer<never> {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return false;
   }
 
-  isFull(): boolean {
+  override isFull(): boolean {
     return false;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return false;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return true;
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return false;
   }
 
-  asPart(part: boolean): OutputBuffer<never> {
+  override asPart(part: boolean): OutputBuffer<never> {
     return this;
   }
 
-  get index(): number {
+  override get index(): number {
     return 0;
   }
 
-  withIndex(index: number): OutputBuffer<never> {
+  override withIndex(index: number): OutputBuffer<never> {
     if (index === 0) {
       return this;
     } else {
@@ -66,11 +69,11 @@ export class OutputBufferError extends OutputBuffer<never> {
     }
   }
 
-  get limit(): number {
+  override get limit(): number {
     return 0;
   }
 
-  withLimit(limit: number): OutputBuffer<never> {
+  override withLimit(limit: number): OutputBuffer<never> {
     if (limit === 0) {
       return this;
     } else {
@@ -78,37 +81,37 @@ export class OutputBufferError extends OutputBuffer<never> {
     }
   }
 
-  get capacity(): number {
+  override get capacity(): number {
     return 0;
   }
 
-  get remaining(): number {
+  override get remaining(): number {
     return 0;
   }
 
-  has(index: number): boolean {
+  override has(index: number): boolean {
     return false;
   }
 
-  get(index: number): number {
+  override get(index: number): number {
     throw new OutputException();
   }
 
-  set(index: number, token: number): void {
+  override set(index: number, token: number): void {
     throw new OutputException();
   }
 
-  write(token: number): OutputBuffer<never>;
-  write(string: string): OutputBuffer<never>;
-  write(tokenOrString: number | string): OutputBuffer<never> {
+  override write(token: number): OutputBuffer<never>;
+  override write(string: string): OutputBuffer<never>;
+  override write(tokenOrString: number | string): OutputBuffer<never> {
     return this;
   }
 
-  writeln(string?: string): OutputBuffer<never> {
+  override writeln(string?: string): OutputBuffer<never> {
     return this;
   }
 
-  step(offset: number = 1): OutputBuffer<never> {
+  override step(offset: number = 1): OutputBuffer<never> {
     if (offset === 0) {
       return this;
     } else {
@@ -116,25 +119,22 @@ export class OutputBufferError extends OutputBuffer<never> {
     }
   }
 
-  bind(): never {
+  override bind(): never {
     throw new OutputException();
   }
 
-  /** @hidden */
-  declare readonly error: Error;
-
-  trap(): Error {
+  override trap(): Error {
     return this.error;
   }
 
-  declare readonly settings: OutputSettings;
+  override readonly settings!: OutputSettings;
 
-  withSettings(settings: AnyOutputSettings): OutputBuffer<never> {
+  override withSettings(settings: AnyOutputSettings): OutputBuffer<never> {
     settings = OutputSettings.fromAny(settings);
     return new OutputBufferError(this.error, settings);
   }
 
-  clone(): OutputBuffer<never> {
+  override clone(): OutputBuffer<never> {
     return this;
   }
 }

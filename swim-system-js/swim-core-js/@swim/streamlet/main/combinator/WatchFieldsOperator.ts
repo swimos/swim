@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import {KeyEffect} from "../KeyEffect";
 import {AbstractMapInlet} from "../AbstractMapInlet";
 
 export abstract class WatchFieldsOperator<K, V, O> extends AbstractMapInlet<K, V, O> {
-  protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
+  protected override onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
     if (effect === KeyEffect.Update) {
       const input = this.input;
       if (input !== null) {

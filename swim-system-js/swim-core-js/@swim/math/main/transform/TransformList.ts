@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import {Murmur3, Constructors} from "@swim/util";
 import type {Output} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item, Value, Record} from "@swim/structure";
-import {PointR2} from "../r2/PointR2";
+import {R2Point} from "../r2/R2Point";
 import {Transform} from "./Transform";
 import {AffineTransform} from "./AffineTransform";
 import {IdentityTransform} from "./IdentityTransform";
@@ -36,11 +36,11 @@ export class TransformList extends Transform {
     });
   }
 
-  declare readonly transforms: ReadonlyArray<Transform>;
+  readonly transforms!: ReadonlyArray<Transform>;
 
-  transform(that: Transform): Transform;
-  transform(x: number, y: number): PointR2;
-  transform(x: Transform | number, y?: number): Transform | PointR2 {
+  override transform(that: Transform): Transform;
+  override transform(x: number, y: number): R2Point;
+  override transform(x: Transform | number, y?: number): Transform | R2Point {
     if (arguments.length === 1) {
       if (x instanceof IdentityTransform) {
         return this;
@@ -56,11 +56,11 @@ export class TransformList extends Transform {
         x = xi;
         y = yi;
       }
-      return new PointR2(x as number, y!);
+      return new R2Point(x as number, y!);
     }
   }
 
-  transformX(x: number, y: number): number {
+  override transformX(x: number, y: number): number {
     const transforms = this.transforms;
     for (let i = 0, n = transforms.length; i < n; i += 1) {
       const transform = transforms[i]!;
@@ -72,7 +72,7 @@ export class TransformList extends Transform {
     return x;
   }
 
-  transformY(x: number, y: number): number {
+  override transformY(x: number, y: number): number {
     const transforms = this.transforms;
     for (let i = 0, n = transforms.length; i < n; i += 1) {
       const transform = transforms[i]!;
@@ -84,7 +84,7 @@ export class TransformList extends Transform {
     return y;
   }
 
-  inverse(): Transform {
+  override inverse(): Transform {
     const transforms = this.transforms;
     const n = transforms.length;
     const inverseTransforms = new Array<Transform>(n);
@@ -94,7 +94,7 @@ export class TransformList extends Transform {
     return new TransformList(inverseTransforms);
   }
 
-  toAffine(): AffineTransform {
+  override toAffine(): AffineTransform {
     let matrix = AffineTransform.identity();
     const transforms = this.transforms;
     for (let i = 0, n = transforms.length; i < n; i += 1) {
@@ -103,14 +103,14 @@ export class TransformList extends Transform {
     return matrix;
   }
 
-  toCssTransformComponent(): CSSTransformComponent | null {
+  override toCssTransformComponent(): CSSTransformComponent | null {
     if (typeof CSSTranslate !== "undefined") {
       return new CSSMatrixComponent(this.toMatrix());
     }
     return null;
   }
 
-  toCssValue(): CSSStyleValue | null {
+  override toCssValue(): CSSStyleValue | null {
     if (typeof CSSTransformValue !== "undefined") {
       const transforms = this.transforms;
       const n = transforms.length;
@@ -129,7 +129,7 @@ export class TransformList extends Transform {
     return null;
   }
 
-  toValue(): Value {
+  override toValue(): Value {
     const transforms = this.transforms;
     const n = transforms.length;
     const record = Record.create(n);
@@ -139,10 +139,10 @@ export class TransformList extends Transform {
     return record;
   }
 
-  interpolateTo(that: TransformList): Interpolator<TransformList>;
-  interpolateTo(that: Transform): Interpolator<Transform>;
-  interpolateTo(that: unknown): Interpolator<Transform> | null;
-  interpolateTo(that: unknown): Interpolator<Transform> | null {
+  override interpolateTo(that: TransformList): Interpolator<TransformList>;
+  override interpolateTo(that: Transform): Interpolator<Transform>;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null {
     if (that instanceof TransformList) {
       return TransformListInterpolator(this, that);
     } else {
@@ -150,7 +150,7 @@ export class TransformList extends Transform {
     }
   }
 
-  conformsTo(that: Transform): boolean {
+  override conformsTo(that: Transform): boolean {
     if (that instanceof TransformList) {
       const n = this.transforms.length;
       if (n === that.transforms.length) {
@@ -165,7 +165,7 @@ export class TransformList extends Transform {
     return false;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (that instanceof TransformList) {
       const n = this.transforms.length;
       if (n === that.transforms.length) {
@@ -180,7 +180,7 @@ export class TransformList extends Transform {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (that instanceof TransformList) {
       const n = this.transforms.length;
       if (n === that.transforms.length) {
@@ -195,7 +195,7 @@ export class TransformList extends Transform {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     let hashValue = Constructors.hash(TransformList);
     const transforms = this.transforms;
     for (let i = 0, n = transforms.length; i < n; i += 1) {
@@ -204,7 +204,7 @@ export class TransformList extends Transform {
     return Murmur3.mash(hashValue);
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Transform").write(46/*'.'*/).write("list").write(40/*'('*/);
     const transforms = this.transforms;
     const n = transforms.length;
@@ -218,9 +218,9 @@ export class TransformList extends Transform {
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
-  toString(): string {
+  override toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       const transforms = this.transforms;
@@ -243,7 +243,7 @@ export class TransformList extends Transform {
     return stringValue;
   }
 
-  toAttributeString(): string {
+  override toAttributeString(): string {
     const transforms = this.transforms;
     const n = transforms.length;
     if (n > 0) {
@@ -258,7 +258,7 @@ export class TransformList extends Transform {
     }
   }
 
-  static fromAny(value: TransformList | string): TransformList {
+  static override fromAny(value: TransformList | string): TransformList {
     if (value === void 0 || value === null || value instanceof TransformList) {
       return value;
     } else if (typeof value === "string") {
@@ -267,7 +267,7 @@ export class TransformList extends Transform {
     throw new TypeError("" + value);
   }
 
-  static fromValue(value: Value): TransformList | null {
+  static override fromValue(value: Value): TransformList | null {
     const transforms: Transform[] = [];
     value.forEach(function (item: Item) {
       const transform = Transform.fromValue(item.toValue());
@@ -281,7 +281,7 @@ export class TransformList extends Transform {
     return null;
   }
 
-  static parse(string: string): TransformList {
+  static override parse(string: string): TransformList {
     const transform = Transform.parse(string);
     if (transform instanceof TransformList) {
       return transform;

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,10 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     super();
   }
 
+  override isDefinite(): boolean {
+    return !this.isEmpty();
+  }
+
   /**
    * Returns `true` if this `Record` has no members.
    */
@@ -61,7 +65,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   /**
    * Returns the number of members contained in this `Record`.
    */
-  abstract get length(): number;
+  abstract override get length(): number;
 
   /**
    * Returns the number of [[Field]] members contained in this `Record`.
@@ -81,7 +85,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return count;
   }
 
-  isConstant(): boolean {
+  override isConstant(): boolean {
     return this.forEach(function (member: Item): boolean | undefined {
       return member.isConstant() ? void 0 : false;
     }, this) === void 0;
@@ -96,7 +100,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * structure.  The `tag` can be used to discern the nominal type of a
    * polymorphic structure, similar to an XML element tag.
    */
-  get tag(): string | undefined {
+  override get tag(): string | undefined {
     const item = this.head();
     if (item instanceof Attr) {
       return item.key.value;
@@ -112,7 +116,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * attributed structure is a `Record` with one or more attributes that modify
    * one or more other members.
    */
-  get target(): Value {
+  override get target(): Value {
     let value: Value | undefined;
     let record: Record | undefined;
     let modified = false;
@@ -151,7 +155,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * Used to convert a unary `Record` into its member `Value`.  Facilitates
    * writing code that treats a unary `Record` equivalently to a bare `Value`.
    */
-  flattened(): Value {
+  override flattened(): Value {
     if (this.isEmpty()) {
       return Value.extant();
     } else {
@@ -169,7 +173,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   /**
    * Returns this `Record`.
    */
-  unflattened(): Record {
+  override unflattened(): Record {
     return this;
   }
 
@@ -185,7 +189,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * be used to check if a structure might conform to a nominal type named
    * `tag`, while simultaneously getting the value of the `tag` attribute.
    */
-  header(tag: string): Value {
+  override header(tag: string): Value {
     const head = this.head();
     if (head instanceof Attr && head.key.value === tag) {
       return head.value;
@@ -200,7 +204,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * like the attributes of an XML element tag; through unlike an XML element,
    * `tag` attribute headers are not limited to string keys and values.
    */
-  headers(tag: string): Record | undefined {
+  override headers(tag: string): Record | undefined {
     const head = this.head();
     if (head instanceof Attr && head.key.value === tag) {
       const header = head.value;
@@ -217,7 +221,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * Returns the first member of this `Record`, if this `Record` is non-empty;
    * otherwise returns [[Absent]].
    */
-  head(): Item {
+  override head(): Item {
     return this.forEach(function (item: Item): Item {
       return item;
     }, this) || Item.absent();
@@ -228,7 +232,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * `Record` is non-empty; otherwise returns an empty `Record`, if this
    * `Record` is itself empty.
    */
-  tail(): Record {
+  override tail(): Record {
     const tail = Record.create();
     this.forEach(function (item: Item, index: number): void {
       if (index > 0) {
@@ -244,7 +248,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * with its last `Value`, rather than a unary `Record` containing its last
    * value, if the structure ends with a `Value` member.
    */
-  body(): Value {
+  override body(): Value {
     const tail = this.tail();
     if (!tail.isEmpty()) {
       return tail.flattened();
@@ -258,7 +262,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * equal to the given `key`; otherwise returns `false` if this `Record` has
    * no `Field` member with a key equal to the given `key`.
    */
-  has(key: AnyValue): boolean {
+  override has(key: AnyValue): boolean {
     key = Value.fromAny(key);
     return this.forEach(function (item: Item): boolean | undefined {
       return item instanceof Field && item.key.equals(key) ? true : void 0;
@@ -299,7 +303,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * is equal to the given `key`; returns [[Absent]] if this `Record` has no
    * `Field` member with a key equal to the given `key`.
    */
-  get(key: AnyValue): Value {
+  override get(key: AnyValue): Value {
     key = Value.fromAny(key);
     return this.forEach(function (item: Item): Value | undefined {
       return item instanceof Field && item.key.equals(key) ? item.value : void 0;
@@ -311,7 +315,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * is equal to the given `key`; returns [[Absent]] if this `Record` has no
    * `Attr` member with a key equal to the given `key`.
    */
-  getAttr(key: AnyText): Value {
+  override getAttr(key: AnyText): Value {
     key = Text.fromAny(key);
     return this.forEach(function (item: Item): Value | undefined {
       return item instanceof Attr && item.key.equals(key) ? item.value : void 0;
@@ -323,7 +327,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * is equal to the given `key`; returns [[Absent]] if this `Record` has no
    * `Slot` member with a key equal to the given `key`.
    */
-  getSlot(key: AnyValue): Value {
+  override getSlot(key: AnyValue): Value {
     key = Value.fromAny(key);
     return this.forEach(function (item: Item): Value | undefined {
       return item instanceof Slot && item.key.equals(key) ? item.value : void 0;
@@ -335,7 +339,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * the given `key`; returns `undefined` if this `Record` has no `Field` member
    * with a `key` equal to the given `key`.
    */
-  getField(key: AnyValue): Field | undefined {
+  override getField(key: AnyValue): Field | undefined {
     key = Value.fromAny(key);
     return this.forEach(function (item: Item): Field | undefined {
       return item instanceof Field && item.key.equals(key) ? item : void 0;
@@ -348,7 +352,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    * length]] of this `Record`; otherwise returns [[Absent]] if the `index` is
    * out of bounds.
    */
-  abstract getItem(index: AnyNum): Item;
+  abstract override getItem(index: AnyNum): Item;
 
   set(key: AnyValue, newValue: AnyValue): this {
     key = Value.fromAny(key);
@@ -421,7 +425,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
    */
   abstract setItem(index: number, item: AnyItem): this;
 
-  updated(key: AnyValue, value: AnyValue): Record {
+  override updated(key: AnyValue, value: AnyValue): Record {
     key = Value.fromAny(key);
     value = Value.fromAny(value);
     const record = this.isMutable() ? this : this.branch();
@@ -442,7 +446,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return record;
   }
 
-  updatedAttr(key: AnyText, value: AnyValue): Record {
+  override updatedAttr(key: AnyText, value: AnyValue): Record {
     key = Text.fromAny(key);
     value = Value.fromAny(value);
     const record = this.isMutable() ? this : this.branch();
@@ -463,7 +467,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return record;
   }
 
-  updatedSlot(key: AnyValue, value: AnyValue): Record {
+  override updatedSlot(key: AnyValue, value: AnyValue): Record {
     key = Value.fromAny(key);
     value = Value.fromAny(value);
     const record = this.isMutable() ? this : this.branch();
@@ -492,25 +496,25 @@ export abstract class Record extends Value implements Builder<Item, Record> {
 
   abstract clear(): void;
 
-  appended(...items: AnyItem[]): Record {
+  override appended(...items: AnyItem[]): Record {
     const record = this.isMutable() ? this : this.branch();
     record.push(...items);
     return record;
   }
 
-  prepended(...items: AnyItem[]): Record {
+  override prepended(...items: AnyItem[]): Record {
     const record = this.isMutable() ? this : this.branch();
     record.splice(0, 0, ...items);
     return record;
   }
 
-  deleted(key: AnyValue): Record {
+  override deleted(key: AnyValue): Record {
     const record = this.isMutable() ? this : this.branch();
     record.delete(key);
     return record;
   }
 
-  concat(...items: AnyItem[]): Record {
+  override concat(...items: AnyItem[]): Record {
     const record = this.isMutable() ? this : this.branch();
     for (let i = 0, n = items.length; i < n; i += 1) {
       Item.fromAny(items[i]).forEach(function (item: Item): void {
@@ -556,7 +560,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return this;
   }
 
-  evaluate(interpreter: AnyInterpreter): Record {
+  override evaluate(interpreter: AnyInterpreter): Record {
     interpreter = Interpreter.fromAny(interpreter);
     const scope = Record.create();
     interpreter.pushScope(scope);
@@ -574,7 +578,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return changed ? scope : this;
   }
 
-  substitute(interpreter: AnyInterpreter): Record {
+  override substitute(interpreter: AnyInterpreter): Record {
     interpreter = Interpreter.fromAny(interpreter);
     const scope = Record.create();
     interpreter.pushScope(scope);
@@ -592,9 +596,9 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return changed ? scope : this;
   }
 
-  stringValue(): string | undefined;
-  stringValue<T>(orElse: T): string | T;
-  stringValue<T>(orElse?: T): string | T | undefined {
+  override stringValue(): string | undefined;
+  override stringValue<T>(orElse: T): string | T;
+  override stringValue<T>(orElse?: T): string | T | undefined {
     let recordString = "";
     const defined = this.forEach(function (item: Item): null | void {
       if (item instanceof Value) {
@@ -609,7 +613,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return defined ? recordString : void 0;
   }
 
-  toAny(): AnyValue {
+  override toAny(): AnyValue {
     if (!this.isEmpty() && this.isArray()) {
       return this.toArray();
     } else {
@@ -653,19 +657,19 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return object;
   }
 
-  isAliased(): boolean {
+  override isAliased(): boolean {
     return false;
   }
 
-  isMutable(): boolean {
+  override isMutable(): boolean {
     return true;
   }
 
-  alias(): void {
+  override alias(): void {
     // nop
   }
 
-  branch(): Record {
+  override branch(): Record {
     const branch = Record.create();
     this.forEach(function (item: Item): void {
       branch.push(item);
@@ -673,7 +677,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return branch;
   }
 
-  clone(): Record {
+  override clone(): Record {
     const clone = Record.create();
     this.forEach(function (item: Item): void {
       clone.push(item.clone());
@@ -681,7 +685,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return clone;
   }
 
-  commit(): this {
+  override commit(): this {
     return this;
   }
 
@@ -716,18 +720,18 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return record;
   }
 
-  abstract forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
-  abstract forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
-                         thisArg: S): T | undefined;
+  abstract override forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  abstract override forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                                  thisArg: S): T | undefined;
 
-  iterator(): Cursor<Item> {
+  override iterator(): Cursor<Item> {
     return new RecordCursor(this);
   }
 
-  interpolateTo(that: Record): Interpolator<Record>;
-  interpolateTo(that: Item): Interpolator<Item>;
-  interpolateTo(that: unknown): Interpolator<Item> | null;
-  interpolateTo(that: unknown): Interpolator<Item> | null {
+  override interpolateTo(that: Record): Interpolator<Record>;
+  override interpolateTo(that: Item): Interpolator<Item>;
+  override interpolateTo(that: unknown): Interpolator<Item> | null;
+  override interpolateTo(that: unknown): Interpolator<Item> | null {
     if (that instanceof Record) {
       return RecordInterpolator(this, that);
     } else {
@@ -735,11 +739,11 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     }
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 3;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof Record) {
       const xs = this.iterator();
       const ys = that.iterator();
@@ -768,7 +772,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Record) {
@@ -786,7 +790,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Record) {
@@ -804,7 +808,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     let hashValue = Constructors.hash(Record);
     this.forEach(function (item: Item): void {
       hashValue = Murmur3.mix(hashValue, item.hashCode());
@@ -812,7 +816,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return hashValue;
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Record").write(46/*'.'*/);
     if (this.isEmpty()) {
       output = output.write("empty").write(40/*'('*/).write(41/*')'*/);
@@ -828,7 +832,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     }
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     this.debug(output);
   }
 
@@ -837,7 +841,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
   /** @hidden */
   static readonly ImmutableFlag: number = 2;
 
-  static empty(): Record {
+  static override empty(): Record {
     return RecordMap.empty();
   }
 
@@ -849,7 +853,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return RecordMap.of(...items);
   }
 
-  static fromAny(value: AnyRecord): Record {
+  static override fromAny(value: AnyRecord): Record {
     if (value instanceof Record) {
       return value;
     } else if (Array.isArray(value)) {

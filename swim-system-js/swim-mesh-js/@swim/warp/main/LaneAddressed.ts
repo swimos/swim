@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,30 +41,30 @@ export abstract class LaneAddressed<E extends LaneAddressed<E>> extends Envelope
     });
   }
 
-  declare readonly node: Uri;
+  override readonly node!: Uri;
 
-  withNode(node: AnyUri): E {
+  override withNode(node: AnyUri): E {
     node = Uri.fromAny(node);
     return this.copy(node as Uri, this.lane, this.body);
   }
 
-  declare readonly lane: Uri;
+  override readonly lane!: Uri;
 
-  withLane(lane: AnyUri): E {
+  override withLane(lane: AnyUri): E {
     lane = Uri.fromAny(lane);
     return this.copy(this.node, lane as Uri, this.body);
   }
 
-  declare readonly body: Value;
+  override readonly body!: Value;
 
-  withBody(body: AnyValue): E {
+  override withBody(body: AnyValue): E {
     body = Value.fromAny(body);
     return this.copy(this.node, this.lane, body);
   }
 
   protected abstract copy(node: Uri, lane: Uri, body: Value): E;
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof LaneAddressed) {
@@ -75,13 +75,13 @@ export abstract class LaneAddressed<E extends LaneAddressed<E>> extends Envelope
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         Constructors.hash(this.constructor), this.node.hashCode()),
         this.lane.hashCode()), this.body.hashCode()));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write(this.constructor.name).write(46/*'.'*/)
         .write("create").write(40/*'('*/)
         .debug(this.node.toString()).write(", ").debug(this.lane.toString());
@@ -91,15 +91,15 @@ export abstract class LaneAddressed<E extends LaneAddressed<E>> extends Envelope
     output = output.write(41/*')'*/);
   }
 
-  toValue(): Value {
+  override toValue(): Value {
     const header = Record.create(2)
         .slot("node", this.node.toString())
         .slot("lane", this.lane.toString());
     return Attr.of(this.tag, header).concat(this.body);
   }
 
-  static fromValue<E extends LaneAddressed<E>>(this: LaneAddressedConstructor<E>,
-                                               value: Value): E | null {
+  static override fromValue<E extends LaneAddressed<E>>(this: LaneAddressedConstructor<E>,
+                                                        value: Value): E | null {
     let node: Uri | undefined;
     let lane: Uri | undefined;
     const header = value.header(this.tag);

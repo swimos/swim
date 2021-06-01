@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,15 +19,15 @@ import type {Record} from "./Record";
 /** @hidden */
 export class RecordCursor extends Cursor<Item> {
   /** @hidden */
-  declare readonly record: Record;
+  readonly record!: Record;
   /** @hidden */
-  declare readonly lower: number;
+  readonly lower!: number;
   /** @hidden */
-  declare readonly upper: number;
+  readonly upper!: number;
   /** @hidden */
-  declare readonly index: number;
+  readonly index!: number;
   /** @hidden */
-  declare readonly direction: number;
+  readonly direction!: number;
 
   constructor(record: Record, lower?: number, upper?: number, index?: number) {
     super();
@@ -64,11 +64,11 @@ export class RecordCursor extends Cursor<Item> {
     });
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.index >= this.upper;
   }
 
-  head(): Item {
+  override head(): Item {
     Object.defineProperty(this, "direction", {
       value: 0,
       enumerable: true,
@@ -81,7 +81,7 @@ export class RecordCursor extends Cursor<Item> {
     }
   }
 
-  step(): void {
+  override step(): void {
     Object.defineProperty(this, "direction", {
       value: 0,
       enumerable: true,
@@ -98,7 +98,7 @@ export class RecordCursor extends Cursor<Item> {
     }
   }
 
-  skip(count: number): void {
+  override skip(count: number): void {
     Object.defineProperty(this, "index", {
       value: Math.min(Math.max(this.lower, this.index + count, this.upper)),
       enumerable: true,
@@ -106,15 +106,15 @@ export class RecordCursor extends Cursor<Item> {
     });
   }
 
-  hasNext(): boolean {
+  override hasNext(): boolean {
     return this.index < this.upper;
   }
 
-  nextIndex(): number {
+  override nextIndex(): number {
     return this.index - this.lower;
   }
 
-  next(): {value?: Item, done: boolean} {
+  override next(): {value?: Item, done: boolean} {
     Object.defineProperty(this, "direction", {
       value: 1,
       enumerable: true,
@@ -138,15 +138,15 @@ export class RecordCursor extends Cursor<Item> {
     }
   }
 
-  hasPrevious(): boolean {
+  override hasPrevious(): boolean {
     return this.index > this.lower;
   }
 
-  previousIndex(): number {
+  override previousIndex(): number {
     return this.index - this.lower - 1;
   }
 
-  previous(): {value?: Item, done: boolean} {
+  override previous(): {value?: Item, done: boolean} {
     Object.defineProperty(this, "direction", {
       value: -1,
       enumerable: true,
@@ -170,7 +170,7 @@ export class RecordCursor extends Cursor<Item> {
     }
   }
 
-  set(newItem: Item): void {
+  override set(newItem: Item): void {
     if (this.direction > 0) {
       this.record.setItem(this.index - 1, newItem);
     } else {
@@ -178,7 +178,7 @@ export class RecordCursor extends Cursor<Item> {
     }
   }
 
-  delete(): void {
+  override delete(): void {
     if (this.direction > 0) {
       Object.defineProperty(this, "index", {
         value: this.index - 1,

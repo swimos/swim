@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@ export class GtOperator extends BinaryOperator {
     super(operand1, operand2);
   }
 
-  get operator(): string {
+  override get operator(): string {
     return ">";
   }
 
-  get precedence(): number {
+  override get precedence(): number {
     return 0;
   }
 
-  evaluate(interpreter: AnyInterpreter): Item {
+  override evaluate(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     interpreter.willOperate(this);
     const argument1 = this.operand1.evaluate(interpreter);
@@ -41,18 +41,18 @@ export class GtOperator extends BinaryOperator {
     return result;
   }
 
-  substitute(interpreter: AnyInterpreter): Item {
+  override substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     const argument1 = this.operand1.substitute(interpreter);
     const argument2 = this.operand2.substitute(interpreter);
     return argument1.gt(argument2);
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 31;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof GtOperator) {
       let order = this.operand1.compareTo(that.operand1);
       if (order === 0) {
@@ -65,7 +65,7 @@ export class GtOperator extends BinaryOperator {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof GtOperator) {
@@ -75,7 +75,7 @@ export class GtOperator extends BinaryOperator {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof GtOperator) {
@@ -84,17 +84,17 @@ export class GtOperator extends BinaryOperator {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(GtOperator),
         this.operand1.hashCode()), this.operand2.hashCode()));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output.debug(this.operand1).write(46/*'.'*/).write("gt").write(40/*'('*/)
         .debug(this.operand2).write(41/*')'*/);
   }
 
-  clone(): GtOperator {
+  override clone(): GtOperator {
     return new GtOperator(this.operand1.clone(), this.operand2.clone());
   }
 }

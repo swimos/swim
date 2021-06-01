@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,16 +42,16 @@ export class Data extends Value {
   }
 
   /** @hidden */
-  declare readonly array: Uint8Array | null;
+  readonly array!: Uint8Array | null;
 
-  isConstant(): boolean {
+  override isConstant(): boolean {
     return true;
   }
 
-  declare readonly size: number;
+  readonly size!: number;
 
   /** @hidden */
-  declare readonly flags: number;
+  readonly flags!: number;
 
   getByte(index: number): number {
     if (index < 0 || index >= this.size) {
@@ -74,7 +74,8 @@ export class Data extends Value {
     }
   }
 
-  private setByteAliased(index: number, value: number): Data {
+  /** @hidden */
+  setByteAliased(index: number, value: number): Data {
     const n = this.size;
     const oldArray = this.array!;
     const newArray = new Uint8Array(Data.expand(n));
@@ -93,7 +94,8 @@ export class Data extends Value {
     return this;
   }
 
-  private setByteMutable(index: number, value: number): Data {
+  /** @hidden */
+  setByteMutable(index: number, value: number): Data {
     this.array![index] = value;
     return this;
   }
@@ -110,7 +112,8 @@ export class Data extends Value {
     }
   }
 
-  private addByteAliased(value: number): Data {
+  /** @hidden */
+  addByteAliased(value: number): Data {
     const n = this.size;
     const oldArray = this.array;
     const newArray = new Uint8Array(Data.expand(n + 1));
@@ -136,7 +139,8 @@ export class Data extends Value {
     return this;
   }
 
-  private addByteMutable(value: number): Data {
+  /** @hidden */
+  addByteMutable(value: number): Data {
     const n = this.size;
     const oldArray = this.array;
     let newArray;
@@ -187,7 +191,8 @@ export class Data extends Value {
     }
   }
 
-  private addUint8ArrayAliased(array: Uint8Array): Data {
+  /** @hidden */
+  addUint8ArrayAliased(array: Uint8Array): Data {
     const size = array.length;
     if (size === 0) {
       return this;
@@ -217,7 +222,8 @@ export class Data extends Value {
     return this;
   }
 
-  private addUint8ArrayMutable(array: Uint8Array): Data {
+  /** @hidden */
+  addUint8ArrayMutable(array: Uint8Array): Data {
     const size = array.length;
     if (size === 0) {
       return this;
@@ -304,19 +310,19 @@ export class Data extends Value {
     return array;
   }
 
-  toAny(): AnyData {
+  override toAny(): AnyData {
     return this.toUint8Array();
   }
 
-  isAliased(): boolean {
+  override isAliased(): boolean {
     return (this.flags & Data.AliasedFlag) !== 0;
   }
 
-  isMutable(): boolean {
+  override isMutable(): boolean {
     return (this.flags & Data.ImmutableFlag) === 0;
   }
 
-  branch(): Data {
+  override branch(): Data {
     Object.defineProperty(this, "flags", {
       value: this.flags | Data.AliasedFlag,
       enumerable: true,
@@ -325,11 +331,11 @@ export class Data extends Value {
     return new Data(this.array, this.size, Data.AliasedFlag);
   }
 
-  clone(): Data {
+  override clone(): Data {
     return this.branch();
   }
 
-  commit(): this {
+  override commit(): this {
     Object.defineProperty(this, "flags", {
       value: this.flags | Data.ImmutableFlag,
       enumerable: true,
@@ -376,18 +382,18 @@ export class Data extends Value {
     return output.bind();
   }
 
-  interpolateTo(that: Data): Interpolator<Data>;
-  interpolateTo(that: Item): Interpolator<Item>;
-  interpolateTo(that: unknown): Interpolator<Item> | null;
-  interpolateTo(that: unknown): Interpolator<Item> | null {
+  override interpolateTo(that: Data): Interpolator<Data>;
+  override interpolateTo(that: Item): Interpolator<Item>;
+  override interpolateTo(that: unknown): Interpolator<Item> | null;
+  override interpolateTo(that: unknown): Interpolator<Item> | null {
     return super.interpolateTo(that);
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 4;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof Data) {
       const xs = this.array!;
       const ys = that.array!;
@@ -420,11 +426,11 @@ export class Data extends Value {
     return NaN;
   }
 
-  equivalentTo(that: Item): boolean {
+  override equivalentTo(that: Item): boolean {
     return this.equals(that);
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Data) {
@@ -444,12 +450,12 @@ export class Data extends Value {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mixUint8Array(Constructors.hash(Data),
         this.array !== null ? this.array : new Uint8Array(0)));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Data").write(46/*'.'*/);
     if (this.size === 0) {
       output = output.write("empty").write(40/*'('*/).write(41/*')'*/);
@@ -460,7 +466,7 @@ export class Data extends Value {
     }
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     this.debug(output);
   }
 
@@ -470,7 +476,7 @@ export class Data extends Value {
   static readonly ImmutableFlag: number = 1 << 1;
 
   @Lazy
-  static empty(): Data {
+  static override empty(): Data {
     return new Data(null, 0, Data.AliasedFlag | Data.ImmutableFlag);
   }
 
@@ -500,7 +506,7 @@ export class Data extends Value {
     return base64.parse(input, Data.output()).bind();
   }
 
-  static fromAny(value: AnyData): Data {
+  static override fromAny(value: AnyData): Data {
     if (value instanceof Data) {
       return value;
     } else if (value instanceof Uint8Array) {

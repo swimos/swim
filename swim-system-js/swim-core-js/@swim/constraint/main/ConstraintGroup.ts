@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ export class ConstraintGroup {
     });
   }
 
-  declare readonly scope: ConstraintScope;
+  readonly scope!: ConstraintScope;
 
   constraint(lhs: AnyConstraintExpression, relation: ConstraintRelation,
              rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint {
@@ -54,7 +54,7 @@ export class ConstraintGroup {
     return constraint;
   }
 
-  declare readonly constraints: ReadonlyArray<Constraint>;
+  readonly constraints!: ReadonlyArray<Constraint>;
 
   hasConstraint(constraint: Constraint): boolean {
     const constraints = this.constraints;
@@ -97,7 +97,7 @@ export class ConstraintGroup {
   }
 
   /** @hidden */
-  declare readonly constrained: boolean;
+  readonly constrained!: boolean;
 
   isConstrained(): boolean {
     return this.constrained;

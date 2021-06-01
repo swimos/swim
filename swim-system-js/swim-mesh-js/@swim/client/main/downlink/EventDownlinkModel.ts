@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ export class EventDownlinkModel extends DownlinkModel {
     super(context, hostUri, nodeUri, laneUri, prio, rate, body);
   }
 
-  declare views: ReadonlyArray<EventDownlink>;
+  override views!: ReadonlyArray<EventDownlink>;
 
-  get type(): DownlinkType {
+  override get type(): DownlinkType {
     return "event";
   }
 }

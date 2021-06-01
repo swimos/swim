@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ export class UriPathForm extends Form<UriPath, AnyUriPath> {
     });
   }
 
-  declare readonly unit: UriPath | undefined;
+  override readonly unit!: UriPath | undefined;
 
-  withUnit(unit: UriPath | undefined): Form<UriPath, AnyUriPath> {
+  override withUnit(unit: UriPath | undefined): Form<UriPath, AnyUriPath> {
     if (unit !== this.unit) {
       return new UriPathForm(unit);
     } else {
@@ -35,7 +35,7 @@ export class UriPathForm extends Form<UriPath, AnyUriPath> {
     }
   }
 
-  mold(object: AnyUriPath, item?: Item): Item {
+  override mold(object: AnyUriPath, item?: Item): Item {
     object = UriPath.fromAny(object);
     if (item === void 0) {
       return Text.from(object.toString());
@@ -44,7 +44,7 @@ export class UriPathForm extends Form<UriPath, AnyUriPath> {
     }
   }
 
-  cast(item: Item, object?: UriPath): UriPath | undefined {
+  override cast(item: Item, object?: UriPath): UriPath | undefined {
     const value = item.target;
     try {
       const string = value.stringValue();

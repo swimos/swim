@@ -489,7 +489,7 @@ BitwiseXorOperator ::= BitwiseAndOperator SP* ('^' SP* BitwiseAndOperator)*
 
 BitwiseAndOperator ::= ComparisonOperator SP* ('&' SP* ComparisonOperator)*
 
-ComparisonOperator ::= AttrExpression SP* (('<' | '<=' | '==' | '>=' | '>') SP* AttrExpression)?
+ComparisonOperator ::= AttrExpression SP* (('<' | '<=' | '==' | '!=' | '>=' | '>') SP* AttrExpression)?
 
 AttrExpression ::= AdditiveOperator SP* (Attr SP* AttrExpression?)? | Attr SP* AttrExpression?
 

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,43 +16,43 @@ import {Cursor} from "./Cursor";
 
 /** @hidden */
 export class CursorEmpty<T> extends Cursor<T> {
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return true;
   }
 
-  head(): T {
+  override head(): T {
     throw new Error("empty");
   }
 
-  step(): void {
+  override step(): void {
     throw new Error("empty");
   }
 
-  skip(count: number): void {
+  override skip(count: number): void {
     // nop
   }
 
-  hasNext(): boolean {
+  override hasNext(): boolean {
     return false;
   }
 
-  nextIndex(): number {
+  override nextIndex(): number {
     return 0;
   }
 
-  next(): {value?: T, done: boolean} {
+  override next(): {value?: T, done: boolean} {
     return {done: true};
   }
 
-  hasPrevious(): boolean {
+  override hasPrevious(): boolean {
     return false;
   }
 
-  previousIndex(): number {
+  override previousIndex(): number {
     return -1;
   }
 
-  previous(): {value?: T, done: boolean} {
+  override previous(): {value?: T, done: boolean} {
     return {done: true};
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,17 +21,17 @@ import type {Base64} from "./Base64";
 /** @hidden */
 export class Base64Parser<O> extends Parser<O> {
   /** @hidden */
-  declare readonly output: Output<O>;
+  readonly output!: Output<O>;
   /** @hidden */
-  declare readonly base64: Base64;
+  readonly base64!: Base64;
   /** @hidden */
-  declare readonly p: number;
+  readonly p!: number;
   /** @hidden */
-  declare readonly q: number;
+  readonly q!: number;
   /** @hidden */
-  declare readonly r: number;
+  readonly r!: number;
   /** @hidden */
-  declare readonly step: number;
+  readonly step!: number;
 
   constructor(output: Output<O>, base64: Base64, p: number = 0, q: number = 0,
               r: number = 0, step: number = 1) {
@@ -62,7 +62,7 @@ export class Base64Parser<O> extends Parser<O> {
     });
   }
 
-  feed(input: Input): Parser<O> {
+  override feed(input: Input): Parser<O> {
     return Base64Parser.parse(input, this.output.clone(), this.base64,
                               this.p, this.q, this.r, this.step);
   }

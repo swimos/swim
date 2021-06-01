@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,31 +23,31 @@ export class BitwiseNotOperator extends UnaryOperator {
     super(operand);
   }
 
-  get operator(): string {
+  override get operator(): string {
     return "~";
   }
 
-  get precedence(): number {
+  override get precedence(): number {
     return 10;
   }
 
-  evaluate(interpreter: AnyInterpreter): Item {
+  override evaluate(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     const argument = this.operand.evaluate(interpreter);
     return argument.bitwiseNot();
   }
 
-  substitute(interpreter: AnyInterpreter): Item {
+  override substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     const argument = this.operand.substitute(interpreter);
     return argument.bitwiseNot();
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 38;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof BitwiseNotOperator) {
       return this.operand.compareTo(that.operand);
     } else if (that instanceof Item) {
@@ -56,7 +56,7 @@ export class BitwiseNotOperator extends UnaryOperator {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof BitwiseNotOperator) {
@@ -65,7 +65,7 @@ export class BitwiseNotOperator extends UnaryOperator {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof BitwiseNotOperator) {
@@ -74,15 +74,15 @@ export class BitwiseNotOperator extends UnaryOperator {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(BitwiseNotOperator), this.operand.hashCode()));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output.debug(this.operand).write(46/*'.'*/).write("bitwiseNot").write(40/*'('*/).write(41/*')'*/);
   }
 
-  clone(): BitwiseNotOperator {
+  override clone(): BitwiseNotOperator {
     return new BitwiseNotOperator(this.operand.clone());
   }
 }

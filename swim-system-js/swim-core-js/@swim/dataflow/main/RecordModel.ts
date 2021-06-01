@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,34 +42,34 @@ export class RecordModel extends AbstractRecordOutlet {
   }
 
   /** @hidden */
-  declare readonly state: Record;
+  readonly state!: Record;
 
   /** @hidden */
-  declare readonly fieldUpdaters: BTree<Value, RecordFieldUpdater>;
+  readonly fieldUpdaters!: BTree<Value, RecordFieldUpdater>;
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.state.isEmpty();
   }
 
-  isArray(): boolean {
+  override isArray(): boolean {
     return this.state.isArray();
   }
 
-  isObject(): boolean {
+  override isObject(): boolean {
     return this.state.isObject();
   }
 
-  get length(): number {
+  override get length(): number {
     return this.state.length;
   }
 
   declare readonly fieldCount: number; // getter defined below to work around useDefineForClassFields lunacy
 
-  get valueCount(): number {
+  override get valueCount(): number {
     return this.state.valueCount;
   }
 
-  has(key: AnyValue): boolean {
+  override has(key: AnyValue): boolean {
     if (this.state.has(key)) {
       return true;
     } else {
@@ -78,21 +78,21 @@ export class RecordModel extends AbstractRecordOutlet {
     }
   }
 
-  hasOwn(key: AnyValue): boolean {
+  override hasOwn(key: AnyValue): boolean {
     return this.state.has(key);
   }
 
-  indexOf(item: AnyItem, index?: number): number {
+  override indexOf(item: AnyItem, index?: number): number {
     return this.state.indexOf(item, index);
   }
 
-  lastIndexOf(item: AnyItem, index: number = 0): number {
+  override lastIndexOf(item: AnyItem, index: number = 0): number {
     return this.state.lastIndexOf(item, index);
   }
 
-  get(): Record;
-  get(key: AnyValue): Value;
-  get(key?: AnyValue): Record | Value {
+  override get(): Record;
+  override get(key: AnyValue): Value;
+  override get(key?: AnyValue): Record | Value {
     if (key === void 0) {
       return this;
     } else {
@@ -108,7 +108,7 @@ export class RecordModel extends AbstractRecordOutlet {
     }
   }
 
-  getAttr(key: AnyText): Value {
+  override getAttr(key: AnyText): Value {
     key = Text.fromAny(key);
     let value = this.state.getAttr(key);
     if (!value.isDefined()) {
@@ -120,7 +120,7 @@ export class RecordModel extends AbstractRecordOutlet {
     return value;
   }
 
-  getSlot(key: AnyValue): Value {
+  override getSlot(key: AnyValue): Value {
     key = Value.fromAny(key);
     let value = this.state.getSlot(key);
     if (!value.isDefined()) {
@@ -132,7 +132,7 @@ export class RecordModel extends AbstractRecordOutlet {
     return value;
   }
 
-  getField(key: AnyValue): Field | undefined {
+  override getField(key: AnyValue): Field | undefined {
     key = Value.fromAny(key);
     let field = this.state.getField(key);
     if (field === void 0) {
@@ -144,7 +144,7 @@ export class RecordModel extends AbstractRecordOutlet {
     return field;
   }
 
-  getItem(index: AnyNum): Item {
+  override getItem(index: AnyNum): Item {
     return this.state.getItem(index);
   }
 
@@ -160,7 +160,7 @@ export class RecordModel extends AbstractRecordOutlet {
     });
   }
 
-  set(key: AnyValue, newValue: AnyValue): this {
+  override set(key: AnyValue, newValue: AnyValue): this {
     key = Value.fromAny(key);
     if (!this.state.has(key)) {
       const scope = this.streamletScope;
@@ -176,7 +176,7 @@ export class RecordModel extends AbstractRecordOutlet {
     return this;
   }
 
-  setAttr(key: AnyText, newValue: AnyValue): this {
+  override setAttr(key: AnyText, newValue: AnyValue): this {
     key = Text.fromAny(key);
     if (!this.state.has(key)) {
       const scope = this.streamletScope;
@@ -192,7 +192,7 @@ export class RecordModel extends AbstractRecordOutlet {
     return this;
   }
 
-  setSlot(key: AnyValue, newValue: AnyValue): this {
+  override setSlot(key: AnyValue, newValue: AnyValue): this {
     key = Value.fromAny(key);
     if (!this.state.has(key)) {
       const scope = this.streamletScope;
@@ -208,7 +208,7 @@ export class RecordModel extends AbstractRecordOutlet {
     return this;
   }
 
-  setItem(index: number, newItem: AnyItem): this {
+  override setItem(index: number, newItem: AnyItem): this {
     const oldItem = this.state.getItem(index);
     newItem = Item.fromAny(newItem);
     this.state.setItem(index, newItem);
@@ -229,7 +229,7 @@ export class RecordModel extends AbstractRecordOutlet {
     return this;
   }
 
-  push(...newItems: AnyItem[]): number {
+  override push(...newItems: AnyItem[]): number {
     let i = this.state.length;
     const n = this.state.push(...newItems);
     while (i < n) {
@@ -242,7 +242,7 @@ export class RecordModel extends AbstractRecordOutlet {
     return n;
   }
 
-  splice(start: number, deleteCount: number = 0, ...newItems: AnyItem[]): Item[] {
+  override splice(start: number, deleteCount: number = 0, ...newItems: AnyItem[]): Item[] {
     const n = this.state.length;
     if (start < 0) {
       start = n + start;
@@ -265,7 +265,7 @@ export class RecordModel extends AbstractRecordOutlet {
     return deleted;
   }
 
-  delete(key: AnyValue): Item {
+  override delete(key: AnyValue): Item {
     const oldItem = this.state.delete(key);
     if (oldItem instanceof Field) {
       this.decohereInputKey(oldItem.key, KeyEffect.Remove);
@@ -273,7 +273,7 @@ export class RecordModel extends AbstractRecordOutlet {
     return oldItem;
   }
 
-  clear(): void {
+  override clear(): void {
     const oldState = this.state.branch();
     this.state.clear();
     oldState.forEach(function (oldItem: Item): void {
@@ -283,19 +283,19 @@ export class RecordModel extends AbstractRecordOutlet {
     }, this);
   }
 
-  forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
-  forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
-                thisArg: S): T | undefined;
-  forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
-                thisArg?: S): T | undefined {
+  override forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  override forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                         thisArg: S): T | undefined;
+  override forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
+                         thisArg?: S): T | undefined {
     return this.state.forEach(callback, thisArg);
   }
 
-  keyIterator(): Cursor<Value> {
+  override keyIterator(): Cursor<Value> {
     throw new Error(); // TODO
   }
 
-  disconnectInputs(): void {
+  override disconnectInputs(): void {
     const oldFieldUpdaters = this.fieldUpdaters;
     if (!oldFieldUpdaters.isEmpty()) {
       Object.defineProperty(this, "fieldUpdaters", {
@@ -309,7 +309,7 @@ export class RecordModel extends AbstractRecordOutlet {
     }
   }
 
-  memoize(): MapOutlet<Value, Value, Record> {
+  override memoize(): MapOutlet<Value, Value, Record> {
     return this;
   }
 
@@ -439,11 +439,11 @@ export class RecordModel extends AbstractRecordOutlet {
     return model;
   }
 
-  static of(...items: AnyItem[]): RecordModel {
+  static override of(...items: AnyItem[]): RecordModel {
     return RecordModel.from(Record.of(...items));
   }
 
-  static globalScope(): RecordModel {
+  static override globalScope(): RecordModel {
     const model = new RecordModel();
     model.materializeField(Slot.of("math", MathModule.scope.branch()));
     return model;

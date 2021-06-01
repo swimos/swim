@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,74 +18,74 @@ import {UriQueryBuilder} from "./"; // forward import
 
 /** @hidden */
 export class UriQueryUndefined extends UriQuery {
-  isDefined(): boolean {
+  override isDefined(): boolean {
     return false;
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return true;
   }
 
-  head(): [string | undefined, string] {
+  override head(): [string | undefined, string] {
     throw new Error("undefined query");
   }
 
-  get key(): string | undefined {
+  override get key(): string | undefined {
     throw new Error("undefined query");
   }
 
-  get value(): string {
+  override get value(): string {
     throw new Error("undefined query");
   }
 
-  tail(): UriQuery {
-    throw new Error("undefined query");
-  }
-
-  /** @hidden */
-  setTail(tail: UriQuery): void {
+  override tail(): UriQuery {
     throw new Error("undefined query");
   }
 
   /** @hidden */
-  dealias(): UriQuery {
+  override setTail(tail: UriQuery): void {
+    throw new Error("undefined query");
+  }
+
+  /** @hidden */
+  override dealias(): UriQuery {
     return this;
   }
 
-  updated(key: string, value: string): UriQuery {
+  override updated(key: string, value: string): UriQuery {
     return UriQuery.param(key, value, this);
   }
 
-  removed(key: string): UriQuery {
+  override removed(key: string): UriQuery {
     return this;
   }
 
-  appended(key: string | undefined, value: string): UriQuery;
-  appended(params: AnyUriQuery): UriQuery;
-  appended(key: AnyUriQuery | undefined, value?: string): UriQuery {
+  override appended(key: string | undefined, value: string): UriQuery;
+  override appended(params: AnyUriQuery): UriQuery;
+  override appended(key: AnyUriQuery | undefined, value?: string): UriQuery {
     const builder = new UriQueryBuilder();
     builder.add(key as any, value as any);
     return builder.bind();
   }
 
-  prepended(key: string | undefined, value: string): UriQuery;
-  prepended(params: AnyUriQuery): UriQuery;
-  prepended(key: AnyUriQuery | undefined, value?: string): UriQuery {
+  override prepended(key: string | undefined, value: string): UriQuery;
+  override prepended(params: AnyUriQuery): UriQuery;
+  override prepended(key: AnyUriQuery | undefined, value?: string): UriQuery {
     const builder = new UriQueryBuilder();
     builder.add(key as any, value as any);
     return builder.bind();
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("UriQuery").write(46/*'.'*/).write("undefined")
         .write(40/*'('*/).write(41/*')'*/);
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     // nop
   }
 
-  toString(): string {
+  override toString(): string {
     return "";
   }
 }

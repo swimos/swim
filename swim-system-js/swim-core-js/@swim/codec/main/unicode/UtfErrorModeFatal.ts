@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,22 +26,22 @@ export class UtfErrorModeFatal extends UtfErrorMode {
     });
   }
 
-  isFatal(): boolean {
+  override isFatal(): boolean {
     return true;
   }
 
-  get replacementChar(): number {
+  override get replacementChar(): number {
     return 0xfffd;
   }
 
   /** @hidden */
-  declare readonly nonZero: boolean;
+  readonly nonZero!: boolean;
 
-  isNonZero(): boolean {
+  override isNonZero(): boolean {
     return this.nonZero;
   }
 
-  asNonZero(nonZero: boolean): UtfErrorMode {
+  override asNonZero(nonZero: boolean): UtfErrorMode {
     if (nonZero) {
       return UtfErrorMode.fatalNonZero();
     } else {
@@ -49,7 +49,7 @@ export class UtfErrorModeFatal extends UtfErrorMode {
     }
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof UtfErrorModeFatal) {
@@ -58,12 +58,12 @@ export class UtfErrorModeFatal extends UtfErrorMode {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(UtfErrorModeFatal),
         Booleans.hash(this.nonZero)));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("UtfErrorMode").write(46/*'.'*/)
         .write(this.nonZero ? "fatalNonZero" : "fatal")
         .write(40/*'('*/).write(41/*')'*/);

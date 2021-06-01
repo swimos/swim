@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,35 +26,31 @@ export class ListDownlinkRecord extends DownlinkRecord {
     });
   }
 
-  declare readonly downlink: ListDownlink<Value, AnyValue>;
+  override readonly downlink!: ListDownlink<Value, AnyValue>;
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.downlink.isEmpty();
   }
 
-  isArray(): boolean {
+  override isArray(): boolean {
     return true;
   }
 
-  isObject(): boolean {
+  override isObject(): boolean {
     return this.downlink.isEmpty();
   }
 
-  get length(): number {
+  override get length(): number {
     return this.downlink.length;
   }
 
-  get size(): number {
-    return this.downlink.length;
-  }
-
-  has(key: AnyValue): boolean {
+  override has(key: AnyValue): boolean {
     return false;
   }
 
-  get(): Record;
-  get(key: AnyValue): Value;
-  get(key?: AnyValue): Value {
+  override get(): Record;
+  override get(key: AnyValue): Value;
+  override get(key?: AnyValue): Value {
     if (key === void 0) {
       return this;
     } else {
@@ -62,15 +58,15 @@ export class ListDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  getAttr(key: AnyText): Value {
+  override getAttr(key: AnyText): Value {
     return Value.absent();
   }
 
-  getSlot(key: AnyValue): Value {
+  override getSlot(key: AnyValue): Value {
     return Value.absent();
   }
 
-  getItem(index: AnyNum): Item {
+  override getItem(index: AnyNum): Item {
     if (index instanceof Num) {
       index = index.value;
     }
@@ -85,19 +81,19 @@ export class ListDownlinkRecord extends DownlinkRecord {
     return Item.absent();
   }
 
-  set(key: AnyValue, newValue: AnyValue): this {
+  override set(key: AnyValue, newValue: AnyValue): this {
     throw new Error("unsupported");
   }
 
-  setAttr(key: AnyText, newValue: AnyValue): this {
+  override setAttr(key: AnyText, newValue: AnyValue): this {
     throw new Error("unsupported");
   }
 
-  setSlot(key: AnyValue, newValue: AnyValue): this {
+  override setSlot(key: AnyValue, newValue: AnyValue): this {
     throw new Error("unsupported");
   }
 
-  setItem(index: AnyNum, newItem: AnyItem): this {
+  override setItem(index: AnyNum, newItem: AnyItem): this {
     if (index instanceof Num) {
       index = index.value;
     }
@@ -112,31 +108,31 @@ export class ListDownlinkRecord extends DownlinkRecord {
     return this;
   }
 
-  push(...newItems: AnyItem[]): number {
+  override push(...newItems: AnyItem[]): number {
     return this.downlink.push(...newItems);
   }
 
-  splice(start: number, deleteCount?: number, ...newItems: AnyItem[]): Item[] {
+  override splice(start: number, deleteCount?: number, ...newItems: AnyItem[]): Item[] {
     return this.downlink.splice(start, deleteCount, ...newItems);
   }
 
-  delete(key: AnyValue): Item {
+  override delete(key: AnyValue): Item {
     return Item.absent();
   }
 
-  clear(): void {
+  override clear(): void {
     this.downlink.clear();
   }
 
-  forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
-  forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
-                thisArg: S): T | undefined;
-  forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
-                thisArg?: S): T | undefined {
+  override forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  override forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                         thisArg: S): T | undefined;
+  override forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
+                         thisArg?: S): T | undefined {
     return this.downlink.forEach(callback, thisArg);
   }
 
-  keyIterator(): Cursor<Value> {
+  override keyIterator(): Cursor<Value> {
     return Cursor.empty();
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,13 +27,13 @@ export abstract class ReduceFieldsOperator<K, V, I, O> extends AbstractMapInletO
   }
 
   /** @hidden */
-  declare readonly state: BTree<K, V, O>;
+  readonly state!: BTree<K, V, O>;
 
-  get(): O | undefined {
+  override get(): O | undefined {
     return this.state.reduced(this.identity, this.accumulate.bind(this), this.combine.bind(this));
   }
 
-  protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
+  protected override onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
     if (effect === KeyEffect.Update) {
       const input = this.input;
       if (input !== null) {

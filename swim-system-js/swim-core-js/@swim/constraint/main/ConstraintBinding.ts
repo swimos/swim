@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -59,11 +59,11 @@ export class ConstraintBinding implements ConstraintVariable, Debug {
     });
   }
 
-  declare readonly id: number;
+  readonly id!: number;
 
-  declare readonly owner: ConstraintScope;
+  readonly owner!: ConstraintScope;
 
-  declare readonly name: string;
+  readonly name!: string;
 
   /** @hidden */
   isExternal(): boolean {
@@ -84,7 +84,7 @@ export class ConstraintBinding implements ConstraintVariable, Debug {
     return false;
   }
 
-  declare readonly state: number;
+  readonly state!: number;
 
   setState(newState: number): void {
     const oldState = this.state;
@@ -124,7 +124,7 @@ export class ConstraintBinding implements ConstraintVariable, Debug {
     }
   }
 
-  declare readonly strength: ConstraintStrength;
+  readonly strength!: ConstraintStrength;
 
   get coefficient(): number {
     return 1;
@@ -175,7 +175,7 @@ export class ConstraintBinding implements ConstraintVariable, Debug {
   }
 
   /** @hidden */
-  declare readonly constraintFlags: number;
+  readonly constraintFlags!: number;
 
   /** @hidden */
   setConstraintFlags(constraintFlags: number): void {
@@ -208,7 +208,7 @@ export class ConstraintBinding implements ConstraintVariable, Debug {
   }
 
   /** @hidden */
-  declare readonly conditionCount: number;
+  readonly conditionCount!: number;
 
   /** @hidden */
   addConstraintCondition(constraint: Constraint, solver: ConstraintSolver): void {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ export class UriQueryParser extends Parser<UriQuery> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<UriQuery> {
+  override feed(input: Input): Parser<UriQuery> {
     return UriQueryParser.parse(input, this.uri, this.builder, this.keyOutput,
                                 this.valueOutput, this.c1, this.step);
   }

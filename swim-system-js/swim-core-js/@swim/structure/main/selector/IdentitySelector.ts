@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,18 +26,18 @@ import {FilterSelector} from "../"; // forward import
 import {AnyInterpreter, Interpreter} from "../"; // forward import
 
 export class IdentitySelector extends Selector {
-  get then(): Selector {
+  override get then(): Selector {
     return this;
   }
 
-  forSelected<T>(interpreter: Interpreter,
-                 callback: (interpreter: Interpreter) => T | undefined): T | undefined;
-  forSelected<T, S>(interpreter: Interpreter,
-                    callback: (this: S, interpreter: Interpreter) => T | undefined,
-                    thisArg: S): T | undefined;
-  forSelected<T, S>(interpreter: Interpreter,
-                    callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
-                    thisArg?: S): T | undefined {
+  override forSelected<T>(interpreter: Interpreter,
+                          callback: (interpreter: Interpreter) => T | undefined): T | undefined;
+  override forSelected<T, S>(interpreter: Interpreter,
+                             callback: (this: S, interpreter: Interpreter) => T | undefined,
+                             thisArg: S): T | undefined;
+  override forSelected<T, S>(interpreter: Interpreter,
+                             callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
+                             thisArg?: S): T | undefined {
     let selected: T | undefined;
     interpreter.willSelect(this);
     if (interpreter.scopeDepth !== 0) {
@@ -56,58 +56,58 @@ export class IdentitySelector extends Selector {
     return selected;
   }
 
-  mapSelected(interpreter: Interpreter,
-              transform: (interpreter: Interpreter) => Item): Item;
-  mapSelected<S>(interpreter: Interpreter,
-                 transform: (this: S, interpreter: Interpreter) => Item,
-                 thisArg: S): Item;
-  mapSelected<S>(interpreter: Interpreter,
-                 transform: (this: S | undefined, interpreter: Interpreter) => Item,
-                 thisArg?: S): Item {
+  override mapSelected(interpreter: Interpreter,
+                       transform: (interpreter: Interpreter) => Item): Item;
+  override mapSelected<S>(interpreter: Interpreter,
+                          transform: (this: S, interpreter: Interpreter) => Item,
+                          thisArg: S): Item;
+  override mapSelected<S>(interpreter: Interpreter,
+                          transform: (this: S | undefined, interpreter: Interpreter) => Item,
+                          thisArg?: S): Item {
     return transform.call(thisArg, interpreter);
   }
 
-  substitute(interpreter: AnyInterpreter): Item {
+  override substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     return interpreter.peekScope().substitute(interpreter);
   }
 
-  get(key: AnyValue): Selector {
+  override get(key: AnyValue): Selector {
     key = Value.fromAny(key);
     return new GetSelector(key, this);
   }
 
-  getAttr(key: AnyText): Selector {
+  override getAttr(key: AnyText): Selector {
     key = Text.fromAny(key);
     return new GetAttrSelector(key, this);
   }
 
-  getItem(index: AnyNum): Selector {
+  override getItem(index: AnyNum): Selector {
     index = Num.fromAny(index);
     return new GetItemSelector(index, this);
   }
 
-  andThen(then: Selector): Selector {
+  override andThen(then: Selector): Selector {
     return then;
   }
 
-  keys(): Selector {
+  override keys(): Selector {
     return Selector.keys();
   }
 
-  values(): Selector {
+  override values(): Selector {
     return Selector.values();
   }
 
-  children(): Selector {
+  override children(): Selector {
     return Selector.children();
   }
 
-  descendants(): Selector {
+  override descendants(): Selector {
     return Selector.descendants();
   }
 
-  filter(predicate?: AnyItem): Selector {
+  override filter(predicate?: AnyItem): Selector {
     if (arguments.length === 0) {
       return new FilterSelector(this, this);
     } else {
@@ -116,34 +116,34 @@ export class IdentitySelector extends Selector {
     }
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 10;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof Item) {
       return Numbers.compare(this.typeOrder, that.typeOrder);
     }
     return NaN;
   }
 
-  equivalentTo(that: unknown): boolean {
+  override equivalentTo(that: unknown): boolean {
     return this === that;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     return this === that;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Constructors.hash(IdentitySelector);
   }
 
-  debugThen(output: Output): void {
+  override debugThen(output: Output): void {
     // nop
   }
 
-  clone(): Selector {
+  override clone(): Selector {
     return this;
   }
 }

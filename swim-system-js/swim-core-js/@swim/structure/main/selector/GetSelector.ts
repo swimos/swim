@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,18 +34,18 @@ export class GetSelector extends Selector {
     });
   }
 
-  declare readonly item: Value;
+  readonly item!: Value;
 
-  declare readonly then: Selector;
+  override readonly then!: Selector;
 
-  forSelected<T>(interpreter: Interpreter,
-                 callback: (interpreter: Interpreter) => T | undefined): T | undefined;
-  forSelected<T, S>(interpreter: Interpreter,
-                    callback: (this: S, interpreter: Interpreter) => T | undefined,
-                    thisArg: S): T | undefined;
-  forSelected<T, S>(interpreter: Interpreter,
-                    callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
-                    thisArg?: S): T | undefined {
+  override forSelected<T>(interpreter: Interpreter,
+                          callback: (interpreter: Interpreter) => T | undefined): T | undefined;
+  override forSelected<T, S>(interpreter: Interpreter,
+                             callback: (this: S, interpreter: Interpreter) => T | undefined,
+                             thisArg: S): T | undefined;
+  override forSelected<T, S>(interpreter: Interpreter,
+                             callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
+                             thisArg?: S): T | undefined {
     interpreter.willSelect(this);
     // Evaluate the key, in case it's dynamic.
     const key = this.item.evaluate(interpreter).toValue();
@@ -54,9 +54,10 @@ export class GetSelector extends Selector {
     return selected;
   }
 
-  private static forSelected<T, S>(key: Value, then: Selector, interpreter: Interpreter,
-                                   callback: (this: S | undefined, interpreter: Interpreter) => T,
-                                   thisArg?: S): T | undefined {
+  /** @hidden */
+  static forSelected<T, S>(key: Value, then: Selector, interpreter: Interpreter,
+                           callback: (this: S | undefined, interpreter: Interpreter) => T,
+                           thisArg?: S): T | undefined {
     let selected: T | undefined;
     if (interpreter.scopeDepth !== 0) {
       // Pop the next selection off of the stack to take it out of scope.
@@ -83,14 +84,14 @@ export class GetSelector extends Selector {
     return selected;
   }
 
-  mapSelected(interpreter: Interpreter,
-              transform: (interpreter: Interpreter) => Item): Item;
-  mapSelected<S>(interpreter: Interpreter,
-                 transform: (this: S, interpreter: Interpreter) => Item,
-                 thisArg: S): Item;
-  mapSelected<S>(interpreter: Interpreter,
-                 transform: (this: S | undefined, interpreter: Interpreter) => Item,
-                 thisArg?: S): Item {
+  override mapSelected(interpreter: Interpreter,
+                       transform: (interpreter: Interpreter) => Item): Item;
+  override mapSelected<S>(interpreter: Interpreter,
+                          transform: (this: S, interpreter: Interpreter) => Item,
+                          thisArg: S): Item;
+  override mapSelected<S>(interpreter: Interpreter,
+                          transform: (this: S | undefined, interpreter: Interpreter) => Item,
+                          thisArg?: S): Item {
     let result: Item;
     interpreter.willTransform(this);
     // Evaluate the key, if it's dynamic.
@@ -135,7 +136,7 @@ export class GetSelector extends Selector {
     return result;
   }
 
-  substitute(interpreter: AnyInterpreter): Item {
+  override substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     // Evaluate the key, in case it's dynamic.
     const key = this.item.evaluate(interpreter).toValue();
@@ -150,7 +151,8 @@ export class GetSelector extends Selector {
     return new GetSelector(this.item, then as Selector);
   }
 
-  private static substitute(key: Value, then: Selector, interpreter: Interpreter): Item | undefined {
+  /** @hidden */
+  static substitute(key: Value, then: Selector, interpreter: Interpreter): Item | undefined {
     let selected: Item | undefined;
     if (interpreter.scopeDepth !== 0) {
       // Pop the next selection off of the stack to take it out of scope.
@@ -173,15 +175,15 @@ export class GetSelector extends Selector {
     return selected;
   }
 
-  andThen(then: Selector): Selector {
+  override andThen(then: Selector): Selector {
     return new GetSelector(this.item, this.then.andThen(then));
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 12;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof GetSelector) {
       let order = this.item.compareTo(that.item);
       if (order === 0) {
@@ -194,7 +196,7 @@ export class GetSelector extends Selector {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof GetSelector) {
@@ -203,7 +205,7 @@ export class GetSelector extends Selector {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof GetSelector) {
@@ -212,17 +214,17 @@ export class GetSelector extends Selector {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(GetSelector),
         this.item.hashCode()), this.then.hashCode()));
   }
 
-  debugThen(output: Output): void {
+  override debugThen(output: Output): void {
     output = output.write(46/*'.'*/).write("get").write(40/*'('*/).debug(this.item).write(41/*')'*/);
     this.then.debugThen(output);
   }
 
-  clone(): Selector {
+  override clone(): Selector {
     return new GetSelector(this.item.clone(), this.then.clone());
   }
 }

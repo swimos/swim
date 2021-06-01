@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {FilterTimeInterval} from "./FilterTimeInterval";
 
 /** @hidden */
 export class MinuteInterval extends UnitTimeInterval {
-  offset(d: AnyDateTime, k?: number): DateTime {
+  override offset(d: AnyDateTime, k?: number): DateTime {
     const z = DateTime.zone(d);
     d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
@@ -26,7 +26,7 @@ export class MinuteInterval extends UnitTimeInterval {
     return new DateTime(d, z);
   }
 
-  next(d: AnyDateTime, k?: number): DateTime {
+  override next(d: AnyDateTime, k?: number): DateTime {
     const z = DateTime.zone(d);
     d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
@@ -34,21 +34,21 @@ export class MinuteInterval extends UnitTimeInterval {
     return new DateTime(d, z);
   }
 
-  floor(d: AnyDateTime): DateTime {
+  override floor(d: AnyDateTime): DateTime {
     const z = DateTime.zone(d);
     d = DateTime.time(d);
     d = Math.floor(d / TimeInterval.MillisPerMinute) * TimeInterval.MillisPerMinute;
     return new DateTime(d, z);
   }
 
-  ceil(d: AnyDateTime): DateTime {
+  override ceil(d: AnyDateTime): DateTime {
     const z = DateTime.zone(d);
     d = DateTime.time(d);
     d = Math.floor(((Math.floor((d - 1) / TimeInterval.MillisPerMinute) * TimeInterval.MillisPerMinute) + TimeInterval.MillisPerMinute) / TimeInterval.MillisPerMinute) * TimeInterval.MillisPerMinute;
     return new DateTime(d, z);
   }
 
-  every(k: number): TimeInterval {
+  override every(k: number): TimeInterval {
     if (k === 1) {
       return this;
     } else if (isFinite(k) && k >= 1) {
@@ -58,7 +58,8 @@ export class MinuteInterval extends UnitTimeInterval {
     }
   }
 
-  private static modulo(k: number, d: DateTime): boolean {
+  /** @hidden */
+  static modulo(k: number, d: DateTime): boolean {
     const minute = d.minute;
     return isFinite(minute) && minute % k === 0;
   }

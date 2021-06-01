@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ export class ConstraintRow {
     });
   }
 
-  declare readonly solver: ConstraintSolver;
+  readonly solver!: ConstraintSolver;
 
-  declare readonly symbol: ConstraintSymbol | null;
+  readonly symbol!: ConstraintSymbol | null;
 
   /** @hidden */
   setSymbol(symbol: ConstraintSymbol | null): void {
@@ -55,9 +55,9 @@ export class ConstraintRow {
     this.invalidate();
   }
 
-  declare readonly cells: ConstraintMap<ConstraintSymbol, number>;
+  readonly cells!: ConstraintMap<ConstraintSymbol, number>;
 
-  declare readonly constant: number;
+  readonly constant!: number;
 
   /** @hidden */
   setConstant(constant: number): void {

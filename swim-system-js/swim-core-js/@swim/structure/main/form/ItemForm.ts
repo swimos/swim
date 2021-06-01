@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ export class ItemForm extends Form<Item, AnyItem> {
     });
   }
 
-  declare readonly unit: Item | undefined;
+  override readonly unit!: Item | undefined;
 
-  withUnit(unit: Item | undefined): Form<Item> {
+  override withUnit(unit: Item | undefined): Form<Item> {
     if (unit !== this.unit) {
       return new ItemForm(unit);
     } else {
@@ -35,7 +35,7 @@ export class ItemForm extends Form<Item, AnyItem> {
     }
   }
 
-  mold(object: AnyItem, item?: Item): Item {
+  override mold(object: AnyItem, item?: Item): Item {
     object = Item.fromAny(object);
     if (item !== void 0) {
       object = item.concat(object);
@@ -43,7 +43,7 @@ export class ItemForm extends Form<Item, AnyItem> {
     return object;
   }
 
-  cast(item: Item, object?: Item): Item | undefined {
+  override cast(item: Item, object?: Item): Item | undefined {
     return item;
   }
 }

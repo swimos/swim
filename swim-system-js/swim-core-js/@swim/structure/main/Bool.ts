@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,59 +31,63 @@ export class Bool extends Value {
     });
   }
 
-  isConstant(): boolean {
+  override isDefinite(): boolean {
+    return this.value;
+  }
+
+  override isConstant(): boolean {
     return true;
   }
 
-  declare readonly value: boolean;
+  readonly value!: boolean;
 
-  stringValue(): string;
-  stringValue<T>(orElse: T): string;
-  stringValue<T>(orElse?: T): string {
+  override stringValue(): string;
+  override stringValue<T>(orElse: T): string;
+  override stringValue<T>(orElse?: T): string {
     return this.value ? "true" : "false";
   }
 
-  booleanValue(): boolean;
-  booleanValue<T>(orElse: T): boolean;
-  booleanValue<T>(orElse?: T): boolean {
+  override booleanValue(): boolean;
+  override booleanValue<T>(orElse: T): boolean;
+  override booleanValue<T>(orElse?: T): boolean {
     return this.value;
   }
 
-  toAny(): AnyBool {
+  override toAny(): AnyBool {
     return this.value;
   }
 
-  valueOf(): boolean {
+  override valueOf(): boolean {
     return this.value;
   }
 
-  conditional(thenTerm: AnyValue, elseTerm: AnyValue): Value;
-  conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item;
-  conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item {
+  override conditional(thenTerm: AnyValue, elseTerm: AnyValue): Value;
+  override conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item;
+  override conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item {
     return this.value ? Item.fromAny(thenTerm) : Item.fromAny(elseTerm);
   }
 
-  or(that: AnyValue): Value;
-  or(that: AnyItem): Item;
-  or(that: AnyItem): Item {
+  override or(that: AnyValue): Value;
+  override or(that: AnyItem): Item;
+  override or(that: AnyItem): Item {
     return this.value ? this : Item.fromAny(that);
   }
 
-  and(that: AnyValue): Value;
-  and(that: AnyItem): Item;
-  and(that: AnyItem): Item {
+  override and(that: AnyValue): Value;
+  override and(that: AnyItem): Item;
+  override and(that: AnyItem): Item {
     return this.value ? Item.fromAny(that) : this;
   }
 
-  not(): Value {
+  override not(): Value {
     return Bool.from(!this.value);
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 7;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof Bool) {
       if (this.value && !that.value) {
         return -1;
@@ -98,11 +102,11 @@ export class Bool extends Value {
     return NaN;
   }
 
-  equivalentTo(that: unknown): boolean {
+  override equivalentTo(that: unknown): boolean {
     return this.equals(that);
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Bool) {
@@ -112,18 +116,18 @@ export class Bool extends Value {
   }
 
   /** @hidden */
-  declare readonly hashValue: number;
+  readonly hashValue!: number;
 
-  hashCode(): number {
+  override hashCode(): number {
     return this.hashValue;
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Bool").write(46/*'.'*/).write("from")
         .write(40/*'('*/).write(this.value ? "true" : "false").write(41/*')'*/);
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     output = output.write(this.value ? "true" : "false");
   }
 
@@ -141,7 +145,7 @@ export class Bool extends Value {
     return value ? Bool.true : Bool.false;
   }
 
-  static fromAny(value: AnyBool): Bool {
+  static override fromAny(value: AnyBool): Bool {
     if (value instanceof Bool) {
       return value;
     } else if (typeof value === "boolean") {

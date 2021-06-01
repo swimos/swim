@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,16 +60,16 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
   }
 
   /** @hidden */
-  declare readonly context: RefContext;
+  readonly context!: RefContext;
 
   /** @hidden */
-  declare readonly host: Host | null;
+  readonly host!: Host | null;
 
   /** @hidden */
-  declare readonly downlinks: Downlink[];
+  readonly downlinks!: Downlink[];
 
   /** @hidden */
-  declare readonly observers: ReadonlyArray<WarpObserver>;
+  readonly observers!: ReadonlyArray<WarpObserver>;
 
   abstract readonly hostUri: Uri;
 

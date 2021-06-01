@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {Parser} from "./Parser";
 /** @hidden */
 export class ParserDone<O> extends Parser<O> {
   /** @hidden */
-  declare readonly value: O;
+  readonly value!: O;
 
   constructor(value: O) {
     super();
@@ -28,19 +28,19 @@ export class ParserDone<O> extends Parser<O> {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return false;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return true;
   }
 
-  feed(input: Input): Parser<O> {
+  override feed(input: Input): Parser<O> {
     return this;
   }
 
-  bind(): O {
+  override bind(): O {
     return this.value;
   }
 }

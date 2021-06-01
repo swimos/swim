@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,11 +29,11 @@ export class AngleForm extends Form<Angle, AnyAngle> {
     });
   }
 
-  declare readonly defaultUnits: AngleUnits | undefined;
+  readonly defaultUnits!: AngleUnits | undefined;
 
-  declare readonly unit: Angle | undefined;
+  override readonly unit!: Angle | undefined;
 
-  withUnit(unit: Angle | undefined): Form<Angle, AnyAngle> {
+  override withUnit(unit: Angle | undefined): Form<Angle, AnyAngle> {
     if (unit !== this.unit) {
       return new AngleForm(this.defaultUnits, unit);
     } else {
@@ -41,12 +41,12 @@ export class AngleForm extends Form<Angle, AnyAngle> {
     }
   }
 
-  mold(angle: AnyAngle): Item {
+  override mold(angle: AnyAngle): Item {
     angle = Angle.fromAny(angle, this.defaultUnits);
     return Text.from(angle.toString());
   }
 
-  cast(item: Item): Angle | undefined {
+  override cast(item: Item): Angle | undefined {
     const value = item.toValue();
     let angle: Angle | null = null;
     try {

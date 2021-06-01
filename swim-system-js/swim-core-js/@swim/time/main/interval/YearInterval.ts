@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,25 +18,25 @@ import {YearsInterval} from "../"; // forward import
 
 /** @hidden */
 export class YearInterval extends UnitTimeInterval {
-  offset(t: AnyDateTime, k?: number): DateTime {
+  override offset(t: AnyDateTime, k?: number): DateTime {
     let d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
     d = d.withYear(d.year + k);
     return d;
   }
 
-  next(t: AnyDateTime, k?: number): DateTime {
+  override next(t: AnyDateTime, k?: number): DateTime {
     const d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
     return d.withYear(d.year + k).withMonth(0, 1).withHour(0, 0, 0, 0);
   }
 
-  floor(t: AnyDateTime): DateTime {
+  override floor(t: AnyDateTime): DateTime {
     const d = DateTime.fromAny(t);
     return d.withMonth(0, 1).withHour(0, 0, 0, 0);
   }
 
-  ceil(t: AnyDateTime): DateTime {
+  override ceil(t: AnyDateTime): DateTime {
     let d = DateTime.fromAny(t);
     d = new DateTime(d.time - 1, d.zone);
     d = d.withMonth(0, 1).withHour(0, 0, 0, 0);
@@ -44,7 +44,7 @@ export class YearInterval extends UnitTimeInterval {
     return d.withMonth(0, 1).withHour(0, 0, 0, 0);
   }
 
-  every(k: number): TimeInterval {
+  override every(k: number): TimeInterval {
     if (k === 1) {
       return this;
     } else if (isFinite(k) && k >= 1) {

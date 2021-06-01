@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import type {Item, Value} from "@swim/structure";
 import {BinaryOutlet} from "./BinaryOutlet";
 
 export class ModuloOutlet extends BinaryOutlet {
-  protected evaluate(argument1: Value, argument2: Value): Item {
+  protected override evaluate(argument1: Value, argument2: Value): Item {
     return argument1.modulo(argument2);
   }
 }

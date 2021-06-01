@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ export class WeekdayFormat extends DateTimeFormat {
     this.locale = locale;
   }
 
-  withLocale(locale: DateTimeLocale): DateTimeFormat {
+  override withLocale(locale: DateTimeLocale): DateTimeFormat {
     if (locale !== this.locale) {
       return new WeekdayFormat(locale);
     } else {
@@ -35,11 +35,11 @@ export class WeekdayFormat extends DateTimeFormat {
     }
   }
 
-  writeDate(date: DateTime, output: Output): void {
+  override writeDate(date: DateTime, output: Output): void {
     output.write(this.locale.weekdays[date.weekday]!);
   }
 
-  parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {
+  override parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {
     return WeekdayParser.parse(input, this.locale, date);
   }
 }

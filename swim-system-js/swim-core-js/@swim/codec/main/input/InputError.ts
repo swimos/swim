@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import {Input} from "./Input";
 /** @hidden */
 export class InputError extends Input {
   /** @hidden */
-  declare readonly error: Error;
+  readonly error!: Error;
 
   constructor(error: Error, id: string | undefined, mark: Mark, settings: InputSettings) {
     super();
@@ -42,80 +42,80 @@ export class InputError extends Input {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return false;
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return false;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return false;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return true;
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return false;
   }
 
-  asPart(part: boolean): Input {
+  override asPart(part: boolean): Input {
     return this;
   }
 
-  head(): number {
+  override head(): number {
     throw new InputException();
   }
 
-  step(): Input {
+  override step(): Input {
     const error = new InputException("error step");
     return new InputError(error, this.id, this.mark, this.settings);
   }
 
-  trap(): Error {
+  override trap(): Error {
     return this.error;
   }
 
-  seek(mark?: Mark): Input {
+  override seek(mark?: Mark): Input {
     const error = new InputException("error seek");
     return new InputError(error, this.id, this.mark, this.settings);
   }
 
-  declare readonly id: string | undefined;
+  override readonly id!: string | undefined;
 
-  withId(id: string | undefined): Input {
+  override withId(id: string | undefined): Input {
     return new InputError(this.error, id, this.mark, this.settings);
   }
 
-  declare readonly mark: Mark;
+  override readonly mark!: Mark;
 
-  withMark(mark: Mark): Input {
+  override withMark(mark: Mark): Input {
     return new InputError(this.error, this.id, mark, this.settings);
   }
 
-  get offset(): number {
+  override get offset(): number {
     return this.mark.offset;
   }
 
-  get line(): number {
+  override get line(): number {
     return this.mark.line;
   }
 
-  get column(): number {
+  override get column(): number {
     return this.mark.column;
   }
 
-  declare readonly settings: InputSettings;
+  override readonly settings!: InputSettings;
 
-  withSettings(settings: AnyInputSettings): Input {
+  override withSettings(settings: AnyInputSettings): Input {
     settings = InputSettings.fromAny(settings);
     return new InputError(this.error, this.id, this.mark, settings);
   }
 
-  clone(): Input {
+  override clone(): Input {
     return this;
   }
 }

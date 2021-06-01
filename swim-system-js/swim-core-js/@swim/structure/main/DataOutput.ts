@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import type {Data} from "./Data";
 /** @hidden */
 export class DataOutput extends Output<Data> {
   /** @hidden */
-  declare readonly data: Data;
+  readonly data!: Data;
 
   constructor(data: Data, settings: OutputSettings) {
     super();
@@ -34,31 +34,31 @@ export class DataOutput extends Output<Data> {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return true;
   }
 
-  isFull(): boolean {
+  override isFull(): boolean {
     return false;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return false;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return false;
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return false;
   }
 
-  asPart(part: boolean): Output<Data> {
+  override asPart(part: boolean): Output<Data> {
     return this;
   }
 
-  write(b: number | string): Output<Data> {
+  override write(b: number | string): Output<Data> {
     if (typeof b === "number") {
       this.data.addByte(b);
       return this;
@@ -67,13 +67,13 @@ export class DataOutput extends Output<Data> {
     }
   }
 
-  writeln(string?: string): Output<Data> {
+  override writeln(string?: string): Output<Data> {
     throw new TypeError("" + string);
   }
 
-  declare readonly settings: OutputSettings;
+  override readonly settings!: OutputSettings;
 
-  withSettings(settings: AnyOutputSettings): Output<Data> {
+  override withSettings(settings: AnyOutputSettings): Output<Data> {
     settings = OutputSettings.fromAny(settings);
     Object.defineProperty(this, "settings", {
       value: settings,
@@ -83,11 +83,11 @@ export class DataOutput extends Output<Data> {
     return this;
   }
 
-  bind(): Data {
+  override bind(): Data {
     return this.data;
   }
 
-  clone(): Output<Data> {
+  override clone(): Output<Data> {
     return new DataOutput(this.data.branch(), this.settings);
   }
 }

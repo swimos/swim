@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import {Output, Parser, Diagnostic, Unicode} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item, Value, Record} from "@swim/structure";
 import {Length} from "../length/Length";
-import {PointR2} from "../r2/PointR2";
+import {R2Point} from "../r2/R2Point";
 import {Transform} from "./Transform";
 import {IdentityTransform} from "./IdentityTransform";
 import {TranslateTransformInterpolator} from "../"; // forward import
@@ -42,13 +42,13 @@ export class TranslateTransform extends Transform {
     });
   }
 
-  declare readonly x: Length;
+  readonly x!: Length;
 
-  declare readonly y: Length;
+  readonly y!: Length;
 
-  transform(that: Transform): Transform;
-  transform(x: number, y: number): PointR2;
-  transform(x: Transform | number, y?: number): Transform | PointR2 {
+  override transform(that: Transform): Transform;
+  override transform(x: number, y: number): R2Point;
+  override transform(x: Transform | number, y?: number): Transform | R2Point {
     if (arguments.length === 1) {
       if (x instanceof IdentityTransform) {
         return this;
@@ -58,27 +58,27 @@ export class TranslateTransform extends Transform {
         return Transform.list(this, x as Transform);
       }
     } else {
-      return new PointR2(this.x.pxValue() + (x as number), this.y.pxValue() + y!);
+      return new R2Point(this.x.pxValue() + (x as number), this.y.pxValue() + y!);
     }
   }
 
-  transformX(x: number, y: number): number {
+  override transformX(x: number, y: number): number {
     return this.x.pxValue() + x;
   }
 
-  transformY(x: number, y: number): number {
+  override transformY(x: number, y: number): number {
     return this.y.pxValue() + y;
   }
 
-  inverse(): Transform {
+  override inverse(): Transform {
     return new TranslateTransform(this.x.negative(), this.y.negative());
   }
 
-  toAffine(): AffineTransform {
+  override toAffine(): AffineTransform {
     return new AffineTransform(1, 0, 0, 1, this.x.pxValue(), this.y.pxValue());
   }
 
-  toCssTransformComponent(): CSSTransformComponent | null {
+  override toCssTransformComponent(): CSSTransformComponent | null {
     if (typeof CSSTranslate !== "undefined") {
       const x = this.x.toCssValue();
       const y = this.y.toCssValue();
@@ -87,16 +87,16 @@ export class TranslateTransform extends Transform {
     return null;
   }
 
-  toValue(): Value {
+  override toValue(): Value {
     return Record.create(1)
                  .attr("translate", Record.create(2).slot("x", this.x.toValue())
                                                     .slot("y", this.y.toValue()));
   }
 
-  interpolateTo(that: TranslateTransform): Interpolator<TranslateTransform>;
-  interpolateTo(that: Transform): Interpolator<Transform>;
-  interpolateTo(that: unknown): Interpolator<Transform> | null;
-  interpolateTo(that: unknown): Interpolator<Transform> | null {
+  override interpolateTo(that: TranslateTransform): Interpolator<TranslateTransform>;
+  override interpolateTo(that: Transform): Interpolator<Transform>;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null {
     if (that instanceof TranslateTransform) {
       return TranslateTransformInterpolator(this, that);
     } else {
@@ -104,11 +104,11 @@ export class TranslateTransform extends Transform {
     }
   }
 
-  conformsTo(that: Transform): boolean {
+  override conformsTo(that: Transform): boolean {
     return that instanceof TranslateTransform;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (that instanceof TranslateTransform) {
       return this.x.equivalentTo(that.x, epsilon)
           && this.y.equivalentTo(that.y, epsilon);
@@ -116,19 +116,19 @@ export class TranslateTransform extends Transform {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (that instanceof TranslateTransform) {
       return this.x.equals(that.x) && this.y.equals(that.y);
     }
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(TranslateTransform),
         this.x.hashCode()), this.y.hashCode()));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Transform").write(46/*'.'*/).write("translate");
     if (this.x.isDefined() && !this.y.isDefined()) {
       output = output.write("X").write(40/*'('*/).debug(this.x).write(41/*')'*/);
@@ -140,9 +140,9 @@ export class TranslateTransform extends Transform {
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
-  toString(): string {
+  override toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       if (this.x.isDefined() && !this.y.isDefined()) {
@@ -161,7 +161,7 @@ export class TranslateTransform extends Transform {
     return stringValue;
   }
 
-  toAttributeString(): string {
+  override toAttributeString(): string {
     if (this.x.isDefined() && !this.y.isDefined()) {
       return "translate(" + this.x.pxValue() + ",0)";
     } else if (!this.x.isDefined() && this.y.isDefined()) {
@@ -171,7 +171,7 @@ export class TranslateTransform extends Transform {
     }
   }
 
-  static fromCssTransformComponent(component: CSSTranslate): TranslateTransform {
+  static override fromCssTransformComponent(component: CSSTranslate): TranslateTransform {
     const x = typeof component.x === "number"
             ? Length.px(component.x)
             : Length.fromCssValue(component.x);
@@ -181,7 +181,7 @@ export class TranslateTransform extends Transform {
     return new TranslateTransform(x, y);
   }
 
-  static fromAny(value: TranslateTransform | string): TranslateTransform {
+  static override fromAny(value: TranslateTransform | string): TranslateTransform {
     if (value === void 0 || value === null || value instanceof TranslateTransform) {
       return value;
     } else if (typeof value === "string") {
@@ -190,7 +190,7 @@ export class TranslateTransform extends Transform {
     throw new TypeError("" + value);
   }
 
-  static fromValue(value: Value): TranslateTransform | null {
+  static override fromValue(value: Value): TranslateTransform | null {
     const header = value.header("translate");
     if (header.isDefined()) {
       let x = Length.zero();
@@ -216,7 +216,7 @@ export class TranslateTransform extends Transform {
     return null;
   }
 
-  static parse(string: string): TranslateTransform {
+  static override parse(string: string): TranslateTransform {
     let input = Unicode.stringInput(string);
     while (input.isCont() && Unicode.isWhitespace(input.head())) {
       input = input.step();

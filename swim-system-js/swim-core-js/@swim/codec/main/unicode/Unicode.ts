@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,6 +60,9 @@ export const Unicode = {} as {
   isAlpha(c: number): boolean;
 
   /** @hidden */
+  isDigit(c: number): boolean;
+
+  /** @hidden */
   isSpace(c: number): boolean;
 
   /** @hidden */
@@ -99,6 +102,10 @@ Unicode.writeString = function <I>(input: unknown, output: Output): Writer<I, un
 Unicode.isAlpha = function (c: number): boolean {
   return c >= 65/*'A'*/ && c <= 90/*'Z'*/
       || c >= 97/*'a'*/ && c <= 122/*'z'*/;
+};
+
+Unicode.isDigit = function (c: number): boolean {
+  return c >= 48/*'0'*/ && c <= 57/*'9'*/;
 };
 
 Unicode.isSpace = function (c: number): boolean {

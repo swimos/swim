@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,9 +35,9 @@ export class ConstraintProduct implements ConstraintTerm, Debug {
     return false;
   }
 
-  declare readonly coefficient: number;
+  readonly coefficient!: number;
 
-  declare readonly variable: ConstraintVariable;
+  readonly variable!: ConstraintVariable;
 
   get terms(): ConstraintMap<ConstraintVariable, number> {
     const terms = new ConstraintMap<ConstraintVariable, number>();

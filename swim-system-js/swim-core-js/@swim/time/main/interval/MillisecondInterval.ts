@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {MillisecondsInterval} from "../"; // forward import
 
 /** @hidden */
 export class MillisecondInterval extends UnitTimeInterval {
-  offset(d: AnyDateTime, k?: number): DateTime {
+  override offset(d: AnyDateTime, k?: number): DateTime {
     const z = DateTime.zone(d);
     d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
@@ -26,7 +26,7 @@ export class MillisecondInterval extends UnitTimeInterval {
     return new DateTime(d, z);
   }
 
-  next(d: AnyDateTime, k?: number): DateTime {
+  override next(d: AnyDateTime, k?: number): DateTime {
     const z = DateTime.zone(d);
     d = DateTime.time(d);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
@@ -34,15 +34,15 @@ export class MillisecondInterval extends UnitTimeInterval {
     return new DateTime(d, z);
   }
 
-  floor(d: AnyDateTime): DateTime {
+  override floor(d: AnyDateTime): DateTime {
     return DateTime.fromAny(d);
   }
 
-  ceil(d: AnyDateTime): DateTime {
+  override ceil(d: AnyDateTime): DateTime {
     return DateTime.fromAny(d);
   }
 
-  every(k: number): TimeInterval {
+  override every(k: number): TimeInterval {
     if (k === 1) {
       return this;
     } else if (isFinite(k) && k >= 1) {

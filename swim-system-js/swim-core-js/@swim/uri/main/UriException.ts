@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 import {Diagnostic} from "@swim/codec";
 
 export class UriException extends Error {
-  declare readonly diagnostic: Diagnostic | null;
+  readonly diagnostic!: Diagnostic | null;
 
   constructor(message?: Diagnostic | string) {
     super(message instanceof Diagnostic ? message.message : message);
@@ -27,7 +27,7 @@ export class UriException extends Error {
     });
   }
 
-  toString(): string {
+  override toString(): string {
     if (this.diagnostic !== null) {
       return this.diagnostic.toString();
     } else {

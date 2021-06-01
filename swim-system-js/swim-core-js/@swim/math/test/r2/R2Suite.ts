@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,42 +13,42 @@
 // limitations under the License.
 
 import {Spec, Unit} from "@swim/unit";
-import {CurveR2ParserSpec} from "./CurveR2ParserSpec";
-import {SplineR2BuilderSpec} from "./SplineR2BuilderSpec";
-import {SplineR2ParserSpec} from "./SplineR2ParserSpec";
-import {PathR2BuilderSpec} from "./PathR2BuilderSpec";
-import {PathR2ParserSpec} from "./PathR2ParserSpec";
-import {PathR2WriterSpec} from "./PathR2WriterSpec";
+import {R2CurveParserSpec} from "./R2CurveParserSpec";
+import {R2SplineBuilderSpec} from "./R2SplineBuilderSpec";
+import {R2SplineParserSpec} from "./R2SplineParserSpec";
+import {R2PathBuilderSpec} from "./R2PathBuilderSpec";
+import {R2PathParserSpec} from "./R2PathParserSpec";
+import {R2PathWriterSpec} from "./R2PathWriterSpec";
 
 @Unit
 export class R2Suite extends Spec {
   @Unit
-  curveR2ParserSpec(): Spec {
-    return new CurveR2ParserSpec();
+  r2CurveParserSpec(): Spec {
+    return new R2CurveParserSpec();
   }
 
   @Unit
-  splineR2BuilderSpec(): Spec {
-    return new SplineR2BuilderSpec();
+  r2SplineBuilderSpec(): Spec {
+    return new R2SplineBuilderSpec();
   }
 
   @Unit
-  splineR2ParserSpec(): Spec {
-    return new SplineR2ParserSpec();
+  r2SplineParserSpec(): Spec {
+    return new R2SplineParserSpec();
   }
 
   @Unit
-  pathR2BuilderSpec(): Spec {
-    return new PathR2BuilderSpec();
+  r2PathBuilderSpec(): Spec {
+    return new R2PathBuilderSpec();
   }
 
   @Unit
-  pathR2ParserSpec(): Spec {
-    return new PathR2ParserSpec();
+  r2PathParserSpec(): Spec {
+    return new R2PathParserSpec();
   }
 
   @Unit
-  pathR2WriterSpec(): Spec {
-    return new PathR2WriterSpec();
+  r2PathWriterSpec(): Spec {
+    return new R2PathWriterSpec();
   }
 }

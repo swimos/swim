@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,15 +44,15 @@ export class Constraint implements ConstraintKey, Debug {
     });
   }
 
-  declare readonly id: number;
+  readonly id!: number;
 
-  declare readonly scope: ConstraintScope;
+  readonly scope!: ConstraintScope;
 
-  declare readonly expression: ConstraintExpression;
+  readonly expression!: ConstraintExpression;
 
-  declare readonly relation: ConstraintRelation;
+  readonly relation!: ConstraintRelation;
 
-  declare readonly strength: ConstraintStrength;
+  readonly strength!: ConstraintStrength;
 
   isConstrained(): boolean {
     return this.scope.hasConstraint(this);

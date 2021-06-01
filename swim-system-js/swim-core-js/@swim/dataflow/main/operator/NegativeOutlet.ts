@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import type {Item, Value} from "@swim/structure";
 import {UnaryOutlet} from "./UnaryOutlet";
 
 export class NegativeOutlet extends UnaryOutlet {
-  protected evaluate(argument: Value): Item {
+  protected override evaluate(argument: Value): Item {
     return argument.negative();
   }
 }

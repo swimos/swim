@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,33 +25,33 @@ export class GradAngle extends Angle {
     });
   }
 
-  declare readonly value: number;
+  override readonly value!: number;
 
-  get units(): AngleUnits {
+  override get units(): AngleUnits {
     return "grad";
   }
 
-  degValue(): number {
+  override degValue(): number {
     return this.value * 0.9;
   }
 
-  gradValue(): number {
+  override gradValue(): number {
     return this.value;
   }
 
-  radValue(): number {
+  override radValue(): number {
     return this.value * Math.PI / 200;
   }
 
-  turnValue(): number {
+  override turnValue(): number {
     return this.value / 400;
   }
 
-  grad(): GradAngle {
+  override grad(): GradAngle {
     return this;
   }
 
-  toCssValue(): CSSUnitValue | null {
+  override toCssValue(): CSSUnitValue | null {
     if (typeof CSSUnitValue !== "undefined") {
       return new CSSUnitValue(this.value, "grad");
     } else {
@@ -59,7 +59,7 @@ export class GradAngle extends Angle {
     }
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof Angle) {
       const x = this.value;
       const y = that.gradValue();
@@ -68,35 +68,35 @@ export class GradAngle extends Angle {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (that instanceof Angle) {
       return Numbers.equivalent(this.value, that.gradValue());
     }
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (that instanceof GradAngle) {
       return this.value === that.value;
     }
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(GradAngle), Numbers.hash(this.value)));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Angle").write(46/*'.'*/).write("grad")
         .write(40/*'('*/).debug(this.value).write(41/*')'*/);
   }
 
-  toString(): string {
+  override toString(): string {
     return this.value + "grad";
   }
 
   @Lazy
-  static zero(): GradAngle {
+  static override zero(): GradAngle {
     return new GradAngle(0);
   }
 }

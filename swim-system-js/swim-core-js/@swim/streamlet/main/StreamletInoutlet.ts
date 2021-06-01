@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ export class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
     });
   }
 
-  declare readonly streamlet: Streamlet<I, O>;
+  readonly streamlet!: Streamlet<I, O>;
 
-  get(): O | undefined {
+  override get(): O | undefined {
     const streamlet = this.streamlet as GenericStreamlet<I, O>;
     if (streamlet.getOutput !== void 0) {
       const output = streamlet.getOutput(this);
@@ -49,14 +49,14 @@ export class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
     }
   }
 
-  protected willDecohere(): void {
+  protected override willDecohere(): void {
     const streamlet = this.streamlet as GenericStreamlet<I, O>;
     if (streamlet.willDecohereOutlet !== void 0) {
       streamlet.willDecohereOutlet(this);
     }
   }
 
-  protected didDecohere(): void {
+  protected override didDecohere(): void {
     const streamlet = this.streamlet as GenericStreamlet<I, O>;
     if (streamlet.didDecohereOutlet !== void 0) {
       streamlet.didDecohereOutlet(this);
@@ -65,14 +65,14 @@ export class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
     }
   }
 
-  protected willRecohere(version: number): void {
+  protected override willRecohere(version: number): void {
     const streamlet = this.streamlet as GenericStreamlet<I, O>;
     if (streamlet.willRecohereOutlet !== void 0) {
       streamlet.willRecohereOutlet(this, version);
     }
   }
 
-  protected didRecohere(version: number): void {
+  protected override didRecohere(version: number): void {
     const streamlet = this.streamlet as GenericStreamlet<I, O>;
     if (streamlet.didRecohereOutlet !== void 0) {
       streamlet.didRecohereOutlet(this, version);

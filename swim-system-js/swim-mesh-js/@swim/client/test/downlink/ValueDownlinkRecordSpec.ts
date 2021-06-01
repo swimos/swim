@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import type {MockServer} from "../MockServer";
 import {ClientExam} from "../ClientExam";
 
 export class ValueDownlinkRecordSpec extends Spec {
-  createExam(report: Report, name: string, options: TestOptions): ClientExam {
+  override createExam(report: Report, name: string, options: TestOptions): ClientExam {
     return new ClientExam(report, this, name, options);
   }
 
@@ -50,7 +50,7 @@ export class ValueDownlinkRecordSpec extends Spec {
       const record = new ValueDownlinkRecord(downlink);
 
       class StateOutput extends AbstractInlet<Value> {
-        didRecohereOutput(version: number): void {
+        override didRecohereOutput(version: number): void {
           const state = this.input!.get()!;
           exam.equal(state, Record.of("on"));
           resolve();

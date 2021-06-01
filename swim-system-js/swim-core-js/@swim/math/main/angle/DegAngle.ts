@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,33 +25,33 @@ export class DegAngle extends Angle {
     });
   }
 
-  declare readonly value: number;
+  override readonly value!: number;
 
-  get units(): AngleUnits {
+  override get units(): AngleUnits {
     return "deg";
   }
 
-  degValue(): number {
+  override degValue(): number {
     return this.value;
   }
 
-  gradValue(): number {
+  override gradValue(): number {
     return this.value * 10 / 9;
   }
 
-  radValue(): number {
+  override radValue(): number {
     return this.value * Math.PI / 180;
   }
 
-  turnValue(): number {
+  override turnValue(): number {
     return this.value / 360;
   }
 
-  deg(): DegAngle {
+  override deg(): DegAngle {
     return this;
   }
 
-  toCssValue(): CSSUnitValue | null {
+  override toCssValue(): CSSUnitValue | null {
     if (typeof CSSUnitValue !== "undefined") {
       return new CSSUnitValue(this.value, "deg");
     } else {
@@ -59,7 +59,7 @@ export class DegAngle extends Angle {
     }
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof Angle) {
       const x = this.value;
       const y = that.degValue();
@@ -68,35 +68,35 @@ export class DegAngle extends Angle {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (that instanceof Angle) {
       return Numbers.equivalent(this.value, that.degValue());
     }
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (that instanceof DegAngle) {
       return this.value === that.value;
     }
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(DegAngle), Numbers.hash(this.value)));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Angle").write(46/*'.'*/).write("deg")
         .write(40/*'('*/).debug(this.value).write(41/*')'*/);
   }
 
-  toString(): string {
+  override toString(): string {
     return this.value + "deg";
   }
 
   @Lazy
-  static zero(): DegAngle {
+  static override zero(): DegAngle {
     return new DegAngle(0);
   }
 }

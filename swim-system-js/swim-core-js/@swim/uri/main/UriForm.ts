@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ export class UriForm extends Form<Uri, AnyUri> {
     });
   }
 
-  declare readonly unit: Uri | undefined;
+  override readonly unit!: Uri | undefined;
 
-  withUnit(unit: Uri | undefined): Form<Uri, AnyUri> {
+  override withUnit(unit: Uri | undefined): Form<Uri, AnyUri> {
     if (unit !== this.unit) {
       return new UriForm(unit);
     } else {
@@ -35,7 +35,7 @@ export class UriForm extends Form<Uri, AnyUri> {
     }
   }
 
-  mold(object: AnyUri, item?: Item): Item {
+  override mold(object: AnyUri, item?: Item): Item {
     object = Uri.fromAny(object);
     if (item === void 0) {
       return Text.from(object.toString());
@@ -44,7 +44,7 @@ export class UriForm extends Form<Uri, AnyUri> {
     }
   }
 
-  cast(item: Item, object?: Uri): Uri | undefined {
+  override cast(item: Item, object?: Uri): Uri | undefined {
     const value = item.target;
     try {
       const string = value.stringValue();

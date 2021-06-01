@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import {InputBufferError} from "../"; // forward import
  * Non-blocking token stream buffer.
  */
 export abstract class InputBuffer extends Input {
-  abstract asPart(part: boolean): InputBuffer;
+  abstract override asPart(part: boolean): InputBuffer;
 
   abstract readonly index: number;
 
@@ -44,23 +44,23 @@ export abstract class InputBuffer extends Input {
 
   abstract set(index: number, token: number): void;
 
-  abstract step(offset?: number): InputBuffer;
+  abstract override step(offset?: number): InputBuffer;
 
-  abstract seek(mark: Mark): InputBuffer;
+  abstract override seek(mark: Mark): InputBuffer;
 
-  abstract withId(id: string | undefined): InputBuffer;
+  abstract override withId(id: string | undefined): InputBuffer;
 
-  abstract withMark(mark: Mark): InputBuffer;
+  abstract override withMark(mark: Mark): InputBuffer;
 
-  abstract withSettings(settings: AnyInputSettings): InputBuffer;
+  abstract override withSettings(settings: AnyInputSettings): InputBuffer;
 
-  abstract clone(): InputBuffer;
+  abstract override clone(): InputBuffer;
 
   /**
    * Returns an `InputBuffer` in the _empty_ state.
    */
   @Lazy
-  static empty(): InputBuffer {
+  static override empty(): InputBuffer {
     return new InputBufferEmpty(void 0, Mark.zero, InputSettings.standard());
   }
 
@@ -68,14 +68,14 @@ export abstract class InputBuffer extends Input {
    * Returns an `InputBuffer` in the _done_ state.
    */
   @Lazy
-  static done(): InputBuffer {
+  static override done(): InputBuffer {
     return new InputBufferDone(void 0, Mark.zero, InputSettings.standard());
   }
 
   /**
    * Returns an `InputBuffer` in the _error_ state that traps the given `error`.
    */
-  static error(error: Error): InputBuffer {
+  static override error(error: Error): InputBuffer {
     return new InputBufferError(error, void 0, Mark.zero, InputSettings.standard());
   }
 }

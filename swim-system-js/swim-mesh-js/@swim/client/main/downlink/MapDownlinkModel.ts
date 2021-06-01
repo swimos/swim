@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,12 +35,12 @@ export class MapDownlinkModel extends DownlinkModel {
     });
   }
 
-  declare readonly views: ReadonlyArray<MapDownlink<unknown, unknown>>;
+  override readonly views!: ReadonlyArray<MapDownlink<unknown, unknown>>;
 
   /** @hidden */
-  declare readonly state: BTree<Value, Value>;
+  readonly state!: BTree<Value, Value>;
 
-  get type(): DownlinkType {
+  override get type(): DownlinkType {
     return "map";
   }
 
@@ -143,7 +143,7 @@ export class MapDownlinkModel extends DownlinkModel {
     });
   }
 
-  onEventMessage(message: EventMessage, host: Host): void {
+  override onEventMessage(message: EventMessage, host: Host): void {
     super.onEventMessage(message, host);
     const event = message.body;
     const tag = event.tag;

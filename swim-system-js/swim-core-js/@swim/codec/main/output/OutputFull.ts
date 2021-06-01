@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,52 +28,52 @@ export class OutputFull extends Output<never> {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return false;
   }
 
-  isFull(): boolean {
+  override isFull(): boolean {
     return true;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return false;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return false;
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return true;
   }
 
-  asPart(part: boolean): Output<never> {
+  override asPart(part: boolean): Output<never> {
     return part ? this : new OutputDone(this.settings);
   }
 
-  write(token: number): Output<never>;
-  write(string: string): Output<never>;
-  write(tokenOrString: number | string): Output<never> {
+  override write(token: number): Output<never>;
+  override write(string: string): Output<never>;
+  override write(tokenOrString: number | string): Output<never> {
     return new OutputError(new OutputException("full"), this.settings);
   }
 
-  writeln(string?: string): Output<never> {
+  override writeln(string?: string): Output<never> {
     return new OutputError(new OutputException("full"), this.settings);
   }
 
-  bind(): never {
+  override bind(): never {
     throw new OutputException();
   }
 
-  declare readonly settings: OutputSettings;
+  override readonly settings!: OutputSettings;
 
-  withSettings(settings: AnyOutputSettings): Output<never> {
+  override withSettings(settings: AnyOutputSettings): Output<never> {
     settings = OutputSettings.fromAny(settings);
     return new OutputFull(settings);
   }
 
-  clone(): Output<never> {
+  override clone(): Output<never> {
     return this;
   }
 }

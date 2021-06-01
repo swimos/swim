@@ -159,6 +159,24 @@ const core = [
     ],
   },
   {
+    id: "macro",
+    name: "@swim/macro",
+    targets: [
+      {
+        id: "main",
+        deps: ["util", "codec", "mapping", "structure", "recon"],
+      },
+      {
+        id: "cli",
+        deps: ["util", "codec", "args", "mapping", "structure", "recon", "macro"],
+      },
+      {
+        id: "test",
+        deps: ["util", "codec", "unit", "mapping", "structure", "recon", "macro"],
+      },
+    ],
+  },
+  {
     id: "uri",
     name: "@swim/uri",
     targets: [
@@ -222,7 +240,7 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time"],
+        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "macro", "uri", "math", "geo", "time"],
       },
     ],
   },

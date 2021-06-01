@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ export class MemoizeValueCombinator<IO> extends AbstractInoutlet<IO, IO> {
   }
 
   /** @hidden */
-  declare readonly state: IO | undefined;
+  readonly state!: IO | undefined;
 
-  get(): IO | undefined {
+  override get(): IO | undefined {
     return this.state;
   }
 
-  protected onRecohere(version: number): void {
+  protected override onRecohere(version: number): void {
     const input = this.input;
     if (input !== null) {
       Object.defineProperty(this, "state", {
@@ -43,7 +43,7 @@ export class MemoizeValueCombinator<IO> extends AbstractInoutlet<IO, IO> {
     }
   }
 
-  memoize(): Outlet<IO> {
+  override memoize(): Outlet<IO> {
     return this;
   }
 }

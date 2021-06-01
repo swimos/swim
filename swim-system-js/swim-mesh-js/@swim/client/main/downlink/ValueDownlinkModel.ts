@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,12 +33,12 @@ export class ValueDownlinkModel extends DownlinkModel {
     });
   }
 
-  declare readonly views: ReadonlyArray<ValueDownlink<unknown>>;
+  override readonly views!: ReadonlyArray<ValueDownlink<unknown>>;
 
   /** @hidden */
-  declare readonly state: Value;
+  readonly state!: Value;
 
-  get type(): DownlinkType {
+  override get type(): DownlinkType {
     return "value";
   }
 
@@ -62,7 +62,7 @@ export class ValueDownlinkModel extends DownlinkModel {
     });
   }
 
-  onEventMessage(message: EventMessage, host: Host): void {
+  override onEventMessage(message: EventMessage, host: Host): void {
     super.onEventMessage(message, host);
     this.onSetEvent(message.body);
   }

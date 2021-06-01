@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ export class NumberForm extends Form<number> {
     });
   }
 
-  declare readonly unit: number | undefined;
+  override readonly unit!: number | undefined;
 
-  withUnit(unit: number | undefined): Form<number> {
+  override withUnit(unit: number | undefined): Form<number> {
     if (unit !== this.unit) {
       return new NumberForm(unit);
     } else {
@@ -36,7 +36,7 @@ export class NumberForm extends Form<number> {
     }
   }
 
-  mold(object: number, item?: Item): Item {
+  override mold(object: number, item?: Item): Item {
     if (item === void 0) {
       return Num.from(object);
     } else {
@@ -44,7 +44,7 @@ export class NumberForm extends Form<number> {
     }
   }
 
-  cast(item: Item, object?: number): number | undefined {
+  override cast(item: Item, object?: number): number | undefined {
     const value = item.target;
     try {
       return value.numberValue();

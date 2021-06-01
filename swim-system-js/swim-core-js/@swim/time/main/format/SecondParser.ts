@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ export class SecondParser extends Parser<DateTimeInit> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<DateTimeInit> {
+  override feed(input: Input): Parser<DateTimeInit> {
     return SecondParser.parse(input, this.date, this.second, this.step);
   }
 
@@ -37,7 +37,7 @@ export class SecondParser extends Parser<DateTimeInit> {
     return DateTimeFormat.parseDateNumber(input, SecondParser, "second", 2, 2, date, second, step);
   }
 
-  static bind(second: number, date: DateTimeInit): Parser<DateTimeInit> {
+  static term(second: number, date: DateTimeInit): Parser<DateTimeInit> {
     date.second = second;
     return Parser.done(date);
   }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,13 +33,13 @@ export class InvokeOutlet extends AbstractOutlet<Value> {
   }
 
   /** @hidden */
-  declare readonly scope: Record;
+  readonly scope!: Record;
 
-  declare readonly funcInlet: Inlet<Value>;
+  readonly funcInlet!: Inlet<Value>;
 
-  declare readonly argsInlet: Inlet<Value>;
+  readonly argsInlet!: Inlet<Value>;
 
-  get(): Value {
+  override get(): Value {
     const funcInput = this.funcInlet.input;
     const argsInput = this.argsInlet.input;
     if (funcInput !== null && argsInput !== null) {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,21 +26,21 @@ export class UnitlessLength extends Length {
     });
   }
 
-  declare readonly value: number;
+  override readonly value!: number;
 
-  get units(): LengthUnits {
+  override get units(): LengthUnits {
     return "";
   }
 
-  pxValue(basis?: LengthBasis | number): number {
+  override pxValue(basis?: LengthBasis | number): number {
     throw new LengthException("unitless length");
   }
 
-  toCssValue(): CSSUnitValue | null {
+  override toCssValue(): CSSUnitValue | null {
     return null;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof Length) {
       const x = this.value;
       const y = that.value;
@@ -49,35 +49,35 @@ export class UnitlessLength extends Length {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (that instanceof Length) {
       return Numbers.equivalent(this.value, that.value);
     }
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (that instanceof UnitlessLength) {
       return this.value === that.value;
     }
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(UnitlessLength), Numbers.hash(this.value)));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Length").write(46/*'.'*/).write("unitless")
         .write(40/*'('*/).debug(this.value).write(41/*')'*/);
   }
 
-  toString(): string {
+  override toString(): string {
     return this.value + "";
   }
 
   @Lazy
-  static zero(): UnitlessLength {
+  static override zero(): UnitlessLength {
     return new UnitlessLength(0);
   }
 }

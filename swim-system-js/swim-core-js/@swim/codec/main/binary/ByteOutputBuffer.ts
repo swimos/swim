@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import {OutputBufferError} from "../output/OutputBufferError";
 /** @hidden */
 export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
   /** @hidden */
-  declare readonly array: Uint8Array;
+  readonly array!: Uint8Array;
   /** @hidden */
-  declare readonly part: boolean;
+  readonly part!: boolean;
 
   constructor(array: Uint8Array, index: number, limit: number,
               part: boolean, settings: OutputSettings) {
@@ -54,27 +54,27 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return this.index < this.limit;
   }
 
-  isFull(): boolean {
+  override isFull(): boolean {
     return this.part && this.index >= this.limit;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return !this.part && this.index >= this.limit;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return false;
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return this.part;
   }
 
-  asPart(part: boolean): OutputBuffer<Uint8Array> {
+  override asPart(part: boolean): OutputBuffer<Uint8Array> {
     Object.defineProperty(this, "part", {
       value: part,
       enumerable: true,
@@ -83,9 +83,9 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
     return this;
   }
 
-  declare readonly index: number;
+  readonly index!: number;
 
-  withIndex(index: number): OutputBuffer<Uint8Array> {
+  override withIndex(index: number): OutputBuffer<Uint8Array> {
     if (0 <= index && index <= this.limit) {
       Object.defineProperty(this, "index", {
         value: index,
@@ -98,9 +98,9 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
     }
   }
 
-  declare readonly limit: number;
+  readonly limit!: number;
 
-  withLimit(limit: number): OutputBuffer<Uint8Array> {
+  override withLimit(limit: number): OutputBuffer<Uint8Array> {
     if (0 <= limit && limit <= this.array.length) {
       Object.defineProperty(this, "limit", {
         value: limit,
@@ -113,19 +113,19 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
     }
   }
 
-  get capacity(): number {
+  override get capacity(): number {
     return this.array.length;
   }
 
-  get remaining(): number {
+  override get remaining(): number {
     return this.limit - this.index;
   }
 
-  has(index: number): boolean {
+  override has(index: number): boolean {
     return 0 <= index && index < this.limit;
   }
 
-  get(index: number): number {
+  override get(index: number): number {
     if (0 <= index && index < this.limit) {
       return this.array[index]!;
     } else {
@@ -133,7 +133,7 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
     }
   }
 
-  set(index: number, token: number): void {
+  override set(index: number, token: number): void {
     if (0 <= index && index < this.limit) {
       this.array[index] = token;
     } else {
@@ -141,7 +141,7 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
     }
   }
 
-  write(token: number | string): OutputBuffer<Uint8Array> {
+  override write(token: number | string): OutputBuffer<Uint8Array> {
     if (typeof token === "number") {
       const index = this.index;
       if (index < this.limit) {
@@ -160,11 +160,11 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
     }
   }
 
-  writeln(string?: string): OutputBuffer<Uint8Array> {
+  override writeln(string?: string): OutputBuffer<Uint8Array> {
     return new OutputBufferError(new OutputException("binary output"), this.settings);
   }
 
-  step(offset: number): OutputBuffer<Uint8Array> {
+  override step(offset: number): OutputBuffer<Uint8Array> {
     const index = this.index + offset;
     if (0 <= index && index <= this.limit) {
       Object.defineProperty(this, "index", {
@@ -178,13 +178,13 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
     }
   }
 
-  bind(): Uint8Array {
+  override bind(): Uint8Array {
     return new Uint8Array(this.array.buffer, 0, this.index);
   }
 
-  declare readonly settings: OutputSettings;
+  override readonly settings!: OutputSettings;
 
-  withSettings(settings: AnyOutputSettings): OutputBuffer<Uint8Array> {
+  override withSettings(settings: AnyOutputSettings): OutputBuffer<Uint8Array> {
     settings = OutputSettings.fromAny(settings);
     Object.defineProperty(this, "settings", {
       value: settings,
@@ -194,7 +194,7 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
     return this;
   }
 
-  clone(): OutputBuffer<Uint8Array> {
+  override clone(): OutputBuffer<Uint8Array> {
     return new ByteOutputBuffer(this.array, this.index, this.limit, this.part, this.settings);
   }
 

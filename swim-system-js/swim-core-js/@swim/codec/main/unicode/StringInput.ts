@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import {InputError} from "../input/InputError";
 /** @hidden */
 export class StringInput extends Input {
   /** @hidden */
-  declare readonly string: string;
+  readonly string!: string;
   /** @hidden */
-  declare readonly index: number;
+  readonly index!: number;
   /** @hidden */
-  declare readonly part: boolean;
+  readonly part!: boolean;
 
   constructor(string: string, id: string | undefined, offset: number,
               line: number, column: number, settings: InputSettings,
@@ -72,27 +72,27 @@ export class StringInput extends Input {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return this.index < this.string.length;
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.part && this.index >= this.string.length;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return !this.part && this.index >= this.string.length;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return false;
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return this.part;
   }
 
-  asPart(part: boolean): Input {
+  override asPart(part: boolean): Input {
     Object.defineProperty(this, "part", {
       value: part,
       enumerable: true,
@@ -101,7 +101,7 @@ export class StringInput extends Input {
     return this;
   }
 
-  head(): number {
+  override head(): number {
     const string = this.string;
     const index = this.index;
     if (index < string.length) {
@@ -115,7 +115,7 @@ export class StringInput extends Input {
     throw new InputException();
   }
 
-  step(): Input {
+  override step(): Input {
     const string = this.string;
     const index = this.index;
     if (index < string.length) {
@@ -155,7 +155,7 @@ export class StringInput extends Input {
     }
   }
 
-  seek(mark?: Mark): Input {
+  override seek(mark?: Mark): Input {
     if (mark !== void 0) {
       const index = this.index + (mark.offset - this.offset);
       if (0 <= index && index <= this.string.length) {
@@ -209,9 +209,9 @@ export class StringInput extends Input {
     }
   }
 
-  declare readonly id: string | undefined;
+  readonly id!: string | undefined;
 
-  withId(id: string | undefined): Input {
+  override withId(id: string | undefined): Input {
     Object.defineProperty(this, "id", {
       value: id,
       enumerable: true,
@@ -220,11 +220,11 @@ export class StringInput extends Input {
     return this;
   }
 
-  get mark(): Mark {
+  override get mark(): Mark {
     return Mark.at(this.offset, this.line, this.column);
   }
 
-  withMark(mark: Mark): Input {
+  override withMark(mark: Mark): Input {
     Object.defineProperty(this, "offset", {
       value: mark.offset,
       enumerable: true,
@@ -243,15 +243,15 @@ export class StringInput extends Input {
     return this;
   }
 
-  declare readonly offset: number;
+  override readonly offset!: number;
 
-  declare readonly line: number;
+  override readonly line!: number;
 
-  declare readonly column: number;
+  override readonly column!: number;
 
-  declare readonly settings: InputSettings;
+  override readonly settings!: InputSettings;
 
-  withSettings(settings: AnyInputSettings): Input {
+  override withSettings(settings: AnyInputSettings): Input {
     settings = InputSettings.fromAny(settings);
     Object.defineProperty(this, "settings", {
       value: settings,
@@ -261,7 +261,7 @@ export class StringInput extends Input {
     return this;
   }
 
-  clone(): Input {
+  override clone(): Input {
     return new StringInput(this.string, this.id, this.offset, this.line,
                            this.column, this.settings, this.index, this.part);
   }

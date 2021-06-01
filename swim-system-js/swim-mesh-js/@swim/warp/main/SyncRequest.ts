@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ export class SyncRequest extends LinkAddressed<SyncRequest> {
     super(node, lane, prio, rate, body);
   }
 
-  protected copy(node: Uri, lane: Uri, prio: number, rate: number, body: Value): SyncRequest {
+  protected override copy(node: Uri, lane: Uri, prio: number, rate: number, body: Value): SyncRequest {
     return new SyncRequest(node, lane, prio, rate, body);
   }
 

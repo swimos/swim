@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,15 +40,15 @@ export class MapInput<K, V> extends AbstractMapOutlet<K, V, Map<K, V>> {
   }
 
   /** @hidden */
-  declare readonly state: BTree<K, V>;
+  readonly state!: BTree<K, V>;
 
-  has(key: K): boolean {
+  override has(key: K): boolean {
     return this.state.has(key);
   }
 
-  get(): Map<K, V> | undefined;
-  get(key: K): V | undefined;
-  get(key?: K): Map<K, V> | V | undefined {
+  override get(): Map<K, V> | undefined;
+  override get(key: K): V | undefined;
+  override get(key?: K): Map<K, V> | V | undefined {
     if (key === void 0) {
       return this.state;
     } else {

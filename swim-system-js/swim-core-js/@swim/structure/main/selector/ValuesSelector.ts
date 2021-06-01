@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,16 +29,16 @@ export class ValuesSelector extends Selector {
     });
   }
 
-  declare readonly then: Selector;
+  override readonly then!: Selector;
 
-  forSelected<T>(interpreter: Interpreter,
-                 callback: (interpreter: Interpreter) => T | undefined): T | undefined;
-  forSelected<T, S>(interpreter: Interpreter,
-                    callback: (this: S, interpreter: Interpreter) => T | undefined,
-                    thisArg: S): T | undefined;
-  forSelected<T, S>(interpreter: Interpreter,
-                    callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
-                    thisArg?: S): T | undefined {
+  override forSelected<T>(interpreter: Interpreter,
+                          callback: (interpreter: Interpreter) => T | undefined): T | undefined;
+  override forSelected<T, S>(interpreter: Interpreter,
+                             callback: (this: S, interpreter: Interpreter) => T | undefined,
+                             thisArg: S): T | undefined;
+  override forSelected<T, S>(interpreter: Interpreter,
+                             callback: (this: S | undefined, interpreter: Interpreter) => T | undefined,
+                             thisArg?: S): T | undefined {
     let selected: T | undefined;
     interpreter.willSelect(this);
     if (interpreter.scopeDepth !== 0) {
@@ -71,14 +71,14 @@ export class ValuesSelector extends Selector {
     return selected;
   }
 
-  mapSelected(interpreter: Interpreter,
-              transform: (interpreter: Interpreter) => Item): Item;
-  mapSelected<S>(interpreter: Interpreter,
-                 transform: (this: S, interpreter: Interpreter) => Item,
-                 thisArg: S): Item;
-  mapSelected<S>(interpreter: Interpreter,
-                 transform: (this: S | undefined, interpreter: Interpreter) => Item,
-                 thisArg?: S): Item {
+  override mapSelected(interpreter: Interpreter,
+                       transform: (interpreter: Interpreter) => Item): Item;
+  override mapSelected<S>(interpreter: Interpreter,
+                          transform: (this: S, interpreter: Interpreter) => Item,
+                          thisArg: S): Item;
+  override mapSelected<S>(interpreter: Interpreter,
+                          transform: (this: S | undefined, interpreter: Interpreter) => Item,
+                          thisArg?: S): Item {
     let result: Item;
     interpreter.willTransform(this);
     if (interpreter.scopeDepth !== 0) {
@@ -156,7 +156,7 @@ export class ValuesSelector extends Selector {
     return result;
   }
 
-  substitute(interpreter: AnyInterpreter): Item {
+  override substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     let then = this.then.substitute(interpreter);
     if (!(then instanceof Selector)) {
@@ -165,15 +165,15 @@ export class ValuesSelector extends Selector {
     return new ValuesSelector(then as Selector);
   }
 
-  andThen(then: Selector): Selector {
+  override andThen(then: Selector): Selector {
     return new ValuesSelector(this.then.andThen(then));
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 16;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof ValuesSelector) {
       return this.then.compareTo(that.then);
     } else if (that instanceof Item) {
@@ -182,7 +182,7 @@ export class ValuesSelector extends Selector {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof ValuesSelector) {
@@ -191,7 +191,7 @@ export class ValuesSelector extends Selector {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof ValuesSelector) {
@@ -200,16 +200,16 @@ export class ValuesSelector extends Selector {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(ValuesSelector), this.then.hashCode()));
   }
 
-  debugThen(output: Output): void {
+  override debugThen(output: Output): void {
     output = output.write(46/*'.'*/).write("values").write(40/*'('*/).write(41/*')'*/);
     this.then.debugThen(output);
   }
 
-  clone(): Selector {
+  override clone(): Selector {
     return new ValuesSelector(this.then.clone());
   }
 }

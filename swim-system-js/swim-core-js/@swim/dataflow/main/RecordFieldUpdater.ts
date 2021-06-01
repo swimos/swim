@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,18 +29,18 @@ export class RecordFieldUpdater extends AbstractInlet<Value> {
     });
   }
 
-  declare readonly record: Record;
+  readonly record!: Record;
 
-  declare readonly key: Value;
+  readonly key!: Value;
 
-  protected onDecohereOutput(): void {
+  protected override onDecohereOutput(): void {
     const record = this.record;
     if (RecordOutlet.is(record)) {
       record.decohereInputKey(this.key, KeyEffect.Update);
     }
   }
 
-  protected onRecohereOutput(version: number): void {
+  protected override onRecohereOutput(version: number): void {
     const input = this.input;
     if (input !== null) {
       const value = input.get();

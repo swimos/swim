@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ import {Output} from "../output/Output";
 /** @hidden */
 export abstract class ByteOutput<T> extends Output<T> {
   /** @hidden */
-  declare readonly array: Uint8Array | null;
+  readonly array!: Uint8Array | null;
   /** @hidden */
-  declare readonly size: number;
+  readonly size!: number;
 
   constructor(array: Uint8Array | null, size: number, settings: OutputSettings) {
     super();
@@ -41,31 +41,31 @@ export abstract class ByteOutput<T> extends Output<T> {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return true;
   }
 
-  isFull(): boolean {
+  override isFull(): boolean {
     return false;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return false;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return false;
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return false;
   }
 
-  asPart(part: boolean): Output<T> {
+  override asPart(part: boolean): Output<T> {
     return this;
   }
 
-  write(b: number | string): Output<T> {
+  override write(b: number | string): Output<T> {
     if (typeof b === "number") {
       const n = this.size;
       const oldArray = this.array;
@@ -95,7 +95,7 @@ export abstract class ByteOutput<T> extends Output<T> {
     }
   }
 
-  writeln(string?: string): Output<T> {
+  override writeln(string?: string): Output<T> {
     throw new TypeError("" + string);
   }
 
@@ -127,9 +127,9 @@ export abstract class ByteOutput<T> extends Output<T> {
     }
   }
 
-  declare readonly settings: OutputSettings;
+  override readonly settings!: OutputSettings;
 
-  withSettings(settings: AnyOutputSettings): Output<T> {
+  override withSettings(settings: AnyOutputSettings): Output<T> {
     settings = OutputSettings.fromAny(settings);
     Object.defineProperty(this, "settings", {
       value: settings,

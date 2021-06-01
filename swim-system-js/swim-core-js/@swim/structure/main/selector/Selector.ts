@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ export abstract class Selector extends Expression {
     super();
   }
 
-  isConstant(): boolean {
+  override isConstant(): boolean {
     return false;
   }
 
@@ -61,7 +61,7 @@ export abstract class Selector extends Expression {
                           transform: (this: S, interpreter: Interpreter) => Item,
                           thisArg: S): Item;
 
-  evaluate(interpreter: AnyInterpreter): Item {
+  override evaluate(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     const selected = Record.create();
     this.forSelected(interpreter, function (interpreter: Interpreter): void {
@@ -73,21 +73,21 @@ export abstract class Selector extends Expression {
     return selected.isEmpty() ? Item.absent() : selected.flattened();
   }
 
-  abstract substitute(interpreter: AnyInterpreter): Item;
+  abstract override substitute(interpreter: AnyInterpreter): Item;
 
   abstract andThen(then: Selector): Selector;
 
-  get(key: AnyValue): Selector {
+  override get(key: AnyValue): Selector {
     key = Value.fromAny(key);
     return this.andThen(new GetSelector(key, Selector.identity()));
   }
 
-  getAttr(key: AnyText): Selector {
+  override getAttr(key: AnyText): Selector {
     key = Text.fromAny(key);
     return this.andThen(new GetAttrSelector(key, Selector.identity()));
   }
 
-  getItem(index: AnyNum): Selector {
+  override getItem(index: AnyNum): Selector {
     index = Num.fromAny(index);
     return this.andThen(new GetItemSelector(index, Selector.identity()));
   }
@@ -108,7 +108,7 @@ export abstract class Selector extends Expression {
     return this.andThen(Selector.descendants());
   }
 
-  filter(predicate?: AnyItem): Selector {
+  override filter(predicate?: AnyItem): Selector {
     if (arguments.length === 0) {
       return new FilterSelector(this, Selector.identity());
     } else {
@@ -117,22 +117,22 @@ export abstract class Selector extends Expression {
     }
   }
 
-  invoke(args: Value): Operator {
+  override invoke(args: Value): Operator {
     return new InvokeOperator(this, args);
   }
 
-  get precedence(): number {
+  override get precedence(): number {
     return 11;
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Selector").write(46/*'.'*/).write("identity").write(40/*'('*/).write(41/*')'*/);
     this.debugThen(output);
   }
 
   abstract debugThen(output: Output): void;
 
-  abstract clone(): Selector;
+  abstract override clone(): Selector;
 
   @Lazy
   static identity(): Selector {

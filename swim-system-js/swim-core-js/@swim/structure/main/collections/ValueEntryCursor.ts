@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ import type {Form} from "../form/Form";
 /** @hidden */
 export class ValueEntryCursor<K, V> extends Cursor<[K, V]> {
   /** @hidden */
-  declare readonly cursor: Cursor<[Value, Value]>;
+  readonly cursor!: Cursor<[Value, Value]>;
   /** @hidden */
-  declare readonly keyForm: Form<K, unknown>;
+  readonly keyForm!: Form<K, unknown>;
   /** @hidden */
-  declare readonly valueForm: Form<V, unknown>;
+  readonly valueForm!: Form<V, unknown>;
 
   constructor(cursor: Cursor<[Value, Value]>, keyForm: Form<K, unknown>, valueForm: Form<V, unknown>) {
     super();
@@ -41,32 +41,32 @@ export class ValueEntryCursor<K, V> extends Cursor<[K, V]> {
     });
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.cursor.isEmpty();
   }
 
-  head(): [K, V] {
+  override head(): [K, V] {
     const pair = this.cursor.head();
     return [pair[0].coerce(this.keyForm), pair[1].coerce(this.valueForm)];
   }
 
-  step(): void {
+  override step(): void {
     this.cursor.step();
   }
 
-  skip(count: number): void {
+  override skip(count: number): void {
     this.cursor.skip(count);
   }
 
-  hasNext(): boolean {
+  override hasNext(): boolean {
     return this.cursor.hasNext();
   }
 
-  nextIndex(): number {
+  override nextIndex(): number {
     return this.cursor.nextIndex();
   }
 
-  next(): {value?: [K, V], done: boolean} {
+  override next(): {value?: [K, V], done: boolean} {
     const {value, done} = this.cursor.next();
     if (value !== void 0) {
       return {value: [value[0].coerce(this.keyForm), value[1].coerce(this.valueForm)], done};
@@ -75,15 +75,15 @@ export class ValueEntryCursor<K, V> extends Cursor<[K, V]> {
     }
   }
 
-  hasPrevious(): boolean {
+  override hasPrevious(): boolean {
     return this.cursor.hasPrevious();
   }
 
-  previousIndex(): number {
+  override previousIndex(): number {
     return this.cursor.previousIndex();
   }
 
-  previous(): {value?: [K, V], done: boolean} {
+  override previous(): {value?: [K, V], done: boolean} {
     const {value, done} = this.cursor.previous();
     if (value !== void 0) {
       return {value: [value[0].coerce(this.keyForm), value[1].coerce(this.valueForm)], done};
@@ -92,7 +92,7 @@ export class ValueEntryCursor<K, V> extends Cursor<[K, V]> {
     }
   }
 
-  delete(): void {
+  override delete(): void {
     this.cursor.delete();
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,37 +37,37 @@ export class UriPathSegment extends UriPath {
   }
 
   /** @hidden */
-  declare readonly segment: string;
+  readonly segment!: string;
 
   /** @hidden */
-  declare readonly rest: UriPath;
+  readonly rest!: UriPath;
 
-  isDefined(): boolean {
+  override isDefined(): boolean {
     return true;
   }
 
-  isAbsolute(): boolean {
+  override isAbsolute(): boolean {
     return false;
   }
 
-  isRelative(): boolean {
+  override isRelative(): boolean {
     return true;
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return false;
   }
 
-  head(): string {
+  override head(): string {
     return this.segment;
   }
 
-  tail(): UriPath {
+  override tail(): UriPath {
     return this.rest;
   }
 
   /** @hidden */
-  setTail(tail: UriPath): void {
+  override setTail(tail: UriPath): void {
     if (tail instanceof UriPathSegment) {
       throw new Error("adjacent path segments");
     }
@@ -79,11 +79,11 @@ export class UriPathSegment extends UriPath {
   }
 
   /** @hidden */
-  dealias(): UriPath {
+  override dealias(): UriPath {
     return new UriPathSegment(this.segment, this.rest);
   }
 
-  parent(): UriPath {
+  override parent(): UriPath {
     const tail = this.rest;
     if (tail.isEmpty()) {
       return UriPath.empty();
@@ -97,7 +97,7 @@ export class UriPathSegment extends UriPath {
     }
   }
 
-  base(): UriPath {
+  override base(): UriPath {
     const tail = this.rest;
     if (tail.isEmpty()) {
       return UriPath.empty();
@@ -106,16 +106,16 @@ export class UriPathSegment extends UriPath {
     }
   }
 
-  prependedSegment(segment: string): UriPath {
+  override prependedSegment(segment: string): UriPath {
     return UriPath.segment(segment, this.prependedSlash());
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("UriPath").write(46/*'.'*/).write("parse")
         .write(40/*'('*/).write(34/*'"'*/) .display(this).write(34/*'"'*/).write(41/*')'*/);
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     const stringValue = this.stringValue;
     if (stringValue !== void 0) {
       output = output.write(stringValue);
@@ -125,9 +125,9 @@ export class UriPathSegment extends UriPath {
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
-  toString(): string {
+  override toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       stringValue = Format.display(this);

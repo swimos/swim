@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,32 +33,32 @@ export abstract class HostAddressed<E extends HostAddressed<E>> extends Envelope
     });
   }
 
-  get node(): Uri {
+  override get node(): Uri {
     return Uri.empty();
   }
 
-  withNode(node: AnyUri): E {
+  override withNode(node: AnyUri): E {
     return this as unknown as E;
   }
 
-  get lane(): Uri {
+  override get lane(): Uri {
     return Uri.empty();
   }
 
-  withLane(lane: AnyUri): E {
+  override withLane(lane: AnyUri): E {
     return this as unknown as E;
   }
 
-  declare readonly body: Value;
+  override readonly body!: Value;
 
-  withBody(body: AnyValue): E {
+  override withBody(body: AnyValue): E {
     body = Value.fromAny(body);
     return this.copy(body);
   }
 
   protected abstract copy(body: Value): E;
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof HostAddressed) {
@@ -68,12 +68,12 @@ export abstract class HostAddressed<E extends HostAddressed<E>> extends Envelope
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(this.constructor),
           this.body.hashCode()));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write(this.constructor.name).write(46/*'.'*/)
         .write("create").write(40/*'('*/);
     if (this.body.isDefined()) {
@@ -82,12 +82,12 @@ export abstract class HostAddressed<E extends HostAddressed<E>> extends Envelope
     output = output.write(41/*')'*/);
   }
 
-  toValue(): Value {
+  override toValue(): Value {
     return Attr.of(this.tag).concat(this.body);
   }
 
-  static fromValue<E extends HostAddressed<E>>(this: HostAddressedConstructor<E>,
-                                               value: Value): E | null {
+  static override fromValue<E extends HostAddressed<E>>(this: HostAddressedConstructor<E>,
+                                                        value: Value): E | null {
     const header = value.header(this.tag);
     if (header.isDefined()) {
       const body = value.body();

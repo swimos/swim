@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 import {AbstractInlet} from "../AbstractInlet";
 
 export abstract class WatchValueOperator<I> extends AbstractInlet<I> {
-  onRecohereOutput(version: number): void {
+  override onRecohereOutput(version: number): void {
     const input = this.input;
     if (input !== null) {
       this.evaluate(input.get());

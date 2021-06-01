@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import {MarkupParser} from "./MarkupParser";
 import {DataParser} from "./DataParser";
 import {IdentParser} from "./IdentParser";
 import {StringParser} from "./StringParser";
+import {RawStringParser} from "./RawStringParser";
 import {NumberParser} from "./NumberParser";
 import {LambdaFuncParser} from "./LambdaFuncParser";
 import {ConditionalOperatorParser} from "./ConditionalOperatorParser";
@@ -180,6 +181,10 @@ export abstract class ReconParser<I, V> {
 
   parseString(input: Input): Parser<V> {
     return StringParser.parse(input, this);
+  }
+
+  parseRawString(input: Input): Parser<V> {
+    return RawStringParser.parse(input, this);
   }
 
   parseNumber(input: Input): Parser<V> {

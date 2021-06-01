@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ export class UriFragment implements HashCode, Compare, Debug, Display {
     return this.identifier !== void 0;
   }
 
-  declare readonly identifier: string | undefined;
+  readonly identifier!: string | undefined;
 
   toAny(): string | undefined {
     return this.identifier;
@@ -81,7 +81,7 @@ export class UriFragment implements HashCode, Compare, Debug, Display {
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
   toString(): string {
     let stringValue = this.stringValue;

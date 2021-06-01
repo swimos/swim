@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ export class UriUserParser extends Parser<UriUser> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<UriUser> {
+  override feed(input: Input): Parser<UriUser> {
     return UriUserParser.parse(input, this.uri, this.usernameOutput,
                                this.passwordOutput, this.c1, this.step);
   }

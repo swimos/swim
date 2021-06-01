@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -74,11 +74,11 @@ export class Cmd implements Equals, Debug {
     });
   }
 
-  declare readonly id: string;
+  readonly id!: string;
 
-  declare readonly name: string;
+  readonly name!: string;
 
-  declare readonly desc: string | undefined;
+  readonly desc!: string | undefined;
 
   withDesc(desc: string | undefined): this {
     Object.defineProperty(this, "desc", {
@@ -89,7 +89,7 @@ export class Cmd implements Equals, Debug {
     return this;
   }
 
-  declare readonly opts: ReadonlyArray<Opt>;
+  readonly opts!: ReadonlyArray<Opt>;
 
   withOpt(opt: AnyOpt): this {
     opt = Opt.fromAny(opt);
@@ -97,7 +97,7 @@ export class Cmd implements Equals, Debug {
     return this;
   }
 
-  declare readonly args: ReadonlyArray<Arg>;
+  readonly args!: ReadonlyArray<Arg>;
 
   withArg(arg: AnyArg): this {
     arg = Arg.fromAny(arg);
@@ -105,7 +105,7 @@ export class Cmd implements Equals, Debug {
     return this;
   }
 
-  declare readonly cmds: ReadonlyArray<Cmd>;
+  readonly cmds!: ReadonlyArray<Cmd>;
 
   withCmd(cmd: AnyCmd): this {
     cmd = Cmd.fromAny(cmd);
@@ -205,7 +205,7 @@ export class Cmd implements Equals, Debug {
     return this;
   }
 
-  declare readonly exec: ExecCmd | null;
+  readonly exec!: ExecCmd | null;
 
   onExec(exec: ExecCmd | null): this {
     Object.defineProperty(this, "exec", {
@@ -216,7 +216,7 @@ export class Cmd implements Equals, Debug {
     return this;
   }
 
-  declare readonly base: Cmd | null;
+  readonly base!: Cmd | null;
 
   withBase(base: Cmd | null): this {
     Object.defineProperty(this, "base", {

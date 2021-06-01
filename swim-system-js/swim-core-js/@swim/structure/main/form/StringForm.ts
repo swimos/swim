@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ export class StringForm extends Form<string> {
     });
   }
 
-  declare readonly unit: string | undefined;
+  override readonly unit!: string | undefined;
 
-  withUnit(unit: string | undefined): Form<string> {
+  override withUnit(unit: string | undefined): Form<string> {
     if (unit !== this.unit) {
       return new StringForm(unit);
     } else {
@@ -36,7 +36,7 @@ export class StringForm extends Form<string> {
     }
   }
 
-  mold(object: string, item?: Item): Item {
+  override mold(object: string, item?: Item): Item {
     if (item === void 0) {
       return Text.from(object);
     } else {
@@ -44,7 +44,7 @@ export class StringForm extends Form<string> {
     }
   }
 
-  cast(item: Item, object?: string): string | undefined {
+  override cast(item: Item, object?: string): string | undefined {
     const value = item.target;
     try {
       return value.stringValue();

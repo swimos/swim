@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ export class BlockWriter<I, V> extends Writer {
     this.step = step;
   }
 
-  pull(output: Output): Writer {
+  override pull(output: Output): Writer {
     return BlockWriter.write(output, this.recon, this.items, this.inBlock, this.inMarkup,
                              this.inBraces, this.inBrackets, this.first, this.markupSafe,
                              this.item, this.next, this.part, this.step);

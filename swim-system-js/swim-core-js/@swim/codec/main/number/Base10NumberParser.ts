@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,13 +21,13 @@ import {Unicode} from "../unicode/Unicode";
 /** @hidden */
 export class Base10NumberParser extends Parser<number> {
   /** @hidden */
-  declare readonly sign: number;
+  readonly sign!: number;
   /** @hidden */
-  declare readonly value: number;
+  readonly value!: number;
   /** @hidden */
-  declare readonly mode: number;
+  readonly mode!: number;
   /** @hidden */
-  declare readonly step: number;
+  readonly step!: number;
 
   constructor(sign: number = 1, value: number = 0, mode: number = 2, step: number = 1) {
     super();
@@ -49,7 +49,7 @@ export class Base10NumberParser extends Parser<number> {
     });
   }
 
-  feed(input: Input): Parser<number> {
+  override feed(input: Input): Parser<number> {
     return Base10NumberParser.parse(input, this.sign, this.value, this.mode, this.step);
   }
 
@@ -140,11 +140,11 @@ export class Base10NumberParser extends Parser<number> {
 /** @hidden */
 class Base10DecimalParser extends Parser<number> {
   /** @hidden */
-  declare readonly output: Output<string>;
+  readonly output!: Output<string>;
   /** @hidden */
-  declare readonly mode: number;
+  readonly mode!: number;
   /** @hidden */
-  declare readonly step: number;
+  readonly step!: number;
 
   constructor(output: Output<string>, mode: number = 2, step: number = 1) {
     super();
@@ -162,7 +162,7 @@ class Base10DecimalParser extends Parser<number> {
     });
   }
 
-  feed(input: Input): Parser<number> {
+  override feed(input: Input): Parser<number> {
     return Base10DecimalParser.parse(input, this.output, this.mode, this.step);
   }
 

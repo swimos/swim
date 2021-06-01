@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ export class WatchFieldsCombinator<K, V, O> extends WatchFieldsOperator<K, V, O>
   }
 
   /** @hidden */
-  declare readonly func: WatchFieldsFunction<K, V>;
+  readonly func!: WatchFieldsFunction<K, V>;
 
-  evaluate(key: K, value: V | undefined): void {
+  override evaluate(key: K, value: V | undefined): void {
     if (value !== void 0) {
       const func = this.func;
       return func(key, value);

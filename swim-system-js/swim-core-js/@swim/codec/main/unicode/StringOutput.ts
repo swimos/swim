@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {Output} from "../output/Output";
 /** @hidden */
 export class StringOutput extends Output<string> {
   /** @hidden */
-  declare readonly string: string;
+  readonly string!: string;
 
   constructor(string: string, settings: OutputSettings) {
     super();
@@ -34,31 +34,31 @@ export class StringOutput extends Output<string> {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return true;
   }
 
-  isFull(): boolean {
+  override isFull(): boolean {
     return false;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return false;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return false;
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return false;
   }
 
-  asPart(part: boolean): Output<string> {
+  override asPart(part: boolean): Output<string> {
     return this;
   }
 
-  write(token: number | string): Output<string> {
+  override write(token: number | string): Output<string> {
     if (typeof token === "number") {
       if ((token >= 0x0000 && token <= 0xd7ff)
           || (token >= 0xe000 && token <= 0xffff)) { // U+0000..U+D7FF | U+E000..U+FFFF
@@ -78,7 +78,7 @@ export class StringOutput extends Output<string> {
     return this;
   }
 
-  writeln(string?: string): Output<string> {
+  override writeln(string?: string): Output<string> {
     if (string === void 0) {
       Object.defineProperty(this, "string", {
         value: this.string.concat(this.settings.lineSeparator),
@@ -96,9 +96,9 @@ export class StringOutput extends Output<string> {
     }
   }
 
-  declare readonly settings: OutputSettings;
+  override readonly settings!: OutputSettings;
 
-  withSettings(settings: AnyOutputSettings): Output<string> {
+  override withSettings(settings: AnyOutputSettings): Output<string> {
     settings = OutputSettings.fromAny(settings);
     Object.defineProperty(this, "settings", {
       value: settings,
@@ -108,15 +108,15 @@ export class StringOutput extends Output<string> {
     return this;
   }
 
-  bind(): string {
+  override bind(): string {
     return this.string;
   }
 
-  clone(): Output<string> {
+  override clone(): Output<string> {
     return new StringOutput(this.string, this.settings);
   }
 
-  toString(): string {
+  override toString(): string {
     return this.string;
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -115,28 +115,28 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
   }
 
   /** @hidden */
-  declare readonly model: MapDownlinkModel | null;
+  override readonly model!: MapDownlinkModel | null;
 
   /** @hidden */
-  declare readonly observers: ReadonlyArray<MapDownlinkObserver<K, V, KU, VU>>;
+  override readonly observers!: ReadonlyArray<MapDownlinkObserver<K, V, KU, VU>>;
 
   /** @hidden */
-  declare readonly ownKeyForm: Form<K, KU>;
+  readonly ownKeyForm!: Form<K, KU>;
 
   /** @hidden */
-  declare readonly ownValueForm: Form<V, VU>;
+  readonly ownValueForm!: Form<V, VU>;
 
   /** @hidden */
-  declare readonly state0: BTree<Value, Value> | null;
+  readonly state0!: BTree<Value, Value> | null;
 
-  get type(): DownlinkType {
+  override get type(): DownlinkType {
     return "map";
   }
 
-  protected copy<K, V, KU, VU>(context: DownlinkContext, owner: DownlinkOwner | null,
-                               hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
-                               body: Value, flags: number, observers: ReadonlyArray<MapDownlinkObserver<K, V, KU, VU>>,
-                               keyForm?: Form<K, KU>, valueForm?: Form<V, VU>, state0?: BTree<Value, Value> | null): MapDownlink<K, V, KU, VU> {
+  protected override copy<K, V, KU, VU>(context: DownlinkContext, owner: DownlinkOwner | null,
+                                        hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
+                                        body: Value, flags: number, observers: ReadonlyArray<MapDownlinkObserver<K, V, KU, VU>>,
+                                        keyForm?: Form<K, KU>, valueForm?: Form<V, VU>, state0?: BTree<Value, Value> | null): MapDownlink<K, V, KU, VU> {
     if (arguments.length === 10) {
       state0 = this.state0;
       keyForm = this.ownKeyForm as unknown as Form<K, KU>;
@@ -414,7 +414,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     this.model!.setState(state);
   }
 
-  observe(observer: MapDownlinkObserver<K, V, KU, VU>): this {
+  override observe(observer: MapDownlinkObserver<K, V, KU, VU>): this {
     return super.observe(observer);
   }
 
@@ -624,7 +624,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     this.onSyncedResponse();
   }
 
-  open(): this {
+  override open(): this {
     const laneUri = this.ownLaneUri;
     if (laneUri.isEmpty()) {
       throw new Error("no lane");
@@ -671,19 +671,19 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     return this.keys();
   }
 
-  declare readonly input: MapOutlet<K, V, Map<K, V>> | null;
+  readonly input!: MapOutlet<K, V, Map<K, V>> | null;
 
   /** @hidden */
-  declare readonly effects: BTree<K, KeyEffect>;
+  readonly effects!: BTree<K, KeyEffect>;
 
   /** @hidden */
-  declare readonly outlets: BTree<K, KeyOutlet<K, V>>;
+  readonly outlets!: BTree<K, KeyOutlet<K, V>>;
 
   /** @hidden */
-  declare readonly outputs: ReadonlyArray<Inlet<MapDownlink<K, V, KU, VU>>>;
+  readonly outputs!: ReadonlyArray<Inlet<MapDownlink<K, V, KU, VU>>>;
 
   /** @hidden */
-  declare readonly version: number;
+  readonly version!: number;
 
   bindInput(newInput: MapOutlet<K, V, Map<K, V>>): void {
     if (!MapOutlet.is(newInput)) {

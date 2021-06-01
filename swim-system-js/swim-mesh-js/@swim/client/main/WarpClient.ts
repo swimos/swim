@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -90,25 +90,25 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
   }
 
   /** @hidden */
-  declare readonly options: WarpClientOptions;
+  readonly options!: WarpClientOptions;
 
   /** @hidden */
-  declare readonly hosts: BTree<Uri, Host>;
+  readonly hosts!: BTree<Uri, Host>;
 
   /** @hidden */
-  declare readonly downlinks: BTree<Uri, BTree<Uri, BTree<Uri, DownlinkModel>>>;
+  readonly downlinks!: BTree<Uri, BTree<Uri, BTree<Uri, DownlinkModel>>>;
 
   /** @hidden */
-  declare readonly downlinkCount: number;
+  readonly downlinkCount!: number;
 
   /** @hidden */
-  declare readonly refs: BaseRef[];
+  readonly refs!: BaseRef[];
 
   /** @hidden */
-  declare readonly online: boolean;
+  readonly online!: boolean;
 
   /** @hidden */
-  declare readonly observers: ReadonlyArray<WarpObserver>;
+  readonly observers!: ReadonlyArray<WarpObserver>;
 
   isOnline(): boolean;
   isOnline(online: boolean): this;

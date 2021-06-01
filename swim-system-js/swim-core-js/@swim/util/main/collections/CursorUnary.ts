@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@ import {Cursor} from "./Cursor";
 
 /** @hidden */
 export class CursorUnary<T> extends Cursor<T> {
-  private declare readonly value: T;
-  private declare index: number;
+  /** @hidden */
+  readonly value!: T;
+  /** @hidden */
+  index!: number;
 
   constructor(value: T) {
     super();
@@ -30,11 +32,11 @@ export class CursorUnary<T> extends Cursor<T> {
     });
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.index !== 0;
   }
 
-  head(): T {
+  override head(): T {
     if (this.index === 0) {
       return this.value;
     } else {
@@ -42,7 +44,7 @@ export class CursorUnary<T> extends Cursor<T> {
     }
   }
 
-  step(): void {
+  override step(): void {
     if (this.index === 0) {
       Object.defineProperty(this, "index", {
         value: 1,
@@ -53,19 +55,19 @@ export class CursorUnary<T> extends Cursor<T> {
     }
   }
 
-  skip(count: number): void {
+  override skip(count: number): void {
     this.index = Math.min(Math.max(0, this.index + count), 1);
   }
 
-  hasNext(): boolean {
+  override hasNext(): boolean {
     return this.index === 0;
   }
 
-  nextIndex(): number {
+  override nextIndex(): number {
     return this.index;
   }
 
-  next(): {value?: T, done: boolean} {
+  override next(): {value?: T, done: boolean} {
     if (this.index === 0) {
       Object.defineProperty(this, "index", {
         value: 1,
@@ -77,15 +79,15 @@ export class CursorUnary<T> extends Cursor<T> {
     }
   }
 
-  hasPrevious(): boolean {
+  override hasPrevious(): boolean {
     return this.index === 1;
   }
 
-  previousIndex(): number {
+  override previousIndex(): number {
     return this.index - 1;
   }
 
-  previous(): {value?: T, done: boolean} {
+  override previous(): {value?: T, done: boolean} {
     if (this.index === 1) {
       Object.defineProperty(this, "index", {
         value: 0,

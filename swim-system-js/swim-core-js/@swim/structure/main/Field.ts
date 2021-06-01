@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ export abstract class Field extends Item {
   /**
    * Always returns `true` because a `Field` can never be [[Absent]].
    */
-  isDefined(): boolean {
+  override isDefined(): boolean {
     return true;
   }
 
@@ -43,14 +43,22 @@ export abstract class Field extends Item {
    * Always returns `true` because a `Field` can be neither [[Extant]] nor
    * [[Absent]].
    */
-  isDistinct(): boolean {
+  override isDistinct(): boolean {
+    return true;
+  }
+
+  /**
+   * Always returns `true` because a `Field` cannot be one of:
+   * an empty `Record`, `False`, `Extant`, or `Absent`.
+   */
+  override isDefinite(): boolean {
     return true;
   }
 
   /**
    * Returns the key component of this `Field`.
    */
-  abstract readonly key: Value;
+  abstract override readonly key: Value;
 
   /**
    * Returns the value component of this `Field`.
@@ -72,7 +80,7 @@ export abstract class Field extends Item {
   /**
    * Returns the value component of this `Field`.
    */
-  toValue(): Value {
+  override toValue(): Value {
     return this.value;
   }
 
@@ -80,14 +88,14 @@ export abstract class Field extends Item {
    * Always returns `undefined` because a `Field` can't be a `Record`, so it
    * can't have a first member `Attr` whose key string could be returned.
    */
-  get tag(): string | undefined {
+  override get tag(): string | undefined {
     return void 0;
   }
 
   /**
    * Always returns the value component of this `Field`.
    */
-  get target(): Value {
+  override get target(): Value {
     return this.value;
   }
 
@@ -95,14 +103,14 @@ export abstract class Field extends Item {
    * Always returns [[Absent]] because a `Field` can't be flattened into a
    * `Value`.
    */
-  flattened(): Value {
+  override flattened(): Value {
     return Value.absent();
   }
 
   /**
    * Returns a `Record` containing just this `Field`.
    */
-  unflattened(): Record {
+  override unflattened(): Record {
     return Record.of(this);
   }
 
@@ -111,7 +119,7 @@ export abstract class Field extends Item {
    * can't have a head `Attr` whose value could be returned if its key were
    * equal to the `tag`.
    */
-  header(tag: string): Value {
+  override header(tag: string): Value {
     return Value.absent();
   }
 
@@ -120,7 +128,7 @@ export abstract class Field extends Item {
    * can't have a head `Attr` whose value could be returned as a `Record` if
    * its key were equal to the `tag`.
    */
-  headers(tag: string): Record | undefined {
+  override headers(tag: string): Record | undefined {
     return void 0;
   }
 
@@ -128,7 +136,7 @@ export abstract class Field extends Item {
    * Always returns [[Absent]] because a `Field` can't be a `Record`, so it
    * can't have a first member.
    */
-  head(): Item {
+  override head(): Item {
     return Item.absent();
   }
 
@@ -136,7 +144,7 @@ export abstract class Field extends Item {
    * Always returns an empty `Record` because a `Field` can't itself be a
    * `Record`, so it can't have any non-first members.
    */
-  tail(): Record {
+  override tail(): Record {
     return Record.empty();
   }
 
@@ -145,7 +153,7 @@ export abstract class Field extends Item {
    * can't have any non-first members to flatten, and because a `Field` isn't
    * a distinct `Value`, so it can't return `Extant`.
    */
-  body(): Value {
+  override body(): Value {
     return Value.absent();
   }
 
@@ -153,7 +161,7 @@ export abstract class Field extends Item {
    * Always returns `0` because a `Field` can't be a `Record`, so it can't
    * contain any members.
    */
-  get length(): number {
+  override get length(): number {
     return 0;
   }
 
@@ -161,7 +169,7 @@ export abstract class Field extends Item {
    * Always returns `false` because a `Field` can't be a `Record`, so it can't
    * have a `Field` member whose key is equal to the given `key`.
    */
-  has(key: AnyValue): boolean {
+  override has(key: AnyValue): boolean {
     return false;
   }
 
@@ -169,7 +177,7 @@ export abstract class Field extends Item {
    * Always returns [[Absent]] because a `Field` can't be a `Record`, so it
    * can't have a `Field` member whose key is equal to the given `key`.
    */
-  get(key: AnyValue): Value {
+  override get(key: AnyValue): Value {
     return Value.absent();
   }
 
@@ -177,7 +185,7 @@ export abstract class Field extends Item {
    * Always returns [[Absent]] because a `Field` can't be a `Record`, so it
    * can't have an `Attr` member whose key is equal to the given `key`.
    */
-  getAttr(key: AnyText): Value {
+  override getAttr(key: AnyText): Value {
     return Value.absent();
   }
 
@@ -185,7 +193,7 @@ export abstract class Field extends Item {
    * Always returns [[Absent]] because a `Field` can't be a `Record`, so it
    * can't have a `Slot` member whose key is equal to the given `key`.
    */
-  getSlot(key: AnyValue): Value {
+  override getSlot(key: AnyValue): Value {
     return Value.absent();
   }
 
@@ -193,7 +201,7 @@ export abstract class Field extends Item {
    * Always returns `undefined` because a `Field` can't be a `Record`, so it
    * can't have a `Field` member whose key is equal to the given `key`.
    */
-  getField(key: AnyValue): Field | undefined {
+  override getField(key: AnyValue): Field | undefined {
     return void 0;
   }
 
@@ -201,35 +209,35 @@ export abstract class Field extends Item {
    * Always returns [[Absent]] because a `Field` can't be a `Record`, so it
    * can't have a member at the given `index`.
    */
-  getItem(index: AnyNum): Item {
+  override getItem(index: AnyNum): Item {
     return Item.absent();
   }
 
-  deleted(key: AnyValue): Field {
+  override deleted(key: AnyValue): Field {
     return this;
   }
 
-  conditional(thenTerm: Field, elseTerm: Field): Field;
-  conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item;
-  conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item {
+  override conditional(thenTerm: Field, elseTerm: Field): Field;
+  override conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item;
+  override conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item {
     thenTerm = Item.fromAny(thenTerm);
     return thenTerm;
   }
 
-  or(that: Field): Field;
-  or(that: AnyItem): Item;
-  or(that: AnyItem): Item {
+  override or(that: Field): Field;
+  override or(that: AnyItem): Item;
+  override or(that: AnyItem): Item {
     return this;
   }
 
-  and(that: Field): Field;
-  and(that: AnyItem): Item;
-  and(that: AnyItem): Item {
+  override and(that: Field): Field;
+  override and(that: AnyItem): Item;
+  override and(that: AnyItem): Item {
     that = Item.fromAny(that);
     return that;
   }
 
-  lambda(template: Value): Value {
+  override lambda(template: Value): Value {
     return Value.absent();
   }
 
@@ -239,14 +247,14 @@ export abstract class Field extends Item {
    * @throws `Error` if the value of this `Field` can't be converted into a
    *         `string` value.
    */
-  stringValue(): string | undefined;
+  override stringValue(): string | undefined;
   /**
    * Converts the value of this `Field` into a `string` value, if possible;
    * otherwise returns `orElse` if the value of this `Field` can't be converted
    * into a `string` value.
    */
-  stringValue<T>(orElse: T): string | T;
-  stringValue<T>(orElse?: T): string | T | undefined {
+  override stringValue<T>(orElse: T): string | T;
+  override stringValue<T>(orElse?: T): string | T | undefined {
     return this.value.stringValue(orElse);
   }
 
@@ -256,14 +264,14 @@ export abstract class Field extends Item {
    * @throws `Error` if the value of this `Field` can't be converted into a
    *         `number` value.
    */
-  numberValue(): number | undefined;
+  override numberValue(): number | undefined;
   /**
    * Converts the value of this `Field` into a `number` value, if possible;
    * otherwise returns `orElse` if the value of this `Field` can't be converted
    * into a `number` value.
    */
-  numberValue<T>(orElse: T): number | T;
-  numberValue<T>(orElse?: T): number | T | undefined {
+  override numberValue<T>(orElse: T): number | T;
+  override numberValue<T>(orElse?: T): number | T | undefined {
     return this.value.numberValue(orElse);
   }
 
@@ -273,29 +281,29 @@ export abstract class Field extends Item {
    * @throws `Error` if the value of this `Field` can't be converted into a
    *         `boolean` value.
    */
-  booleanValue(): boolean | undefined;
+  override booleanValue(): boolean | undefined;
   /**
    * Converts the value of this `Field` into a `boolean` value, if possible;
    * otherwise returns `orElse` if the value of this `Field` can't be converted
    * into a `boolean` value.
    */
-  booleanValue<T>(orElse: T): boolean | T;
-  booleanValue<T>(orElse?: T): boolean | T | undefined {
+  override booleanValue<T>(orElse: T): boolean | T;
+  override booleanValue<T>(orElse?: T): boolean | T | undefined {
     return this.value.booleanValue(orElse);
   }
 
-  abstract toAny(): AnyField;
+  abstract override toAny(): AnyField;
 
-  abstract branch(): Field;
+  abstract override branch(): Field;
 
-  abstract clone(): Field;
+  abstract override clone(): Field;
 
-  abstract commit(): this;
+  abstract override commit(): this;
 
-  interpolateTo(that: Field): Interpolator<Field>;
-  interpolateTo(that: Item): Interpolator<Item>;
-  interpolateTo(that: unknown): Interpolator<Item> | null;
-  interpolateTo(that: unknown): Interpolator<Item> | null {
+  override interpolateTo(that: Field): Interpolator<Field>;
+  override interpolateTo(that: Item): Interpolator<Item>;
+  override interpolateTo(that: unknown): Interpolator<Item> | null;
+  override interpolateTo(that: unknown): Interpolator<Item> | null {
     if (that instanceof Field) {
       return FieldInterpolator(this, that);
     } else {
@@ -329,7 +337,7 @@ export abstract class Field extends Item {
     }
   }
 
-  static fromAny(field: AnyField): Field {
+  static override fromAny(field: AnyField): Field {
     if (field instanceof Field) {
       return field;
     } else if (typeof field === "object" && field !== null) {

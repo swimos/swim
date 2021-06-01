@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ export class OutputSettings implements Debug, HashCode {
    * The Unicode code point sequence used to separate lines of text.
    * Defaults to the runtime operating system's line separator.
    */
-  declare readonly lineSeparator: string;
+  readonly lineSeparator!: string;
 
   /**
    * Returns a copy of these settings with the given `lineSeparator`.
@@ -75,7 +75,7 @@ export class OutputSettings implements Debug, HashCode {
   }
 
   /** @hidden */
-  declare readonly pretty: boolean;
+  readonly pretty!: boolean;
 
   /**
    * Returns `true` if output producers should pretty print their output,
@@ -93,7 +93,7 @@ export class OutputSettings implements Debug, HashCode {
   }
 
   /** @hidden */
-  declare readonly styled: boolean;
+  readonly styled!: boolean;
 
   /**
    * Returns `true` if output producers should style their output,
@@ -114,7 +114,7 @@ export class OutputSettings implements Debug, HashCode {
    * Returns the numeric precision output producers should use
    * when formatting numbers.
    */
-  declare readonly precision: number;
+  readonly precision!: number;
 
   /**
    * Returns a copy of these settings with the given numeric `precision`.

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -78,26 +78,26 @@ export abstract class DownlinkModel implements HostDownlink {
     });
   }
 
-  declare readonly context: DownlinkContext;
+  readonly context!: DownlinkContext;
 
-  declare readonly hostUri: Uri;
+  readonly hostUri!: Uri;
 
-  declare readonly nodeUri: Uri;
+  readonly nodeUri!: Uri;
 
-  declare readonly laneUri: Uri;
+  readonly laneUri!: Uri;
 
-  declare readonly prio: number;
+  readonly prio!: number;
 
-  declare readonly rate: number;
+  readonly rate!: number;
 
-  declare readonly body: Value;
+  readonly body!: Value;
 
-  declare readonly views: ReadonlyArray<Downlink>;
+  readonly views!: ReadonlyArray<Downlink>;
 
-  declare readonly host: Host | null;
+  readonly host!: Host | null;
 
   /** @hidden */
-  declare readonly status: number;
+  readonly status!: number;
 
   abstract readonly type: DownlinkType;
 

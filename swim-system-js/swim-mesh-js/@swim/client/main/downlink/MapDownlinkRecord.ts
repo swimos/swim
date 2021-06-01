@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@ import type {Cursor} from "@swim/util";
 import {AnyItem, Item, Slot, AnyValue, Value, Record, AnyText, AnyNum, Num} from "@swim/structure";
 import {KeyEffect} from "@swim/streamlet";
 import {DownlinkRecord} from "./DownlinkRecord";
-import type {MapDownlink} from "./MapDownlink";
+import type {MapDownlinkObserver, MapDownlink} from "./MapDownlink";
 
-export class MapDownlinkRecord extends DownlinkRecord {
+export class MapDownlinkRecord extends DownlinkRecord implements MapDownlinkObserver<Value, Value, AnyValue, AnyValue> {
   constructor(downlink: MapDownlink<Value, Value, AnyValue, AnyValue>) {
     super();
     Object.defineProperty(this, "downlink", {
@@ -28,31 +28,31 @@ export class MapDownlinkRecord extends DownlinkRecord {
     downlink.observe(this);
   }
 
-  declare readonly downlink: MapDownlink<Value, Value, AnyValue, AnyValue>;
+  override readonly downlink!: MapDownlink<Value, Value, AnyValue, AnyValue>;
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.downlink.isEmpty();
   }
 
-  isArray(): boolean {
+  override isArray(): boolean {
     return this.downlink.isEmpty();
   }
 
-  isObject(): boolean {
+  override isObject(): boolean {
     return true;
   }
 
-  get length(): number {
+  override get length(): number {
     return this.downlink.size;
   }
 
-  has(key: AnyValue): boolean {
+  override has(key: AnyValue): boolean {
     return this.downlink.has(key);
   }
 
-  get(): Record;
-  get(key: AnyValue): Value;
-  get(key?: AnyValue): Value {
+  override get(): Record;
+  override get(key: AnyValue): Value;
+  override get(key?: AnyValue): Value {
     if (key === void 0) {
       return this;
     } else {
@@ -60,15 +60,15 @@ export class MapDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  getAttr(key: AnyText): Value {
+  override getAttr(key: AnyText): Value {
     return Value.absent();
   }
 
-  getSlot(key: AnyValue): Value {
+  override getSlot(key: AnyValue): Value {
     return this.get(key);
   }
 
-  getItem(index: AnyNum): Item {
+  override getItem(index: AnyNum): Item {
     if (index instanceof Num) {
       index = index.value;
     }
@@ -84,32 +84,32 @@ export class MapDownlinkRecord extends DownlinkRecord {
     return Item.absent();
   }
 
-  set(key: AnyValue, newValue: AnyValue): this {
+  override set(key: AnyValue, newValue: AnyValue): this {
     this.downlink.set(key, newValue);
     return this;
   }
 
-  setAttr(key: AnyText, newValue: AnyValue): this {
+  override setAttr(key: AnyText, newValue: AnyValue): this {
     throw new Error("unsupported");
   }
 
-  setSlot(key: AnyValue, newValue: AnyValue): this {
+  override setSlot(key: AnyValue, newValue: AnyValue): this {
     return this.set(key, newValue);
   }
 
-  setItem(index: number, newItem: AnyItem): this {
+  override setItem(index: number, newItem: AnyItem): this {
     throw new Error("unsupported");
   }
 
-  push(...newItems: AnyItem[]): number {
+  override push(...newItems: AnyItem[]): number {
     throw new Error("unsupported");
   }
 
-  splice(start: number, deleteCount?: number, ...newItems: AnyItem[]): Item[] {
+  override splice(start: number, deleteCount?: number, ...newItems: AnyItem[]): Item[] {
     throw new Error("unsupported");
   }
 
-  delete(key: AnyValue): Item {
+  override delete(key: AnyValue): Item {
     key = Value.fromAny(key);
     const oldValue = this.downlink.get(key);
     if (this.downlink.delete(key)) {
@@ -118,15 +118,15 @@ export class MapDownlinkRecord extends DownlinkRecord {
     return Item.absent();
   }
 
-  clear(): void {
+  override clear(): void {
     this.downlink.clear();
   }
 
-  forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
-  forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
-                thisArg: S): T | undefined;
-  forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
-                thisArg?: S): T | undefined {
+  override forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  override forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                         thisArg: S): T | undefined;
+  override forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
+                         thisArg?: S): T | undefined {
     let index = 0;
     return this.downlink.forEach(function (key: Value, value: Value): T | void {
       const result = callback.call(thisArg, Slot.of(key, value), index);
@@ -135,7 +135,7 @@ export class MapDownlinkRecord extends DownlinkRecord {
     });
   }
 
-  keyIterator(): Cursor<Value> {
+  override keyIterator(): Cursor<Value> {
     return this.downlink.keys();
   }
 

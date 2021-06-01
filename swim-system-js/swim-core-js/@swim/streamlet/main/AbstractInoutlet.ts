@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,13 +37,13 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
     });
   }
 
-  declare readonly input: Outlet<I> | null;
+  readonly input!: Outlet<I> | null;
 
   /** @hidden */
-  declare readonly outputs: ReadonlyArray<Inlet<O>>;
+  readonly outputs!: ReadonlyArray<Inlet<O>>;
 
   /** @hidden */
-  declare readonly version: number;
+  readonly version!: number;
 
   bindInput(newInput: Outlet<I> | null): void {
     const oldInput = this.input;

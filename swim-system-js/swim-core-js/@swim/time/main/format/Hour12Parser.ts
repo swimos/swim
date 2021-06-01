@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ export class Hour12Parser extends Parser<DateTimeInit> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<DateTimeInit> {
+  override feed(input: Input): Parser<DateTimeInit> {
     return Hour12Parser.parse(input, this.date, this.hour, this.step);
   }
 
@@ -37,7 +37,7 @@ export class Hour12Parser extends Parser<DateTimeInit> {
     return DateTimeFormat.parseDateNumber(input, Hour12Parser, "hour (12)", 2, 2, date, hour, step);
   }
 
-  static bind(hour: number, date: DateTimeInit): Parser<DateTimeInit> {
+  static term(hour: number, date: DateTimeInit): Parser<DateTimeInit> {
     date.hour = (date.hour !== void 0 ? date.hour : 0) + hour;
     return Parser.done(date);
   }

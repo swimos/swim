@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,20 +29,21 @@ export class TransformParser extends Parser<Transform> {
     this.identOutput = identOutput;
   }
 
-  feed(input: Input): Parser<Transform> {
+  override feed(input: Input): Parser<Transform> {
     return TransformParser.parse(input, this.identOutput);
   }
 
   static parse(input: Input, identOutput?: Output<string>): Parser<Transform> {
     let c = 0;
     identOutput = identOutput || Unicode.stringOutput();
-    while (input.isCont() && (c = input.head(), Unicode.isAlpha(c))) {
+    while (input.isCont() && (c = input.head(), Unicode.isAlpha(c) || Unicode.isDigit(c) || c === 45/*'-'*/)) {
       input = input.step();
       identOutput.write(c);
     }
     if (!input.isEmpty()) {
       const ident = identOutput.bind();
       switch (ident) {
+        case "translate3d":
         case "translateX":
         case "translateY":
         case "translate": return TranslateTransformParser.parseRest(input, identOutput);

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ export class ScaleTransformParser extends Parser<ScaleTransform> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<ScaleTransform> {
+  override feed(input: Input): Parser<ScaleTransform> {
     return ScaleTransformParser.parse(input, this.identOutput, this.xParser, this.yParser, this.step);
   }
 

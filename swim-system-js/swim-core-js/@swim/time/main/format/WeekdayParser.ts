@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ export class WeekdayParser extends Parser<DateTimeInit> {
     this.output = output;
   }
 
-  feed(input: Input): Parser<DateTimeInit> {
+  override feed(input: Input): Parser<DateTimeInit> {
     return WeekdayParser.parse(input, this.locale, this.date, this.output);
   }
 
@@ -39,7 +39,7 @@ export class WeekdayParser extends Parser<DateTimeInit> {
     return DateTimeFormat.parseDateString(input, WeekdayParser, locale, date, output);
   }
 
-  static bind(locale: DateTimeLocale, value: string, date: DateTimeInit, input: Input): Parser<DateTimeInit> {
+  static term(locale: DateTimeLocale, value: string, date: DateTimeInit, input: Input): Parser<DateTimeInit> {
     const day = locale.weekdays.indexOf(value);
     if (day >= 0) {
       // nop

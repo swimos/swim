@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ export class UriAuthorityParser extends Parser<UriAuthority> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<UriAuthority> {
+  override feed(input: Input): Parser<UriAuthority> {
     return UriAuthorityParser.parse(input, this.uri, this.userParser, this.hostParser,
                                     this.portParser, this.step);
   }

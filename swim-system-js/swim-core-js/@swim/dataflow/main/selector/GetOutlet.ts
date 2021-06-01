@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,11 +29,11 @@ export class GetOutlet extends AbstractOutlet<Value> {
     });
   }
 
-  declare readonly keyInlet: OutletInlet<Value>;
+  readonly keyInlet!: OutletInlet<Value>;
 
-  declare readonly mapInlet: OutletMapInlet<Value, Value, unknown>;
+  readonly mapInlet!: OutletMapInlet<Value, Value, unknown>;
 
-  get(): Value {
+  override get(): Value {
     const keyInput = this.keyInlet.input;
     if (keyInput !== null) {
       const key = keyInput.get();

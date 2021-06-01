@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import {Murmur3, Numbers, Constructors} from "@swim/util";
 import {Output, Parser, Diagnostic, Unicode} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item, Value, Record} from "@swim/structure";
-import {PointR2} from "../r2/PointR2";
+import {R2Point} from "../r2/R2Point";
 import {Transform} from "./Transform";
 import {IdentityTransform} from "./IdentityTransform";
 import {ScaleTransformInterpolator} from "../"; // forward import
@@ -41,13 +41,13 @@ export class ScaleTransform extends Transform {
     });
   }
 
-  declare readonly x: number;
+  readonly x!: number;
 
-  declare readonly y: number;
+  readonly y!: number;
 
-  transform(that: Transform): Transform;
-  transform(x: number, y: number): PointR2;
-  transform(x: Transform | number, y?: number): Transform | PointR2 {
+  override transform(that: Transform): Transform;
+  override transform(x: number, y: number): R2Point;
+  override transform(x: Transform | number, y?: number): Transform | R2Point {
     if (arguments.length === 1) {
       if (x instanceof IdentityTransform) {
         return this;
@@ -55,19 +55,19 @@ export class ScaleTransform extends Transform {
         return Transform.list(this, x as Transform);
       }
     } else {
-      return new PointR2(this.x * (x as number), this.y * y!);
+      return new R2Point(this.x * (x as number), this.y * y!);
     }
   }
 
-  transformX(x: number, y: number): number {
+  override transformX(x: number, y: number): number {
     return this.x * x;
   }
 
-  transformY(x: number, y: number): number {
+  override transformY(x: number, y: number): number {
     return this.y * y;
   }
 
-  inverse(): Transform {
+  override inverse(): Transform {
     return new ScaleTransform(1 / (this.x || 1), 1 / (this.y || 1));
   }
 
@@ -75,23 +75,23 @@ export class ScaleTransform extends Transform {
     return new AffineTransform(this.x, 0, 0, this.y, 0, 0);
   }
 
-  toCssTransformComponent(): CSSTransformComponent | null {
+  override toCssTransformComponent(): CSSTransformComponent | null {
     if (typeof CSSTranslate !== "undefined") {
       return new CSSScale(this.x, this.y);
     }
     return null;
   }
 
-  toValue(): Value {
+  override toValue(): Value {
     return Record.create(1)
                  .attr("scale", Record.create(2).slot("x", this.x)
                                                 .slot("y", this.y));
   }
 
-  interpolateTo(that: ScaleTransform): Interpolator<ScaleTransform>;
-  interpolateTo(that: Transform): Interpolator<Transform>;
-  interpolateTo(that: unknown): Interpolator<Transform> | null;
-  interpolateTo(that: unknown): Interpolator<Transform> | null {
+  override interpolateTo(that: ScaleTransform): Interpolator<ScaleTransform>;
+  override interpolateTo(that: Transform): Interpolator<Transform>;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null {
     if (that instanceof ScaleTransform) {
       return ScaleTransformInterpolator(this, that);
     } else {
@@ -99,11 +99,11 @@ export class ScaleTransform extends Transform {
     }
   }
 
-  conformsTo(that: Transform): boolean {
+  override conformsTo(that: Transform): boolean {
     return that instanceof ScaleTransform;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (that instanceof ScaleTransform) {
       return Numbers.equivalent(this.x, that.x, epsilon)
           && Numbers.equivalent(this.y, that.y, epsilon);
@@ -111,19 +111,19 @@ export class ScaleTransform extends Transform {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (that instanceof ScaleTransform) {
       return this.x === that.x && this.y === that.y;
     }
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(ScaleTransform),
         Numbers.hash(this.x)), Numbers.hash(this.y)));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Transform").write(46/*'.'*/).write("scale");
     if (this.x !== 0 && this.y === 0) {
       output = output.write("X").write(40/*'('*/).debug(this.x).write(41/*')'*/);
@@ -135,9 +135,9 @@ export class ScaleTransform extends Transform {
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
-  toString(): string {
+  override toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       if (this.x !== 0 && this.y === 0) {
@@ -156,7 +156,7 @@ export class ScaleTransform extends Transform {
     return stringValue;
   }
 
-  static fromCssTransformComponent(component: CSSScale): ScaleTransform {
+  static override fromCssTransformComponent(component: CSSScale): ScaleTransform {
     const x = typeof component.x === "number"
             ? component.x
             : component.x.to("number").value;
@@ -166,7 +166,7 @@ export class ScaleTransform extends Transform {
     return new ScaleTransform(x, y);
   }
 
-  static fromAny(value: ScaleTransform | string): ScaleTransform {
+  static override fromAny(value: ScaleTransform | string): ScaleTransform {
     if (value === void 0 || value === null || value instanceof ScaleTransform) {
       return value;
     } else if (typeof value === "string") {
@@ -175,7 +175,7 @@ export class ScaleTransform extends Transform {
     throw new TypeError("" + value);
   }
 
-  static fromValue(value: Value): ScaleTransform | null {
+  static override fromValue(value: Value): ScaleTransform | null {
     const header = value.header("scale");
     if (header.isDefined()) {
       let x = 0;
@@ -201,7 +201,7 @@ export class ScaleTransform extends Transform {
     return null;
   }
 
-  static parse(string: string): ScaleTransform {
+  static override parse(string: string): ScaleTransform {
     let input = Unicode.stringInput(string);
     while (input.isCont() && Unicode.isWhitespace(input.head())) {
       input = input.step();

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ export class DocTheme extends typedoc.DefaultTheme {
     this.targetReflections = targetReflections;
   }
 
-  getUrls(project: typedoc.ProjectReflection): typedoc.UrlMapping[] {
+  override getUrls(project: typedoc.ProjectReflection): typedoc.UrlMapping[] {
     const urls: typedoc.UrlMapping[] = [];
 
     const rootTarget = this.rootTargets.length === 1 ? this.rootTargets[0]! : null;
@@ -54,7 +54,7 @@ export class DocTheme extends typedoc.DefaultTheme {
     return urls;
   }
 
-  getNavigation(project: typedoc.ProjectReflection): typedoc.NavigationItem {
+  override getNavigation(project: typedoc.ProjectReflection): typedoc.NavigationItem {
     const rootItem = new typedoc.NavigationItem("Index", "index.html");
     const rootTarget = this.rootTargets.length === 1 ? this.rootTargets[0]! : null;
     if (rootTarget === null) {

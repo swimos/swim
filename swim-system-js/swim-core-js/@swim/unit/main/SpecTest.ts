@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,17 +44,17 @@ export class SpecTest {
   /**
    * The name of this test–typically the name of the underlying test function.
    */
-  declare readonly name: string;
+  readonly name!: string;
 
   /**
    * The function used to evaluate this test.
    */
-  declare readonly func: TestFunc;
+  readonly func!: TestFunc;
 
   /**
    * The options that govern the evaluation of this test.
    */
-  declare readonly options: TestOptions;
+  readonly options!: TestOptions;
 
   /**
    * Lifecycle callback invoked before each evaluation of the test function.
@@ -111,7 +111,12 @@ export class SpecTest {
       }
     } catch (error) {
       if (!(error instanceof TestException)) {
-        exam.proove(Proof.error(error));
+        try {
+          exam.proove(Proof.error(error));
+        } catch (failure) {
+          exam.proove(Proof.error(failure));
+          throw failure;
+        }
       }
       this.didRunTest(report, spec, exam, error);
       return Promise.resolve(exam);

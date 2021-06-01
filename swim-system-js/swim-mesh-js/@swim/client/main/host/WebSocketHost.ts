@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ export class WebSocketHost extends RemoteHost {
     });
   }
 
-  declare readonly options: WebSocketHostOptions;
+  override readonly options!: WebSocketHostOptions;
 
   /** @hidden */
-  declare readonly socket: WebSocket | null;
+  readonly socket!: WebSocket | null;
 
   get WebSocket(): WebSocketConstructor | null {
     if (this.options.WebSocket !== void 0) {
@@ -54,11 +54,11 @@ export class WebSocketHost extends RemoteHost {
     }
   }
 
-  isConnected(): boolean {
+  override isConnected(): boolean {
     return this.socket !== null && this.socket.readyState === this.socket.OPEN;
   }
 
-  open(): void {
+  override open(): void {
     this.clearReconnect();
     let socket = this.socket;
     if (socket === null) {
@@ -90,7 +90,7 @@ export class WebSocketHost extends RemoteHost {
     }
   }
 
-  close(): void {
+  override close(): void {
     this.clearReconnect();
     this.clearIdle();
     if (this.socket !== null) {
@@ -103,7 +103,7 @@ export class WebSocketHost extends RemoteHost {
     }
   }
 
-  push(envelope: Envelope): void {
+  override push(envelope: Envelope): void {
     if (this.isConnected()) {
       this.clearIdle();
       const text = envelope.toRecon();

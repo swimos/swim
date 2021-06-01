@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -87,17 +87,17 @@ export abstract class RemoteHost extends Host {
   }
 
   /** @hidden */
-  declare readonly context: HostContext;
+  readonly context!: HostContext;
 
-  declare readonly hostUri: Uri;
+  override readonly hostUri!: Uri;
 
-  declare readonly options: HostOptions;
+  readonly options!: HostOptions;
 
   get credentials(): Value {
     return this.options.credentials ?? Value.absent();
   }
 
-  get unlinkDelay(): number {
+  override get unlinkDelay(): number {
     return this.options.unlinkDelay ?? RemoteHost.UnlinkDelay;
   }
 
@@ -113,42 +113,42 @@ export abstract class RemoteHost extends Host {
     return this.options.sendBufferSize ?? RemoteHost.SendBufferSize;
   }
 
-  abstract isConnected(): boolean;
+  abstract override isConnected(): boolean;
 
   /** @hidden */
-  declare readonly authenticated: boolean;
+  readonly authenticated!: boolean;
 
-  isAuthenticated(): boolean {
+  override isAuthenticated(): boolean {
     return this.authenticated;
   }
 
-  declare readonly session: Value;
+  override readonly session!: Value;
 
   /** @hidden */
-  declare readonly sendBuffer: Envelope[];
+  readonly sendBuffer!: Envelope[];
 
   /** @hidden */
-  declare readonly downlinks: BTree<Uri, BTree<Uri, HostDownlink>>;
+  readonly downlinks!: BTree<Uri, BTree<Uri, HostDownlink>>;
 
   /** @hidden */
-  declare readonly downlinkCount: number;
+  readonly downlinkCount!: number;
 
   isIdle(): boolean {
     return this.sendBuffer.length === 0 && this.downlinkCount === 0;
   }
 
   /** @hidden */
-  declare readonly uriCache: UriCache;
+  readonly uriCache!: UriCache;
 
-  resolve(relative: AnyUri): Uri {
+  override resolve(relative: AnyUri): Uri {
     return this.uriCache.resolve(relative);
   }
 
-  unresolve(absolute: AnyUri): Uri {
+  override unresolve(absolute: AnyUri): Uri {
     return this.uriCache.unresolve(absolute);
   }
 
-  authenticate(credentials: AnyValue): void {
+  override authenticate(credentials: AnyValue): void {
     credentials = Value.fromAny(credentials);
     if (!credentials.equals(this.options.credentials)) {
       this.options.credentials = credentials;
@@ -161,7 +161,7 @@ export abstract class RemoteHost extends Host {
     }
   }
 
-  openDownlink(downlink: HostDownlink): void {
+  override openDownlink(downlink: HostDownlink): void {
     this.clearIdle();
     const nodeUri = this.resolve(downlink.nodeUri);
     const laneUri = downlink.laneUri;
@@ -188,7 +188,7 @@ export abstract class RemoteHost extends Host {
     }
   }
 
-  unlinkDownlink(downlink: HostDownlink): void {
+  override unlinkDownlink(downlink: HostDownlink): void {
     const nodeUri = this.resolve(downlink.nodeUri);
     const laneUri = downlink.laneUri;
     const nodeDownlinks = this.downlinks.get(nodeUri);
@@ -199,7 +199,7 @@ export abstract class RemoteHost extends Host {
     }
   }
 
-  closeDownlink(downlink: HostDownlink): void {
+  override closeDownlink(downlink: HostDownlink): void {
     const nodeUri = this.resolve(downlink.nodeUri);
     const laneUri = downlink.laneUri;
     const nodeDownlinks = this.downlinks.get(nodeUri);
@@ -222,7 +222,7 @@ export abstract class RemoteHost extends Host {
     }
   }
 
-  command(nodeUri: AnyUri, laneUri: AnyUri, body: AnyValue): void {
+  override command(nodeUri: AnyUri, laneUri: AnyUri, body: AnyValue): void {
     nodeUri = Uri.fromAny(nodeUri);
     nodeUri = this.resolve(nodeUri);
     laneUri = Uri.fromAny(laneUri);
@@ -453,13 +453,13 @@ export abstract class RemoteHost extends Host {
     }
   }
 
-  abstract open(): void;
+  abstract override open(): void;
 
-  close(): void {
+  override close(): void {
     this.context.closeHost(this);
   }
 
-  closeUp(): void {
+  override closeUp(): void {
     this.downlinks.forEach(function (nodeUri: Uri, nodeDownlinks: BTree<Uri, HostDownlink>): void {
       nodeDownlinks.forEach(function (laneUri: Uri, downlink: HostDownlink): void {
         downlink.closeUp(this);
@@ -467,7 +467,7 @@ export abstract class RemoteHost extends Host {
     }, this);
   }
 
-  abstract push(envelope: Envelope): void;
+  abstract override push(envelope: Envelope): void;
 
   static readonly UnlinkDelay: number = 0;
   static readonly MaxReconnectTimeout: number = 30000;

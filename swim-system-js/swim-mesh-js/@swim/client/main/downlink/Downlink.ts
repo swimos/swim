@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -160,37 +160,37 @@ export abstract class Downlink {
   }
 
   /** @hidden */
-  declare readonly context: DownlinkContext;
+  readonly context!: DownlinkContext;
 
   /** @hidden */
-  declare readonly owner: DownlinkOwner | null;
+  readonly owner!: DownlinkOwner | null;
   
   /** @hidden */
-  declare readonly ownHostUri: Uri;
+  readonly ownHostUri!: Uri;
   
   /** @hidden */
-  declare readonly ownNodeUri: Uri;
+  readonly ownNodeUri!: Uri;
   
   /** @hidden */
-  declare readonly ownLaneUri: Uri;
+  readonly ownLaneUri!: Uri;
   
   /** @hidden */
-  declare readonly ownPrio: number;
+  readonly ownPrio!: number;
   
   /** @hidden */
-  declare readonly ownRate: number;
+  readonly ownRate!: number;
   
   /** @hidden */
-  declare readonly ownBody: Value;
+  readonly ownBody!: Value;
 
   /** @hidden */
-  declare readonly flags: number;
+  readonly flags!: number;
 
   /** @hidden */
-  declare readonly model: DownlinkModel | null;
+  readonly model!: DownlinkModel | null;
 
   /** @hidden */
-  declare readonly observers: ReadonlyArray<DownlinkObserver>;
+  readonly observers!: ReadonlyArray<DownlinkObserver>;
 
   abstract readonly type: DownlinkType;
 
@@ -579,7 +579,7 @@ export abstract class Downlink {
 class DownlinkInitForm extends Form<DownlinkInit | undefined> {
   declare readonly tag: string | undefined; // getter defined below to work around useDefineForClassFields lunacy
 
-  mold(init: DownlinkInit | undefined): Item {
+  override mold(init: DownlinkInit | undefined): Item {
     if (init !== void 0) {
       const header = Record.create();
       if (init.hostUri !== void 0) {
@@ -609,7 +609,7 @@ class DownlinkInitForm extends Form<DownlinkInit | undefined> {
     }
   }
 
-  cast(item: Item): DownlinkInit | undefined {
+  override cast(item: Item): DownlinkInit | undefined {
     const value = item.toValue();
     const header = value.get("link");
     if (header.isDefined()) {

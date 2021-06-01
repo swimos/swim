@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -54,9 +54,9 @@ export class Opt implements Equals, Debug {
     });
   }
 
-  declare readonly name: string;
+  readonly name!: string;
 
-  declare readonly flag: string | undefined;
+  readonly flag!: string | undefined;
 
   withFlag(flag: string | undefined): this {
     Object.defineProperty(this, "flag", {
@@ -67,7 +67,7 @@ export class Opt implements Equals, Debug {
     return this;
   }
 
-  declare readonly desc: string | undefined;
+  readonly desc!: string | undefined;
 
   withDesc(desc: string | undefined): this {
     Object.defineProperty(this, "desc", {
@@ -78,7 +78,7 @@ export class Opt implements Equals, Debug {
     return this;
   }
 
-  declare readonly args: ReadonlyArray<Arg>;
+  readonly args!: ReadonlyArray<Arg>;
 
   /** @hidden */
   withArg(arg: AnyArg): this {
@@ -87,7 +87,7 @@ export class Opt implements Equals, Debug {
     return this;
   }
 
-  declare readonly defs: number;
+  readonly defs!: number;
 
   def(): this {
     Object.defineProperty(this, "defs", {

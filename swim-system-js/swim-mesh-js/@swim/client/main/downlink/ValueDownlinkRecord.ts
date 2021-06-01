@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 import {Cursor} from "@swim/util";
 import {AnyItem, Item, Field, AnyValue, Value, Record, AnyText, AnyNum} from "@swim/structure";
 import {DownlinkRecord} from "./DownlinkRecord";
-import type {ValueDownlink} from "./ValueDownlink";
+import type {ValueDownlinkObserver, ValueDownlink} from "./ValueDownlink";
 
-export class ValueDownlinkRecord extends DownlinkRecord {
+export class ValueDownlinkRecord extends DownlinkRecord implements ValueDownlinkObserver<Value, AnyValue> {
   constructor(downlink: ValueDownlink<Value, AnyValue>) {
     super();
     Object.defineProperty(this, "downlink", {
@@ -27,9 +27,9 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     downlink.observe(this);
   }
 
-  declare readonly downlink: ValueDownlink<Value, AnyValue>;
+  override readonly downlink!: ValueDownlink<Value, AnyValue>;
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     const value = this.downlink.get();
     if (value instanceof Record) {
       return value.isEmpty();
@@ -38,7 +38,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  isArray(): boolean {
+  override isArray(): boolean {
     const value = this.downlink.get();
     if (value instanceof Record) {
       return value.isArray();
@@ -47,7 +47,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  isObject(): boolean {
+  override isObject(): boolean {
     const value = this.downlink.get();
     if (value instanceof Record) {
       return value.isObject();
@@ -56,7 +56,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  get length(): number {
+  override get length(): number {
     const value = this.downlink.get();
     if (value instanceof Record) {
       return value.length;
@@ -67,7 +67,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  has(key: AnyValue): boolean {
+  override has(key: AnyValue): boolean {
     const value = this.downlink.get();
     if (value instanceof Record) {
       return value.has(key);
@@ -76,9 +76,9 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  get(): Record;
-  get(key: AnyValue): Value;
-  get(key?: AnyValue): Value {
+  override get(): Record;
+  override get(key: AnyValue): Value;
+  override get(key?: AnyValue): Value {
     if (key === void 0) {
       return this;
     } else {
@@ -91,7 +91,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  getAttr(key: AnyText): Value {
+  override getAttr(key: AnyText): Value {
     const value = this.downlink.get();
     if (value instanceof Record) {
       return value.getAttr(key);
@@ -100,7 +100,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  getSlot(key: AnyValue): Value {
+  override getSlot(key: AnyValue): Value {
     const value = this.downlink.get();
     if (value instanceof Record) {
       return value.getSlot(key);
@@ -109,7 +109,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  getField(key: AnyValue): Field | undefined {
+  override getField(key: AnyValue): Field | undefined {
     const value = this.downlink.get();
     if (value instanceof Record) {
       return value.getField(key);
@@ -118,7 +118,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  getItem(index: AnyNum): Item {
+  override getItem(index: AnyNum): Item {
     const value = this.downlink.get();
     if (value instanceof Record) {
       return value.getItem(index);
@@ -127,7 +127,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  set(key: AnyValue, newValue: AnyValue): this {
+  override set(key: AnyValue, newValue: AnyValue): this {
     const value = this.downlink.get();
     if (value instanceof Record) {
       value.set(key, newValue);
@@ -137,7 +137,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     return this;
   }
 
-  setAttr(key: AnyText, newValue: AnyValue): this {
+  override setAttr(key: AnyText, newValue: AnyValue): this {
     const value = this.downlink.get();
     if (value instanceof Record) {
       value.setAttr(key, newValue);
@@ -147,7 +147,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     return this;
   }
 
-  setSlot(key: AnyValue, newValue: AnyValue): this {
+  override setSlot(key: AnyValue, newValue: AnyValue): this {
     const value = this.downlink.get();
     if (value instanceof Record) {
       value.setSlot(key, newValue);
@@ -157,7 +157,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     return this;
   }
 
-  setItem(index: number, newItem: AnyItem): this {
+  override setItem(index: number, newItem: AnyItem): this {
     const value = this.downlink.get();
     if (value instanceof Record) {
       value.setItem(index, newItem);
@@ -167,7 +167,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     return this;
   }
 
-  push(...newItems: AnyItem[]): number {
+  override push(...newItems: AnyItem[]): number {
     const value = this.downlink.get();
     if (value instanceof Record) {
       return value.push(...newItems);
@@ -176,7 +176,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  splice(start: number, deleteCount?: number, ...newItems: AnyItem[]): Item[] {
+  override splice(start: number, deleteCount?: number, ...newItems: AnyItem[]): Item[] {
     const value = this.downlink.get();
     if (value instanceof Record) {
       return value.splice(start, deleteCount, ...newItems);
@@ -185,7 +185,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  delete(key: AnyValue): Item {
+  override delete(key: AnyValue): Item {
     const value = this.downlink.get();
     if (value instanceof Record) {
       return value.delete(key);
@@ -194,7 +194,7 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  clear(): void {
+  override clear(): void {
     const value = this.downlink.get();
     if (value instanceof Record) {
       value.clear();
@@ -203,16 +203,16 @@ export class ValueDownlinkRecord extends DownlinkRecord {
     }
   }
 
-  forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
-  forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
-                thisArg: S): T | undefined;
-  forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
-                thisArg?: S): T | undefined {
+  override forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  override forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                         thisArg: S): T | undefined;
+  override forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
+                         thisArg?: S): T | undefined {
     const value = this.downlink.get();
     return value.forEach(callback, thisArg);
   }
 
-  keyIterator(): Cursor<Value> {
+  override keyIterator(): Cursor<Value> {
     const value = this.downlink.get();
     if (value instanceof Record) {
       throw new Error(); // TODO

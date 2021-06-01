@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -89,25 +89,25 @@ export class ListDownlink<V, VU = never> extends Downlink {
   }
 
   /** @hidden */
-  declare readonly model: ListDownlinkModel | null;
+  override readonly model!: ListDownlinkModel | null;
 
   /** @hidden */
-  declare readonly observers: ReadonlyArray<ListDownlinkObserver<V, VU>>;
+  override readonly observers!: ReadonlyArray<ListDownlinkObserver<V, VU>>;
 
   /** @hidden */
-  declare readonly ownValueForm: Form<V, VU>;
+  readonly ownValueForm!: Form<V, VU>;
 
   /** @hidden */
-  declare readonly state0: STree<Value, Value> | null;
+  readonly state0!: STree<Value, Value> | null;
 
-  get type(): DownlinkType {
+  override get type(): DownlinkType {
     return "list";
   }
 
-  protected copy<V, VU>(context: DownlinkContext, owner: DownlinkOwner | null,
-                        hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
-                        body: Value, flags: number, observers: ReadonlyArray<ListDownlinkObserver<V, VU>>,
-                        valueForm?: Form<V, VU>, state0?: STree<Value, Value> | null): ListDownlink<V, VU> {
+  protected override copy<V, VU>(context: DownlinkContext, owner: DownlinkOwner | null,
+                                 hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
+                                 body: Value, flags: number, observers: ReadonlyArray<ListDownlinkObserver<V, VU>>,
+                                 valueForm?: Form<V, VU>, state0?: STree<Value, Value> | null): ListDownlink<V, VU> {
     if (arguments.length === 10) {
       valueForm = this.ownValueForm as unknown as Form<V, VU>;
       state0 = this.state0;
@@ -259,7 +259,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     this.model!.setState(state);
   }
 
-  observe(observer: ListDownlinkObserver<V, VU>): this {
+  override observe(observer: ListDownlinkObserver<V, VU>): this {
     return super.observe(observer);
   }
 
@@ -493,7 +493,7 @@ export class ListDownlink<V, VU = never> extends Downlink {
     this.onSyncedResponse();
   }
 
-  open(): this {
+  override open(): this {
     const laneUri = this.ownLaneUri;
     if (laneUri.isEmpty()) {
       throw new Error("no lane");

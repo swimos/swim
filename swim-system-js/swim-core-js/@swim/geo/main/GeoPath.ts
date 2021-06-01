@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 import {Equivalent, Equals, Arrays} from "@swim/util";
 import {Debug, Format, Output} from "@swim/codec";
-import {SplineR2, PathR2} from "@swim/math";
+import {R2Spline, R2Path} from "@swim/math";
 import type {GeoProjection} from "./GeoProjection";
 import {AnyGeoShape, GeoShape} from "./GeoShape";
 import {GeoPoint} from "./GeoPoint";
@@ -45,21 +45,21 @@ export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
     return this.splines.length !== 0;
   }
 
-  declare readonly splines: ReadonlyArray<GeoSpline>;
+  readonly splines!: ReadonlyArray<GeoSpline>;
 
-  get lngMin(): number {
+  override get lngMin(): number {
     return this.bounds.lngMin;
   }
 
-  get latMin(): number {
+  override get latMin(): number {
     return this.bounds.latMin;
   }
 
-  get lngMax(): number {
+  override get lngMax(): number {
     return this.bounds.lngMax;
   }
 
-  get latMax(): number {
+  override get latMax(): number {
     return this.bounds.latMax;
   }
 
@@ -102,13 +102,13 @@ export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
     }
   }
 
-  contains(that: AnyGeoShape): boolean;
-  contains(x: number, y: number): boolean;
-  contains(that: AnyGeoShape | number, y?: number): boolean {
+  override contains(that: AnyGeoShape): boolean;
+  override contains(x: number, y: number): boolean;
+  override contains(that: AnyGeoShape | number, y?: number): boolean {
     return false; // TODO
   }
 
-  intersects(that: AnyGeoShape): boolean {
+  override intersects(that: AnyGeoShape): boolean {
     return false; // TODO
   }
 
@@ -157,24 +157,24 @@ export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
     }
   }
 
-  project(f: GeoProjection): PathR2 {
+  override project(f: GeoProjection): R2Path {
     const oldSplines = this.splines;
     const n = oldSplines.length;
     if (n > 0) {
-      const newSplines = new Array<SplineR2>(n);
+      const newSplines = new Array<R2Spline>(n);
       for (let i = 0; i < n; i += 1) {
         newSplines[i] = oldSplines[i]!.project(f);
       }
-      return new PathR2(newSplines);
+      return new R2Path(newSplines);
     } else {
-      return PathR2.empty();
+      return R2Path.empty();
     }
   }
 
   /** @hidden */
-  declare readonly boundingBox: GeoBox | null;
+  readonly boundingBox!: GeoBox | null;
 
-  get bounds(): GeoBox {
+  override get bounds(): GeoBox {
     let boundingBox = this.boundingBox;
     if (boundingBox === null) {
       let lngMin = Infinity;
@@ -240,7 +240,7 @@ export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof GeoPath) {
@@ -276,7 +276,7 @@ export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
     output = output.write(41/*')'*/);
   }
 
-  toString(): string {
+  override toString(): string {
     return Format.debug(this);
   }
 
@@ -309,9 +309,9 @@ export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
     return new GeoPath(splines);
   }
 
-  static fromAny(value: AnyGeoPath): GeoPath;
-  static fromAny(value: AnyGeoShape): GeoShape;
-  static fromAny(value: AnyGeoPath | AnyGeoShape): GeoShape {
+  static override fromAny(value: AnyGeoPath): GeoPath;
+  static override fromAny(value: AnyGeoShape): GeoShape;
+  static override fromAny(value: AnyGeoPath | AnyGeoShape): GeoShape {
     if (value === void 0 || value === null || value instanceof GeoPath) {
       return value;
     } else if (GeoPath.isSplines(value)) {

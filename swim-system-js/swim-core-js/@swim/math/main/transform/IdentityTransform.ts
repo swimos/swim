@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,49 +16,49 @@ import {Constructors} from "@swim/util";
 import type {Output} from "@swim/codec";
 import {Interpolator, IdentityInterpolator} from "@swim/mapping";
 import {Value, Record} from "@swim/structure";
-import {PointR2} from "../r2/PointR2";
+import {R2Point} from "../r2/R2Point";
 import {Transform} from "./Transform";
 import {AffineTransform} from "../"; // forward import
 
 export class IdentityTransform extends Transform {
-  transform(that: Transform): Transform;
-  transform(x: number, y: number): PointR2;
-  transform(x: Transform | number, y?: number): Transform | PointR2 {
+  override transform(that: Transform): Transform;
+  override transform(x: number, y: number): R2Point;
+  override transform(x: Transform | number, y?: number): Transform | R2Point {
     if (arguments.length === 1) {
       return x as Transform;
     } else {
-      return new PointR2(x as number, y!);
+      return new R2Point(x as number, y!);
     }
   }
 
-  transformX(x: number, y: number): number {
+  override transformX(x: number, y: number): number {
     return x;
   }
 
-  transformY(x: number, y: number): number {
+  override transformY(x: number, y: number): number {
     return y;
   }
 
-  inverse(): Transform {
+  override inverse(): Transform {
     return this;
   }
 
-  toAffine(): AffineTransform {
+  override toAffine(): AffineTransform {
     return new AffineTransform(1, 0, 0, 1, 0, 0);
   }
 
-  toCssValue(): CSSStyleValue | null {
+  override toCssValue(): CSSStyleValue | null {
     return new CSSKeywordValue("identity");
   }
 
-  toValue(): Value {
+  override toValue(): Value {
     return Record.create(1).attr("identity");
   }
 
-  interpolateTo(that: IdentityTransform): Interpolator<IdentityTransform>;
-  interpolateTo(that: Transform): Interpolator<Transform>;
-  interpolateTo(that: unknown): Interpolator<Transform> | null;
-  interpolateTo(that: unknown): Interpolator<Transform> | null {
+  override interpolateTo(that: IdentityTransform): Interpolator<IdentityTransform>;
+  override interpolateTo(that: Transform): Interpolator<Transform>;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null {
     if (that instanceof IdentityTransform) {
       return IdentityInterpolator(this);
     } else {
@@ -66,32 +66,32 @@ export class IdentityTransform extends Transform {
     }
   }
 
-  conformsTo(that: Transform): boolean {
+  override conformsTo(that: Transform): boolean {
     return that instanceof IdentityTransform;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     return that instanceof IdentityTransform;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     return that instanceof IdentityTransform;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Constructors.hash(IdentityTransform);
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Transform").write(46/*'.'*/).write("identity")
         .write(40/*'('*/).write(41/*')'*/);
   }
 
-  toString(): string {
+  override toString(): string {
     return "none";
   }
 
-  static fromValue(value: Value): IdentityTransform | null {
+  static override fromValue(value: Value): IdentityTransform | null {
     if (value.tag === "identity") {
       return Transform.identity();
     }

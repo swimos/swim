@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,6 +43,14 @@ export class TransformParserSpec extends Spec {
     exam.equal(Transform.parse("translate(5px,7px)"), Transform.translate(5, 7));
     exam.equal(Transform.parse("translate  (  5  ,  7  )"), Transform.translate(5, 7));
     exam.equal(Transform.parse("translate  (  5px  ,  7px  )"), Transform.translate(5, 7));
+  }
+
+  @Test
+  parseTranslate3dTransforms(exam: Exam): void {
+    exam.equal(Transform.parse("translate3d(5,7,0)"), Transform.translate(5, 7));
+    exam.equal(Transform.parse("translate3d(5px,7px,0px)"), Transform.translate(5, 7));
+    exam.equal(Transform.parse("translate3d  (  5  ,  7  ,  0  )"), Transform.translate(5, 7));
+    exam.equal(Transform.parse("translate3d  (  5px  ,  7px  ,  0px  )"), Transform.translate(5, 7));
   }
 
   @Test

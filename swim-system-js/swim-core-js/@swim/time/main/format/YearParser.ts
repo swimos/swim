@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ export class YearParser extends Parser<DateTimeInit> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<DateTimeInit> {
+  override feed(input: Input): Parser<DateTimeInit> {
     return YearParser.parse(input, this.date, this.year, this.step);
   }
 
@@ -37,7 +37,7 @@ export class YearParser extends Parser<DateTimeInit> {
     return DateTimeFormat.parseDateNumber(input, YearParser, "full year", 4, 4, date, year, step);
   }
 
-  static bind(year: number, date: DateTimeInit): Parser<DateTimeInit> {
+  static term(year: number, date: DateTimeInit): Parser<DateTimeInit> {
     date.year = year;
     return Parser.done(date);
   }

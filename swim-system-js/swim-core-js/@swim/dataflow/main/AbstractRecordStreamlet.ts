@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,9 +47,9 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     });
   }
 
-  declare readonly streamletScope: StreamletScope<O> | null;
+  override readonly streamletScope!: StreamletScope<O> | null;
 
-  setStreamletScope(scope: StreamletScope<O> | null): void {
+  override setStreamletScope(scope: StreamletScope<O> | null): void {
     Object.defineProperty(this, "streamletScope", {
       value: scope,
       enumerable: true,
@@ -57,9 +57,9 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     });
   }
 
-  declare readonly streamletContext: StreamletContext | null;
+  override readonly streamletContext!: StreamletContext | null;
 
-  setStreamletContext(context: StreamletContext | null): void {
+  override setStreamletContext(context: StreamletContext | null): void {
     Object.defineProperty(this, "streamletContext", {
       value: context,
       enumerable: true,
@@ -68,17 +68,17 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
   }
 
   /** @hidden */
-  declare readonly version: number;
+  readonly version!: number;
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.length !== 0;
   }
 
-  get length(): number {
+  override get length(): number {
     return AbstractStreamlet.reflectOutletCount(Object.getPrototypeOf(this));
   }
 
-  has(key: AnyValue): boolean {
+  override has(key: AnyValue): boolean {
     if (key instanceof Text) {
       key = key.value;
     } else if (typeof key !== "string") {
@@ -88,7 +88,7 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     return outlet !== null;
   }
 
-  get(key: AnyValue): Value {
+  override get(key: AnyValue): Value {
     if (key instanceof Text) {
       key = key.value;
     } else if (typeof key !== "string") {
@@ -104,15 +104,15 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     return Value.absent();
   }
 
-  getAttr(key: AnyText): Value {
+  override getAttr(key: AnyText): Value {
     return Value.absent();
   }
 
-  getSlot(key: AnyValue): Value {
+  override getSlot(key: AnyValue): Value {
     return this.get(key);
   }
 
-  getField(key: AnyValue): Field | undefined {
+  override getField(key: AnyValue): Field | undefined {
     if (typeof key === "string") {
       key = Text.from(key);
     } else if (!(key instanceof Text)) {
@@ -125,7 +125,7 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     return void 0;
   }
 
-  getItem(index: AnyNum): Item {
+  override getItem(index: AnyNum): Item {
     if (index instanceof Num) {
       index = index.value;
     }
@@ -141,43 +141,43 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     return Item.absent();
   }
 
-  set(key: AnyValue, newValue: AnyValue): this {
+  override set(key: AnyValue, newValue: AnyValue): this {
     throw new Error("unsupported");
   }
 
-  setAttr(key: AnyText, newValue: AnyValue): this {
+  override setAttr(key: AnyText, newValue: AnyValue): this {
     throw new Error("unsupported");
   }
 
-  setSlot(key: AnyValue, newValue: AnyValue): this {
+  override setSlot(key: AnyValue, newValue: AnyValue): this {
     throw new Error("unsupported");
   }
 
-  setItem(index: number, item: AnyItem): this {
+  override setItem(index: number, item: AnyItem): this {
     throw new Error("unsupported");
   }
 
-  push(...items: AnyItem[]): number {
+  override push(...items: AnyItem[]): number {
     throw new Error("unsupported");
   }
 
-  splice(start: number, deleteCount?: number, ...newItems: AnyItem[]): Item[] {
+  override splice(start: number, deleteCount?: number, ...newItems: AnyItem[]): Item[] {
     throw new Error("unsupported");
   }
 
-  delete(key: AnyValue): Item {
+  override delete(key: AnyValue): Item {
     throw new Error("unsupported");
   }
 
-  clear(): void {
+  override clear(): void {
     throw new Error("unsupported");
   }
 
-  forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
-  forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
-                thisArg: S): T | undefined;
-  forEach<T, S>(callback: (this: S | unknown, item: Item, index: number) => T | void,
-                thisArg?: S): T | undefined {
+  override forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  override forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                         thisArg: S): T | undefined;
+  override forEach<T, S>(callback: (this: S | unknown, item: Item, index: number) => T | void,
+                         thisArg?: S): T | undefined {
     return AbstractStreamlet.reflectEachOutlet(this, Object.getPrototypeOf(this), function (outlet: Outlet<O>, name: string, index: number): T | void {
       const output = outlet.get();
       if (output !== void 0) {
@@ -189,9 +189,9 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     }, this);
   }
 
-  inlet(key: string): Inlet<I> | null;
-  inlet<I2 extends I>(): Inlet<I2>;
-  inlet(key?: string): Inlet<I> | null {
+  override inlet(key: string): Inlet<I> | null;
+  override inlet<I2 extends I>(): Inlet<I2>;
+  override inlet(key?: string): Inlet<I> | null {
     if (key === void 0) {
       return new StreamletInlet<I>(this);
     } else {
@@ -199,7 +199,7 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     }
   }
 
-  bindInput(key: string, input: Outlet<I>): void {
+  override bindInput(key: string, input: Outlet<I>): void {
     const inlet = this.inlet(key);
     if (inlet === null) {
       throw new Error(key);
@@ -207,7 +207,7 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     inlet.bindInput(input);
   }
 
-  unbindInput(key: string): void {
+  override unbindInput(key: string): void {
     const inlet = this.inlet(key);
     if (inlet === null) {
       throw new Error(key);
@@ -215,9 +215,9 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     inlet.unbindInput();
   }
 
-  outlet(key: string | Outlet<O>): Outlet<O> | null;
-  outlet<O2 extends Value>(): Outlet<O2>;
-  outlet(key?: string | Outlet<O>): Outlet<O> | null {
+  override outlet(key: string | Outlet<O>): Outlet<O> | null;
+  override outlet<O2 extends Value>(): Outlet<O2>;
+  override outlet(key?: string | Outlet<O>): Outlet<O> | null {
     if (key === void 0) {
       return new StreamletOutlet<O>(this);
     } else if (typeof key === "string") {
@@ -231,7 +231,7 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     return new StreamletInoutlet<I2, O2>(this as RecordStreamlet<I2, O2>);
   }
 
-  decohere(): void {
+  override decohere(): void {
     if (this.version >= 0) {
       this.willDecohere();
       Object.defineProperty(this, "version", {
@@ -245,7 +245,7 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     }
   }
 
-  recohere(version: number): void {
+  override recohere(version: number): void {
     if (this.version < 0) {
       this.willRecohere(version);
       Object.defineProperty(this, "version", {
@@ -314,11 +314,11 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
     return void 0;
   }
 
-  disconnectInputs(): void {
+  override disconnectInputs(): void {
     AbstractStreamlet.disconnectInputs(this, Object.getPrototypeOf(this));
   }
 
-  disconnectOutputs(): void {
+  override disconnectOutputs(): void {
     AbstractStreamlet.disconnectOutputs(this, Object.getPrototypeOf(this));
   }
 

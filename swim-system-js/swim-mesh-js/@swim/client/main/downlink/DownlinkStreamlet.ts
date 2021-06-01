@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
   @Out
   state: Outlet<Value | Map<Value, Value>> = this.outlet();
 
-  getOutput(outlet: Outlet<Value> | string): Value | undefined {
+  override getOutput(outlet: Outlet<Value> | string): Value | undefined {
     outlet = this.outlet(outlet)!;
     if (outlet === this.state) {
       if (this.downlink instanceof ValueDownlink) {
@@ -98,7 +98,7 @@ export class DownlinkStreamlet extends AbstractRecordStreamlet {
     return void 0;
   }
 
-  protected onRecohere(version: number): void {
+  protected override onRecohere(version: number): void {
     const hostUri = this.castInput(this.hostUri, Form.forString());
     const nodeUri = this.castInput(this.nodeUri, Form.forString());
     const laneUri = this.castInput(this.laneUri, Form.forString());

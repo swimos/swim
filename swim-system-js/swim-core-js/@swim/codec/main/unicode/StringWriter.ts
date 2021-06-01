@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ import {Writer} from "../writer/Writer";
 /** @hidden */
 export class StringWriter extends Writer<unknown, unknown> {
   /** @hidden */
-  declare readonly value: unknown;
+  readonly value!: unknown;
   /** @hidden */
-  declare readonly input: string;
+  readonly input!: string;
   /** @hidden */
-  declare readonly index: number;
+  readonly index!: number;
 
   constructor(value: unknown, input: string, index: number = 0) {
     super();
@@ -41,11 +41,11 @@ export class StringWriter extends Writer<unknown, unknown> {
     });
   }
 
-  feed(input: unknown): Writer<unknown, unknown> {
+  override feed(input: unknown): Writer<unknown, unknown> {
     return new StringWriter(input, "" + input);
   }
 
-  pull(output: Output): Writer<unknown, unknown> {
+  override pull(output: Output): Writer<unknown, unknown> {
     return StringWriter.write(output, this.value, this.input, this.index);
   }
 

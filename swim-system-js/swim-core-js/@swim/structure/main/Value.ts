@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -62,14 +62,22 @@ export abstract class Value extends Item {
   /**
    * Returns `true` if this `Value` is not [[Absent]].
    */
-  isDefined(): boolean {
+  override isDefined(): boolean {
     return true;
   }
 
   /**
    * Returns `true` if this `Value` is neither [[Extant]] nor [[Absent]].
    */
-  isDistinct(): boolean {
+  override isDistinct(): boolean {
+    return true;
+  }
+
+  /**
+   * Returns `true` if this `Value` is not one of: an empty `Record`, `False`,
+   * `Extant`, or `Absent`.
+   */
+  override isDefinite(): boolean {
     return true;
   }
 
@@ -77,14 +85,14 @@ export abstract class Value extends Item {
    * Always returns [[Absent]] because a `Value` can't be a `Field`, so it
    * can't have a key component.
    */
-  get key(): Value {
+  override get key(): Value {
     return Value.absent();
   }
 
   /**
    * Always returns `this` because every `Value` is its own value component.
    */
-  toValue(): Value {
+  override toValue(): Value {
     return this;
   }
 
@@ -98,7 +106,7 @@ export abstract class Value extends Item {
    * structure.  The `tag` can be used to discern the nominal type of a
    * polymorphic structure, similar to an XML element tag.
    */
-  get tag(): string | undefined {
+  override get tag(): string | undefined {
     return void 0;
   }
 
@@ -111,7 +119,7 @@ export abstract class Value extends Item {
    * attributed structure is a `Record` with one or more attributes that modify
    * one or more other members.
    */
-  get target(): Value {
+  override get target(): Value {
     return this;
   }
 
@@ -125,7 +133,7 @@ export abstract class Value extends Item {
    * Used to convert a unary `Record` into its member `Value`.  Facilitates
    * writing code that treats a unary `Record` equivalently to a bare `Value`.
    */
-  flattened(): Value {
+  override flattened(): Value {
     return this;
   }
 
@@ -136,7 +144,7 @@ export abstract class Value extends Item {
    * [[Extant]] or [[Absent]].  Facilitates writing code that treats a bare
    * `Value` equivalently to a unary `Record`.
    */
-  unflattened(): Record {
+  override unflattened(): Record {
     return Record.of(this);
   }
 
@@ -153,7 +161,7 @@ export abstract class Value extends Item {
    * be used to check if a structure might conform to a nominal type named
    * `tag`, while simultaneously getting the value of the `tag` attribute.
    */
-  header(tag: string): Value {
+  override header(tag: string): Value {
     return Value.absent();
   }
 
@@ -167,7 +175,7 @@ export abstract class Value extends Item {
    * attributes of an XML element tag; through unlike an XML element, `tag`
    * attribute headers are not limited to string keys and values.
    */
-  headers(tag: string): Record | undefined {
+  override headers(tag: string): Record | undefined {
     return void 0;
   }
 
@@ -175,7 +183,7 @@ export abstract class Value extends Item {
    * Returns the first member of this `Value`, if this `Value` is a non-empty
    * [[Record]]; otherwise returns [[Absent]].
    */
-  head(): Item {
+  override head(): Item {
     return Item.absent();
   }
 
@@ -185,7 +193,7 @@ export abstract class Value extends Item {
    * if this `Value` is not a `Record`, of if this `Value` is itself an
    * empty `Record`.
    */
-  tail(): Record {
+  override tail(): Record {
     return Record.empty();
   }
 
@@ -195,7 +203,7 @@ export abstract class Value extends Item {
    * its last `Value`, rather than a unary `Record` containing its last value,
    * if the structure ends with a `Value` member.
    */
-  body(): Value {
+  override body(): Value {
     return Value.extant();
   }
 
@@ -203,7 +211,7 @@ export abstract class Value extends Item {
    * Returns the number of members contained in this `Value`, if this `Value`
    * is a [[Record]]; otherwise returns `0` if this `Value` is not a `Record`.
    */
-  get length(): number {
+  override get length(): number {
     return 0;
   }
 
@@ -213,7 +221,7 @@ export abstract class Value extends Item {
    * this `Value` is not a `Record`, or if this `Value` is a `Record`, but has
    * no `Field` member with a key equal to the given `key`.
    */
-  has(key: AnyValue): boolean {
+  override has(key: AnyValue): boolean {
     return false;
   }
 
@@ -223,7 +231,7 @@ export abstract class Value extends Item {
    * [[Record]], or if this `Value` is a `Record`, but has no `Field` member
    * with a key equal to the given `key`.
    */
-  get(key: AnyValue): Value {
+  override get(key: AnyValue): Value {
     return Value.absent();
   }
 
@@ -233,7 +241,7 @@ export abstract class Value extends Item {
    * [[Record]], or if this `Value` is a `Record`, but has no `Attr` member
    * with a key equal to the given `key`.
    */
-  getAttr(key: AnyText): Value {
+  override getAttr(key: AnyText): Value {
     return Value.absent();
   }
 
@@ -243,7 +251,7 @@ export abstract class Value extends Item {
    * [[Record]], or if this `Value` is a `Record`, but has no `Slot` member
    * with a key equal to the given `key`.
    */
-  getSlot(key: AnyValue): Value {
+  override getSlot(key: AnyValue): Value {
     return Value.absent();
   }
 
@@ -253,7 +261,7 @@ export abstract class Value extends Item {
    * or if this `Value` is a `Record`, but has no `Field` member with a `key`
    * equal to the given `key`.
    */
-  getField(key: AnyValue): Field | undefined {
+  override getField(key: AnyValue): Field | undefined {
     return void 0;
   }
 
@@ -264,37 +272,37 @@ export abstract class Value extends Item {
    * [[Absent]] if this `Value` is not a `Record`, or if this `Value` is a
    * `Record`, but the `index` is out of bounds.
    */
-  getItem(index: AnyNum): Item {
+  override getItem(index: AnyNum): Item {
     return Item.absent();
   }
 
-  deleted(key: AnyValue): Value {
+  override deleted(key: AnyValue): Value {
     return this;
   }
 
-  conditional(thenTerm: AnyValue, elseTerm: AnyValue): Value;
-  conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item;
-  conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item {
+  override conditional(thenTerm: AnyValue, elseTerm: AnyValue): Value;
+  override conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item;
+  override conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item {
     thenTerm = Item.fromAny(thenTerm);
     return thenTerm;
   }
 
-  or(that: AnyValue): Value;
-  or(that: AnyItem): Item;
-  or(that: AnyItem): Item {
+  override or(that: AnyValue): Value;
+  override or(that: AnyItem): Item;
+  override or(that: AnyItem): Item {
     return this;
   }
 
-  and(that: AnyValue): Value;
-  and(that: AnyItem): Item;
-  and(that: AnyItem): Item {
+  override and(that: AnyValue): Value;
+  override and(that: AnyItem): Item;
+  override and(that: AnyItem): Item {
     that = Item.fromAny(that);
     return that;
   }
 
-  bitwiseOr(that: AnyValue): Value;
-  bitwiseOr(that: AnyItem): Item;
-  bitwiseOr(that: AnyItem): Item {
+  override bitwiseOr(that: AnyValue): Value;
+  override bitwiseOr(that: AnyItem): Item;
+  override bitwiseOr(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new BitwiseOrOperator(this, that);
@@ -312,9 +320,9 @@ export abstract class Value extends Item {
     return Item.absent();
   }
 
-  bitwiseXor(that: AnyValue): Value;
-  bitwiseXor(that: AnyItem): Item;
-  bitwiseXor(that: AnyItem): Item {
+  override bitwiseXor(that: AnyValue): Value;
+  override bitwiseXor(that: AnyItem): Item;
+  override bitwiseXor(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new BitwiseXorOperator(this, that);
@@ -332,9 +340,9 @@ export abstract class Value extends Item {
     return Item.absent();
   }
 
-  bitwiseAnd(that: AnyValue): Value;
-  bitwiseAnd(that: AnyItem): Item;
-  bitwiseAnd(that: AnyItem): Item {
+  override bitwiseAnd(that: AnyValue): Value;
+  override bitwiseAnd(that: AnyItem): Item;
+  override bitwiseAnd(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new BitwiseAndOperator(this, that);
@@ -352,9 +360,9 @@ export abstract class Value extends Item {
     return Item.absent();
   }
 
-  lt(that: AnyValue): Value;
-  lt(that: AnyItem): Item;
-  lt(that: AnyItem): Item {
+  override lt(that: AnyValue): Value;
+  override lt(that: AnyItem): Item;
+  override lt(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new LtOperator(this, that);
@@ -362,9 +370,9 @@ export abstract class Value extends Item {
     return super.lt(that);
   }
 
-  le(that: AnyValue): Value;
-  le(that: AnyItem): Item;
-  le(that: AnyItem): Item {
+  override le(that: AnyValue): Value;
+  override le(that: AnyItem): Item;
+  override le(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new LeOperator(this, that);
@@ -372,9 +380,9 @@ export abstract class Value extends Item {
     return super.le(that);
   }
 
-  eq(that: AnyValue): Value;
-  eq(that: AnyItem): Item;
-  eq(that: AnyItem): Item {
+  override eq(that: AnyValue): Value;
+  override eq(that: AnyItem): Item;
+  override eq(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new EqOperator(this, that);
@@ -382,9 +390,9 @@ export abstract class Value extends Item {
     return super.eq(that);
   }
 
-  ne(that: AnyValue): Value;
-  ne(that: AnyItem): Item;
-  ne(that: AnyItem): Item {
+  override ne(that: AnyValue): Value;
+  override ne(that: AnyItem): Item;
+  override ne(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new NeOperator(this, that);
@@ -392,9 +400,9 @@ export abstract class Value extends Item {
     return super.ne(that);
   }
 
-  ge(that: AnyValue): Value;
-  ge(that: AnyItem): Item;
-  ge(that: AnyItem): Item {
+  override ge(that: AnyValue): Value;
+  override ge(that: AnyItem): Item;
+  override ge(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new GeOperator(this, that);
@@ -402,9 +410,9 @@ export abstract class Value extends Item {
     return super.ge(that);
   }
 
-  gt(that: AnyValue): Value;
-  gt(that: AnyItem): Item;
-  gt(that: AnyItem): Item {
+  override gt(that: AnyValue): Value;
+  override gt(that: AnyItem): Item;
+  override gt(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new GtOperator(this, that);
@@ -412,9 +420,9 @@ export abstract class Value extends Item {
     return super.gt(that);
   }
 
-  plus(that: AnyValue): Value;
-  plus(that: AnyItem): Item;
-  plus(that: AnyItem): Item {
+  override plus(that: AnyValue): Value;
+  override plus(that: AnyItem): Item;
+  override plus(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new PlusOperator(this, that);
@@ -432,9 +440,9 @@ export abstract class Value extends Item {
     return Item.absent();
   }
 
-  minus(that: AnyValue): Value;
-  minus(that: AnyItem): Item;
-  minus(that: AnyItem): Item {
+  override minus(that: AnyValue): Value;
+  override minus(that: AnyItem): Item;
+  override minus(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new MinusOperator(this, that);
@@ -452,9 +460,9 @@ export abstract class Value extends Item {
     return Item.absent();
   }
 
-  times(that: AnyValue): Value;
-  times(that: AnyItem): Item;
-  times(that: AnyItem): Item {
+  override times(that: AnyValue): Value;
+  override times(that: AnyItem): Item;
+  override times(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new TimesOperator(this, that);
@@ -472,9 +480,9 @@ export abstract class Value extends Item {
     return Item.absent();
   }
 
-  divide(that: AnyValue): Value;
-  divide(that: AnyItem): Item;
-  divide(that: AnyItem): Item {
+  override divide(that: AnyValue): Value;
+  override divide(that: AnyItem): Item;
+  override divide(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new DivideOperator(this, that);
@@ -492,9 +500,9 @@ export abstract class Value extends Item {
     return Item.absent();
   }
 
-  modulo(that: AnyValue): Value;
-  modulo(that: AnyItem): Item;
-  modulo(that: AnyItem): Item {
+  override modulo(that: AnyValue): Value;
+  override modulo(that: AnyItem): Item;
+  override modulo(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new ModuloOperator(this, that);
@@ -512,27 +520,27 @@ export abstract class Value extends Item {
     return Item.absent();
   }
 
-  not(): Value {
+  override not(): Value {
     return Value.absent();
   }
 
-  bitwiseNot(): Value {
+  override bitwiseNot(): Value {
     return Value.absent();
   }
 
-  negative(): Value {
+  override negative(): Value {
     return Value.absent();
   }
 
-  positive(): Value {
+  override positive(): Value {
     return Value.absent();
   }
 
-  inverse(): Value {
+  override inverse(): Value {
     return Value.absent();
   }
 
-  lambda(template: Value): Value {
+  override lambda(template: Value): Value {
     return new LambdaFunc(this, template);
   }
 
@@ -540,13 +548,13 @@ export abstract class Value extends Item {
    * Converts this `Value` into a `string` value, if possible; otherwise returns
    * `undefined` if this `Value` can't be converted into a `string` value.
    */
-  stringValue(): string | undefined;
+  override stringValue(): string | undefined;
   /**
    * Converts this `Value` into a `string` value, if possible; otherwise returns
    * `orElse` if this `Value` can't be converted into a `string` value.
    */
-  stringValue<T>(orElse: T): string | T;
-  stringValue<T>(orElse?: T): string | T | undefined {
+  override stringValue<T>(orElse: T): string | T;
+  override stringValue<T>(orElse?: T): string | T | undefined {
     return orElse;
   }
 
@@ -554,13 +562,13 @@ export abstract class Value extends Item {
    * Converts this `Value` into a `number` value, if possible; otherwise returns
    * `undefined` if this `Value` can't be converted into a `number` value.
    */
-  numberValue(): number | undefined;
+  override numberValue(): number | undefined;
   /**
    * Converts this `Value` into a `number` value, if possible; otherwise returns
    * `orElse` if this `Value` can't be converted into a `number` value.
    */
-  numberValue<T>(orElse: T): number | T;
-  numberValue<T>(orElse?: T): number | T | undefined {
+  override numberValue<T>(orElse: T): number | T;
+  override numberValue<T>(orElse?: T): number | T | undefined {
     return orElse;
   }
 
@@ -569,50 +577,50 @@ export abstract class Value extends Item {
    * returns `undefined` if this `Value` can't be converted into a `boolean`
    * value.
    */
-  booleanValue(): boolean | undefined;
+  override booleanValue(): boolean | undefined;
   /**
    * Converts this `Value` into a `boolean` value, if possible; otherwise
    * returns `orElse` if this `Value` can't be converted into a `boolean` value.
    */
-  booleanValue<T>(orElse: T): boolean | T;
-  booleanValue<T>(orElse?: T): boolean | T | undefined {
+  override booleanValue<T>(orElse: T): boolean | T;
+  override booleanValue<T>(orElse?: T): boolean | T | undefined {
     return orElse;
   }
 
-  abstract toAny(): AnyValue;
+  abstract override toAny(): AnyValue;
 
-  isAliased(): boolean {
+  override isAliased(): boolean {
     return false;
   }
 
-  isMutable(): boolean {
+  override isMutable(): boolean {
     return false;
   }
 
-  alias(): void {
+  override alias(): void {
     // nop
   }
 
-  branch(): Value {
+  override branch(): Value {
     return this;
   }
 
-  clone(): Value {
+  override clone(): Value {
     return this;
   }
 
-  commit(): this {
+  override commit(): this {
     return this;
   }
 
-  interpolateTo(that: Value): Interpolator<Value>;
-  interpolateTo(that: Item): Interpolator<Item>;
-  interpolateTo(that: unknown): Interpolator<Item> | null;
-  interpolateTo(that: unknown): Interpolator<Item> | null {
+  override interpolateTo(that: Value): Interpolator<Value>;
+  override interpolateTo(that: Item): Interpolator<Item>;
+  override interpolateTo(that: unknown): Interpolator<Item> | null;
+  override interpolateTo(that: unknown): Interpolator<Item> | null {
     return super.interpolateTo(that);
   }
 
-  keyEquals(key: unknown): boolean {
+  override keyEquals(key: unknown): boolean {
     return false;
   }
 
@@ -620,19 +628,19 @@ export abstract class Value extends Item {
     return new ValueBuilder();
   }
 
-  static empty(): Value {
+  static override empty(): Value {
     return Record.empty();
   }
 
-  static extant(): Value {
+  static override extant(): Value {
     return Extant.extant();
   }
 
-  static absent(): Value {
+  static override absent(): Value {
     return Absent.absent();
   }
 
-  static fromAny(value: AnyValue): Value {
+  static override fromAny(value: AnyValue): Value {
     if (value instanceof Value) {
       return value;
     } else if (value === void 0) {

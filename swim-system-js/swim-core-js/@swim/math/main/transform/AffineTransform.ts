@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import {Lazy, Murmur3, Numbers, Constructors} from "@swim/util";
 import {Output, Parser, Diagnostic, Unicode} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item, Value, Record} from "@swim/structure";
-import {PointR2} from "../r2/PointR2";
+import {R2Point} from "../r2/R2Point";
 import {Transform} from "./Transform";
 import {IdentityTransform} from "./IdentityTransform";
 import {AffineTransformInterpolator} from "../"; // forward import
@@ -56,21 +56,21 @@ export class AffineTransform extends Transform {
     });
   }
 
-  declare readonly x0: number;
+  readonly x0!: number;
 
-  declare readonly y0: number;
+  readonly y0!: number;
 
-  declare readonly x1: number;
+  readonly x1!: number;
 
-  declare readonly y1: number;
+  readonly y1!: number;
 
-  declare readonly tx: number;
+  readonly tx!: number;
 
-  declare readonly ty: number;
+  readonly ty!: number;
 
-  transform(that: Transform): Transform;
-  transform(x: number, y: number): PointR2;
-  transform(x: Transform | number, y?: number): Transform | PointR2 {
+  override transform(that: Transform): Transform;
+  override transform(x: number, y: number): R2Point;
+  override transform(x: Transform | number, y?: number): Transform | R2Point {
     if (arguments.length === 1) {
       if (x instanceof IdentityTransform) {
         return this;
@@ -78,20 +78,20 @@ export class AffineTransform extends Transform {
         return this.multiply((x as Transform).toAffine());
       }
     } else {
-      return new PointR2(this.x0 * (x as number) + this.x1 * y! + this.tx,
+      return new R2Point(this.x0 * (x as number) + this.x1 * y! + this.tx,
                          this.y0 * (x as number) + this.y1 * y! + this.ty);
     }
   }
 
-  transformX(x: number, y: number): number {
+  override transformX(x: number, y: number): number {
     return this.x0 * x + this.x1 * y + this.tx;
   }
 
-  transformY(x: number, y: number): number {
+  override transformY(x: number, y: number): number {
     return this.y0 * x + this.y1 * y + this.ty;
   }
 
-  inverse(): Transform {
+  override inverse(): Transform {
     const m00 = this.x0;
     const m10 = this.y0;
     const m01 = this.x1;
@@ -119,32 +119,32 @@ export class AffineTransform extends Transform {
     return new AffineTransform(x0, y0, x1, y1, tx, ty);
   }
 
-  toAffine(): AffineTransform {
+  override toAffine(): AffineTransform {
     return this;
   }
 
-  toMatrix(): DOMMatrix {
+  override toMatrix(): DOMMatrix {
     return new DOMMatrix([this.x0, this.y0, this.x1, this.y1, this.tx, this.ty]);
   }
 
-  toCssTransformComponent(): CSSTransformComponent | null {
+  override toCssTransformComponent(): CSSTransformComponent | null {
     if (typeof CSSTranslate !== "undefined") {
       return new CSSMatrixComponent(this.toMatrix());
     }
     return null;
   }
 
-  toValue(): Value {
+  override toValue(): Value {
     return Record.create(1)
                  .attr("matrix", Record.create(6).item(this.x0).item(this.y0)
                                                  .item(this.x1).item(this.y1)
                                                  .item(this.tx).item(this.ty));
   }
 
-  interpolateTo(that: AffineTransform): Interpolator<AffineTransform>;
-  interpolateTo(that: Transform): Interpolator<Transform>;
-  interpolateTo(that: unknown): Interpolator<Transform> | null;
-  interpolateTo(that: unknown): Interpolator<Transform> | null {
+  override interpolateTo(that: AffineTransform): Interpolator<AffineTransform>;
+  override interpolateTo(that: Transform): Interpolator<Transform>;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null {
     if (that instanceof AffineTransform) {
       return AffineTransformInterpolator(this, that);
     } else {
@@ -152,11 +152,11 @@ export class AffineTransform extends Transform {
     }
   }
 
-  conformsTo(that: Transform): boolean {
+  override conformsTo(that: Transform): boolean {
     return that instanceof AffineTransform;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (that instanceof AffineTransform) {
       return Numbers.equivalent(this.x0, that.x0, epsilon)
           && Numbers.equivalent(this.y0, that.y0, epsilon)
@@ -168,7 +168,7 @@ export class AffineTransform extends Transform {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (that instanceof AffineTransform) {
       return this.x0 === that.x0 && this.y0 === that.y0
           && this.x1 === that.x1 && this.y1 === that.y1
@@ -177,7 +177,7 @@ export class AffineTransform extends Transform {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         Murmur3.mix(Murmur3.mix(Constructors.hash(AffineTransform),
         Numbers.hash(this.x0)), Numbers.hash(this.y0)),
@@ -185,7 +185,7 @@ export class AffineTransform extends Transform {
         Numbers.hash(this.tx)), Numbers.hash(this.ty)));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Transform").write(46/*'.'*/).write("affine").write(40/*'('*/)
         .debug(this.x0).write(", ").debug(this.y0).write(", ")
         .debug(this.x1).write(", ").debug(this.y1).write(", ")
@@ -193,9 +193,9 @@ export class AffineTransform extends Transform {
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
-  toString(): string {
+  override toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       stringValue = "matrix(" + this.x0 + "," + this.y0 + ","
@@ -211,11 +211,11 @@ export class AffineTransform extends Transform {
   }
 
   @Lazy
-  static identity(): AffineTransform {
+  static override identity(): AffineTransform {
     return new AffineTransform(1, 0, 0, 1, 0, 0);
   }
 
-  static fromAny(value: AffineTransform | string): AffineTransform {
+  static override fromAny(value: AffineTransform | string): AffineTransform {
     if (value === void 0 || value === null || value instanceof AffineTransform) {
       return value;
     } else if (typeof value === "string") {
@@ -228,11 +228,11 @@ export class AffineTransform extends Transform {
     return new AffineTransform(matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f);
   }
 
-  static fromCssTransformComponent(component: CSSMatrixComponent): AffineTransform {
+  static override fromCssTransformComponent(component: CSSMatrixComponent): AffineTransform {
     return AffineTransform.fromMatrix(component.matrix);
   }
 
-  static fromValue(value: Value): AffineTransform | null {
+  static override fromValue(value: Value): AffineTransform | null {
     const header = value.header("matrix");
     if (header.isDefined()) {
       let x0 = 0;
@@ -274,7 +274,7 @@ export class AffineTransform extends Transform {
     return null;
   }
 
-  static parse(string: string): AffineTransform {
+  static override parse(string: string): AffineTransform {
     let input = Unicode.stringInput(string);
     while (input.isCont() && Unicode.isWhitespace(input.head())) {
       input = input.step();

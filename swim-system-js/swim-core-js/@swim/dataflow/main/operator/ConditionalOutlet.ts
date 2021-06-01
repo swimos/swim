@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,18 +32,18 @@ export class ConditionalOutlet extends AbstractOutlet<Value> {
     });
   }
 
-  declare readonly ifInlet: Inlet<Value>;
+  readonly ifInlet!: Inlet<Value>;
 
-  declare readonly thenInlet: Inlet<Value>;
+  readonly thenInlet!: Inlet<Value>;
 
-  declare readonly elseInlet: Inlet<Value>;
+  readonly elseInlet!: Inlet<Value>;
 
-  get(): Value {
+  override get(): Value {
     const ifInput = this.ifInlet.input;
     if (ifInput !== null) {
       const ifTerm = ifInput.get();
       if (ifTerm !== void 0) {
-        if (ifTerm.booleanValue(false)) {
+        if (ifTerm.isDefinite()) {
           const thenInput = this.thenInlet.input;
           if (thenInput !== null) {
             const thenTerm = thenInput.get();

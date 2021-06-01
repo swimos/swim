@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import {Output, Parser, Diagnostic, Unicode} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item, Value, Record} from "@swim/structure";
 import {Angle} from "../angle/Angle";
-import {PointR2} from "../r2/PointR2";
+import {R2Point} from "../r2/R2Point";
 import {Transform} from "./Transform";
 import {IdentityTransform} from "./IdentityTransform";
 import {RotateTransformInterpolator} from "../"; // forward import
@@ -38,11 +38,11 @@ export class RotateTransform extends Transform {
     });
   }
 
-  declare readonly angle: Angle;
+  readonly angle!: Angle;
 
-  transform(that: Transform): Transform;
-  transform(x: number, y: number): PointR2;
-  transform(x: Transform | number, y?: number): Transform | PointR2 {
+  override transform(that: Transform): Transform;
+  override transform(x: number, y: number): R2Point;
+  override transform(x: Transform | number, y?: number): Transform | R2Point {
     if (arguments.length === 1) {
       if (x instanceof IdentityTransform) {
         return this;
@@ -53,33 +53,33 @@ export class RotateTransform extends Transform {
       const angle = this.angle.radValue();
       const cosA = Math.cos(angle);
       const sinA = Math.sin(angle);
-      return new PointR2((x as number) * cosA - y! * sinA,
+      return new R2Point((x as number) * cosA - y! * sinA,
                          (x as number) * sinA + y! * cosA);
     }
   }
 
-  transformX(x: number, y: number): number {
+  override transformX(x: number, y: number): number {
     const angle = this.angle.radValue();
     return x * Math.cos(angle) - y * Math.sin(angle);
   }
 
-  transformY(x: number, y: number): number {
+  override transformY(x: number, y: number): number {
     const angle = this.angle.radValue();
     return x * Math.sin(angle) + y * Math.cos(angle);
   }
 
-  inverse(): Transform {
+  override inverse(): Transform {
     return new RotateTransform(this.angle.negative());
   }
 
-  toAffine(): AffineTransform {
+  override toAffine(): AffineTransform {
     const angle = this.angle.radValue();
     return new AffineTransform(Math.cos(angle), Math.sin(angle),
                               -Math.sin(angle), Math.cos(angle),
                                0, 0);
   }
 
-  toCssTransformComponent(): CSSTransformComponent | null {
+  override toCssTransformComponent(): CSSTransformComponent | null {
     if (typeof CSSTranslate !== "undefined") {
       const angle = this.angle.toCssValue();
       return new CSSRotate(angle!);
@@ -87,14 +87,14 @@ export class RotateTransform extends Transform {
     return null;
   }
 
-  toValue(): Value {
+  override toValue(): Value {
     return Record.create(1).attr("rotate", this.angle.toString());
   }
 
-  interpolateTo(that: RotateTransform): Interpolator<RotateTransform>;
-  interpolateTo(that: Transform): Interpolator<Transform>;
-  interpolateTo(that: unknown): Interpolator<Transform> | null;
-  interpolateTo(that: unknown): Interpolator<Transform> | null {
+  override interpolateTo(that: RotateTransform): Interpolator<RotateTransform>;
+  override interpolateTo(that: Transform): Interpolator<Transform>;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null {
     if (that instanceof RotateTransform) {
       return RotateTransformInterpolator(this, that);
     } else {
@@ -102,37 +102,37 @@ export class RotateTransform extends Transform {
     }
   }
 
-  conformsTo(that: Transform): boolean {
+  override conformsTo(that: Transform): boolean {
     return that instanceof RotateTransform;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (that instanceof RotateTransform) {
       return this.angle.equivalentTo(that.angle, epsilon);
     }
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (that instanceof RotateTransform) {
       return this.angle.equals(that.angle);
     }
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(RotateTransform), this.angle.hashCode()));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Transform").write(46/*'.'*/).write("rotate")
         .write(40/*'('*/).debug(this.angle).write(41/*')'*/);
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
-  toString(): string {
+  override toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       stringValue = "rotate(" + this.angle + ")";
@@ -145,16 +145,16 @@ export class RotateTransform extends Transform {
     return stringValue;
   }
 
-  toAttributeString(): string {
+  override toAttributeString(): string {
     return "rotate(" + this.angle.degValue() + ")";
   }
 
-  static fromCssTransformComponent(component: CSSRotate): RotateTransform {
+  static override fromCssTransformComponent(component: CSSRotate): RotateTransform {
     const angle = Angle.fromCssValue(component.angle);
     return new RotateTransform(angle);
   }
 
-  static fromAny(value: RotateTransform | string): RotateTransform {
+  static override fromAny(value: RotateTransform | string): RotateTransform {
     if (value === void 0 || value === null || value instanceof RotateTransform) {
       return value;
     } else if (typeof value === "string") {
@@ -163,7 +163,7 @@ export class RotateTransform extends Transform {
     throw new TypeError("" + value);
   }
 
-  static fromValue(value: Value): RotateTransform | null {
+  static override fromValue(value: Value): RotateTransform | null {
     const header = value.header("rotate");
     if (header.isDefined()) {
       let angle = Angle.zero();
@@ -180,7 +180,7 @@ export class RotateTransform extends Transform {
     return null;
   }
 
-  static parse(string: string): RotateTransform {
+  static override parse(string: string): RotateTransform {
     let input = Unicode.stringInput(string);
     while (input.isCont() && Unicode.isWhitespace(input.head())) {
       input = input.step();

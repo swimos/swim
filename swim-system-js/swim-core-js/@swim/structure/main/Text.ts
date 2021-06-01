@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,25 +35,25 @@ export class Text extends Value {
     });
   }
 
-  isConstant(): boolean {
+  override isConstant(): boolean {
     return true;
   }
 
-  declare readonly value: string;
+  readonly value!: string;
 
   get size(): number {
     return this.value.length;
   }
 
-  stringValue(): string;
-  stringValue<T>(orElse: T): string;
-  stringValue<T>(orElse?: T): string {
+  override stringValue(): string;
+  override stringValue<T>(orElse: T): string;
+  override stringValue<T>(orElse?: T): string {
     return this.value;
   }
 
-  numberValue(): number | undefined;
-  numberValue<T>(orElse: T): number | T;
-  numberValue<T>(orElse?: T): number | T | undefined {
+  override numberValue(): number | undefined;
+  override numberValue<T>(orElse: T): number | T;
+  override numberValue<T>(orElse?: T): number | T | undefined {
     try {
       return Num.parse(this.value).numberValue();
     } catch (error) {
@@ -61,9 +61,9 @@ export class Text extends Value {
     }
   }
 
-  booleanValue(): boolean | undefined;
-  booleanValue<T>(orElse: T): boolean | T;
-  booleanValue<T>(orElse?: T): boolean | T | undefined {
+  override booleanValue(): boolean | undefined;
+  override booleanValue<T>(orElse: T): boolean | T;
+  override booleanValue<T>(orElse?: T): boolean | T | undefined {
     if (this.value === "true") {
       return true;
     } else if (this.value === "false") {
@@ -73,17 +73,17 @@ export class Text extends Value {
     }
   }
 
-  toAny(): AnyText {
+  override toAny(): AnyText {
     return this.value;
   }
 
-  valueOf(): string {
+  override valueOf(): string {
     return this.value;
   }
 
-  plus(that: AnyValue): Value;
-  plus(that: AnyItem): Item;
-  plus(that: AnyItem): Item {
+  override plus(that: AnyValue): Value;
+  override plus(that: AnyItem): Item;
+  override plus(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Text) {
       return Text.from(this.value + that.value);
@@ -91,30 +91,30 @@ export class Text extends Value {
     return super.plus(that);
   }
 
-  branch(): Text {
+  override branch(): Text {
     return this;
   }
 
-  clone(): Text {
+  override clone(): Text {
     return this;
   }
 
-  commit(): this {
+  override commit(): this {
     return this;
   }
 
-  interpolateTo(that: Text): Interpolator<Text>;
-  interpolateTo(that: Item): Interpolator<Item>;
-  interpolateTo(that: unknown): Interpolator<Item> | null;
-  interpolateTo(that: unknown): Interpolator<Item> | null {
+  override interpolateTo(that: Text): Interpolator<Text>;
+  override interpolateTo(that: Item): Interpolator<Item>;
+  override interpolateTo(that: unknown): Interpolator<Item> | null;
+  override interpolateTo(that: unknown): Interpolator<Item> | null {
     return super.interpolateTo(that);
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 5;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof Text) {
       return this.value.localeCompare(that.value);
     } else if (that instanceof Item) {
@@ -123,11 +123,11 @@ export class Text extends Value {
     return NaN;
   }
 
-  equivalentTo(that: unknown): boolean {
+  override equivalentTo(that: unknown): boolean {
     return this.equals(that);
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Text) {
@@ -137,9 +137,9 @@ export class Text extends Value {
   }
 
   /** @hidden */
-  declare readonly hashValue: number | undefined;
+  readonly hashValue!: number | undefined;
 
-  hashCode(): number {
+  override hashCode(): number {
     let hashValue = this.hashValue;
     if (hashValue === void 0) {
       hashValue = Strings.hash(this.value);
@@ -150,7 +150,7 @@ export class Text extends Value {
     return hashValue;
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Text").write(46/*'.'*/);
     if (this.value.length === 0) {
       output = output.write("empty").write(40/*'('*/).write(41/*')'*/);
@@ -159,16 +159,16 @@ export class Text extends Value {
     }
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     Format.debug(this.value, output);
   }
 
-  toString(): string {
+  override toString(): string {
     return this.value;
   }
 
   @Lazy
-  static empty(): Text {
+  static override empty(): Text {
     return new Text("");
   }
 
@@ -185,7 +185,7 @@ export class Text extends Value {
     }
   }
 
-  static fromAny(value: AnyText): Text {
+  static override fromAny(value: AnyText): Text {
     if (value instanceof Text) {
       return value;
     } else if (typeof value === "string") {

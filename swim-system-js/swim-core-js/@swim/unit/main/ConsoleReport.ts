@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ export class ConsoleReport extends Report {
     this.failCount = 0;
   }
 
-  willRunSpec(spec: Spec): void {
+  override willRunSpec(spec: Spec): void {
     let output = Unicode.stringOutput(this.outputSettings);
     if (this.testDepth > 0) {
       OutputStyle.cyanBold(output);
@@ -60,7 +60,7 @@ export class ConsoleReport extends Report {
     this.testDepth += 1;
   }
 
-  willRunTest(spec: Spec, exam: Exam): void {
+  override willRunTest(spec: Spec, exam: Exam): void {
     let output = Unicode.stringOutput(this.outputSettings);
     OutputStyle.cyanBold(output);
     for (let i = 0; i < this.testDepth - 1; i += 1) {
@@ -72,7 +72,7 @@ export class ConsoleReport extends Report {
     console.log(output.toString());
   }
 
-  onProof(spec: Spec, exam: Exam, proof: Proof): void {
+  override onProof(spec: Spec, exam: Exam, proof: Proof): void {
     if (proof.isValid()) {
       this.passCount += 1;
     } else {
@@ -88,7 +88,7 @@ export class ConsoleReport extends Report {
     console.log(output.toString());
   }
 
-  onComment(spec: Spec, exam: Exam, message: string): void {
+  override onComment(spec: Spec, exam: Exam, message: string): void {
     let output = Unicode.stringOutput(this.outputSettings);
     OutputStyle.cyanBold(output);
     for (let i = 0; i < this.testDepth; i += 1) {
@@ -101,7 +101,7 @@ export class ConsoleReport extends Report {
     console.log(output.toString());
   }
 
-  didRunSpec(spec: Spec): void {
+  override didRunSpec(spec: Spec): void {
     this.testDepth -= 1;
     if (this.testDepth === 0) {
       let output = Unicode.stringOutput(this.outputSettings);

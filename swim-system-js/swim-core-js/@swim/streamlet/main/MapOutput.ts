@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,13 +28,13 @@ export class MapOutput<K, V> extends AbstractMapInlet<K, V, Map<K, V>> {
   }
 
   /** @hidden */
-  declare readonly state: BTree<K, V>;
+  readonly state!: BTree<K, V>;
 
   get(): Map<K, V> {
     return this.state;
   }
 
-  protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
+  protected override onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
     if (effect === KeyEffect.Update) {
       const input = this.input;
       if (input !== null) {

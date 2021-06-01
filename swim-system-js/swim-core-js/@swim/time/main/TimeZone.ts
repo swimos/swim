@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ export class TimeZone implements HashCode, Debug {
     });
   }
 
-  declare readonly name: string | undefined;
+  readonly name!: string | undefined;
 
-  declare readonly offset: number;
+  readonly offset!: number;
 
   isUTC(): boolean {
     return this.offset === 0;

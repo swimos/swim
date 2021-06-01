@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ export class MillisecondParser extends Parser<DateTimeInit> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<DateTimeInit> {
+  override feed(input: Input): Parser<DateTimeInit> {
     return MillisecondParser.parse(input, this.date, this.millisecond, this.step);
   }
 
@@ -37,7 +37,7 @@ export class MillisecondParser extends Parser<DateTimeInit> {
     return DateTimeFormat.parseDateNumber(input, MillisecondParser, "millisecond", 1, 3, date, millisecond, step);
   }
 
-  static bind(millisecond: number, date: DateTimeInit): Parser<DateTimeInit> {
+  static term(millisecond: number, date: DateTimeInit): Parser<DateTimeInit> {
     date.millisecond = millisecond;
     return Parser.done(date);
   }

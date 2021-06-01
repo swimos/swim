@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ export class ValueInput<O> extends AbstractOutlet<O> {
   }
 
   /** @hidden */
-  declare readonly state: O | undefined;
+  readonly state!: O | undefined;
 
-  get(): O | undefined {
+  override get(): O | undefined {
     return this.state;
   }
 

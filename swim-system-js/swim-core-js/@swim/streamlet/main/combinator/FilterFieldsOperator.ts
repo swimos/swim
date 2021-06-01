@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {KeyEffect} from "../KeyEffect";
 import {AbstractMapInletMapOutlet} from "../AbstractMapInletMapOutlet";
 
 export abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapOutlet<K, K, V, V, I, Map<K, V>> {
-  has(key: K): boolean {
+  override has(key: K): boolean {
     const input = this.input;
     if (input !== null) {
       const value = input.get(key);
@@ -27,9 +27,9 @@ export abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
     return false;
   }
 
-  get(): Map<K, V>;
-  get(key: K): V | undefined;
-  get(key?: K): Map<K, V> | V | undefined {
+  override get(): Map<K, V>;
+  override get(key: K): V | undefined;
+  override get(key?: K): Map<K, V> | V | undefined {
     if (key === void 0) {
       const output = new BTree<K, V>();
       const keys = this.keyIterator();
@@ -58,7 +58,7 @@ export abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
     }
   }
 
-  keyIterator(): Iterator<K> {
+  override keyIterator(): Iterator<K> {
     const input = this.input;
     if (input !== null) {
       return input.keyIterator(); // TODO: filter keys
@@ -67,15 +67,15 @@ export abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
     }
   }
 
-  protected onDecohereOutputKey(key: K, effect: KeyEffect): void {
+  protected override onDecohereOutputKey(key: K, effect: KeyEffect): void {
     this.decohereInputKey(key, effect);
   }
 
-  protected onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
+  protected override onRecohereOutputKey(key: K, effect: KeyEffect, version: number): void {
     this.recohereInputKey(key, version);
   }
 
-  protected willRecohereInputKey(key: K, effect: KeyEffect, version: number): KeyEffect {
+  protected override willRecohereInputKey(key: K, effect: KeyEffect, version: number): KeyEffect {
     if (effect === KeyEffect.Update) {
       const input = this.input;
       if (input !== null) {

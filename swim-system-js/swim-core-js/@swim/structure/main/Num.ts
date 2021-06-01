@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,14 +34,14 @@ export class Num extends Value {
     });
   }
 
-  isConstant(): boolean {
+  override isConstant(): boolean {
     return true;
   }
 
-  declare readonly value: number;
+  readonly value!: number;
 
   /** @hidden */
-  declare readonly flags: number;
+  readonly flags!: number;
 
   isNaN(): boolean {
     return isNaN(this.value);
@@ -59,35 +59,35 @@ export class Num extends Value {
     return (this.flags & Num.Uint64Flag) !== 0;
   }
 
-  stringValue(): string;
-  stringValue<T>(orElse: T): string;
-  stringValue<T>(orElse?: T): string {
+  override stringValue(): string;
+  override stringValue<T>(orElse: T): string;
+  override stringValue<T>(orElse?: T): string {
     return "" + this.value;
   }
 
-  numberValue(): number;
-  numberValue<T>(orElse: T): number;
-  numberValue<T>(orElse?: T): number {
+  override numberValue(): number;
+  override numberValue<T>(orElse: T): number;
+  override numberValue<T>(orElse?: T): number {
     return this.value;
   }
 
-  booleanValue(): boolean;
-  booleanValue<T>(orElse: T): boolean;
-  booleanValue<T>(orElse?: T): boolean {
+  override booleanValue(): boolean;
+  override booleanValue<T>(orElse: T): boolean;
+  override booleanValue<T>(orElse?: T): boolean {
     return !!this.value;
   }
 
-  toAny(): AnyNum {
+  override toAny(): AnyNum {
     return this.value;
   }
 
-  valueOf(): number {
+  override valueOf(): number {
     return this.value;
   }
 
-  bitwiseOr(that: AnyValue): Value;
-  bitwiseOr(that: AnyItem): Item;
-  bitwiseOr(that: AnyItem): Item {
+  override bitwiseOr(that: AnyValue): Value;
+  override bitwiseOr(that: AnyItem): Item;
+  override bitwiseOr(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Num) {
       return Num.from((this.value | that.value) >>> 0);
@@ -95,9 +95,9 @@ export class Num extends Value {
     return super.bitwiseOr(that);
   }
 
-  bitwiseXor(that: AnyValue): Value;
-  bitwiseXor(that: AnyItem): Item;
-  bitwiseXor(that: AnyItem): Item {
+  override bitwiseXor(that: AnyValue): Value;
+  override bitwiseXor(that: AnyItem): Item;
+  override bitwiseXor(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Num) {
       return Num.from((this.value ^ that.value) >>> 0);
@@ -105,9 +105,9 @@ export class Num extends Value {
     return super.bitwiseXor(that);
   }
 
-  bitwiseAnd(that: AnyValue): Value;
-  bitwiseAnd(that: AnyItem): Item;
-  bitwiseAnd(that: AnyItem): Item {
+  override bitwiseAnd(that: AnyValue): Value;
+  override bitwiseAnd(that: AnyItem): Item;
+  override bitwiseAnd(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Num) {
       return Num.from((this.value & that.value) >>> 0);
@@ -115,9 +115,9 @@ export class Num extends Value {
     return super.bitwiseAnd(that);
   }
 
-  plus(that: AnyValue): Value;
-  plus(that: AnyItem): Item;
-  plus(that: AnyItem): Item {
+  override plus(that: AnyValue): Value;
+  override plus(that: AnyItem): Item;
+  override plus(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Num) {
       return Num.from(this.value + that.value);
@@ -125,9 +125,9 @@ export class Num extends Value {
     return super.plus(that);
   }
 
-  minus(that: AnyValue): Value;
-  minus(that: AnyItem): Item;
-  minus(that: AnyItem): Item {
+  override minus(that: AnyValue): Value;
+  override minus(that: AnyItem): Item;
+  override minus(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Num) {
       return Num.from(this.value - that.value);
@@ -135,9 +135,9 @@ export class Num extends Value {
     return super.minus(that);
   }
 
-  times(that: AnyValue): Value;
-  times(that: AnyItem): Item;
-  times(that: AnyItem): Item {
+  override times(that: AnyValue): Value;
+  override times(that: AnyItem): Item;
+  override times(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Num) {
       return Num.from(this.value * that.value);
@@ -145,9 +145,9 @@ export class Num extends Value {
     return super.times(that);
   }
 
-  divide(that: AnyValue): Value;
-  divide(that: AnyItem): Item;
-  divide(that: AnyItem): Item {
+  override divide(that: AnyValue): Value;
+  override divide(that: AnyItem): Item;
+  override divide(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Num) {
       return Num.from(this.value / that.value);
@@ -155,9 +155,9 @@ export class Num extends Value {
     return super.divide(that);
   }
 
-  modulo(that: AnyValue): Value;
-  modulo(that: AnyItem): Item;
-  modulo(that: AnyItem): Item {
+  override modulo(that: AnyValue): Value;
+  override modulo(that: AnyItem): Item;
+  override modulo(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Num) {
       return Num.from(this.value % that.value);
@@ -165,19 +165,19 @@ export class Num extends Value {
     return super.modulo(that);
   }
 
-  bitwiseNot(): Value {
+  override bitwiseNot(): Value {
     return Num.from(~this.value >>> 0);
   }
 
-  negative(): Value {
+  override negative(): Value {
     return Num.from(-this.value);
   }
 
-  positive(): Value {
+  override positive(): Value {
     return this;
   }
 
-  inverse(): Value {
+  override inverse(): Value {
     return Num.from(1 / this.value);
   }
 
@@ -206,22 +206,22 @@ export class Num extends Value {
     return Num.from(Math.pow(this.value, that.value));
   }
 
-  max(that: Num): Num;
-  max(that: Item): Item;
-  max(that: Item): Item {
+  override max(that: Num): Num;
+  override max(that: Item): Item;
+  override max(that: Item): Item {
     return this.compareTo(that) >= 0 ? this : that;
   }
 
-  min(that: Num): Num;
-  min(that: Item): Item;
-  min(that: Item): Item {
+  override min(that: Num): Num;
+  override min(that: Item): Item;
+  override min(that: Item): Item {
     return this.compareTo(that) <= 0 ? this : that;
   }
 
-  interpolateTo(that: Num): Interpolator<Num>;
-  interpolateTo(that: Item): Interpolator<Item>;
-  interpolateTo(that: unknown): Interpolator<Item> | null;
-  interpolateTo(that: unknown): Interpolator<Item> | null {
+  override interpolateTo(that: Num): Interpolator<Num>;
+  override interpolateTo(that: Item): Interpolator<Item>;
+  override interpolateTo(that: unknown): Interpolator<Item> | null;
+  override interpolateTo(that: unknown): Interpolator<Item> | null {
     if (that instanceof Num) {
       return NumInterpolator(this, that);
     } else {
@@ -229,11 +229,11 @@ export class Num extends Value {
     }
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 6;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof Num) {
       const x = this.value;
       const y = that.value;
@@ -244,7 +244,7 @@ export class Num extends Value {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Num) {
@@ -255,7 +255,7 @@ export class Num extends Value {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Num) {
@@ -266,16 +266,16 @@ export class Num extends Value {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Numbers.hash(this.value);
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Num").write(46/*'.'*/).write("from")
         .write(40/*'('*/).display(this).write(41/*')'*/);
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     Format.displayNumber(this.value, output);
   }
 
@@ -337,7 +337,7 @@ export class Num extends Value {
     }
   }
 
-  static fromAny(value: AnyNum): Num {
+  static override fromAny(value: AnyNum): Num {
     if (value instanceof Num) {
       return value;
     } else if (typeof value === "number") {

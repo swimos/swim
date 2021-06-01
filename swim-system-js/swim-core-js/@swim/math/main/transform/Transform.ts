@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import {PxLength} from "../length/PxLength";
 import {AnyAngle, Angle} from "../angle/Angle";
 import {DegAngle} from "../angle/DegAngle";
 import type {R2Operator} from "../r2/R2Operator";
-import type {PointR2} from "../r2/PointR2";
+import type {R2Point} from "../r2/R2Point";
 import {TransformForm} from "../"; // forward import
 import {IdentityTransform} from "../"; // forward import
 import {TranslateTransform} from "../"; // forward import
@@ -37,7 +37,7 @@ export type AnyTransform = Transform | string;
 
 export abstract class Transform implements R2Operator, Interpolate<Transform>, HashCode, Equivalent, Debug {
   abstract transform(that: Transform): Transform;
-  abstract transform(x: number, y: number): PointR2;
+  abstract transform(x: number, y: number): R2Point;
 
   abstract transformX(x: number, y: number): number;
 

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,30 +30,36 @@ export class Extant extends Value {
   /**
    * Always returns `true` because `Extant` is a defined value.
    */
-  isDefined(): boolean {
+  override isDefined(): boolean {
     return true;
   }
 
   /**
-   * Always returns `false` because `Extant` is not a distinct
-   * value.
+   * Always returns `false` because `Extant` is not a distinct value.
    */
-  isDistinct(): boolean {
+  override isDistinct(): boolean {
     return false;
   }
 
-  isConstant(): boolean {
+  /**
+   * Always returns `false` because `Extant` is not a definite value.
+   */
+  override isDefinite(): boolean {
+    return false;
+  }
+
+  override isConstant(): boolean {
     return true;
   }
 
   /**
    * Always returns an empty `Record` because `Extant` is not a distinct value.
    */
-  unflattened(): Record {
+  override unflattened(): Record {
     return Record.empty();
   }
 
-  not(): Value {
+  override not(): Value {
     return Value.absent();
   }
 
@@ -62,77 +68,77 @@ export class Extant extends Value {
    * `Record`, which converts to a `string` by concatenating the string values
    * of all its members, if all its members convert to string values.
    */
-  stringValue(): string;
+  override stringValue(): string;
   /**
    * Always returns the empty `string` because `Extant` behaves like an empty
    * `Record`, which converts to a `string` by concatenating the string values
    * of all its members, if all its members convert to string values.
    */
-  stringValue<T>(orElse: T): string;
-  stringValue<T>(orElse?: T): string {
+  override stringValue<T>(orElse: T): string;
+  override stringValue<T>(orElse?: T): string {
     return "";
   }
 
   /**
    * Always returns `true` because `Extant` behaves like a truthy value.
    */
-  booleanValue(): boolean;
+  override booleanValue(): boolean;
   /**
    * Always returns `true` because `Extant` behaves like a truthy value.
    */
-  booleanValue<T>(orElse: T): boolean;
-  booleanValue<T>(orElse?: T): boolean {
+  override booleanValue<T>(orElse: T): boolean;
+  override booleanValue<T>(orElse?: T): boolean {
     return true;
   }
 
-  toAny(): AnyExtant {
+  override toAny(): AnyExtant {
     return null;
   }
 
-  interpolateTo(that: Extant): Interpolator<Extant>;
-  interpolateTo(that: Item): Interpolator<Item>;
-  interpolateTo(that: unknown): Interpolator<Item> | null;
-  interpolateTo(that: unknown): Interpolator<Item> | null {
+  override interpolateTo(that: Extant): Interpolator<Extant>;
+  override interpolateTo(that: Item): Interpolator<Item>;
+  override interpolateTo(that: unknown): Interpolator<Item> | null;
+  override interpolateTo(that: unknown): Interpolator<Item> | null {
     return super.interpolateTo(that);
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 98;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof Item) {
       return Numbers.compare(this.typeOrder, that.typeOrder);
     }
     return NaN;
   }
 
-  equivalentTo(that: unknown): boolean {
+  override equivalentTo(that: unknown): boolean {
     return this === that;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     return this === that;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Constructors.hash(Extant);
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Value").write(46/*'.'*/).write("extant").write(40/*'('*/).write(41/*')'*/);
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     output = output.write("null");
   }
 
   @Lazy
-  static extant(): Extant {
+  static override extant(): Extant {
     return new Extant();
   }
 
-  static fromAny(value: AnyExtant): Extant {
+  static override fromAny(value: AnyExtant): Extant {
     if (value instanceof Extant) {
       return value;
     } else if (value === null) {

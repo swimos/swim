@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {Writer} from "./Writer";
 /** @hidden */
 export class WriterError extends Writer<never, never> {
   /** @hidden */
-  declare readonly error: Error;
+  readonly error!: Error;
 
   constructor(error: Error) {
     super();
@@ -28,31 +28,31 @@ export class WriterError extends Writer<never, never> {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return false;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return true;
   }
 
-  pull(output: Output): Writer<never, never> {
+  override pull(output: Output): Writer<never, never> {
     return this;
   }
 
-  bind(): never {
+  override bind(): never {
     throw this.error;
   }
 
-  trap(): Error {
+  override trap(): Error {
     return this.error;
   }
 
-  asError<I2, O2>(): Writer<I2, O2> {
+  override asError<I2, O2>(): Writer<I2, O2> {
     return this;
   }
 
-  andThen<O2>(that: Writer<never, O2>): Writer<never, O2> {
+  override andThen<O2>(that: Writer<never, O2>): Writer<never, O2> {
     return this;
   }
 }

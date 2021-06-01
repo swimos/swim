@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ export abstract class UnaryOutlet extends AbstractOutlet<Value> {
     });
   }
 
-  declare readonly operandInlet: Inlet<Value>;
+  readonly operandInlet!: Inlet<Value>;
 
-  get(): Value {
+  override get(): Value {
     const operandInput = this.operandInlet.input;
     if (operandInput !== null) {
       const argument = operandInput.get();

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ export class LiteralParser<I, V> extends Parser<V> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<V> {
+  override feed(input: Input): Parser<V> {
     return LiteralParser.parse(input, this.recon, this.builder, this.valueParser, this.step);
   }
 
@@ -61,6 +61,9 @@ export class LiteralParser<I, V> extends Parser<V> {
           step = 2;
         } else if (c === 34/*'"'*/ || c === 39/*'\''*/) {
           valueParser = recon.parseString(input);
+          step = 2;
+        } else if (c === 96/*'`'*/) {
+          valueParser = recon.parseRawString(input);
           step = 2;
         } else if (c === 45/*'-'*/ || c >= 48/*'0'*/ && c <= 57/*'9'*/) {
           valueParser = recon.parseNumber(input);

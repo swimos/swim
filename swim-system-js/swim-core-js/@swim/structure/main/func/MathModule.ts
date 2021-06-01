@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -212,7 +212,7 @@ Object.defineProperty(MathModule, "scope", {
 
 /** @hidden */
 class MaxFunc extends BridgeFunc {
-  invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
+  override invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     interpreter = Interpreter.fromAny(interpreter);
     let x: Item;
     let y: Item | undefined;
@@ -233,7 +233,7 @@ class MaxFunc extends BridgeFunc {
     return Item.absent();
   }
 
-  expand(args: Value, interpreter: Interpreter, operator: InvokeOperator): Item | undefined {
+  override expand(args: Value, interpreter: Interpreter, operator: InvokeOperator): Item | undefined {
     if (args.length === 1) {
       args = args.evaluate(interpreter).toValue();
       return this.invoke(args, interpreter, operator);
@@ -244,7 +244,7 @@ class MaxFunc extends BridgeFunc {
 
 /** @hidden */
 class MinFunc extends BridgeFunc {
-  invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
+  override invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     interpreter = Interpreter.fromAny(interpreter);
     let x: Item;
     let y: Item | undefined;
@@ -265,7 +265,7 @@ class MinFunc extends BridgeFunc {
     return Item.absent();
   }
 
-  expand(args: Value, interpreter: Interpreter, operator: InvokeOperator): Item | undefined {
+  override expand(args: Value, interpreter: Interpreter, operator: InvokeOperator): Item | undefined {
     if (args.length === 1) {
       args = args.evaluate(interpreter).toValue();
       return this.invoke(args, interpreter, operator);
@@ -276,7 +276,7 @@ class MinFunc extends BridgeFunc {
 
 /** @hidden */
 class AbsFunc extends BridgeFunc {
-  invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
+  override invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     args = args.evaluate(interpreter).toValue();
     if (args instanceof Num) {
       return args.abs();
@@ -287,7 +287,7 @@ class AbsFunc extends BridgeFunc {
 
 /** @hidden */
 class CeilFunc extends BridgeFunc {
-  invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
+  override invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     args = args.evaluate(interpreter).toValue();
     if (args instanceof Num) {
       return args.ceil();
@@ -298,7 +298,7 @@ class CeilFunc extends BridgeFunc {
 
 /** @hidden */
 class FloorFunc extends BridgeFunc {
-  invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
+  override invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     args = args.evaluate(interpreter).toValue();
     if (args instanceof Num) {
       return args.floor();
@@ -309,7 +309,7 @@ class FloorFunc extends BridgeFunc {
 
 /** @hidden */
 class RoundFunc extends BridgeFunc {
-  invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
+  override invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     args = args.evaluate(interpreter).toValue();
     if (args instanceof Num) {
       return args.round();
@@ -320,7 +320,7 @@ class RoundFunc extends BridgeFunc {
 
 /** @hidden */
 class SqrtFunc extends BridgeFunc {
-  invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
+  override invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     args = args.evaluate(interpreter).toValue();
     if (args instanceof Num) {
       return args.sqrt();
@@ -331,7 +331,7 @@ class SqrtFunc extends BridgeFunc {
 
 /** @hidden */
 class PowFunc extends BridgeFunc {
-  invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
+  override invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     interpreter = Interpreter.fromAny(interpreter);
     const x = args.getItem(0).evaluate(interpreter);
     const y = args.getItem(1).evaluate(interpreter);
@@ -344,7 +344,7 @@ class PowFunc extends BridgeFunc {
 
 /** @hidden */
 class RateFunc extends BridgeFunc {
-  invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
+  override invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     interpreter = Interpreter.fromAny(interpreter);
     let value: number;
     let period: number;
@@ -380,7 +380,7 @@ class RateFunc extends BridgeFunc {
     return Item.absent();
   }
 
-  expand(args: Value, interpreter: Interpreter, operator: InvokeOperator): Item | undefined {
+  override expand(args: Value, interpreter: Interpreter, operator: InvokeOperator): Item | undefined {
     args = args.evaluate(interpreter).toValue();
     return this.invoke(args, interpreter, operator);
   }
@@ -388,7 +388,7 @@ class RateFunc extends BridgeFunc {
 
 /** @hidden */
 class RandomFunc extends BridgeFunc {
-  invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
+  override invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     args = args.evaluate(interpreter).toValue();
     const lower = args.length >= 1 ? args.getItem(0).numberValue(0.0) : 0.0;
     const upper = args.length >= 2 ? args.getItem(1).numberValue(lower + 1.0) : lower + 1.0;

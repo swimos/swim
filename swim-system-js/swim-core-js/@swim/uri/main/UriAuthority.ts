@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ export class UriAuthority implements HashCode, Compare, Debug, Display {
     return this.user.isDefined() || this.host.isDefined() || this.port.isDefined();
   }
 
-  declare readonly user: UriUser;
+  readonly user!: UriUser;
 
   withUser(user: AnyUriUser): UriAuthority {
     user = UriUser.fromAny(user);
@@ -97,7 +97,7 @@ export class UriAuthority implements HashCode, Compare, Debug, Display {
     return this.withUser(this.user.withPassword(password));
   }
 
-  declare readonly host: UriHost;
+  readonly host!: UriHost;
 
   withHost(host: AnyUriHost): UriAuthority {
     host = UriHost.fromAny(host);
@@ -144,7 +144,7 @@ export class UriAuthority implements HashCode, Compare, Debug, Display {
     return this.withHost(UriHost.ipv6(hostIPv5));
   }
 
-  declare readonly port: UriPort;
+  readonly port!: UriPort;
 
   withPort(port: AnyUriPort): UriAuthority {
     port = UriPort.fromAny(port);
@@ -209,7 +209,7 @@ export class UriAuthority implements HashCode, Compare, Debug, Display {
   }
 
   /** @hidden */
-  declare readonly hashValue: number | undefined;
+  readonly hashValue!: number | undefined;
 
   hashCode(): number {
     let hashValue = this.hashValue;
@@ -252,7 +252,7 @@ export class UriAuthority implements HashCode, Compare, Debug, Display {
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
   toString(): string {
     let stringValue = this.stringValue;

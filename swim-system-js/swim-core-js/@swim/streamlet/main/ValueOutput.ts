@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@ export class ValueOutput<I> extends AbstractInlet<I> {
   }
 
   /** @hidden */
-  declare readonly state: I | undefined;
+  readonly state!: I | undefined;
 
   get(): I | undefined {
     return this.state;
   }
 
-  protected onRecohereOutput(version: number): void {
+  protected override onRecohereOutput(version: number): void {
     const input = this.input;
     if (input !== null) {
       Object.defineProperty(this, "state", {

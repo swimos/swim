@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ export class FilterTimeInterval extends TimeInterval {
     this.predicate = predicate;
   }
 
-  offset(t: AnyDateTime, k?: number): DateTime {
+  override offset(t: AnyDateTime, k?: number): DateTime {
     let d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
     while (k < 0) {
@@ -44,7 +44,7 @@ export class FilterTimeInterval extends TimeInterval {
     return d;
   }
 
-  floor(t: AnyDateTime): DateTime {
+  override floor(t: AnyDateTime): DateTime {
     let d = DateTime.fromAny(t);
     while (d = this.unit.floor(d), d.isDefined() && !this.predicate(d)) {
       d = new DateTime(d.time - 1, d.zone);

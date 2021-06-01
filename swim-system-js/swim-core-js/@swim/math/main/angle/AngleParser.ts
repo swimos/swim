@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ export class AngleParser extends Parser<Angle> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<Angle> {
+  override feed(input: Input): Parser<Angle> {
     return AngleParser.parse(input, this.defaultUnits, this.valueParser,
                              this.unitsOutput, this.step);
   }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,13 +29,13 @@ export class OutletInlet<I> extends AbstractInlet<I> {
     });
   }
 
-  declare readonly outlet: Outlet<unknown>;
+  readonly outlet!: Outlet<unknown>;
 
-  protected onDecohereOutput(): void {
+  protected override onDecohereOutput(): void {
     this.outlet.decohereInput();
   }
 
-  protected onRecohereOutput(version: number): void {
+  protected override onRecohereOutput(version: number): void {
     this.outlet.recohereInput(version);
   }
 }

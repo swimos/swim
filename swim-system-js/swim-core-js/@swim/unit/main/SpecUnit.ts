@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,18 +42,18 @@ export class SpecUnit {
    * The name of this `SpecUnit`–typically the name of the factory function
    * that instantiates its child specs.
    */
-  declare readonly name: string;
+  readonly name!: string;
 
   /**
    * The factory function used to instantiate child specs to be executed by
    * the test unit.
    */
-  declare readonly func: UnitFunc;
+  readonly func!: UnitFunc;
 
   /**
    * The options that govern the execution of this test unit.
    */
-  declare readonly options: UnitOptions;
+  readonly options!: UnitOptions;
 
   /**
    * Lifecycle callback invoked before the execution of each child spec

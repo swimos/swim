@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -74,25 +74,25 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
   }
 
   /** @hidden */
-  declare readonly model: ValueDownlinkModel | null;
+  override readonly model!: ValueDownlinkModel | null;
 
   /** @hidden */
-  declare observers: ReadonlyArray<ValueDownlinkObserver<V, VU>>;
+  override observers!: ReadonlyArray<ValueDownlinkObserver<V, VU>>;
 
   /** @hidden */
-  declare readonly ownValueForm: Form<V, VU>;
+  readonly ownValueForm!: Form<V, VU>;
 
   /** @hidden */
-  declare readonly state0: Value;
+  readonly state0!: Value;
 
-  get type(): DownlinkType {
+  override get type(): DownlinkType {
     return "value";
   }
 
-  protected copy<V, VU>(context: DownlinkContext, owner: DownlinkOwner | null,
-                        hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
-                        body: Value, flags: number, observers: ReadonlyArray<ValueDownlinkObserver<V, VU>>,
-                        valueForm?: Form<V, VU>, state0?: Value): ValueDownlink<V, VU> {
+  protected override copy<V, VU>(context: DownlinkContext, owner: DownlinkOwner | null,
+                                 hostUri: Uri, nodeUri: Uri, laneUri: Uri, prio: number, rate: number,
+                                 body: Value, flags: number, observers: ReadonlyArray<ValueDownlinkObserver<V, VU>>,
+                                 valueForm?: Form<V, VU>, state0?: Value): ValueDownlink<V, VU> {
     if (arguments.length === 10) {
       state0 = this.state0;
       valueForm = this.ownValueForm as unknown as Form<V, VU>;
@@ -128,7 +128,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
     this.model!.setState(state);
   }
 
-  observe(observer: ValueDownlinkObserver<V, VU>): this {
+  override observe(observer: ValueDownlinkObserver<V, VU>): this {
     return super.observe(observer);
   }
 
@@ -200,7 +200,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
     this.onSyncedResponse();
   }
 
-  open(): this {
+  override open(): this {
     const laneUri = this.ownLaneUri;
     if (laneUri.isEmpty()) {
       throw new Error("no lane");
@@ -243,13 +243,13 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
     return this;
   }
 
-  declare readonly input: Outlet<V> | null;
+  readonly input!: Outlet<V> | null;
 
   /** @hidden */
-  declare readonly outputs: ReadonlyArray<Inlet<V>>;
+  readonly outputs!: ReadonlyArray<Inlet<V>>;
 
   /** @hidden */
-  declare readonly version: number;
+  readonly version!: number;
 
   bindInput(newInput: Outlet<V> | null): void {
     const oldInput = this.input;

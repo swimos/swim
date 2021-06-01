@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,22 +27,22 @@ export class UriHostName extends UriHost {
     });
   }
 
-  declare readonly address: string;
+  override readonly address!: string;
 
-  get name(): string {
+  override get name(): string {
     return this.address;
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("UriHost").write(46/*'.'*/).write("hostname")
         .write(40/*'('*/).debug(this.address).write(41/*')'*/);
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     Uri.writeHost(this.address, output);
   }
 
-  toString(): string {
+  override toString(): string {
     return this.address;
   }
 }

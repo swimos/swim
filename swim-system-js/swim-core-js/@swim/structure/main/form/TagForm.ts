@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,11 +31,11 @@ export class TagForm<T, U = never> extends Form<T, U> {
   }
 
   /** @hidden */
-  declare readonly form: Form<T, U>;
+  readonly form!: Form<T, U>;
 
-  declare readonly tag: string;
+  override readonly tag!: string;
 
-  withTag(tag: string | undefined): Form<T, U> {
+  override withTag(tag: string | undefined): Form<T, U> {
      if (tag !== void 0 && tag !== this.tag) {
       return new TagForm(this.form, tag);
     } else if (tag === void 0) {
@@ -45,9 +45,9 @@ export class TagForm<T, U = never> extends Form<T, U> {
     }
   }
 
-  declare readonly unit: T | undefined; // // getter defined below to work around useDefineForClassFields lunacy
+  override readonly unit!: T | undefined; // // getter defined below to work around useDefineForClassFields lunacy
 
-  withUnit(unit: T | undefined): Form<T, U> {
+  override withUnit(unit: T | undefined): Form<T, U> {
     if (unit !== this.unit) {
       return new TagForm(this.form.withUnit(unit), this.tag);
     } else {
@@ -55,7 +55,7 @@ export class TagForm<T, U = never> extends Form<T, U> {
     }
   }
 
-  mold(object: T | U, item?: Item): Item {
+  override mold(object: T | U, item?: Item): Item {
     item = this.form.mold(object, item);
     if (!item.header(this.tag).isDefined()) {
       item = item.prepended(Attr.of(this.tag));
@@ -63,7 +63,7 @@ export class TagForm<T, U = never> extends Form<T, U> {
     return item;
   }
 
-  cast(item: Item, object?: T): T | undefined {
+  override cast(item: Item, object?: T): T | undefined {
     if (item.header(this.tag).isDefined()) {
       return this.form.cast(item, object);
     } else if (item.keyEquals(this.tag)) {

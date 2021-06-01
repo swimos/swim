@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,19 +41,19 @@ export class RecordMapView extends Record {
   }
 
   /** @hidden */
-  declare readonly record: RecordMap;
+  readonly record!: RecordMap;
 
   /** @hidden */
-  declare readonly lower: number;
+  readonly lower!: number;
 
   /** @hidden */
-  declare readonly upper: number;
+  readonly upper!: number;
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.lower === this.upper;
   }
 
-  isArray(): boolean {
+  override isArray(): boolean {
     const array = this.record.array;
     for (let i = this.lower, n = this.upper; i < n; i += 1) {
       if (array![i] instanceof Field) {
@@ -63,7 +63,7 @@ export class RecordMapView extends Record {
     return true;
   }
 
-  isObject(): boolean {
+  override isObject(): boolean {
     const array = this.record.array;
     for (let i = this.lower, n = this.upper; i < n; i += 1) {
       if (array![i] instanceof Value) {
@@ -73,13 +73,13 @@ export class RecordMapView extends Record {
     return true;
   }
 
-  get length(): number {
+  override get length(): number {
     return this.upper - this.lower;
   }
 
   declare readonly fieldCount: number; // getter defined below to work around useDefineForClassFields lunacy
 
-  get valueCount(): number {
+  override get valueCount(): number {
     let k = 0;
     const array = this.record.array;
     for (let i = this.lower, n = this.upper; i < n; i += 1) {
@@ -90,7 +90,7 @@ export class RecordMapView extends Record {
     return k;
   }
 
-  isConstant(): boolean {
+  override isConstant(): boolean {
     const array = this.record.array;
     for (let i = this.lower, n = this.upper; i < n; i += 1) {
       if (!array![i]!.isConstant()) {
@@ -100,7 +100,7 @@ export class RecordMapView extends Record {
     return true;
   }
 
-  get tag(): string | undefined {
+  override get tag(): string | undefined {
     if (this.length > 0) {
       const item = this.record.array![this.lower];
       if (item instanceof Attr) {
@@ -110,7 +110,7 @@ export class RecordMapView extends Record {
     return void 0;
   }
 
-  get target(): Value {
+  override get target(): Value {
     let value: Value | undefined;
     let record: Record | undefined;
     let modified = false;
@@ -142,7 +142,7 @@ export class RecordMapView extends Record {
     }
   }
 
-  head(): Item {
+  override head(): Item {
     if (this.length > 0) {
       return this.record.array![this.lower]!;
     } else {
@@ -150,7 +150,7 @@ export class RecordMapView extends Record {
     }
   }
 
-  tail(): Record {
+  override tail(): Record {
     if (this.length > 0) {
       return new RecordMapView(this.record, this.lower + 1, this.upper);
     } else {
@@ -158,7 +158,7 @@ export class RecordMapView extends Record {
     }
   }
 
-  body(): Value {
+  override body(): Value {
     const n = this.length;
     if (n > 2) {
       return new RecordMapView(this.record, this.lower + 1, this.upper).branch();
@@ -174,7 +174,7 @@ export class RecordMapView extends Record {
     }
   }
 
-  indexOf(item: AnyItem, index: number = 0): number {
+  override indexOf(item: AnyItem, index: number = 0): number {
     item = Item.fromAny(item);
     const array = this.record.array;
     const n = this.length;
@@ -191,7 +191,7 @@ export class RecordMapView extends Record {
     return -1;
   }
 
-  lastIndexOf(item: AnyItem, index?: number): number {
+  override lastIndexOf(item: AnyItem, index?: number): number {
     item = Item.fromAny(item);
     const array = this.record.array;
     const n = this.length;
@@ -210,7 +210,7 @@ export class RecordMapView extends Record {
     return -1;
   }
 
-  getItem(index: AnyNum): Item {
+  override getItem(index: AnyNum): Item {
     if (index instanceof Num) {
       index = index.value;
     }
@@ -225,7 +225,7 @@ export class RecordMapView extends Record {
     }
   }
 
-  setItem(index: number, newItem: AnyItem): this {
+  override setItem(index: number, newItem: AnyItem): this {
     if ((this.record.flags & Record.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
@@ -245,7 +245,8 @@ export class RecordMapView extends Record {
     return this;
   }
 
-  private setItemAliased(index: number, newItem: Item): void {
+  /** @hidden */
+  setItemAliased(index: number, newItem: Item): void {
     const record = this.record;
     const n = record.length;
     const oldArray = record.array;
@@ -287,7 +288,8 @@ export class RecordMapView extends Record {
     });
   }
 
-  private setItemMutable(index: number, newItem: Item): void {
+  /** @hidden */
+  setItemMutable(index: number, newItem: Item): void {
     const record = this.record;
     const array = record.array!;
     const oldItem = array[this.lower + index];
@@ -319,7 +321,7 @@ export class RecordMapView extends Record {
     }
   }
 
-  push(...newItems: AnyItem[]): number {
+  override push(...newItems: AnyItem[]): number {
     if ((this.record.flags & Record.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
@@ -331,7 +333,8 @@ export class RecordMapView extends Record {
     return this.length;
   }
 
-  private pushAliased(...newItems: AnyItem[]): void {
+  /** @hidden */
+  pushAliased(...newItems: AnyItem[]): void {
     const record = this.record;
     const k = newItems.length;
     let m = record.length;
@@ -386,7 +389,8 @@ export class RecordMapView extends Record {
     });
   }
 
-  private pushMutable(...newItems: AnyItem[]): void {
+  /** @hidden */
+  pushMutable(...newItems: AnyItem[]): void {
     const record = this.record;
     const k = newItems.length;
     let m = record.length;
@@ -441,7 +445,7 @@ export class RecordMapView extends Record {
     });
   }
 
-  splice(start: number, deleteCount: number = 0, ...newItems: AnyItem[]): Item[] {
+  override splice(start: number, deleteCount: number = 0, ...newItems: AnyItem[]): Item[] {
     if ((this.record.flags & Record.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
@@ -465,7 +469,7 @@ export class RecordMapView extends Record {
     return deleted;
   }
 
-  delete(key: AnyValue): Item {
+  override delete(key: AnyValue): Item {
     if ((this.record.flags & Record.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
@@ -564,7 +568,7 @@ export class RecordMapView extends Record {
     return Item.absent();
   }
 
-  clear(): void {
+  override clear(): void {
     if ((this.record.flags & Record.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
@@ -575,7 +579,8 @@ export class RecordMapView extends Record {
     }
   }
 
-  private clearAliased(): void {
+  /** @hidden */
+  clearAliased(): void {
     const record = this.record;
     const m = record.length;
     let n = record.fieldCount;
@@ -632,7 +637,8 @@ export class RecordMapView extends Record {
     });
   }
 
-  private clearMutable(): void {
+  /** @hidden */
+  clearMutable(): void {
     const record = this.record;
     const m = record.length;
     let n = record.fieldCount;
@@ -680,15 +686,15 @@ export class RecordMapView extends Record {
     });
   }
 
-  isAliased(): boolean {
+  override isAliased(): boolean {
     return (this.record.flags & Record.AliasedFlag) !== 0;
   }
 
-  isMutable(): boolean {
+  override isMutable(): boolean {
     return (this.record.flags & Record.ImmutableFlag) === 0;
   }
 
-  alias(): void {
+  override alias(): void {
     Object.defineProperty(this.record, "flags", {
       value: this.record.flags | Record.AliasedFlag,
       enumerable: true,
@@ -696,7 +702,7 @@ export class RecordMapView extends Record {
     });
   }
 
-  branch(): RecordMap {
+  override branch(): RecordMap {
     const m = this.length;
     let n = 0;
     const oldArray = this.record.array;
@@ -715,7 +721,7 @@ export class RecordMapView extends Record {
     return new RecordMap(newArray, null, m, n, 0);
   }
 
-  clone(): RecordMap {
+  override clone(): RecordMap {
     const m = this.length;
     let n = 0;
     const oldArray = this.record.array;
@@ -734,12 +740,12 @@ export class RecordMapView extends Record {
     return new RecordMap(newArray, null, m, n, 0);
   }
 
-  commit(): this {
+  override commit(): this {
     this.record.commit();
     return this;
   }
 
-  subRecord(lower?: number, upper?: number): Record {
+  override subRecord(lower?: number, upper?: number): Record {
     const n = this.length;
     if (lower === void 0) {
       lower = 0;
@@ -757,11 +763,11 @@ export class RecordMapView extends Record {
     return new RecordMapView(this.record, this.lower + lower, this.upper + upper);
   }
 
-  forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
-  forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
-                thisArg?: S): T | undefined;
-  forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
-                thisArg?: S): T | undefined {
+  override forEach<T>(callback: (item: Item, index: number) => T | void): T | undefined;
+  override forEach<T, S>(callback: (this: S, item: Item, index: number) => T | void,
+                         thisArg?: S): T | undefined;
+  override forEach<T, S>(callback: (this: S | undefined, item: Item, index: number) => T | void,
+                         thisArg?: S): T | undefined {
     const array = this.record.array;
     for (let i = this.lower, n = this.upper; i < n; i += 1) {
       const result = callback.call(thisArg, array![i]!, i);

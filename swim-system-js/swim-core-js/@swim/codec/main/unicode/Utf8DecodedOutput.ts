@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import {Base16} from "../number/Base16";
 /** @hidden */
 export class Utf8DecodedOutput<T> extends Output<T> {
   /** @hidden */
-  declare readonly output: Output<T>;
+  readonly output!: Output<T>;
   /** @hidden */
-  declare readonly errorMode: UtfErrorMode;
+  readonly errorMode!: UtfErrorMode;
   /** @hidden */
   c1: number;
   /** @hidden */
@@ -53,27 +53,27 @@ export class Utf8DecodedOutput<T> extends Output<T> {
     this.have = have;
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return this.output.isCont();
   }
 
-  isFull(): boolean {
+  override isFull(): boolean {
     return this.output.isFull();
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return this.output.isDone();
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return this.output.isError();
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return this.output.isPart();
   }
 
-  asPart(part: boolean): Output<T> {
+  override asPart(part: boolean): Output<T> {
     Object.defineProperty(this, "output", {
       value: this.output.asPart(part),
       enumerable: true,
@@ -82,7 +82,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
     return this;
   }
 
-  write(token: number | string): Output<T> {
+  override write(token: number | string): Output<T> {
     if (typeof token === "number") {
       let c1 = this.c1;
       let c2 = this.c2;
@@ -258,7 +258,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
     }
   }
 
-  static invalid(c1: number, c2?: number, c3?: number, c4?: number): string {
+  private static invalid(c1: number, c2?: number, c3?: number, c4?: number): string {
     let output = Unicode.stringOutput();
     output = output.write("invalid UTF-8 code unit sequence: ");
     const base16 = Base16.uppercase;
@@ -278,11 +278,11 @@ export class Utf8DecodedOutput<T> extends Output<T> {
     return output.bind();
   }
 
-  get settings(): OutputSettings {
+  override get settings(): OutputSettings {
     return this.output.settings;
   }
 
-  withSettings(settings: AnyOutputSettings): Output<T> {
+  override withSettings(settings: AnyOutputSettings): Output<T> {
     Object.defineProperty(this, "output", {
       value: this.output.withSettings(settings),
       enumerable: true,
@@ -291,7 +291,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
     return this;
   }
 
-  bind(): T {
+  override bind(): T {
     if (this.have === 0) {
       return this.output.bind();
     } else {
@@ -299,11 +299,11 @@ export class Utf8DecodedOutput<T> extends Output<T> {
     }
   }
 
-  trap(): Error {
+  override trap(): Error {
     return this.output.trap();
   }
 
-  clone(): Output<T> {
+  override clone(): Output<T> {
     return new Utf8DecodedOutput(this.output.clone(), this.errorMode,
                                  this.c1, this.c2, this.c3, this.have);
   }

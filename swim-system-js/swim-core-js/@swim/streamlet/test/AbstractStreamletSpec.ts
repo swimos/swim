@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ export class AbstractStreamletSpec extends Spec {
       bar: Inlet<number> = this.inlet();
       @Out
       baz: Outlet<number> = this.outlet();
-      getOutput(outlet: Outlet<number>): number | undefined {
+      override getOutput(outlet: Outlet<number>): number | undefined {
         if (outlet === this.baz) {
           return this.getInput(this.foo)! + this.getInput(this.bar)!;
         }

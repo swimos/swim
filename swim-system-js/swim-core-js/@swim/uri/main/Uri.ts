@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
         && !this.query.isDefined() && !this.fragment.isDefined();
   }
 
-  declare readonly scheme: UriScheme;
+  readonly scheme!: UriScheme;
 
   withScheme(scheme: AnyUriScheme): Uri {
     scheme = UriScheme.fromAny(scheme);
@@ -112,7 +112,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return this.withScheme(UriScheme.create(schemeName));
   }
 
-  declare readonly authority: UriAuthority;
+  readonly authority!: UriAuthority;
 
   withAuthority(authority: AnyUriAuthority): Uri {
     authority = UriAuthority.fromAny(authority);
@@ -235,7 +235,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return this.withAuthority(this.authority.withPortNumber(portNumber));
   }
 
-  declare readonly path: UriPath;
+  readonly path!: UriPath;
 
   withPath(...components: AnyUriPath[]): Uri {
     const path = UriPath.of(...components);
@@ -302,7 +302,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return this.withPath(this.path.prependedSegment(segment));
   }
 
-  declare readonly query: UriQuery;
+  readonly query!: UriQuery;
 
   withQuery(query: AnyUriQuery): Uri {
     query = UriQuery.fromAny(query);
@@ -341,7 +341,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return this.withQuery(this.query.prepended(key as any, value as any));
   }
 
-  declare readonly fragment: UriFragment;
+  readonly fragment!: UriFragment;
 
   withFragment(fragment: AnyUriFragment): Uri {
     fragment = UriFragment.fromAny(fragment);
@@ -471,7 +471,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
   }
 
   /** @hidden */
-  declare readonly hashValue: number | undefined;
+  readonly hashValue!: number | undefined;
 
   hashCode(): number {
     let hashValue = this.hashValue;
@@ -496,7 +496,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
   display(output: Output): void {
     const stringValue = this.stringValue;

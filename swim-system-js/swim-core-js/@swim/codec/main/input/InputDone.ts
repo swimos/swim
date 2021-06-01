@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,76 +37,76 @@ export class InputDone extends Input {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return false;
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return false;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return true;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return false;
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return false;
   }
 
-  asPart(part: boolean): Input {
+  override asPart(part: boolean): Input {
     return part ? new InputEmpty(this.id, this.mark, this.settings) : this;
   }
 
-  head(): number {
+  override head(): number {
     throw new InputException();
   }
 
-  step(): Input {
+  override step(): Input {
     const error = new InputException("done step");
     return new InputError(error, this.id, this.mark, this.settings);
   }
 
-  seek(mark?: Mark): Input {
+  override seek(mark?: Mark): Input {
     const error = new InputException("empty seek");
     return new InputError(error, this.id, this.mark, this.settings);
   }
 
-  declare readonly id: string | undefined;
+  override readonly id!: string | undefined;
 
-  withId(id: string | undefined): Input {
+  override withId(id: string | undefined): Input {
     return new InputDone(id, this.mark, this.settings);
   }
 
-  declare readonly mark: Mark;
+  override readonly mark!: Mark;
 
-  withMark(mark: Mark): Input {
+  override withMark(mark: Mark): Input {
     return new InputDone(this.id, mark, this.settings);
   }
 
-  get offset(): number {
+  override get offset(): number {
     return this.mark.offset;
   }
 
-  get line(): number {
+  override get line(): number {
     return this.mark.line;
   }
 
-  get column(): number {
+  override get column(): number {
     return this.mark.column;
   }
 
-  declare readonly settings: InputSettings;
+  override readonly settings!: InputSettings;
 
-  withSettings(settings: AnyInputSettings): Input {
+  override withSettings(settings: AnyInputSettings): Input {
     settings = InputSettings.fromAny(settings);
     return new InputDone(this.id, this.mark, settings);
   }
 
-  clone(): Input {
+  override clone(): Input {
     return this;
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,9 +16,12 @@ import {Cursor} from "./Cursor";
 
 /** @hidden */
 export class CursorArray<T> extends Cursor<T> {
-  private declare readonly array: ReadonlyArray<T>;
-  private declare index: number;
-  private declare readonly limit: number;
+  /** @hidden */
+  readonly array!: ReadonlyArray<T>;
+  /** @hidden */
+  index!: number;
+  /** @hidden */
+  readonly limit!: number;
 
   constructor(array: ReadonlyArray<T>, index: number, limit: number) {
     super();
@@ -34,11 +37,11 @@ export class CursorArray<T> extends Cursor<T> {
     });
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.index >= this.limit;
   }
 
-  head(): T {
+  override head(): T {
     if (this.index < this.limit) {
       return this.array[this.index]!;
     } else {
@@ -46,7 +49,7 @@ export class CursorArray<T> extends Cursor<T> {
     }
   }
 
-  step(): void {
+  override step(): void {
     const index = this.index;
     if (index < this.limit) {
       Object.defineProperty(this, "index", {
@@ -58,22 +61,22 @@ export class CursorArray<T> extends Cursor<T> {
     }
   }
 
-  skip(count: number): void {
+  override skip(count: number): void {
     Object.defineProperty(this, "index", {
       value: Math.min(this.index + count, this.limit),
       configurable: true,
     });
   }
 
-  hasNext(): boolean {
+  override hasNext(): boolean {
     return this.index < this.limit;
   }
 
-  nextIndex(): number {
+  override nextIndex(): number {
     return this.index;
   }
 
-  next(): {value?: T, done: boolean} {
+  override next(): {value?: T, done: boolean} {
     const index = this.index;
     if (index < this.limit) {
       Object.defineProperty(this, "index", {
@@ -90,15 +93,15 @@ export class CursorArray<T> extends Cursor<T> {
     }
   }
 
-  hasPrevious(): boolean {
+  override hasPrevious(): boolean {
     return this.index > 0;
   }
 
-  previousIndex(): number {
+  override previousIndex(): number {
     return this.index - 1;
   }
 
-  previous(): {value?: T, done: boolean} {
+  override previous(): {value?: T, done: boolean} {
     const index = this.index - 1;
     if (index >= 0) {
       Object.defineProperty(this, "index", {

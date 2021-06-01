@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import {Cursor} from "@swim/util";
 /** @hidden */
 export abstract class NodeCursor<T, P> extends Cursor<T> {
   /** @hidden */
-  declare readonly pages: ReadonlyArray<P>;
+  readonly pages!: ReadonlyArray<P>;
   /** @hidden */
   index: number;
   /** @hidden */
@@ -43,7 +43,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
 
   protected abstract reversePageCursor(page: P): Cursor<T>;
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     do {
       if (this.childCursor !== null) {
         if (!this.childCursor.isEmpty()) {
@@ -61,7 +61,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
     } while (true);
   }
 
-  head(): T {
+  override head(): T {
     do {
       if (this.childCursor !== null) {
         if (!this.childCursor.isEmpty()) {
@@ -81,7 +81,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
     } while (true);
   }
 
-  step(): void {
+  override step(): void {
     do {
       if (this.childCursor !== null) {
         if (!this.childCursor.isEmpty()) {
@@ -102,7 +102,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
     } while (true);
   }
 
-  skip(count: number): void {
+  override skip(count: number): void {
     while (count > 0) {
       if (this.childCursor !== null) {
         if (this.childCursor.hasNext()) {
@@ -134,7 +134,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
     }
   }
 
-  hasNext(): boolean {
+  override hasNext(): boolean {
     do {
       if (this.childCursor !== null) {
         if (this.childCursor.hasNext()) {
@@ -152,11 +152,11 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
     } while (true);
   }
 
-  nextIndex(): number {
+  override nextIndex(): number {
     return this.index;
   }
 
-  next(): {value?: T, done: boolean} {
+  override next(): {value?: T, done: boolean} {
     do {
       if (this.childCursor !== null) {
         if (this.childCursor.hasNext()) {
@@ -177,7 +177,7 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
     } while (true);
   }
 
-  hasPrevious(): boolean {
+  override hasPrevious(): boolean {
     do {
       if (this.childCursor !== null) {
         if (this.childCursor.hasPrevious()) {
@@ -195,11 +195,11 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
     } while (true);
   }
 
-  previousIndex(): number {
+  override previousIndex(): number {
     return this.index - 1;
   }
 
-  previous(): {value?: T, done: boolean} {
+  override previous(): {value?: T, done: boolean} {
     do {
       if (this.childCursor !== null) {
         if (this.childCursor.hasPrevious()) {
@@ -218,11 +218,11 @@ export abstract class NodeCursor<T, P> extends Cursor<T> {
     } while (true);
   }
 
-  set(newValue: T): void {
+  override set(newValue: T): void {
     this.childCursor!.set(newValue);
   }
 
-  delete(): void {
+  override delete(): void {
     this.childCursor!.delete();
   }
 }

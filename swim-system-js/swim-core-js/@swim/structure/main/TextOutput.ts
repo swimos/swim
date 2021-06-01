@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {Text} from "./Text";
 /** @hidden */
 export class TextOutput extends Output<Text> {
   /** @hidden */
-  declare readonly string: string;
+  readonly string!: string;
 
   constructor(string: string, settings: OutputSettings) {
     super();
@@ -34,31 +34,31 @@ export class TextOutput extends Output<Text> {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return true;
   }
 
-  isFull(): boolean {
+  override isFull(): boolean {
     return false;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return false;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return false;
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return false;
   }
 
-  asPart(part: boolean): Output<Text> {
+  override asPart(part: boolean): Output<Text> {
     return this;
   }
 
-  write(token: number | string): Output<Text> {
+  override write(token: number | string): Output<Text> {
     if (typeof token === "number") {
       if ((token >= 0x0000 && token <= 0xd7ff)
           || (token >= 0xe000 && token <= 0xffff)) { // U+0000..U+D7FF | U+E000..U+FFFF
@@ -78,9 +78,9 @@ export class TextOutput extends Output<Text> {
     return this;
   }
 
-  declare readonly settings: OutputSettings;
+  override readonly settings!: OutputSettings;
 
-  withSettings(settings: AnyOutputSettings): Output<Text> {
+  override withSettings(settings: AnyOutputSettings): Output<Text> {
     settings = OutputSettings.fromAny(settings);
     Object.defineProperty(this, "settings", {
       value: settings,
@@ -90,15 +90,15 @@ export class TextOutput extends Output<Text> {
     return this;
   }
 
-  bind(): Text {
+  override bind(): Text {
     return Text.from(this.string);
   }
 
-  clone(): Output<Text> {
+  override clone(): Output<Text> {
     return new TextOutput(this.string, this.settings);
   }
 
-  toString(): string {
+  override toString(): string {
     return this.string;
   }
 }

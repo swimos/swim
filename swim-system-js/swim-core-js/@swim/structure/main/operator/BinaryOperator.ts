@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,20 +30,20 @@ export abstract class BinaryOperator extends Operator {
     });
   }
 
-  declare readonly operand1: Item;
+  readonly operand1!: Item;
 
   abstract readonly operator: string;
 
-  declare readonly operand2: Item;
+  readonly operand2!: Item;
 
-  isConstant(): boolean {
+  override isConstant(): boolean {
     return this.operand1.isConstant() && this.operand2.isConstant();
   }
 
-  interpolateTo(that: BinaryOperator): Interpolator<BinaryOperator>;
-  interpolateTo(that: Item): Interpolator<Item>;
-  interpolateTo(that: unknown): Interpolator<Item> | null;
-  interpolateTo(that: unknown): Interpolator<Item> | null {
+  override interpolateTo(that: BinaryOperator): Interpolator<BinaryOperator>;
+  override interpolateTo(that: Item): Interpolator<Item>;
+  override interpolateTo(that: unknown): Interpolator<Item> | null;
+  override interpolateTo(that: unknown): Interpolator<Item> | null {
     if (that instanceof BinaryOperator && this.operator === that.operator) {
       return BinaryOperatorInterpolator(this, that);
     } else {

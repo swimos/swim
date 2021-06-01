@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ export abstract class AbstractStreamlet<I = unknown, O = I> implements GenericSt
     });
   }
 
-  declare readonly streamletScope: StreamletScope<O> | null;
+  readonly streamletScope!: StreamletScope<O> | null;
 
   setStreamletScope(scope: StreamletScope<O> | null): void {
     Object.defineProperty(this, "streamletScope", {
@@ -98,7 +98,7 @@ export abstract class AbstractStreamlet<I = unknown, O = I> implements GenericSt
     });
   }
 
-  declare readonly streamletContext: StreamletContext | null;
+  readonly streamletContext!: StreamletContext | null;
 
   setStreamletContext(context: StreamletContext | null): void {
     Object.defineProperty(this, "streamletContext", {
@@ -109,7 +109,7 @@ export abstract class AbstractStreamlet<I = unknown, O = I> implements GenericSt
   }
 
   /** @hidden */
-  declare readonly version: number;
+  readonly version!: number;
 
   inlet(key: string): Inlet<I> | null;
   inlet<I2 extends I>(): Inlet<I2>;

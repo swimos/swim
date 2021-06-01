@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,25 +25,25 @@ export class EmLength extends Length {
     });
   }
 
-  declare readonly value: number;
+  override readonly value!: number;
 
-  get units(): LengthUnits {
+  override get units(): LengthUnits {
     return "em";
   }
 
-  pxValue(basis?: LengthBasis | number): number {
+  override pxValue(basis?: LengthBasis | number): number {
     return this.value !== 0 ? this.value * Length.emUnit(basis) : 0;
   }
 
-  emValue(basis?: LengthBasis | number): number {
+  override emValue(basis?: LengthBasis | number): number {
     return this.value;
   }
 
-  em(basis?: LengthBasis | number): EmLength {
+  override em(basis?: LengthBasis | number): EmLength {
     return this;
   }
 
-  toCssValue(): CSSUnitValue | null {
+  override toCssValue(): CSSUnitValue | null {
     if (typeof CSSUnitValue !== "undefined") {
       return new CSSUnitValue(this.value, "em");
     } else {
@@ -51,7 +51,7 @@ export class EmLength extends Length {
     }
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof Length) {
       const x = this.value;
       const y = that.emValue();
@@ -60,35 +60,35 @@ export class EmLength extends Length {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (that instanceof Length) {
       return Numbers.equivalent(this.value, that.emValue());
     }
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (that instanceof EmLength) {
       return this.value === that.value;
     }
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(EmLength), Numbers.hash(this.value)));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Length").write(46/*'.'*/).write("em")
         .write(40/*'('*/).debug(this.value).write(41/*')'*/);
   }
 
-  toString(): string {
+  override toString(): string {
     return this.value + "em";
   }
 
   @Lazy
-  static zero(): EmLength {
+  static override zero(): EmLength {
     return new EmLength(0);
   }
 }

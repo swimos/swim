@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,18 +34,18 @@ export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
   }
 
   /** @hidden */
-  declare readonly state: IO | undefined;
+  readonly state!: IO | undefined;
 
   /** @hidden */
-  declare readonly cache: BTree<K, V>;
+  readonly cache!: BTree<K, V>;
 
-  has(key: K): boolean {
+  override has(key: K): boolean {
     return this.cache.has(key);
   }
 
-  get(): IO | undefined;
-  get(key: K): V | undefined;
-  get(key?: K): IO | V | undefined {
+  override get(): IO | undefined;
+  override get(key: K): V | undefined;
+  override get(key?: K): IO | V | undefined {
     if (key === void 0) {
       let state = this.state;
       const input = this.input;
@@ -63,11 +63,11 @@ export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
     }
   }
 
-  keyIterator(): Iterator<K> {
+  override keyIterator(): Iterator<K> {
     return this.cache.keys();
   }
 
-  protected onRecohereKey(key: K, effect: KeyEffect, version: number): void {
+  protected override onRecohereKey(key: K, effect: KeyEffect, version: number): void {
     if (effect === KeyEffect.Update) {
       const input = this.input;
       if (input !== null) {
@@ -95,7 +95,7 @@ export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
     }
   }
 
-  protected onRecohere(version: number): void {
+  protected override onRecohere(version: number): void {
     Object.defineProperty(this, "state", {
       value: void 0,
       enumerable: true,
@@ -103,7 +103,7 @@ export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
     });
   }
 
-  memoize(): MapOutlet<K, V, IO> {
+  override memoize(): MapOutlet<K, V, IO> {
     return this;
   }
 }

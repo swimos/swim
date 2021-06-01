@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -63,33 +63,33 @@ export class Diagnostic implements Display {
   }
 
   /** @hidden */
-  declare readonly input: Input;
+  readonly input!: Input;
 
   /**
    * The location in the `input` to which this diagnostic is attached.
    */
-  declare readonly tag: Tag;
+  readonly tag!: Tag;
 
   /**
    * The level of importance of this diagnostic.
    */
-  declare readonly severity: Severity;
+  readonly severity!: Severity;
 
   /**
    * The help message that describes this diagnostic.
    */
-  declare readonly message: string | undefined;
+  readonly message!: string | undefined;
 
   /**
    * An informative comment on the source context to which this diagnostic is attached.
    */
-  declare readonly note: string | undefined;
+  readonly note!: string | undefined;
 
   /**
    * The `Diagnostic` cause of this diagnostic, forming a linked chain of
    * diagnostics, or `null` if this diagnostic has no cause.
    */
-  declare readonly cause: Diagnostic | null;
+  readonly cause!: Diagnostic | null;
 
   private lineDigits(): number {
     let digits = Base10.countDigits(this.tag.end.line);
@@ -202,6 +202,7 @@ export class Diagnostic implements Display {
                     note?: Diagnostic | null | string | undefined, cause?: Diagnostic | null): Diagnostic {
     if (arguments.length === 1) { // (input)
       cause = null;
+      severity = Severity.error();
     } else if (arguments.length === 2) {
       if (severity === null || severity instanceof Diagnostic) { // (input, cause)
         cause = severity;
@@ -250,9 +251,10 @@ export class Diagnostic implements Display {
   static expected(expected: string | number, input: Input, severity?: Severity, note?: string, cause?: Diagnostic | null): Diagnostic;
   static expected(expected: string | number, input: Input, severity?: Diagnostic | null | Severity | string | undefined,
                   note?: Diagnostic | null | string | undefined, cause?: Diagnostic | null): Diagnostic {
-    if (arguments.length === 1) { // (excpected, input)
+    if (arguments.length === 2) { // (excpected, input)
       cause = null;
-    } else if (arguments.length === 2) {
+      severity = Severity.error();
+    } else if (arguments.length === 3) {
       if (severity === null || severity instanceof Diagnostic) { // (excpected, input, cause)
         cause = severity;
         severity = Severity.error();
@@ -263,7 +265,7 @@ export class Diagnostic implements Display {
       } else { // (expected, input, severity)
         cause = null;
       }
-    } else if (arguments.length === 3) {
+    } else if (arguments.length === 4) {
       if (typeof severity === "string") { // (excpected, input, note, cause)
         cause = note as Diagnostic | null;
         note = severity;

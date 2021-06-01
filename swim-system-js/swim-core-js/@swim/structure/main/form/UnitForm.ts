@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,11 +30,11 @@ export class UnitForm<T, U = never> extends Form<T, U> {
   }
 
   /** @hidden */
-  declare readonly form: Form<T, U>;
+  readonly form!: Form<T, U>;
 
-  declare readonly tag: string | undefined; // // getter defined below to work around useDefineForClassFields lunacy
+  override readonly tag!: string | undefined; // // getter defined below to work around useDefineForClassFields lunacy
 
-  withTag(tag: string | undefined): Form<T, U> {
+  override withTag(tag: string | undefined): Form<T, U> {
     if (tag !== this.tag) {
       return new UnitForm(this.form.withTag(tag), this.unit);
     } else {
@@ -42,9 +42,9 @@ export class UnitForm<T, U = never> extends Form<T, U> {
     }
   }
 
-  declare readonly unit: T | undefined;
+  override readonly unit!: T | undefined;
 
-  withUnit(unit: T | undefined): Form<T, U> {
+  override withUnit(unit: T | undefined): Form<T, U> {
     if (unit !== this.unit) {
       return new UnitForm(this.form, unit);
     } else if (unit === this.form.unit) {
@@ -54,7 +54,7 @@ export class UnitForm<T, U = never> extends Form<T, U> {
     }
   }
 
-  mold(object: T | U, item?: Item): Item {
+  override mold(object: T | U, item?: Item): Item {
     if (arguments.length === 1) {
       return this.form.mold(object);
     } else {
@@ -62,7 +62,7 @@ export class UnitForm<T, U = never> extends Form<T, U> {
     }
   }
 
-  cast(item: Item, object?: T): T | undefined {
+  override cast(item: Item, object?: T): T | undefined {
     if (arguments.length === 1) {
       return this.form.cast(item);
     } else {

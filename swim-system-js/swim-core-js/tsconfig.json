@@ -13,6 +13,7 @@
     {"path": "./@swim/streamlet"},
     {"path": "./@swim/dataflow"},
     {"path": "./@swim/recon"},
+    {"path": "./@swim/macro"},
     {"path": "./@swim/uri"},
     {"path": "./@swim/math"},
     {"path": "./@swim/geo"},

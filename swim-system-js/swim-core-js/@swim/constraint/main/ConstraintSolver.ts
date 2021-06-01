@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -72,25 +72,25 @@ export class ConstraintSolver implements ConstraintScope {
   }
 
   /** @hidden */
-  declare readonly constraints: ConstraintMap<Constraint, ConstraintTag>;
+  readonly constraints!: ConstraintMap<Constraint, ConstraintTag>;
 
   /** @hidden */
-  declare readonly constraintVariables: ConstraintMap<ConstraintVariable, ConstraintVariableBinding>;
+  readonly constraintVariables!: ConstraintMap<ConstraintVariable, ConstraintVariableBinding>;
 
   /** @hidden */
-  declare readonly rows: ConstraintMap<ConstraintSymbol, ConstraintRow>;
+  readonly rows!: ConstraintMap<ConstraintSymbol, ConstraintRow>;
 
   /** @hidden */
-  declare readonly infeasible: ConstraintSymbol[];
+  readonly infeasible!: ConstraintSymbol[];
 
   /** @hidden */
-  declare readonly objective: ConstraintRow;
+  readonly objective!: ConstraintRow;
 
   /** @hidden */
-  declare readonly artificial: ConstraintRow | null;
+  readonly artificial!: ConstraintRow | null;
 
   /** @hidden */
-  declare readonly invalidated: ConstraintMap<ConstraintSymbol, ConstraintRow | null>;
+  readonly invalidated!: ConstraintMap<ConstraintSymbol, ConstraintRow | null>;
 
   constraint(lhs: AnyConstraintExpression, relation: ConstraintRelation,
              rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint {

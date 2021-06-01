@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,27 +37,27 @@ export class ConditionalOperator extends Operator {
     });
   }
 
-  declare readonly ifTerm: Item;
+  readonly ifTerm!: Item;
 
-  declare readonly thenTerm: Item;
+  readonly thenTerm!: Item;
 
-  declare readonly elseTerm: Item;
+  readonly elseTerm!: Item;
 
-  isConstant(): boolean {
+  override isConstant(): boolean {
     return this.ifTerm.isConstant() && this.thenTerm.isConstant()
         && this.elseTerm.isConstant();
   }
 
-  get precedence(): number {
+  override get precedence(): number {
     return 2;
   }
 
-  evaluate(interpreter: AnyInterpreter): Item {
+  override evaluate(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     interpreter.willOperate(this);
     let result;
     const ifTerm = this.ifTerm.evaluate(interpreter);
-    if (ifTerm.booleanValue(false)) {
+    if (ifTerm.isDefinite()) {
       const theTerm = this.thenTerm.evaluate(interpreter);
       result = theTerm;
     } else {
@@ -68,7 +68,7 @@ export class ConditionalOperator extends Operator {
     return result;
   }
 
-  substitute(interpreter: AnyInterpreter): Item {
+  override substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     const ifTerm = this.ifTerm.substitute(interpreter);
     const thenTerm = this.thenTerm.substitute(interpreter);
@@ -76,10 +76,10 @@ export class ConditionalOperator extends Operator {
     return new ConditionalOperator(ifTerm, thenTerm, elseTerm);
   }
 
-  interpolateTo(that: ConditionalOperator): Interpolator<ConditionalOperator>;
-  interpolateTo(that: Item): Interpolator<Item>;
-  interpolateTo(that: unknown): Interpolator<Item> | null;
-  interpolateTo(that: unknown): Interpolator<Item> | null {
+  override interpolateTo(that: ConditionalOperator): Interpolator<ConditionalOperator>;
+  override interpolateTo(that: Item): Interpolator<Item>;
+  override interpolateTo(that: unknown): Interpolator<Item> | null;
+  override interpolateTo(that: unknown): Interpolator<Item> | null {
     if (that instanceof ConditionalOperator) {
       return ConditionalOperatorInterpolator(this, that);
     } else {
@@ -87,11 +87,11 @@ export class ConditionalOperator extends Operator {
     }
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 20;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof ConditionalOperator) {
       let order = this.ifTerm.compareTo(that.ifTerm);
       if (order === 0) {
@@ -107,7 +107,7 @@ export class ConditionalOperator extends Operator {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof ConditionalOperator) {
@@ -118,7 +118,7 @@ export class ConditionalOperator extends Operator {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof ConditionalOperator) {
@@ -128,18 +128,18 @@ export class ConditionalOperator extends Operator {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Constructors.hash(ConditionalOperator),
         this.ifTerm.hashCode()), this.thenTerm.hashCode()), this.elseTerm.hashCode()));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output.debug(this.ifTerm).write(46/*'.'*/).write("conditional").write(40/*'('*/)
         .debug(this.thenTerm).write(44/*','*/).write(32/*' '*/)
         .debug(this.elseTerm).write(41/*')'*/);
   }
 
-  clone(): ConditionalOperator {
+  override clone(): ConditionalOperator {
     return new ConditionalOperator(this.ifTerm.clone(), this.thenTerm.clone(), this.elseTerm.clone());
   }
 }

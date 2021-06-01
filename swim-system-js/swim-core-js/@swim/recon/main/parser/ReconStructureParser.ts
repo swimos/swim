@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,19 +50,19 @@ import {
 import {ReconParser} from "./ReconParser";
 
 export class ReconStructureParser extends ReconParser<Item, Value> {
-  isDistinct(value: Value): boolean {
+  override isDistinct(value: Value): boolean {
     return value.isDistinct();
   }
 
-  item(value: Value): Item {
+  override item(value: Value): Item {
     return value;
   }
 
-  value(item: Item): Value {
+  override value(item: Item): Value {
     return item.toValue();
   }
 
-  attr(key: Value, value?: Value): Item {
+  override attr(key: Value, value?: Value): Item {
     if (arguments.length === 1) {
       return Attr.of(key as Text);
     } else {
@@ -70,7 +70,7 @@ export class ReconStructureParser extends ReconParser<Item, Value> {
     }
   }
 
-  slot(key: Value, value?: Value): Item {
+  override slot(key: Value, value?: Value): Item {
     if (arguments.length === 1) {
       return Slot.of(key);
     } else {
@@ -78,23 +78,23 @@ export class ReconStructureParser extends ReconParser<Item, Value> {
     }
   }
 
-  valueBuilder(): Builder<Item, Value> {
+  override valueBuilder(): Builder<Item, Value> {
     return Value.builder();
   }
 
-  recordBuilder(): Builder<Item, Value> {
+  override recordBuilder(): Builder<Item, Value> {
     return Record.create();
   }
 
-  dataOutput(): Output<Value> {
+  override dataOutput(): Output<Value> {
     return Data.output();
   }
 
-  textOutput(): Output<Value> {
+  override textOutput(): Output<Value> {
     return Text.output();
   }
 
-  ident(value: Value): Value {
+  override ident(value: Value): Value {
     if (value instanceof Text) {
       const string = value.stringValue();
       if (string === "true") {
@@ -106,7 +106,7 @@ export class ReconStructureParser extends ReconParser<Item, Value> {
     return value;
   }
 
-  num(value: number | string): Value {
+  override num(value: number | string): Value {
     if (typeof value === "number") {
       return Num.from(value);
     } else if (typeof value === "string") {
@@ -116,107 +116,107 @@ export class ReconStructureParser extends ReconParser<Item, Value> {
     }
   }
 
-  uint32(value: number): Value {
+  override uint32(value: number): Value {
     return Num.uint32(value);
   }
 
-  uint64(value: number): Value {
+  override uint64(value: number): Value {
     return Num.uint64(value);
   }
 
-  bool(value: boolean): Value {
+  override bool(value: boolean): Value {
     return Bool.from(value);
   }
 
-  selector(): Value {
+  override selector(): Value {
     return Selector.identity();
   }
 
-  extant(): Value {
+  override extant(): Value {
     return Value.extant();
   }
 
-  absent(): Value {
+  override absent(): Value {
     return Value.absent();
   }
 
-  conditional(ifTerm: Value, thenTerm: Value, elseTerm: Value): Value {
+  override conditional(ifTerm: Value, thenTerm: Value, elseTerm: Value): Value {
     return ifTerm.conditional(thenTerm, elseTerm);
   }
 
-  or(lhs: Value, rhs: Value): Value {
+  override or(lhs: Value, rhs: Value): Value {
     return new OrOperator(lhs, rhs);
   }
 
-  and(lhs: Value, rhs: Value): Value {
+  override and(lhs: Value, rhs: Value): Value {
     return new AndOperator(lhs, rhs);
   }
 
-  bitwiseOr(lhs: Value, rhs: Value): Value {
+  override bitwiseOr(lhs: Value, rhs: Value): Value {
     return new BitwiseOrOperator(lhs, rhs);
   }
 
-  bitwiseXor(lhs: Value, rhs: Value): Value {
+  override bitwiseXor(lhs: Value, rhs: Value): Value {
     return new BitwiseXorOperator(lhs, rhs);
   }
 
-  bitwiseAnd(lhs: Value, rhs: Value): Value {
+  override bitwiseAnd(lhs: Value, rhs: Value): Value {
     return new BitwiseAndOperator(lhs, rhs);
   }
 
-  lt(lhs: Value, rhs: Value): Value {
+  override lt(lhs: Value, rhs: Value): Value {
     return new LtOperator(lhs, rhs);
   }
 
-  le(lhs: Value, rhs: Value): Value {
+  override le(lhs: Value, rhs: Value): Value {
     return new LeOperator(lhs, rhs);
   }
 
-  eq(lhs: Value, rhs: Value): Value {
+  override eq(lhs: Value, rhs: Value): Value {
     return new EqOperator(lhs, rhs);
   }
 
-  ne(lhs: Value, rhs: Value): Value {
+  override ne(lhs: Value, rhs: Value): Value {
     return new NeOperator(lhs, rhs);
   }
 
-  ge(lhs: Value, rhs: Value): Value {
+  override ge(lhs: Value, rhs: Value): Value {
     return new GeOperator(lhs, rhs);
   }
 
-  gt(lhs: Value, rhs: Value): Value {
+  override gt(lhs: Value, rhs: Value): Value {
     return new GtOperator(lhs, rhs);
   }
 
-  plus(lhs: Value, rhs: Value): Value {
+  override plus(lhs: Value, rhs: Value): Value {
     return new PlusOperator(lhs, rhs);
   }
 
-  minus(lhs: Value, rhs: Value): Value {
+  override minus(lhs: Value, rhs: Value): Value {
     return new MinusOperator(lhs, rhs);
   }
 
-  times(lhs: Value, rhs: Value): Value {
+  override times(lhs: Value, rhs: Value): Value {
     return new TimesOperator(lhs, rhs);
   }
 
-  divide(lhs: Value, rhs: Value): Value {
+  override divide(lhs: Value, rhs: Value): Value {
     return new DivideOperator(lhs, rhs);
   }
 
-  modulo(lhs: Value, rhs: Value): Value {
+  override modulo(lhs: Value, rhs: Value): Value {
     return new ModuloOperator(lhs, rhs);
   }
 
-  not(rhs: Value): Value {
+  override not(rhs: Value): Value {
     return new NotOperator(rhs);
   }
 
-  bitwiseNot(rhs: Value): Value {
+  override bitwiseNot(rhs: Value): Value {
     return new BitwiseNotOperator(rhs);
   }
 
-  negative(rhs: Value): Value {
+  override negative(rhs: Value): Value {
     if (rhs instanceof Num) {
       return rhs.negative();
     } else {
@@ -224,47 +224,47 @@ export class ReconStructureParser extends ReconParser<Item, Value> {
     }
   }
 
-  positive(rhs: Value): Value {
+  override positive(rhs: Value): Value {
     return new PositiveOperator(rhs);
   }
 
-  invoke(func: Value, args: Value): Value {
+  override invoke(func: Value, args: Value): Value {
     return new InvokeOperator(func, args);
   }
 
-  lambda(bindings: Value, template: Value): Value {
+  override lambda(bindings: Value, template: Value): Value {
     return bindings.lambda(template);
   }
 
-  get(selector: Value, key: Value): Value {
+  override get(selector: Value, key: Value): Value {
     return selector.get(key);
   }
 
-  getAttr(selector: Value, key: Value): Value {
+  override getAttr(selector: Value, key: Value): Value {
     return selector.getAttr(key as Text);
   }
 
-  getItem(selector: Value, index: Value): Item {
+  override getItem(selector: Value, index: Value): Item {
     return selector.getItem(index as Num);
   }
 
-  children(selector: Value): Value {
+  override children(selector: Value): Value {
     return Selector.literal(selector).children();
   }
 
-  descendants(selector: Value): Value {
+  override descendants(selector: Value): Value {
     return Selector.literal(selector).descendants();
   }
 
-  keys(selector: Value): Value {
+  override keys(selector: Value): Value {
     return Selector.literal(selector).keys();
   }
 
-  values(selector: Value): Value {
+  override values(selector: Value): Value {
     return Selector.literal(selector).values();
   }
 
-  filter(selector: Value, predicate: Value): Value {
+  override filter(selector: Value, predicate: Value): Value {
     return selector.filter(predicate);
   }
 }

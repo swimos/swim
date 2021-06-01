@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,31 +39,31 @@ export class UriQueryParam extends UriQuery {
     });
   }
 
-  declare readonly key: string | undefined;
+  override readonly key!: string | undefined;
 
-  declare readonly value: string;
+  override readonly value!: string;
 
   /** @hidden */
-  declare readonly rest: UriQuery;
+  readonly rest!: UriQuery;
 
-  isDefined(): boolean {
+  override isDefined(): boolean {
     return true;
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return false;
   }
 
-  head(): [string | undefined, string] {
+  override head(): [string | undefined, string] {
     return [this.key, this.value];
   }
 
-  tail(): UriQuery {
+  override tail(): UriQuery {
     return this.rest;
   }
 
   /** @hidden */
-  setTail(tail: UriQuery): void {
+  override setTail(tail: UriQuery): void {
     Object.defineProperty(this, "rest", {
       value: tail,
       enumerable: true,
@@ -72,16 +72,16 @@ export class UriQueryParam extends UriQuery {
   }
 
   /** @hidden */
-  dealias(): UriQuery {
+  override dealias(): UriQuery {
     return new UriQueryParam(this.key, this.value, this.rest);
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("UriQuery").write(46/*'.'*/).write("parse")
         .write(40/*'('*/).write(34/*'"'*/).display(this).write(34/*'"'*/).write(41/*')'*/);
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     const stringValue = this.stringValue;
     if (stringValue !== void 0) {
       output = output.write(stringValue);
@@ -91,9 +91,9 @@ export class UriQueryParam extends UriQuery {
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
-  toString(): string {
+  override toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       stringValue = Format.display(this);

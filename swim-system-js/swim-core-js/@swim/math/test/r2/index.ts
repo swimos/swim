@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {CurveR2ParserSpec} from "./CurveR2ParserSpec";
-export {SplineR2BuilderSpec} from "./SplineR2BuilderSpec";
-export {SplineR2ParserSpec} from "./SplineR2ParserSpec";
-export {PathR2BuilderSpec} from "./PathR2BuilderSpec";
-export {PathR2ParserSpec} from "./PathR2ParserSpec";
-export {PathR2WriterSpec} from "./PathR2WriterSpec";
+export {R2CurveParserSpec} from "./R2CurveParserSpec";
+export {R2SplineBuilderSpec} from "./R2SplineBuilderSpec";
+export {R2SplineParserSpec} from "./R2SplineParserSpec";
+export {R2PathBuilderSpec} from "./R2PathBuilderSpec";
+export {R2PathParserSpec} from "./R2PathParserSpec";
+export {R2PathWriterSpec} from "./R2PathWriterSpec";
 export {R2Suite} from "./R2Suite";

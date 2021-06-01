@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ export class TransformListParser extends Parser<Transform> {
     this.transformParser = transformParser;
   }
 
-  feed(input: Input): Parser<Transform> {
+  override feed(input: Input): Parser<Transform> {
     return TransformListParser.parse(input, this.transform, this.transformParser);
   }
 

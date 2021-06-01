@@ -4,7 +4,7 @@
   "description": "Rich object model for working with Uniform Resource Identifiers and URI subcomponents, including an efficient and safe codec for parsing and writing compliant URI strings",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/uri",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2020 Swim inc.",
+  "copyright": "2015-2021 Swim inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-uri.js",

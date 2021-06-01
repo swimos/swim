@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ export class BooleanForm extends Form<boolean> {
     });
   }
 
-  declare readonly unit: boolean | undefined;
+  override readonly unit!: boolean | undefined;
 
-  withUnit(unit: boolean | undefined): Form<boolean> {
+  override withUnit(unit: boolean | undefined): Form<boolean> {
     if (unit !== this.unit) {
       return new BooleanForm(unit);
     } else {
@@ -36,7 +36,7 @@ export class BooleanForm extends Form<boolean> {
     }
   }
 
-  mold(object: boolean, item?: Item): Item {
+  override mold(object: boolean, item?: Item): Item {
     if (item === void 0) {
       return Bool.from(object);
     } else {
@@ -44,7 +44,7 @@ export class BooleanForm extends Form<boolean> {
     }
   }
 
-  cast(item: Item, object?: boolean): boolean | undefined {
+  override cast(item: Item, object?: boolean): boolean | undefined {
     const value = item.target;
     try {
       return value.booleanValue();

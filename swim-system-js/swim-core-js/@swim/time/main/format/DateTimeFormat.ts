@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,13 +35,13 @@ import {PatternFormat} from "../"; // forward import
 
 /** @hidden */
 export interface DateNumberFactory {
-  bind(value: number, date: DateTimeInit, input: Input): Parser<DateTimeInit>;
+  term(value: number, date: DateTimeInit, input: Input): Parser<DateTimeInit>;
   cont(date: DateTimeInit, value: number, step: number, input: Input): Parser<DateTimeInit>;
 }
 
 /** @hidden */
 export interface DateStringFactory {
-  bind(locale: DateTimeLocale, value: string, date: DateTimeInit, input: Input): Parser<DateTimeInit>;
+  term(locale: DateTimeLocale, value: string, date: DateTimeInit, input: Input): Parser<DateTimeInit>;
   cont(locale: DateTimeLocale, date: DateTimeInit, output: Output, input: Input): Parser<DateTimeInit>;
 }
 
@@ -185,7 +185,7 @@ export abstract class DateTimeFormat {
     }
     if (!input.isEmpty()) {
       if (step >= minDigits) {
-        return factory.bind(value, date || {}, input);
+        return factory.term(value, date || {}, input);
       } else {
         return Parser.error(Diagnostic.expected(desc, input));
       }
@@ -204,7 +204,7 @@ export abstract class DateTimeFormat {
         output.write(c);
         continue;
       } else if (!input.isEmpty()) {
-        return factory.bind(locale, output.bind(), date || {}, input);
+        return factory.term(locale, output.bind(), date || {}, input);
       }
       break;
     } while (true);

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,20 +23,20 @@ export class AndOperator extends BinaryOperator {
     super(operand1, operand2);
   }
 
-  get operator(): string {
+  override get operator(): string {
     return "&&";
   }
 
-  get precedence(): number {
+  override get precedence(): number {
     return 4;
   }
 
-  evaluate(interpreter: AnyInterpreter): Item {
+  override evaluate(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     interpreter.willOperate(this);
     let result: Item;
     const argument1 = this.operand1.evaluate(interpreter);
-    if (argument1.booleanValue(false)) {
+    if (argument1.isDefinite()) {
       const argument2 = this.operand2.evaluate(interpreter);
       result = argument2;
     } else {
@@ -46,18 +46,18 @@ export class AndOperator extends BinaryOperator {
     return result;
   }
 
-  substitute(interpreter: AnyInterpreter): Item {
+  override substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     const argument1 = this.operand1.substitute(interpreter);
     const argument2 = this.operand2.substitute(interpreter);
     return argument1.and(argument2);
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 22;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof AndOperator) {
       let order = this.operand1.compareTo(that.operand1);
       if (order === 0) {
@@ -70,7 +70,7 @@ export class AndOperator extends BinaryOperator {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof AndOperator) {
@@ -80,7 +80,7 @@ export class AndOperator extends BinaryOperator {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof AndOperator) {
@@ -89,17 +89,17 @@ export class AndOperator extends BinaryOperator {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(AndOperator),
         this.operand1.hashCode()), this.operand2.hashCode()));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output.debug(this.operand1).write(46/*'.'*/).write("and").write(40/*'('*/)
         .debug(this.operand2).write(41/*')'*/);
   }
 
-  clone(): AndOperator {
+  override clone(): AndOperator {
     return new AndOperator(this.operand1.clone(), this.operand2.clone());
   }
 }

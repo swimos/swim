@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,115 +44,115 @@ export abstract class Expression extends Value {
     super();
   }
 
-  conditional(thenTerm: Value, elseTerm: Value): Value;
-  conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item;
-  conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item {
+  override conditional(thenTerm: Value, elseTerm: Value): Value;
+  override conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item;
+  override conditional(thenTerm: AnyItem, elseTerm: AnyItem): Item {
     thenTerm = Item.fromAny(thenTerm);
     elseTerm = Item.fromAny(elseTerm);
     return new ConditionalOperator(this, thenTerm, elseTerm);
   }
 
-  or(that: AnyItem): Operator {
+  override or(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new OrOperator(this, that);
   }
 
-  and(that: AnyItem): Operator {
+  override and(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new AndOperator(this, that);
   }
 
-  bitwiseOr(that: AnyItem): Operator {
+  override bitwiseOr(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new BitwiseOrOperator(this, that);
   }
 
-  bitwiseXor(that: AnyItem): Operator {
+  override bitwiseXor(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new BitwiseXorOperator(this, that);
   }
 
-  bitwiseAnd(that: AnyItem): Operator {
+  override bitwiseAnd(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new BitwiseAndOperator(this, that);
   }
 
-  lt(that: AnyItem): Operator {
+  override lt(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new LtOperator(this, that);
   }
 
-  le(that: AnyItem): Operator {
+  override le(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new LeOperator(this, that);
   }
 
-  eq(that: AnyItem): Operator {
+  override eq(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new EqOperator(this, that);
   }
 
-  ne(that: AnyItem): Operator {
+  override ne(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new NeOperator(this, that);
   }
 
-  ge(that: AnyItem): Operator {
+  override ge(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new GeOperator(this, that);
   }
 
-  gt(that: AnyItem): Operator {
+  override gt(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new GtOperator(this, that);
   }
 
-  plus(that: AnyItem): Operator {
+  override plus(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new PlusOperator(this, that);
   }
 
-  minus(that: AnyItem): Operator {
+  override minus(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new MinusOperator(this, that);
   }
 
-  times(that: AnyItem): Operator {
+  override times(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new TimesOperator(this, that);
   }
 
-  divide(that: AnyItem): Operator {
+  override divide(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new DivideOperator(this, that);
   }
 
-  modulo(that: AnyItem): Operator {
+  override modulo(that: AnyItem): Operator {
     that = Item.fromAny(that);
     return new ModuloOperator(this, that);
   }
 
-  not(): Operator {
+  override not(): Operator {
     return new NotOperator(this);
   }
 
-  bitwiseNot(): Operator {
+  override bitwiseNot(): Operator {
     return new BitwiseNotOperator(this);
   }
 
-  negative(): Operator {
+  override negative(): Operator {
     return new NegativeOperator(this);
   }
 
-  positive(): Operator {
+  override positive(): Operator {
     return new PositiveOperator(this);
   }
 
-  inverse(): Operator {
+  override inverse(): Operator {
     return new DivideOperator(Num.one, this);
   }
 
-  toAny(): AnyValue {
+  override toAny(): AnyValue {
     return this;
   }
 }

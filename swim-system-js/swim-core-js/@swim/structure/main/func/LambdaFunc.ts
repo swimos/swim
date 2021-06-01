@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,15 +36,15 @@ export class LambdaFunc extends Func {
     });
   }
 
-  declare readonly bindings: Value;
+  readonly bindings!: Value;
 
-  declare readonly template: Value;
+  readonly template!: Value;
 
-  get precedence(): number {
+  override get precedence(): number {
     return 1;
   }
 
-  invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
+  override invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item {
     interpreter = Interpreter.fromAny(interpreter);
     const bindings = this.bindings;
     const arity = Math.max(1, bindings.length);
@@ -73,11 +73,11 @@ export class LambdaFunc extends Func {
     return result;
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 50;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof LambdaFunc) {
       let order = this.bindings.compareTo(that.bindings);
       if (order === 0) {
@@ -90,7 +90,7 @@ export class LambdaFunc extends Func {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof LambdaFunc) {
@@ -100,7 +100,7 @@ export class LambdaFunc extends Func {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof LambdaFunc) {
@@ -109,12 +109,12 @@ export class LambdaFunc extends Func {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(LambdaFunc),
         this.bindings.hashCode()), this.template.hashCode()));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output.debug(this.bindings).write(46/*'.'*/).write("lambda").write(40/*'('*/)
         .debug(this.template).write(41/*')'*/);
   }

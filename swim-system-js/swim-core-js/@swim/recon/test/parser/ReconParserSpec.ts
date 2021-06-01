@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import {Attr, Slot, Value, Record, Data, Text, Num, Bool} from "@swim/structure"
 import {ReconExam} from "../ReconExam";
 
 export class ReconParserSpec extends Spec {
-  createExam(report: Report, name: string, options: TestOptions): ReconExam {
+  override createExam(report: Report, name: string, options: TestOptions): ReconExam {
     return new ReconExam(report, this, name, options);
   }
 
@@ -91,6 +91,35 @@ export class ReconParserSpec extends Spec {
   parseStringsWithEscapes(exam: ReconExam): void {
     exam.parses("\"\\\"\\\\\\/\\@\\{\\}\\[\\]\\b\\f\\n\\r\\t\"", Text.from("\"\\/@{}[]\b\f\n\r\t"));
     exam.parses("'\\'\\\\\\/\\@\\{\\}\\[\\]\\b\\f\\n\\r\\t'", Text.from("'\\/@{}[]\b\f\n\r\t"));
+  }
+
+  @Test
+  parseEmptyRawStrings(exam: ReconExam): void {
+    exam.parses("``", Text.empty());
+    exam.parses(" `` ", Text.empty());
+    exam.parses("``````", Text.empty());
+    exam.parses(" `````` ", Text.empty());
+  }
+
+  @Test
+  parseNonEmptyRawStrings(exam: ReconExam): void {
+    exam.parses("`test`", Text.from("test"));
+    exam.parses("```test```", Text.from("test"));
+  }
+
+  @Test
+  parseRawStringsWithBackticks(exam: ReconExam): void {
+    exam.parses("``` ` ```", Text.from(" ` "));
+    exam.parses("``` `` ```", Text.from(" `` "));
+    exam.parses("``` \\` ```", Text.from(" ` "));
+    exam.parses("``` \\`\\` ```", Text.from(" `` "));
+    exam.parses("``` \\`\\`\\` ```", Text.from(" ``` "));
+  }
+
+  @Test
+  parseRawStringsWithBackslashes(exam: ReconExam): void {
+    exam.parses("``` \\ ```", Text.from(" \\ "));
+    exam.parses("``` \\\\` ```", Text.from(" \\` "));
   }
 
   @Test

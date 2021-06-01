@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import {Value, Record} from "@swim/structure";
 import {Inlet, Outlet, StreamletContext, StreamletScope, Streamlet, AbstractStreamlet} from "@swim/streamlet";
 
 export abstract class RecordStreamlet<I extends Value = Value, O extends Value = I> extends Record implements Streamlet<I, O> {
-  isConstant(): boolean {
+  override isConstant(): boolean {
     return false;
   }
 

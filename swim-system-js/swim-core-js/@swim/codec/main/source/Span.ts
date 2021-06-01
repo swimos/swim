@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,11 +38,11 @@ export class Span extends Tag {
     });
   }
 
-  declare readonly start: Mark;
+  override readonly start!: Mark;
 
-  declare readonly end: Mark;
+  override readonly end!: Mark;
 
-  union(that: Tag): Tag {
+  override union(that: Tag): Tag {
     if (that instanceof Mark) {
       const start = this.start.min(that);
       const end = this.end.max(that);
@@ -63,7 +63,7 @@ export class Span extends Tag {
     throw new Error(that.toString());
   }
 
-  shift(mark: Mark): Span {
+  override shift(mark: Mark): Span {
     const start = this.start.shift(mark);
     const end = this.end.shift(mark);
     if (start === this.start && end === this.end) {
@@ -73,7 +73,7 @@ export class Span extends Tag {
     }
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Span) {
@@ -82,12 +82,12 @@ export class Span extends Tag {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(Span),
         this.start.hashCode()), this.end.hashCode()));
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     if (this.start.note !== void 0) {
       output = output.write(this.start.note).write(58/*':'*/).write(32/*' '*/);
     }
@@ -103,7 +103,7 @@ export class Span extends Tag {
     }
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Span").write(".").write("from").write("(");
     this.start.debug(output);
     output = output.write(", ");
@@ -111,7 +111,7 @@ export class Span extends Tag {
     output = output.write(")");
   }
 
-  toString(): string {
+  override toString(): string {
     return Format.display(this);
   }
 

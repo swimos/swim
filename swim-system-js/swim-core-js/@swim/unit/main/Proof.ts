@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -101,18 +101,18 @@ export class ValidProof extends Proof {
     });
   }
 
-  isValid(): boolean {
+  override isValid(): boolean {
     return true;
   }
 
   /**
    * The name of the asserted operator.
    */
-  declare readonly operator: string;
+  readonly operator!: string;
 
-  declare readonly message: string | undefined;
+  override readonly message!: string | undefined;
 
-  display(output: Output): void {
+  override display(output: Output): void {
     if (this.message !== void 0) {
       OutputStyle.gray(output);
       output.display(this.message).write(58/*':'*/).write(32/*' '*/);
@@ -141,18 +141,18 @@ export class InvalidProof extends Proof {
     });
   }
 
-  isValid(): boolean {
+  override isValid(): boolean {
     return false;
   }
 
   /**
    * The name of the asserted operator.
    */
-  declare readonly operator: string;
+  readonly operator!: string;
 
-  declare readonly message: string | undefined;
+  override readonly message!: string | undefined;
 
-  display(output: Output): void {
+  override display(output: Output): void {
     if (this.message !== void 0) {
       OutputStyle.gray(output);
       output.display(this.message).write(58/*':'*/).write(32/*' '*/);
@@ -196,21 +196,21 @@ export class RefutedProof extends Proof {
   /**
    * Returns the left-hand side of the contradictory expression.
    */
-  declare readonly lhs: unknown;
+  readonly lhs!: unknown;
 
   /**
    * The name of the asserted binary operator.
    */
-  declare readonly operator: string;
+  readonly operator!: string;
 
   /**
    * Returns the right-hand side of the contradictory expression.
    */
-  declare readonly rhs: unknown;
+  readonly rhs!: unknown;
 
-  declare readonly message: string | undefined;
+  override readonly message!: string | undefined;
 
-  display(output: Output): void {
+  override display(output: Output): void {
     if (this.message !== void 0) {
       OutputStyle.gray(output);
       output.display(this.message).write(58/*':'*/).write(32/*' '*/);
@@ -245,18 +245,18 @@ export class ErrorProof extends Proof {
     });
   }
 
-  isValid(): boolean {
+  override isValid(): boolean {
     return false;
   }
 
   /**
    * The exception that was thrown while evaluating the assertion.
    */
-  declare readonly error: unknown;
+  readonly error!: unknown;
 
-  declare readonly message: string | undefined;
+  override readonly message!: string | undefined;
 
-  display(output: Output): void {
+  override display(output: Output): void {
     if (this.message !== void 0) {
       OutputStyle.gray(output);
       output.display(this.message).write(58/*':'*/).write(32/*' '*/);
@@ -287,17 +287,17 @@ export class PendingProof extends Proof {
     });
   }
 
-  isValid(): boolean {
+  override isValid(): boolean {
     return true;
   }
 
-  isPending(): boolean {
+  override isPending(): boolean {
     return true;
   }
 
-  declare readonly message: string | undefined;
+  override readonly message!: string | undefined;
 
-  display(output: Output): void {
+  override display(output: Output): void {
     if (this.message !== void 0) {
       OutputStyle.gray(output);
       output.display(this.message).write(58/*':'*/).write(32/*' '*/);

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {Writer} from "./Writer";
 /** @hidden */
 export class WriterDone<O> extends Writer<unknown, O> {
   /** @hidden */
-  declare readonly value: O;
+  readonly value!: O;
 
   constructor(value: O) {
     super();
@@ -28,27 +28,27 @@ export class WriterDone<O> extends Writer<unknown, O> {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return false;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return true;
   }
 
-  pull(output: Output): Writer<unknown, O> {
+  override pull(output: Output): Writer<unknown, O> {
     return this;
   }
 
-  bind(): O {
+  override bind(): O {
     return this.value;
   }
 
-  asDone<I2>(): Writer<I2, O> {
+  override asDone<I2>(): Writer<I2, O> {
     return this;
   }
 
-  andThen<O2>(that: Writer<unknown, O2>): Writer<unknown, O2> {
+  override andThen<O2>(that: Writer<unknown, O2>): Writer<unknown, O2> {
     return that;
   }
 }

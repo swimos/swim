@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,86 +22,86 @@ export class UriPathEmpty extends UriPath {
     super();
   }
 
-  isDefined(): boolean {
+  override isDefined(): boolean {
     return false;
   }
 
-  isAbsolute(): boolean {
+  override isAbsolute(): boolean {
     return false;
   }
 
-  isRelative(): boolean {
+  override isRelative(): boolean {
     return true;
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return true;
   }
 
-  head(): string {
+  override head(): string {
     throw new Error("empty path");
   }
 
-  tail(): UriPath {
+  override tail(): UriPath {
     throw new Error("empty path");
   }
 
   /** @hidden */
-  setTail(tail: UriPath): void {
+  override setTail(tail: UriPath): void {
     throw new Error("empty path");
   }
 
   /** @hidden */
-  dealias(): UriPath {
+  override dealias(): UriPath {
     return this;
   }
 
-  parent(): UriPath {
+  override parent(): UriPath {
     return this;
   }
 
-  base(): UriPath {
+  override base(): UriPath {
     return this;
   }
 
-  appended(...components: AnyUriPath[]): UriPath {
+  override appended(...components: AnyUriPath[]): UriPath {
     return UriPath.of(...components);
   }
 
-  appendedSlash(): UriPath {
+  override appendedSlash(): UriPath {
     return UriPath.slash();
   }
 
-  appendedSegment(segment: string): UriPath {
+  override appendedSegment(segment: string): UriPath {
     return UriPath.segment(segment);
   }
 
-  prepended(...components: AnyUriPath[]): UriPath {
+  override prepended(...components: AnyUriPath[]): UriPath {
     return UriPath.of(...components);
   }
 
-  prependedSlash(): UriPath {
+  override prependedSlash(): UriPath {
     return UriPath.slash();
   }
 
-  prependedSegment(segment: string): UriPath {
+  override prependedSegment(segment: string): UriPath {
     return UriPath.segment(segment);
   }
 
-  merge(that: UriPath): UriPath {
+  override merge(that: UriPath): UriPath {
     return that;
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("UriPath").write(46/*'.'*/).write("empty")
         .write(40/*'('*/).write(41/*')'*/);
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     // nop
   }
 
-  toString(): string {
+  override toString(): string {
     return "";
   }
 }

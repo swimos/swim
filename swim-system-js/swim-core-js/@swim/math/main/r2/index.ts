@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,74 +16,74 @@ export {R2Function} from "./R2Function";
 export {R2Operator} from "./R2Operator";
 
 export {
-  AnyVectorR2,
-  VectorR2Init,
-  VectorR2,
-} from "./VectorR2";
-export {VectorR2Interpolator} from "./VectorR2Interpolator";
+  AnyR2Vector,
+  R2VectorInit,
+  R2Vector,
+} from "./R2Vector";
+export {R2VectorInterpolator} from "./R2VectorInterpolator";
 
 export {
-  AnyShapeR2,
-  ShapeR2,
-} from "./ShapeR2";
+  AnyR2Shape,
+  R2Shape,
+} from "./R2Shape";
 
 export {
-  AnyPointR2,
-  PointR2Init,
-  PointR2Tuple,
-  PointR2,
-} from "./PointR2";
-export {PointR2Interpolator} from "./PointR2Interpolator";
+  AnyR2Point,
+  R2PointInit,
+  R2PointTuple,
+  R2Point,
+} from "./R2Point";
+export {R2PointInterpolator} from "./R2PointInterpolator";
 
-export {CurveR2Context} from "./CurveR2Context";
+export {R2CurveContext} from "./R2CurveContext";
 
-export {CurveR2} from "./CurveR2";
-export {CurveR2Parser} from "./CurveR2Parser";
+export {R2Curve} from "./R2Curve";
+export {R2CurveParser} from "./R2CurveParser";
 
-export {BezierCurveR2} from "./BezierCurveR2";
-
-export {
-  AnySegmentR2,
-  SegmentR2Init,
-  SegmentR2,
-} from "./SegmentR2";
-export {SegmentR2Interpolator} from "./SegmentR2Interpolator";
-export {SegmentR2Parser} from "./SegmentR2Parser";
-
-export {QuadraticCurveR2} from "./QuadraticCurveR2";
-export {QuadraticCurveR2Parser} from "./QuadraticCurveR2Parser";
-
-export {CubicCurveR2} from "./CubicCurveR2";
-export {CubicCurveR2Parser} from "./CubicCurveR2Parser";
-
-export {EllipticCurveR2} from "./EllipticCurveR2";
-export {EllipticCurveR2Parser} from "./EllipticCurveR2Parser";
-
-export {SplineR2Context} from "./SplineR2Context";
-export {SplineR2} from "./SplineR2";
-export {SplineR2Builder} from "./SplineR2Builder";
-export {SplineR2Parser} from "./SplineR2Parser";
-
-export {PathR2Context} from "./PathR2Context";
-export {
-  AnyPathR2,
-  PathR2,
-} from "./PathR2";
-export {PathR2Builder} from "./PathR2Builder";
-export {PathR2Parser} from "./PathR2Parser";
+export {R2BezierCurve} from "./R2BezierCurve";
 
 export {
-  AnyBoxR2,
-  BoxR2Init,
-  BoxR2,
-} from "./BoxR2";
-export {BoxR2Interpolator} from "./BoxR2Interpolator";
+  AnyR2Segment,
+  R2SegmentInit,
+  R2Segment,
+} from "./R2Segment";
+export {R2SegmentInterpolator} from "./R2SegmentInterpolator";
+export {R2SegmentParser} from "./R2SegmentParser";
+
+export {R2QuadraticCurve} from "./R2QuadraticCurve";
+export {R2QuadraticCurveParser} from "./R2QuadraticCurveParser";
+
+export {R2CubicCurve} from "./R2CubicCurve";
+export {R2CubicCurveParser} from "./R2CubicCurveParser";
+
+export {R2EllipticCurve} from "./R2EllipticCurve";
+export {R2EllipticCurveParser} from "./R2EllipticCurveParser";
+
+export {R2SplineContext} from "./R2SplineContext";
+export {R2Spline} from "./R2Spline";
+export {R2SplineBuilder} from "./R2SplineBuilder";
+export {R2SplineParser} from "./R2SplineParser";
+
+export {R2PathContext} from "./R2PathContext";
+export {
+  AnyR2Path,
+  R2Path,
+} from "./R2Path";
+export {R2PathBuilder} from "./R2PathBuilder";
+export {R2PathParser} from "./R2PathParser";
 
 export {
-  AnyCircleR2,
-  CircleR2Init,
-  CircleR2,
-} from "./CircleR2";
-export {CircleR2Interpolator} from "./CircleR2Interpolator";
+  AnyR2Box,
+  R2BoxInit,
+  R2Box,
+} from "./R2Box";
+export {R2BoxInterpolator} from "./R2BoxInterpolator";
 
-export {GroupR2} from "./GroupR2";
+export {
+  AnyR2Circle,
+  R2CircleInit,
+  R2Circle,
+} from "./R2Circle";
+export {R2CircleInterpolator} from "./R2CircleInterpolator";
+
+export {R2Group} from "./R2Group";

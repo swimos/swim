@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import {Attr, Slot, Value, Record, Data, Text, Num, Bool} from "@swim/structure"
 import {ReconExam} from "../ReconExam";
 
 export class ReconWriterSpec extends Spec {
-  createExam(report: Report, name: string, options: TestOptions): ReconExam {
+  override createExam(report: Report, name: string, options: TestOptions): ReconExam {
     return new ReconExam(report, this, name, options);
   }
 

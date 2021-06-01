@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import {STreeNode} from "./"; // forward import
 /** @hidden */
 export class STreeLeaf<V, I> extends STreePage<V, I> {
   /** @hidden */
-  declare readonly slots: ReadonlyArray<[I, V]>;
+  readonly slots!: ReadonlyArray<[I, V]>;
 
   constructor(slots: ReadonlyArray<[I, V]>) {
     super();
@@ -30,19 +30,19 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     });
   }
 
-  get arity(): number {
+  override get arity(): number {
     return this.slots.length;
   }
 
-  get size(): number {
+  override get size(): number {
     return this.slots.length;
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.slots.length === 0;
   }
 
-  get(index: number): V | undefined {
+  override get(index: number): V | undefined {
     const slot = this.slots[index];
     if (slot !== void 0) {
       return slot[1];
@@ -51,18 +51,19 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     }
   }
 
-  getEntry(index: number): [I, V] | undefined {
+  override getEntry(index: number): [I, V] | undefined {
     return this.slots[index];
   }
 
-  updated(index: number, newValue: V, tree: STreeContext<V, I>): STreeLeaf<V, I> {
+  override updated(index: number, newValue: V, tree: STreeContext<V, I>): STreeLeaf<V, I> {
     if (index < 0 || index >= this.slots.length) {
       throw new RangeError("" + index);
     }
     return this.updatedItem(index, newValue);
   }
 
-  private updatedItem(index: number, newValue: V): STreeLeaf<V, I> {
+  /** @hidden */
+  updatedItem(index: number, newValue: V): STreeLeaf<V, I> {
     const oldItems = this.slots;
     const oldSlot = oldItems[index];
     if (oldSlot !== void 0 && newValue !== oldSlot[1]) {
@@ -74,14 +75,15 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     }
   }
 
-  inserted(index: number, newValue: V, id: I | undefined, tree: STreeContext<V, I>): STreeLeaf<V, I> {
+  override inserted(index: number, newValue: V, id: I | undefined, tree: STreeContext<V, I>): STreeLeaf<V, I> {
     if (index < 0 || index > this.slots.length) {
       throw new RangeError("" + index);
     }
     return this.insertedItem(index, newValue, id, tree);
   }
 
-  private insertedItem(index: number, newValue: V, id: I | undefined, tree: STreeContext<V, I>): STreeLeaf<V, I> {
+  /** @hidden */
+  insertedItem(index: number, newValue: V, id: I | undefined, tree: STreeContext<V, I>): STreeLeaf<V, I> {
     if (id === void 0) {
       id = tree.identify(newValue);
     }
@@ -97,7 +99,7 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     return new STreeLeaf(newSlots);
   }
 
-  removed(index: number, tree: STreeContext<V, I>): STreeLeaf<V, I> {
+  override removed(index: number, tree: STreeContext<V, I>): STreeLeaf<V, I> {
     if (index < 0 || index >= this.slots.length) {
       throw new RangeError("" + index);
     }
@@ -108,7 +110,8 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     }
   }
 
-  private removedSlot(index: number): STreeLeaf<V, I> {
+  /** @hidden */
+  removedSlot(index: number): STreeLeaf<V, I> {
     const oldSlots = this.slots;
     const newSlots = new Array<[I, V]>(oldSlots.length - 1);
     for (let i = 0; i < index; i += 1) {
@@ -120,7 +123,7 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     return new STreeLeaf(newSlots);
   }
 
-  drop(lower: number, tree: STreeContext<V, I>): STreeLeaf<V, I> {
+  override drop(lower: number, tree: STreeContext<V, I>): STreeLeaf<V, I> {
     const oldSlots = this.slots;
     if (lower > 0 && oldSlots.length > 0) {
       if (lower < oldSlots.length) {
@@ -138,7 +141,7 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     }
   }
 
-  take(upper: number, tree: STreeContext<V, I>): STreeLeaf<V, I> {
+  override take(upper: number, tree: STreeContext<V, I>): STreeLeaf<V, I> {
     const oldSlots = this.slots;
     if (upper < oldSlots.length && oldSlots.length > 0) {
       if (upper > 0) {
@@ -155,7 +158,7 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     }
   }
 
-  balanced(tree: STreeContext<V, I>): STreePage<V, I> {
+  override balanced(tree: STreeContext<V, I>): STreePage<V, I> {
     const size = this.slots.length;
     if (size > 1 && tree.pageShouldSplit(this)) {
       return this.split(size >>> 1);
@@ -164,7 +167,7 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     }
   }
 
-  split(index: number): STreeNode<V, I> {
+  override split(index: number): STreeNode<V, I> {
     const newPages = new Array<STreePage<V, I>>(2);
     const newLeftPage = this.splitLeft(index);
     const newRightPage = this.splitRight(index);
@@ -177,7 +180,7 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     return new STreeNode(newPages, newKnots, this.slots.length);
   }
 
-  splitLeft(index: number): STreeLeaf<V, I> {
+  override splitLeft(index: number): STreeLeaf<V, I> {
     const oldSlots = this.slots;
     const newSlots = new Array<[I, V]>(index);
     for (let i = 0; i < index; i += 1) {
@@ -186,7 +189,7 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     return new STreeLeaf(newSlots);
   }
 
-  splitRight(index: number): STreeLeaf<V, I> {
+  override splitRight(index: number): STreeLeaf<V, I> {
     const oldSlots = this.slots;
     const newSize = oldSlots.length - index;
     const newSlots = new Array<[I, V]>(newSize);
@@ -196,8 +199,8 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     return new STreeLeaf(newSlots);
   }
 
-  forEach<T, S>(callback: (this: S, value: V, index: number, id: I) => T | void,
-                thisArg: S, offset: number): T | undefined {
+  override forEach<T, S>(callback: (this: S, value: V, index: number, id: I) => T | void,
+                         thisArg: S, offset: number): T | undefined {
     for (let i = 0; i < this.slots.length; i += 1) {
       const slot = this.slots[i]!;
       const result = callback.call(thisArg, slot[1], offset + i, slot[0]);
@@ -208,11 +211,11 @@ export class STreeLeaf<V, I> extends STreePage<V, I> {
     return void 0;
   }
 
-  entries(): Cursor<[I, V]> {
+  override entries(): Cursor<[I, V]> {
     return Cursor.array(this.slots);
   }
 
-  reverseEntries(): Cursor<[I, V]> {
+  override reverseEntries(): Cursor<[I, V]> {
     return Cursor.array(this.slots, this.slots.length);
   }
 }

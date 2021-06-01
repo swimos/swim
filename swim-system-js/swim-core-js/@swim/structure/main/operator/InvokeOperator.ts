@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,11 +40,11 @@ export class InvokeOperator extends Operator {
     });
   }
 
-  declare readonly func: Value;
+  readonly func!: Value;
 
-  declare readonly args: Value;
+  readonly args!: Value;
 
-  declare readonly state: unknown;
+  readonly state!: unknown;
 
   setState(state: unknown): void {
     Object.defineProperty(this, "state", {
@@ -54,15 +54,15 @@ export class InvokeOperator extends Operator {
     });
   }
 
-  isConstant(): boolean {
+  override isConstant(): boolean {
     return this.func.isConstant() && this.args.isConstant();
   }
 
-  get precedence(): number {
+  override get precedence(): number {
     return 11;
   }
 
-  evaluate(interpreter: AnyInterpreter): Item {
+  override evaluate(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     const func = this.func.evaluate(interpreter);
     if (func instanceof Func) {
@@ -71,7 +71,7 @@ export class InvokeOperator extends Operator {
     return Item.absent();
   }
 
-  substitute(interpreter: AnyInterpreter): Item {
+  override substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     const func = this.func.evaluate(interpreter);
     if (func instanceof Func) {
@@ -84,10 +84,10 @@ export class InvokeOperator extends Operator {
     return new InvokeOperator(this.func, args);
   }
 
-  interpolateTo(that: InvokeOperator): Interpolator<InvokeOperator>;
-  interpolateTo(that: Item): Interpolator<Item>;
-  interpolateTo(that: unknown): Interpolator<Item> | null;
-  interpolateTo(that: unknown): Interpolator<Item> | null {
+  override interpolateTo(that: InvokeOperator): Interpolator<InvokeOperator>;
+  override interpolateTo(that: Item): Interpolator<Item>;
+  override interpolateTo(that: unknown): Interpolator<Item> | null;
+  override interpolateTo(that: unknown): Interpolator<Item> | null {
     if (that instanceof InvokeOperator) {
       return InvokeOperatorInterpolator(this, that);
     } else {
@@ -95,11 +95,11 @@ export class InvokeOperator extends Operator {
     }
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 41;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof InvokeOperator) {
       let order = this.func.compareTo(that.func);
       if (order === 0) {
@@ -112,7 +112,7 @@ export class InvokeOperator extends Operator {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof InvokeOperator) {
@@ -122,7 +122,7 @@ export class InvokeOperator extends Operator {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof InvokeOperator) {
@@ -131,17 +131,17 @@ export class InvokeOperator extends Operator {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(InvokeOperator),
         this.func.hashCode()), this.args.hashCode()));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output.debug(this.func).write(46/*'.'*/).write("invoke").write(40/*'('*/)
         .debug(this.args).write(41/*')'*/);
   }
 
-  clone(): InvokeOperator {
+  override clone(): InvokeOperator {
     return new InvokeOperator(this.func.clone(), this.args.clone());
   }
 }

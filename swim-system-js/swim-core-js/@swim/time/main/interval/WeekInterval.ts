@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ export class WeekInterval extends TimeInterval {
     this.day = day;
   }
 
-  offset(t: AnyDateTime, k?: number): DateTime {
+  override offset(t: AnyDateTime, k?: number): DateTime {
     const d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
     return d.withDay(d.day + 7 * k);
   }
 
-  next(t: AnyDateTime, k?: number): DateTime {
+  override next(t: AnyDateTime, k?: number): DateTime {
     let d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
     d = d.withDay(d.day + 7 * k);
@@ -38,13 +38,13 @@ export class WeekInterval extends TimeInterval {
     return d.withHour(0, 0, 0, 0);
   }
 
-  floor(t: AnyDateTime): DateTime {
+  override floor(t: AnyDateTime): DateTime {
     let d = DateTime.fromAny(t);
     d = d.withDay(d.day - (d.weekday + 7 - this.day) % 7);
     return d.withHour(0, 0, 0, 0);
   }
 
-  ceil(t: AnyDateTime): DateTime {
+  override ceil(t: AnyDateTime): DateTime {
     let d = DateTime.fromAny(t);
     d = new DateTime(d.time - 1, d.zone);
     d = d.withDay(d.day - (d.weekday + 7 - this.day) % 7);

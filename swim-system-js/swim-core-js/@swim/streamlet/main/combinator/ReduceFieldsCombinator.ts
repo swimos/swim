@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,24 +32,24 @@ export class ReduceFieldsCombinator<K, V, I, O> extends ReduceFieldsOperator<K, 
     });
   }
 
-  get(): O {
+  override get(): O {
     return this.state.reduced(this.identity, this.accumulator, this.combiner);
   }
 
-  declare readonly identity: O;
+  override readonly identity!: O;
 
   /** @hidden */
-  declare readonly accumulator: (result: O, element: V) => O;
+  readonly accumulator!: (result: O, element: V) => O;
 
-  accumulate(result: O, value: V): O {
+  override accumulate(result: O, value: V): O {
     const accumulator = this.accumulator;
     return accumulator(result, value);
   }
 
   /** @hidden */
-  declare readonly combiner: (result: O, result2: O) => O;
+  readonly combiner!: (result: O, result2: O) => O;
 
-  combine(result: O, value: O): O {
+  override combine(result: O, value: O): O {
     const combiner = this.combiner;
     return combiner(result, value);
   }

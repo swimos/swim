@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,25 +18,25 @@ import {FilterTimeInterval} from "./FilterTimeInterval";
 
 /** @hidden */
 export class MonthInterval extends UnitTimeInterval {
-  offset(t: AnyDateTime, k?: number): DateTime {
+  override offset(t: AnyDateTime, k?: number): DateTime {
     const d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
     return d.withMonth(d.month + k);
   }
 
-  next(t: AnyDateTime, k?: number): DateTime {
+  override next(t: AnyDateTime, k?: number): DateTime {
     let d = DateTime.fromAny(t);
     k = Math.max(1, typeof k === "number" ? Math.floor(k) : 1);
     d = d.withMonth(d.month + k);
     return d.withDay(1).withHour(0, 0, 0, 0);
   }
 
-  floor(t: AnyDateTime): DateTime {
+  override floor(t: AnyDateTime): DateTime {
     const d = DateTime.fromAny(t);
     return d.withDay(1).withHour(0, 0, 0, 0);
   }
 
-  ceil(t: AnyDateTime): DateTime {
+  override ceil(t: AnyDateTime): DateTime {
     let d = DateTime.fromAny(t);
     d = new DateTime(d.time - 1, d.zone);
     d = d.withDay(1).withHour(0, 0, 0, 0);
@@ -44,7 +44,7 @@ export class MonthInterval extends UnitTimeInterval {
     return d.withDay(1).withHour(0, 0, 0, 0);
   }
 
-  every(k: number): TimeInterval {
+  override every(k: number): TimeInterval {
     if (k === 1) {
       return this;
     } else if (isFinite(k) && k >= 1) {
@@ -54,7 +54,8 @@ export class MonthInterval extends UnitTimeInterval {
     }
   }
 
-  private static modulo(k: number, d: DateTime): boolean {
+  /** @hidden */
+  static modulo(k: number, d: DateTime): boolean {
     const month = d.month;
     return isFinite(month) && month % k === 0;
   }

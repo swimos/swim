@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,16 +30,16 @@ export class StreamletInlet<I> extends AbstractInlet<I> {
     });
   }
 
-  declare readonly streamlet: Streamlet<I, unknown>;
+  readonly streamlet!: Streamlet<I, unknown>;
 
-  protected willDecohereOutput(): void {
+  protected override willDecohereOutput(): void {
     const streamlet = this.streamlet as GenericStreamlet<I, unknown>;
     if (streamlet.willDecohereInlet !== void 0) {
       streamlet.willDecohereInlet(this);
     }
   }
 
-  protected didDecohereOutput(): void {
+  protected override didDecohereOutput(): void {
     const streamlet = this.streamlet as GenericStreamlet<I, unknown>;
     if (streamlet.didDecohereInlet !== void 0) {
       streamlet.didDecohereInlet(this);
@@ -48,14 +48,14 @@ export class StreamletInlet<I> extends AbstractInlet<I> {
     }
   }
 
-  protected willRecohereOutput(version: number): void {
+  protected override willRecohereOutput(version: number): void {
     const streamlet = this.streamlet as GenericStreamlet<I, unknown>;
     if (streamlet.willRecohereInlet !== void 0) {
       streamlet.willRecohereInlet(this, version);
     }
   }
 
-  protected didRecohereOutput(version: number): void {
+  protected override didRecohereOutput(version: number): void {
     const streamlet = this.streamlet as GenericStreamlet<I, unknown>;
     if (streamlet.didRecohereInlet !== void 0) {
       streamlet.didRecohereInlet(this, version);

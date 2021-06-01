@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -57,16 +57,16 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
   }
 
   /** @hidden */
-  declare readonly effects: BTree<Value, KeyEffect>;
+  readonly effects!: BTree<Value, KeyEffect>;
 
   /** @hidden */
-  declare readonly outlets: BTree<Value, KeyOutlet<Value, Value>>;
+  readonly outlets!: BTree<Value, KeyOutlet<Value, Value>>;
 
   /** @hidden */
-  declare readonly outputs: ReadonlyArray<Inlet<Record>>;
+  readonly outputs!: ReadonlyArray<Inlet<Record>>;
 
   /** @hidden */
-  declare readonly version: number;
+  readonly version!: number;
 
   declare readonly streamletScope: StreamletScope<Value> | null; // getter defined below to work around useDefineForClassFields lunacy
 
@@ -82,9 +82,9 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
     return this.has(key);
   }
 
-  get(): Record;
-  get(key: AnyValue): Value;
-  get(key?: AnyValue): Record | Value {
+  override get(): Record;
+  override get(key: AnyValue): Value;
+  override get(key?: AnyValue): Record | Value {
     if (key === void 0) {
       return this;
     } else {
@@ -366,9 +366,9 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
     // hook
   }
 
-  filter(predicate?: AnyItem): Selector;
-  filter(func: FilterFieldsFunction<Value, Value>): MapOutlet<Value, Value, Map<Value, Value>>;
-  filter(func: AnyItem | FilterFieldsFunction<Value, Value>): Selector | MapOutlet<Value, Value, Map<Value, Value>> {
+  override filter(predicate?: AnyItem): Selector;
+  override filter(func: FilterFieldsFunction<Value, Value>): MapOutlet<Value, Value, Map<Value, Value>>;
+  override filter(func: AnyItem | FilterFieldsFunction<Value, Value>): Selector | MapOutlet<Value, Value, Map<Value, Value>> {
     if (typeof func !== "function") {
       return super.filter(func as AnyItem);
     } else {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import {UtfErrorMode} from "./UtfErrorMode";
 /** @hidden */
 export class Utf8EncodedOutput<T> extends Output<T> {
   /** @hidden */
-  declare readonly output: Output<T>;
+  readonly output!: Output<T>;
   /** @hidden */
-  declare readonly errorMode: UtfErrorMode;
+  readonly errorMode!: UtfErrorMode;
   /** @hidden */
   c2: number;
   /** @hidden */
@@ -51,27 +51,27 @@ export class Utf8EncodedOutput<T> extends Output<T> {
     this.index = index;
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return this.output.isCont();
   }
 
-  isFull(): boolean {
+  override isFull(): boolean {
     return this.output.isFull();
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return this.output.isDone();
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return false;
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return this.output.isPart();
   }
 
-  asPart(part: boolean): Output<T> {
+  override asPart(part: boolean): Output<T> {
     Object.defineProperty(this, "output", {
       value: this.output.asPart(part),
       enumerable: true,
@@ -80,7 +80,7 @@ export class Utf8EncodedOutput<T> extends Output<T> {
     return this;
   }
 
-  write(token: number | string): Output<T> {
+  override write(token: number | string): Output<T> {
     if (typeof token === "number") {
       let c1 = 0;
       let c2 = this.c2;
@@ -170,7 +170,7 @@ export class Utf8EncodedOutput<T> extends Output<T> {
     }
   }
 
-  flush(): Output<T> {
+  override flush(): Output<T> {
     let output = this.output;
     let index = this.index;
     while (index < 4) {
@@ -195,11 +195,11 @@ export class Utf8EncodedOutput<T> extends Output<T> {
     return this;
   }
 
-  get settings(): OutputSettings {
+  override get settings(): OutputSettings {
     return this.output.settings;
   }
 
-  withSettings(settings: AnyOutputSettings): Output<T> {
+  override withSettings(settings: AnyOutputSettings): Output<T> {
     Object.defineProperty(this, "output", {
       value: this.output.withSettings(settings),
       enumerable: true,
@@ -208,11 +208,11 @@ export class Utf8EncodedOutput<T> extends Output<T> {
     return this;
   }
 
-  bind(): T {
+  override bind(): T {
     return this.output.bind();
   }
 
-  clone(): Output<T> {
+  override clone(): Output<T> {
     return new Utf8EncodedOutput(this.output.clone(), this.errorMode,
                                  this.c2, this.c3, this.c4, this.index);
   }

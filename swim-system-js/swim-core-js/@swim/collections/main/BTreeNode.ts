@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import {BTreeNodeCursor} from "./"; // forward import
 /** @hidden */
 export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   /** @hidden */
-  declare readonly pages: ReadonlyArray<BTreePage<K, V, U>>;
+  readonly pages!: ReadonlyArray<BTreePage<K, V, U>>;
   /** @hidden */
-  declare readonly knots: ReadonlyArray<K>;
+  readonly knots!: ReadonlyArray<K>;
 
   constructor(pages: ReadonlyArray<BTreePage<K, V, U>>, knots: ReadonlyArray<K>,
               fold: U | undefined, size: number) {
@@ -45,27 +45,27 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     });
   }
 
-  get arity(): number {
+  override get arity(): number {
     return this.pages.length;
   }
 
-  declare readonly size: number;
+  override readonly size!: number;
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.size === 0;
   }
 
-  declare readonly fold: U | undefined;
+  override readonly fold!: U | undefined;
 
-  minKey(): K {
+  override minKey(): K {
     return this.pages[0]!.minKey();
   }
 
-  maxKey(): K {
+  override maxKey(): K {
     return this.pages[this.pages.length - 1]!.maxKey();
   }
 
-  has(key: K, tree: BTreeContext<K, V>): boolean {
+  override has(key: K, tree: BTreeContext<K, V>): boolean {
     let xx = this.lookup(key, tree);
     if (xx > 0) {
       xx += 1;
@@ -77,7 +77,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return this.pages[xx]!.has(key, tree);
   }
 
-  get(key: K, tree: BTreeContext<K, V>): V | undefined {
+  override get(key: K, tree: BTreeContext<K, V>): V | undefined {
     let x = this.lookup(key, tree);
     if (x >= 0) {
       x += 1;
@@ -87,7 +87,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return this.pages[x]!.get(key, tree);
   }
 
-  getEntry(x: number): [K, V] | undefined {
+  override getEntry(x: number): [K, V] | undefined {
     const pages = this.pages;
     for (let i = 0, n = pages.length; i < n; i += 1) {
       const page = pages[i]!;
@@ -100,7 +100,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return void 0;
   }
 
-  firstEntry(): [K, V] | undefined {
+  override firstEntry(): [K, V] | undefined {
     const pages = this.pages;
     if (pages.length !== 0) {
       return pages[0]!.firstEntry();
@@ -109,7 +109,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  lastEntry(): [K, V] | undefined {
+  override lastEntry(): [K, V] | undefined {
     const pages = this.pages;
     if (pages.length !== 0) {
       return pages[pages.length - 1]!.lastEntry();
@@ -118,7 +118,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  nextEntry(key: K, tree: BTreeContext<K, V>): [K, V] | undefined {
+  override nextEntry(key: K, tree: BTreeContext<K, V>): [K, V] | undefined {
     let x = this.lookup(key, tree);
     if (x >= 0) {
       x += 1;
@@ -133,7 +133,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return entry;
   }
 
-  previousEntry(key: K, tree: BTreeContext<K, V>): [K, V] | undefined {
+  override previousEntry(key: K, tree: BTreeContext<K, V>): [K, V] | undefined {
     let x = this.lookup(key, tree);
     if (x >= 0) {
       x += 1;
@@ -148,7 +148,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return entry;
   }
 
-  updated(key: K, newValue: V, tree: BTreeContext<K, V>): BTreeNode<K, V, U> {
+  override updated(key: K, newValue: V, tree: BTreeContext<K, V>): BTreeNode<K, V, U> {
     let x = this.lookup(key, tree);
     if (x >= 0) {
       x += 1;
@@ -168,7 +168,8 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  private updatedPage(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
+  /** @hidden */
+  updatedPage(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
     const oldPages = this.pages;
     const newPages = oldPages.slice(0);
     newPages[x] = newPage;
@@ -188,7 +189,8 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
-  private updatedPageSplit(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
+  /** @hidden */
+  updatedPageSplit(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
     const oldPages = this.pages;
     const newPages = new Array<BTreePage<K, V, U>>(oldPages.length + 1);
     for (let i = 0; i < x; i += 1) {
@@ -225,7 +227,8 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
-  private updatedPageMerge(x: number, newPage: BTreeNode<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
+  /** @hidden */
+  updatedPageMerge(x: number, newPage: BTreeNode<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
     const oldPages = this.pages;
     const midPages = newPage.pages;
     const newPages = new Array<BTreePage<K, V, U>>(oldPages.length + midPages.length - 1);
@@ -267,7 +270,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
-  removed(key: K, tree: BTreeContext<K, V>): BTreePage<K, V, U> {
+  override removed(key: K, tree: BTreeContext<K, V>): BTreePage<K, V, U> {
     let x = this.lookup(key, tree);
     if (x >= 0) {
       x += 1;
@@ -283,8 +286,9 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  private replacedPage(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>,
-                       tree: BTreeContext<K, V>): BTreePage<K, V, U> {
+  /** @hidden */
+  replacedPage(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>,
+               tree: BTreeContext<K, V>): BTreePage<K, V, U> {
     if (!newPage.isEmpty()) {
       if (newPage instanceof BTreeNode && tree.pageShouldMerge(newPage)) {
         return this.updatedPageMerge(x, newPage, oldPage);
@@ -304,7 +308,8 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  private removedPage(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
+  /** @hidden */
+  removedPage(x: number, newPage: BTreePage<K, V, U>, oldPage: BTreePage<K, V, U>): BTreeNode<K, V, U> {
     const oldPages = this.pages;
     const newPages = new Array<BTreePage<K, V, U>>(oldPages.length - 1);
     for (let i = 0; i < x; i += 1) {
@@ -333,7 +338,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
-  drop(lower: number, tree: BTreeContext<K, V>): BTreePage<K, V, U> {
+  override drop(lower: number, tree: BTreeContext<K, V>): BTreePage<K, V, U> {
     if (lower > 0) {
       let newSize = this.size;
       if (lower < newSize) {
@@ -383,7 +388,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  take(upper: number, tree: BTreeContext<K, V>): BTreePage<K, V, U> {
+  override take(upper: number, tree: BTreeContext<K, V>): BTreePage<K, V, U> {
     if (upper < this.size) {
       if (upper > 0) {
         const oldPages = this.pages;
@@ -435,7 +440,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  balanced(tree: BTreeContext<K, V>): BTreeNode<K, V, U> {
+  override balanced(tree: BTreeContext<K, V>): BTreeNode<K, V, U> {
     if (this.pages.length > 1 && tree.pageShouldSplit(this)) {
       const x = this.knots.length >>> 1;
       return this.split(x);
@@ -444,7 +449,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  split(x: number): BTreeNode<K, V, U> {
+  override split(x: number): BTreeNode<K, V, U> {
     const newPages = new Array<BTreePage<K, V, U>>(2);
     const newLeftPage = this.splitLeft(x);
     const newRightPage = this.splitRight(x);
@@ -457,7 +462,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return new BTreeNode(newPages, newKnots, void 0, this.size);
   }
 
-  splitLeft(x: number): BTreeNode<K, V, U> {
+  override splitLeft(x: number): BTreeNode<K, V, U> {
     const oldPages = this.pages;
     const newPages = new Array<BTreePage<K, V, U>>(x + 1);
     for (let i = 0; i < x + 1; i += 1) {
@@ -478,7 +483,7 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
-  splitRight(x: number): BTreeNode<K, V, U> {
+  override splitRight(x: number): BTreeNode<K, V, U> {
     const oldPages = this.pages;
     const newArity = oldPages.length - (x + 1);
     const newPages = new Array<BTreePage<K, V, U>>(newArity);
@@ -500,8 +505,8 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return new BTreeNode(newPages, newKnots, void 0, newSize);
   }
 
-  reduced(identity: U, accumulator: (result: U, element: V) => U,
-          combiner: (result: U, result2: U) => U): BTreeNode<K, V, U> {
+  override reduced(identity: U, accumulator: (result: U, element: V) => U,
+                   combiner: (result: U, result2: U) => U): BTreeNode<K, V, U> {
     if (this.fold === void 0) {
       const oldPages = this.pages;
       const n = oldPages.length;
@@ -520,8 +525,8 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
   }
 
-  forEach<T, S>(callback: (this: S, key: K, value: V) => T | void,
-                thisArg: S): T | undefined {
+  override forEach<T, S>(callback: (this: S, key: K, value: V) => T | void,
+                         thisArg: S): T | undefined {
     const pages = this.pages;
     for (let i = 0, n = pages.length; i < n; i += 1) {
       const result = pages[i]!.forEach(callback, thisArg);
@@ -532,8 +537,8 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return void 0;
   }
 
-  forEachKey<T, S>(callback: (this: S, key: K) => T | void,
-                   thisArg: S): T | undefined {
+  override forEachKey<T, S>(callback: (this: S, key: K) => T | void,
+                            thisArg: S): T | undefined {
     const pages = this.pages;
     for (let i = 0, n = pages.length; i < n; i += 1) {
       const result = pages[i]!.forEachKey(callback, thisArg);
@@ -544,8 +549,8 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return void 0;
   }
 
-  forEachValue<T, S>(callback: (this: S, value: V) => T | void,
-                     thisArg: S): T | undefined {
+  override forEachValue<T, S>(callback: (this: S, value: V) => T | void,
+                              thisArg: S): T | undefined {
     const pages = this.pages;
     for (let i = 0, n = pages.length; i < n; i += 1) {
       const result = pages[i]!.forEachValue(callback, thisArg);
@@ -556,15 +561,16 @@ export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     return void 0;
   }
 
-  entries(): Cursor<[K, V]> {
+  override entries(): Cursor<[K, V]> {
     return new BTreeNodeCursor(this.pages);
   }
 
-  reverseEntries(): Cursor<[K, V]> {
+  override reverseEntries(): Cursor<[K, V]> {
     return new BTreeNodeCursor(this.pages, this.size, this.pages.length);
   }
 
-  private lookup(key: K, tree: BTreeContext<K, V>): number {
+  /** @hidden */
+  lookup(key: K, tree: BTreeContext<K, V>): number {
     let lo = 0;
     let hi = this.knots.length - 1;
     while (lo <= hi) {

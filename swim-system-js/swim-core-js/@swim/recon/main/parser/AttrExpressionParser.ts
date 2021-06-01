@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ export class AttrExpressionParser<I, V> extends Parser<V> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<V> {
+  override feed(input: Input): Parser<V> {
     return AttrExpressionParser.parse(input, this.recon, this.builder,
                                       this.fieldParser, this.valueParser, this.step);
   }
@@ -58,7 +58,7 @@ export class AttrExpressionParser<I, V> extends Parser<V> {
             step = 4;
           } else if (c === 33/*'!'*/ || c === 34/*'"'*/ || c === 36/*'$'*/ || c === 37/*'%'*/
                   || c === 39/*'\''*/ || c === 43/*'+'*/ || c === 45/*'-'*/
-                  || c >= 48/*'0'*/ && c <= 57/*'9'*/ || c === 126/*'~'*/
+                  || c >= 48/*'0'*/ && c <= 57/*'9'*/ || c === 96/*'`'*/ || c === 126/*'~'*/
                   || Recon.isIdentStartChar(c)) {
             step = 3;
           } else if (builder === void 0) {

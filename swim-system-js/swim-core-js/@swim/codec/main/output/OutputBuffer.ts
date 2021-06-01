@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import {Format} from "../"; // forward import
  * Non-blocking token stream buffer.
  */
 export abstract class OutputBuffer<T = unknown> extends Output<T> {
-  abstract asPart(part: boolean): OutputBuffer<T>;
+  abstract override asPart(part: boolean): OutputBuffer<T>;
 
   abstract readonly index: number;
 
@@ -44,35 +44,35 @@ export abstract class OutputBuffer<T = unknown> extends Output<T> {
 
   abstract set(index: number, token: number): void;
 
-  abstract write(token: number): OutputBuffer<T>;
-  abstract write(string: string): OutputBuffer<T>;
+  abstract override write(token: number): OutputBuffer<T>;
+  abstract override write(string: string): OutputBuffer<T>;
 
-  writeln(string?: string): OutputBuffer<T> {
+  override writeln(string?: string): OutputBuffer<T> {
     if (typeof string === "string") {
       this.write(string);
     }
     return this.write(this.settings.lineSeparator);
   }
 
-  display(object: unknown): OutputBuffer<T> {
+  override display(object: unknown): OutputBuffer<T> {
     Format.display(object, this);
     return this;
   }
 
-  debug(object: unknown): OutputBuffer<T> {
+  override debug(object: unknown): OutputBuffer<T> {
     Format.debug(object, this);
     return this;
   }
 
   abstract step(offset?: number): OutputBuffer<T>;
 
-  flush(): OutputBuffer<T> {
+  override flush(): OutputBuffer<T> {
     return this;
   }
 
-  abstract withSettings(settings: AnyOutputSettings): Output<T>;
+  abstract override withSettings(settings: AnyOutputSettings): Output<T>;
 
-  clone(): OutputBuffer<T> {
+  override clone(): OutputBuffer<T> {
     throw new Error();
   }
 
@@ -80,7 +80,7 @@ export abstract class OutputBuffer<T = unknown> extends Output<T> {
    * Returns an `OutputBuffer` in the _full_ state.
    */
   @Lazy
-  static full(): OutputBuffer<never> {
+  static override full(): OutputBuffer<never> {
     return new OutputBufferFull(OutputSettings.standard());
   }
 
@@ -88,14 +88,14 @@ export abstract class OutputBuffer<T = unknown> extends Output<T> {
    * Returns an `OutputBuffer` in the _done_ state.
    */
   @Lazy
-  static done(): OutputBuffer<never> {
+  static override done(): OutputBuffer<never> {
     return new OutputBufferDone(OutputSettings.standard());
   }
 
   /**
    * Returns an `OutputBuffer` in the _error_ state that traps the given `error`.
    */
-  static error(error: Error): OutputBuffer<never> {
+  static override error(error: Error): OutputBuffer<never> {
     return new OutputBufferError(error, OutputSettings.standard());
   }
 }

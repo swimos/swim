@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,18 +26,18 @@ export abstract class UnaryOperator extends Operator {
     });
   }
 
-  declare readonly operand: Item;
+  readonly operand!: Item;
 
   abstract readonly operator: string;
 
-  isConstant(): boolean {
+  override isConstant(): boolean {
     return this.operand.isConstant();
   }
 
-  interpolateTo(that: UnaryOperator): Interpolator<UnaryOperator>;
-  interpolateTo(that: Item): Interpolator<Item>;
-  interpolateTo(that: unknown): Interpolator<Item> | null;
-  interpolateTo(that: unknown): Interpolator<Item> | null {
+  override interpolateTo(that: UnaryOperator): Interpolator<UnaryOperator>;
+  override interpolateTo(that: Item): Interpolator<Item>;
+  override interpolateTo(that: unknown): Interpolator<Item> | null;
+  override interpolateTo(that: unknown): Interpolator<Item> | null {
     if (that instanceof UnaryOperator && this.operator === that.operator) {
       return UnaryOperatorInterpolator(this, that);
     } else {

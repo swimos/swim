@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import {Cursor} from "@swim/util";
 /** @hidden */
 export class ValuesCursor<K, V> extends Cursor<V> {
   /** @hidden */
-  declare readonly cursor: Cursor<[K, V]>;
+  readonly cursor!: Cursor<[K, V]>;
 
   constructor(cursor: Cursor<[K, V]>) {
     super();
@@ -27,49 +27,49 @@ export class ValuesCursor<K, V> extends Cursor<V> {
     });
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.cursor.isEmpty();
   }
 
-  head(): V {
+  override head(): V {
     return this.cursor.head()[1];
   }
 
-  step(): void {
+  override step(): void {
     this.cursor.step();
   }
 
-  skip(count: number): void {
+  override skip(count: number): void {
     this.cursor.skip(count);
   }
 
-  hasNext(): boolean {
+  override hasNext(): boolean {
     return this.cursor.hasNext();
   }
 
-  nextIndex(): number {
+  override nextIndex(): number {
     return this.cursor.nextIndex();
   }
 
-  next(): {value?: V, done: boolean} {
+  override next(): {value?: V, done: boolean} {
     const {value, done} = this.cursor.next();
     return {value: value && value[1], done};
   }
 
-  hasPrevious(): boolean {
+  override hasPrevious(): boolean {
     return this.cursor.hasPrevious();
   }
 
-  previousIndex(): number {
+  override previousIndex(): number {
     return this.cursor.previousIndex();
   }
 
-  previous(): {value?: V, done: boolean} {
+  override previous(): {value?: V, done: boolean} {
     const {value, done} = this.cursor.previous();
     return {value: value && value[1], done};
   }
 
-  delete(): void {
+  override delete(): void {
     this.cursor.delete();
   }
 }

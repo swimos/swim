@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,18 +51,18 @@ export class Slot extends Field {
     });
   }
 
-  declare readonly key: Value;
+  override readonly key!: Value;
 
-  declare readonly value: Value;
+  override readonly value!: Value;
 
   /** @hidden */
-  declare readonly flags: number;
+  readonly flags!: number;
 
-  isConstant(): boolean {
+  override isConstant(): boolean {
     return this.key.isConstant() && this.value.isConstant();
   }
 
-  setValue(newValue: Value): Value {
+  override setValue(newValue: Value): Value {
     if ((this.flags & Field.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
@@ -75,11 +75,11 @@ export class Slot extends Field {
     return oldValue;
   }
 
-  updatedValue(value: Value): Slot {
+  override updatedValue(value: Value): Slot {
     return new Slot(this.key, value);
   }
 
-  bitwiseOr(that: AnyItem): Item {
+  override bitwiseOr(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new BitwiseOrOperator(this, that);
@@ -98,7 +98,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  bitwiseXor(that: AnyItem): Item {
+  override bitwiseXor(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new BitwiseXorOperator(this, that);
@@ -117,7 +117,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  bitwiseAnd(that: AnyItem): Item {
+  override bitwiseAnd(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new BitwiseAndOperator(this, that);
@@ -136,7 +136,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  plus(that: AnyItem): Item {
+  override plus(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new PlusOperator(this, that);
@@ -155,7 +155,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  minus(that: AnyItem): Item {
+  override minus(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new MinusOperator(this, that);
@@ -174,7 +174,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  times(that: AnyItem): Item {
+  override times(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new TimesOperator(this, that);
@@ -193,7 +193,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  divide(that: AnyItem): Item {
+  override divide(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new DivideOperator(this, that);
@@ -212,7 +212,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  modulo(that: AnyItem): Item {
+  override modulo(that: AnyItem): Item {
     that = Item.fromAny(that);
     if (that instanceof Expression) {
       return new ModuloOperator(this, that);
@@ -231,7 +231,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  not(): Item {
+  override not(): Item {
     const newValue = this.value.not();
     if (newValue.isDefined()) {
       return new Slot(this.key, newValue);
@@ -239,7 +239,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  bitwiseNot(): Item {
+  override bitwiseNot(): Item {
     const newValue = this.value.bitwiseNot();
     if (newValue.isDefined()) {
       return new Slot(this.key, newValue);
@@ -247,7 +247,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  negative(): Item {
+  override negative(): Item {
     const newValue = this.value.negative();
     if (newValue.isDefined()) {
       return new Slot(this.key, newValue);
@@ -255,7 +255,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  positive(): Item {
+  override positive(): Item {
     const newValue = this.value.positive();
     if (newValue.isDefined()) {
       return new Slot(this.key, newValue);
@@ -263,7 +263,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  inverse(): Item {
+  override inverse(): Item {
     const newValue = this.value.inverse();
     if (newValue.isDefined()) {
       return new Slot(this.key, newValue);
@@ -271,7 +271,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  evaluate(interpreter: AnyInterpreter): Item {
+  override evaluate(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     const key = this.key.evaluate(interpreter).toValue();
     const value = this.value.evaluate(interpreter).toValue();
@@ -283,7 +283,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  substitute(interpreter: AnyInterpreter): Item {
+  override substitute(interpreter: AnyInterpreter): Item {
     interpreter = Interpreter.fromAny(interpreter);
     const key = this.key.substitute(interpreter).toValue();
     const value = this.value.substitute(interpreter).toValue();
@@ -295,7 +295,7 @@ export class Slot extends Field {
     return Item.absent();
   }
 
-  toAny(): AnyField {
+  override toAny(): AnyField {
     const field = {} as {[key: string]: AnyValue};
     if (this.key instanceof Text) {
       field[this.key.value] = this.value.toAny();
@@ -306,15 +306,15 @@ export class Slot extends Field {
     return field;
   }
 
-  isAliased(): boolean {
+  override isAliased(): boolean {
     return false;
   }
 
-  isMutable(): boolean {
+  override isMutable(): boolean {
     return (this.flags & Field.ImmutableFlag) === 0;
   }
 
-  alias(): void {
+  override alias(): void {
     if ((this.flags & Field.ImmutableFlag) === 0) {
       Object.defineProperty(this, "flags", {
         value: this.flags | Field.ImmutableFlag,
@@ -328,7 +328,7 @@ export class Slot extends Field {
     }
   }
 
-  branch(): Slot {
+  override branch(): Slot {
     if ((this.flags & Field.ImmutableFlag) !== 0) {
       return new Slot(this.key, this.value, this.flags & ~Field.ImmutableFlag);
     } else {
@@ -336,11 +336,11 @@ export class Slot extends Field {
     }
   }
 
-  clone(): Slot {
+  override clone(): Slot {
     return new Slot(this.key.clone(), this.value.clone());
   }
 
-  commit(): this {
+  override commit(): this {
     if ((this.flags & Field.ImmutableFlag) === 0) {
       Object.defineProperty(this, "flags", {
         value: this.flags | Field.ImmutableFlag,
@@ -356,10 +356,10 @@ export class Slot extends Field {
     return this;
   }
 
-  interpolateTo(that: Slot): Interpolator<Slot>;
-  interpolateTo(that: Item): Interpolator<Item>;
-  interpolateTo(that: unknown): Interpolator<Item> | null;
-  interpolateTo(that: unknown): Interpolator<Item> | null {
+  override interpolateTo(that: Slot): Interpolator<Slot>;
+  override interpolateTo(that: Item): Interpolator<Item>;
+  override interpolateTo(that: unknown): Interpolator<Item> | null;
+  override interpolateTo(that: unknown): Interpolator<Item> | null {
     if (that instanceof Slot) {
       return SlotInterpolator(this, that);
     } else {
@@ -367,11 +367,11 @@ export class Slot extends Field {
     }
   }
 
-  get typeOrder(): number {
+  override get typeOrder(): number {
     return 2;
   }
 
-  compareTo(that: unknown): number {
+  override compareTo(that: unknown): number {
     if (that instanceof Slot) {
       let order = this.key.compareTo(that.key);
       if (order === 0) {
@@ -384,7 +384,7 @@ export class Slot extends Field {
     return NaN;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Slot) {
@@ -393,7 +393,7 @@ export class Slot extends Field {
     return false;
   }
 
-  keyEquals(key: unknown): boolean {
+  override keyEquals(key: unknown): boolean {
     if (typeof key === "string" && this.key instanceof Text) {
       return this.key.value === key;
     } else if (key instanceof Field) {
@@ -403,7 +403,7 @@ export class Slot extends Field {
     }
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Slot) {
@@ -412,12 +412,12 @@ export class Slot extends Field {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(Slot),
         this.key.hashCode()), this.value.hashCode()));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Slot").write(46/*'.'*/).write("of").write(40/*'('*/).display(this.key);
     if (!(this.value instanceof Extant)) {
       output = output.write(44/*','*/).write(32/*' '*/).display(this.value);
@@ -425,11 +425,11 @@ export class Slot extends Field {
     output = output.write(41/*')'*/);
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     this.debug(output);
   }
 
-  static of(key: AnyValue, value?: AnyValue): Slot {
+  static override of(key: AnyValue, value?: AnyValue): Slot {
     key = Value.fromAny(key);
     if (arguments.length === 1) {
       value = Value.extant();

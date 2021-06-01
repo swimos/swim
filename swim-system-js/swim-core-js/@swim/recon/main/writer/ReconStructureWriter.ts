@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,71 +51,71 @@ import {
 import {ReconWriter} from "./ReconWriter";
 
 export class ReconStructureWriter extends ReconWriter<Item, Value> {
-  isField(item: Item): boolean {
+  override isField(item: Item): boolean {
     return item instanceof Field;
   }
 
-  isAttr(item: Item): boolean {
+  override isAttr(item: Item): boolean {
     return item instanceof Attr;
   }
 
-  isSlot(item: Item): boolean {
+  override isSlot(item: Item): boolean {
     return item instanceof Slot;
   }
 
-  isValue(item: Item): boolean {
+  override isValue(item: Item): boolean {
     return item instanceof Value;
   }
 
-  isRecord(item: Item): boolean {
+  override isRecord(item: Item): boolean {
     return item instanceof Record;
   }
 
-  isText(item: Item): boolean {
+  override isText(item: Item): boolean {
     return item instanceof Text;
   }
 
-  isNum(item: Item): boolean {
+  override isNum(item: Item): boolean {
     return item instanceof Num;
   }
 
-  isBool(item: Item): boolean {
+  override isBool(item: Item): boolean {
     return item instanceof Bool;
   }
 
-  isExpression(item: Item): boolean {
+  override isExpression(item: Item): boolean {
     return item instanceof Expression;
   }
 
-  isExtant(item: Item): boolean {
+  override isExtant(item: Item): boolean {
     return item instanceof Extant;
   }
 
-  items(item: Item): Cursor<Item> {
+  override items(item: Item): Cursor<Item> {
     return item.iterator();
   }
 
-  item(value: Value): Item {
+  override item(value: Value): Item {
     return value;
   }
 
-  key(item: Item): Value {
+  override key(item: Item): Value {
     return item.key;
   }
 
-  value(item: Item): Value {
+  override value(item: Item): Value {
     return item.toValue();
   }
 
-  string(item: Item): string {
+  override string(item: Item): string {
     return item.stringValue("");
   }
 
-  precedence(item: Item): number {
+  override precedence(item: Item): number {
     return item.precedence;
   }
 
-  sizeOfItem(item: Item): number {
+  override sizeOfItem(item: Item): number {
     if (item instanceof Field) {
       if (item instanceof Attr) {
         return this.sizeOfAttr(item.key, item.value);
@@ -128,7 +128,7 @@ export class ReconStructureWriter extends ReconWriter<Item, Value> {
     throw new WriterException("No Recon serialization for " + item);
   }
 
-  writeItem(item: Item, output: Output): Writer {
+  override writeItem(item: Item, output: Output): Writer {
     if (item instanceof Field) {
       if (item instanceof Attr) {
         return this.writeAttr(item.key, item.value, output);
@@ -141,7 +141,7 @@ export class ReconStructureWriter extends ReconWriter<Item, Value> {
     return Writer.error(new WriterException("No Recon serialization for " + item));
   }
 
-  sizeOfValue(value: Value): number {
+  override sizeOfValue(value: Value): number {
     if (value instanceof Record) {
       return this.sizeOfRecord(value);
     } else if (value instanceof Data) {
@@ -172,7 +172,7 @@ export class ReconStructureWriter extends ReconWriter<Item, Value> {
     throw new WriterException("No Recon serialization for " + value);
   }
 
-  writeValue(value: Value, output: Output): Writer {
+  override writeValue(value: Value, output: Output): Writer {
     if (value instanceof Record) {
       return this.writeRecord(value, output);
     } else if (value instanceof Data) {
@@ -297,7 +297,7 @@ export class ReconStructureWriter extends ReconWriter<Item, Value> {
     return Writer.error(new WriterException("No Recon serialization for " + func));
   }
 
-  sizeOfBlockItem(item: Item): number {
+  override sizeOfBlockItem(item: Item): number {
     if (item instanceof Field) {
       return this.sizeOfItem(item);
     } else if (item instanceof Value) {
@@ -306,7 +306,7 @@ export class ReconStructureWriter extends ReconWriter<Item, Value> {
     throw new WriterException("No Recon serialization for " + item);
   }
 
-  writeBlockItem(item: Item, output: Output): Writer {
+  override writeBlockItem(item: Item, output: Output): Writer {
     if (item instanceof Field) {
       return this.writeItem(item, output);
     } else if (item instanceof Value) {
@@ -315,21 +315,21 @@ export class ReconStructureWriter extends ReconWriter<Item, Value> {
     return Writer.error(new WriterException("No Recon serialization for " + item));
   }
 
-  sizeOfBlockValue(value: Value): number {
+  override sizeOfBlockValue(value: Value): number {
     if (value instanceof Record) {
       return this.sizeOfBlock(value);
     }
     return this.sizeOfValue(value);
   }
 
-  writeBlockValue(value: Value, output: Output): Writer {
+  override writeBlockValue(value: Value, output: Output): Writer {
     if (value instanceof Record) {
       return this.writeBlock(value, output);
     }
     return this.writeValue(value, output);
   }
 
-  sizeOfThen(then: Value): number {
+  override sizeOfThen(then: Value): number {
     if (then instanceof Selector) {
       if (then instanceof IdentitySelector) {
         return this.sizeOfThenIdentitySelector();
@@ -356,7 +356,7 @@ export class ReconStructureWriter extends ReconWriter<Item, Value> {
     throw new WriterException("No Recon serialization for " + then);
   }
 
-  writeThen(then: Value, output: Output): Writer {
+  override writeThen(then: Value, output: Output): Writer {
     if (then instanceof Selector) {
       if (then instanceof IdentitySelector) {
         return this.writeThenIdentitySelector(output);

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,15 +20,15 @@ import type {Base16} from "./Base16";
 /** @hidden */
 export class Base16Writer extends Writer {
   /** @hidden */
-  declare readonly value: unknown;
+  readonly value!: unknown;
   /** @hidden */
-  declare readonly input: Uint8Array | null;
+  readonly input!: Uint8Array | null;
   /** @hidden */
-  declare readonly base16: Base16;
+  readonly base16!: Base16;
   /** @hidden */
-  declare readonly index: number;
+  readonly index!: number;
   /** @hidden */
-  declare readonly step: number;
+  readonly step!: number;
 
   constructor(value: unknown, input: Uint8Array | null, base16: Base16,
               index: number = 0, step: number = 1) {
@@ -55,7 +55,7 @@ export class Base16Writer extends Writer {
     });
   }
 
-  feed(value: unknown): Writer {
+  override feed(value: unknown): Writer {
     if (value instanceof Uint8Array) {
       return new Base16Writer(void 0, value, this.base16);
     } else {
@@ -63,7 +63,7 @@ export class Base16Writer extends Writer {
     }
   }
 
-  pull(output: Output): Writer {
+  override pull(output: Output): Writer {
     if (this.input === null) {
       throw new WriterException();
     }

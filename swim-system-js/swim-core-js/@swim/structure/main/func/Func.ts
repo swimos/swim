@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ export abstract class Func extends Expression {
     super();
   }
 
-  abstract invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item;
+  override isConstant(): boolean {
+    return false;
+  }
+
+  abstract override invoke(args: Value, interpreter?: Interpreter, operator?: InvokeOperator): Item;
 
   expand(args: Value, interpreter: Interpreter, operator: InvokeOperator): Item | undefined {
     return void 0;
-  }
-
-  isConstant(): boolean {
-    return false;
   }
 }

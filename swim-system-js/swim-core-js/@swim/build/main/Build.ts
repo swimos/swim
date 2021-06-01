@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -315,9 +315,9 @@ export class Build {
       const target = targets[i]!;
       const result = callback(target);
       if (result !== void 0) {
-        return result.then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
+        return result.then(this.forEachTarget.bind(this, targets, callback, i + 1));
       } else {
-        return Promise.resolve(void 0).then(this.forEachTransitiveTarget.bind(this, targets, callback, i + 1));
+        return Promise.resolve(void 0).then(this.forEachTarget.bind(this, targets, callback, i + 1));
       }
     } else {
       return Promise.resolve(void 0);

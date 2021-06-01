@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ export class Arg implements HashCode, Debug {
     });
   }
 
-  declare readonly name: string;
+  readonly name!: string;
 
-  declare readonly value: string | undefined;
+  readonly value!: string | undefined;
 
   withValue(value: string | undefined): this {
     Object.defineProperty(this, "value", {
@@ -54,7 +54,7 @@ export class Arg implements HashCode, Debug {
     return this;
   }
 
-  declare readonly optional: boolean;
+  readonly optional!: boolean;
 
   asOptional(optional: boolean): this {
     Object.defineProperty(this, "optional", {

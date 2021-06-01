@@ -4,7 +4,7 @@
   "description": "Streaming API client for linking to lanes of stateful Web Agents using the WARP protocol, enabling massively real-time applications that continuously synchronize all shared states with ping latency",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/client",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2020 Swim inc.",
+  "copyright": "2015-2021 Swim inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-client.js",
@@ -33,6 +33,6 @@
     "@swim/recon": "3.11.0-dev.20210415",
     "@swim/uri": "3.11.0-dev.20210415",
     "@swim/warp": "3.11.0-dev.20210415",
-    "ws": "7"
+    "ws": ">= 7.4.6"
   }
 }

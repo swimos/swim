@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import type {Form} from "../form/Form";
 /** @hidden */
 export class ValueCursor<V> extends Cursor<V> {
   /** @hidden */
-  declare readonly cursor: Cursor<Value>;
+  readonly cursor!: Cursor<Value>;
   /** @hidden */
-  declare readonly form: Form<V, unknown>;
+  readonly form!: Form<V, unknown>;
 
   constructor(cursor: Cursor<Value>, form: Form<V, unknown>) {
     super();
@@ -35,32 +35,32 @@ export class ValueCursor<V> extends Cursor<V> {
     });
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return this.cursor.isEmpty();
   }
 
-  head(): V {
+  override head(): V {
     const value = this.cursor.head();
     return value.coerce(this.form);
   }
 
-  step(): void {
+  override step(): void {
     this.cursor.step();
   }
 
-  skip(count: number): void {
+  override skip(count: number): void {
     this.cursor.skip(count);
   }
 
-  hasNext(): boolean {
+  override hasNext(): boolean {
     return this.cursor.hasNext();
   }
 
-  nextIndex(): number {
+  override nextIndex(): number {
     return this.cursor.nextIndex();
   }
 
-  next(): {value?: V, done: boolean} {
+  override next(): {value?: V, done: boolean} {
     const {value, done} = this.cursor.next();
     if (value !== void 0) {
       return {value: value.coerce(this.form), done};
@@ -69,15 +69,15 @@ export class ValueCursor<V> extends Cursor<V> {
     }
   }
 
-  hasPrevious(): boolean {
+  override hasPrevious(): boolean {
     return this.cursor.hasPrevious();
   }
 
-  previousIndex(): number {
+  override previousIndex(): number {
     return this.cursor.previousIndex();
   }
 
-  previous(): {value?: V, done: boolean} {
+  override previous(): {value?: V, done: boolean} {
     const {value, done} = this.cursor.previous();
     if (value !== void 0) {
       return {value: value.coerce(this.form), done};
@@ -86,7 +86,7 @@ export class ValueCursor<V> extends Cursor<V> {
     }
   }
 
-  delete(): void {
+  override delete(): void {
     this.cursor.delete();
   }
 }

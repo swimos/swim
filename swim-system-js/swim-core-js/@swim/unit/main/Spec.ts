@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ export class Spec {
    * The name of this `Spec`; either a custom `name` set via the [[withName]]
    * method, or the name of this spec's constructor function.
    */
-  declare readonly name: string;
+  readonly name!: string;
 
   /**
    * Sets the name of this `Spec`, and returns `this`.  If `name` is `undefined`,
@@ -71,7 +71,7 @@ export class Spec {
    * [[UnitFunc child unit factory functions]], or `null` if this is
    * a root spec.
    */
-  declare readonly parent: Spec | null;
+  readonly parent!: Spec | null;
 
   /** @hidden */
   setParent(parent: Spec | null): void {

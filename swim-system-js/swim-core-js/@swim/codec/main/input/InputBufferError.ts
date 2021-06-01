@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import {InputBuffer} from "./InputBuffer";
 /** @hidden */
 export class InputBufferError extends InputBuffer {
   /** @hidden */
-  declare readonly error: Error;
+  readonly error!: Error;
 
   constructor(error: Error, id: string | undefined, mark: Mark, settings: InputSettings) {
     super();
@@ -42,35 +42,35 @@ export class InputBufferError extends InputBuffer {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return false;
   }
 
-  isEmpty(): boolean {
+  override isEmpty(): boolean {
     return false;
   }
 
-  isDone(): boolean {
+  override isDone(): boolean {
     return false;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return true;
   }
 
-  isPart(): boolean {
+  override isPart(): boolean {
     return false;
   }
 
-  asPart(part: boolean): InputBuffer {
+  override asPart(part: boolean): InputBuffer {
     return this;
   }
 
-  get index(): number {
+  override get index(): number {
     return 0;
   }
 
-  withIndex(index: number): InputBuffer {
+  override withIndex(index: number): InputBuffer {
     if (index === 0) {
       return this;
     } else {
@@ -79,11 +79,11 @@ export class InputBufferError extends InputBuffer {
     }
   }
 
-  get limit(): number {
+  override get limit(): number {
     return 0;
   }
 
-  withLimit(limit: number): InputBuffer {
+  override withLimit(limit: number): InputBuffer {
     if (limit === 0) {
       return this;
     } else {
@@ -92,76 +92,76 @@ export class InputBufferError extends InputBuffer {
     }
   }
 
-  get capacity(): number {
+  override get capacity(): number {
     return 0;
   }
 
-  get remaining(): number {
+  override get remaining(): number {
     return 0;
   }
 
-  has(index: number): boolean {
+  override has(index: number): boolean {
     return false;
   }
 
-  get(index: number): number {
+  override get(index: number): number {
     throw new InputException();
   }
 
-  set(index: number, token: number): void {
+  override set(index: number, token: number): void {
     throw new InputException();
   }
 
-  head(): number {
+  override head(): number {
     throw new InputException();
   }
 
-  step(offset?: number): InputBuffer {
+  override step(offset?: number): InputBuffer {
     const error = new InputException("error step");
     return new InputBufferError(error, this.id, this.mark, this.settings);
   }
 
-  trap(): Error {
+  override trap(): Error {
     return this.error;
   }
 
-  seek(mark: Mark): InputBuffer {
+  override seek(mark: Mark): InputBuffer {
     const error = new InputException("error seek");
     return new InputBufferError(error, this.id, this.mark, this.settings);
   }
 
-  declare readonly id: string | undefined;
+  override readonly id!: string | undefined;
 
   withId(id: string | undefined): InputBuffer {
     return new InputBufferError(this.error, id, this.mark, this.settings);
   }
 
-  declare readonly mark: Mark;
+  override readonly mark!: Mark;
 
-  withMark(mark: Mark): InputBuffer {
+  override withMark(mark: Mark): InputBuffer {
     return new InputBufferError(this.error, this.id, mark, this.settings);
   }
 
-  get offset(): number {
+  override get offset(): number {
     return this.mark.offset;
   }
 
-  get line(): number {
+  override get line(): number {
     return this.mark.line;
   }
 
-  get column(): number {
+  override get column(): number {
     return this.mark.column;
   }
 
-  declare readonly settings: InputSettings;
+  override readonly settings!: InputSettings;
 
-  withSettings(settings: AnyInputSettings): InputBuffer {
+  override withSettings(settings: AnyInputSettings): InputBuffer {
     settings = InputSettings.fromAny(settings);
     return new InputBufferError(this.error, this.id, this.mark, settings);
   }
 
-  clone(): InputBuffer {
+  override clone(): InputBuffer {
     return this;
   }
 }

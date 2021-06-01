@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ export class UriUser implements HashCode, Debug, Display {
     return this.username !== void 0;
   }
 
-  declare readonly username: string | undefined;
+  readonly username!: string | undefined;
 
   withUsername(username: string | undefined): UriUser {
     if (username !== this.username) {
@@ -50,7 +50,7 @@ export class UriUser implements HashCode, Debug, Display {
     }
   }
 
-  declare readonly password: string | undefined;
+  readonly password!: string | undefined;
 
   withPassword(password: string | undefined): UriUser {
     if (password !== this.password) {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import {Output, Parser, Diagnostic, Unicode} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item, Value, Record} from "@swim/structure";
 import {Angle} from "../angle/Angle";
-import {PointR2} from "../r2/PointR2";
+import {R2Point} from "../r2/R2Point";
 import {Transform} from "./Transform";
 import {IdentityTransform} from "./IdentityTransform";
 import {SkewTransformInterpolator} from "../"; // forward import
@@ -42,13 +42,13 @@ export class SkewTransform extends Transform {
     });
   }
 
-  declare readonly x: Angle;
+  readonly x!: Angle;
 
-  declare readonly y: Angle;
+  readonly y!: Angle;
 
-  transform(that: Transform): Transform;
-  transform(x: number, y: number): PointR2;
-  transform(x: Transform | number, y?: number): Transform | PointR2 {
+  override transform(that: Transform): Transform;
+  override transform(x: number, y: number): R2Point;
+  override transform(x: Transform | number, y?: number): Transform | R2Point {
     if (arguments.length === 1) {
       if (x instanceof IdentityTransform) {
         return this;
@@ -56,30 +56,30 @@ export class SkewTransform extends Transform {
         return Transform.list(this, x as Transform);
       }
     } else {
-      return new PointR2(Math.tan(this.x.radValue()) * y! + (x as number),
+      return new R2Point(Math.tan(this.x.radValue()) * y! + (x as number),
                          Math.tan(this.y.radValue()) * (x as number) + y!);
     }
   }
 
-  transformX(x: number, y: number): number {
+  override transformX(x: number, y: number): number {
     return Math.tan(this.x.radValue()) * y + x;
   }
 
-  transformY(x: number, y: number): number {
+  override transformY(x: number, y: number): number {
     return Math.tan(this.y.radValue()) * x + y;
   }
 
-  inverse(): Transform {
+  override inverse(): Transform {
     return new SkewTransform(this.x.negative(), this.y.negative());
   }
 
-  toAffine(): AffineTransform {
+  override toAffine(): AffineTransform {
     const x = this.x.radValue();
     const y = this.y.radValue();
     return new AffineTransform(1, Math.tan(y), Math.tan(x), 1, 0, 0);
   }
 
-  toCssTransformComponent(): CSSTransformComponent | null {
+  override toCssTransformComponent(): CSSTransformComponent | null {
     if (typeof CSSTranslate !== "undefined") {
       const x = this.x.toCssValue();
       const y = this.y.toCssValue();
@@ -88,16 +88,16 @@ export class SkewTransform extends Transform {
     return null;
   }
 
-  toValue(): Value {
+  override toValue(): Value {
     return Record.create(1)
                  .attr("skew", Record.create(2).slot("x", this.x.toValue())
                                                .slot("y", this.y.toValue()));
   }
 
-  interpolateTo(that: SkewTransform): Interpolator<SkewTransform>;
-  interpolateTo(that: Transform): Interpolator<Transform>;
-  interpolateTo(that: unknown): Interpolator<Transform> | null;
-  interpolateTo(that: unknown): Interpolator<Transform> | null {
+  override interpolateTo(that: SkewTransform): Interpolator<SkewTransform>;
+  override interpolateTo(that: Transform): Interpolator<Transform>;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null;
+  override interpolateTo(that: unknown): Interpolator<Transform> | null {
     if (that instanceof SkewTransform) {
       return SkewTransformInterpolator(this, that);
     } else {
@@ -105,11 +105,11 @@ export class SkewTransform extends Transform {
     }
   }
 
-  conformsTo(that: Transform): boolean {
+  override conformsTo(that: Transform): boolean {
     return that instanceof SkewTransform;
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (that instanceof SkewTransform) {
       return this.x.equivalentTo(that.x, epsilon)
           && this.y.equivalentTo(that.y, epsilon);
@@ -117,19 +117,19 @@ export class SkewTransform extends Transform {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (that instanceof SkewTransform) {
       return this.x.equals(that.x) && this.y.equals(that.y);
     }
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Constructors.hash(SkewTransform),
         this.x.hashCode()), this.y.hashCode()));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Transform").write(46/*'.'*/).write("skew");
     if (this.x.isDefined() && !this.y.isDefined()) {
       output = output.write("X").write(40/*'('*/).debug(this.x).write(41/*')'*/);
@@ -141,9 +141,9 @@ export class SkewTransform extends Transform {
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
-  toString(): string {
+  override toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       if (this.x.isDefined() && !this.y.isDefined()) {
@@ -162,7 +162,7 @@ export class SkewTransform extends Transform {
     return stringValue;
   }
 
-  toAttributeString(): string {
+  override toAttributeString(): string {
     if (this.x.isDefined() && !this.y.isDefined()) {
       return "skewX(" + this.x.degValue() + ")";
     } else if (!this.x.isDefined() && this.y.isDefined()) {
@@ -172,7 +172,7 @@ export class SkewTransform extends Transform {
     }
   }
 
-  static fromCssTransformComponent(component: CSSSkew): SkewTransform {
+  static override fromCssTransformComponent(component: CSSSkew): SkewTransform {
     const x = typeof component.ax === "number"
             ? Angle.rad(component.ax)
             : Angle.fromCssValue(component.ax);
@@ -182,7 +182,7 @@ export class SkewTransform extends Transform {
     return new SkewTransform(x, y);
   }
 
-  static fromAny(value: SkewTransform | string): SkewTransform {
+  static override fromAny(value: SkewTransform | string): SkewTransform {
     if (value === void 0 || value === null || value instanceof SkewTransform) {
       return value;
     } else if (typeof value === "string") {
@@ -191,7 +191,7 @@ export class SkewTransform extends Transform {
     throw new TypeError("" + value);
   }
 
-  static fromValue(value: Value): SkewTransform | null {
+  static override fromValue(value: Value): SkewTransform | null {
     const header = value.header("skew");
     if (header.isDefined()) {
       let x = Angle.zero();
@@ -217,7 +217,7 @@ export class SkewTransform extends Transform {
     return null;
   }
 
-  static parse(string: string): SkewTransform {
+  static override parse(string: string): SkewTransform {
     let input = Unicode.stringInput(string);
     while (input.isCont() && Unicode.isWhitespace(input.head())) {
       input = input.step();

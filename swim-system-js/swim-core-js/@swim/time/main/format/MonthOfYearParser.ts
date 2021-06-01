@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ export class MonthOfYearParser extends Parser<DateTimeInit> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<DateTimeInit> {
+  override feed(input: Input): Parser<DateTimeInit> {
     return MonthOfYearParser.parse(input, this.date, this.month, this.step);
   }
 
@@ -37,7 +37,7 @@ export class MonthOfYearParser extends Parser<DateTimeInit> {
     return DateTimeFormat.parseDateNumber(input, MonthOfYearParser, "month number", 2, 2, date, month, step);
   }
 
-  static bind(month: number, date: DateTimeInit): Parser<DateTimeInit> {
+  static term(month: number, date: DateTimeInit): Parser<DateTimeInit> {
     date.month = month - 1;
     return Parser.done(date);
   }

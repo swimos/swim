@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {Parser} from "./Parser";
 /** @hidden */
 export class ParserError extends Parser<never> {
   /** @hidden */
-  declare readonly error: Error;
+  readonly error!: Error;
 
   constructor(error: Error) {
     super();
@@ -28,27 +28,27 @@ export class ParserError extends Parser<never> {
     });
   }
 
-  isCont(): boolean {
+  override isCont(): boolean {
     return false;
   }
 
-  isError(): boolean {
+  override isError(): boolean {
     return true;
   }
 
-  feed(input: Input): Parser<never> {
+  override feed(input: Input): Parser<never> {
     return this;
   }
 
-  bind(): never {
+  override bind(): never {
     throw this.error;
   }
 
-  trap(): Error {
+  override trap(): Error {
     return this.error;
   }
 
-  asError<O2>(): Parser<O2> {
+  override asError<O2>(): Parser<O2> {
     return this;
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,17 +20,17 @@ import type {Base16} from "./Base16";
 /** @hidden */
 export class Base16IntegerWriter extends Writer {
   /** @hidden */
-  declare readonly value: unknown;
+  readonly value!: unknown;
   /** @hidden */
-  declare readonly input: number;
+  readonly input!: number;
   /** @hidden */
-  declare readonly width: number;
+  readonly width!: number;
   /** @hidden */
-  declare readonly base16: Base16;
+  readonly base16!: Base16;
   /** @hidden */
-  declare readonly index: number;
+  readonly index!: number;
   /** @hidden */
-  declare readonly step: number;
+  readonly step!: number;
 
   constructor(value: unknown, input: number, width: number,
               base16: Base16, index: number = 0, step: number = 3) {
@@ -61,7 +61,7 @@ export class Base16IntegerWriter extends Writer {
     });
   }
 
-  pull(output: Output): Writer {
+  override pull(output: Output): Writer {
     return Base16IntegerWriter.write(output, this.value, this.input, this.width,
                                      this.base16, this.index, this.step);
   }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ export class MapFieldValuesCombinator<K, VI, VO, I> extends MapFieldValuesOperat
   }
 
   /** @hidden */
-  declare readonly func: MapFieldValuesFunction<K, VI, VO>;
+  readonly func!: MapFieldValuesFunction<K, VI, VO>;
 
-  evaluate(key: K, value: VI | undefined): VO | undefined {
+  override evaluate(key: K, value: VI | undefined): VO | undefined {
     if (value !== void 0) {
       const func = this.func;
       return func(key, value);

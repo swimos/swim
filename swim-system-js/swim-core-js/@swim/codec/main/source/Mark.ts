@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,23 +51,23 @@ export class Mark extends Tag {
   /**
    * The zero-based byte offset of this position.
    */
-  declare readonly offset: number;
+  readonly offset!: number;
 
   /**
    * The one-based line number of this position.
    */
-  declare readonly line: number;
+  readonly line!: number;
 
   /**
    * The one-based column number of this position.
    */
-  declare readonly column: number;
+  readonly column!: number;
 
   /**
    * The note attached to the marked position, or `null` if this position has
    * no attached note.
    */
-  declare readonly note: string | undefined;
+  readonly note!: string | undefined;
 
   withNote(note: string | undefined): Mark {
     if (this.note !== note) {
@@ -93,15 +93,15 @@ export class Mark extends Tag {
     return this.offset >= that.offset ? this : that;
   }
 
-  get start(): Mark {
+  override get start(): Mark {
     return this;
   }
 
-  get end(): Mark {
+  override get end(): Mark {
     return this;
   }
 
-  union(that: Tag): Tag {
+  override union(that: Tag): Tag {
     if (that instanceof Mark) {
       if (this.offset === that.offset && this.line === that.line
           && this.column === that.column) {
@@ -121,7 +121,7 @@ export class Mark extends Tag {
     throw new Error(that.toString());
   }
 
-  shift(mark: Mark): Mark {
+  override shift(mark: Mark): Mark {
     const offset = this.offset + (this.offset - mark.offset);
     const line = this.line + (this.line - mark.line);
     let column = this.column;
@@ -135,7 +135,7 @@ export class Mark extends Tag {
     }
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Mark) {
@@ -145,13 +145,13 @@ export class Mark extends Tag {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Constructors.hash(Mark),
         Numbers.hash(this.offset)), Numbers.hash(this.line)), Numbers.hash(this.column)),
         Strings.hash(this.note)));
   }
 
-  display(output: Output): void {
+  override display(output: Output): void {
     Format.displayNumber(this.line, output);
     output = output.write(58/*':'*/);
     Format.displayNumber(this.column, output);
@@ -160,7 +160,7 @@ export class Mark extends Tag {
     }
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Mark").write(".").write("at").write("(");
     Format.debugNumber(this.offset, output);
     output = output.write(", ");
@@ -174,7 +174,7 @@ export class Mark extends Tag {
     output = output.write(")");
   }
 
-  toString(): string {
+  override toString(): string {
     return Format.display(this);
   }
 

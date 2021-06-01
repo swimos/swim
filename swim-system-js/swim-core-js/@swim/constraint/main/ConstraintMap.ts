@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ export class ConstraintMap<K extends ConstraintKey, V> {
   }
 
   /** @hidden */
-  declare readonly index: {[id: number]: number | undefined};
+  readonly index!: {[id: number]: number | undefined};
 
   /** @hidden */
-  declare readonly array: Array<[K, V]>;
+  readonly array!: Array<[K, V]>;
 
   get size(): number {
     return this.array.length;

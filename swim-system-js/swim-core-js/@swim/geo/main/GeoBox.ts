@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 import {Equivalent, HashCode, Lazy, Murmur3, Numbers, Constructors} from "@swim/util";
 import {Debug, Format, Output} from "@swim/codec";
 import type {Interpolate, Interpolator} from "@swim/mapping";
-import {BoxR2} from "@swim/math";
+import {R2Box} from "@swim/math";
 import type {GeoProjection} from "./GeoProjection";
 import {AnyGeoShape, GeoShape} from "./GeoShape";
 import {AnyGeoPoint, GeoPoint} from "./GeoPoint";
@@ -57,13 +57,13 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
         && isFinite(this.lngMax) && isFinite(this.latMax);
   }
 
-  declare readonly lngMin: number;
+  readonly lngMin!: number;
 
-  declare readonly latMin: number;
+  readonly latMin!: number;
 
-  declare readonly lngMax: number;
+  readonly lngMax!: number;
 
-  declare readonly latMax: number;
+  readonly latMax!: number;
 
   get west(): number {
     return this.lngMin;
@@ -102,9 +102,9 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
                         (this.latMin + this.latMax) / 2);
   }
 
-  contains(that: AnyGeoPoint | AnyGeoBox): boolean;
-  contains(lng: number, lat: number): boolean;
-  contains(that: AnyGeoPoint | AnyGeoBox | number, y?: number): boolean {
+  override contains(that: AnyGeoPoint | AnyGeoBox): boolean;
+  override contains(lng: number, lat: number): boolean;
+  override contains(that: AnyGeoPoint | AnyGeoBox | number, y?: number): boolean {
     if (typeof that === "number") {
       return this.lngMin <= that && that <= this.lngMax
           && this.latMin <= y! && y! <= this.latMax;
@@ -139,7 +139,7 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
         && this.latMin <= that.latMin && that.latMax <= this.latMax;
   }
 
-  intersects(that: AnyGeoPoint | AnyGeoBox): boolean {
+  override intersects(that: AnyGeoPoint | AnyGeoBox): boolean {
     if (GeoPoint.isAny(that)) {
       return this.intersectsPoint(GeoPoint.fromAny(that));
     } else if (GeoSegment.isAny(that)) {
@@ -172,10 +172,10 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
       return false;
     } else if (lng0 > lngMin && lng0 < lngMax && lat0 > latMin && lat0 < latMax) {
       return true;
-    } else if ((BoxR2.intersectsSegment(lng0 - lngMin, lng1 - lngMin, lng0, lat0, lng1, lat1) && BoxR2.hitY > latMin && BoxR2.hitY < latMax)
-            || (BoxR2.intersectsSegment(lat0 - latMin, lat1 - latMin, lng0, lat0, lng1, lat1) && BoxR2.hitX > lngMin && BoxR2.hitX < lngMax)
-            || (BoxR2.intersectsSegment(lng0 - lngMax, lng1 - lngMax, lng0, lat0, lng1, lat1) && BoxR2.hitY > latMin && BoxR2.hitY < latMax)
-            || (BoxR2.intersectsSegment(lat0 - latMax, lat1 - latMax, lng0, lat0, lng1, lat1) && BoxR2.hitX > lngMin && BoxR2.hitX < lngMax)) {
+    } else if ((R2Box.intersectsSegment(lng0 - lngMin, lng1 - lngMin, lng0, lat0, lng1, lat1) && R2Box.hitY > latMin && R2Box.hitY < latMax)
+            || (R2Box.intersectsSegment(lat0 - latMin, lat1 - latMin, lng0, lat0, lng1, lat1) && R2Box.hitX > lngMin && R2Box.hitX < lngMax)
+            || (R2Box.intersectsSegment(lng0 - lngMax, lng1 - lngMax, lng0, lat0, lng1, lat1) && R2Box.hitY > latMin && R2Box.hitY < latMax)
+            || (R2Box.intersectsSegment(lat0 - latMax, lat1 - latMax, lng0, lat0, lng1, lat1) && R2Box.hitX > lngMin && R2Box.hitX < lngMax)) {
       return true;
     } else {
       return false;
@@ -188,11 +188,11 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
         && this.latMin <= that.latMax && that.latMin <= this.latMax;
   }
 
-  union(that: AnyGeoShape): GeoBox {
+  override union(that: AnyGeoShape): GeoBox {
     return super.union(that) as GeoBox;
   }
 
-  project(f: GeoProjection): BoxR2 {
+  override project(f: GeoProjection): R2Box {
     const bottomLeft = f.project(this.lngMin, this.latMin);
     const topRight = f.project(this.lngMax, this.latMax);
     let xMin = bottomLeft.x;
@@ -221,10 +221,10 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
     if (!isFinite(yMax)) {
       yMax = Infinity;
     }
-    return new BoxR2(xMin, yMin, xMax, yMax);
+    return new R2Box(xMin, yMin, xMax, yMax);
   }
 
-  get bounds(): GeoBox {
+  override get bounds(): GeoBox {
     return this;
   }
 
@@ -259,7 +259,7 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof GeoBox) {
@@ -281,7 +281,7 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
         .debug(this.lngMax).write(", ").debug(this.latMax).write(41/*')'*/);
   }
 
-  toString(): string {
+  override toString(): string {
     return Format.debug(this);
   }
 
@@ -309,7 +309,7 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
     return new GeoBox(value.lngMin, value.latMin, value.lngMax, value.latMax);
   }
 
-  static fromAny(value: AnyGeoBox): GeoBox {
+  static override fromAny(value: AnyGeoBox): GeoBox {
     if (value === void 0 || value === null || value instanceof GeoBox) {
       return value;
     } else if (GeoBox.isInit(value)) {
@@ -331,7 +331,7 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
   }
 
   /** @hidden */
-  static isAny(value: unknown): value is AnyGeoBox {
+  static override isAny(value: unknown): value is AnyGeoBox {
     return value instanceof GeoBox
         || GeoBox.isInit(value);
   }
