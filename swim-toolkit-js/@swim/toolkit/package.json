@@ -3,7 +3,7 @@
   "version": "3.11.0-dev.20210415",
   "description": "Framework for building pervasively real-time user interface applications",
   "homepage": "https://github.com/swimos/swim",
-  "author": "Chris Sachs <chris@swim.ai>",
+  "author": "Chris Sachs <chris@swimos.org>",
   "copyright": "2015-2021 Swim inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",

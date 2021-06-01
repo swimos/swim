@@ -13,9 +13,9 @@ without a separate app server.
 
 Check out the [**SwimOS** cookbook](https://www.swimos.org/tutorials) to learn
 how to build massively real-time streaming applications.  Use the
-[**Swim API**](https://mvnrepository.com/artifact/ai.swim/swim-api) to write
+[**Swim API**](https://mvnrepository.com/artifact/org.swimos/swim-api) to write
 Web Agents that run on the **Swim Kernel**.  Use the
-[**Swim Server**](https://mvnrepository.com/artifact/ai.swim/swim-server)
+[**Swim Server**](https://mvnrepository.com/artifact/org.swimos/swim-server)
 library to embed the **Swim Kernel** directly into an application, creating
 a self-sufficient stateful distributed application plane.
 
