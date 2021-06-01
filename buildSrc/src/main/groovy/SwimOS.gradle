@@ -1,0 +1,56 @@
+plugins {
+  id 'java-library'
+}
+
+group = 'org.swimos'
+version = property('swim.version')
+ext.homepage = 'https://github.com/swimos/swim'
+ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
+
+def javaVersion = System.getProperty('java.version').split('\\.')
+ext.jvmVersion = (javaVersion[0] as Integer) > 1 ? javaVersion[0] as Integer : javaVersion[1] as Integer
+
+repositories {
+  mavenCentral()
+  maven {
+    url 'https://oss.sonatype.org/content/repositories/snapshots/'
+  }
+}
+
+javadoc {
+  options.addBooleanOption('Xdoclint:all,-missing', true)
+  options.charSet = 'UTF-8'
+  options.encoding = 'UTF-8'
+  options.addBooleanOption('html5', true)
+  options.links += ["https://docs.oracle.com/en/java/javase/" + jvmVersion + "/docs/api/"]
+}
+gradle.projectsEvaluated {
+  def dependencyProjects = resolveDependencyProjects(project, new HashSet())
+  def moduleNames = dependencyProjects.findAll { project -> project.moduleName != null }
+                                      .collect { project -> project.moduleName }
+  javadoc {
+    options.addStringOption('-module', moduleNames.join(','))
+    source dependencyProjects.collect { project -> project.sourceSets.main.allJava }
+  }
+}
+
+jar {
+  manifest {
+    attributes('Implementation-Title': project.name,
+               'Implementation-Version': archiveVersion)
+  }
+}
+
+def resolveDependencyProjects(project, dependencyProjects) {
+  def dependencies = project.configurations.api.dependencies + project.configurations.implementation.dependencies
+  dependencies.each { dependency ->
+    if (dependency instanceof ProjectDependency) {
+      def dependencyProject = dependency.dependencyProject;
+      if (!dependencyProjects.contains(dependencyProject)) {
+        dependencyProjects.add(dependencyProject)
+        resolveDependencyProjects(dependencyProject, dependencyProjects)
+      }
+    }
+  }
+  return dependencyProjects;
+}

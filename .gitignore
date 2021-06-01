@@ -1,5 +1,19 @@
+# ignore IDE files
+.gradle
+.idea
+*.iml
+.vscode
+
+# ignore hidden macOS files
 .DS_Store
 *.DS_Store
-.idea
-.gradle
-.vscode
+
+# ignore folders
+build
+node_modules
+
+# ignore files
+out
+package-lock.json
+yarn.lock
+*~
