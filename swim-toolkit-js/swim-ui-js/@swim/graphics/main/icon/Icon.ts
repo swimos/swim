@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {BoxR2} from "@swim/math";
+import type {R2Box} from "@swim/math";
 import type {Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
 import type {GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import type {Graphics} from "../graphics/Graphics";
@@ -30,9 +30,9 @@ export abstract class Icon implements Graphics {
 
   abstract withTheme(theme: ThemeMatrix, mood: MoodVector): Icon;
 
-  abstract render(renderer: GraphicsRenderer, frame: BoxR2): void;
+  abstract render(renderer: GraphicsRenderer, frame: R2Box): void;
 
-  abstract paint(context: PaintingContext, frame: BoxR2): void;
+  abstract paint(context: PaintingContext, frame: R2Box): void;
 
-  abstract draw(context: DrawingContext, frame: BoxR2): void;
+  abstract draw(context: DrawingContext, frame: R2Box): void;
 }

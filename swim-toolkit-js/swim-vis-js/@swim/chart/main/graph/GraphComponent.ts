@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     });
   }
 
-  declare readonly componentObservers: ReadonlyArray<GraphComponentObserver<X, Y>>;
+  override readonly componentObservers!: ReadonlyArray<GraphComponentObserver<X, Y>>;
 
   protected initGraphTrait(graphTrait: GraphTrait<X, Y>): void {
     // hook
@@ -199,7 +199,7 @@ export class GraphComponent<X, Y> extends CompositeComponent {
   @ComponentViewTrait<GraphComponent<X, Y>, GraphView<X, Y>, GraphTrait<X, Y>>({
     extends: GraphComponent.GraphFastener,
   })
-  declare graph: ComponentViewTrait<this, GraphView<X, Y>, GraphTrait<X, Y>>;
+  readonly graph!: ComponentViewTrait<this, GraphView<X, Y>, GraphTrait<X, Y>>;
 
   insertPlot(plotComponent: PlotComponent<X, Y>, targetComponent: Component | null = null): void {
     const plotFasteners = this.plotFasteners as ComponentFastener<this, PlotComponent<X, Y>>[];
@@ -889,7 +889,7 @@ export class GraphComponent<X, Y> extends CompositeComponent {
   }
 
   /** @hidden */
-  declare readonly plotFasteners: ReadonlyArray<ComponentFastener<this, PlotComponent<X, Y>>>;
+  readonly plotFasteners!: ReadonlyArray<ComponentFastener<this, PlotComponent<X, Y>>>;
 
   protected getPlotFastener(plotTrait: PlotTrait<X, Y>): ComponentFastener<this, PlotComponent<X, Y>> | null {
     const plotFasteners = this.plotFasteners;
@@ -925,7 +925,7 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     return component instanceof PlotComponent ? component : null;
   }
 
-  protected onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
+  protected override onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
     super.onInsertChildComponent(childComponent, targetComponent);
     const plotComponent = this.detectPlotComponent(childComponent);
     if (plotComponent !== null) {
@@ -933,7 +933,7 @@ export class GraphComponent<X, Y> extends CompositeComponent {
     }
   }
 
-  protected onRemoveChildComponent(childComponent: Component): void {
+  protected override onRemoveChildComponent(childComponent: Component): void {
     super.onRemoveChildComponent(childComponent);
     const plotComponent = this.detectPlotComponent(childComponent);
     if (plotComponent !== null) {
@@ -942,13 +942,13 @@ export class GraphComponent<X, Y> extends CompositeComponent {
   }
 
   /** @hidden */
-  protected mountComponentFasteners(): void {
+  protected override mountComponentFasteners(): void {
     super.mountComponentFasteners();
     this.mountPlotFasteners();
   }
 
   /** @hidden */
-  protected unmountComponentFasteners(): void {
+  protected override unmountComponentFasteners(): void {
     this.unmountPlotFasteners();
     super.unmountComponentFasteners();
   }

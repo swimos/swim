@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import {AnyFont, Font, FontInterpolator} from "@swim/style";
 import {Look} from "./Look";
 
 export class FontLook extends Look<Font, AnyFont> {
-  combine(combination: Font | undefined, value: Font, weight?: number): Font {
+  override combine(combination: Font | undefined, value: Font, weight?: number): Font {
     if (weight === void 0 || weight !== 0) {
       return value;
     } else if (combination !== void 0) {
@@ -27,11 +27,11 @@ export class FontLook extends Look<Font, AnyFont> {
     }
   }
 
-  between(a: Font, b: Font): Interpolator<Font> {
+  override between(a: Font, b: Font): Interpolator<Font> {
     return FontInterpolator(a, b);
   }
 
-  coerce(value: AnyFont): Font {
+  override coerce(value: AnyFont): Font {
     return Font.fromAny(value);
   }
 }

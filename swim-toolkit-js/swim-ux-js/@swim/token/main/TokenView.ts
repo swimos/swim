@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {AnyTiming, Timing} from "@swim/mapping";
-import {Length, BoxR2} from "@swim/math";
+import {Length, R2Box} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Feel, MoodVector, ThemeMatrix} from "@swim/theme";
 import {
@@ -77,11 +77,11 @@ export class TokenView extends HtmlView {
     this.shape.injectView();
   }
 
-  declare readonly viewController: TokenViewController | null;
+  override readonly viewController!: TokenViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<TokenViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<TokenViewObserver>;
 
-  initView(init: TokenViewInit): void {
+  override initView(init: TokenViewInit): void {
     super.initView(init);
   }
 
@@ -114,7 +114,7 @@ export class TokenView extends HtmlView {
   }
 
   /** @hidden */
-  declare readonly headGesture: PositionGesture<SvgView> | null;
+  readonly headGesture!: PositionGesture<SvgView> | null;
 
   protected createHeadGesture(headView: SvgView): PositionGesture<SvgView> | null {
     return new PositionGesture(headView, this.head);
@@ -140,7 +140,7 @@ export class TokenView extends HtmlView {
   }
 
   /** @hidden */
-  declare readonly bodyGesture: PositionGesture<SvgView> | null;
+  readonly bodyGesture!: PositionGesture<SvgView> | null;
 
   protected createBodyGesture(bodyView: SvgView): PositionGesture<SvgView> | null {
     return new PositionGesture(bodyView, this.body);
@@ -162,7 +162,7 @@ export class TokenView extends HtmlView {
   }
 
   /** @hidden */
-  declare readonly footGesture: PositionGesture<SvgView> | null;
+  readonly footGesture!: PositionGesture<SvgView> | null;
 
   protected createFootGesture(footView: SvgView): PositionGesture<SvgView> | null {
     return new PositionGesture(footView, this.foot);
@@ -191,7 +191,7 @@ export class TokenView extends HtmlView {
     labelView.left.setState(0, View.Intrinsic);
   }
 
-  declare readonly tokenState: TokenViewState;
+  readonly tokenState!: TokenViewState;
 
   isExpanded(): boolean {
     return this.tokenState === "expanded" || this.tokenState === "expanding";
@@ -214,7 +214,7 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  declare expandedPhase: ViewAnimator<this, number>;
+  readonly expandedPhase!: ViewAnimator<this, number>;
 
   @ViewFastener<TokenView, SvgView>({
     key: true,
@@ -225,7 +225,7 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  declare shape: ViewFastener<this, SvgView>;
+  readonly shape!: ViewFastener<this, SvgView>;
 
   /** @hidden */
   get fillLook(): Look<Color> {
@@ -304,7 +304,7 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  declare head: ViewFastener<this, SvgView> & PositionGestureDelegate;
+  readonly head!: ViewFastener<this, SvgView> & PositionGestureDelegate;
 
   /** @hidden */
   @ViewFastener<TokenView, SvgView, never, ViewObserver & PositionGestureDelegate>({
@@ -324,7 +324,7 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  declare headIcon: ViewFastener<this, SvgView> & PositionGestureDelegate;
+  readonly headIcon!: ViewFastener<this, SvgView> & PositionGestureDelegate;
 
   @ViewProperty<TokenView, Graphics | null, never, {embossed: boolean}>({
     extends: void 0,
@@ -333,7 +333,7 @@ export class TokenView extends HtmlView {
     updateFlags: View.NeedsLayout,
     embossed: true,
   })
-  declare icon: ViewProperty<this, Graphics | null> & {embossed: boolean};
+  readonly icon!: ViewProperty<this, Graphics | null> & {embossed: boolean};
 
   @ViewFastener<TokenView, SvgView, never, ViewObserver & PositionGestureDelegate>({
     extends: void 0,
@@ -404,7 +404,7 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  declare body: ViewFastener<this, SvgView> & PositionGestureDelegate;
+  readonly body!: ViewFastener<this, SvgView> & PositionGestureDelegate;
 
   @ViewFastener<TokenView, SvgView, never, ViewObserver & PositionGestureDelegate>({
     extends: void 0,
@@ -478,7 +478,7 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  declare foot: ViewFastener<this, SvgView> & PositionGestureDelegate;
+  readonly foot!: ViewFastener<this, SvgView> & PositionGestureDelegate;
 
   /** @hidden */
   @ViewFastener<TokenView, SvgView, never, ViewObserver & PositionGestureDelegate>({
@@ -498,7 +498,7 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  declare footIcon: ViewFastener<this, SvgView> & PositionGestureDelegate;
+  readonly footIcon!: ViewFastener<this, SvgView> & PositionGestureDelegate;
 
   @ViewProperty<TokenView, Graphics | null, never, {embossed: boolean}>({
     extends: void 0,
@@ -507,7 +507,7 @@ export class TokenView extends HtmlView {
     updateFlags: View.NeedsLayout,
     embossed: true,
   })
-  declare accessory: ViewProperty<this, Graphics | null> & {embossed: boolean};
+  readonly accessory!: ViewProperty<this, Graphics | null> & {embossed: boolean};
 
   @ViewFastener<TokenView, HtmlView>({
     key: true,
@@ -518,7 +518,7 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  declare labelContainer: ViewFastener<this, HtmlView>;
+  readonly labelContainer!: ViewFastener<this, HtmlView>;
 
   @ViewFastener<TokenView, HtmlView>({
     key: true,
@@ -537,16 +537,16 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  declare label: ViewFastener<this, HtmlView>;
+  readonly label!: ViewFastener<this, HtmlView>;
 
-  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsLayout) !== 0) {
       processFlags |= View.NeedsAnimate;
     }
     return processFlags;
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.layoutToken();
   }
@@ -624,7 +624,7 @@ export class TokenView extends HtmlView {
       context.closePath();
       if (icon !== null && !this.icon.embossed) {
         const renderer = new PathRenderer(context);
-        const frame = new BoxR2(paddingLeft, paddingTop, paddingLeft + tokenHeight, paddingTop + tokenHeight);
+        const frame = new R2Box(paddingLeft, paddingTop, paddingLeft + tokenHeight, paddingTop + tokenHeight);
         icon.render(renderer, frame);
         this.headIcon.removeView();
       }
@@ -636,7 +636,7 @@ export class TokenView extends HtmlView {
         const context = new PathContext();
         context.setPrecision(3);
         const renderer = new PathRenderer(context);
-        const frame = new BoxR2(paddingLeft, paddingTop, paddingLeft + tokenHeight, paddingTop + tokenHeight);
+        const frame = new R2Box(paddingLeft, paddingTop, paddingLeft + tokenHeight, paddingTop + tokenHeight);
         icon.render(renderer, frame);
         headIconView.d.setState(context.toString(), View.Intrinsic);
         this.headIcon.injectView();
@@ -669,7 +669,7 @@ export class TokenView extends HtmlView {
         context.closePath();
         if (accessoryIcon !== null && !this.accessory.embossed) {
           const renderer = new PathRenderer(context);
-          const frame = new BoxR2(paddingLeft + bodyRight + gap, paddingTop, paddingLeft + bodyRight + gap + 2 * radius, paddingTop + 2 * radius);
+          const frame = new R2Box(paddingLeft + bodyRight + gap, paddingTop, paddingLeft + bodyRight + gap + 2 * radius, paddingTop + 2 * radius);
           accessoryIcon.render(renderer, frame);
           this.headIcon.removeView();
         }
@@ -683,7 +683,7 @@ export class TokenView extends HtmlView {
         context.setPrecision(3);
         if (expandedPhase !== 0) {
           const renderer = new PathRenderer(context);
-          const frame = new BoxR2(paddingLeft + bodyRight + gap, paddingTop, paddingLeft + bodyRight + gap + tokenHeight, paddingTop + tokenHeight);
+          const frame = new R2Box(paddingLeft + bodyRight + gap, paddingTop, paddingLeft + bodyRight + gap + tokenHeight, paddingTop + tokenHeight);
           accessoryIcon.render(renderer, frame);
         }
         footIconView.d.setState(context.toString(), View.Intrinsic);

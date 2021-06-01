@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ export class StyleValueForm extends Form<StyleValue, AnyStyleValue> {
     });
   }
 
-  declare readonly unit: StyleValue | undefined;
+  override readonly unit!: StyleValue | undefined;
 
-  withUnit(unit: StyleValue | undefined): Form<StyleValue, AnyStyleValue> {
+  override withUnit(unit: StyleValue | undefined): Form<StyleValue, AnyStyleValue> {
     if (unit !== this.unit) {
       return new StyleValueForm(unit);
     } else {
@@ -40,7 +40,7 @@ export class StyleValueForm extends Form<StyleValue, AnyStyleValue> {
     }
   }
 
-  mold(value: AnyStyleValue): Item {
+  override mold(value: AnyStyleValue): Item {
     if (value !== void 0) {
       value = StyleValue.fromAny(value);
       if (value instanceof DateTime) {
@@ -66,7 +66,7 @@ export class StyleValueForm extends Form<StyleValue, AnyStyleValue> {
     }
   }
 
-  cast(item: Item): StyleValue | undefined {
+  override cast(item: Item): StyleValue | undefined {
     const value = item.toValue();
     if (value instanceof Num) {
       return value.numberValue();

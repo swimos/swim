@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,15 +40,15 @@ export class ModalManager<V extends View = View> extends ViewManager<V> {
     this.onClick = this.onClick.bind(this);
   }
 
-  declare readonly modals: ReadonlyArray<Modal>;
+  readonly modals!: ReadonlyArray<Modal>;
 
   isModal(): boolean {
     return this.modality !== 0;
   }
 
-  declare readonly modality: number;
+  readonly modality!: number;
 
-  declare readonly matteView: View | null;
+  readonly matteView!: View | null;
 
   setMatteView(matteView: View | null): void {
     Object.defineProperty(this, "matteView", {
@@ -261,14 +261,14 @@ export class ModalManager<V extends View = View> extends ViewManager<V> {
     }
   }
 
-  declare readonly viewManagerObservers: ReadonlyArray<ModalManagerObserver>;
+  override readonly viewManagerObservers!: ReadonlyArray<ModalManagerObserver>;
 
-  protected onInsertRootView(rootView: V): void {
+  protected override onInsertRootView(rootView: V): void {
     super.onInsertRootView(rootView);
     this.attachEvents(rootView);
   }
 
-  protected onRemoveRootView(rootView: V): void {
+  protected override onRemoveRootView(rootView: V): void {
     super.onRemoveRootView(rootView);
     this.detachEvents(rootView);
   }

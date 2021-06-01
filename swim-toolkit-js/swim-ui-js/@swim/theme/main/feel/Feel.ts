@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import type {Look} from "../look/Look";
 import {FeelVector} from "./FeelVector";
 
 export abstract class Feel implements Mood {
-  declare readonly name: string;
+  readonly name!: string;
 
   constructor(name: string) {
     Object.defineProperty(this, "name", {

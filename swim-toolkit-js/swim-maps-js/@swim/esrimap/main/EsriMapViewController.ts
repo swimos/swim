@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ import type {EsriMapView} from "./EsriMapView";
 import type {EsriMapViewObserver} from "./EsriMapViewObserver";
 
 export class EsriMapViewController<V extends EsriMapView = EsriMapView> extends EsriViewController<V> implements EsriMapViewObserver<V> {
-  viewWillSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport, view: V): void {
+  override viewWillSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport, view: V): void {
     // hook
   }
 
-  viewDidSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport, view: V): void {
+  override viewDidSetGeoViewport(newGeoViewport: EsriMapViewport, oldGeoViewport: EsriMapViewport, view: V): void {
     // hook
   }
 }

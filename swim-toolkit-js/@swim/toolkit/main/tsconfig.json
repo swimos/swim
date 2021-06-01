@@ -47,6 +47,7 @@
 
       "@swim/map": ["../../../swim-maps-js/@swim/map/main"],
       "@swim/mapbox": ["../../../swim-maps-js/@swim/mapbox/main"],
+      "@swim/leaflet": ["../../../swim-maps-js/@swim/leaflet/main"],
       "@swim/googlemap": ["../../../swim-maps-js/@swim/googlemap/main"],
       "@swim/esrimap": ["../../../swim-maps-js/@swim/esrimap/main"],
       "@swim/maps": ["../../../swim-maps-js/@swim/maps/main"]
@@ -76,6 +77,7 @@
 
     {"path": "../../../swim-maps-js/@swim/map/main"},
     {"path": "../../../swim-maps-js/@swim/mapbox/main"},
+    {"path": "../../../swim-maps-js/@swim/leaflet/main"},
     {"path": "../../../swim-maps-js/@swim/googlemap/main"},
     {"path": "../../../swim-maps-js/@swim/esrimap/main"},
     {"path": "../../../swim-maps-js/@swim/maps/main"}

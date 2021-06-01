@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Arrays} from "@swim/util";
-import {BoxR2} from "@swim/math";
+import {R2Box} from "@swim/math";
 import {
   ViewContextType,
   ViewContext,
@@ -90,7 +90,7 @@ export class CanvasView extends HtmlView {
       configurable: true,
     });
     Object.defineProperty(this, "viewFrame", {
-      value: BoxR2.undefined(),
+      value: R2Box.undefined(),
       enumerable: true,
       configurable: true,
     });
@@ -152,13 +152,13 @@ export class CanvasView extends HtmlView {
     this.position.setState("absolute", View.Intrinsic);
   }
 
-  declare readonly node: HTMLCanvasElement;
+  override readonly node!: HTMLCanvasElement;
 
-  declare readonly viewController: CanvasViewController | null;
+  override readonly viewController!: CanvasViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<CanvasViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<CanvasViewObserver>;
 
-  initView(init: CanvasViewInit): void {
+  override initView(init: CanvasViewInit): void {
     super.initView(init);
     if (init.renderer !== void 0) {
       this.setRenderer(init.renderer);
@@ -180,7 +180,7 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  protected onAddViewObserver(viewObserver: ViewObserverType<this>): void {
+  protected override onAddViewObserver(viewObserver: ViewObserverType<this>): void {
     super.onAddViewObserver(viewObserver);
     if (viewObserver.viewWillRender !== void 0) {
       this.viewObserverCache.viewWillRenderObservers = Arrays.inserted(viewObserver as ViewWillRender, this.viewObserverCache.viewWillRenderObservers);
@@ -202,7 +202,7 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  protected onRemoveViewObserver(viewObserver: ViewObserverType<this>): void {
+  protected override onRemoveViewObserver(viewObserver: ViewObserverType<this>): void {
     super.onRemoveViewObserver(viewObserver);
     if (viewObserver.viewWillRender !== void 0) {
       this.viewObserverCache.viewWillRenderObservers = Arrays.removed(viewObserver as ViewWillRender, this.viewObserverCache.viewWillRenderObservers);
@@ -225,9 +225,9 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  declare readonly graphicsViews: ReadonlyArray<GraphicsView>;
+  readonly graphicsViews!: ReadonlyArray<GraphicsView>;
 
-  get childViewCount(): number {
+  override get childViewCount(): number {
     let childViewCount = 0;
     const childNodes = this.node.childNodes;
     for (let i = 0, n = childNodes.length; i < n; i += 1) {
@@ -240,7 +240,7 @@ export class CanvasView extends HtmlView {
     return childViewCount;
   }
 
-  get childViews(): ReadonlyArray<View> {
+  override get childViews(): ReadonlyArray<View> {
     const childNodes = this.node.childNodes;
     const childViews: View[] = [];
     for (let i = 0, n = childNodes.length; i < n; i += 1) {
@@ -253,7 +253,7 @@ export class CanvasView extends HtmlView {
     return childViews;
   }
 
-  firstChildView(): View | null {
+  override firstChildView(): View | null {
     const childNodes = this.node.childNodes;
     for (let i = 0, n = childNodes.length; i < n; i += 1) {
       const childView = (childNodes[i]! as ViewNode).view;
@@ -268,7 +268,7 @@ export class CanvasView extends HtmlView {
     return null;
   }
 
-  lastChildView(): View | null {
+  override lastChildView(): View | null {
     const graphicsViews = this.graphicsViews;
     if (graphicsViews.length !== 0) {
       return graphicsViews[graphicsViews.length - 1]!;
@@ -283,7 +283,7 @@ export class CanvasView extends HtmlView {
     return null;
   }
 
-  nextChildView(targetView: View): View | null {
+  override nextChildView(targetView: View): View | null {
     const graphicsViews = this.graphicsViews;
     if (targetView instanceof NodeView && targetView.parentView === this) {
       let targetNode: ViewNode | null = targetView.node;
@@ -309,7 +309,7 @@ export class CanvasView extends HtmlView {
     return null;
   }
 
-  previousChildView(targetView: View): View | null {
+  override previousChildView(targetView: View): View | null {
     let targetNode: ViewNode | null = null;
     if (targetView instanceof GraphicsView) {
       const graphicsViews = this.graphicsViews;
@@ -340,11 +340,11 @@ export class CanvasView extends HtmlView {
     return null;
   }
 
-  forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
-  forEachChildView<T, S>(callback: (this: S, childView: View) => T | void,
-                         thisArg: S): T | undefined;
-  forEachChildView<T, S>(callback: (this: S | undefined, childView: View) => T | void,
-                         thisArg?: S): T | undefined {
+  override forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
+  override forEachChildView<T, S>(callback: (this: S, childView: View) => T | void,
+                                  thisArg: S): T | undefined;
+  override forEachChildView<T, S>(callback: (this: S | undefined, childView: View) => T | void,
+                                  thisArg?: S): T | undefined {
     let result: T | undefined;
     const childNodes = this.node.childNodes;
     let i = 0;
@@ -376,7 +376,7 @@ export class CanvasView extends HtmlView {
     return result;
   }
 
-  setChildView(key: string, newChildView: View | null): View | null {
+  override setChildView(key: string, newChildView: View | null): View | null {
     if (newChildView instanceof GraphicsView) {
       return this.setGraphicsView(key, newChildView);
     } else {
@@ -440,16 +440,16 @@ export class CanvasView extends HtmlView {
     return oldChildView;
   }
 
-  append<V extends View>(childView: V, key?: string): V;
-  append<V extends NodeView>(viewConstructor: NodeViewConstructor<V>, key?: string): V;
-  append<V extends View>(viewConstructor: ViewConstructor<V>, key?: string): V;
-  append(childNode: HTMLElement, key?: string): HtmlView;
-  append(childNode: Element, key?: string): ElementView;
-  append(childNode: Node, key?: string): NodeView;
-  append<T extends keyof HtmlViewTagMap>(tag: T, key?: string): HtmlViewTagMap[T];
-  append(tag: string, key?: string): ElementView;
-  append(child: Node | string, key?: string): NodeView;
-  append(child: View | NodeViewConstructor | Node | string, key?: string): View {
+  override append<V extends View>(childView: V, key?: string): V;
+  override append<V extends NodeView>(viewConstructor: NodeViewConstructor<V>, key?: string): V;
+  override append<V extends View>(viewConstructor: ViewConstructor<V>, key?: string): V;
+  override append(childNode: HTMLElement, key?: string): HtmlView;
+  override append(childNode: Element, key?: string): ElementView;
+  override append(childNode: Node, key?: string): NodeView;
+  override append<T extends keyof HtmlViewTagMap>(tag: T, key?: string): HtmlViewTagMap[T];
+  override append(tag: string, key?: string): ElementView;
+  override append(child: Node | string, key?: string): NodeView;
+  override append(child: View | NodeViewConstructor | Node | string, key?: string): View {
     if (child instanceof Node) {
       child = NodeView.fromNode(child);
     } else if (typeof child === "function") {
@@ -461,7 +461,7 @@ export class CanvasView extends HtmlView {
     return child;
   }
 
-  appendChildView(childView: View, key?: string): void {
+  override appendChildView(childView: View, key?: string): void {
     if (childView instanceof GraphicsView) {
       this.appendGraphicsView(childView, key);
     } else {
@@ -483,16 +483,16 @@ export class CanvasView extends HtmlView {
     childView.cascadeInsert();
   }
 
-  prepend<V extends View>(childView: V, key?: string): V;
-  prepend<V extends NodeView>(viewConstructor: NodeViewConstructor<V>, key?: string): V;
-  prepend<V extends View>(viewConstructor: ViewConstructor<V>, key?: string): V;
-  prepend(childNode: HTMLElement, key?: string): HtmlView;
-  prepend(childNode: Element, key?: string): ElementView;
-  prepend(childNode: Node, key?: string): NodeView;
-  prepend<T extends keyof HtmlViewTagMap>(tag: T, key?: string): HtmlViewTagMap[T];
-  prepend(tag: string, key?: string): ElementView;
-  prepend(child: Node | string, key?: string): NodeView;
-  prepend(child: View | NodeViewConstructor | Node | string, key?: string): View {
+  override prepend<V extends View>(childView: V, key?: string): V;
+  override prepend<V extends NodeView>(viewConstructor: NodeViewConstructor<V>, key?: string): V;
+  override prepend<V extends View>(viewConstructor: ViewConstructor<V>, key?: string): V;
+  override prepend(childNode: HTMLElement, key?: string): HtmlView;
+  override prepend(childNode: Element, key?: string): ElementView;
+  override prepend(childNode: Node, key?: string): NodeView;
+  override prepend<T extends keyof HtmlViewTagMap>(tag: T, key?: string): HtmlViewTagMap[T];
+  override prepend(tag: string, key?: string): ElementView;
+  override prepend(child: Node | string, key?: string): NodeView;
+  override prepend(child: View | NodeViewConstructor | Node | string, key?: string): View {
     if (child instanceof Node) {
       child = NodeView.fromNode(child);
     } else if (typeof child === "function") {
@@ -504,7 +504,7 @@ export class CanvasView extends HtmlView {
     return child;
   }
 
-  prependChildView(childView: View, key?: string): void {
+  override prependChildView(childView: View, key?: string): void {
     if (childView instanceof GraphicsView) {
       this.prependGraphicsView(childView);
     } else {
@@ -528,16 +528,16 @@ export class CanvasView extends HtmlView {
     childView.cascadeInsert();
   }
 
-  insert<V extends View>(childView: V, target: View | Node | null, key?: string): V;
-  insert<V extends NodeView>(viewConstructor: NodeViewConstructor<V>, target: View | Node | null, key?: string): V;
-  insert<V extends View>(viewConstructor: ViewConstructor<V>, target: View | Node | null, key?: string): V;
-  insert(childNode: HTMLElement, target: View | Node | null, key?: string): HtmlView;
-  insert(childNode: Element, target: View | Node | null, key?: string): ElementView;
-  insert(childNode: Node, target: View | Node | null, key?: string): NodeView;
-  insert<T extends keyof HtmlViewTagMap>(tag: T, target: View | Node | null, key?: string): HtmlViewTagMap[T];
-  insert(tag: string, target: View | Node | null, key?: string): ElementView;
-  insert(child: Node | string, target: View | Node | null, key?: string): NodeView;
-  insert(child: View | NodeViewConstructor | Node | string, target: View | Node | null, key?: string): View {
+  override insert<V extends View>(childView: V, target: View | Node | null, key?: string): V;
+  override insert<V extends NodeView>(viewConstructor: NodeViewConstructor<V>, target: View | Node | null, key?: string): V;
+  override insert<V extends View>(viewConstructor: ViewConstructor<V>, target: View | Node | null, key?: string): V;
+  override insert(childNode: HTMLElement, target: View | Node | null, key?: string): HtmlView;
+  override insert(childNode: Element, target: View | Node | null, key?: string): ElementView;
+  override insert(childNode: Node, target: View | Node | null, key?: string): NodeView;
+  override insert<T extends keyof HtmlViewTagMap>(tag: T, target: View | Node | null, key?: string): HtmlViewTagMap[T];
+  override insert(tag: string, target: View | Node | null, key?: string): ElementView;
+  override insert(child: Node | string, target: View | Node | null, key?: string): NodeView;
+  override insert(child: View | NodeViewConstructor | Node | string, target: View | Node | null, key?: string): View {
     if (child instanceof Node) {
       child = NodeView.fromNode(child);
     } else if (typeof child === "function") {
@@ -549,7 +549,7 @@ export class CanvasView extends HtmlView {
     return child;
   }
 
-  insertChildView(childView: View, targetView: View | null, key?: string): void {
+  override insertChildView(childView: View, targetView: View | null, key?: string): void {
     if (childView instanceof GraphicsView) {
       this.insertGraphicsView(childView, targetView, key);
     } else {
@@ -583,9 +583,9 @@ export class CanvasView extends HtmlView {
     childView.cascadeInsert();
   }
 
-  removeChildView(key: string): View | null;
-  removeChildView(childView: View): void;
-  removeChildView(key: string | View): View | null | void {
+  override removeChildView(key: string): View | null;
+  override removeChildView(childView: View): void;
+  override removeChildView(key: string | View): View | null | void {
     let childView: View | null;
     if (typeof key === "string") {
       childView = this.getChildView(key);
@@ -622,7 +622,7 @@ export class CanvasView extends HtmlView {
     childView.setKey(void 0);
   }
 
-  removeAll(): void {
+  override removeAll(): void {
     super.removeAll();
     const graphicsViews = this.graphicsViews as GraphicsView[];
     do {
@@ -646,7 +646,7 @@ export class CanvasView extends HtmlView {
     return window.devicePixelRatio || 1;
   }
 
-  declare readonly renderer: GraphicsRenderer | null;
+  readonly renderer!: GraphicsRenderer | null;
 
   setRenderer(renderer: AnyGraphicsRenderer | null): void {
     if (typeof renderer === "string") {
@@ -681,7 +681,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  declare readonly canvasFlags: number;
+  readonly canvasFlags!: number;
 
   /** @hidden */
   setCanvasFlags(canvasFlags: number): void {
@@ -692,13 +692,13 @@ export class CanvasView extends HtmlView {
     });
   }
 
-  protected onMount(): void {
+  protected override onMount(): void {
     super.onMount();
     this.attachEvents(this.eventNode);
   }
 
   /** @hidden */
-  doMountChildViews(): void {
+  override doMountChildViews(): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -727,13 +727,13 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  protected onUnmount(): void {
+  protected override onUnmount(): void {
     this.detachEvents(this.eventNode);
     super.onUnmount();
   }
 
   /** @hidden */
-  doUnmountChildViews(): void {
+  override doUnmountChildViews(): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -763,7 +763,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  doPowerChildViews(): void {
+  override doPowerChildViews(): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -793,7 +793,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  doUnpowerChildViews(): void {
+  override doUnpowerChildViews(): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -822,7 +822,7 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  cascadeInsert(updateFlags?: ViewFlags, viewContext?: ViewContext): void {
+  override cascadeInsert(updateFlags?: ViewFlags, viewContext?: ViewContext): void {
     if ((this.viewFlags & (View.MountedFlag | View.PoweredFlag)) === (View.MountedFlag | View.PoweredFlag)) {
       if (updateFlags === void 0) {
         updateFlags = 0;
@@ -837,32 +837,32 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  protected didRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
+  protected override didRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
     super.didRequestUpdate(targetView, updateFlags, immediate);
     this.requireUpdate(View.NeedsRender | View.NeedsComposite);
   }
 
-  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.ProcessMask) !== 0) {
       this.requireUpdate(View.NeedsRender | View.NeedsComposite);
     }
     return processFlags;
   }
 
-  protected onResize(viewContext: ViewContextType<this>): void {
+  protected override onResize(viewContext: ViewContextType<this>): void {
     super.onResize(viewContext);
     this.resizeCanvas(this.node);
     this.resetRenderer();
     this.requireUpdate(View.NeedsLayout | View.NeedsRender | View.NeedsComposite);
   }
 
-  protected onScroll(viewContext: ViewContextType<this>): void {
+  protected override onScroll(viewContext: ViewContextType<this>): void {
     super.onScroll(viewContext);
     this.setCulled(!this.intersectsViewport());
   }
 
   /** @hidden */
-  protected doProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected override doProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     if ((processFlags & View.ProcessMask) !== 0) {
       this.willProcessChildViews(processFlags, viewContext);
       this.onProcessChildViews(processFlags, viewContext);
@@ -870,9 +870,9 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  protected processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              processChildView: (this: this, childView: View, processFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       processChildView: (this: this, childView: View, processFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -901,13 +901,13 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     displayFlags |= View.NeedsRender | View.NeedsComposite;
     return displayFlags;
   }
 
   /** @hidden */
-  protected doDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected override doDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     let cascadeFlags = displayFlags;
     this.setViewFlags(this.viewFlags & ~View.NeedsDisplay | (View.TraversingFlag | View.DisplayingFlag));
     try {
@@ -967,7 +967,7 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  protected didDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected override didDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     this.detectHitTargets();
     super.didDisplay(displayFlags, viewContext);
   }
@@ -1069,7 +1069,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  protected doDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected override doDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     if ((displayFlags & View.DisplayMask) !== 0 && !this.isHidden() && !this.isCulled()) {
       this.willDisplayChildViews(displayFlags, viewContext);
       this.onDisplayChildViews(displayFlags, viewContext);
@@ -1077,9 +1077,9 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -1160,26 +1160,26 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  extendViewContext(viewContext: ViewContext): ViewContextType<this> {
+  override extendViewContext(viewContext: ViewContext): ViewContextType<this> {
     const canvasViewContext = Object.create(viewContext);
     canvasViewContext.renderer = this.renderer;
     return canvasViewContext;
   }
 
-  declare readonly viewContext: GraphicsViewContext;
+  override readonly viewContext!: GraphicsViewContext;
 
   /** @hidden */
-  declare readonly viewFrame: BoxR2;
+  readonly viewFrame!: R2Box;
 
-  setViewFrame(viewFrame: BoxR2 | null): void {
+  setViewFrame(viewFrame: R2Box | null): void {
     // nop
   }
 
-  get viewBounds(): BoxR2 {
+  get viewBounds(): R2Box {
     return this.viewFrame;
   }
 
-  get hitBounds(): BoxR2 {
+  get hitBounds(): R2Box {
     return this.viewFrame;
   }
 
@@ -1214,7 +1214,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  protected detectHitTargets(clientBounds?: BoxR2): void {
+  protected detectHitTargets(clientBounds?: R2Box): void {
     if ((this.canvasFlags & CanvasView.MouseEventsFlag) !== 0) {
       const mouse = this.mouse;
       if (mouse !== null) {
@@ -1236,7 +1236,7 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  declare readonly eventNode: HTMLElement;
+  readonly eventNode!: HTMLElement;
 
   setEventNode(newEventNode: HTMLElement | null): void {
     if (newEventNode === null) {
@@ -1457,7 +1457,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  declare readonly mouse: CanvasViewMouse | null;
+  readonly mouse!: CanvasViewMouse | null;
 
   /** @hidden */
   protected updateMouse(mouse: CanvasViewMouse, event: MouseEvent): void {
@@ -1616,7 +1616,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  protected detectMouseTarget(mouse: CanvasViewMouse, clientBounds: BoxR2): void {
+  protected detectMouseTarget(mouse: CanvasViewMouse, clientBounds: R2Box): void {
     const clientX = mouse.clientX!;
     const clientY = mouse.clientY!;
     if (clientBounds.contains(clientX, clientY)) {
@@ -1662,7 +1662,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  declare readonly pointers: {[id: string]: CanvasViewPointer | undefined} | null;
+  readonly pointers!: {[id: string]: CanvasViewPointer | undefined} | null;
 
   /** @hidden */
   protected updatePointer(pointer: CanvasViewPointer, event: PointerEvent): void {
@@ -1880,7 +1880,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  protected detectPointerTarget(pointer: CanvasViewPointer, clientBounds: BoxR2): void {
+  protected detectPointerTarget(pointer: CanvasViewPointer, clientBounds: R2Box): void {
     const clientX = pointer.clientX!;
     const clientY = pointer.clientY!;
     if (clientBounds.contains(clientX, clientY)) {
@@ -1922,7 +1922,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  declare readonly touches: {[id: string]: CanvasViewTouch | undefined} | null;
+  readonly touches!: {[id: string]: CanvasViewTouch | undefined} | null;
 
   /** @hidden */
   protected updateTouch(touch: CanvasViewTouch, event: Touch): void {
@@ -1979,7 +1979,7 @@ export class CanvasView extends HtmlView {
 
   /** @hidden */
   protected onTouchStart(event: TouchEvent): void {
-    let clientBounds: BoxR2 | undefined;
+    let clientBounds: R2Box | undefined;
     let touches = this.touches;
     if (touches === null) {
       touches = {};
@@ -2157,7 +2157,7 @@ export class CanvasView extends HtmlView {
       pixelRatio = 1;
     }
     Object.defineProperty(this, "viewFrame", {
-      value: new BoxR2(0, 0, width, height),
+      value: new R2Box(0, 0, width, height),
       enumerable: true,
       configurable: true,
     });
@@ -2186,7 +2186,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  static readonly tag: string = "canvas";
+  static override readonly tag: string = "canvas";
 
   /** @hidden */
   static readonly ClickEventsFlag: CanvasFlags = 1 << 0;
@@ -2205,8 +2205,8 @@ export class CanvasView extends HtmlView {
                                           | CanvasView.PointerEventsFlag
                                           | CanvasView.TouchEventsFlag;
 
-  static readonly powerFlags: ViewFlags = HtmlView.powerFlags | View.NeedsRender | View.NeedsComposite;
-  static readonly uncullFlags: ViewFlags = HtmlView.uncullFlags | View.NeedsRender | View.NeedsComposite;
+  static override readonly powerFlags: ViewFlags = HtmlView.powerFlags | View.NeedsRender | View.NeedsComposite;
+  static override readonly uncullFlags: ViewFlags = HtmlView.uncullFlags | View.NeedsRender | View.NeedsComposite;
 }
 
 HtmlView.Tag("canvas")(CanvasView, "canvas");

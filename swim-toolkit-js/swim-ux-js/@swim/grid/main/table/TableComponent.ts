@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ export class TableComponent extends CompositeComponent {
     });
   }
 
-  declare readonly componentObservers: ReadonlyArray<TableComponentObserver>;
+  override readonly componentObservers!: ReadonlyArray<TableComponentObserver>;
 
   protected layoutTable(tableLayout: TableLayout, tableView: TableView): void {
     tableView.layout.setState(tableLayout, View.Intrinsic);
@@ -279,7 +279,7 @@ export class TableComponent extends CompositeComponent {
   @ComponentViewTrait<TableComponent, TableView, TableTrait>({
     extends: TableComponent.TableFastener,
   })
-  declare table: ComponentViewTrait<this, TableView, TableTrait>;
+  readonly table!: ComponentViewTrait<this, TableView, TableTrait>;
 
   insertCol(colComponent: ColComponent, targetComponent: Component | null = null): void {
     const colFasteners = this.colFasteners as ComponentFastener<this, ColComponent>[];
@@ -647,7 +647,7 @@ export class TableComponent extends CompositeComponent {
   }
 
   /** @hidden */
-  declare readonly colFasteners: ReadonlyArray<ComponentFastener<this, ColComponent>>;
+  readonly colFasteners!: ReadonlyArray<ComponentFastener<this, ColComponent>>;
 
   protected getColFastener(colTrait: ColTrait): ComponentFastener<this, ColComponent> | null {
     const colFasteners = this.colFasteners;
@@ -1232,7 +1232,7 @@ export class TableComponent extends CompositeComponent {
   }
 
   /** @hidden */
-  declare readonly rowFasteners: ReadonlyArray<ComponentFastener<this, RowComponent>>;
+  readonly rowFasteners!: ReadonlyArray<ComponentFastener<this, RowComponent>>;
 
   protected getRowFastener(rowTrait: RowTrait): ComponentFastener<this, RowComponent> | null {
     const rowFasteners = this.rowFasteners;
@@ -1268,7 +1268,7 @@ export class TableComponent extends CompositeComponent {
     return component instanceof RowComponent ? component : null;
   }
 
-  protected onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
+  protected override onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
     super.onInsertChildComponent(childComponent, targetComponent);
     const rowComponent = this.detectRowComponent(childComponent);
     if (rowComponent !== null) {
@@ -1276,7 +1276,7 @@ export class TableComponent extends CompositeComponent {
     }
   }
 
-  protected onRemoveChildComponent(childComponent: Component): void {
+  protected override onRemoveChildComponent(childComponent: Component): void {
     super.onRemoveChildComponent(childComponent);
     const rowComponent = this.detectRowComponent(childComponent);
     if (rowComponent !== null) {
@@ -1285,14 +1285,14 @@ export class TableComponent extends CompositeComponent {
   }
 
   /** @hidden */
-  protected mountComponentFasteners(): void {
+  protected override mountComponentFasteners(): void {
     super.mountComponentFasteners();
     this.mountColFasteners();
     this.mountRowFasteners();
   }
 
   /** @hidden */
-  protected unmountComponentFasteners(): void {
+  protected override unmountComponentFasteners(): void {
     this.unmountRowFasteners();
     this.unmountColFasteners();
     super.unmountComponentFasteners();

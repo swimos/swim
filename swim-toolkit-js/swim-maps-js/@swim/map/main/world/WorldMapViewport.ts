@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Equals} from "@swim/util";
-import type {AnyPointR2, PointR2, BoxR2} from "@swim/math";
+import type {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import type {GeoViewport} from "../geo/GeoViewport";
 
@@ -38,14 +38,14 @@ export abstract class WorldMapViewport implements GeoViewport, Equals {
     return 0;
   }
 
-  abstract readonly viewFrame: BoxR2;
+  abstract readonly viewFrame: R2Box;
 
-  abstract withViewFrame(viewFrame: BoxR2): WorldMapViewport;
+  abstract withViewFrame(viewFrame: R2Box): WorldMapViewport;
 
-  abstract project(geoPoint: AnyGeoPoint): PointR2;
-  abstract project(lng: number, lat: number): PointR2;
+  abstract project(geoPoint: AnyGeoPoint): R2Point;
+  abstract project(lng: number, lat: number): R2Point;
 
-  abstract unproject(viewPoint: AnyPointR2): GeoPoint;
+  abstract unproject(viewPoint: AnyR2Point): GeoPoint;
   abstract unproject(x: number, y: number): GeoPoint;
 
   protected canEqual(that: unknown): boolean {

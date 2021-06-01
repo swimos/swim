@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyLength, Length, BoxR2} from "@swim/math";
+import {AnyLength, Length, R2Box} from "@swim/math";
 import type {GeoPath} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ViewContextType, View, ViewProperty, ViewAnimator} from "@swim/view";
@@ -32,7 +32,7 @@ export interface GeoLineViewInit extends GeoPathViewInit, StrokeViewInit {
 }
 
 export class GeoLineView extends GeoPathView implements StrokeView {
-  initView(init: GeoLineViewInit): void {
+  override initView(init: GeoLineViewInit): void {
     super.initView(init);
     if (init.stroke !== void 0) {
       this.stroke(init.stroke);
@@ -45,9 +45,9 @@ export class GeoLineView extends GeoPathView implements StrokeView {
     }
   }
 
-  declare readonly viewController: GeoViewController<GeoLineView> & GeoLineViewObserver | null;
+  override readonly viewController!: GeoViewController<GeoLineView> & GeoLineViewObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<GeoLineViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<GeoLineViewObserver>;
 
   protected willSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
     const viewController = this.viewController;
@@ -93,7 +93,7 @@ export class GeoLineView extends GeoPathView implements StrokeView {
       this.owner.didSetStroke(newStroke, oldStroke);
     },
   })
-  declare stroke: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
     const viewController = this.viewController;
@@ -139,19 +139,19 @@ export class GeoLineView extends GeoPathView implements StrokeView {
       this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
     },
   })
-  declare strokeWidth: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewProperty({type: Number})
-  declare hitWidth: ViewProperty<this, number | undefined>;
+  readonly hitWidth!: ViewProperty<this, number | undefined>;
 
-  protected onSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath): void {
+  protected override onSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath): void {
     super.onSetGeoPath(newGeoPath, oldGeoPath);
     if (this.geoCentroid.takesPrecedence(View.Intrinsic)) {
       this.geoCentroid.setState(newGeoPath.centroid(), View.Intrinsic);
     }
   }
 
-  protected onRender(viewContext: ViewContextType<this>): void {
+  protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -162,7 +162,7 @@ export class GeoLineView extends GeoPathView implements StrokeView {
     }
   }
 
-  protected renderLine(context: CanvasContext, frame: BoxR2): void {
+  protected renderLine(context: CanvasContext, frame: R2Box): void {
     const viewPath = this.viewPath.value;
     if (viewPath !== null && viewPath.isDefined()) {
       context.beginPath();
@@ -178,7 +178,7 @@ export class GeoLineView extends GeoPathView implements StrokeView {
     }
   }
 
-  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -194,7 +194,7 @@ export class GeoLineView extends GeoPathView implements StrokeView {
     return hit;
   }
 
-  protected hitTestLine(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
+  protected hitTestLine(x: number, y: number, context: CanvasContext, frame: R2Box): GraphicsView | null {
     const viewPath = this.viewPath.value;
     if (viewPath !== null && viewPath.isDefined()) {
       context.beginPath();

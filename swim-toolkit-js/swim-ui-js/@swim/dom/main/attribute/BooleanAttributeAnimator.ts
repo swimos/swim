@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@ import type {ElementView} from "../element/ElementView";
 
 /** @hidden */
 export abstract class BooleanAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, boolean | undefined, string> {
-  parse(value: string): boolean | undefined {
+  override parse(value: string): boolean | undefined {
     return !!value;
   }
 
-  fromAny(value: boolean | string): boolean | undefined {
+  override fromAny(value: boolean | string): boolean | undefined {
     return !!value;
   }
 }

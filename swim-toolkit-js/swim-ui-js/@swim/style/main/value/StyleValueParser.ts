@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ export class StyleValueParser extends Parser<StyleValue> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<StyleValue> {
+  override feed(input: Input): Parser<StyleValue> {
     return StyleValueParser.parse(input, this.identOutput, this.valueParser,
                                   this.unitsOutput, this.step);
   }
@@ -75,7 +75,7 @@ export class StyleValueParser extends Parser<StyleValue> {
     }
     if (step === 2) {
       identOutput = identOutput || Unicode.stringOutput();
-      while (input.isCont() && (c = input.head(), Unicode.isAlpha(c) || c === 45/*'-'*/)) {
+      while (input.isCont() && (c = input.head(), Unicode.isAlpha(c) || Unicode.isDigit(c) || c === 45/*'-'*/)) {
         input = input.step();
         identOutput.write(c);
       }
@@ -115,6 +115,7 @@ export class StyleValueParser extends Parser<StyleValue> {
           case "xx-large":
           case "xx-small": return FontParser.parseRest(input, void 0, void 0, void 0, void 0, ident);
 
+          case "translate3d":
           case "translateX":
           case "translateY":
           case "translate": return TranslateTransformParser.parseRest(input, identOutput);

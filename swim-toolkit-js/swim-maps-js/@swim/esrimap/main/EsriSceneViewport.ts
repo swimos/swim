@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 /// <reference types="arcgis-js-api"/>
 
-import {AnyPointR2, PointR2} from "@swim/math";
+import {AnyR2Point, R2Point} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {EsriViewport} from "./EsriViewport";
 
@@ -24,11 +24,11 @@ export class EsriSceneViewport extends EsriViewport {
     super(map, geoFrame, geoCenter, zoom, heading, tilt);
   }
 
-  declare readonly map: __esri.SceneView;
+  override readonly map!: __esri.SceneView;
 
-  project(geoPoint: AnyGeoPoint): PointR2;
-  project(lng: number, lat: number): PointR2;
-  project(lng: AnyGeoPoint | number, lat?: number): PointR2 {
+  override project(geoPoint: AnyGeoPoint): R2Point;
+  override project(lng: number, lat: number): R2Point;
+  override project(lng: AnyGeoPoint | number, lat?: number): R2Point {
     let geoPoint: __esri.Point;
     if (typeof lng === "number") {
       geoPoint = {x: lng, y: lat!, spatialReference: {wkid: 4326}} as __esri.Point;
@@ -38,12 +38,12 @@ export class EsriSceneViewport extends EsriViewport {
       geoPoint = {x: lng.lng, y: lng.lat, spatialReference: {wkid: 4326}} as __esri.Point;
     }
     const point = this.map.toScreen(geoPoint);
-    return point !== null ? new PointR2(point.x, point.y) : PointR2.origin();
+    return point !== null ? new R2Point(point.x, point.y) : R2Point.origin();
   }
 
-  unproject(viewPoint: AnyPointR2): GeoPoint;
-  unproject(x: number, y: number): GeoPoint;
-  unproject(x: AnyPointR2 | number, y?: number): GeoPoint {
+  override unproject(viewPoint: AnyR2Point): GeoPoint;
+  override unproject(x: number, y: number): GeoPoint;
+  override unproject(x: AnyR2Point | number, y?: number): GeoPoint {
     let viewPoint: __esri.ScreenPoint;
     if (typeof x === "number") {
       viewPoint = {x: x, y: y!};

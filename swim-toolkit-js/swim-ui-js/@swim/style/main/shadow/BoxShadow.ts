@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     });
   }
 
-  declare readonly inset: boolean;
+  readonly inset!: boolean;
 
   withInset(inset: boolean): BoxShadow {
     if (inset === this.inset) {
@@ -82,7 +82,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     }
   }
 
-  declare readonly offsetX: Length;
+  readonly offsetX!: Length;
 
   withOffsetX(offsetX: AnyLength): BoxShadow {
     offsetX = Length.fromAny(offsetX);
@@ -94,7 +94,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     }
   }
 
-  declare readonly offsetY: Length;
+  readonly offsetY!: Length;
 
   withOffsetY(offsetY: AnyLength): BoxShadow {
     offsetY = Length.fromAny(offsetY);
@@ -106,7 +106,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     }
   }
 
-  declare readonly blurRadius: Length;
+  readonly blurRadius!: Length;
 
   withBlurRadius(blurRadius: AnyLength): BoxShadow {
     blurRadius = Length.fromAny(blurRadius);
@@ -118,7 +118,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     }
   }
 
-  declare readonly spreadRadius: Length;
+  readonly spreadRadius!: Length;
 
   withSpreadRadius(spreadRadius: AnyLength): BoxShadow {
     spreadRadius = Length.fromAny(spreadRadius);
@@ -130,7 +130,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     }
   }
 
-  declare readonly color: Color;
+  readonly color!: Color;
 
   withColor(color: AnyColor): BoxShadow {
     color = Color.fromAny(color);
@@ -142,7 +142,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     }
   }
 
-  declare readonly next: BoxShadow | null;
+  readonly next!: BoxShadow | null;
 
   and(value: AnyBoxShadow): BoxShadow;
   and(offsetX: AnyLength, offsetY: AnyLength, color: AnyColor): BoxShadow;
@@ -202,7 +202,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
   toString(): string {
     let s = this.stringValue;

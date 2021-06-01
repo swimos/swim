@@ -99,6 +99,8 @@ the following component libraries:
   graphics views for efficiently rendering animated geospatial map overlays.
 - [**@swim/mapbox**](swim-maps-js/@swim/mapbox) –
   **@swim/map** overlays for Mapbox maps.
+- [**@swim/leaflet**](swim-maps-js/@swim/leaflet) –
+  **@swim/map** overlays for Leaflet maps.
 - [**@swim/googlemap**](swim-maps-js/@swim/googlemap) –
   **@swim/map** overlays for Google maps.
 - [**@swim/esrimap**](swim-maps-js/@swim/esrimap) –

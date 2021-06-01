@@ -11,7 +11,6 @@ const main = {
     name: namespace,
     format: "umd",
     globals: {
-      "mapbox-gl": "mapboxgl",
       "@swim/util": "swim",
       "@swim/codec": "swim",
       "@swim/mapping": "swim",
@@ -27,13 +26,14 @@ const main = {
       "@swim/time": "swim",
       "@swim/warp": "swim",
       "@swim/client": "swim",
+      "leaflet": "L",
+      "mapbox-gl": "mapboxgl",
     },
     sourcemap: true,
     interop: false,
     extend: true,
   },
   external: [
-    "mapbox-gl",
     "@swim/util",
     "@swim/codec",
     "@swim/mapping",
@@ -49,6 +49,8 @@ const main = {
     "@swim/time",
     "@swim/warp",
     "@swim/client",
+    "leaflet",
+    "mapbox-gl",
   ],
   plugins: [
     nodeResolve({moduleDirectories: ["../../swim-ui-js",

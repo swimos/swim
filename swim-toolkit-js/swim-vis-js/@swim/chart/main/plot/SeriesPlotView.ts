@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 import {Equals, Values} from "@swim/util";
 import {Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/mapping";
 import {BTree} from "@swim/collections";
-import type {BoxR2} from "@swim/math";
+import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewFlags, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
 import {GraphicsView, GraphicsViewController, CanvasContext, CanvasRenderer} from "@swim/graphics";
@@ -73,7 +73,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     });
   }
 
-  initView(init: SeriesPlotViewInit<X, Y>): void {
+  override initView(init: SeriesPlotViewInit<X, Y>): void {
     super.initView(init);
     if (init.xScale !== void 0) {
       this.xScale(init.xScale);
@@ -101,20 +101,20 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     }
   }
 
-  declare readonly viewController: GraphicsViewController<SeriesPlotView<X, Y>> & SeriesPlotViewObserver<X, Y> | null;
+  override readonly viewController!: GraphicsViewController<SeriesPlotView<X, Y>> & SeriesPlotViewObserver<X, Y> | null;
 
-  declare readonly viewObservers: ReadonlyArray<SeriesPlotViewObserver<X, Y>>;
+  override readonly viewObservers!: ReadonlyArray<SeriesPlotViewObserver<X, Y>>;
 
   abstract readonly plotType: SeriesPlotType;
 
   @ViewAnimator({type: Font, state: null, inherit: true})
-  declare font: ViewAnimator<this, Font | null, AnyFont | null>;
+  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
 
   @ViewAnimator({type: Color, state: null, inherit: true})
-  declare textColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewProperty({type: String, state: "domain"})
-  declare hitMode: ViewProperty<this, SeriesPlotHitMode>;
+  readonly hitMode!: ViewProperty<this, SeriesPlotHitMode>;
 
   protected willSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
     const viewController = this.viewController;
@@ -162,7 +162,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
       this.owner.didSetXScale(newXScale, oldXScale);
     },
   })
-  declare xScale: ContinuousScaleAnimator<this, X, number>;
+  readonly xScale!: ContinuousScaleAnimator<this, X, number>;
 
   protected willSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
     const viewController = this.viewController;
@@ -210,7 +210,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
       this.owner.didSetYScale(newYScale, oldYScale);
     },
   })
-  declare yScale: ContinuousScaleAnimator<this, Y, number>;
+  readonly yScale!: ContinuousScaleAnimator<this, Y, number>;
 
   xDomain(): Domain<X> | null;
   xDomain(xDomain: Domain<X> | string | null, timing?: AnyTiming | boolean): this;
@@ -294,7 +294,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
       this.owner.didSetXRangePadding(newXRangePadding, oldXRangePadding);
     },
   })
-  declare xRangePadding: ViewProperty<this, readonly [number, number]>
+  readonly xRangePadding!: ViewProperty<this, readonly [number, number]>
 
   protected willSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
     const viewController = this.viewController;
@@ -340,9 +340,9 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
       this.owner.didSetYRangePadding(newYRangePadding, oldYRangePadding);
     },
   })
-  declare yRangePadding: ViewProperty<this, readonly [number, number]>
+  readonly yRangePadding!: ViewProperty<this, readonly [number, number]>
 
-  declare readonly xDataDomain: Domain<X> | null;
+  readonly xDataDomain!: Domain<X> | null;
 
   protected setXDataDomain(newXDataDomain: Domain<X> | null): void {
     const oldXDataDomain = this.xDataDomain;
@@ -405,7 +405,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     this.setXDataDomain(xDataDomain);
   }
 
-  declare readonly yDataDomain: Domain<Y> | null;
+  readonly yDataDomain!: Domain<Y> | null;
 
   protected setYDataDomain(newYDataDomain: Domain<Y> | null): void {
     const oldYDataDomain = this.yDataDomain;
@@ -477,7 +477,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     this.setYDataDomain(yDataDomain);
   }
 
-  declare readonly xDataRange: Range<number> | null;
+  readonly xDataRange!: Range<number> | null;
 
   protected setXDataRange(xDataRange: Range<number> | null): void {
     Object.defineProperty(this, "xDataRange", {
@@ -499,7 +499,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     }
   }
 
-  declare readonly yDataRange: Range<number> | null;
+  readonly yDataRange!: Range<number> | null;
 
   protected setYDataRange(yDataRange: Range<number> | null): void {
     Object.defineProperty(this, "yDataRange", {
@@ -522,7 +522,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   }
 
   /** @hidden */
-  declare readonly gradientStops: number;
+  readonly gradientStops!: number;
 
   insertDataPoint(dataPointView: AnyDataPointView<X, Y>, targetView: View | null = null): void {
     dataPointView = DataPointView.fromAny(dataPointView);
@@ -693,7 +693,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   }
 
   /** @hidden */
-  declare readonly dataPointFasteners: BTree<X, ViewFastener<this, DataPointView<X, Y>>>;
+  readonly dataPointFasteners!: BTree<X, ViewFastener<this, DataPointView<X, Y>>>;
 
   /** @hidden */
   getDataPointFastener(x: X): ViewFastener<this, DataPointView<X, Y>> | null {
@@ -722,11 +722,11 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     }, this);
   }
 
-  get childViewCount(): number {
+  override get childViewCount(): number {
     return this.dataPointFasteners.size;
   }
 
-  get childViews(): ReadonlyArray<View> {
+  override get childViews(): ReadonlyArray<View> {
     const childViews: View[] = [];
     type self = this;
     this.dataPointFasteners.forEachValue(function (dataPointFastener: ViewFastener<self, DataPointView<X, Y>>): void {
@@ -735,17 +735,17 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     return childViews;
   }
 
-  firstChildView(): View | null {
+  override firstChildView(): View | null {
     const dataPointFastener = this.dataPointFasteners.firstValue();
     return dataPointFastener !== void 0 ? dataPointFastener.view! : null;
   }
 
-  lastChildView(): View | null {
+  override lastChildView(): View | null {
     const dataPointFastener = this.dataPointFasteners.lastValue();
     return dataPointFastener !== void 0 ? dataPointFastener.view! : null;
   }
 
-  nextChildView(targetView: View): View | null {
+  override nextChildView(targetView: View): View | null {
     if (targetView instanceof DataPointView) {
       const dataPointFastener = this.dataPointFasteners.nextValue(targetView.x.getState());
       if (dataPointFastener !== void 0) {
@@ -755,7 +755,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     return null;
   }
 
-  previousChildView(targetView: View): View | null {
+  override previousChildView(targetView: View): View | null {
     if (targetView instanceof DataPointView) {
       const dataPointFastener = this.dataPointFasteners.previousValue(targetView.x.getState());
       if (dataPointFastener !== void 0) {
@@ -765,11 +765,11 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     return null;
   }
 
-  forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
-  forEachChildView<T, S>(callback: (this: S, childView: View) => T | void,
-                         thisArg: S): T | undefined;
-  forEachChildView<T, S>(callback: (this: S | undefined, childView: View) => T | void,
-                         thisArg?: S): T | undefined {
+  override forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
+  override forEachChildView<T, S>(callback: (this: S, childView: View) => T | void,
+                                  thisArg: S): T | undefined;
+  override forEachChildView<T, S>(callback: (this: S | undefined, childView: View) => T | void,
+                                  thisArg?: S): T | undefined {
     type self = this;
     return this.dataPointFasteners.forEachValue(function (dataPointFastener: ViewFastener<self, DataPointView<X, Y>>): T | void {
       const result = callback.call(thisArg, dataPointFastener.view!);
@@ -779,15 +779,15 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     }, thisArg);
   }
 
-  getChildView(key: string): View | null {
+  override getChildView(key: string): View | null {
     return null;
   }
 
-  setChildView(key: string, newChildView: View | null): View | null {
+  override setChildView(key: string, newChildView: View | null): View | null {
     throw new Error("unsupported");
   }
 
-  appendChildView(childView: View, key?: string): void {
+  override appendChildView(childView: View, key?: string): void {
     if (key !== void 0) {
       throw new Error("unsupported");
     }
@@ -797,7 +797,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     this.insertDataPoint(childView);
   }
 
-  prependChildView(childView: View, key?: string): void {
+  override prependChildView(childView: View, key?: string): void {
     if (key !== void 0) {
       throw new Error("unsupported");
     }
@@ -807,7 +807,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     this.insertDataPoint(childView);
   }
 
-  insertChildView(childView: View, targetView: View | null, key?: string): void {
+  override insertChildView(childView: View, targetView: View | null, key?: string): void {
     if (key !== void 0) {
       throw new Error("unsupported");
     }
@@ -817,9 +817,9 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     this.insertDataPoint(childView);
   }
 
-  removeChildView(key: string): View | null;
-  removeChildView(childView: View): void;
-  removeChildView(childView: string | View): View | null | void {
+  override removeChildView(key: string): View | null;
+  override removeChildView(childView: View): void;
+  override removeChildView(childView: string | View): View | null | void {
     if (typeof childView === "string") {
       throw new Error("unsupported");
     }
@@ -829,7 +829,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     this.removeDataPoint(childView.x.getState());
   }
 
-  removeAll(): void {
+  override removeAll(): void {
     type self = this;
     this.dataPointFasteners.forEach(function (x: X, dataPointFastener: ViewFastener<self, DataPointView<X, Y>>): void {
       const childView = dataPointFastener.view!;
@@ -846,7 +846,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     }, this);
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.xScale.onAnimate(viewContext.updateTime);
     this.yScale.onAnimate(viewContext.updateTime);
@@ -856,7 +856,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   /**
    * Updates own scale ranges to project onto view frame.
    */
-  protected resizeScales(frame: BoxR2): void {
+  protected resizeScales(frame: R2Box): void {
     const xScale = !this.xScale.isInherited() ? this.xScale.ownValue : null;
     if (xScale !== null && xScale.range[1] !== frame.width) {
       this.xScale.setRange(0, frame.width);
@@ -867,9 +867,9 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     }
   }
 
-  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     let xScale: ContinuousScale<X, number> | null;
     let yScale: ContinuousScale<Y, number> | null;
     if ((displayFlags & View.NeedsLayout) !== 0 &&
@@ -1006,7 +1006,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     });
   }
 
-  protected didRender(viewContext: ViewContextType<this>): void {
+  protected override didRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
       const context = renderer.context;
@@ -1015,9 +1015,9 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     super.didRender(viewContext);
   }
 
-  protected abstract renderPlot(context: CanvasContext, frame: BoxR2): void;
+  protected abstract renderPlot(context: CanvasContext, frame: R2Box): void;
 
-  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     let hit: GraphicsView | null = null;
     const hitMode = this.hitMode.state;
     if (hitMode !== "none") {
@@ -1064,13 +1064,13 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   protected abstract hitTestPlot(x: number, y: number, renderer: CanvasRenderer): GraphicsView | null;
 
   /** @hidden */
-  protected mountViewFasteners(): void {
+  protected override mountViewFasteners(): void {
     super.mountViewFasteners();
     this.mountDataPointFasteners();
   }
 
   /** @hidden */
-  protected unmountViewFasteners(): void {
+  protected override unmountViewFasteners(): void {
     this.unmountDataPointFasteners();
     super.unmountViewFasteners();
   }

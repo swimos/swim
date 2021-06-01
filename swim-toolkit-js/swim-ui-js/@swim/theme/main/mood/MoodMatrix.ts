@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,16 +42,16 @@ export class MoodMatrix<M extends Mood = Feel, N extends Mood = Feel> implements
   }
 
   /** @hidden */
-  declare readonly rowArray: ReadonlyArray<[M, MoodVector<N>]>;
+  readonly rowArray!: ReadonlyArray<[M, MoodVector<N>]>;
 
   /** @hidden */
-  declare readonly rowIndex: {readonly [name: string]: number | undefined};
+  readonly rowIndex!: {readonly [name: string]: number | undefined};
 
   /** @hidden */
-  declare readonly colArray: ReadonlyArray<[N, MoodVector<M>]>;
+  readonly colArray!: ReadonlyArray<[N, MoodVector<M>]>;
 
   /** @hidden */
-  declare readonly colIndex: {readonly [name: string]: number | undefined};
+  readonly colIndex!: {readonly [name: string]: number | undefined};
 
   get rowCount(): number {
     return this.rowArray.length;

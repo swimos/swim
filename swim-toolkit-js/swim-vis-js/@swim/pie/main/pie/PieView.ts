@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyLength, Length, AnyAngle, Angle, AnyPointR2, PointR2, BoxR2} from "@swim/math";
+import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {ViewContextType, View, ViewAnimator, ViewFastener} from "@swim/view";
@@ -32,7 +32,7 @@ export type AnyPieView = PieView | PieViewInit;
 
 export interface PieViewInit extends GraphicsViewInit {
   limit?: number;
-  center?: AnyPointR2;
+  center?: AnyR2Point;
   baseAngle?: AnyAngle;
   innerRadius?: AnyLength;
   outerRadius?: AnyLength;
@@ -62,7 +62,7 @@ export class PieView extends LayerView {
     });
   }
 
-  initView(init: PieViewInit): void {
+  override initView(init: PieViewInit): void {
     super.initView(init);
     if (init.limit !== void 0) {
       this.limit(init.limit);
@@ -130,63 +130,63 @@ export class PieView extends LayerView {
     }
   }
 
-  declare readonly viewController: GraphicsViewController & PieViewObserver | null;
+  override readonly viewController!: GraphicsViewController & PieViewObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<PieViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<PieViewObserver>;
 
   @ViewAnimator({type: Number, state: 0, updateFlags: View.NeedsLayout})
-  declare limit: ViewAnimator<this, number>;
+  readonly limit!: ViewAnimator<this, number>;
 
-  @ViewAnimator({type: PointR2, state: PointR2.origin(), updateFlags: View.NeedsLayout})
-  declare center: ViewAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsLayout})
+  readonly center!: ViewAnimator<this, R2Point, AnyR2Point>;
 
   @ViewAnimator({type: Angle, state: Angle.rad(-Math.PI / 2), updateFlags: View.NeedsLayout})
-  declare baseAngle: ViewAnimator<this, Angle, AnyAngle>;
+  readonly baseAngle!: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Length, state: Length.pct(3)})
-  declare innerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly innerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.pct(25)})
-  declare outerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly outerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Angle, state: Angle.deg(2)})
-  declare padAngle: ViewAnimator<this, Angle, AnyAngle>;
+  readonly padAngle!: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Length, state: null})
-  declare padRadius: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly padRadius!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  declare cornerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly cornerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.pct(50)})
-  declare labelRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly labelRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Color, state: null, look: Look.accentColor})
-  declare sliceColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly sliceColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Number, state: 0.5})
-  declare tickAlign: ViewAnimator<this, number>;
+  readonly tickAlign!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Length, state: Length.pct(30)})
-  declare tickRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly tickRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.pct(50)})
-  declare tickLength: ViewAnimator<this, Length, AnyLength>;
+  readonly tickLength!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.px(1)})
-  declare tickWidth: ViewAnimator<this, Length, AnyLength>;
+  readonly tickWidth!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.px(2)})
-  declare tickPadding: ViewAnimator<this, Length, AnyLength>;
+  readonly tickPadding!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Color, state: null, look: Look.neutralColor})
-  declare tickColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly tickColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Font, state: null, inherit: true})
-  declare font: ViewAnimator<this, Font | null, AnyFont | null>;
+  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
 
   @ViewAnimator({type: Color, state: null, look: Look.mutedColor})
-  declare textColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected initTitle(titleView: GraphicsView): void {
     if (TypesetView.is(titleView)) {
@@ -265,7 +265,7 @@ export class PieView extends LayerView {
       this.owner.didSetTitle(newTitleView, oldTitleView);
     },
   })
-  declare title: ViewFastener<this, GraphicsView, AnyTextRunView>;
+  readonly title!: ViewFastener<this, GraphicsView, AnyTextRunView>;
 
   insertSlice(sliceView: AnySliceView, targetView: View | null = null): void {
     sliceView = SliceView.fromAny(sliceView);
@@ -419,7 +419,7 @@ export class PieView extends LayerView {
   }
 
   /** @hidden */
-  declare readonly sliceFasteners: ReadonlyArray<ViewFastener<this, SliceView>>;
+  readonly sliceFasteners!: ReadonlyArray<ViewFastener<this, SliceView>>;
 
   /** @hidden */
   protected mountSliceFasteners(): void {
@@ -443,7 +443,7 @@ export class PieView extends LayerView {
     return view instanceof SliceView ? view : null;
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     const sliceView = this.detectSlice(childView);
     if (sliceView !== null) {
@@ -451,7 +451,7 @@ export class PieView extends LayerView {
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     super.onRemoveChildView(childView);
     const sliceView = this.detectSlice(childView);
     if (sliceView !== null) {
@@ -459,16 +459,16 @@ export class PieView extends LayerView {
     }
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.layoutPie(this.viewFrame);
   }
 
-  protected layoutPie(frame: BoxR2): void {
+  protected layoutPie(frame: R2Box): void {
     if (this.center.takesPrecedence(View.Intrinsic)) {
       const cx = (frame.xMin + frame.xMax) / 2;
       const cy = (frame.yMin + frame.yMax) / 2;
-      this.center.setState(new PointR2(cx, cy), View.Intrinsic);
+      this.center.setState(new R2Point(cx, cy), View.Intrinsic);
     }
 
     const sliceFasteners = this.sliceFasteners;
@@ -507,18 +507,18 @@ export class PieView extends LayerView {
   }
 
   /** @hidden */
-  protected mountViewFasteners(): void {
+  protected override mountViewFasteners(): void {
     super.mountViewFasteners();
     this.mountSliceFasteners();
   }
 
   /** @hidden */
-  protected unmountViewFasteners(): void {
+  protected override unmountViewFasteners(): void {
     this.unmountSliceFasteners();
     super.unmountViewFasteners();
   }
 
-  static create(): PieView {
+  static override create(): PieView {
     return new PieView();
   }
 

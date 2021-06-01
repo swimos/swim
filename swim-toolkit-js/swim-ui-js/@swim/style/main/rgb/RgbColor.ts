@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,22 +55,22 @@ export class RgbColor extends Color {
     });
   }
 
-  isDefined(): boolean {
+  override isDefined(): boolean {
     return isFinite(this.r) && isFinite(this.g)
         && isFinite(this.b) && isFinite(this.a);
   }
 
-  declare readonly r: number;
+  readonly r!: number;
 
-  declare readonly g: number;
+  readonly g!: number;
 
-  declare readonly b: number;
+  readonly b!: number;
 
-  declare readonly a: number;
+  readonly a!: number;
 
-  alpha(): number;
-  alpha(a: number): RgbColor;
-  alpha(a?: number): number | RgbColor {
+  override alpha(): number;
+  override alpha(a: number): RgbColor;
+  override alpha(a?: number): number | RgbColor {
     if (a === void 0) {
       return this.a;
     } else if (this.a !== a) {
@@ -80,7 +80,7 @@ export class RgbColor extends Color {
     }
   }
 
-  get lightness(): number {
+  override get lightness(): number {
     const r = this.r / 255;
     const g = this.g / 255;
     const b = this.b / 255;
@@ -89,37 +89,37 @@ export class RgbColor extends Color {
     return (max + min) / 2;
   }
 
-  plus(that: AnyColor): RgbColor {
+  override plus(that: AnyColor): RgbColor {
     that = Color.fromAny(that).rgb();
     return new RgbColor(this.r + (that as RgbColor).r, this.g + (that as RgbColor).g,
                         this.b + (that as RgbColor).b, this.a + (that as RgbColor).a);
   }
 
-  times(scalar: number): RgbColor {
+  override times(scalar: number): RgbColor {
     return new RgbColor(this.r * scalar, this.g * scalar, this.b * scalar, this.a * scalar);
   }
 
-  combine(that: AnyColor, scalar: number = 1): Color {
+  override combine(that: AnyColor, scalar: number = 1): Color {
     that = Color.fromAny(that).rgb();
     return new RgbColor(this.r + (that as RgbColor).r * scalar, this.g + (that as RgbColor).g * scalar,
                         this.b + (that as RgbColor).b * scalar, this.a + (that as RgbColor).a * scalar);
   }
 
-  lighter(k?: number): RgbColor {
+  override lighter(k?: number): RgbColor {
     k = k === void 0 ? Color.Brighter : Math.pow(Color.Brighter, k);
     return k !== 1 ? new RgbColor(this.r * k, this.g * k, this.b * k, this.a) : this;
   }
 
-  darker(k?: number): RgbColor {
+  override darker(k?: number): RgbColor {
     k = k === void 0 ? Color.Darker : Math.pow(Color.Darker, k);
     return k !== 1 ? new RgbColor(this.r * k, this.g * k, this.b * k, this.a) : this;
   }
 
-  rgb(): RgbColor {
+  override rgb(): RgbColor {
     return this;
   }
 
-  hsl(): HslColor {
+  override hsl(): HslColor {
     const r = this.r / 255;
     const g = this.g / 255;
     const b = this.b / 255;
@@ -144,10 +144,10 @@ export class RgbColor extends Color {
     return new HslColor(h, s, l, this.a);
   }
 
-  interpolateTo(that: RgbColor): Interpolator<RgbColor>;
-  interpolateTo(that: Color): Interpolator<Color>;
-  interpolateTo(that: unknown): Interpolator<Color> | null;
-  interpolateTo(that: unknown): Interpolator<Color> | null {
+  override interpolateTo(that: RgbColor): Interpolator<RgbColor>;
+  override interpolateTo(that: Color): Interpolator<Color>;
+  override interpolateTo(that: unknown): Interpolator<Color> | null;
+  override interpolateTo(that: unknown): Interpolator<Color> | null {
     if (that instanceof RgbColor) {
       return RgbColorInterpolator(this, that);
     } else {
@@ -155,7 +155,7 @@ export class RgbColor extends Color {
     }
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Color) {
@@ -168,7 +168,7 @@ export class RgbColor extends Color {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof RgbColor) {
@@ -177,12 +177,12 @@ export class RgbColor extends Color {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Constructors.hash(RgbColor),
         Numbers.hash(this.r)), Numbers.hash(this.g)), Numbers.hash(this.b)), Numbers.hash(this.a)));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Color").write(46/*'.'*/).write("rgb").write(40/*'('*/)
         .debug(this.r).write(", ").debug(this.g).write(", ").debug(this.b);
     if (this.a !== 1) {
@@ -191,7 +191,7 @@ export class RgbColor extends Color {
     output = output.write(41/*')'*/);
   }
 
-  toHexString(): string {
+  override toHexString(): string {
     const r = Math.min(Math.max(0, Math.round(this.r || 0)), 255);
     const g = Math.min(Math.max(0, Math.round(this.g || 0)), 255);
     const b = Math.min(Math.max(0, Math.round(this.b || 0)), 255);
@@ -207,9 +207,9 @@ export class RgbColor extends Color {
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
-  toString(): string {
+  override toString(): string {
     let s = this.stringValue;
     if (s === void 0) {
       let a = this.a;
@@ -240,23 +240,23 @@ export class RgbColor extends Color {
   }
 
   @Lazy
-  static transparent(): RgbColor {
+  static override transparent(): RgbColor {
     return new RgbColor(0, 0, 0, 0);
   }
 
-  static black(alpha: number = 1): RgbColor {
+  static override black(alpha: number = 1): RgbColor {
     return new RgbColor(0, 0, 0, alpha);
   }
 
-  static white(alpha: number = 1): RgbColor {
+  static override white(alpha: number = 1): RgbColor {
     return new RgbColor(255, 255, 255, alpha);
   }
 
-  static fromInit(value: RgbColorInit): RgbColor {
+  static override fromInit(value: RgbColorInit): RgbColor {
     return new RgbColor(value.r, value.g, value.b, value.a);
   }
 
-  static fromAny(value: AnyRgbColor): RgbColor {
+  static override fromAny(value: AnyRgbColor): RgbColor {
     if (value === void 0 || value === null || value instanceof RgbColor) {
       return value;
     } else if (typeof value === "string") {
@@ -267,7 +267,7 @@ export class RgbColor extends Color {
     throw new TypeError("" + value);
   }
 
-  static fromValue(value: Value): RgbColor | null {
+  static override fromValue(value: Value): RgbColor | null {
     const tag = value.tag;
     let positional: boolean;
     if (tag === "rgb" || tag === "rgba") {
@@ -310,12 +310,12 @@ export class RgbColor extends Color {
     return null;
   }
 
-  static parse(str: string): RgbColor {
+  static override parse(str: string): RgbColor {
     return Color.parse(str).rgb();
   }
 
   /** @hidden */
-  static isInit(value: unknown): value is RgbColorInit {
+  static override isInit(value: unknown): value is RgbColorInit {
     if (typeof value === "object" && value !== null) {
       const init = value as RgbColorInit;
       return typeof init.r === "number"
@@ -327,7 +327,7 @@ export class RgbColor extends Color {
   }
 
   /** @hidden */
-  static isAny(value: unknown): value is AnyRgbColor {
+  static override isAny(value: unknown): value is AnyRgbColor {
     return value instanceof RgbColor
         || RgbColor.isInit(value)
         || typeof value === "string";

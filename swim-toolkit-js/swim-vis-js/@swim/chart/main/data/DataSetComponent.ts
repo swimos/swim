@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     });
   }
 
-  declare readonly componentObservers: ReadonlyArray<DataSetComponentObserver<X, Y>>;
+  override readonly componentObservers!: ReadonlyArray<DataSetComponentObserver<X, Y>>;
 
   protected initDataSetTrait(dataSetTrait: DataSetTrait<X, Y>): void {
     // hook
@@ -123,7 +123,7 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
   @ComponentTrait<DataSetComponent<X, Y>, DataSetTrait<X, Y>>({
     extends: DataSetComponent.DataSetFastener,
   })
-  declare dataSet: ComponentTrait<this, DataSetTrait<X, Y>>;
+  readonly dataSet!: ComponentTrait<this, DataSetTrait<X, Y>>;
 
   insertDataPoint(dataPointComponent: DataPointComponent<X, Y>, targetComponent: Component | null = null): void {
     const dataPointFasteners = this.dataPointFasteners as ComponentFastener<this, DataPointComponent<X, Y>>[];
@@ -568,7 +568,7 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
   }
 
   @ComponentProperty({type: Timing, state: true})
-  declare dataPointTiming: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
+  readonly dataPointTiming!: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
 
   /** @hidden */
   static DataPointFastener = ComponentFastener.define<DataSetComponent<unknown, unknown>, DataPointComponent<unknown, unknown>>({
@@ -654,7 +654,7 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
   }
 
   /** @hidden */
-  declare readonly dataPointFasteners: ReadonlyArray<ComponentFastener<this, DataPointComponent<X, Y>>>;
+  readonly dataPointFasteners!: ReadonlyArray<ComponentFastener<this, DataPointComponent<X, Y>>>;
 
   protected getDataPointFastener(dataPointTrait: DataPointTrait<X, Y>): ComponentFastener<this, DataPointComponent<X, Y>> | null {
     const dataPointFasteners = this.dataPointFasteners;
@@ -690,7 +690,7 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     return component instanceof DataPointComponent ? component : null;
   }
 
-  protected onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
+  protected override onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
     super.onInsertChildComponent(childComponent, targetComponent);
     const dataPointComponent = this.detectDataPointComponent(childComponent);
     if (dataPointComponent !== null) {
@@ -698,7 +698,7 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
     }
   }
 
-  protected onRemoveChildComponent(childComponent: Component): void {
+  protected override onRemoveChildComponent(childComponent: Component): void {
     super.onRemoveChildComponent(childComponent);
     const dataPointComponent = this.detectDataPointComponent(childComponent);
     if (dataPointComponent !== null) {
@@ -707,13 +707,13 @@ export class DataSetComponent<X, Y> extends CompositeComponent {
   }
 
   /** @hidden */
-  protected mountComponentFasteners(): void {
+  protected override mountComponentFasteners(): void {
     super.mountComponentFasteners();
     this.mountDataPointFasteners();
   }
 
   /** @hidden */
-  protected unmountComponentFasteners(): void {
+  protected override unmountComponentFasteners(): void {
     this.unmountDataPointFasteners();
     super.unmountComponentFasteners();
   }

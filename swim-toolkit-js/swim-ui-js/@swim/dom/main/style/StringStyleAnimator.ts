@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@ import {StyleAnimator} from "./StyleAnimator";
 
 /** @hidden */
 export abstract class StringStyleAnimator<V extends StyleContext> extends StyleAnimator<V, string | undefined> {
-  parse(value: string): string | undefined {
+  override parse(value: string): string | undefined {
     return value;
   }
 
-  fromCssValue(value: CSSStyleValue): string | undefined {
+  override fromCssValue(value: CSSStyleValue): string | undefined {
     return value.toString();
   }
 
-  fromAny(value: string): string | undefined {
+  override fromAny(value: string): string | undefined {
     return value;
   }
 }

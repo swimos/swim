@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,21 +53,21 @@ export class DisclosureButton extends HtmlView {
   }
 
   @ViewAnimator({type: Number, inherit: true, updateFlags: View.NeedsAnimate})
-  declare disclosurePhase: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
+  readonly disclosurePhase!: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
 
   @ViewAnimator({type: Color, inherit: true, state: null, updateFlags: View.NeedsAnimate})
-  declare collapsedColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly collapsedColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Color, inherit: true, state: null, updateFlags: View.NeedsAnimate})
-  declare expandedColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly expandedColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     this.collapsedColor.setState(theme.getOr(Look.color, mood, null), timing, View.Intrinsic);
     this.expandedColor.setState(theme.getOr(Look.accentColor, mood, null), timing, View.Intrinsic);
   }
 
-  protected onAnimate(viewContext: ViewContextType<this>): void {
+  protected override onAnimate(viewContext: ViewContextType<this>): void {
     super.onAnimate(viewContext);
     if (this.disclosurePhase.isUpdated() || this.collapsedColor.isUpdated() || this.expandedColor.isUpdated()) {
       const disclosurePhase = this.disclosurePhase.takeValue()!;

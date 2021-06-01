@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Range, AnyTiming, Timing, Easing, LinearRange} from "@swim/mapping";
-import {AnyLength, Length, PointR2, BoxR2} from "@swim/math";
+import {AnyLength, Length, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
@@ -60,7 +60,7 @@ export interface ChartViewInit<X, Y> extends ScaledViewInit<X, Y> {
 }
 
 export class ChartView<X, Y> extends ScaledView<X, Y> {
-  initView(init: ChartViewInit<X, Y>): void {
+  override initView(init: ChartViewInit<X, Y>): void {
     super.initView(init);
      if (init.graph !== void 0) {
       this.graph(init.graph);
@@ -133,42 +133,42 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
     }
   }
 
-  declare readonly viewController: GraphicsViewController<ChartView<X, Y>> & ChartViewObserver<X, Y> | null;
+  override readonly viewController!: GraphicsViewController<ChartView<X, Y>> & ChartViewObserver<X, Y> | null;
 
-  declare readonly viewObservers: ReadonlyArray<ChartViewObserver<X, Y>>;
-
-  @ViewAnimator({type: Length, state: Length.px(20)})
-  declare gutterTop: ViewAnimator<this, Length, AnyLength>;
-
-  @ViewAnimator({type: Length, state: Length.px(40)})
-  declare gutterRight: ViewAnimator<this, Length, AnyLength>;
+  override readonly viewObservers!: ReadonlyArray<ChartViewObserver<X, Y>>;
 
   @ViewAnimator({type: Length, state: Length.px(20)})
-  declare gutterBottom: ViewAnimator<this, Length, AnyLength>;
+  readonly gutterTop!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.px(40)})
-  declare gutterLeft: ViewAnimator<this, Length, AnyLength>;
+  readonly gutterRight!: ViewAnimator<this, Length, AnyLength>;
+
+  @ViewAnimator({type: Length, state: Length.px(20)})
+  readonly gutterBottom!: ViewAnimator<this, Length, AnyLength>;
+
+  @ViewAnimator({type: Length, state: Length.px(40)})
+  readonly gutterLeft!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Color, state: null, look: Look.neutralColor})
-  declare borderColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly borderColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Number, state: 1})
-  declare borderWidth: ViewAnimator<this, number>;
+  readonly borderWidth!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Number, state: 6})
-  declare borderSerif: ViewAnimator<this, number>;
+  readonly borderSerif!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Color, state: null, look: Look.neutralColor})
-  declare tickMarkColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly tickMarkColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Number, state: 1})
-  declare tickMarkWidth: ViewAnimator<this, number>;
+  readonly tickMarkWidth!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Number, state: 6})
-  declare tickMarkLength: ViewAnimator<this, number>;
+  readonly tickMarkLength!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Number, state: 2})
-  declare tickLabelPadding: ViewAnimator<this, number>;
+  readonly tickLabelPadding!: ViewAnimator<this, number>;
 
   @ViewProperty({
     type: Timing,
@@ -176,21 +176,21 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       return Easing.cubicOut.withDuration(250);
     },
   })
-  declare tickTransition: ViewProperty<this, Timing, AnyTiming>;
+  readonly tickTransition!: ViewProperty<this, Timing, AnyTiming>;
 
   @ViewAnimator({type: Color, state: null, look: Look.subduedColor})
-  declare gridLineColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly gridLineColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Number, state: 0})
-  declare gridLineWidth: ViewAnimator<this, number>;
+  readonly gridLineWidth!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Font, state: null, inherit: true})
-  declare font: ViewAnimator<this, Font | null, AnyFont | null>;
+  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
 
   @ViewAnimator({type: Color, state: null, look: Look.mutedColor})
-  declare textColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  xRange(): Range<number> | null {
+  override xRange(): Range<number> | null {
     const frame = this.viewFrame;
     const gutterLeft = this.gutterLeft.getValue().pxValue(frame.width);
     const gutterRight = this.gutterRight.getValue().pxValue(frame.width);
@@ -200,7 +200,7 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
     return LinearRange(xRangeMin, xRangeMax);
   }
 
-  yRange(): Range<number> | null {
+  override yRange(): Range<number> | null {
     const frame = this.viewFrame;
     const gutterTop = this.gutterTop.getValue().pxValue(frame.height);
     const gutterBottom = this.gutterBottom.getValue().pxValue(frame.height);
@@ -280,7 +280,7 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       this.owner.didSetGraph(newGraphView, oldGraphView);
     },
   })
-  declare graph: ViewFastener<this, GraphView<X, Y>, AnyGraphView<X, Y>>;
+  readonly graph!: ViewFastener<this, GraphView<X, Y>, AnyGraphView<X, Y>>;
 
   protected createTopAxis(): AxisView<X> | null {
     return new TopAxisView();
@@ -352,7 +352,7 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       this.owner.didSetTopAxis(newTopAxisView, oldTopAxisView);
     },
   })
-  declare topAxis: ViewFastener<this, AxisView<X>, AnyAxisView<X> | true>;
+  readonly topAxis!: ViewFastener<this, AxisView<X>, AnyAxisView<X> | true>;
 
   protected createRightAxis(): AxisView<Y> | null {
     return new RightAxisView();
@@ -424,7 +424,7 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       this.owner.didSetRightAxis(newRightAxisView, oldRightAxisView);
     },
   })
-  declare rightAxis: ViewFastener<this, AxisView<Y>, AnyAxisView<Y> | true>;
+  readonly rightAxis!: ViewFastener<this, AxisView<Y>, AnyAxisView<Y> | true>;
 
   protected createBottomAxis(): AxisView<X> | null {
     return new BottomAxisView();
@@ -496,7 +496,7 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       this.owner.didSetBottomAxis(newBottomAxisView, oldBottomAxisView);
     },
   })
-  declare bottomAxis: ViewFastener<this, AxisView<X>, AnyAxisView<X> | true>;
+  readonly bottomAxis!: ViewFastener<this, AxisView<X>, AnyAxisView<X> | true>;
 
   protected createLeftAxis(): AxisView<Y> | null {
     return new LeftAxisView();
@@ -568,7 +568,7 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       this.owner.didSetLeftAxis(newLeftAxisView, oldLeftAxisView);
     },
   })
-  declare leftAxis: ViewFastener<this, AxisView<Y>, AnyAxisView<Y> | true>;
+  readonly leftAxis!: ViewFastener<this, AxisView<Y>, AnyAxisView<Y> | true>;
 
   protected detectGraphView(view: View): GraphView<X, Y> | null {
     return view instanceof GraphView ? view : null;
@@ -590,7 +590,7 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
     return view instanceof LeftAxisView ? view : null;
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     if (this.graph.view === null) {
       const graphView = this.detectGraphView(childView);
@@ -624,7 +624,7 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     super.onRemoveChildView(childView);
     if (this.graph.view === null) {
       const graphView = this.detectGraphView(childView);
@@ -658,12 +658,12 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
     }
   }
 
-  protected updateScales(): void {
+  protected override updateScales(): void {
     this.layoutChart(this.viewFrame);
     super.updateScales();
   }
 
-  protected layoutChart(frame: BoxR2): void {
+  protected layoutChart(frame: R2Box): void {
     const gutterTop = this.gutterTop.getValue().pxValue(frame.height);
     const gutterRight = this.gutterRight.getValue().pxValue(frame.width);
     const gutterBottom = this.gutterBottom.getValue().pxValue(frame.height);
@@ -679,8 +679,8 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       const topFrame = topAxisView.viewFrame;
       if (topFrame.xMin !== graphLeft || topFrame.yMin !== frame.yMin ||
           topFrame.xMax !== graphRight || topFrame.yMax !== graphBottom) {
-        topAxisView.setViewFrame(new BoxR2(graphLeft, frame.yMin, graphRight, graphBottom));
-        topAxisView.origin.setState(new PointR2(graphLeft, graphTop), View.Intrinsic);
+        topAxisView.setViewFrame(new R2Box(graphLeft, frame.yMin, graphRight, graphBottom));
+        topAxisView.origin.setState(new R2Point(graphLeft, graphTop), View.Intrinsic);
         topAxisView.requireUpdate(View.NeedsLayout);
       }
     }
@@ -689,8 +689,8 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       const rightFrame = rightAxisView.viewFrame;
       if (rightFrame.xMin !== graphLeft || rightFrame.yMin !== graphTop ||
           rightFrame.xMax !== frame.xMax || rightFrame.yMax !== graphBottom) {
-        rightAxisView.setViewFrame(new BoxR2(graphLeft, graphTop, frame.xMax, graphBottom));
-        rightAxisView.origin.setState(new PointR2(Math.max(graphLeft, graphRight), graphBottom), View.Intrinsic);
+        rightAxisView.setViewFrame(new R2Box(graphLeft, graphTop, frame.xMax, graphBottom));
+        rightAxisView.origin.setState(new R2Point(Math.max(graphLeft, graphRight), graphBottom), View.Intrinsic);
         rightAxisView.requireUpdate(View.NeedsLayout);
       }
     }
@@ -699,8 +699,8 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       const bottomFrame = bottomAxisView.viewFrame;
       if (bottomFrame.xMin !== graphLeft || bottomFrame.yMin !== graphTop ||
           bottomFrame.xMax !== graphRight || bottomFrame.yMax !== frame.yMax) {
-        bottomAxisView.setViewFrame(new BoxR2(graphLeft, graphTop, graphRight, frame.yMax));
-        bottomAxisView.origin.setState(new PointR2(graphLeft, Math.max(graphTop, graphBottom)), View.Intrinsic);
+        bottomAxisView.setViewFrame(new R2Box(graphLeft, graphTop, graphRight, frame.yMax));
+        bottomAxisView.origin.setState(new R2Point(graphLeft, Math.max(graphTop, graphBottom)), View.Intrinsic);
         bottomAxisView.requireUpdate(View.NeedsLayout);
       }
     }
@@ -709,8 +709,8 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       const leftFrame = leftAxisView.viewFrame;
       if (leftFrame.xMin !== frame.xMin || leftFrame.yMin !== graphTop ||
           leftFrame.xMax !== graphRight || leftFrame.yMax !== graphBottom) {
-        leftAxisView.setViewFrame(new BoxR2(frame.xMin, graphTop, graphRight, graphBottom));
-        leftAxisView.origin.setState(new PointR2(graphLeft, graphBottom), View.Intrinsic);
+        leftAxisView.setViewFrame(new R2Box(frame.xMin, graphTop, graphRight, graphBottom));
+        leftAxisView.origin.setState(new R2Point(graphLeft, graphBottom), View.Intrinsic);
         leftAxisView.requireUpdate(View.NeedsLayout);
       }
     }
@@ -720,13 +720,13 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       const graphFrame = graphView.viewFrame;
       if (graphFrame.xMin !== graphLeft || graphFrame.yMin !== graphTop ||
           graphFrame.xMax !== graphRight || graphFrame.yMax !== graphBottom) {
-        graphView.setViewFrame(new BoxR2(graphLeft, graphTop, graphRight, graphBottom));
+        graphView.setViewFrame(new R2Box(graphLeft, graphTop, graphRight, graphBottom));
         graphView.requireUpdate(View.NeedsLayout);
       }
     }
   }
 
-  static create<X, Y>(): ChartView<X, Y> {
+  static override create<X, Y>(): ChartView<X, Y> {
     return new ChartView<X, Y>();
   }
 

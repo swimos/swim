@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,14 +26,14 @@ export class WebStorageManager<C extends Component = Component> extends StorageM
     this.onStorage = this.onStorage.bind(this);
   }
 
-  declare readonly storage: Storage;
+  readonly storage!: Storage;
 
-  get(key: string): string | undefined {
+  override get(key: string): string | undefined {
     const value = this.storage.getItem(key);
     return value !== null ? value : void 0;
   }
 
-  set(key: string, newValue: string | undefined): string | undefined {
+  override set(key: string, newValue: string | undefined): string | undefined {
     let oldValue: string | null | undefined = this.storage.getItem(key);
     if (oldValue === null) {
       oldValue = void 0;
@@ -51,7 +51,7 @@ export class WebStorageManager<C extends Component = Component> extends StorageM
     return oldValue;
   }
 
-  clear(): void {
+  override clear(): void {
     this.willClear();
     this.storage.clear();
     this.onClear();
@@ -84,12 +84,12 @@ export class WebStorageManager<C extends Component = Component> extends StorageM
     }
   }
 
-  protected onAttach(): void {
+  protected override onAttach(): void {
     super.onAttach();
     this.attachEvents();
   }
 
-  protected onDetach(): void {
+  protected override onDetach(): void {
     this.detachEvents();
     super.onDetach();
   }

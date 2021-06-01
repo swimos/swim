@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import {DataSetTrait} from "../data/DataSetTrait";
 import type {PlotTraitObserver} from "./PlotTraitObserver";
 
 export class PlotTrait<X, Y> extends GenericTrait {
-  declare readonly traitObservers: ReadonlyArray<PlotTraitObserver<X, Y>>;
+  override readonly traitObservers!: ReadonlyArray<PlotTraitObserver<X, Y>>;
 
   protected initDataSet(dataSetTrait: DataSetTrait<X, Y>): void {
     // hook
@@ -78,7 +78,7 @@ export class PlotTrait<X, Y> extends GenericTrait {
       this.owner.didSetDataSet(newDataSetTrait, oldDataSetTrait, targetTrait);
     },
   })
-  declare dataSet: TraitFastener<this, DataSetTrait<X, Y>>;
+  readonly dataSet!: TraitFastener<this, DataSetTrait<X, Y>>;
 
   protected detectDataSetTrait(trait: Trait): DataSetTrait<X, Y> | null {
     return trait instanceof DataSetTrait ? trait : null;
@@ -97,14 +97,14 @@ export class PlotTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
+  protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
     if (newModel !== null) {
       this.detectTraits(newModel);
     }
     super.didSetModel(newModel, oldModel);
   }
 
-  protected onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
+  protected override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
     super.onInsertTrait(trait, targetTrait);
     if (this.dataSet.trait === null) {
       const dataSetTrait = this.detectDataSetTrait(trait);
@@ -114,7 +114,7 @@ export class PlotTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected onRemoveTrait(trait: Trait): void {
+  protected override onRemoveTrait(trait: Trait): void {
     super.onRemoveTrait(trait);
     const dataSetTrait = this.detectDataSetTrait(trait);
     if (dataSetTrait !== null && this.dataSet.trait === dataSetTrait) {
@@ -122,7 +122,7 @@ export class PlotTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected onStartConsuming(): void {
+  protected override onStartConsuming(): void {
     super.onStartConsuming();
     const dataSetTrait = this.dataSet.trait;
     if (dataSetTrait !== null) {
@@ -130,7 +130,7 @@ export class PlotTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected onStopConsuming(): void {
+  protected override onStopConsuming(): void {
     super.onStopConsuming();
     const dataSetTrait = this.dataSet.trait;
     if (dataSetTrait !== null) {

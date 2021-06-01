@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,23 +45,23 @@ export class DeckView extends HtmlView {
     this.overflowY.setState("hidden", View.Intrinsic);
   }
 
-  declare readonly viewController: DeckViewController | null;
+  override readonly viewController!: DeckViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<DeckViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<DeckViewObserver>;
 
   @ViewAnimator({type: Number, state: 0, updateFlags: View.NeedsLayout})
-  declare deckPhase: ViewAnimator<this, number>;
+  readonly deckPhase!: ViewAnimator<this, number>;
 
   @ViewProperty({type: Number, state: 1})
-  declare inAlign: ViewProperty<this, number>;
+  readonly inAlign!: ViewProperty<this, number>;
 
   @ViewProperty({type: Number, state: 1 / 3})
-  declare outAlign: ViewProperty<this, number>;
+  readonly outAlign!: ViewProperty<this, number>;
 
   @ViewProperty({type: Object, inherit: true, state: null, updateFlags: View.NeedsResize})
-  declare edgeInsets: ViewProperty<this, ViewEdgeInsets | null>;
+  readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
 
-  declare bar: DeckViewBar<this, DeckBar>; // defined by DeckViewBar
+  readonly bar!: DeckViewBar<this, DeckBar>; // defined by DeckViewBar
 
   /** @hidden */
   cardCount: number;
@@ -186,7 +186,7 @@ export class DeckView extends HtmlView {
     });
   }
 
-  protected didLayout(viewContext: ViewContextType<this>): void {
+  protected override didLayout(viewContext: ViewContextType<this>): void {
     if (!this.deckPhase.isAnimating()) {
       const deckPhase = this.deckPhase.takeUpdatedValue();
       if (deckPhase !== void 0) {
@@ -229,13 +229,13 @@ export class DeckView extends HtmlView {
 
 /** @hidden */
 export abstract class DeckViewBar<V extends DeckView, S extends DeckBar> extends ViewFastener<V, S> {
-  onSetView(barView: S | null): void {
+  override onSetView(barView: S | null): void {
     if (barView !== null) {
       this.initBar(barView);
     }
   }
 
-  insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
+  override insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
     parentView.prependChildView(childView, key);
   }
 
@@ -283,13 +283,13 @@ export abstract class DeckViewCard<V extends DeckView, S extends DeckCard> exten
 
   cardIndex: number;
 
-  onSetView(cardView: S | null): void {
+  override onSetView(cardView: S | null): void {
     if (cardView !== null) {
       this.initCard(cardView);
     }
   }
 
-  insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
+  override insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
     const targetKey = "card" + (this.cardIndex + 1);
     targetView = parentView.getChildView(targetKey);
     parentView.insertChildView(childView, targetView, key);

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -96,10 +96,10 @@ export class GenericTrait extends Trait {
     return result;
   }
 
-  declare readonly key: string | undefined;
+  override readonly key!: string | undefined;
 
   /** @hidden */
-  setKey(key: string | undefined): void {
+  override setKey(key: string | undefined): void {
     Object.defineProperty(this, "key", {
       value: key,
       enumerable: true,
@@ -107,10 +107,10 @@ export class GenericTrait extends Trait {
     });
   }
 
-  declare readonly model: Model | null;
+  override readonly model!: Model | null;
 
   /** @hidden */
-  setModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
+  override setModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
     this.willSetModel(newModel, oldModel);
     if (oldModel !== null) {
       this.detachModel(oldModel);
@@ -147,35 +147,35 @@ export class GenericTrait extends Trait {
     this.detachTraitServices();
   }
 
-  remove(): void {
+  override remove(): void {
     const model = this.model;
     if (model !== null) {
       model.removeTrait(this);
     }
   }
 
-  protected onInsertChildModel(childModel: Model, targetModel: Model | null): void {
+  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
     super.onInsertChildModel(childModel, targetModel);
     this.insertTraitModel(childModel, targetModel);
   }
 
-  protected onRemoveChildModel(childModel: Model): void {
+  protected override onRemoveChildModel(childModel: Model): void {
     super.onRemoveChildModel(childModel);
     this.removeTraitModel(childModel);
   }
 
-  protected onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
+  protected override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
     super.onInsertTrait(trait, targetTrait);
     this.insertTraitFastener(trait, targetTrait);
   }
 
-  protected onRemoveTrait(trait: Trait): void {
+  protected override onRemoveTrait(trait: Trait): void {
     super.onRemoveTrait(trait);
     this.removeTraitFastener(trait);
   }
 
   /** @hidden */
-  doMount(): void {
+  override doMount(): void {
     if ((this.traitFlags & Trait.MountedFlag) === 0) {
       this.setTraitFlags(this.traitFlags | Trait.MountedFlag);
       this.willMount();
@@ -186,7 +186,7 @@ export class GenericTrait extends Trait {
     }
   }
 
-  protected onMount(): void {
+  protected override onMount(): void {
     super.onMount();
     this.mountTraitModels();
     this.mountTraitFasteners();
@@ -197,7 +197,7 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  doUnmount(): void {
+  override doUnmount(): void {
     if ((this.traitFlags & Trait.MountedFlag) !== 0) {
       this.setTraitFlags(this.traitFlags & ~Trait.MountedFlag);
       this.willUnmount();
@@ -208,7 +208,7 @@ export class GenericTrait extends Trait {
     }
   }
 
-  protected onUnmount(): void {
+  protected override onUnmount(): void {
     this.stopConsuming();
     this.unmountTraitDownlinks();
     this.unmountTraitFasteners();
@@ -216,7 +216,7 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  doPower(): void {
+  override doPower(): void {
     if ((this.traitFlags & Trait.PoweredFlag) === 0) {
       this.setTraitFlags(this.traitFlags | Trait.PoweredFlag);
       this.willPower();
@@ -228,7 +228,7 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  doUnpower(): void {
+  override doUnpower(): void {
     if ((this.traitFlags & Trait.PoweredFlag) !== 0) {
       this.setTraitFlags(this.traitFlags & ~Trait.PoweredFlag);
       this.willUnpower();
@@ -239,19 +239,19 @@ export class GenericTrait extends Trait {
     }
   }
 
-  protected onMutate(modelContext: TraitContextType<this>): void {
+  protected override onMutate(modelContext: TraitContextType<this>): void {
     super.onMutate(modelContext);
     this.mutateTraitProperties();
   }
 
-  protected onReconcile(modelContext: TraitContextType<this>): void {
+  protected override onReconcile(modelContext: TraitContextType<this>): void {
     super.onReconcile(modelContext);
     this.reconcileTraitDownlinks();
   }
 
-  declare readonly traitConsumers: ReadonlyArray<TraitConsumer>;
+  override readonly traitConsumers!: ReadonlyArray<TraitConsumer>;
 
-  addTraitConsumer(traitConsumer: TraitConsumerType<this>): void {
+  override addTraitConsumer(traitConsumer: TraitConsumerType<this>): void {
     const oldTraitConsumers = this.traitConsumers;
     const newTraitConsumers = Arrays.inserted(traitConsumer, oldTraitConsumers);
     if (oldTraitConsumers !== newTraitConsumers) {
@@ -269,12 +269,12 @@ export class GenericTrait extends Trait {
     }
   }
 
-  protected onStartConsuming(): void {
+  protected override onStartConsuming(): void {
     super.onStartConsuming();
     this.startConsumingTraitDownlinks();
   }
 
-  removeTraitConsumer(traitConsumer: TraitConsumerType<this>): void {
+  override removeTraitConsumer(traitConsumer: TraitConsumerType<this>): void {
     const oldTraitConsumers = this.traitConsumers;
     const newTraitCnsumers = Arrays.removed(traitConsumer, oldTraitConsumers);
     if (oldTraitConsumers !== newTraitCnsumers) {
@@ -292,20 +292,20 @@ export class GenericTrait extends Trait {
     }
   }
 
-  protected onStopConsuming(): void {
+  protected override onStopConsuming(): void {
     this.stopConsumingTraitDownlinks();
     super.onStopConsuming();
   }
 
   /** @hidden */
-  declare readonly traitServices: {[serviceName: string]: TraitService<Trait, unknown> | undefined} | null;
+  readonly traitServices!: {[serviceName: string]: TraitService<Trait, unknown> | undefined} | null;
 
-  hasTraitService(serviceName: string): boolean {
+  override hasTraitService(serviceName: string): boolean {
     const traitServices = this.traitServices;
     return traitServices !== null && traitServices[serviceName] !== void 0;
   }
 
-  getTraitService(serviceName: string): TraitService<this, unknown> | null {
+  override getTraitService(serviceName: string): TraitService<this, unknown> | null {
     const traitServices = this.traitServices;
     if (traitServices !== null) {
       const traitService = traitServices[serviceName];
@@ -316,7 +316,7 @@ export class GenericTrait extends Trait {
     return null;
   }
 
-  setTraitService(serviceName: string, newTraitService: TraitService<this, unknown> | null): void {
+  override setTraitService(serviceName: string, newTraitService: TraitService<this, unknown> | null): void {
     let traitServices = this.traitServices;
     if (traitServices === null) {
       traitServices = {};
@@ -358,20 +358,17 @@ export class GenericTrait extends Trait {
     }
   }
 
-
-
-
-  hasModelProperty(propertyName: string): boolean {
+  override hasModelProperty(propertyName: string): boolean {
     const model = this.model;
     return model !== null && model.hasModelProperty(propertyName);
   }
 
-  getModelProperty(propertyName: string): ModelProperty<TraitModelType<this>, unknown> | null {
+  override getModelProperty(propertyName: string): ModelProperty<TraitModelType<this>, unknown> | null {
     const model = this.model as TraitModelType<this>;
     return model !== null ? model.getModelProperty(propertyName) : null;
   }
 
-  setModelProperty(propertyName: string, newModelProperty: ModelProperty<TraitModelType<this>, unknown> | null): void {
+  override setModelProperty(propertyName: string, newModelProperty: ModelProperty<TraitModelType<this>, unknown> | null): void {
     const model = this.model;
     if (model !== null) {
       model.setModelProperty(propertyName, newModelProperty);
@@ -381,14 +378,14 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  declare readonly traitProperties: {[propertyName: string]: TraitProperty<Trait, unknown> | undefined} | null;
+  readonly traitProperties!: {[propertyName: string]: TraitProperty<Trait, unknown> | undefined} | null;
 
-  hasTraitProperty(propertyName: string): boolean {
+  override hasTraitProperty(propertyName: string): boolean {
     const traitProperties = this.traitProperties;
     return traitProperties !== null && traitProperties[propertyName] !== void 0;
   }
 
-  getTraitProperty(propertyName: string): TraitProperty<this, unknown> | null {
+  override getTraitProperty(propertyName: string): TraitProperty<this, unknown> | null {
     const traitProperties = this.traitProperties;
     if (traitProperties !== null) {
       const traitProperty = traitProperties[propertyName];
@@ -399,7 +396,7 @@ export class GenericTrait extends Trait {
     return null;
   }
 
-  setTraitProperty(propertyName: string, newTraitProperty: TraitProperty<this, unknown> | null): void {
+  override setTraitProperty(propertyName: string, newTraitProperty: TraitProperty<this, unknown> | null): void {
     let traitProperties = this.traitProperties;
     if (traitProperties === null) {
       traitProperties = {};
@@ -451,14 +448,14 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  declare readonly traitModels: {[fastenerName: string]: TraitModel<Trait, Model> | undefined} | null;
+  readonly traitModels!: {[fastenerName: string]: TraitModel<Trait, Model> | undefined} | null;
 
-  hasTraitModel(fastenerName: string): boolean {
+  override hasTraitModel(fastenerName: string): boolean {
     const traitModels = this.traitModels;
     return traitModels !== null && traitModels[fastenerName] !== void 0;
   }
 
-  getTraitModel(fastenerName: string): TraitModel<this, Model> | null {
+  override getTraitModel(fastenerName: string): TraitModel<this, Model> | null {
     const traitModels = this.traitModels;
     if (traitModels !== null) {
       const traitModel = traitModels[fastenerName];
@@ -469,7 +466,7 @@ export class GenericTrait extends Trait {
     return null;
   }
 
-  setTraitModel(fastenerName: string, newTraitModel: TraitModel<this, any> | null): void {
+  override setTraitModel(fastenerName: string, newTraitModel: TraitModel<this, any> | null): void {
     let traitModels = this.traitModels;
     if (traitModels === null) {
       traitModels = {};
@@ -546,14 +543,14 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  declare readonly traitFasteners: {[fastenerName: string]: TraitFastener<Trait, Trait> | undefined} | null;
+  readonly traitFasteners!: {[fastenerName: string]: TraitFastener<Trait, Trait> | undefined} | null;
 
-  hasTraitFastener(fastenerName: string): boolean {
+  override hasTraitFastener(fastenerName: string): boolean {
     const traitFasteners = this.traitFasteners;
     return traitFasteners !== null && traitFasteners[fastenerName] !== void 0;
   }
 
-  getTraitFastener(fastenerName: string): TraitFastener<this, Trait> | null {
+  override getTraitFastener(fastenerName: string): TraitFastener<this, Trait> | null {
     const traitFasteners = this.traitFasteners;
     if (traitFasteners !== null) {
       const traitFastener = traitFasteners[fastenerName];
@@ -564,7 +561,7 @@ export class GenericTrait extends Trait {
     return null;
   }
 
-  setTraitFastener(fastenerName: string, newTraitFastener: TraitFastener<this, any> | null): void {
+  override setTraitFastener(fastenerName: string, newTraitFastener: TraitFastener<this, any> | null): void {
     let traitFasteners = this.traitFasteners;
     if (traitFasteners === null) {
       traitFasteners = {};
@@ -641,14 +638,14 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  declare readonly traitDownlinks: {[downlinkName: string]: ModelDownlink<Trait> | undefined} | null;
+  readonly traitDownlinks!: {[downlinkName: string]: ModelDownlink<Trait> | undefined} | null;
 
-  hasModelDownlink(downlinkName: string): boolean {
+  override hasModelDownlink(downlinkName: string): boolean {
     const traitDownlinks = this.traitDownlinks;
     return traitDownlinks !== null && traitDownlinks[downlinkName] !== void 0;
   }
 
-  getModelDownlink(downlinkName: string): ModelDownlink<this> | null {
+  override getModelDownlink(downlinkName: string): ModelDownlink<this> | null {
     const traitDownlinks = this.traitDownlinks;
     if (traitDownlinks !== null) {
       const traitDownlink = traitDownlinks[downlinkName];
@@ -659,7 +656,7 @@ export class GenericTrait extends Trait {
     return null;
   }
 
-  setModelDownlink(downlinkName: string, newTraitDownlink: ModelDownlink<this> | null): void {
+  override setModelDownlink(downlinkName: string, newTraitDownlink: ModelDownlink<this> | null): void {
     let traitDownlinks = this.traitDownlinks;
     if (traitDownlinks === null) {
       traitDownlinks = {};

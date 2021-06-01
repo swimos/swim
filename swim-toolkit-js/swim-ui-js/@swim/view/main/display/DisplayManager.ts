@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ export class DisplayManager<V extends View = View> extends ViewManager<V> {
     rootView.cascadeUnpower();
   }
 
-  declare readonly rootFlags: ViewFlags;
+  readonly rootFlags!: ViewFlags;
 
   /** @hidden */
   setRootFlags(rootFlags: ViewFlags): void {
@@ -240,14 +240,14 @@ export class DisplayManager<V extends View = View> extends ViewManager<V> {
     }
   }
 
-  declare readonly viewManagerObservers: ReadonlyArray<DisplayManagerObserver>;
+  override readonly viewManagerObservers!: ReadonlyArray<DisplayManagerObserver>;
 
-  protected onAttach(): void {
+  protected override onAttach(): void {
     super.onAttach();
     this.attachEvents();
   }
 
-  protected onDetach(): void {
+  protected override onDetach(): void {
     this.detachEvents();
     super.onDetach();
   }
@@ -264,7 +264,7 @@ export class DisplayManager<V extends View = View> extends ViewManager<V> {
     }
   }
 
-  protected onInsertRootView(rootView: V): void {
+  protected override onInsertRootView(rootView: V): void {
     super.onInsertRootView(rootView);
     this.requestUpdate(rootView, rootView.viewFlags & View.UpdateMask, false);
   }

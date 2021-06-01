@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ export class RgbColorParser extends Parser<RgbColor> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<RgbColor> {
+  override feed(input: Input): Parser<RgbColor> {
     return RgbColorParser.parse(input, this.rParser, this.gParser,
                                 this.bParser, this.aParser, this.step);
   }

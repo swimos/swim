@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ export class GraphTrait<X, Y> extends GenericTrait {
     });
   }
 
-  declare readonly traitObservers: ReadonlyArray<GraphTraitObserver<X, Y>>;
+  override readonly traitObservers!: ReadonlyArray<GraphTraitObserver<X, Y>>;
 
   insertPlot(plotTrait: PlotTrait<X, Y>, targetTrait: Trait | null = null): void {
     const plotFasteners = this.plotFasteners as TraitFastener<this, PlotTrait<X, Y>>[];
@@ -130,7 +130,7 @@ export class GraphTrait<X, Y> extends GenericTrait {
   }
 
   /** @hidden */
-  declare readonly plotFasteners: ReadonlyArray<TraitFastener<this, PlotTrait<X, Y>>>;
+  readonly plotFasteners!: ReadonlyArray<TraitFastener<this, PlotTrait<X, Y>>>;
 
   /** @hidden */
   protected mountPlotFasteners(): void {
@@ -187,14 +187,14 @@ export class GraphTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
+  protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
     if (newModel !== null) {
       this.detectModels(newModel);
     }
     super.didSetModel(newModel, oldModel);
   }
 
-  protected onInsertChildModel(childModel: Model, targetModel: Model | null): void {
+  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
     super.onInsertChildModel(childModel, targetModel);
     const plotTrait = this.detectPlotModel(childModel);
     if (plotTrait !== null) {
@@ -203,7 +203,7 @@ export class GraphTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected onRemoveChildModel(childModel: Model): void {
+  protected override onRemoveChildModel(childModel: Model): void {
     super.onRemoveChildModel(childModel);
     const plotTrait = this.detectPlotModel(childModel);
     if (plotTrait !== null) {
@@ -212,23 +212,23 @@ export class GraphTrait<X, Y> extends GenericTrait {
   }
 
   /** @hidden */
-  protected mountTraitFasteners(): void {
+  protected override mountTraitFasteners(): void {
     super.mountTraitFasteners();
     this.mountPlotFasteners();
   }
 
   /** @hidden */
-  protected unmountTraitFasteners(): void {
+  protected override unmountTraitFasteners(): void {
     this.unmountPlotFasteners();
     super.unmountTraitFasteners();
   }
 
-  protected onStartConsuming(): void {
+  protected override onStartConsuming(): void {
     super.onStartConsuming();
     this.startConsumingPlots();
   }
 
-  protected onStopConsuming(): void {
+  protected override onStopConsuming(): void {
     super.onStopConsuming();
     this.stopConsumingPlots();
   }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     });
   }
 
-  declare readonly style: FontStyle | undefined;
+  readonly style!: FontStyle | undefined;
 
   withStyle(style: FontStyle | undefined): Font {
     if (style === this.style) {
@@ -90,7 +90,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     }
   }
 
-  declare readonly variant: FontVariant | undefined;
+  readonly variant!: FontVariant | undefined;
 
   withVariant(variant: FontVariant | undefined): Font {
     if (variant === this.variant) {
@@ -101,7 +101,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     }
   }
 
-  declare readonly weight: FontWeight | undefined;
+  readonly weight!: FontWeight | undefined;
 
   withWeight(weight: FontWeight | undefined): Font {
     if (weight === this.weight) {
@@ -112,7 +112,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     }
   }
 
-  declare readonly stretch: FontStretch | undefined;
+  readonly stretch!: FontStretch | undefined;
 
   withStretch(stretch: FontStretch | undefined): Font {
     if (stretch === this.stretch) {
@@ -123,7 +123,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     }
   }
 
-  declare readonly size: FontSize | null;
+  readonly size!: FontSize | null;
 
   withSize(size: AnyFontSize | null): Font{
     if (size !== null) {
@@ -137,7 +137,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     }
   }
 
-  declare readonly height: LineHeight | null;
+  readonly height!: LineHeight | null;
 
   withHeight(height: AnyLineHeight | null): Font {
     if (height !== null) {
@@ -151,7 +151,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     }
   }
 
-  declare readonly family: FontFamily | ReadonlyArray<FontFamily>;
+  readonly family!: FontFamily | ReadonlyArray<FontFamily>;
 
   withFamily(family: FontFamily | ReadonlyArray<FontFamily>): Font {
     if (Array.isArray(family) && family.length === 1) {
@@ -245,7 +245,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
   }
 
   /* @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
   toString(): string {
     let s = this.stringValue;

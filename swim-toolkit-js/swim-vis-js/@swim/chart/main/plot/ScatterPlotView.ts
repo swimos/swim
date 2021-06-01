@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 import {Equals, Values} from "@swim/util";
 import {Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/mapping";
-import type {BoxR2} from "@swim/math";
+import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewFlags, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
 import {GraphicsView, GraphicsViewController, LayerView, CanvasContext, CanvasRenderer} from "@swim/graphics";
@@ -61,7 +61,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     });
   }
 
-  initView(init: ScatterPlotViewInit<X, Y>): void {
+  override initView(init: ScatterPlotViewInit<X, Y>): void {
     super.initView(init);
     if (init.xScale !== void 0) {
       this.xScale(init.xScale);
@@ -85,17 +85,17 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     }
   }
 
-  declare readonly viewController: GraphicsViewController<ScatterPlotView<X, Y>> & ScatterPlotViewObserver<X, Y> | null;
+  override readonly viewController!: GraphicsViewController<ScatterPlotView<X, Y>> & ScatterPlotViewObserver<X, Y> | null;
 
-  declare readonly viewObservers: ReadonlyArray<ScatterPlotViewObserver<X, Y>>;
+  override readonly viewObservers!: ReadonlyArray<ScatterPlotViewObserver<X, Y>>;
 
   abstract readonly plotType: ScatterPlotType;
 
   @ViewAnimator({type: Font, state: null, inherit: true})
-  declare font: ViewAnimator<this, Font | null, AnyFont | null>;
+  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
 
   @ViewAnimator({type: Color, state: null, inherit: true})
-  declare textColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
     const viewController = this.viewController;
@@ -143,7 +143,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
       this.owner.didSetXScale(newXScale, oldXScale);
     },
   })
-  declare xScale: ContinuousScaleAnimator<this, X, number>;
+  readonly xScale!: ContinuousScaleAnimator<this, X, number>;
 
   protected willSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
     const viewController = this.viewController;
@@ -191,7 +191,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
       this.owner.didSetYScale(newYScale, oldYScale);
     },
   })
-  declare yScale: ContinuousScaleAnimator<this, Y, number>;
+  readonly yScale!: ContinuousScaleAnimator<this, Y, number>;
 
   xDomain(): Domain<X> | null;
   xDomain(xDomain: Domain<X> | string | null, timing?: AnyTiming | boolean): this;
@@ -275,7 +275,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
       this.owner.didSetXRangePadding(newXRangePadding, oldXRangePadding);
     },
   })
-  declare xRangePadding: ViewProperty<this, readonly [number, number]>
+  readonly xRangePadding!: ViewProperty<this, readonly [number, number]>
 
   protected willSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
     const viewController = this.viewController;
@@ -321,9 +321,9 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
       this.owner.didSetYRangePadding(newYRangePadding, oldYRangePadding);
     },
   })
-  declare yRangePadding: ViewProperty<this, readonly [number, number]>
+  readonly yRangePadding!: ViewProperty<this, readonly [number, number]>
 
-  declare readonly xDataDomain: Domain<X> | null;
+  readonly xDataDomain!: Domain<X> | null;
 
   protected setXDataDomain(newXDataDomain: Domain<X> | null): void {
     const oldXDataDomain = this.xDataDomain;
@@ -387,7 +387,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     this.setXDataDomain(xDataDomain);
   }
 
-  declare readonly yDataDomain: Domain<Y> | null;
+  readonly yDataDomain!: Domain<Y> | null;
 
   protected setYDataDomain(newYDataDomain: Domain<Y> | null): void {
     const oldYDataDomain = this.yDataDomain;
@@ -459,7 +459,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     this.setYDataDomain(yDataDomain);
   }
 
-  declare readonly xDataRange: Range<number> | null;
+  readonly xDataRange!: Range<number> | null;
 
   protected setXDataRange(xDataRange: Range<number> | null): void {
     Object.defineProperty(this, "xDataRange", {
@@ -481,7 +481,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     }
   }
 
-  declare readonly yDataRange: Range<number> | null;
+  readonly yDataRange!: Range<number> | null;
 
   protected setYDataRange(yDataRange: Range<number> | null): void {
     Object.defineProperty(this, "yDataRange", {
@@ -663,7 +663,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   }
 
   /** @hidden */
-  declare readonly dataPointFasteners: ReadonlyArray<ViewFastener<this, DataPointView<X, Y>>>;
+  readonly dataPointFasteners!: ReadonlyArray<ViewFastener<this, DataPointView<X, Y>>>;
 
   /** @hidden */
   protected mountDataPointFasteners(): void {
@@ -687,7 +687,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     return view instanceof DataPointView ? view : null;
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     const dataPointView = this.detectDataPoint(childView);
     if (dataPointView !== null) {
@@ -695,7 +695,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     super.onRemoveChildView(childView);
     const dataPointView = this.detectDataPoint(childView);
     if (dataPointView !== null) {
@@ -703,7 +703,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     }
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.xScale.onAnimate(viewContext.updateTime);
     this.yScale.onAnimate(viewContext.updateTime);
@@ -713,7 +713,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   /**
    * Updates own scale ranges to project onto view frame.
    */
-  protected resizeScales(frame: BoxR2): void {
+  protected resizeScales(frame: R2Box): void {
     const xScale = !this.xScale.isInherited() ? this.xScale.ownValue : null;
     if (xScale !== null && xScale.range[1] !== frame.width) {
       this.xScale.setRange(0, frame.width);
@@ -724,9 +724,9 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     }
   }
 
-  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     let xScale: ContinuousScale<X, number> | null;
     let yScale: ContinuousScale<Y, number> | null;
     if ((displayFlags & View.NeedsLayout) !== 0 &&
@@ -815,7 +815,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     this.yRangePadding.setState([yRangePaddingMin, yRangePaddingMax], View.Intrinsic);
   }
 
-  protected didRender(viewContext: ViewContextType<this>): void {
+  protected override didRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
       const context = renderer.context;
@@ -824,16 +824,16 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     super.didRender(viewContext);
   }
 
-  protected abstract renderPlot(context: CanvasContext, frame: BoxR2): void;
+  protected abstract renderPlot(context: CanvasContext, frame: R2Box): void;
 
   /** @hidden */
-  protected mountViewFasteners(): void {
+  protected override mountViewFasteners(): void {
     super.mountViewFasteners();
     this.mountDataPointFasteners();
   }
 
   /** @hidden */
-  protected unmountViewFasteners(): void {
+  protected override unmountViewFasteners(): void {
     this.unmountDataPointFasteners();
     super.unmountViewFasteners();
   }

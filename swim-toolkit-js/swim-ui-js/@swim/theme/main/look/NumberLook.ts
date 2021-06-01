@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ import {Interpolator, NumberInterpolator} from "@swim/mapping";
 import {Look} from "./Look";
 
 export class NumberLook extends Look<number> {
-  combine(combination: number | undefined, value: number, weight: number): number {
+  override combine(combination: number | undefined, value: number, weight: number): number {
     if (combination !== void 0) {
       if (weight === void 0 || weight === 1) {
         return value;
@@ -32,11 +32,11 @@ export class NumberLook extends Look<number> {
     }
   }
 
-  between(a: number, b: number): Interpolator<number> {
+  override between(a: number, b: number): Interpolator<number> {
     return NumberInterpolator(a, b);
   }
 
-  coerce(value: number): number {
+  override coerce(value: number): number {
     return value;
   }
 }

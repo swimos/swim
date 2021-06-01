@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 import {Arrays} from "@swim/util";
 import type {AnyTiming} from "@swim/mapping";
 import type {ConstraintVariable, Constraint} from "@swim/constraint";
-import {BoxR2, Transform} from "@swim/math";
+import {R2Box, Transform} from "@swim/math";
 import type {Look, Feel, MoodVectorUpdates, MoodVector} from "@swim/theme";
 import {
   ViewContextType,
@@ -102,18 +102,18 @@ export class NodeView extends View {
     (node as ViewNode).view = this;
   }
 
-  initView(init: NodeViewInit): void {
+  override initView(init: NodeViewInit): void {
     super.initView(init);
     if (init.text !== void 0) {
       this.text(init.text);
     }
   }
 
-  declare readonly node: Node;
+  readonly node!: Node;
 
-  declare readonly viewController: NodeViewController | null;
+  override readonly viewController!: NodeViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<NodeViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<NodeViewObserver>;
 
   protected willObserve<T>(callback: (this: this, viewObserver: ViewObserverType<this>) => T | void): T | undefined {
     let result: T | undefined;
@@ -155,10 +155,10 @@ export class NodeView extends View {
     return result;
   }
 
-  declare readonly key: string | undefined;
+  override readonly key!: string | undefined;
 
   /** @hidden */
-  setKey(key: string | undefined): void {
+  override setKey(key: string | undefined): void {
     Object.defineProperty(this, "key", {
       value: key,
       enumerable: true,
@@ -166,7 +166,7 @@ export class NodeView extends View {
     });
   }
 
-  get parentView(): View | null {
+  override get parentView(): View | null {
     const parentNode: ViewNode | null = this.node.parentNode;
     if (parentNode !== null) {
       const parentView = parentNode.view;
@@ -178,7 +178,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  setParentView(newParentView: View | null, oldParentView: View | null): void {
+  override setParentView(newParentView: View | null, oldParentView: View | null): void {
     this.willSetParentView(newParentView, oldParentView);
     if (oldParentView !== null) {
       this.detachParentView(oldParentView);
@@ -190,7 +190,7 @@ export class NodeView extends View {
     this.didSetParentView(newParentView, oldParentView);
   }
 
-  remove(): void {
+  override remove(): void {
     const node = this.node;
     const parentNode: ViewNode | null = node.parentNode;
     if (parentNode !== null) {
@@ -209,7 +209,7 @@ export class NodeView extends View {
     }
   }
 
-  get childViewCount(): number {
+  override get childViewCount(): number {
     let childViewCount = 0;
     const childNodes = this.node.childNodes;
     for (let i = 0, n = childNodes.length; i < n; i += 1) {
@@ -221,7 +221,7 @@ export class NodeView extends View {
     return childViewCount;
   }
 
-  get childViews(): ReadonlyArray<View> {
+  override get childViews(): ReadonlyArray<View> {
     const childNodes = this.node.childNodes;
     const childViews = [];
     for (let i = 0, n = childNodes.length; i < n; i += 1) {
@@ -233,7 +233,7 @@ export class NodeView extends View {
     return childViews;
   }
 
-  firstChildView(): View | null {
+  override firstChildView(): View | null {
     const childNodes = this.node.childNodes;
     for (let i = 0, n = childNodes.length; i < n; i += 1) {
       const childView = (childNodes[i]! as ViewNode).view;
@@ -244,7 +244,7 @@ export class NodeView extends View {
     return null;
   }
 
-  lastChildView(): View | null {
+  override lastChildView(): View | null {
     const childNodes = this.node.childNodes;
     for (let i = childNodes.length - 1; i >= 0; i -= 1) {
       const childView = (childNodes[i]! as ViewNode).view;
@@ -255,7 +255,7 @@ export class NodeView extends View {
     return null;
   }
 
-  nextChildView(targetView: View): View | null {
+  override nextChildView(targetView: View): View | null {
     if (targetView instanceof NodeView && targetView.parentView === this) {
       let targetNode: ViewNode | null = targetView.node;
       do {
@@ -272,7 +272,7 @@ export class NodeView extends View {
     return null;
   }
 
-  previousChildView(targetView: View): View | null {
+  override previousChildView(targetView: View): View | null {
     if (targetView instanceof NodeView && targetView.parentView === this) {
       let targetNode: ViewNode | null = targetView.node;
       do {
@@ -289,11 +289,11 @@ export class NodeView extends View {
     return null;
   }
 
-  forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
-  forEachChildView<T, S>(callback: (this: S, childView: View) => T | void,
-                         thisArg: S): T | undefined;
-  forEachChildView<T, S>(callback: (this: S | undefined, childView: View) => T | void,
-                         thisArg?: S): T | undefined {
+  override forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
+  override forEachChildView<T, S>(callback: (this: S, childView: View) => T | void,
+                                  thisArg: S): T | undefined;
+  override forEachChildView<T, S>(callback: (this: S | undefined, childView: View) => T | void,
+                                  thisArg?: S): T | undefined {
     let result: T | undefined;
     const childNodes = this.node.childNodes;
     let i = 0;
@@ -314,9 +314,9 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  declare readonly childViewMap: {[key: string]: View | undefined} | null;
+  readonly childViewMap!: {[key: string]: View | undefined} | null;
 
-  getChildView(key: string): View | null {
+  override getChildView(key: string): View | null {
     const childViewMap = this.childViewMap;
     if (childViewMap !== null) {
       const childView = childViewMap[key];
@@ -327,7 +327,7 @@ export class NodeView extends View {
     return null;
   }
 
-  setChildView(key: string, newChildView: View | null): View | null {
+  override setChildView(key: string, newChildView: View | null): View | null {
     let targetNode: ViewNode | null = null;
     if (newChildView !== null) {
       if (!(newChildView instanceof NodeView)) {
@@ -418,7 +418,7 @@ export class NodeView extends View {
     }
   }
 
-  appendChildView(childView: View, key?: string): void {
+  override appendChildView(childView: View, key?: string): void {
     if (!(childView instanceof NodeView)) {
       throw new TypeError("" + childView);
     }
@@ -477,7 +477,7 @@ export class NodeView extends View {
     }
   }
 
-  prependChildView(childView: View, key?: string): void {
+  override prependChildView(childView: View, key?: string): void {
     if (!(childView instanceof NodeView)) {
       throw new TypeError("" + childView);
     }
@@ -564,7 +564,7 @@ export class NodeView extends View {
     }
   }
 
-  insertChildView(childView: View, targetView: View | null, key?: string): void {
+  override insertChildView(childView: View, targetView: View | null, key?: string): void {
     if (!(childView instanceof NodeView)) {
       throw new TypeError("" + childView);
     }
@@ -590,7 +590,7 @@ export class NodeView extends View {
     childView.cascadeInsert();
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     this.insertViewFastener(childView, targetView);
   }
@@ -680,7 +680,7 @@ export class NodeView extends View {
     }
   }
 
-  cascadeInsert(updateFlags?: ViewFlags, viewContext?: ViewContext): void {
+  override cascadeInsert(updateFlags?: ViewFlags, viewContext?: ViewContext): void {
     if ((this.viewFlags & (View.MountedFlag | View.PoweredFlag)) === (View.MountedFlag | View.PoweredFlag)) {
       if (updateFlags === void 0) {
         updateFlags = 0;
@@ -705,9 +705,9 @@ export class NodeView extends View {
     }
   }
 
-  removeChildView(key: string): View | null;
-  removeChildView(childView: View): void;
-  removeChildView(key: string | View): View | null | void {
+  override removeChildView(key: string): View | null;
+  override removeChildView(childView: View): void;
+  override removeChildView(key: string | View): View | null | void {
     let childView: View | null;
     if (typeof key === "string") {
       childView = this.getChildView(key);
@@ -739,7 +739,7 @@ export class NodeView extends View {
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     super.onRemoveChildView(childView);
     this.removeViewFastener(childView);
   }
@@ -769,7 +769,7 @@ export class NodeView extends View {
     }
   }
 
-  removeAll(): void {
+  override removeAll(): void {
     do {
       const childNode = this.node.lastChild as ViewNode | null;
       if (childNode !== null) {
@@ -890,7 +890,7 @@ export class NodeView extends View {
     }
   }
 
-  cascadeMount(): void {
+  override cascadeMount(): void {
     if ((this.viewFlags & View.MountedFlag) === 0) {
       this.setViewFlags(this.viewFlags | (View.MountedFlag | View.TraversingFlag));
       try {
@@ -906,7 +906,7 @@ export class NodeView extends View {
     }
   }
 
-  protected onMount(): void {
+  protected override onMount(): void {
     super.onMount();
     this.mountViewServices();
     this.mountViewProperties();
@@ -914,7 +914,7 @@ export class NodeView extends View {
     this.mountViewFasteners();
   }
 
-  protected didMount(): void {
+  protected override didMount(): void {
     this.activateLayout();
     super.didMount();
   }
@@ -937,7 +937,7 @@ export class NodeView extends View {
     }
   }
 
-  cascadeUnmount(): void {
+  override cascadeUnmount(): void {
     if ((this.viewFlags & View.MountedFlag) !== 0) {
       this.setViewFlags(this.viewFlags & ~View.MountedFlag | View.TraversingFlag);
       try {
@@ -953,12 +953,12 @@ export class NodeView extends View {
     }
   }
 
-  protected willUnmount(): void {
+  protected override willUnmount(): void {
     super.willUnmount();
     this.deactivateLayout();
   }
 
-  protected onUnmount(): void {
+  protected override onUnmount(): void {
     this.unmountViewFasteners();
     this.unmountViewAnimators();
     this.unmountViewProperties();
@@ -984,7 +984,7 @@ export class NodeView extends View {
     }
   }
 
-  cascadePower(): void {
+  override cascadePower(): void {
     if ((this.viewFlags & View.PoweredFlag) === 0) {
       this.setViewFlags(this.viewFlags | (View.PoweredFlag | View.TraversingFlag));
       try {
@@ -1018,7 +1018,7 @@ export class NodeView extends View {
     }
   }
 
-  cascadeUnpower(): void {
+  override cascadeUnpower(): void {
     if ((this.viewFlags & View.PoweredFlag) !== 0) {
       this.setViewFlags(this.viewFlags & ~View.PoweredFlag | View.TraversingFlag);
       try {
@@ -1052,7 +1052,7 @@ export class NodeView extends View {
     }
   }
 
-  setCulled(culled: boolean): void {
+  override setCulled(culled: boolean): void {
     const viewFlags = this.viewFlags;
     if (culled && (viewFlags & View.CulledFlag) === 0) {
       this.setViewFlags(viewFlags | View.CulledFlag);
@@ -1067,7 +1067,7 @@ export class NodeView extends View {
     }
   }
 
-  cascadeCull(): void {
+  override cascadeCull(): void {
     if ((this.viewFlags & View.CullFlag) === 0) {
       this.setViewFlags(this.viewFlags | View.CullFlag);
       if ((this.viewFlags & View.CulledFlag) === 0) {
@@ -1107,7 +1107,7 @@ export class NodeView extends View {
     }
   }
 
-  cascadeUncull(): void {
+  override cascadeUncull(): void {
     if ((this.viewFlags & View.CullFlag) !== 0) {
       this.setViewFlags(this.viewFlags & ~View.CullFlag);
       if ((this.viewFlags & View.CulledFlag) === 0) {
@@ -1147,7 +1147,7 @@ export class NodeView extends View {
     }
   }
 
-  cascadeProcess(processFlags: ViewFlags, viewContext: ViewContext): void {
+  override cascadeProcess(processFlags: ViewFlags, viewContext: ViewContext): void {
     const extendedViewContext = this.extendViewContext(viewContext);
     processFlags &= ~View.NeedsProcess;
     processFlags |= this.viewFlags & View.UpdateMask;
@@ -1219,12 +1219,12 @@ export class NodeView extends View {
     }
   }
 
-  protected willResize(viewContext: ViewContextType<this>): void {
+  protected override willResize(viewContext: ViewContextType<this>): void {
     super.willResize(viewContext);
     this.evaluateConstraintVariables();
   }
 
-  protected onChange(viewContext: ViewContextType<this>): void {
+  protected override onChange(viewContext: ViewContextType<this>): void {
     super.onChange(viewContext);
     this.changeViewProperties();
   }
@@ -1238,9 +1238,9 @@ export class NodeView extends View {
     }
   }
 
-  protected processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              processChildView: (this: this, childView: View, processFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       processChildView: (this: this, childView: View, processFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -1257,7 +1257,7 @@ export class NodeView extends View {
     }
   }
 
-  cascadeDisplay(displayFlags: ViewFlags, viewContext: ViewContext): void {
+  override cascadeDisplay(displayFlags: ViewFlags, viewContext: ViewContext): void {
     const extendedViewContext = this.extendViewContext(viewContext);
     displayFlags &= ~View.NeedsDisplay;
     displayFlags |= this.viewFlags & View.UpdateMask;
@@ -1305,9 +1305,9 @@ export class NodeView extends View {
     }
   }
 
-  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -1324,13 +1324,13 @@ export class NodeView extends View {
     }
   }
 
-  getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
+  override getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
     return void 0;
   }
 
-  getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
-  getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
-  getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
+  override getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
+  override getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
+  override getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
     if (arguments.length === 2) {
       elseValue = mood as E;
       mood = null;
@@ -1338,23 +1338,23 @@ export class NodeView extends View {
     return elseValue as E;
   }
 
-  modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
+  override modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
     // nop
   }
 
-  modifyTheme(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
+  override modifyTheme(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
     // nop
   }
 
   /** @hidden */
-  declare readonly viewServices: {[serviceName: string]: ViewService<View, unknown> | undefined} | null;
+  readonly viewServices!: {[serviceName: string]: ViewService<View, unknown> | undefined} | null;
 
-  hasViewService(serviceName: string): boolean {
+  override hasViewService(serviceName: string): boolean {
     const viewServices = this.viewServices;
     return viewServices !== null && viewServices[serviceName] !== void 0;
   }
 
-  getViewService(serviceName: string): ViewService<this, unknown> | null {
+  override getViewService(serviceName: string): ViewService<this, unknown> | null {
     const viewServices = this.viewServices;
     if (viewServices !== null) {
       const viewService = viewServices[serviceName];
@@ -1365,7 +1365,7 @@ export class NodeView extends View {
     return null;
   }
 
-  setViewService(serviceName: string, newViewService: ViewService<this, unknown> | null): void {
+  override setViewService(serviceName: string, newViewService: ViewService<this, unknown> | null): void {
     let viewServices = this.viewServices;
     if (viewServices === null) {
       viewServices = {};
@@ -1408,14 +1408,14 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  declare readonly viewProperties: {[propertyName: string]: ViewProperty<View, unknown> | undefined} | null;
+  readonly viewProperties!: {[propertyName: string]: ViewProperty<View, unknown> | undefined} | null;
 
-  hasViewProperty(propertyName: string): boolean {
+  override hasViewProperty(propertyName: string): boolean {
     const viewProperties = this.viewProperties;
     return viewProperties !== null && viewProperties[propertyName] !== void 0;
   }
 
-  getViewProperty(propertyName: string): ViewProperty<this, unknown> | null {
+  override getViewProperty(propertyName: string): ViewProperty<this, unknown> | null {
     const viewProperties = this.viewProperties;
     if (viewProperties !== null) {
       const viewProperty = viewProperties[propertyName];
@@ -1426,7 +1426,7 @@ export class NodeView extends View {
     return null;
   }
 
-  setViewProperty(propertyName: string, newViewProperty: ViewProperty<this, unknown> | null): void {
+  override setViewProperty(propertyName: string, newViewProperty: ViewProperty<this, unknown> | null): void {
     let viewProperties = this.viewProperties;
     if (viewProperties === null) {
       viewProperties = {};
@@ -1478,14 +1478,14 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  declare readonly viewAnimators: {[animatorName: string]: ViewAnimator<View, unknown> | undefined} | null;
+  readonly viewAnimators!: {[animatorName: string]: ViewAnimator<View, unknown> | undefined} | null;
 
-  hasViewAnimator(animatorName: string): boolean {
+  override hasViewAnimator(animatorName: string): boolean {
     const viewAnimators = this.viewAnimators;
     return viewAnimators !== null && viewAnimators[animatorName] !== void 0;
   }
 
-  getViewAnimator(animatorName: string): ViewAnimator<this, unknown> | null {
+  override getViewAnimator(animatorName: string): ViewAnimator<this, unknown> | null {
     const viewAnimators = this.viewAnimators;
     if (viewAnimators !== null) {
       const viewAnimator = viewAnimators[animatorName];
@@ -1496,7 +1496,7 @@ export class NodeView extends View {
     return null;
   }
 
-  setViewAnimator(animatorName: string, newViewAnimator: ViewAnimator<this, unknown> | null): void {
+  override setViewAnimator(animatorName: string, newViewAnimator: ViewAnimator<this, unknown> | null): void {
     let viewAnimators = this.viewAnimators;
     if (viewAnimators === null) {
       viewAnimators = {};
@@ -1539,14 +1539,14 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  declare readonly viewFasteners: {[fastenerName: string]: ViewFastener<View, View> | undefined} | null;
+  readonly viewFasteners!: {[fastenerName: string]: ViewFastener<View, View> | undefined} | null;
 
-  hasViewFastener(fastenerName: string): boolean {
+  override hasViewFastener(fastenerName: string): boolean {
     const viewFasteners = this.viewFasteners;
     return viewFasteners !== null && viewFasteners[fastenerName] !== void 0;
   }
 
-  getViewFastener(fastenerName: string): ViewFastener<this, View> | null {
+  override getViewFastener(fastenerName: string): ViewFastener<this, View> | null {
     const viewFasteners = this.viewFasteners;
     if (viewFasteners !== null) {
       const viewFastener = viewFasteners[fastenerName];
@@ -1557,7 +1557,7 @@ export class NodeView extends View {
     return null;
   }
 
-  setViewFastener(fastenerName: string, newViewFastener: ViewFastener<this, any> | null): void {
+  override setViewFastener(fastenerName: string, newViewFastener: ViewFastener<this, any> | null): void {
     let viewFasteners = this.viewFasteners;
     if (viewFasteners === null) {
       viewFasteners = {};
@@ -1621,13 +1621,13 @@ export class NodeView extends View {
     }
   }
 
-  declare readonly constraints: ReadonlyArray<Constraint>;
+  readonly constraints!: ReadonlyArray<Constraint>;
 
-  hasConstraint(constraint: Constraint): boolean {
+  override hasConstraint(constraint: Constraint): boolean {
     return this.constraints.indexOf(constraint) >= 0;
   }
 
-  addConstraint(constraint: Constraint): void {
+  override addConstraint(constraint: Constraint): void {
     const oldConstraints = this.constraints;
     const newConstraints = Arrays.inserted(constraint, oldConstraints);
     if (oldConstraints !== newConstraints) {
@@ -1640,7 +1640,7 @@ export class NodeView extends View {
     }
   }
 
-  removeConstraint(constraint: Constraint): void {
+  override removeConstraint(constraint: Constraint): void {
     const oldConstraints = this.constraints;
     const newConstraints = Arrays.removed(constraint, oldConstraints);
     if (oldConstraints !== newConstraints) {
@@ -1653,13 +1653,13 @@ export class NodeView extends View {
     }
   }
 
-  declare readonly constraintVariables: ReadonlyArray<ConstraintVariable>;
+  readonly constraintVariables!: ReadonlyArray<ConstraintVariable>;
 
-  hasConstraintVariable(constraintVariable: ConstraintVariable): boolean {
+  override hasConstraintVariable(constraintVariable: ConstraintVariable): boolean {
     return this.constraintVariables.indexOf(constraintVariable) >= 0;
   }
 
-  addConstraintVariable(constraintVariable: ConstraintVariable): void {
+  override addConstraintVariable(constraintVariable: ConstraintVariable): void {
     const oldConstraintVariables = this.constraintVariables;
     const newConstraintVariables = Arrays.inserted(constraintVariable, oldConstraintVariables);
     if (oldConstraintVariables !== newConstraintVariables) {
@@ -1672,7 +1672,7 @@ export class NodeView extends View {
     }
   }
 
-  removeConstraintVariable(constraintVariable: ConstraintVariable): void {
+  override removeConstraintVariable(constraintVariable: ConstraintVariable): void {
     const oldConstraintVariables = this.constraintVariables;
     const newConstraintVariables = Arrays.removed(constraintVariable, oldConstraintVariables);
     if (oldConstraintVariables !== newConstraintVariables) {
@@ -1716,39 +1716,39 @@ export class NodeView extends View {
     }
   }
 
-  get parentTransform(): Transform {
+  override get parentTransform(): Transform {
     return Transform.identity();
   }
 
-  get clientBounds(): BoxR2 {
+  override get clientBounds(): R2Box {
     const range = document.createRange();
     range.selectNode(this.node);
     const bounds = range.getBoundingClientRect();
     range.detach();
-    return new BoxR2(bounds.left, bounds.top, bounds.right, bounds.bottom);
+    return new R2Box(bounds.left, bounds.top, bounds.right, bounds.bottom);
   }
 
-  get pageBounds(): BoxR2 {
+  override get pageBounds(): R2Box {
     const range = document.createRange();
     range.selectNode(this.node);
     const bounds = range.getBoundingClientRect();
     range.detach();
     const scrollX = window.pageXOffset;
     const scrollY = window.pageYOffset;
-    return new BoxR2(bounds.left + scrollX, bounds.top + scrollY,
+    return new R2Box(bounds.left + scrollX, bounds.top + scrollY,
                      bounds.right + scrollX, bounds.bottom + scrollY);
   }
 
-  dispatchEvent(event: Event): boolean {
+  override dispatchEvent(event: Event): boolean {
     return this.node.dispatchEvent(event);
   }
 
-  on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
+  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
     this.node.addEventListener(type, listener, options);
     return this;
   }
 
-  off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
+  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
     this.node.removeEventListener(type, listener, options);
     return this;
   }

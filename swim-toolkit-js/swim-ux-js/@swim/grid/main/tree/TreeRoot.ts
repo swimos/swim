@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -72,13 +72,13 @@ export class TreeRoot implements Equals, Equivalent, Debug {
     });
   }
 
-  declare readonly key: string;
+  readonly key!: string;
 
-  declare readonly grow: number;
+  readonly grow!: number;
 
-  declare readonly shrink: number;
+  readonly shrink!: number;
 
-  declare readonly basis: Length;
+  readonly basis!: Length;
 
   withFlex(grow: number, shrink: number, basis?: AnyLength): TreeRoot {
     if (basis !== void 0) {
@@ -90,20 +90,20 @@ export class TreeRoot implements Equals, Equivalent, Debug {
                      this.width, this.left, this.right, this.hidden);
   }
 
-  declare readonly optional: boolean;
+  readonly optional!: boolean;
 
   asOptional(optional: boolean): TreeRoot {
     return this.copy(this.key, this.grow, this.shrink, this.basis, optional,
                      this.width, this.left, this.right, this.hidden);
   }
 
-  declare readonly width: Length | null;
+  readonly width!: Length | null;
 
-  declare readonly left: Length | null;
+  readonly left!: Length | null;
 
-  declare readonly right: Length | null;
+  readonly right!: Length | null;
 
-  declare readonly hidden: boolean;
+  readonly hidden!: boolean;
 
   asHidden(hidden: boolean): TreeRoot {
     return this.copy(this.key, this.grow, this.shrink, this.basis,

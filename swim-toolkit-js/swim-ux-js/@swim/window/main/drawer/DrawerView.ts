@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -80,11 +80,11 @@ export class DrawerView extends HtmlView implements Modal {
     this.modifyTheme(Feel.default, [[Feel.raised, 1]]);
   }
 
-  declare readonly viewController: DrawerViewController | null;
+  override readonly viewController!: DrawerViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<DrawerViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<DrawerViewObserver>;
 
-  initView(init: DrawerViewInit): void {
+  override initView(init: DrawerViewInit): void {
     super.initView(init);
     if (init.drawerPlacement !== void 0) {
       this.drawerPlacement(init.drawerPlacement);
@@ -98,7 +98,7 @@ export class DrawerView extends HtmlView implements Modal {
   }
 
   /** @hidden */
-  declare readonly displayState: number;
+  readonly displayState!: number;
 
   /** @hidden */
   setDisplayState(displayState: number): void {
@@ -156,25 +156,25 @@ export class DrawerView extends HtmlView implements Modal {
   }
 
   @ViewAnimatorConstraint({type: Length, state: Length.px(60)})
-  declare collapsedWidth: ViewAnimatorConstraint<this, Length, AnyLength>;
+  readonly collapsedWidth!: ViewAnimatorConstraint<this, Length, AnyLength>;
 
   @ViewAnimatorConstraint({type: Length, state: Length.px(200)})
-  declare expandedWidth: ViewAnimatorConstraint<this, Length, AnyLength>;
+  readonly expandedWidth!: ViewAnimatorConstraint<this, Length, AnyLength>;
 
   @ViewAnimator({type: Number, state: 0, updateFlags: View.NeedsResize | View.NeedsAnimate | View.NeedsLayout})
-  declare drawerSlide: ViewAnimator<this, number>; // 0 = hidden; 1 = shown
+  readonly drawerSlide!: ViewAnimator<this, number>; // 0 = hidden; 1 = shown
 
   @ViewAnimator({type: Number, state: 1, updateFlags: View.NeedsResize | View.NeedsAnimate | View.NeedsLayout})
-  declare drawerStretch: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
+  readonly drawerStretch!: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
 
   @ViewPropertyConstraint({type: Length, state: null})
-  declare effectiveWidth: ViewPropertyConstraint<this, Length | null, AnyLength | null>;
+  readonly effectiveWidth!: ViewPropertyConstraint<this, Length | null, AnyLength | null>;
 
   @ViewPropertyConstraint({type: Length, state: null})
-  declare effectiveHeight: ViewPropertyConstraint<this, Length | null, AnyLength | null>;
+  readonly effectiveHeight!: ViewPropertyConstraint<this, Length | null, AnyLength | null>;
 
   /** @hidden */
-  declare readonly placement: DrawerPlacement;
+  readonly placement!: DrawerPlacement;
 
   drawerPlacement(): DrawerPlacement;
   drawerPlacement(drawerPlacement: DrawerPlacement): this;
@@ -206,7 +206,7 @@ export class DrawerView extends HtmlView implements Modal {
   }
 
   @ViewProperty({type: Object, inherit: true, state: null})
-  declare edgeInsets: ViewProperty<this, ViewEdgeInsets | null>;
+  readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
 
   protected willSetDrawerPlacement(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
     const viewController = this.viewController;
@@ -301,14 +301,14 @@ export class DrawerView extends HtmlView implements Modal {
     }
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       this.backgroundColor.setState(theme.getOr(Look.backgroundColor, mood, null), timing, View.Intrinsic);
     }
   }
 
-  protected onAnimate(viewContext: ViewContextType<this>): void {
+  protected override onAnimate(viewContext: ViewContextType<this>): void {
     const displayState = this.displayState;
     if (displayState === DrawerView.ShowState) {
       this.willShow();
@@ -330,7 +330,7 @@ export class DrawerView extends HtmlView implements Modal {
     }
   }
 
-  protected didAnimate(viewContext: ViewContextType<this>): void {
+  protected override didAnimate(viewContext: ViewContextType<this>): void {
     const displayState = this.displayState;
     const drawerStretch = this.drawerStretch.value;
     const drawerSlide = this.drawerSlide.value;
@@ -346,7 +346,7 @@ export class DrawerView extends HtmlView implements Modal {
     super.didAnimate(viewContext);
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.place(viewContext);
     if (viewContext.viewIdiom === "mobile") {
@@ -516,7 +516,7 @@ export class DrawerView extends HtmlView implements Modal {
     }
   }
 
-  declare readonly modality: boolean | number;
+  readonly modality!: boolean | number;
 
   showModal(options: ModalOptions, timing?: AnyTiming | boolean): void {
     if (options.modal !== void 0) {

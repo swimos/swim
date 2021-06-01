@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ import type {MapboxView} from "./MapboxView";
 import type {MapboxViewObserver} from "./MapboxViewObserver";
 
 export class MapboxViewController<V extends MapboxView = MapboxView> extends MapViewController<V> implements MapboxViewObserver<V> {
-  viewWillSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport, view: V): void {
+  override viewWillSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport, view: V): void {
     // hook
   }
 
-  viewDidSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport, view: V): void {
+  override viewDidSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport, view: V): void {
     // hook
   }
 

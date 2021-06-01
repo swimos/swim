@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@ import {StyleAnimator} from "./StyleAnimator";
 
 /** @hidden */
 export abstract class NumberStyleAnimator<V extends StyleContext> extends StyleAnimator<V, number | undefined, string> {
-  parse(value: string): number | undefined {
+  override parse(value: string): number | undefined {
     const number = +value;
     return isFinite(number) ? number : void 0;
   }
 
-  fromCssValue(value: CSSStyleValue): number | undefined {
+  override fromCssValue(value: CSSStyleValue): number | undefined {
     if (value instanceof CSSNumericValue) {
       return value.to("number").value;
     } else {
@@ -30,7 +30,7 @@ export abstract class NumberStyleAnimator<V extends StyleContext> extends StyleA
     }
   }
 
-  fromAny(value: number | string): number | undefined {
+  override fromAny(value: number | string): number | undefined {
     if (typeof value === "number") {
       return value;
     } else {

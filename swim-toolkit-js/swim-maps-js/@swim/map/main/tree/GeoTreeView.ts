@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ export class GeoTreeView extends GeoView {
     });
   }
 
-  initView(init: GeoTreeViewInit): void {
+  override initView(init: GeoTreeViewInit): void {
     super.initView(init);
     if (init.treeOutlineColor !== void 0) {
       this.treeOutlineColor(init.treeOutlineColor);
@@ -46,16 +46,16 @@ export class GeoTreeView extends GeoView {
   }
 
   @ViewAnimator({type: Color})
-  declare treeOutlineColor: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
+  readonly treeOutlineColor!: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
   /** @hidden */
-  declare readonly root: GeoTree;
+  readonly root!: GeoTree;
 
-  get childViewCount(): number {
+  override get childViewCount(): number {
     return this.root.size;
   }
 
-  get childViews(): ReadonlyArray<View> {
+  override get childViews(): ReadonlyArray<View> {
     const childViews: View[] = [];
     this.root.forEach(function (childView: GeoView): void {
       childViews.push(childView);
@@ -63,21 +63,21 @@ export class GeoTreeView extends GeoView {
     return childViews;
   }
 
-  firstChildView(): View | null {
+  override firstChildView(): View | null {
     const childView = this.root.forEach(function (childView: GeoView): GeoView {
       return childView;
     }, this);
     return childView !== void 0 ? childView : null;
   }
 
-  lastChildView(): View | null {
+  override lastChildView(): View | null {
     const childView = this.root.forEachReverse(function (childView: GeoView): GeoView {
       return childView;
     }, this);
     return childView !== void 0 ? childView : null;
   }
 
-  nextChildView(targetView: View): View | null {
+  override nextChildView(targetView: View): View | null {
     if (targetView.parentView === this) {
       let nextChildView: GeoView | null = null;
       const childView = this.root.forEachReverse(function (childView: GeoView): GeoView | null | void {
@@ -93,7 +93,7 @@ export class GeoTreeView extends GeoView {
     return null;
   }
 
-  previousChildView(targetView: View): View | null {
+  override previousChildView(targetView: View): View | null {
     if (targetView.parentView === this) {
       let previousChildView: GeoView | null = null;
       const childView = this.root.forEach(function (childView: GeoView): GeoView | null | void {
@@ -109,18 +109,18 @@ export class GeoTreeView extends GeoView {
     return null;
   }
 
-  forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
-  forEachChildView<T, S>(callback: (this: S, childView: View) => T | void,
-                         thisArg: S): T | undefined;
-  forEachChildView<T, S>(callback: (this: S | undefined, childView: View) => T | void,
-                         thisArg?: S): T | undefined {
+  override forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
+  override forEachChildView<T, S>(callback: (this: S, childView: View) => T | void,
+                                  thisArg: S): T | undefined;
+  override forEachChildView<T, S>(callback: (this: S | undefined, childView: View) => T | void,
+                                  thisArg?: S): T | undefined {
     return this.root.forEach(callback, thisArg);
   }
 
   /** @hidden */
-  declare readonly childViewMap: {[key: string]: GeoView | undefined} | null;
+  readonly childViewMap!: {[key: string]: GeoView | undefined} | null;
 
-  getChildView(key: string): GeoView | null {
+  override getChildView(key: string): GeoView | null {
     const childViewMap = this.childViewMap;
     if (childViewMap !== null) {
       const childView = childViewMap[key];
@@ -131,7 +131,7 @@ export class GeoTreeView extends GeoView {
     return null;
   }
 
-  setChildView(key: string, newChildView: View | null): View | null {
+  override setChildView(key: string, newChildView: View | null): View | null {
     if (newChildView !== null) {
       if (!(newChildView instanceof GeoView)) {
         throw new TypeError("" + newChildView);
@@ -208,7 +208,7 @@ export class GeoTreeView extends GeoView {
     }
   }
 
-  appendChildView(childView: View, key?: string): void {
+  override appendChildView(childView: View, key?: string): void {
     if (!(childView instanceof GeoView)) {
       throw new TypeError("" + childView);
     }
@@ -236,7 +236,7 @@ export class GeoTreeView extends GeoView {
     childView.cascadeInsert();
   }
 
-  prependChildView(childView: View, key?: string): void {
+  override prependChildView(childView: View, key?: string): void {
     if (!(childView instanceof GeoView)) {
       throw new TypeError("" + childView);
     }
@@ -264,7 +264,7 @@ export class GeoTreeView extends GeoView {
     childView.cascadeInsert();
   }
 
-  insertChildView(childView: View, targetView: View | null, key?: string): void {
+  override insertChildView(childView: View, targetView: View | null, key?: string): void {
     if (!(childView instanceof GeoView)) {
       throw new TypeError("" + childView);
     }
@@ -298,9 +298,9 @@ export class GeoTreeView extends GeoView {
     childView.cascadeInsert();
   }
 
-  removeChildView(key: string): View | null;
-  removeChildView(childView: View): void;
-  removeChildView(key: string | View): View | null | void {
+  override removeChildView(key: string): View | null;
+  override removeChildView(childView: View): void;
+  override removeChildView(key: string | View): View | null | void {
     let childView: View | null;
     if (typeof key === "string") {
       childView = this.getChildView(key);
@@ -338,14 +338,14 @@ export class GeoTreeView extends GeoView {
     }
   }
 
-  removeAll(): void {
+  override removeAll(): void {
     this.root.forEach(function (childView: GeoView): void {
       this.removeChildView(childView);
     }, this);
   }
 
   /** @hidden */
-  protected doProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected override doProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     if ((processFlags & View.ProcessMask) !== 0) {
       this.willProcessChildViews(processFlags, viewContext);
       this.onProcessChildViews(processFlags, viewContext);
@@ -353,9 +353,9 @@ export class GeoTreeView extends GeoView {
     }
   }
 
-  protected processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              processChildView: (this: this, childView: View, processFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       processChildView: (this: this, childView: View, processFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     this.processTree(this.root, processFlags, viewContext, processChildView);
   }
 
@@ -386,7 +386,7 @@ export class GeoTreeView extends GeoView {
     }
   }
 
-  protected onRender(viewContext: ViewContextType<this>): void {
+  protected override onRender(viewContext: ViewContextType<this>): void {
     const outlineColor = this.getViewAnimator("treeOutlineColor") as ViewAnimator<this, Color, AnyColor> | null;
     if (outlineColor !== null && outlineColor.value !== void 0) {
       this.renderTree(viewContext, outlineColor.value);
@@ -436,9 +436,9 @@ export class GeoTreeView extends GeoView {
     }
   }
 
-  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     this.displayTree(this.root, displayFlags, viewContext, displayChildView);
   }
 
@@ -469,7 +469,7 @@ export class GeoTreeView extends GeoView {
     }
   }
 
-  onSetChildViewGeoBounds(childView: GeoView, newChildViewGeoBounds: GeoBox, oldChildViewGeoBounds: GeoBox): void {
+  override onSetChildViewGeoBounds(childView: GeoView, newChildViewGeoBounds: GeoBox, oldChildViewGeoBounds: GeoBox): void {
     const oldGeoBounds = this.root.geoBounds;
     Object.defineProperty(this, "root", {
       value: this.root.moved(childView, newChildViewGeoBounds, oldChildViewGeoBounds),
@@ -484,7 +484,7 @@ export class GeoTreeView extends GeoView {
 
   declare readonly geoBounds: GeoBox; // getter defined below to work around useDefineForClassFields lunacy
 
-  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const geoPoint = viewContext.geoViewport.unproject(x, y);
     return this.hitTestTree(this.root, x, y, geoPoint, viewContext);
   }

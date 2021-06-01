@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
 export abstract class FontViewAnimator<V extends View> extends ViewAnimator<V, Font | null | undefined, AnyFont | null | undefined> {
-  fromAny(value: AnyFont | null | undefined): Font | null | undefined {
+  override fromAny(value: AnyFont | null | undefined): Font | null | undefined {
     return value !== void 0 && value !== null ? Font.fromAny(value) : value;
   }
 }

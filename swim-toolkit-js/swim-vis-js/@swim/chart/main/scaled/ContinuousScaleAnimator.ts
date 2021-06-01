@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -139,7 +139,7 @@ export abstract class ContinuousScaleAnimator<V extends View, X, Y> extends View
     }
   }
 
-  fromAny(value: ContinuousScale<X, Y> | string | null): ContinuousScale<X, Y> | null {
+  override fromAny(value: ContinuousScale<X, Y> | string | null): ContinuousScale<X, Y> | null {
     if (typeof value === "string") {
       value = ScaledView.parseScale(value);
     }

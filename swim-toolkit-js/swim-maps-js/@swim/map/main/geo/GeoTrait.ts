@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import {GenericTrait} from "@swim/model";
 import type {GeoTraitObserver} from "./GeoTraitObserver";
 
 export abstract class GeoTrait extends GenericTrait {
-  declare readonly traitObservers: ReadonlyArray<GeoTraitObserver>;
+  override readonly traitObservers!: ReadonlyArray<GeoTraitObserver>;
 
   abstract readonly geoBounds: GeoBox;
 }

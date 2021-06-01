@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ import type {ElementView} from "../element/ElementView";
 
 /** @hidden */
 export abstract class ColorAttributeAnimator<V extends ElementView> extends AttributeAnimator<V, Color | null, AnyColor | null> {
-  parse(value: string): Color | null {
+  override parse(value: string): Color | null {
     return Color.parse(value);
   }
 
-  fromAny(value: AnyColor): Color | null {
+  override fromAny(value: AnyColor): Color | null {
     try {
       return Color.fromAny(value);
     } catch (swallow) {

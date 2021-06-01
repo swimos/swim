@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ export type SliceLegend = SliceLegendFunction | string;
 export type SliceLegendFunction = (sliceTrait: SliceTrait) => GraphicsView | string | null;
 
 export class SliceTrait extends GenericTrait {
-  declare readonly traitObservers: ReadonlyArray<SliceTraitObserver>;
+  override readonly traitObservers!: ReadonlyArray<SliceTraitObserver>;
 
   protected willSetValue(newValue: number, oldValue: number): void {
     const traitObservers = this.traitObservers;
@@ -60,7 +60,7 @@ export class SliceTrait extends GenericTrait {
       this.owner.didSetValue(newValue, oldValue);
     },
   })
-  declare value: TraitProperty<this, number>;
+  readonly value!: TraitProperty<this, number>;
 
   protected willSetLabel(newLabel: SliceLabel | null, oldLabel: SliceLabel | null): void {
     const traitObservers = this.traitObservers;
@@ -100,7 +100,7 @@ export class SliceTrait extends GenericTrait {
       this.owner.didSetLabel(newLabel, oldLabel);
     },
   })
-  declare label: TraitProperty<this, SliceLabel | null>;
+  readonly label!: TraitProperty<this, SliceLabel | null>;
 
   protected willSetLegend(newLegend: SliceLegend | null, oldLegend: SliceLegend | null): void {
     const traitObservers = this.traitObservers;
@@ -140,5 +140,5 @@ export class SliceTrait extends GenericTrait {
       this.owner.didSetLegend(newLegend, oldLegend);
     },
   })
-  declare legend: TraitProperty<this, SliceLegend | null>;
+  readonly legend!: TraitProperty<this, SliceLegend | null>;
 }

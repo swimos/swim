@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,9 +35,12 @@ export abstract class RefreshService<M extends Model> extends ModelManagerServic
     return manager.updatedModelContext();
   }
 
-  initManager(): RefreshManager<M> {
+  override initManager(): RefreshManager<M> {
     return RefreshManager.global();
   }
 }
 
-ModelService({type: RefreshManager, observe: false})(Model.prototype, "refreshService");
+ModelService({
+  type: RefreshManager,
+  observe: false,
+})(Model.prototype, "refreshService");

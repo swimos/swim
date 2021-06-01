@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import {ChartTrait} from "./ChartTrait";
 import type {ChartComponentObserver} from "./ChartComponentObserver";
 
 export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
-  declare readonly componentObservers: ReadonlyArray<ChartComponentObserver<X, Y>>;
+  override readonly componentObservers!: ReadonlyArray<ChartComponentObserver<X, Y>>;
 
   protected initChartTrait(chartTrait: ChartTrait<X, Y>): void {
     // hook
@@ -234,9 +234,9 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
   @ComponentViewTrait<ChartComponent<X, Y>, ChartView<X, Y>, ChartTrait<X, Y>>({
     extends: ChartComponent.ChartFastener,
   })
-  declare chart: ComponentViewTrait<this, ChartView<X, Y>, ChartTrait<X, Y>>;
+  readonly chart!: ComponentViewTrait<this, ChartView<X, Y>, ChartTrait<X, Y>>;
 
-  protected attachGraphTrait(graphTrait: GraphTrait<X, Y>): void {
+  protected override attachGraphTrait(graphTrait: GraphTrait<X, Y>): void {
     super.attachGraphTrait(graphTrait);
     const chartView = this.chart.view;
     if (chartView !== null) {
@@ -244,7 +244,7 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     }
   }
 
-  protected attachGraphView(graphView: GraphView<X, Y>): void {
+  protected override attachGraphView(graphView: GraphView<X, Y>): void {
     super.attachGraphView(graphView);
     const chartView = this.chart.view;
     if (chartView !== null) {
@@ -252,7 +252,7 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     }
   }
 
-  protected detachGraphView(graphView: GraphView<X, Y>): void {
+  protected override detachGraphView(graphView: GraphView<X, Y>): void {
     graphView.remove();
   }
 
@@ -489,7 +489,7 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
   @ComponentFastener<ChartComponent<X, Y>, AxisComponent<X>>({
     extends: ChartComponent.TopAxisFastener,
   })
-  declare topAxis: ComponentFastener<this, AxisComponent<X>>;
+  readonly topAxis!: ComponentFastener<this, AxisComponent<X>>;
 
   protected createRightAxis(rightAxisTrait: AxisTrait<Y>): AxisComponent<Y> | null {
     return new RightAxisComponent<Y>();
@@ -724,7 +724,7 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
   @ComponentFastener<ChartComponent<X, Y>, AxisComponent<Y>>({
     extends: ChartComponent.RightAxisFastener,
   })
-  declare rightAxis: ComponentFastener<this, AxisComponent<Y>>;
+  readonly rightAxis!: ComponentFastener<this, AxisComponent<Y>>;
 
   protected createBottomAxis(bottomAxisTrait: AxisTrait<X>): AxisComponent<X> | null {
     return new BottomAxisComponent<X>();
@@ -959,7 +959,7 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
   @ComponentFastener<ChartComponent<X, Y>, AxisComponent<X>>({
     extends: ChartComponent.BottomAxisFastener,
   })
-  declare bottomAxis: ComponentFastener<this, AxisComponent<X>>;
+  readonly bottomAxis!: ComponentFastener<this, AxisComponent<X>>;
 
   protected createLeftAxis(leftAxisTrait: AxisTrait<Y>): AxisComponent<Y> | null {
     return new LeftAxisComponent<Y>();
@@ -1194,7 +1194,7 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
   @ComponentFastener<ChartComponent<X, Y>, AxisComponent<Y>>({
     extends: ChartComponent.LeftAxisFastener,
   })
-  declare leftAxis: ComponentFastener<this, AxisComponent<Y>>;
+  readonly leftAxis!: ComponentFastener<this, AxisComponent<Y>>;
 
   protected detectTopAxisComponent(component: Component): AxisComponent<X> | null {
     return component instanceof TopAxisComponent ? component : null;
@@ -1212,7 +1212,7 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     return component instanceof LeftAxisComponent ? component : null;
   }
 
-  protected onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
+  protected override onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
     super.onInsertChildComponent(childComponent, targetComponent);
     const topAxisComponent = this.detectTopAxisComponent(childComponent);
     if (topAxisComponent !== null) {
@@ -1232,7 +1232,7 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
     }
   }
 
-  protected onRemoveChildComponent(childComponent: Component): void {
+  protected override onRemoveChildComponent(childComponent: Component): void {
     super.onRemoveChildComponent(childComponent);
     const topAxisComponent = this.detectTopAxisComponent(childComponent);
     if (topAxisComponent !== null) {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {PointR2, BoxR2} from "@swim/math";
+import {R2Point, R2Box} from "@swim/math";
 import {View} from "@swim/view";
 import {GraphicsView, CanvasContext, TypesetView} from "@swim/graphics";
 import {TickOrientation, TickView} from "./TickView";
@@ -22,11 +22,11 @@ export class TopTickView<X> extends TickView<X> {
     super(value);
   }
 
-  get orientation(): TickOrientation {
+  override get orientation(): TickOrientation {
     return "top";
   }
 
-  protected layoutLabel(labelView: GraphicsView): void {
+  protected override layoutLabel(labelView: GraphicsView): void {
     const anchor = this.anchor.getValue();
     const x = Math.round(anchor.x);
     const y0 = Math.round(anchor.y);
@@ -36,11 +36,11 @@ export class TopTickView<X> extends TickView<X> {
     if (TypesetView.is(labelView)) {
       labelView.textAlign.setState("center", View.Intrinsic);
       labelView.textBaseline.setState("bottom", View.Intrinsic);
-      labelView.textOrigin.setState(new PointR2(x, y2), View.Intrinsic);
+      labelView.textOrigin.setState(new R2Point(x, y2), View.Intrinsic);
     }
   }
 
-  protected renderTick(context: CanvasContext, frame: BoxR2): void {
+  protected override renderTick(context: CanvasContext, frame: R2Box): void {
     const anchor = this.anchor.getValue();
     const x = Math.round(anchor.x);
     const y0 = Math.round(anchor.y);

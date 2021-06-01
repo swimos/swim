@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ export class BoxShadowForm extends Form<BoxShadow | null, AnyBoxShadow> {
     });
   }
 
-  declare readonly unit: BoxShadow | null | undefined;
+  override readonly unit!: BoxShadow | null | undefined;
 
-  withUnit(unit: BoxShadow | null | undefined): Form<BoxShadow | null, AnyBoxShadow> {
+  override withUnit(unit: BoxShadow | null | undefined): Form<BoxShadow | null, AnyBoxShadow> {
     if (unit !== this.unit) {
       return new BoxShadowForm(unit);
     } else {
@@ -37,7 +37,7 @@ export class BoxShadowForm extends Form<BoxShadow | null, AnyBoxShadow> {
     }
   }
 
-  mold(boxShadow: AnyBoxShadow): Item {
+  override mold(boxShadow: AnyBoxShadow): Item {
     let shadow = BoxShadow.fromAny(boxShadow)!;
     const record = Record.create();
     do {
@@ -60,7 +60,7 @@ export class BoxShadowForm extends Form<BoxShadow | null, AnyBoxShadow> {
     return record;
   }
 
-  cast(item: Item): BoxShadow | null | undefined {
+  override cast(item: Item): BoxShadow | null | undefined {
     const value = item.toValue();
     let boxShadow: BoxShadow | null | undefined;
     try {

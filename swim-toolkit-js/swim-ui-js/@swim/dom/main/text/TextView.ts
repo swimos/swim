@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,13 +33,13 @@ export class TextView extends NodeView {
     super(node);
   }
 
-  declare readonly node: Text;
+  override readonly node!: Text;
 
-  declare readonly viewController: TextViewController | null;
+  override readonly viewController!: TextViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<TextViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<TextViewObserver>;
 
-  initView(init: TextViewInit): void {
+  override initView(init: TextViewInit): void {
     super.initView(init);
   }
 
@@ -48,10 +48,10 @@ export class TextView extends NodeView {
     return new TextView(node);
   }
 
-  static fromConstructor<V extends NodeView>(viewConstructor: NodeViewConstructor<V>): V;
-  static fromConstructor<V extends View>(viewConstructor: ViewConstructor<V>): V;
-  static fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View;
-  static fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View {
+  static override fromConstructor<V extends NodeView>(viewConstructor: NodeViewConstructor<V>): V;
+  static override fromConstructor<V extends View>(viewConstructor: ViewConstructor<V>): V;
+  static override fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View;
+  static override fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View {
     if (viewConstructor.prototype instanceof TextView) {
       const node = document.createTextNode("");
       return new viewConstructor(node);

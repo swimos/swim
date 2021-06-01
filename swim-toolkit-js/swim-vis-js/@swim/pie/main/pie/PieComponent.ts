@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ export class PieComponent extends CompositeComponent {
     });
   }
 
-  declare readonly componentObservers: ReadonlyArray<PieComponentObserver>;
+  override readonly componentObservers!: ReadonlyArray<PieComponentObserver>;
 
   protected initPieTrait(pieTrait: PieTrait): void {
     // hook
@@ -281,7 +281,7 @@ export class PieComponent extends CompositeComponent {
   @ComponentViewTrait<PieComponent, PieView, PieTrait>({
     extends: PieComponent.PieFastener,
   })
-  declare pie: ComponentViewTrait<this, PieView, PieTrait>;
+  readonly pie!: ComponentViewTrait<this, PieView, PieTrait>;
 
   @ComponentView<PieComponent, GraphicsView>({
     key: true,
@@ -295,7 +295,7 @@ export class PieComponent extends CompositeComponent {
       this.owner.didSetTitleView(newTitleView, oldTitleView);
     },
   })
-  declare title: ComponentView<this, GraphicsView>;
+  readonly title!: ComponentView<this, GraphicsView>;
 
   insertSlice(sliceComponent: SliceComponent, targetComponent: Component | null = null): void {
     const sliceFasteners = this.sliceFasteners as ComponentFastener<this, SliceComponent>[];
@@ -693,7 +693,7 @@ export class PieComponent extends CompositeComponent {
   }
 
   @ComponentProperty({type: Timing, state: true})
-  declare sliceTiming: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
+  readonly sliceTiming!: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
 
   /** @hidden */
   static SliceFastener = ComponentFastener.define<PieComponent, SliceComponent>({
@@ -751,7 +751,7 @@ export class PieComponent extends CompositeComponent {
   }
 
   /** @hidden */
-  declare readonly sliceFasteners: ReadonlyArray<ComponentFastener<this, SliceComponent>>;
+  readonly sliceFasteners!: ReadonlyArray<ComponentFastener<this, SliceComponent>>;
 
   protected getSliceFastener(sliceTrait: SliceTrait): ComponentFastener<this, SliceComponent> | null {
     const sliceFasteners = this.sliceFasteners;
@@ -787,7 +787,7 @@ export class PieComponent extends CompositeComponent {
     return component instanceof SliceComponent ? component : null;
   }
 
-  protected onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
+  protected override onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
     super.onInsertChildComponent(childComponent, targetComponent);
     const sliceComponent = this.detectSliceComponent(childComponent);
     if (sliceComponent !== null) {
@@ -795,7 +795,7 @@ export class PieComponent extends CompositeComponent {
     }
   }
 
-  protected onRemoveChildComponent(childComponent: Component): void {
+  protected override onRemoveChildComponent(childComponent: Component): void {
     super.onRemoveChildComponent(childComponent);
     const sliceComponent = this.detectSliceComponent(childComponent);
     if (sliceComponent !== null) {
@@ -804,13 +804,13 @@ export class PieComponent extends CompositeComponent {
   }
 
   /** @hidden */
-  protected mountComponentFasteners(): void {
+  protected override mountComponentFasteners(): void {
     super.mountComponentFasteners();
     this.mountSliceFasteners();
   }
 
   /** @hidden */
-  protected unmountComponentFasteners(): void {
+  protected override unmountComponentFasteners(): void {
     this.unmountSliceFasteners();
     super.unmountComponentFasteners();
   }

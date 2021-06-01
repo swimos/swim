@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ export class MoodVector<M extends Mood = Feel> implements Equals, Debug {
   }
 
   /** @hidden */
-  declare readonly array: ReadonlyArray<[M, number]>;
+  readonly array!: ReadonlyArray<[M, number]>;
 
   /** @hidden */
-  declare readonly index: {readonly [name: string]: number | undefined};
+  readonly index!: {readonly [name: string]: number | undefined};
 
   get size(): number {
     return this.array.length;

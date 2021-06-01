@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import {DeckViewController} from "./DeckViewController";
 import {TitleDeckBar} from "./TitleDeckBar";
 
 export class TitleDeckViewController<V extends DeckView> extends DeckViewController<V> {
-  onSetView(deckView: V | null): void {
+  override onSetView(deckView: V | null): void {
     super.onSetView(deckView);
     if (deckView !== null) {
       this.initBar(deckView);
@@ -34,7 +34,7 @@ export class TitleDeckViewController<V extends DeckView> extends DeckViewControl
     }
   }
 
-  deckWillPushCard(newCardView: DeckCard, oldCardView: DeckCard | null, deckView: V): void {
+  override deckWillPushCard(newCardView: DeckCard, oldCardView: DeckCard | null, deckView: V): void {
     const deckBar = deckView.bar.view;
     if (deckBar instanceof TitleDeckBar) {
       deckBar.pushTitle(newCardView.cardTitle.getStateOr(""));
@@ -45,7 +45,7 @@ export class TitleDeckViewController<V extends DeckView> extends DeckViewControl
     }
   }
 
-  deckDidPushCard(newCardView: DeckCard, oldCardView: DeckCard | null, deckView: V): void {
+  override deckDidPushCard(newCardView: DeckCard, oldCardView: DeckCard | null, deckView: V): void {
     const deckBar = deckView.bar.view;
     if (deckBar instanceof TitleDeckBar) {
       const backMembrane = deckBar.backMembrane.view;
@@ -55,14 +55,14 @@ export class TitleDeckViewController<V extends DeckView> extends DeckViewControl
     }
   }
 
-  deckWillPopCard(newCardView: DeckCard | null, oldCardView: DeckCard, deckView: V): void {
+  override deckWillPopCard(newCardView: DeckCard | null, oldCardView: DeckCard, deckView: V): void {
     const deckBar = deckView.bar.view;
     if (deckBar instanceof TitleDeckBar) {
       deckBar.popTitle();
     }
   }
 
-  deckDidPressBackButton(event: Event | null, deckView: V): void {
+  override deckDidPressBackButton(event: Event | null, deckView: V): void {
     if (!deckView.deckPhase.isAnimating()) {
       deckView.popCard();
     }

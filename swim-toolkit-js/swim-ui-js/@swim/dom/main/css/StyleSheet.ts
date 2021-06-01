@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -57,9 +57,9 @@ export class StyleSheet implements AnimationTrack, CssContext {
     });
   }
 
-  declare readonly owner: StyleSheetContext;
+  readonly owner!: StyleSheetContext;
 
-  declare readonly stylesheet: CSSStyleSheet;
+  readonly stylesheet!: CSSStyleSheet;
 
   protected createStylesheet(): CSSStyleSheet {
     return new CSSStyleSheet();
@@ -78,7 +78,7 @@ export class StyleSheet implements AnimationTrack, CssContext {
   }
 
   /** @hidden */
-  declare readonly cssRules: {[ruleName: string]: CssRule<StyleSheet> | undefined};
+  readonly cssRules!: {[ruleName: string]: CssRule<StyleSheet> | undefined};
 
   hasCssRule(ruleName: string): boolean {
     return this.cssRules[ruleName] !== void 0;
@@ -151,7 +151,7 @@ export class StyleSheet implements AnimationTrack, CssContext {
   }
 
   /** @hidden */
-  declare readonly animationTracks: ReadonlyArray<AnimationTrack>;
+  readonly animationTracks!: ReadonlyArray<AnimationTrack>;
 
   trackWillStartAnimating(track: AnimationTrack): void {
     const oldTracks = this.animationTracks;

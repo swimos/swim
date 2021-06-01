@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 import {Equals, Equivalent, Lazy} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 import type {Interpolate, Interpolator} from "@swim/mapping";
-import type {BoxR2} from "@swim/math";
+import type {R2Box} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
 import type {GraphicsRenderer} from "../graphics/GraphicsRenderer";
@@ -43,9 +43,9 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
     });
   }
 
-  declare readonly fillColor: Color | null;
+  override readonly fillColor!: Color | null;
 
-  withFillColor(fillColor: Color | null): CircleIcon {
+  override withFillColor(fillColor: Color | null): CircleIcon {
     if (Equals(this.fillColor, fillColor)) {
       return this;
     } else {
@@ -53,9 +53,9 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
     }
   }
 
-  declare readonly fillLook: Look<Color> | null;
+  override readonly fillLook!: Look<Color> | null;
 
-  withFillLook(fillLook: Look<Color> | null): CircleIcon {
+  override withFillLook(fillLook: Look<Color> | null): CircleIcon {
     if (this.fillLook === fillLook) {
       return this;
     } else {
@@ -63,9 +63,9 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
     }
   }
 
-  declare readonly moodModifier: MoodMatrix | null;
+  override readonly moodModifier!: MoodMatrix | null;
 
-  withMoodModifier(moodModifier: MoodMatrix | null): CircleIcon {
+  override withMoodModifier(moodModifier: MoodMatrix | null): CircleIcon {
     if (Equals(this.moodModifier, moodModifier)) {
       return this;
     } else {
@@ -73,7 +73,7 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
     }
   }
 
-  modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>): CircleIcon {
+  override modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>): CircleIcon {
     let oldMoodModifier = this.moodModifier;
     if (oldMoodModifier === null) {
       oldMoodModifier = MoodMatrix.empty();
@@ -86,11 +86,11 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
     }
   }
 
-  isThemed(): boolean {
+  override isThemed(): boolean {
     return this.fillColor !== null;
   }
 
-  withTheme(theme: ThemeMatrix, mood: MoodVector): CircleIcon {
+  override withTheme(theme: ThemeMatrix, mood: MoodVector): CircleIcon {
     const fillLook = this.fillLook;
     if (fillLook !== null) {
       const moodModifier = this.moodModifier;
@@ -103,7 +103,7 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
     }
   }
 
-  render(renderer: GraphicsRenderer, frame: BoxR2): void {
+  override render(renderer: GraphicsRenderer, frame: R2Box): void {
     if (renderer instanceof PaintingRenderer) {
       this.paint(renderer.context, frame);
     } else if (renderer instanceof DrawingRenderer) {
@@ -111,7 +111,7 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
     }
   }
 
-  paint(context: PaintingContext, frame: BoxR2): void {
+  override paint(context: PaintingContext, frame: R2Box): void {
     context.beginPath();
     this.draw(context, frame);
     if (this.fillColor !== null) {
@@ -120,7 +120,7 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
     context.fill();
   }
 
-  draw(context: DrawingContext, frame: BoxR2): void {
+  override draw(context: DrawingContext, frame: R2Box): void {
     const centerX = (frame.xMin + frame.xMax) / 2;
     const centerY = (frame.yMin + frame.yMax) / 2;
     const width = frame.width;
@@ -174,7 +174,7 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
         .debug(this.moodModifier).write(41/*')'*/);
   }
 
-  toString(): string {
+  override toString(): string {
     return Format.debug(this);
   }
 

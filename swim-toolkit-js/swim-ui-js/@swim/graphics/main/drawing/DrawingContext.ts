@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {PathR2Context} from "@swim/math";
+import type {R2PathContext} from "@swim/math";
 import type {GraphicsContext} from "../graphics/GraphicsContext";
 
-export interface DrawingContext extends GraphicsContext, PathR2Context {
+export interface DrawingContext extends GraphicsContext, R2PathContext {
   moveTo(x: number, y: number): void;
 
   lineTo(x: number, y: number): void;

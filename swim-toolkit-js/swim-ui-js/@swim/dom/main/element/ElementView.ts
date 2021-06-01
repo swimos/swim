@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 import {Arrays} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
-import {BoxR2} from "@swim/math";
+import {R2Box} from "@swim/math";
 import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
 import {ToAttributeString, ToStyleString, ToCssValue} from "@swim/style";
 import {
@@ -105,13 +105,13 @@ export class ElementView extends NodeView implements StyleContext {
     });
   }
 
-  declare readonly node: Element & ElementCSSInlineStyle;
+  override readonly node!: Element & ElementCSSInlineStyle;
 
-  declare readonly viewController: ElementViewController | null;
+  override readonly viewController!: ElementViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<ElementViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<ElementViewObserver>;
 
-  initView(init: ElementViewInit): void {
+  override initView(init: ElementViewInit): void {
     super.initView(init);
     if (init.id !== void 0) {
       this.id(init.id);
@@ -134,9 +134,9 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   /** @hidden */
-  declare readonly viewObserverCache: ElementViewObserverCache<this>;
+  override readonly viewObserverCache!: ElementViewObserverCache<this>;
 
-  protected onAddViewObserver(viewObserver: ViewObserverType<this>): void {
+  protected override onAddViewObserver(viewObserver: ViewObserverType<this>): void {
     super.onAddViewObserver(viewObserver);
     if (viewObserver.viewWillSetAttribute !== void 0) {
       this.viewObserverCache.viewWillSetAttributeObservers = Arrays.inserted(viewObserver as ViewWillSetAttribute, this.viewObserverCache.viewWillSetAttributeObservers);
@@ -152,7 +152,7 @@ export class ElementView extends NodeView implements StyleContext {
     }
   }
 
-  protected onRemoveViewObserver(viewObserver: ViewObserverType<this>): void {
+  protected override onRemoveViewObserver(viewObserver: ViewObserverType<this>): void {
     super.onRemoveViewObserver(viewObserver);
     if (viewObserver.viewWillSetAttribute !== void 0) {
       this.viewObserverCache.viewWillSetAttributeObservers = Arrays.removed(viewObserver as ViewWillSetAttribute, this.viewObserverCache.viewWillSetAttributeObservers);
@@ -168,17 +168,17 @@ export class ElementView extends NodeView implements StyleContext {
     }
   }
 
-  protected onMount(): void {
+  protected override onMount(): void {
     super.onMount();
     this.mountTheme();
   }
 
-  protected onChange(viewContext: ViewContextType<this>): void {
+  protected override onChange(viewContext: ViewContextType<this>): void {
     super.onChange(viewContext);
     this.updateTheme();
   }
 
-  protected onUncull(): void {
+  protected override onUncull(): void {
     super.onUncull();
     if (this.mood.isInherited()) {
       this.mood.change();
@@ -189,12 +189,12 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   @ViewProperty({type: MoodMatrix, state: null})
-  declare moodModifier: ViewProperty<this, MoodMatrix | null>;
+  readonly moodModifier!: ViewProperty<this, MoodMatrix | null>;
 
   @ViewProperty({type: MoodMatrix, state: null})
-  declare themeModifier: ViewProperty<this, MoodMatrix | null>;
+  readonly themeModifier!: ViewProperty<this, MoodMatrix | null>;
 
-  getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
+  override getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
     const theme = this.theme.state;
     let value: T | undefined;
     if (theme !== null) {
@@ -208,9 +208,9 @@ export class ElementView extends NodeView implements StyleContext {
     return value;
   }
 
-  getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
-  getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
-  getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
+  override getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
+  override getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
+  override getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
     if (arguments.length === 2) {
       elseValue = mood as E;
       mood = null;
@@ -232,7 +232,7 @@ export class ElementView extends NodeView implements StyleContext {
     return value;
   }
 
-  modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
+  override modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
     if (this.moodModifier.takesPrecedence(View.Intrinsic)) {
       const oldMoodModifier = this.moodModifier.getStateOr(MoodMatrix.empty());
       const newMoodModifier = oldMoodModifier.updatedCol(feel, updates, true);
@@ -257,7 +257,7 @@ export class ElementView extends NodeView implements StyleContext {
     }
   }
 
-  modifyTheme(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
+  override modifyTheme(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
     if (this.themeModifier.takesPrecedence(View.Intrinsic)) {
       const oldThemeModifier = this.themeModifier.getStateOr(MoodMatrix.empty());
       const newThemeModifier = oldThemeModifier.updatedCol(feel, updates, true);
@@ -336,7 +336,7 @@ export class ElementView extends NodeView implements StyleContext {
     }
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     this.themeViewAnimators(theme, mood, timing);
   }
@@ -405,7 +405,7 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   /** @hidden */
-  declare readonly attributeAnimators: {[animatorName: string]: AttributeAnimator<ElementView, unknown> | undefined} | null;
+  readonly attributeAnimators!: {[animatorName: string]: AttributeAnimator<ElementView, unknown> | undefined} | null;
 
   hasAttributeAnimator(animatorName: string): boolean {
     const attributeAnimators = this.attributeAnimators;
@@ -556,7 +556,7 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   /** @hidden */
-  declare readonly styleAnimators: {[animatorName: string]: StyleAnimator<ElementView, unknown> | undefined} | null;
+  readonly styleAnimators!: {[animatorName: string]: StyleAnimator<ElementView, unknown> | undefined} | null;
 
   hasStyleAnimator(animatorName: string): boolean {
     const styleAnimators = this.styleAnimators;
@@ -631,7 +631,7 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   /** @hidden */
-  protected mountViewAnimators(): void {
+  protected override mountViewAnimators(): void {
     super.mountViewAnimators();
     const attributeAnimators = this.attributeAnimators;
     for (const animatorName in attributeAnimators) {
@@ -646,7 +646,7 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   /** @hidden */
-  protected unmountViewAnimators(): void {
+  protected override unmountViewAnimators(): void {
     const styleAnimators = this.styleAnimators;
     for (const animatorName in styleAnimators) {
       const styleAnimator = styleAnimators[animatorName]!;
@@ -721,7 +721,7 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   /** @hidden */
-  setViewMember(key: string, value: unknown, timing?: AnyTiming | boolean, precedence?: ViewPrecedence): void {
+  override setViewMember(key: string, value: unknown, timing?: AnyTiming | boolean, precedence?: ViewPrecedence): void {
     const viewProperty = this.getLazyViewProperty(key);
     if (viewProperty !== null) {
       viewProperty.setState(value, precedence);
@@ -744,9 +744,9 @@ export class ElementView extends NodeView implements StyleContext {
     }
   }
 
-  setViewState<S extends ElementView>(this: S, state: ElementViewMemberMap<S>, precedenceOrTiming: ViewPrecedence | AnyTiming | boolean | undefined): void;
-  setViewState<S extends ElementView>(this: S, state: ElementViewMemberMap<S>, timing?: AnyTiming | boolean, precedence?: ViewPrecedence): void;
-  setViewState<S extends ElementView>(this: S, state: ElementViewMemberMap<S>, timing?: ViewPrecedence | AnyTiming | boolean, precedence?: ViewPrecedence): void {
+  override setViewState<S extends ElementView>(this: S, state: ElementViewMemberMap<S>, precedenceOrTiming: ViewPrecedence | AnyTiming | boolean | undefined): void;
+  override setViewState<S extends ElementView>(this: S, state: ElementViewMemberMap<S>, timing?: AnyTiming | boolean, precedence?: ViewPrecedence): void;
+  override setViewState<S extends ElementView>(this: S, state: ElementViewMemberMap<S>, timing?: ViewPrecedence | AnyTiming | boolean, precedence?: ViewPrecedence): void {
     if (typeof timing === "number") {
       precedence = timing;
       timing = void 0;
@@ -759,31 +759,31 @@ export class ElementView extends NodeView implements StyleContext {
     }
   }
 
-  get clientBounds(): BoxR2 {
+  override get clientBounds(): R2Box {
     const bounds = this.node.getBoundingClientRect();
-    return new BoxR2(bounds.left, bounds.top, bounds.right, bounds.bottom);
+    return new R2Box(bounds.left, bounds.top, bounds.right, bounds.bottom);
   }
 
-  get pageBounds(): BoxR2 {
+  override get pageBounds(): R2Box {
     const bounds = this.node.getBoundingClientRect();
     const scrollX = window.pageXOffset;
     const scrollY = window.pageYOffset;
-    return new BoxR2(bounds.left + scrollX, bounds.top + scrollY,
+    return new R2Box(bounds.left + scrollX, bounds.top + scrollY,
                      bounds.right + scrollX, bounds.bottom + scrollY);
   }
 
-  on<T extends keyof ElementEventMap>(type: T, listener: (this: Element, event: ElementEventMap[T]) => unknown,
-                                      options?: AddEventListenerOptions | boolean): this;
-  on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
-  on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
+  override on<T extends keyof ElementEventMap>(type: T, listener: (this: Element, event: ElementEventMap[T]) => unknown,
+                                               options?: AddEventListenerOptions | boolean): this;
+  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
+  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
     this.node.addEventListener(type, listener, options);
     return this;
   }
 
-  off<T extends keyof ElementEventMap>(type: T, listener: (this: Element, event: ElementEventMap[T]) => unknown,
-                                       options?: EventListenerOptions | boolean): this;
-  off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
-  off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
+  override off<T extends keyof ElementEventMap>(type: T, listener: (this: Element, event: ElementEventMap[T]) => unknown,
+                                                options?: EventListenerOptions | boolean): this;
+  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
+  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
     this.node.removeEventListener(type, listener, options);
     return this;
   }
@@ -815,7 +815,7 @@ export class ElementView extends NodeView implements StyleContext {
     return new viewConstructor(node as Element & ElementCSSInlineStyle);
   }
 
-  static fromNode(node: ViewElement): ElementView {
+  static override fromNode(node: ViewElement): ElementView {
     if (node.view instanceof this) {
       return node.view;
     } else {
@@ -832,10 +832,10 @@ export class ElementView extends NodeView implements StyleContext {
     }
   }
 
-  static fromConstructor<V extends NodeView>(viewConstructor: NodeViewConstructor<V>): V;
-  static fromConstructor<V extends View>(viewConstructor: ViewConstructor<V>): V;
-  static fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View;
-  static fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View {
+  static override fromConstructor<V extends NodeView>(viewConstructor: NodeViewConstructor<V>): V;
+  static override fromConstructor<V extends View>(viewConstructor: ViewConstructor<V>): V;
+  static override fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View;
+  static override fromConstructor(viewConstructor: NodeViewConstructor | ViewConstructor): View {
     if (viewConstructor.prototype instanceof ElementView) {
       let node: Element;
       const tag = (viewConstructor as unknown as ElementViewConstructor).tag;
@@ -855,7 +855,7 @@ export class ElementView extends NodeView implements StyleContext {
     }
   }
 
-  static fromAny(value: ElementView | Element): ElementView {
+  static override fromAny(value: ElementView | Element): ElementView {
     if (value instanceof ElementView) {
       return value;
     } else if (value instanceof Element) {

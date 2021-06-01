@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,15 +52,15 @@ export class DeckRail implements Equals, Equivalent, Debug {
     });
   }
 
-  declare readonly width: Length | null;
+  readonly width!: Length | null;
 
-  declare readonly left: Length | null;
+  readonly left!: Length | null;
 
-  declare readonly right: Length | null;
+  readonly right!: Length | null;
 
-  declare readonly spacing: Length | null;
+  readonly spacing!: Length | null;
 
-  declare readonly posts: ReadonlyArray<DeckPost>;
+  readonly posts!: ReadonlyArray<DeckPost>;
 
   lookupPost(key: string): number | undefined {
     const posts = this.posts;

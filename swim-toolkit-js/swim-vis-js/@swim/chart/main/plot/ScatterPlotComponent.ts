@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import type {ScatterPlotTrait} from "./ScatterPlotTrait";
 import type {ScatterPlotComponentObserver} from "./ScatterPlotComponentObserver";
 
 export abstract class ScatterPlotComponent<X, Y> extends PlotComponent<X, Y> {
-  declare readonly componentObservers: ReadonlyArray<ScatterPlotComponentObserver<X, Y>>;
+  override readonly componentObservers!: ReadonlyArray<ScatterPlotComponentObserver<X, Y>>;
 
-  abstract readonly plot: ComponentViewTrait<this, ScatterPlotView<X, Y>, ScatterPlotTrait<X, Y>>;
+  abstract override readonly plot: ComponentViewTrait<this, ScatterPlotView<X, Y>, ScatterPlotTrait<X, Y>>;
 }

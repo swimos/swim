@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import {SeriesPlotTrait} from "./SeriesPlotTrait";
 import type {AreaPlotTraitObserver} from "./AreaPlotTraitObserver";
 
 export class AreaPlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
-  declare readonly traitObservers: ReadonlyArray<AreaPlotTraitObserver<X, Y>>;
+  override readonly traitObservers!: ReadonlyArray<AreaPlotTraitObserver<X, Y>>;
 
   protected willSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
     const traitObservers = this.traitObservers;
@@ -61,5 +61,5 @@ export class AreaPlotTrait<X, Y> extends SeriesPlotTrait<X, Y> {
       return fill;
     },
   })
-  declare fill: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly fill!: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 }

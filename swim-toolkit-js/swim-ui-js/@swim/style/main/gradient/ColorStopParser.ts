@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ export class ColorStopParser extends Parser<ColorStop> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<ColorStop> {
+  override feed(input: Input): Parser<ColorStop> {
     return ColorStopParser.parse(input, this.colorParser, this.stopParser,
                                  this.hintParser, this.step);
   }

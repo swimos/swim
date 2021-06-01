@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,11 +44,11 @@ export class MapboxView extends MapView {
     this.initMap(map);
   }
 
-  declare readonly viewController: MapboxViewController | null;
+  override readonly viewController!: MapboxViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<MapboxViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<MapboxViewObserver>;
 
-  declare readonly map: mapboxgl.Map;
+  readonly map!: mapboxgl.Map;
 
   protected initMap(map: mapboxgl.Map): void {
     map.on("render", this.onMapRender);
@@ -56,7 +56,7 @@ export class MapboxView extends MapView {
     map.on("moveend", this.onMoveEnd);
   }
 
-  declare readonly geoViewport: MapboxViewport;
+  override readonly geoViewport!: MapboxViewport;
 
   protected willSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport): void {
     const viewController = this.viewController;
@@ -122,7 +122,7 @@ export class MapboxView extends MapView {
     this.didMoveMap();
   }
 
-  moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void {
+  override moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void {
     const options: mapboxgl.FlyToOptions = {};
     const geoViewport = this.geoViewport;
     let geoCenter = geoPerspective.geoCenter;
@@ -183,7 +183,7 @@ export class MapboxView extends MapView {
     }
   }
 
-  protected attachCanvas(canvasView: CanvasView): void {
+  protected override attachCanvas(canvasView: CanvasView): void {
     super.attachCanvas(canvasView);
     if (this.parentView === null) {
       canvasView.appendChildView(this);
@@ -191,26 +191,26 @@ export class MapboxView extends MapView {
     }
   }
 
-  protected detachCanvas(canvasView: CanvasView): void {
+  protected override detachCanvas(canvasView: CanvasView): void {
     if (this.parentView === canvasView) {
       canvasView.removeChildView(this);
     }
     super.detachCanvas(canvasView);
   }
 
-  protected initContainer(containerView: HtmlView): void {
+  protected override initContainer(containerView: HtmlView): void {
     super.initContainer(containerView);
     HtmlView.fromNode(this.map.getContainer());
     HtmlView.fromNode(this.map.getCanvasContainer());
   }
 
-  protected attachContainer(containerView: HtmlView): void {
+  protected override attachContainer(containerView: HtmlView): void {
     super.attachContainer(containerView);
     const canvasContainerView = HtmlView.fromNode(this.map.getCanvasContainer());
     this.canvas.injectView(canvasContainerView);
   }
 
-  protected detachContainer(containerView: HtmlView): void {
+  protected override detachContainer(containerView: HtmlView): void {
     const canvasView = this.canvas.view;
     const canvasContainerView = HtmlView.fromNode(this.map.getCanvasContainer());
     if (canvasView !== null && canvasView.parentView === canvasContainerView) {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {ViewService} from "./ViewService";
 import {ViewManagerService} from "./ViewManagerService";
 
 export abstract class LayoutService<V extends View> extends ViewManagerService<V, LayoutManager<V>> {
-  initManager(): LayoutManager<V> {
+  override initManager(): LayoutManager<V> {
     return LayoutManager.global();
   }
 }

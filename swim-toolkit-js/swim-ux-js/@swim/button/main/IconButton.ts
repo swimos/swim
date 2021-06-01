@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -75,32 +75,32 @@ export class IconButton extends ButtonMembrane implements IconView, PositionGest
     this.modifyTheme(Feel.default, [[Feel.translucent, 1]]);
   }
 
-  initView(init: IconButtonInit): void {
+  override initView(init: IconButtonInit): void {
     super.initView(init);
     IconView.initView(this, init);
   }
 
-  declare readonly viewController: HtmlViewController & ButtonObserver | null;
+  override readonly viewController!: HtmlViewController & ButtonObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<HtmlViewObserver & ButtonObserver>;
-
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  declare xAlign: ViewAnimator<this, number>;
+  override readonly viewObservers!: ReadonlyArray<HtmlViewObserver & ButtonObserver>;
 
   @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  declare yAlign: ViewAnimator<this, number>;
+  readonly xAlign!: ViewAnimator<this, number>;
+
+  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
+  readonly yAlign!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Length, state: Length.px(24), updateFlags: View.NeedsLayout})
-  declare iconWidth: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly iconWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Length, state: Length.px(24), updateFlags: View.NeedsLayout})
-  declare iconHeight: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly iconHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Color, state: null, updateFlags: View.NeedsLayout})
-  declare iconColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly iconColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({extends: IconViewAnimator, state: null, type: Object, updateFlags: View.NeedsLayout})
-  declare graphics: ViewAnimator<this, Graphics | null>;
+  readonly graphics!: ViewAnimator<this, Graphics | null>;
 
   /** @hidden */
   static IconFastener = ViewFastener.define<IconButton, SvgIconView, never, ViewObserverType<SvgIconView> & {iconIndex: number}>({
@@ -211,7 +211,7 @@ export class IconButton extends ButtonMembrane implements IconView, PositionGest
     return oldIconView;
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       let backgroundColor = this.getLookOr(Look.backgroundColor, null);
@@ -229,12 +229,12 @@ export class IconButton extends ButtonMembrane implements IconView, PositionGest
     }
   }
 
-  protected onResize(viewContext: ViewContextType<this>): void {
+  protected override onResize(viewContext: ViewContextType<this>): void {
     super.onResize(viewContext);
     this.requireUpdate(View.NeedsLayout);
   }
 
-  protected onAnimate(viewContext: ViewContextType<this>): void {
+  protected override onAnimate(viewContext: ViewContextType<this>): void {
     super.onAnimate(viewContext);
     const iconColor = this.iconColor.takeUpdatedValue();
     if (iconColor !== void 0 && iconColor !== null) {
@@ -246,14 +246,14 @@ export class IconButton extends ButtonMembrane implements IconView, PositionGest
     }
   }
 
-  needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((this.viewFlags & View.NeedsLayout) === 0) {
       displayFlags &= ~View.NeedsLayout;
     }
     return displayFlags;
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.layoutIcon();
   }
@@ -279,12 +279,12 @@ export class IconButton extends ButtonMembrane implements IconView, PositionGest
     }
   }
 
-  protected onMount(): void {
+  protected override onMount(): void {
     super.onMount();
     this.on("click", this.onClick);
   }
 
-  protected onUnmount(): void {
+  protected override onUnmount(): void {
     this.off("click", this.onClick);
     super.onUnmount();
   }

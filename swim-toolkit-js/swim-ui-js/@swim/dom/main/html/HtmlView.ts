@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -179,7 +179,7 @@ export class HtmlView extends ElementView {
     super(node);
   }
 
-  initView(init: HtmlViewInit): void {
+  override initView(init: HtmlViewInit): void {
     super.initView(init);
     if (init.attributes !== void 0) {
       this.initAttributes(init.attributes);
@@ -226,11 +226,11 @@ export class HtmlView extends ElementView {
     StyleMap.init(this, init);
   }
 
-  declare readonly node: HTMLElement;
+  override readonly node!: HTMLElement;
 
-  declare readonly viewController: HtmlViewController | null;
+  override readonly viewController!: HtmlViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<HtmlViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<HtmlViewObserver>;
 
   append<V extends View>(childView: V, key?: string): V;
   append<V extends NodeView>(viewConstructor: NodeViewConstructor<V>, key?: string): V;
@@ -295,7 +295,7 @@ export class HtmlView extends ElementView {
     return child;
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     if (this.node === document.body) {
       this.applyRootTheme(theme, mood, timing);
@@ -335,7 +335,7 @@ export class HtmlView extends ElementView {
     return style.position === "relative" || style.position === "absolute";
   }
 
-  get parentTransform(): Transform {
+  override get parentTransform(): Transform {
     const transform = this.transform.value;
     if (transform !== null) {
       return transform;
@@ -349,56 +349,56 @@ export class HtmlView extends ElementView {
     return Transform.identity();
   }
 
-  on<T extends keyof HTMLElementEventMap>(type: T, listener: (this: HTMLElement, event: HTMLElementEventMap[T]) => unknown,
-                                          options?: AddEventListenerOptions | boolean): this;
-  on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
-  on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
+  override on<T extends keyof HTMLElementEventMap>(type: T, listener: (this: HTMLElement, event: HTMLElementEventMap[T]) => unknown,
+                                                   options?: AddEventListenerOptions | boolean): this;
+  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
+  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
     this.node.addEventListener(type, listener, options);
     return this;
   }
 
-  off<T extends keyof HTMLElementEventMap>(type: T, listener: (this: HTMLElement, event: HTMLElementEventMap[T]) => unknown,
-                                           options?: EventListenerOptions | boolean): this;
-  off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
-  off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
+  override off<T extends keyof HTMLElementEventMap>(type: T, listener: (this: HTMLElement, event: HTMLElementEventMap[T]) => unknown,
+                                                    options?: EventListenerOptions | boolean): this;
+  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
+  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
     this.node.removeEventListener(type, listener, options);
     return this;
   }
 
   @AttributeAnimator({attributeName: "autocomplete", type: String})
-  declare autocomplete: AttributeAnimator<this, string>;
+  readonly autocomplete!: AttributeAnimator<this, string>;
 
   @AttributeAnimator({attributeName: "checked", type: Boolean})
-  declare checked: AttributeAnimator<this, boolean, boolean | string>;
+  readonly checked!: AttributeAnimator<this, boolean, boolean | string>;
 
   @AttributeAnimator({attributeName: "colspan", type: Number})
-  declare colspan: AttributeAnimator<this, number, number | string>;
+  readonly colspan!: AttributeAnimator<this, number, number | string>;
 
   @AttributeAnimator({attributeName: "disabled", type: Boolean})
-  declare disabled: AttributeAnimator<this, boolean, boolean | string>;
+  readonly disabled!: AttributeAnimator<this, boolean, boolean | string>;
 
   @AttributeAnimator({attributeName: "placeholder", type: String})
-  declare placeholder: AttributeAnimator<this, string>;
+  readonly placeholder!: AttributeAnimator<this, string>;
 
   @AttributeAnimator({attributeName: "rowspan", type: Number})
-  declare rowspan: AttributeAnimator<this, number, number | string>;
+  readonly rowspan!: AttributeAnimator<this, number, number | string>;
 
   @AttributeAnimator({attributeName: "selected", type: Boolean})
-  declare selected: AttributeAnimator<this, boolean, boolean | string>;
+  readonly selected!: AttributeAnimator<this, boolean, boolean | string>;
 
   @AttributeAnimator({attributeName: "title", type: String})
-  declare title: AttributeAnimator<this, string>;
+  readonly title!: AttributeAnimator<this, string>;
 
   @AttributeAnimator({attributeName: "type", type: String})
-  declare type: AttributeAnimator<this, string>;
+  readonly type!: AttributeAnimator<this, string>;
 
   @AttributeAnimator({attributeName: "value", type: String})
-  declare value: AttributeAnimator<this, string>;
+  readonly value!: AttributeAnimator<this, string>;
 
   /** @hidden */
-  static readonly tags: {[tag: string]: HtmlViewConstructor<any> | undefined} = {};
+  static override readonly tags: {[tag: string]: HtmlViewConstructor<any> | undefined} = {};
 
-  static readonly tag: string = "div";
+  static override readonly tag: string = "div";
 
   static forTag(tag: string): HtmlViewConstructor<HtmlView> {
     if (tag === this.tag) {
@@ -418,9 +418,9 @@ export class HtmlView extends ElementView {
     return this.fromTag(tag);
   }
 
-  static fromTag<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, tag: string): InstanceType<S>;
-  static fromTag(tag: string): ElementView;
-  static fromTag(tag: string): ElementView {
+  static override fromTag<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, tag: string): InstanceType<S>;
+  static override fromTag(tag: string): ElementView;
+  static override fromTag(tag: string): ElementView {
     let viewConstructor: HtmlViewConstructor | undefined;
     if (Object.prototype.hasOwnProperty.call(this, "tags")) {
       viewConstructor = this.tags[tag];
@@ -432,9 +432,9 @@ export class HtmlView extends ElementView {
     return new viewConstructor(node);
   }
 
-  static fromNode<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
-  static fromNode(node: ViewHtml): HtmlView;
-  static fromNode(node: ViewHtml): HtmlView {
+  static override fromNode<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
+  static override fromNode(node: ViewHtml): HtmlView;
+  static override fromNode(node: ViewHtml): HtmlView {
     if (node.view instanceof this) {
       return node.view;
     } else {
@@ -451,7 +451,7 @@ export class HtmlView extends ElementView {
     }
   }
 
-  static fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S> {
+  static override fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S> {
     if (value instanceof this) {
       return value;
     } else if (value instanceof HTMLElement) {

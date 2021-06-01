@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ export class GeoLayerComponent extends GeoComponent {
     });
   }
 
-  declare readonly componentObservers: ReadonlyArray<GeoLayerComponentObserver>;
+  override readonly componentObservers!: ReadonlyArray<GeoLayerComponentObserver>;
 
   protected initGeoTrait(geoTrait: GeoLayerTrait): void {
     // hook
@@ -245,7 +245,7 @@ export class GeoLayerComponent extends GeoComponent {
   @ComponentViewTrait<GeoLayerComponent, GeoView, GeoLayerTrait>({
     extends: GeoLayerComponent.GeoFastener,
   })
-  declare geo: ComponentViewTrait<this, GeoView, GeoLayerTrait>;
+  readonly geo!: ComponentViewTrait<this, GeoView, GeoLayerTrait>;
 
   insertFeature(featureComponent: GeoComponent, targetComponent: Component | null = null): void {
     const featureFasteners = this.featureFasteners as ComponentFastener<this, GeoComponent>[];
@@ -564,7 +564,7 @@ export class GeoLayerComponent extends GeoComponent {
   }
 
   /** @hidden */
-  declare readonly featureFasteners: ReadonlyArray<ComponentFastener<this, GeoComponent>>;
+  readonly featureFasteners!: ReadonlyArray<ComponentFastener<this, GeoComponent>>;
 
   protected getFeatureFastener(featureTrait: GeoTrait): ComponentFastener<this, GeoComponent> | null {
     const featureFasteners = this.featureFasteners;
@@ -600,7 +600,7 @@ export class GeoLayerComponent extends GeoComponent {
     return component instanceof GeoComponent ? component : null;
   }
 
-  protected onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
+  protected override onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
     super.onInsertChildComponent(childComponent, targetComponent);
     const featureComponent = this.detectFeatureComponent(childComponent);
     if (featureComponent !== null) {
@@ -608,7 +608,7 @@ export class GeoLayerComponent extends GeoComponent {
     }
   }
 
-  protected onRemoveChildComponent(childComponent: Component): void {
+  protected override onRemoveChildComponent(childComponent: Component): void {
     super.onRemoveChildComponent(childComponent);
     const featureComponent = this.detectFeatureComponent(childComponent);
     if (featureComponent !== null) {
@@ -617,13 +617,13 @@ export class GeoLayerComponent extends GeoComponent {
   }
 
   /** @hidden */
-  protected mountComponentFasteners(): void {
+  protected override mountComponentFasteners(): void {
     super.mountComponentFasteners();
     this.mountFeatureFasteners();
   }
 
   /** @hidden */
-  protected unmountComponentFasteners(): void {
+  protected override unmountComponentFasteners(): void {
     this.unmountFeatureFasteners();
     super.unmountComponentFasteners();
   }

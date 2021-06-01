@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {BoxR2} from "@swim/math";
+import type {R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {ViewAnimator} from "@swim/view";
@@ -26,18 +26,18 @@ export interface AreaPlotViewInit<X, Y> extends SeriesPlotViewInit<X, Y>, FillVi
 }
 
 export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView {
-  initView(init: AreaPlotViewInit<X, Y>): void {
+  override initView(init: AreaPlotViewInit<X, Y>): void {
     super.initView(init);
     if (init.fill !== void 0) {
       this.fill(init.fill);
     }
   }
 
-  declare readonly viewController: GraphicsViewController<AreaPlotView<X, Y>> & AreaPlotViewObserver<X, Y> | null;
+  override readonly viewController!: GraphicsViewController<AreaPlotView<X, Y>> & AreaPlotViewObserver<X, Y> | null;
 
-  declare readonly viewObservers: ReadonlyArray<AreaPlotViewObserver<X, Y>>;
+  override readonly viewObservers!: ReadonlyArray<AreaPlotViewObserver<X, Y>>;
 
-  get plotType(): SeriesPlotType {
+  override get plotType(): SeriesPlotType {
     return "area";
   }
 
@@ -85,9 +85,9 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
       this.owner.didSetFill(newFill, oldFill);
     },
   })
-  declare fill: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  protected renderPlot(context: CanvasContext, frame: BoxR2): void {
+  protected renderPlot(context: CanvasContext, frame: R2Box): void {
     const fill = this.fill.getValueOr(Color.transparent());
     const gradientStops = this.gradientStops;
     let gradient: CanvasGradient | null = null;
@@ -186,13 +186,13 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
     return new AreaPlotView<X, Y>();
   }
 
-  static fromInit<X, Y>(init: AreaPlotViewInit<X, Y>): AreaPlotView<X, Y> {
+  static override fromInit<X, Y>(init: AreaPlotViewInit<X, Y>): AreaPlotView<X, Y> {
     const view = new AreaPlotView<X, Y>();
     view.initView(init);
     return view;
   }
 
-  static fromAny<X, Y>(value: AnyAreaPlotView<X, Y>): AreaPlotView<X, Y> {
+  static override fromAny<X, Y>(value: AnyAreaPlotView<X, Y>): AreaPlotView<X, Y> {
     if (value instanceof AreaPlotView) {
       return value;
     } else if (typeof value === "object" && value !== null) {

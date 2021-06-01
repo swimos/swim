@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,17 +34,17 @@ export class StyleView extends HtmlView implements StyleSheetContext {
     });
   }
 
-  declare readonly node: HTMLStyleElement;
+  override readonly node!: HTMLStyleElement;
 
-  declare readonly viewController: StyleViewController | null;
+  override readonly viewController!: StyleViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<StyleViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<StyleViewObserver>;
 
-  initView(init: StyleViewInit): void {
+  override initView(init: StyleViewInit): void {
     super.initView(init);
   }
 
-  declare readonly sheet: StyleSheet | null;
+  readonly sheet!: StyleSheet | null;
 
   protected createSheet(): StyleSheet | null {
     const stylesheet = this.node.sheet;
@@ -61,7 +61,7 @@ export class StyleView extends HtmlView implements StyleSheetContext {
     return sheet !== null ? sheet.getCssRule(ruleName) : null;
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     const sheet = this.sheet;
     if (sheet !== null) {
@@ -69,7 +69,7 @@ export class StyleView extends HtmlView implements StyleSheetContext {
     }
   }
 
-  protected onMount(): void {
+  protected override onMount(): void {
     super.onMount();
     const sheet = this.createSheet();
     Object.defineProperty(this, "sheet", {
@@ -82,7 +82,7 @@ export class StyleView extends HtmlView implements StyleSheetContext {
     }
   }
 
-  protected onUnmount(): void {
+  protected override onUnmount(): void {
     const sheet = this.sheet;
     if (sheet !== null) {
       sheet.unmount();
@@ -96,7 +96,7 @@ export class StyleView extends HtmlView implements StyleSheetContext {
   }
 
   /** @hidden */
-  static readonly tag: string = "style";
+  static override readonly tag: string = "style";
 }
 
 HtmlView.Tag("style")(StyleView, "style");

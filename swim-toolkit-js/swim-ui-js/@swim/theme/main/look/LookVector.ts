@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ export class LookVector<T> implements Equals, Debug {
   }
 
   /** @hidden */
-  declare readonly array: ReadonlyArray<[Feel, T]>;
+  readonly array!: ReadonlyArray<[Feel, T]>;
 
   /** @hidden */
-  declare readonly index: {readonly [name: string]: number | undefined};
+  readonly index!: {readonly [name: string]: number | undefined};
 
   get size(): number {
     return this.array.length;

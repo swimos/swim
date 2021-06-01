@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,11 +52,11 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
     this.overflowY.setState("hidden", View.Intrinsic);
   }
 
-  declare readonly viewController: TreeLeafController | null;
+  override readonly viewController!: TreeLeafController | null;
 
-  declare readonly viewObservers: ReadonlyArray<TreeLeafObserver>;
+  override readonly viewObservers!: ReadonlyArray<TreeLeafObserver>;
 
-  initView(init: TreeLeafInit): void {
+  override initView(init: TreeLeafInit): void {
     super.initView(init);
     if (init.highlighted === true) {
       this.highlight();
@@ -85,13 +85,13 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
   }
 
   @ViewProperty({type: TreeSeed, state: null, inherit: true})
-  declare seed: ViewProperty<this, TreeSeed | null, AnyTreeSeed | null>;
+  readonly seed!: ViewProperty<this, TreeSeed | null, AnyTreeSeed | null>;
 
   @ViewProperty({type: Number, inherit: true})
-  declare limbSpacing: ViewProperty<this, number | undefined>;
+  readonly limbSpacing!: ViewProperty<this, number | undefined>;
 
   @ViewProperty({type: Boolean, state: false})
-  declare highlighted: ViewProperty<this, boolean>;
+  readonly highlighted!: ViewProperty<this, boolean>;
 
   highlight(timing?: AnyTiming | boolean): void {
     if (!this.highlighted.state) {
@@ -220,7 +220,7 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
     }
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       let backgroundColor = this.getLookOr(Look.backgroundColor, null);
@@ -239,14 +239,14 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
     }
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     if (childView instanceof TreeCell) {
       this.onInsertCell(childView);
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     if (childView instanceof TreeCell) {
       this.onRemoveCell(childView);
     }
@@ -263,9 +263,9 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
     // hook
   }
 
-  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     if ((displayFlags & View.NeedsLayout) !== 0) {
       this.layoutChildViews(displayFlags, viewContext, displayChildView);
     } else {
@@ -301,7 +301,7 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
     super.displayChildViews(displayFlags, viewContext, layoutChildView);
   }
 
-  didEndPress(input: PositionGestureInput, event: Event | null): void {
+  override didEndPress(input: PositionGestureInput, event: Event | null): void {
     super.didEndPress(input, event);
     let target = input.target;
     while (target !== null && target !== this.node) {
@@ -362,9 +362,9 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
     return view;
   }
 
-  static fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
-  static fromAny(value: AnyTreeLeaf): TreeLeaf;
-  static fromAny(value: AnyTreeLeaf): TreeLeaf {
+  static override fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
+  static override fromAny(value: AnyTreeLeaf): TreeLeaf;
+  static override fromAny(value: AnyTreeLeaf): TreeLeaf {
     if (value instanceof this) {
       return value;
     } else if (value instanceof HTMLElement) {

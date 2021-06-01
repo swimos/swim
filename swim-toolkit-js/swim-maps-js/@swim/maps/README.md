@@ -25,6 +25,10 @@ component libraries:
   ([npm](https://www.npmjs.com/package/@swim/mapbox),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_mapbox.html)) –
   **@swim/map** overlays for Mapbox maps.
+- [**@swim/leaflet**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/leaflet)
+  ([npm](https://www.npmjs.com/package/@swim/leaflet),
+  [doc](https://docs.swimos.org/js/latest/modules/_swim_leaflet.html)) –
+  **@swim/map** overlays for Leaflet maps.
 - [**@swim/googlemap**](https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/googlemap)
   ([npm](https://www.npmjs.com/package/@swim/googlemap),
   [doc](https://docs.swimos.org/js/latest/modules/_swim_googlemap.html)) –

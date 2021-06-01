@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyLength, Length, BoxR2} from "@swim/math";
+import {AnyLength, Length, R2Box} from "@swim/math";
 import type {GeoBox, GeoPath} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ViewContextType, View, ViewProperty, ViewAnimator} from "@swim/view";
@@ -34,7 +34,7 @@ export interface GeoAreaViewInit extends GeoPathViewInit, FillViewInit, StrokeVi
 }
 
 export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
-  initView(init: GeoAreaViewInit): void {
+  override initView(init: GeoAreaViewInit): void {
     super.initView(init);
     if (init.fill !== void 0) {
       this.fill(init.fill);
@@ -50,9 +50,9 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     }
   }
 
-  declare readonly viewController: GeoViewController<GeoAreaView> & GeoAreaViewObserver | null;
+  override readonly viewController!: GeoViewController<GeoAreaView> & GeoAreaViewObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<GeoAreaViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<GeoAreaViewObserver>;
 
   protected willSetFill(newFill: Color | null, oldFill: Color | null): void {
     const viewController = this.viewController;
@@ -98,7 +98,7 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
       this.owner.didSetFill(newFill, oldFill);
     },
   })
-  declare fill: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
     const viewController = this.viewController;
@@ -144,7 +144,7 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
       this.owner.didSetStroke(newStroke, oldStroke);
     },
   })
-  declare stroke: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
     const viewController = this.viewController;
@@ -190,19 +190,19 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
       this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
     },
   })
-  declare strokeWidth: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewProperty({type: Boolean, state: true})
-  declare clipViewport: ViewProperty<this, boolean>;
+  readonly clipViewport!: ViewProperty<this, boolean>;
 
-  protected onSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath): void {
+  protected override onSetGeoPath(newGeoPath: GeoPath, oldGeoPath: GeoPath): void {
     super.onSetGeoPath(newGeoPath, oldGeoPath);
     if (this.geoCentroid.takesPrecedence(View.Intrinsic)) {
       this.geoCentroid.setState(newGeoPath.centroid(), View.Intrinsic);
     }
   }
 
-  cullGeoFrame(geoFrame: GeoBox = this.geoFrame): void {
+  override cullGeoFrame(geoFrame: GeoBox = this.geoFrame): void {
     let culled: boolean;
     if (geoFrame.intersects(this.geoBounds)) {
       const frame = this.viewFrame;
@@ -220,7 +220,7 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     this.setCulled(culled);
   }
 
-  protected onRender(viewContext: ViewContextType<this>): void {
+  protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -231,7 +231,7 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     }
   }
 
-  protected renderArea(context: CanvasContext, frame: BoxR2): void {
+  protected renderArea(context: CanvasContext, frame: R2Box): void {
     const viewPath = this.viewPath.value;
     if (viewPath !== null && viewPath.isDefined()) {
       context.beginPath();
@@ -252,7 +252,7 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     }
   }
 
-  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -268,7 +268,7 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     return hit;
   }
 
-  protected hitTestArea(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
+  protected hitTestArea(x: number, y: number, context: CanvasContext, frame: R2Box): GraphicsView | null {
     const viewPath = this.viewPath.value;
     if (viewPath !== null && viewPath.isDefined()) {
       context.beginPath();

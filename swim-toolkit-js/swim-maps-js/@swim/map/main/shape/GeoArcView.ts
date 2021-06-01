@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@ import {
   Length,
   AnyAngle,
   Angle,
-  AnyPointR2,
-  PointR2,
-  SegmentR2,
-  BoxR2,
-  CircleR2,
+  AnyR2Point,
+  R2Point,
+  R2Segment,
+  R2Box,
+  R2Circle,
 } from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
@@ -46,7 +46,7 @@ export type AnyGeoArcView = GeoArcView | GeoArcViewInit;
 
 export interface GeoArcViewInit extends GeoViewInit, FillViewInit, StrokeViewInit {
   geoCenter?: AnyGeoPoint;
-  viewCenter?: PointR2;
+  viewCenter?: R2Point;
   innerRadius?: AnyLength;
   outerRadius?: AnyLength;
   startAngle?: AnyAngle;
@@ -57,7 +57,7 @@ export interface GeoArcViewInit extends GeoViewInit, FillViewInit, StrokeViewIni
 }
 
 export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
-  initView(init: GeoArcViewInit): void {
+  override initView(init: GeoArcViewInit): void {
     super.initView(init);
     if (init.geoCenter !== void 0) {
       this.geoCenter(init.geoCenter);
@@ -97,9 +97,9 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
     }
   }
 
-  declare readonly viewController: GeoViewController<GeoArcView> & GeoArcViewObserver | null;
+  override readonly viewController!: GeoViewController<GeoArcView> & GeoArcViewObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<GeoArcViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<GeoArcViewObserver>;
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
     const viewController = this.viewController;
@@ -150,40 +150,40 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
       this.owner.didSetGeoCenter(newGeoCenter, oldGeoCenter);
     },
   })
-  declare geoCenter: ViewAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
+  readonly geoCenter!: ViewAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ViewAnimator({type: PointR2, state: PointR2.undefined()})
-  declare viewCenter: ViewAnimator<this, PointR2 | null, AnyPointR2 | null>;
-
-  @ViewAnimator({type: Length, state: Length.zero()})
-  declare innerRadius: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimator({type: R2Point, state: R2Point.undefined()})
+  readonly viewCenter!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  declare outerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly innerRadius!: ViewAnimator<this, Length, AnyLength>;
+
+  @ViewAnimator({type: Length, state: Length.zero()})
+  readonly outerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Angle, state: Angle.zero()})
-  declare startAngle: ViewAnimator<this, Angle, AnyAngle>;
+  readonly startAngle!: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Angle, state: Angle.zero()})
-  declare sweepAngle: ViewAnimator<this, Angle, AnyAngle>;
+  readonly sweepAngle!: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Angle, state: Angle.zero()})
-  declare padAngle: ViewAnimator<this, Angle, AnyAngle>;
+  readonly padAngle!: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Length, state: null})
-  declare padRadius: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly padRadius!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  declare cornerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly cornerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Color, state: null, inherit: true})
-  declare fill: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Color, state: null, inherit: true})
-  declare stroke: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Length, state: null, inherit: true})
-  declare strokeWidth: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   get value(): Arc | null {
     const viewCenter = this.viewCenter.value;
@@ -207,7 +207,7 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
     }
   }
 
-  protected onProject(viewContext: ViewContextType<this>): void {
+  protected override onProject(viewContext: ViewContextType<this>): void {
     super.onProject(viewContext);
     this.projectArc(viewContext);
   }
@@ -237,15 +237,15 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
     const p0 = this.viewCenter.value;
     const p1 = this.viewCenter.state;
     if (p0 !== null && p1 !== null && (
-        viewFrame.intersectsCircle(new CircleR2(p0.x, p0.y, r)) ||
-        viewFrame.intersectsSegment(new SegmentR2(p0.x, p0.y, p1.x, p1.y)))) {
+        viewFrame.intersectsCircle(new R2Circle(p0.x, p0.y, r)) ||
+        viewFrame.intersectsSegment(new R2Segment(p0.x, p0.y, p1.x, p1.y)))) {
       this.setCulled(false);
     } else {
       this.setCulled(true);
     }
   }
 
-  protected onRender(viewContext: ViewContextType<this>): void {
+  protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -256,7 +256,7 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
     }
   }
 
-  protected renderArc(context: CanvasContext, frame: BoxR2): void {
+  protected renderArc(context: CanvasContext, frame: R2Box): void {
     const arc = this.value;
     if (arc !== null && frame.isDefined()) {
       arc.draw(context, frame);
@@ -278,11 +278,11 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
     }
   }
 
-  protected updateGeoBounds(): void {
+  protected override updateGeoBounds(): void {
     // nop
   }
 
-  get popoverFrame(): BoxR2 {
+  override get popoverFrame(): R2Box {
     const viewCenter = this.viewCenter.value;
     const frame = this.viewFrame;
     if (viewCenter !== null && viewCenter.isDefined() && frame.isDefined()) {
@@ -294,15 +294,15 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
       const a = this.startAngle.getValue().radValue() + this.sweepAngle.getValue().radValue() / 2;
       const x = px + r * Math.cos(a);
       const y = py + r * Math.sin(a);
-      return new BoxR2(x, y, x, y);
+      return new R2Box(x, y, x, y);
     } else {
       return this.pageBounds;
     }
   }
 
-  declare readonly viewBounds: BoxR2; // getter defined below to work around useDefineForClassFields lunacy
+  declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
-  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -318,7 +318,7 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
     return hit;
   }
 
-  protected hitTestArc(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
+  protected hitTestArc(x: number, y: number, context: CanvasContext, frame: R2Box): GraphicsView | null {
     const arc = this.value;
     if (arc !== null) {
       context.beginPath();
@@ -363,13 +363,13 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
   }
 }
 Object.defineProperty(GeoArcView.prototype, "viewBounds", {
-  get(this: GeoArcView): BoxR2 {
+  get(this: GeoArcView): R2Box {
     const viewCenter = this.viewCenter.value;
     const frame = this.viewFrame;
     if (viewCenter !== null && viewCenter.isDefined() && frame.isDefined()) {
       const size = Math.min(frame.width, frame.height);
       const radius = this.outerRadius.getValue().pxValue(size);
-      return new BoxR2(viewCenter.x - radius, viewCenter.y - radius,
+      return new R2Box(viewCenter.x - radius, viewCenter.y - radius,
                        viewCenter.x + radius, viewCenter.y + radius);
     } else {
       return this.viewFrame

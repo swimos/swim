@@ -4,7 +4,7 @@
   "description": "Attribute, action, and user input token views",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swim.ai>",
-  "copyright": "2015-2020 Swim inc.",
+  "copyright": "2015-2021 Swim inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-token.js",

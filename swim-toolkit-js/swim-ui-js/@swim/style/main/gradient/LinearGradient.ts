@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ export class LinearGradient implements Interpolate<LinearGradient>, Equals, Equi
     });
   }
 
-  declare readonly angle: LinearGradientAngle;
+  readonly angle!: LinearGradientAngle;
 
   withAngle(angle: AnyLinearGradientAngle): LinearGradient {
     if (angle instanceof Angle || typeof angle === "number") {
@@ -62,7 +62,7 @@ export class LinearGradient implements Interpolate<LinearGradient>, Equals, Equi
     return new LinearGradient(angle, this.stops);
   }
 
-  declare readonly stops: ReadonlyArray<ColorStop>;
+  readonly stops!: ReadonlyArray<ColorStop>;
 
   withStops(stops: ReadonlyArray<AnyColorStop>): LinearGradient {
     const n = stops.length;
@@ -104,7 +104,7 @@ export class LinearGradient implements Interpolate<LinearGradient>, Equals, Equi
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
   toString(): string {
     let s = this.stringValue;

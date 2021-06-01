@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Equivalent} from "@swim/util";
-import {AnyLength, Length, AnyAngle, Angle, AnyPointR2, PointR2, BoxR2} from "@swim/math";
+import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {ViewContextType, View, ViewAnimator, ViewFastener} from "@swim/view";
@@ -37,7 +37,7 @@ export type AnySliceView = SliceView | SliceViewInit;
 export interface SliceViewInit extends GraphicsViewInit {
   value?: number;
   total?: number;
-  center?: AnyPointR2;
+  center?: AnyR2Point;
   innerRadius?: AnyLength;
   outerRadius?: AnyLength;
   phaseAngle?: AnyAngle;
@@ -59,7 +59,7 @@ export interface SliceViewInit extends GraphicsViewInit {
 }
 
 export class SliceView extends LayerView {
-  initView(init: SliceViewInit): void {
+  override initView(init: SliceViewInit): void {
     super.initView(init);
     if (init.value !== void 0) {
       this.value(init.value);
@@ -126,9 +126,9 @@ export class SliceView extends LayerView {
     }
   }
 
-  declare readonly viewController: GraphicsViewController & SliceViewObserver | null;
+  override readonly viewController!: GraphicsViewController & SliceViewObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<SliceViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<SliceViewObserver>;
 
   protected willSetValue(newValue: number, oldValue: number): void {
     const viewController = this.viewController;
@@ -173,61 +173,61 @@ export class SliceView extends LayerView {
       this.owner.didSetValue(newValue, oldValue);
     },
   })
-  declare value: ViewAnimator<this, number>;
+  readonly value!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Number, state: 1})
-  declare total: ViewAnimator<this, number>;
+  readonly total!: ViewAnimator<this, number>;
 
-  @ViewAnimator({type: PointR2, inherit: true, state: PointR2.origin()})
-  declare center: ViewAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator({type: R2Point, inherit: true, state: R2Point.origin()})
+  readonly center!: ViewAnimator<this, R2Point, AnyR2Point>;
 
   @ViewAnimator({type: Length, inherit: true, state: Length.pct(3)})
-  declare innerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly innerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, inherit: true, state: Length.pct(25)})
-  declare outerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly outerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Angle, state: Angle.zero()})
-  declare phaseAngle: ViewAnimator<this, Angle, AnyAngle>;
+  readonly phaseAngle!: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Angle, inherit: true, state: Angle.deg(2)})
-  declare padAngle: ViewAnimator<this, Angle, AnyAngle>;
+  readonly padAngle!: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Length, inherit: true, state: null})
-  declare padRadius: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly padRadius!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Length, inherit: true, state: Length.zero()})
-  declare cornerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly cornerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, inherit: true, state: Length.pct(50)})
-  declare labelRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly labelRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Color, inherit: true, state: null, look: Look.accentColor})
-  declare sliceColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly sliceColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Number, inherit: true, state: 0.5})
-  declare tickAlign: ViewAnimator<this, number>;
+  readonly tickAlign!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Length, inherit: true, state: Length.pct(30)})
-  declare tickRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly tickRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, inherit: true, state: Length.pct(50)})
-  declare tickLength: ViewAnimator<this, Length, AnyLength>;
+  readonly tickLength!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, inherit: true, state: Length.px(1)})
-  declare tickWidth: ViewAnimator<this, Length, AnyLength>;
+  readonly tickWidth!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, inherit: true, state: Length.px(2)})
-  declare tickPadding: ViewAnimator<this, Length, AnyLength>;
+  readonly tickPadding!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Color, inherit: true, state: null, look: Look.neutralColor})
-  declare tickColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly tickColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Font, inherit: true, state: null})
-  declare font: ViewAnimator<this, Font | null, AnyFont | null>;
+  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
 
   @ViewAnimator({type: Color, inherit: true, state: null, look: Look.mutedColor})
-  declare textColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected initLabel(labelView: GraphicsView): void {
     // hook
@@ -302,7 +302,7 @@ export class SliceView extends LayerView {
       this.owner.didSetLabel(newLabelView, oldLabelView);
     },
   })
-  declare label: ViewFastener<this, GraphicsView, AnyTextRunView>;
+  readonly label!: ViewFastener<this, GraphicsView, AnyTextRunView>;
 
   protected initLegend(legendView: GraphicsView | null): void {
     // hook
@@ -377,14 +377,14 @@ export class SliceView extends LayerView {
       this.owner.didSetLegend(newLegendView, oldLegendView);
     },
   })
-  declare legend: ViewFastener<this, GraphicsView, AnyTextRunView>;
+  readonly legend!: ViewFastener<this, GraphicsView, AnyTextRunView>;
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.center.onAnimate(viewContext.updateTime);
   }
 
-  protected onRender(viewContext: ViewContextType<this>): void {
+  protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -395,7 +395,7 @@ export class SliceView extends LayerView {
     }
   }
 
-  protected renderSlice(context: CanvasContext, frame: BoxR2): void {
+  protected renderSlice(context: CanvasContext, frame: R2Box): void {
     const width = frame.width;
     const height = frame.height;
     const size = Math.min(width, height);
@@ -434,7 +434,7 @@ export class SliceView extends LayerView {
       if (TypesetView.is(labelView)) {
         labelView.textAlign.setState("center", View.Intrinsic);
         labelView.textBaseline.setState("middle", View.Intrinsic);
-        labelView.textOrigin.setState(new PointR2(center.x + rx, center.y + ry), View.Intrinsic);
+        labelView.textOrigin.setState(new R2Point(center.x + rx, center.y + ry), View.Intrinsic);
       }
     }
 
@@ -496,12 +496,12 @@ export class SliceView extends LayerView {
         }
         legendView.textAlign.setState(textAlign, View.Intrinsic);
         legendView.textBaseline.setState("alphabetic", View.Intrinsic);
-        legendView.textOrigin.setState(new PointR2(cx + r2x + dx, cy + r2y - tickPadding), View.Intrinsic);
+        legendView.textOrigin.setState(new R2Point(cx + r2x + dx, cy + r2y - tickPadding), View.Intrinsic);
       }
     }
   }
 
-  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -517,7 +517,7 @@ export class SliceView extends LayerView {
     return hit;
   }
 
-  protected hitTestSlice(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
+  protected hitTestSlice(x: number, y: number, context: CanvasContext, frame: R2Box): GraphicsView | null {
     const size = Math.min(frame.width, frame.height);
     const value = this.value.getValue();
     const total = this.total.getValue();
@@ -543,7 +543,7 @@ export class SliceView extends LayerView {
     return null;
   }
 
-  static create(): SliceView {
+  static override create(): SliceView {
     return new SliceView();
   }
 

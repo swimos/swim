@@ -33,6 +33,7 @@ const main = {
       "@swim/dom": "swim",
       "@swim/graphics": "swim",
       "@swim/component": "swim",
+      "leaflet": "L",
       "mapbox-gl": "mapboxgl",
     },
     sourcemap: true,
@@ -62,6 +63,7 @@ const main = {
     "@swim/dom",
     "@swim/graphics",
     "@swim/component",
+    "leaflet",
     "mapbox-gl",
   ],
   plugins: [

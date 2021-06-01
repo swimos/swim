@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,9 +30,9 @@ export class AbstractMomentumGesture<V extends View> extends AbstractPositionGes
     });
   }
 
-  declare readonly delegate: MomentumGestureDelegate | null;
+  override readonly delegate!: MomentumGestureDelegate | null;
 
-  setDelegate(delegate: MomentumGestureDelegate | null): void {
+  override setDelegate(delegate: MomentumGestureDelegate | null): void {
     Object.defineProperty(this, "delegate", {
       value: delegate,
       enumerable: true,
@@ -40,9 +40,9 @@ export class AbstractMomentumGesture<V extends View> extends AbstractPositionGes
     });
   }
 
-  declare readonly inputs: {readonly [inputId: string]: MomentumGestureInput | undefined};
+  override readonly inputs!: {readonly [inputId: string]: MomentumGestureInput | undefined};
 
-  getInput(inputId: string | number): MomentumGestureInput | null {
+  override getInput(inputId: string | number): MomentumGestureInput | null {
     if (typeof inputId === "number") {
       inputId = "" + inputId;
     }
@@ -50,13 +50,13 @@ export class AbstractMomentumGesture<V extends View> extends AbstractPositionGes
     return input !== void 0 ? input : null;
   }
 
-  protected createInput(inputId: string, inputType: GestureInputType, isPrimary: boolean,
-                        x: number, y: number, t: number): MomentumGestureInput {
+  protected override createInput(inputId: string, inputType: GestureInputType, isPrimary: boolean,
+                                 x: number, y: number, t: number): MomentumGestureInput {
     return new MomentumGestureInput(inputId, inputType, isPrimary, x, y, t);
   }
 
-  protected getOrCreateInput(inputId: string | number, inputType: GestureInputType, isPrimary: boolean,
-                             x: number, y: number, t: number): MomentumGestureInput {
+  protected override getOrCreateInput(inputId: string | number, inputType: GestureInputType, isPrimary: boolean,
+                                      x: number, y: number, t: number): MomentumGestureInput {
     if (typeof inputId === "number") {
       inputId = "" + inputId;
     }
@@ -74,7 +74,7 @@ export class AbstractMomentumGesture<V extends View> extends AbstractPositionGes
     return input;
   }
 
-  protected clearInput(input: MomentumGestureInput): void {
+  protected override clearInput(input: MomentumGestureInput): void {
     if (!input.hovering && !input.pressing && !input.coasting) {
       const inputs = this.inputs as {[inputId: string]: MomentumGestureInput | undefined};
       delete inputs[input.inputId];
@@ -113,7 +113,7 @@ export class AbstractMomentumGesture<V extends View> extends AbstractPositionGes
     }
   }
 
-  viewWillUnmount(view: V): void {
+  override viewWillUnmount(view: V): void {
     super.viewWillUnmount(view);
     Object.defineProperty(this, "coastCount", {
       value: 0,
@@ -191,55 +191,55 @@ export class AbstractMomentumGesture<V extends View> extends AbstractPositionGes
     }
   }
 
-  protected onStartPressing(): void {
+  protected override onStartPressing(): void {
     super.onStartPressing();
     if (this.coastCount === 0) {
       this.startInteracting();
     }
   }
 
-  protected onStopPressing(): void {
+  protected override onStopPressing(): void {
     super.onStopPressing();
     if (this.coastCount === 0) {
       this.stopInteracting();
     }
   }
 
-  beginPress(input: MomentumGestureInput, event: Event | null): void {
+  override beginPress(input: MomentumGestureInput, event: Event | null): void {
     super.beginPress(input, event);
     this.interrupt(event);
   }
 
-  protected onBeginPress(input: MomentumGestureInput, event: Event | null): void {
+  protected override onBeginPress(input: MomentumGestureInput, event: Event | null): void {
     super.onBeginPress(input, event);
     input.updatePosition(this.hysteresis);
     input.deriveVelocity(this.velocityMax);
   }
 
-  protected onMovePress(input: MomentumGestureInput, event: Event | null): void {
+  protected override onMovePress(input: MomentumGestureInput, event: Event | null): void {
     super.onMovePress(input, event);
     input.updatePosition(this.hysteresis);
     input.deriveVelocity(this.velocityMax);
   }
 
-  protected willEndPress(input: MomentumGestureInput, event: Event | null): void {
+  protected override willEndPress(input: MomentumGestureInput, event: Event | null): void {
     super.willEndPress(input, event);
     this.beginCoast(input, event);
   }
 
-  protected onEndPress(input: MomentumGestureInput, event: Event | null): void {
+  protected override onEndPress(input: MomentumGestureInput, event: Event | null): void {
     super.onEndPress(input, event);
     input.updatePosition(this.hysteresis);
     input.deriveVelocity(this.velocityMax);
   }
 
-  protected onCancelPress(input: MomentumGestureInput, event: Event | null): void {
+  protected override onCancelPress(input: MomentumGestureInput, event: Event | null): void {
     super.onCancelPress(input, event);
     input.updatePosition(this.hysteresis);
     input.deriveVelocity(this.velocityMax);
   }
 
-  declare readonly coastCount: number;
+  readonly coastCount!: number;
 
   isCoasting(): boolean {
     return this.coastCount !== 0;
@@ -460,26 +460,26 @@ export class PointerMomentumGesture<V extends View> extends AbstractMomentumGest
     this.initView(view);
   }
 
-  protected attachHoverEvents(view: V): void {
+  protected override attachHoverEvents(view: V): void {
     view.on("pointerenter", this.onPointerEnter as EventListener);
     view.on("pointerleave", this.onPointerLeave as EventListener);
     view.on("pointerdown", this.onPointerDown as EventListener);
   }
 
-  protected detachHoverEvents(view: V): void {
+  protected override detachHoverEvents(view: V): void {
     view.off("pointerenter", this.onPointerEnter as EventListener);
     view.off("pointerleave", this.onPointerLeave as EventListener);
     view.off("pointerdown", this.onPointerDown as EventListener);
   }
 
-  protected attachPressEvents(view: V): void {
+  protected override attachPressEvents(view: V): void {
     document.body.addEventListener("pointermove", this.onPointerMove);
     document.body.addEventListener("pointerup", this.onPointerUp);
     document.body.addEventListener("pointercancel", this.onPointerCancel);
     document.body.addEventListener("pointerleave", this.onPointerLeaveDocument);
   }
 
-  protected detachPressEvents(view: V): void {
+  protected override detachPressEvents(view: V): void {
     document.body.removeEventListener("pointermove", this.onPointerMove);
     document.body.removeEventListener("pointerup", this.onPointerUp);
     document.body.removeEventListener("pointercancel", this.onPointerCancel);
@@ -600,21 +600,21 @@ export class TouchMomentumGesture<V extends View> extends AbstractMomentumGestur
     this.initView(view);
   }
 
-  protected attachHoverEvents(view: V): void {
+  protected override attachHoverEvents(view: V): void {
     view.on("touchstart", this.onTouchStart as EventListener);
   }
 
-  protected detachHoverEvents(view: V): void {
+  protected override detachHoverEvents(view: V): void {
     view.off("touchstart", this.onTouchStart as EventListener);
   }
 
-  protected attachPressEvents(view: V): void {
+  protected override attachPressEvents(view: V): void {
     view.on("touchmove", this.onTouchMove as EventListener);
     view.on("touchend", this.onTouchEnd as EventListener);
     view.on("touchcancel", this.onTouchCancel as EventListener);
   }
 
-  protected detachPressEvents(view: V): void {
+  protected override detachPressEvents(view: V): void {
     view.off("touchmove", this.onTouchMove as EventListener);
     view.off("touchend", this.onTouchEnd as EventListener);
     view.off("touchcancel", this.onTouchCancel as EventListener);
@@ -702,25 +702,25 @@ export class MouseMomentumGesture<V extends View> extends AbstractMomentumGestur
     this.initView(view);
   }
 
-  protected attachHoverEvents(view: V): void {
+  protected override attachHoverEvents(view: V): void {
     view.on("mouseenter", this.onMouseEnter as EventListener);
     view.on("mouseleave", this.onMouseLeave as EventListener);
     view.on("mousedown", this.onMouseDown as EventListener);
   }
 
-  protected detachHoverEvents(view: V): void {
+  protected override detachHoverEvents(view: V): void {
     view.off("mouseenter", this.onMouseEnter as EventListener);
     view.off("mouseleave", this.onMouseLeave as EventListener);
     view.off("mousedown", this.onMouseDown as EventListener);
   }
 
-  protected attachPressEvents(view: V): void {
+  protected override attachPressEvents(view: V): void {
     document.body.addEventListener("mousemove", this.onMouseMove);
     document.body.addEventListener("mouseup", this.onMouseUp);
     document.body.addEventListener("mouseleave", this.onMouseLeaveDocument);
   }
 
-  protected detachPressEvents(view: V): void {
+  protected override detachPressEvents(view: V): void {
     document.body.removeEventListener("mousemove", this.onMouseMove);
     document.body.removeEventListener("mouseup", this.onMouseUp);
     document.body.removeEventListener("mouseleave", this.onMouseLeaveDocument);

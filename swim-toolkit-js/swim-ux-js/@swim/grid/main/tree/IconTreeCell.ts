@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ export class IconTreeCell extends TreeCell implements IconView {
     }
   }
 
-  initView(init: IconTreeCellInit): void {
+  override initView(init: IconTreeCellInit): void {
     super.initView(init);
     IconView.initView(this, init);
   }
@@ -49,29 +49,29 @@ export class IconTreeCell extends TreeCell implements IconView {
   }
 
   @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  declare xAlign: ViewAnimator<this, number>;
+  readonly xAlign!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  declare yAlign: ViewAnimator<this, number>;
+  readonly yAlign!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
-  declare iconWidth: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly iconWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
-  declare iconHeight: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly iconHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Color, state: null, updateFlags: View.NeedsLayout})
-  declare iconColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly iconColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({extends: IconViewAnimator, type: Object, state: null, updateFlags: View.NeedsLayout})
-  declare graphics: ViewAnimator<this, Graphics | null>;
+  readonly graphics!: ViewAnimator<this, Graphics | null>;
 
   get svgView(): SvgIconView | null {
     const svgView = this.getChildView("svg");
     return svgView instanceof SvgIconView ? svgView : null;
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     if (childView.key === "svg" && childView instanceof SvgIconView) {
       this.onInsertSvg(childView);
@@ -88,7 +88,7 @@ export class IconTreeCell extends TreeCell implements IconView {
     pathView.setStyle("position", "absolute");
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     if (!this.graphics.isInherited()) {
       const oldGraphics = this.graphics.value;
@@ -99,12 +99,12 @@ export class IconTreeCell extends TreeCell implements IconView {
     }
   }
 
-  protected onResize(viewContext: ViewContextType<this>): void {
+  protected override onResize(viewContext: ViewContextType<this>): void {
     super.onResize(viewContext);
     this.requireUpdate(View.NeedsLayout);
   }
 
-  protected onAnimate(viewContext: ViewContextType<this>): void {
+  protected override onAnimate(viewContext: ViewContextType<this>): void {
     super.onAnimate(viewContext);
     const iconColor = this.iconColor.takeUpdatedValue();
     if (iconColor !== void 0 && iconColor !== null) {
@@ -116,14 +116,14 @@ export class IconTreeCell extends TreeCell implements IconView {
     }
   }
 
-  needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((this.viewFlags & View.NeedsLayout) === 0) {
       displayFlags &= ~View.NeedsLayout;
     }
     return displayFlags;
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.layoutIcon();
   }

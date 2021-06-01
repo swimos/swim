@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/mapping";
-import {AnyLength, Length, BoxR2} from "@swim/math";
+import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
@@ -35,30 +35,30 @@ export class SvgIconView extends SvgView implements IconView {
     super(node);
   }
 
-  initView(init: SvgIconViewInit): void {
+  override initView(init: SvgIconViewInit): void {
     super.initView(init);
     IconView.initView(this, init);
   }
 
   @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  declare xAlign: ViewAnimator<this, number>;
+  readonly xAlign!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
-  declare yAlign: ViewAnimator<this, number>;
+  readonly yAlign!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
-  declare iconWidth: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly iconWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout})
-  declare iconHeight: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly iconHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Color, state: null, updateFlags: View.NeedsLayout})
-  declare iconColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly iconColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({extends: IconViewAnimator, type: Object, state: null, updateFlags: View.NeedsLayout})
-  declare graphics: ViewAnimator<this, Graphics | null>;
+  readonly graphics!: ViewAnimator<this, Graphics | null>;
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     if (!this.graphics.isInherited()) {
       const oldGraphics = this.graphics.value;
@@ -69,7 +69,7 @@ export class SvgIconView extends SvgView implements IconView {
     }
   }
 
-  protected onAnimate(viewContext: ViewContextType<this>): void {
+  protected override onAnimate(viewContext: ViewContextType<this>): void {
     super.onAnimate(viewContext);
     const iconColor = this.iconColor.takeUpdatedValue();
     if (iconColor !== void 0 && iconColor !== null) {
@@ -81,7 +81,7 @@ export class SvgIconView extends SvgView implements IconView {
     }
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.renderIcon();
   }
@@ -102,7 +102,7 @@ export class SvgIconView extends SvgView implements IconView {
     context.finalizeSvg();
   }
 
-  get iconBounds(): BoxR2 {
+  get iconBounds(): R2Box {
     let viewportElement = this.node.viewportElement;
     if (viewportElement === null) {
       viewportElement = this.node;
@@ -118,11 +118,11 @@ export class SvgIconView extends SvgView implements IconView {
       iconHeight = iconHeight instanceof Length ? iconHeight.pxValue(viewSize) : viewSize;
       const x = viewBox.x + (viewWidth - iconWidth) * this.xAlign.getValue();
       const y = viewBox.y + (viewHeight - iconHeight) * this.yAlign.getValue();
-      return new BoxR2(x, y, x + iconWidth, y + iconHeight);
+      return new R2Box(x, y, x + iconWidth, y + iconHeight);
     } else {
-      return BoxR2.undefined();
+      return R2Box.undefined();
     }
   }
 
-  static readonly mountFlags: ViewFlags = SvgView.mountFlags | View.NeedsAnimate;
+  static override readonly mountFlags: ViewFlags = SvgView.mountFlags | View.NeedsAnimate;
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,28 +24,28 @@ import type {MapViewObserver} from "./MapViewObserver";
 import type {MapViewController} from "./MapViewController";
 
 export abstract class MapView extends GeoLayerView {
-  declare readonly viewController: MapViewController | null;
+  override readonly viewController!: MapViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<MapViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<MapViewObserver>;
 
-  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsResize) !== 0) {
       processFlags |= View.NeedsProject;
     }
     return processFlags;
   }
 
-  extendViewContext(viewContext: GraphicsViewContext): ViewContextType<this> {
+  override extendViewContext(viewContext: GraphicsViewContext): ViewContextType<this> {
     const mapViewContext = Object.create(viewContext);
     mapViewContext.geoViewport = this.geoViewport;
     return mapViewContext;
   }
 
-  get geoFrame(): GeoBox {
+  override get geoFrame(): GeoBox {
     return this.geoViewport.geoFrame;
   }
 
-  abstract get geoViewport(): GeoViewport;
+  abstract override get geoViewport(): GeoViewport;
 
   abstract moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void;
 
@@ -112,7 +112,7 @@ export abstract class MapView extends GeoLayerView {
       this.owner.didSetCanvas(newCanvasView, oldCanvasView);
     },
   })
-  declare canvas: ViewFastener<this, CanvasView>;
+  readonly canvas!: ViewFastener<this, CanvasView>;
 
   protected initContainer(containerView: HtmlView): void {
     // hook
@@ -177,7 +177,7 @@ export abstract class MapView extends GeoLayerView {
       this.owner.didSetContainer(newContainerView, oldContainerView);
     },
   })
-  declare container: ViewFastener<this, HtmlView>;
+  readonly container!: ViewFastener<this, HtmlView>;
 
-  static readonly powerFlags: ViewFlags = GeoLayerView.powerFlags | View.NeedsProject;
+  static override readonly powerFlags: ViewFlags = GeoLayerView.powerFlags | View.NeedsProject;
 }

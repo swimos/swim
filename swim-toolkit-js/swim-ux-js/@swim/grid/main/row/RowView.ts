@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,12 +35,12 @@ export class RowView extends HtmlView {
     this.overflowY.setState("hidden", View.Intrinsic);
   }
 
-  declare readonly viewController: HtmlViewController & RowViewObserver | null;
+  override readonly viewController!: HtmlViewController & RowViewObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<RowViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<RowViewObserver>;
 
   @ViewProperty({type: TableLayout, state: null, inherit: true})
-  declare layout: ViewProperty<this, TableLayout | null, AnyTableLayout | null>;
+  readonly layout!: ViewProperty<this, TableLayout | null, AnyTableLayout | null>;
 
   insertCell(cellView: CellView, targetView: View | null = null): void {
     const cellFasteners = this.cellFasteners as ViewFastener<this, CellView>[];
@@ -154,7 +154,7 @@ export class RowView extends HtmlView {
   }
 
   /** @hidden */
-  declare readonly cellFasteners: ReadonlyArray<ViewFastener<this, CellView>>;
+  readonly cellFasteners!: ReadonlyArray<ViewFastener<this, CellView>>;
 
   /** @hidden */
   protected mountCellFasteners(): void {
@@ -178,7 +178,7 @@ export class RowView extends HtmlView {
     return view instanceof CellView ? view : null;
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     const cellView = this.detectCell(childView);
     if (cellView !== null) {
@@ -186,7 +186,7 @@ export class RowView extends HtmlView {
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     super.onRemoveChildView(childView);
     const cellView = this.detectCell(childView);
     if (cellView !== null) {
@@ -194,9 +194,9 @@ export class RowView extends HtmlView {
     }
   }
 
-  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     if ((displayFlags & View.NeedsLayout) !== 0) {
       this.layoutChildViews(displayFlags, viewContext, displayChildView);
     } else {
@@ -239,13 +239,13 @@ export class RowView extends HtmlView {
   }
 
   /** @hidden */
-  protected mountViewFasteners(): void {
+  protected override mountViewFasteners(): void {
     super.mountViewFasteners();
     this.mountCellFasteners();
   }
 
   /** @hidden */
-  protected unmountViewFasteners(): void {
+  protected override unmountViewFasteners(): void {
     this.unmountCellFasteners();
     super.unmountViewFasteners();
   }

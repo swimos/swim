@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 import {Arrays} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import type {ConstraintVariable, Constraint} from "@swim/constraint";
-import {BoxR2, Transform} from "@swim/math";
+import {R2Box, Transform} from "@swim/math";
 import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
 import {
   ViewContextType,
@@ -147,7 +147,7 @@ export abstract class GraphicsView extends View {
     });
   }
 
-  initView(init: GraphicsViewInit): void {
+  override initView(init: GraphicsViewInit): void {
     super.initView(init);
     if (init.mood !== void 0) {
       this.mood(init.mood);
@@ -166,11 +166,11 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  declare readonly viewController: GraphicsViewController | null;
+  override readonly viewController!: GraphicsViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<GraphicsViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<GraphicsViewObserver>;
 
-  protected onAddViewObserver(viewObserver: ViewObserverType<this>): void {
+  protected override onAddViewObserver(viewObserver: ViewObserverType<this>): void {
     super.onAddViewObserver(viewObserver);
     if (viewObserver.viewWillRender !== void 0) {
       this.viewObserverCache.viewWillRenderObservers = Arrays.inserted(viewObserver as ViewWillRender, this.viewObserverCache.viewWillRenderObservers);
@@ -192,7 +192,7 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  protected onRemoveViewObserver(viewObserver: ViewObserverType<this>): void {
+  protected override onRemoveViewObserver(viewObserver: ViewObserverType<this>): void {
     super.onRemoveViewObserver(viewObserver);
     if (viewObserver.viewWillRender !== void 0) {
       this.viewObserverCache.viewWillRenderObservers = Arrays.removed(viewObserver as ViewWillRender, this.viewObserverCache.viewWillRenderObservers);
@@ -254,10 +254,10 @@ export abstract class GraphicsView extends View {
     return result;
   }
 
-  declare readonly key: string | undefined;
+  override readonly key!: string | undefined;
 
   /** @hidden */
-  setKey(key: string | undefined): void {
+  override setKey(key: string | undefined): void {
     Object.defineProperty(this, "key", {
       value: key,
       enumerable: true,
@@ -265,10 +265,10 @@ export abstract class GraphicsView extends View {
     });
   }
 
-  declare readonly parentView: View | null;
+  override readonly parentView!: View | null;
 
   /** @hidden */
-  setParentView(newParentView: View | null, oldParentView: View | null): void {
+  override setParentView(newParentView: View | null, oldParentView: View | null): void {
     this.willSetParentView(newParentView, oldParentView);
     if (oldParentView !== null) {
       this.detachParentView(oldParentView);
@@ -285,7 +285,7 @@ export abstract class GraphicsView extends View {
     this.didSetParentView(newParentView, oldParentView);
   }
 
-  remove(): void {
+  override remove(): void {
     const parentView = this.parentView;
     if (parentView !== null) {
       if ((this.viewFlags & View.TraversingFlag) === 0) {
@@ -296,24 +296,24 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  abstract readonly childViewCount: number;
+  abstract override readonly childViewCount: number;
 
-  abstract readonly childViews: ReadonlyArray<View>;
+  abstract override readonly childViews: ReadonlyArray<View>;
 
-  abstract firstChildView(): View | null;
+  abstract override firstChildView(): View | null;
 
-  abstract lastChildView(): View | null;
+  abstract override lastChildView(): View | null;
 
-  abstract nextChildView(targetView: View): View | null;
+  abstract override nextChildView(targetView: View): View | null;
 
-  abstract previousChildView(targetView: View): View | null;
+  abstract override previousChildView(targetView: View): View | null;
 
-  abstract forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
-  abstract forEachChildView<T, S>(callback: (this: S, childView: View) => T | void, thisArg: S): T | undefined;
+  abstract override forEachChildView<T>(callback: (childView: View) => T | void): T | undefined;
+  abstract override forEachChildView<T, S>(callback: (this: S, childView: View) => T | void, thisArg: S): T | undefined;
 
-  abstract getChildView(key: string): View | null;
+  abstract override getChildView(key: string): View | null;
 
-  abstract setChildView(key: string, newChildView: View | null): View | null;
+  abstract override setChildView(key: string, newChildView: View | null): View | null;
 
   append<V extends View>(childView: V, key?: string): V;
   append<V extends GraphicsView>(viewConstructor: GraphicsViewConstructor<V>, key?: string): V
@@ -326,7 +326,7 @@ export abstract class GraphicsView extends View {
     return child;
   }
 
-  abstract appendChildView(childView: View, key?: string): void;
+  abstract override appendChildView(childView: View, key?: string): void;
 
   prepend<V extends View>(childView: V, key?: string): V;
   prepend<V extends GraphicsView>(viewConstructor: GraphicsViewConstructor<V>, key?: string): V
@@ -339,7 +339,7 @@ export abstract class GraphicsView extends View {
     return child;
   }
 
-  abstract prependChildView(childView: View, key?: string): void;
+  abstract override prependChildView(childView: View, key?: string): void;
 
   insert<V extends View>(childView: V, target: View | null, key?: string): V;
   insert<V extends GraphicsView>(viewConstructor: GraphicsViewConstructor<V>, target: View | null, key?: string): V
@@ -352,14 +352,14 @@ export abstract class GraphicsView extends View {
     return child;
   }
 
-  abstract insertChildView(childView: View, targetView: View | null, key?: string): void;
+  abstract override insertChildView(childView: View, targetView: View | null, key?: string): void;
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     this.insertViewFastener(childView, targetView);
   }
 
-  cascadeInsert(updateFlags?: ViewFlags, viewContext?: ViewContext): void {
+  override cascadeInsert(updateFlags?: ViewFlags, viewContext?: ViewContext): void {
     if ((this.viewFlags & (View.MountedFlag | View.PoweredFlag)) === (View.MountedFlag | View.PoweredFlag)) {
       if (updateFlags === void 0) {
         updateFlags = 0;
@@ -374,17 +374,17 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  abstract removeChildView(key: string): View | null;
-  abstract removeChildView(childView: View): void;
+  abstract override removeChildView(key: string): View | null;
+  abstract override removeChildView(childView: View): void;
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     super.onRemoveChildView(childView);
     this.removeViewFastener(childView);
   }
 
-  abstract removeAll(): void;
+  abstract override removeAll(): void;
 
-  cascadeMount(): void {
+  override cascadeMount(): void {
     if ((this.viewFlags & View.MountedFlag) === 0) {
       this.setViewFlags(this.viewFlags | (View.MountedFlag | View.TraversingFlag));
       try {
@@ -400,7 +400,7 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  protected onMount(): void {
+  protected override onMount(): void {
     super.onMount();
     this.mountViewServices();
     this.mountViewProperties();
@@ -409,7 +409,7 @@ export abstract class GraphicsView extends View {
     this.mountTheme();
   }
 
-  protected didMount(): void {
+  protected override didMount(): void {
     this.activateLayout();
     super.didMount();
   }
@@ -427,7 +427,7 @@ export abstract class GraphicsView extends View {
     this.forEachChildView(doMountChildView, this);
   }
 
-  cascadeUnmount(): void {
+  override cascadeUnmount(): void {
     if ((this.viewFlags & View.MountedFlag) !== 0) {
       this.setViewFlags(this.viewFlags & ~View.MountedFlag | View.TraversingFlag);
       try {
@@ -443,12 +443,12 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  protected willUnmount(): void {
+  protected override willUnmount(): void {
     super.willUnmount();
     this.deactivateLayout();
   }
 
-  protected onUnmount(): void {
+  protected override onUnmount(): void {
     this.unmountViewFasteners();
     this.unmountViewAnimators();
     this.unmountViewProperties();
@@ -469,7 +469,7 @@ export abstract class GraphicsView extends View {
     this.forEachChildView(doUnmountChildView, this);
   }
 
-  cascadePower(): void {
+  override cascadePower(): void {
     if ((this.viewFlags & View.PoweredFlag) === 0) {
       this.setViewFlags(this.viewFlags | (View.PoweredFlag | View.TraversingFlag));
       try {
@@ -498,7 +498,7 @@ export abstract class GraphicsView extends View {
     this.forEachChildView(doPowerChildView, this);
   }
 
-  cascadeUnpower(): void {
+  override cascadeUnpower(): void {
     if ((this.viewFlags & View.PoweredFlag) !== 0) {
       this.setViewFlags(this.viewFlags & ~View.PoweredFlag | View.TraversingFlag);
       try {
@@ -527,7 +527,7 @@ export abstract class GraphicsView extends View {
     this.forEachChildView(doUnpowerChildView, this);
   }
 
-  setCulled(culled: boolean): void {
+  override setCulled(culled: boolean): void {
     const viewFlags = this.viewFlags;
     if (culled && (viewFlags & View.CulledFlag) === 0) {
       this.setViewFlags(viewFlags | View.CulledFlag);
@@ -542,7 +542,7 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  cascadeCull(): void {
+  override cascadeCull(): void {
     if ((this.viewFlags & View.CullFlag) === 0) {
       this.setViewFlags(this.viewFlags | View.CullFlag);
       if ((this.viewFlags & View.CulledFlag) === 0) {
@@ -577,7 +577,7 @@ export abstract class GraphicsView extends View {
     this.forEachChildView(doCullChildView, this);
   }
 
-  cascadeUncull(): void {
+  override cascadeUncull(): void {
     if ((this.viewFlags & View.CullFlag) !== 0) {
       this.setViewFlags(this.viewFlags & ~View.CullFlag);
       if ((this.viewFlags & View.CulledFlag) === 0) {
@@ -612,7 +612,7 @@ export abstract class GraphicsView extends View {
     this.forEachChildView(doUncullChildView, this);
   }
 
-  protected onUncull(): void {
+  protected override onUncull(): void {
     super.onUncull();
     if (this.mood.isInherited()) {
       this.mood.change();
@@ -622,20 +622,20 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  cullViewFrame(viewFrame: BoxR2 = this.viewFrame): void {
+  cullViewFrame(viewFrame: R2Box = this.viewFrame): void {
     this.setCulled(!viewFrame.intersects(this.viewBounds));
   }
 
   declare readonly renderer: GraphicsRenderer | null; // getter defined below to work around useDefineForClassFields lunacy
 
-  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((this.viewFlags & View.NeedsAnimate) === 0) {
       processFlags &= ~View.NeedsAnimate;
     }
     return processFlags;
   }
 
-  cascadeProcess(processFlags: ViewFlags, viewContext: ViewContext): void {
+  override cascadeProcess(processFlags: ViewFlags, viewContext: ViewContext): void {
     const extendedViewContext = this.extendViewContext(viewContext);
     processFlags &= ~View.NeedsProcess;
     processFlags |= this.viewFlags & View.UpdateMask;
@@ -707,12 +707,12 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  protected willResize(viewContext: ViewContextType<this>): void {
+  protected override willResize(viewContext: ViewContextType<this>): void {
     super.willResize(viewContext);
     this.evaluateConstraintVariables();
   }
 
-  protected onChange(viewContext: ViewContextType<this>): void {
+  protected override onChange(viewContext: ViewContextType<this>): void {
     super.onChange(viewContext);
     this.changeViewProperties();
     this.updateTheme();
@@ -727,7 +727,7 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  cascadeDisplay(displayFlags: ViewFlags, viewContext: ViewContext): void {
+  override cascadeDisplay(displayFlags: ViewFlags, viewContext: ViewContext): void {
     const extendedViewContext = this.extendViewContext(viewContext);
     displayFlags &= ~View.NeedsDisplay;
     displayFlags |= this.viewFlags & View.UpdateMask;
@@ -904,12 +904,12 @@ export abstract class GraphicsView extends View {
   }
 
   @ViewProperty({type: MoodMatrix, state: null})
-  declare moodModifier: ViewProperty<this, MoodMatrix | null>;
+  readonly moodModifier!: ViewProperty<this, MoodMatrix | null>;
 
   @ViewProperty({type: MoodMatrix, state: null})
-  declare themeModifier: ViewProperty<this, MoodMatrix | null>;
+  readonly themeModifier!: ViewProperty<this, MoodMatrix | null>;
 
-  getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
+  override getLook<T>(look: Look<T, unknown>, mood?: MoodVector<Feel> | null): T | undefined {
     const theme = this.theme.state;
     let value: T | undefined;
     if (theme !== null) {
@@ -923,9 +923,9 @@ export abstract class GraphicsView extends View {
     return value;
   }
 
-  getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
-  getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
-  getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
+  override getLookOr<T, E>(look: Look<T, unknown>, elseValue: E): T | E;
+  override getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null, elseValue: E): T | E;
+  override getLookOr<T, E>(look: Look<T, unknown>, mood: MoodVector<Feel> | null | E, elseValue?: E): T | E {
     if (arguments.length === 2) {
       elseValue = mood as E;
       mood = null;
@@ -947,7 +947,7 @@ export abstract class GraphicsView extends View {
     return value;
   }
 
-  modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
+  override modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
     if (this.moodModifier.takesPrecedence(View.Intrinsic)) {
       const oldMoodModifier = this.moodModifier.getStateOr(MoodMatrix.empty());
       const newMoodModifier = oldMoodModifier.updatedCol(feel, updates, true);
@@ -972,7 +972,7 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  modifyTheme(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
+  override modifyTheme(feel: Feel, updates: MoodVectorUpdates<Feel>, timing?: AnyTiming | boolean): void {
     if (this.themeModifier.takesPrecedence(View.Intrinsic)) {
       const oldThemeModifier = this.themeModifier.getStateOr(MoodMatrix.empty());
       const newThemeModifier = oldThemeModifier.updatedCol(feel, updates, true);
@@ -1051,7 +1051,7 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     this.themeViewAnimators(theme, mood, timing);
   }
@@ -1199,14 +1199,14 @@ export abstract class GraphicsView extends View {
   }
 
   /** @hidden */
-  declare readonly viewServices: {[serviceName: string]: ViewService<View, unknown> | undefined} | null;
+  readonly viewServices!: {[serviceName: string]: ViewService<View, unknown> | undefined} | null;
 
-  hasViewService(serviceName: string): boolean {
+  override hasViewService(serviceName: string): boolean {
     const viewServices = this.viewServices;
     return viewServices !== null && viewServices[serviceName] !== void 0;
   }
 
-  getViewService(serviceName: string): ViewService<this, unknown> | null {
+  override getViewService(serviceName: string): ViewService<this, unknown> | null {
     const viewServices = this.viewServices;
     if (viewServices !== null) {
       const viewService = viewServices[serviceName];
@@ -1217,7 +1217,7 @@ export abstract class GraphicsView extends View {
     return null;
   }
 
-  setViewService(serviceName: string, newViewService: ViewService<this, unknown> | null): void {
+  override setViewService(serviceName: string, newViewService: ViewService<this, unknown> | null): void {
     let viewServices = this.viewServices;
     if (viewServices === null) {
       viewServices = {};
@@ -1260,14 +1260,14 @@ export abstract class GraphicsView extends View {
   }
 
   /** @hidden */
-  declare readonly viewProperties: {[propertyName: string]: ViewProperty<View, unknown> | undefined} | null;
+  readonly viewProperties!: {[propertyName: string]: ViewProperty<View, unknown> | undefined} | null;
 
-  hasViewProperty(propertyName: string): boolean {
+  override hasViewProperty(propertyName: string): boolean {
     const viewProperties = this.viewProperties;
     return viewProperties !== null && viewProperties[propertyName] !== void 0;
   }
 
-  getViewProperty(propertyName: string): ViewProperty<this, unknown> | null {
+  override getViewProperty(propertyName: string): ViewProperty<this, unknown> | null {
     const viewProperties = this.viewProperties;
     if (viewProperties !== null) {
       const viewProperty = viewProperties[propertyName];
@@ -1278,7 +1278,7 @@ export abstract class GraphicsView extends View {
     return null;
   }
 
-  setViewProperty(propertyName: string, newViewProperty: ViewProperty<this, unknown> | null): void {
+  override setViewProperty(propertyName: string, newViewProperty: ViewProperty<this, unknown> | null): void {
     let viewProperties = this.viewProperties;
     if (viewProperties === null) {
       viewProperties = {};
@@ -1330,14 +1330,14 @@ export abstract class GraphicsView extends View {
   }
 
   /** @hidden */
-  declare readonly viewAnimators: {[animatorName: string]: ViewAnimator<View, unknown> | undefined} | null;
+  readonly viewAnimators!: {[animatorName: string]: ViewAnimator<View, unknown> | undefined} | null;
 
-  hasViewAnimator(animatorName: string): boolean {
+  override hasViewAnimator(animatorName: string): boolean {
     const viewAnimators = this.viewAnimators;
     return viewAnimators !== null && viewAnimators[animatorName] !== void 0;
   }
 
-  getViewAnimator(animatorName: string): ViewAnimator<this, unknown> | null {
+  override getViewAnimator(animatorName: string): ViewAnimator<this, unknown> | null {
     const viewAnimators = this.viewAnimators;
     if (viewAnimators !== null) {
       const viewAnimator = viewAnimators[animatorName];
@@ -1348,7 +1348,7 @@ export abstract class GraphicsView extends View {
     return null;
   }
 
-  setViewAnimator(animatorName: string, newViewAnimator: ViewAnimator<this, unknown> | null): void {
+  override setViewAnimator(animatorName: string, newViewAnimator: ViewAnimator<this, unknown> | null): void {
     let viewAnimators = this.viewAnimators;
     if (viewAnimators === null) {
       viewAnimators = {};
@@ -1400,14 +1400,14 @@ export abstract class GraphicsView extends View {
   }
 
   /** @hidden */
-  declare readonly viewFasteners: {[fastenerName: string]: ViewFastener<View, View> | undefined} | null;
+  readonly viewFasteners!: {[fastenerName: string]: ViewFastener<View, View> | undefined} | null;
 
-  hasViewFastener(fastenerName: string): boolean {
+  override hasViewFastener(fastenerName: string): boolean {
     const viewFasteners = this.viewFasteners;
     return viewFasteners !== null && viewFasteners[fastenerName] !== void 0;
   }
 
-  getViewFastener(fastenerName: string): ViewFastener<this, View> | null {
+  override getViewFastener(fastenerName: string): ViewFastener<this, View> | null {
     const viewFasteners = this.viewFasteners;
     if (viewFasteners !== null) {
       const viewFastener = viewFasteners[fastenerName];
@@ -1418,7 +1418,7 @@ export abstract class GraphicsView extends View {
     return null;
   }
 
-  setViewFastener(fastenerName: string, newViewFastener: ViewFastener<this, any> | null): void {
+  override setViewFastener(fastenerName: string, newViewFastener: ViewFastener<this, any> | null): void {
     let viewFasteners = this.viewFasteners;
     if (viewFasteners === null) {
       viewFasteners = {};
@@ -1482,13 +1482,13 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  declare readonly constraints: ReadonlyArray<Constraint>;
+  readonly constraints!: ReadonlyArray<Constraint>;
 
-  hasConstraint(constraint: Constraint): boolean {
+  override hasConstraint(constraint: Constraint): boolean {
     return this.constraints.indexOf(constraint) >= 0;
   }
 
-  addConstraint(constraint: Constraint): void {
+  override addConstraint(constraint: Constraint): void {
     const oldConstraints = this.constraints;
     const newConstraints = Arrays.inserted(constraint, oldConstraints);
     if (oldConstraints !== newConstraints) {
@@ -1501,7 +1501,7 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  removeConstraint(constraint: Constraint): void {
+  override removeConstraint(constraint: Constraint): void {
     const oldConstraints = this.constraints;
     const newConstraints = Arrays.removed(constraint, oldConstraints);
     if (oldConstraints !== newConstraints) {
@@ -1514,13 +1514,13 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  declare readonly constraintVariables: ReadonlyArray<ConstraintVariable>;
+  readonly constraintVariables!: ReadonlyArray<ConstraintVariable>;
 
-  hasConstraintVariable(constraintVariable: ConstraintVariable): boolean {
+  override hasConstraintVariable(constraintVariable: ConstraintVariable): boolean {
     return this.constraintVariables.indexOf(constraintVariable) >= 0;
   }
 
-  addConstraintVariable(constraintVariable: ConstraintVariable): void {
+  override addConstraintVariable(constraintVariable: ConstraintVariable): void {
     const oldConstraintVariables = this.constraintVariables;
     const newConstraintVariables = Arrays.inserted(constraintVariable, oldConstraintVariables);
     if (oldConstraintVariables !== newConstraintVariables) {
@@ -1533,7 +1533,7 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  removeConstraintVariable(constraintVariable: ConstraintVariable): void {
+  override removeConstraintVariable(constraintVariable: ConstraintVariable): void {
     const oldConstraintVariables = this.constraintVariables;
     const newConstraintVariables = Arrays.removed(constraintVariable, oldConstraintVariables);
     if (oldConstraintVariables !== newConstraintVariables) {
@@ -1577,23 +1577,23 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  declare readonly viewContext: GraphicsViewContext;
+  override readonly viewContext!: GraphicsViewContext;
 
   /** @hidden */
-  declare readonly ownViewFrame: BoxR2 | null;
+  readonly ownViewFrame!: R2Box | null;
 
   /**
    * The parent-specified view-coordinate bounding box in which this view
    * should layout and render graphics.
    */
-  get viewFrame(): BoxR2 {
+  get viewFrame(): R2Box {
     let viewFrame = this.ownViewFrame;
     if (viewFrame === null) {
       const parentView = this.parentView;
       if (parentView instanceof GraphicsView || parentView instanceof CanvasView) {
         viewFrame = parentView.viewFrame;
       } else {
-        viewFrame = BoxR2.undefined();
+        viewFrame = R2Box.undefined();
       }
     }
     return viewFrame;
@@ -1603,7 +1603,7 @@ export abstract class GraphicsView extends View {
    * Sets the view-coordinate bounding box in which this view should layout
    * and render graphics.  Should only be invoked by the view's parent view.
    */
-  setViewFrame(viewFrame: BoxR2 | null): void {
+  setViewFrame(viewFrame: R2Box | null): void {
     Object.defineProperty(this, "ownViewFrame", {
       value: viewFrame,
       enumerable: true,
@@ -1616,14 +1616,14 @@ export abstract class GraphicsView extends View {
    * this view could possibly render.  Views with view bounds that don't
    * overlap their view frames may be culled from rendering and hit testing.
    */
-  declare readonly viewBounds: BoxR2; // getter defined below to work around useDefineForClassFields lunacy
+  declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
-  get ownViewBounds(): BoxR2 | null {
+  get ownViewBounds(): R2Box | null {
     return null;
   }
 
-  deriveViewBounds(): BoxR2 {
-    let viewBounds: BoxR2 | null = this.ownViewBounds;
+  deriveViewBounds(): R2Box {
+    let viewBounds: R2Box | null = this.ownViewBounds;
     type self = this;
     function accumulateViewBounds(this: self, childView: View): void {
       if (childView instanceof GraphicsView && !childView.isHidden()) {
@@ -1648,12 +1648,12 @@ export abstract class GraphicsView extends View {
    * The self-defined view-coordinate bounding box surrounding all hit regions
    * in this view.
    */
-  get hitBounds(): BoxR2 {
+  get hitBounds(): R2Box {
     return this.viewBounds;
   }
 
-  deriveHitBounds(): BoxR2 {
-    let hitBounds: BoxR2 | undefined;
+  deriveHitBounds(): R2Box {
+    let hitBounds: R2Box | undefined;
     type self = this;
     function accumulateHitBounds(this: self, childView: View): void {
       if (childView instanceof GraphicsView && !childView.isHidden()) {
@@ -1697,27 +1697,27 @@ export abstract class GraphicsView extends View {
     return this.forEachChildView(hitTestChildView, this) || null;
   }
 
-  get parentTransform(): Transform {
+  override get parentTransform(): Transform {
     return Transform.identity();
   }
 
-  get clientBounds(): BoxR2 {
+  override get clientBounds(): R2Box {
     const inverseClientTransform = this.clientTransform.inverse();
     return this.viewBounds.transform(inverseClientTransform);
   }
 
-  get popoverFrame(): BoxR2 {
+  override get popoverFrame(): R2Box {
     const inversePageTransform = this.pageTransform.inverse();
     return this.viewBounds.transform(inversePageTransform);
   }
 
   /** @hidden */
-  declare readonly eventHandlers: {[type: string]: ViewEventHandler[] | undefined} | null;
+  readonly eventHandlers!: {[type: string]: ViewEventHandler[] | undefined} | null;
 
-  on<T extends keyof GraphicsViewEventMap>(type: T, listener: (this: this, event: GraphicsViewEventMap[T]) => unknown,
-                                           options?: AddEventListenerOptions | boolean): this;
-  on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
-  on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
+  override on<T extends keyof GraphicsViewEventMap>(type: T, listener: (this: this, event: GraphicsViewEventMap[T]) => unknown,
+                                                    options?: AddEventListenerOptions | boolean): this;
+  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
+  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
     let eventHandlers = this.eventHandlers;
     if (eventHandlers === null) {
       eventHandlers = {};
@@ -1758,10 +1758,10 @@ export abstract class GraphicsView extends View {
     return this;
   }
 
-  off<T extends keyof GraphicsViewEventMap>(type: T, listener: (this: View, event: GraphicsViewEventMap[T]) => unknown,
-                                            options?: EventListenerOptions | boolean): this;
-  off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
-  off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
+  override off<T extends keyof GraphicsViewEventMap>(type: T, listener: (this: View, event: GraphicsViewEventMap[T]) => unknown,
+                                                     options?: EventListenerOptions | boolean): this;
+  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
+  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
     const eventHandlers = this.eventHandlers;
     if (eventHandlers !== null) {
       const handlers = eventHandlers[type];
@@ -1849,7 +1849,7 @@ export abstract class GraphicsView extends View {
     return next;
   }
 
-  dispatchEvent(event: ViewEvent): boolean {
+  override dispatchEvent(event: ViewEvent): boolean {
     event.targetView = this;
     const next = this.bubbleEvent(event);
     if (next !== null) {
@@ -1860,7 +1860,7 @@ export abstract class GraphicsView extends View {
   }
 
   /** @hidden */
-  declare readonly hoverSet: {[id: string]: null | undefined} | null;
+  readonly hoverSet!: {[id: string]: null | undefined} | null;
 
   isHovering(): boolean {
     const hoverSet = this.hoverSet;
@@ -2043,9 +2043,9 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  static readonly uncullFlags: ViewFlags = View.uncullFlags | View.NeedsRender;
-  static readonly insertChildFlags: ViewFlags = View.insertChildFlags | View.NeedsRender;
-  static readonly removeChildFlags: ViewFlags = View.removeChildFlags | View.NeedsRender;
+  static override readonly uncullFlags: ViewFlags = View.uncullFlags | View.NeedsRender;
+  static override readonly insertChildFlags: ViewFlags = View.insertChildFlags | View.NeedsRender;
+  static override readonly removeChildFlags: ViewFlags = View.removeChildFlags | View.NeedsRender;
 }
 Object.defineProperty(GraphicsView.prototype, "renderer", {
   get(this: GraphicsView): GraphicsRenderer | null {
@@ -2060,7 +2060,7 @@ Object.defineProperty(GraphicsView.prototype, "renderer", {
   configurable: true,
 });
 Object.defineProperty(GraphicsView.prototype, "viewBounds", {
-  get(this: GraphicsView): BoxR2 {
+  get(this: GraphicsView): R2Box {
     return this.viewFrame;
   },
   enumerable: true,

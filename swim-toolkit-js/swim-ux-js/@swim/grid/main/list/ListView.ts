@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,18 +33,18 @@ export class ListView extends HtmlView {
     this.userSelect.setState("none", View.Intrinsic);
   }
 
-  declare readonly viewController: ListViewController | null;
+  override readonly viewController!: ListViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<ListViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<ListViewObserver>;
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     if (childView instanceof ListItem) {
       this.onInsertItem(childView);
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     if (childView instanceof ListItem) {
       this.onRemoveItem(childView);
     }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 /// <reference types="googlemaps"/>
 
 import type {Equals} from "@swim/util";
-import {AnyPointR2, PointR2} from "@swim/math";
+import {AnyR2Point, R2Point} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import type {GeoViewport} from "@swim/map";
 
@@ -48,21 +48,21 @@ export class GoogleMapViewport implements GeoViewport, Equals {
     });
   }
 
-  declare readonly projection: google.maps.MapCanvasProjection | null;
+  readonly projection!: google.maps.MapCanvasProjection | null;
 
-  declare readonly geoFrame: GeoBox;
+  readonly geoFrame!: GeoBox;
 
-  declare readonly geoCenter: GeoPoint;
+  readonly geoCenter!: GeoPoint;
 
-  declare readonly zoom: number;
+  readonly zoom!: number;
 
-  declare readonly heading: number;
+  readonly heading!: number;
 
-  declare readonly tilt: number;
+  readonly tilt!: number;
 
-  project(geoPoint: AnyGeoPoint): PointR2;
-  project(lng: number, lat: number): PointR2;
-  project(lng: AnyGeoPoint | number, lat?: number): PointR2 {
+  project(geoPoint: AnyGeoPoint): R2Point;
+  project(lng: number, lat: number): R2Point;
+  project(lng: AnyGeoPoint | number, lat?: number): R2Point {
     const projection = this.projection;
     if (projection !== null) {
       let geoPoint: google.maps.LatLng;
@@ -74,15 +74,15 @@ export class GoogleMapViewport implements GeoViewport, Equals {
         geoPoint = new google.maps.LatLng(lng.lat, lng.lng);
       }
       const point = projection.fromLatLngToContainerPixel(geoPoint);
-      return new PointR2(point.x, point.y);
+      return new R2Point(point.x, point.y);
     } else {
-      return PointR2.undefined();
+      return R2Point.undefined();
     }
   }
 
-  unproject(viewPoint: AnyPointR2): GeoPoint;
+  unproject(viewPoint: AnyR2Point): GeoPoint;
   unproject(x: number, y: number): GeoPoint;
-  unproject(x: AnyPointR2 | number, y?: number): GeoPoint {
+  unproject(x: AnyR2Point | number, y?: number): GeoPoint {
     const projection = this.projection;
     if (projection !== null) {
       let viewPoint: google.maps.Point;

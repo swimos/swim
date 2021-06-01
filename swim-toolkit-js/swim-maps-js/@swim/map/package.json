@@ -4,7 +4,7 @@
   "description": "Graphics views for efficiently rendering animated geospatial map overlays",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/map",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2020 Swim inc.",
+  "copyright": "2015-2021 Swim inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-map.js",

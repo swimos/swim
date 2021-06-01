@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -101,10 +101,10 @@ export abstract class GenericComponent extends Component {
     return result;
   }
 
-  declare readonly key: string | undefined;
+  override readonly key!: string | undefined;
 
   /** @hidden */
-  setKey(key: string | undefined): void {
+  override setKey(key: string | undefined): void {
     Object.defineProperty(this, "key", {
       value: key,
       enumerable: true,
@@ -112,10 +112,10 @@ export abstract class GenericComponent extends Component {
     });
   }
 
-  declare readonly parentComponent: Component | null;
+  override readonly parentComponent!: Component | null;
 
   /** @hidden */
-  setParentComponent(newParentComponent: Component | null, oldParentComponent: Component | null): void {
+  override setParentComponent(newParentComponent: Component | null, oldParentComponent: Component | null): void {
     this.willSetParentComponent(newParentComponent, oldParentComponent);
     if (oldParentComponent !== null) {
       this.detachParentComponent(oldParentComponent);
@@ -132,7 +132,7 @@ export abstract class GenericComponent extends Component {
     this.didSetParentComponent(newParentComponent, oldParentComponent);
   }
 
-  remove(): void {
+  override remove(): void {
     const parentComponent = this.parentComponent;
     if (parentComponent !== null) {
       if ((this.componentFlags & Component.TraversingFlag) === 0) {
@@ -143,44 +143,44 @@ export abstract class GenericComponent extends Component {
     }
   }
 
-  abstract readonly childComponentCount: number;
+  abstract override readonly childComponentCount: number;
 
-  abstract readonly childComponents: ReadonlyArray<Component>;
+  abstract override readonly childComponents: ReadonlyArray<Component>;
 
-  abstract forEachChildComponent<T>(callback: (childComponent: Component) => T | void): T | undefined;
-  abstract forEachChildComponent<T, S>(callback: (this: S, childComponent: Component) => T | void,
-                                       thisArg: S): T | undefined;
+  abstract override forEachChildComponent<T>(callback: (childComponent: Component) => T | void): T | undefined;
+  abstract override forEachChildComponent<T, S>(callback: (this: S, childComponent: Component) => T | void,
+                                                thisArg: S): T | undefined;
 
-  abstract getChildComponent(key: string): Component | null;
+  abstract override getChildComponent(key: string): Component | null;
 
-  abstract setChildComponent(key: string, newChildComponent: Component | null): Component | null;
+  abstract override setChildComponent(key: string, newChildComponent: Component | null): Component | null;
 
-  abstract appendChildComponent(childComponent: Component, key?: string): void;
+  abstract override appendChildComponent(childComponent: Component, key?: string): void;
 
-  abstract prependChildComponent(childComponent: Component, key?: string): void;
+  abstract override prependChildComponent(childComponent: Component, key?: string): void;
 
-  abstract insertChildComponent(childComponent: Component, targetComponent: Component | null, key?: string): void;
+  abstract override insertChildComponent(childComponent: Component, targetComponent: Component | null, key?: string): void;
 
-  protected onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
+  protected override onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
     super.onInsertChildComponent(childComponent, targetComponent);
     this.insertComponentFastener(childComponent, targetComponent);
   }
 
-  cascadeInsert(updateFlags?: ComponentFlags, componentContext?: ComponentContext): void {
+  override cascadeInsert(updateFlags?: ComponentFlags, componentContext?: ComponentContext): void {
     // nop
   }
 
-  abstract removeChildComponent(key: string): Component | null;
-  abstract removeChildComponent(childComponent: Component): void;
+  abstract override removeChildComponent(key: string): Component | null;
+  abstract override removeChildComponent(childComponent: Component): void;
 
-  protected onRemoveChildComponent(childComponent: Component): void {
+  protected override onRemoveChildComponent(childComponent: Component): void {
     super.onRemoveChildComponent(childComponent);
     this.removeComponentFastener(childComponent);
   }
 
-  abstract removeAll(): void;
+  abstract override removeAll(): void;
 
-  cascadeMount(): void {
+  override cascadeMount(): void {
     if ((this.componentFlags & Component.MountedFlag) === 0) {
       this.setComponentFlags(this.componentFlags | (Component.MountedFlag | Component.TraversingFlag));
       try {
@@ -196,7 +196,7 @@ export abstract class GenericComponent extends Component {
     }
   }
 
-  protected onMount(): void {
+  protected override onMount(): void {
     super.onMount();
     this.mountComponentServices();
     this.mountComponentProperties();
@@ -220,7 +220,7 @@ export abstract class GenericComponent extends Component {
     this.forEachChildComponent(doMountChildComponent, this);
   }
 
-  cascadeUnmount(): void {
+  override cascadeUnmount(): void {
     if ((this.componentFlags & Component.MountedFlag) !== 0) {
       this.setComponentFlags(this.componentFlags & ~Component.MountedFlag | Component.TraversingFlag);
       try {
@@ -236,7 +236,7 @@ export abstract class GenericComponent extends Component {
     }
   }
 
-  protected onUnmount(): void {
+  protected override onUnmount(): void {
     this.unmountComponentFasteners();
     this.unmountComponentViewTraits();
     this.unmountComponentViews();
@@ -260,7 +260,7 @@ export abstract class GenericComponent extends Component {
     this.forEachChildComponent(doUnmountChildComponent, this);
   }
 
-  cascadePower(): void {
+  override cascadePower(): void {
     if ((this.componentFlags & Component.PoweredFlag) === 0) {
       this.setComponentFlags(this.componentFlags | (Component.PoweredFlag | Component.TraversingFlag));
       try {
@@ -289,7 +289,7 @@ export abstract class GenericComponent extends Component {
     this.forEachChildComponent(doPowerChildComponent, this);
   }
 
-  cascadeUnpower(): void {
+  override cascadeUnpower(): void {
     if ((this.componentFlags & Component.PoweredFlag) !== 0) {
       this.setComponentFlags(this.componentFlags & ~Component.PoweredFlag | Component.TraversingFlag);
       try {
@@ -318,7 +318,7 @@ export abstract class GenericComponent extends Component {
     this.forEachChildComponent(doUnpowerChildComponent, this);
   }
 
-  cascadeCompile(compileFlags: ComponentFlags, componentContext: ComponentContext): void {
+  override cascadeCompile(compileFlags: ComponentFlags, componentContext: ComponentContext): void {
     const extendedComponentContext = this.extendComponentContext(componentContext);
     compileFlags &= ~Component.NeedsCompile;
     compileFlags |= this.componentFlags & Component.UpdateMask;
@@ -379,7 +379,7 @@ export abstract class GenericComponent extends Component {
     }
   }
 
-  cascadeExecute(executeFlags: ComponentFlags, componentContext: ComponentContext): void {
+  override cascadeExecute(executeFlags: ComponentFlags, componentContext: ComponentContext): void {
     const extendedComponentContext = this.extendComponentContext(componentContext);
     executeFlags &= ~Component.NeedsExecute;
     executeFlags |= this.componentFlags & Component.UpdateMask;
@@ -429,20 +429,20 @@ export abstract class GenericComponent extends Component {
     }
   }
 
-  protected onRevise(componentContext: ComponentContextType<this>): void {
+  protected override onRevise(componentContext: ComponentContextType<this>): void {
     super.onRevise(componentContext);
     this.reviseComponentProperties();
   }
 
   /** @hidden */
-  declare readonly componentServices: {[serviceName: string]: ComponentService<Component, unknown> | undefined} | null;
+  readonly componentServices!: {[serviceName: string]: ComponentService<Component, unknown> | undefined} | null;
 
-  hasComponentService(serviceName: string): boolean {
+  override hasComponentService(serviceName: string): boolean {
     const componentServices = this.componentServices;
     return componentServices !== null && componentServices[serviceName] !== void 0;
   }
 
-  getComponentService(serviceName: string): ComponentService<this, unknown> | null {
+  override getComponentService(serviceName: string): ComponentService<this, unknown> | null {
     const componentServices = this.componentServices;
     if (componentServices !== null) {
       const componentService = componentServices[serviceName];
@@ -453,7 +453,7 @@ export abstract class GenericComponent extends Component {
     return null;
   }
 
-  setComponentService(serviceName: string, newComponentService: ComponentService<this, unknown> | null): void {
+  override setComponentService(serviceName: string, newComponentService: ComponentService<this, unknown> | null): void {
     let componentServices = this.componentServices;
     if (componentServices === null) {
       componentServices = {};
@@ -496,14 +496,14 @@ export abstract class GenericComponent extends Component {
   }
 
   /** @hidden */
-  declare readonly componentProperties: {[propertyName: string]: ComponentProperty<Component, unknown> | undefined} | null;
+  readonly componentProperties!: {[propertyName: string]: ComponentProperty<Component, unknown> | undefined} | null;
 
-  hasComponentProperty(propertyName: string): boolean {
+  override hasComponentProperty(propertyName: string): boolean {
     const componentProperties = this.componentProperties;
     return componentProperties !== null && componentProperties[propertyName] !== void 0;
   }
 
-  getComponentProperty(propertyName: string): ComponentProperty<this, unknown> | null {
+  override getComponentProperty(propertyName: string): ComponentProperty<this, unknown> | null {
     const componentProperties = this.componentProperties;
     if (componentProperties !== null) {
       const componentProperty = componentProperties[propertyName];
@@ -514,7 +514,7 @@ export abstract class GenericComponent extends Component {
     return null;
   }
 
-  setComponentProperty(propertyName: string, newComponentProperty: ComponentProperty<this, unknown> | null): void {
+  override setComponentProperty(propertyName: string, newComponentProperty: ComponentProperty<this, unknown> | null): void {
     let componentProperties = this.componentProperties;
     if (componentProperties === null) {
       componentProperties = {};
@@ -566,14 +566,14 @@ export abstract class GenericComponent extends Component {
   }
 
   /** @hidden */
-  declare readonly componentModels: {[modelName: string]: ComponentModel<Component, Model> | undefined} | null;
+  readonly componentModels!: {[modelName: string]: ComponentModel<Component, Model> | undefined} | null;
 
-  hasComponentModel(modelName: string): boolean {
+  override hasComponentModel(modelName: string): boolean {
     const componentModels = this.componentModels;
     return componentModels !== null && componentModels[modelName] !== void 0;
   }
 
-  getComponentModel(modelName: string): ComponentModel<this, Model> | null {
+  override getComponentModel(modelName: string): ComponentModel<this, Model> | null {
     const componentModels = this.componentModels;
     if (componentModels !== null) {
       const componentModel = componentModels[modelName];
@@ -584,7 +584,7 @@ export abstract class GenericComponent extends Component {
     return null;
   }
 
-  setComponentModel(modelName: string, newComponentModel: ComponentModel<this, any> | null): void {
+  override setComponentModel(modelName: string, newComponentModel: ComponentModel<this, any> | null): void {
     let componentModels = this.componentModels;
     if (componentModels === null) {
       componentModels = {};
@@ -627,14 +627,14 @@ export abstract class GenericComponent extends Component {
   }
 
   /** @hidden */
-  declare readonly componentTraits: {[traitName: string]: ComponentTrait<Component, Trait> | undefined} | null;
+  readonly componentTraits!: {[traitName: string]: ComponentTrait<Component, Trait> | undefined} | null;
 
-  hasComponentTrait(traitName: string): boolean {
+  override hasComponentTrait(traitName: string): boolean {
     const componentTraits = this.componentTraits;
     return componentTraits !== null && componentTraits[traitName] !== void 0;
   }
 
-  getComponentTrait(traitName: string): ComponentTrait<this, Trait> | null {
+  override getComponentTrait(traitName: string): ComponentTrait<this, Trait> | null {
     const componentTraits = this.componentTraits;
     if (componentTraits !== null) {
       const componentTrait = componentTraits[traitName];
@@ -645,7 +645,7 @@ export abstract class GenericComponent extends Component {
     return null;
   }
 
-  setComponentTrait(traitName: string, newComponentTrait: ComponentTrait<this, any> | null): void {
+  override setComponentTrait(traitName: string, newComponentTrait: ComponentTrait<this, any> | null): void {
     let componentTraits = this.componentTraits;
     if (componentTraits === null) {
       componentTraits = {};
@@ -688,14 +688,14 @@ export abstract class GenericComponent extends Component {
   }
 
   /** @hidden */
-  declare readonly componentViews: {[viewName: string]: ComponentView<Component, View> | undefined} | null;
+  readonly componentViews!: {[viewName: string]: ComponentView<Component, View> | undefined} | null;
 
-  hasComponentView(viewName: string): boolean {
+  override hasComponentView(viewName: string): boolean {
     const componentViews = this.componentViews;
     return componentViews !== null && componentViews[viewName] !== void 0;
   }
 
-  getComponentView(viewName: string): ComponentView<this, View> | null {
+  override getComponentView(viewName: string): ComponentView<this, View> | null {
     const componentViews = this.componentViews;
     if (componentViews !== null) {
       const componentView = componentViews[viewName];
@@ -706,7 +706,7 @@ export abstract class GenericComponent extends Component {
     return null;
   }
 
-  setComponentView(viewName: string, newComponentView: ComponentView<this, any> | null): void {
+  override setComponentView(viewName: string, newComponentView: ComponentView<this, any> | null): void {
     let componentViews = this.componentViews;
     if (componentViews === null) {
       componentViews = {};
@@ -749,14 +749,14 @@ export abstract class GenericComponent extends Component {
   }
 
   /** @hidden */
-  declare readonly componentViewTraits: {[fastenerName: string]: ComponentViewTrait<Component, View, Trait> | undefined} | null;
+  readonly componentViewTraits!: {[fastenerName: string]: ComponentViewTrait<Component, View, Trait> | undefined} | null;
 
-  hasComponentViewTrait(fastenerName: string): boolean {
+  override hasComponentViewTrait(fastenerName: string): boolean {
     const componentViewTraits = this.componentViewTraits;
     return componentViewTraits !== null && componentViewTraits[fastenerName] !== void 0;
   }
 
-  getComponentViewTrait(fastenerName: string): ComponentViewTrait<this, View, Trait> | null {
+  override getComponentViewTrait(fastenerName: string): ComponentViewTrait<this, View, Trait> | null {
     const componentViewTraits = this.componentViewTraits;
     if (componentViewTraits !== null) {
       const componentViewTrait = componentViewTraits[fastenerName];
@@ -767,7 +767,7 @@ export abstract class GenericComponent extends Component {
     return null;
   }
 
-  setComponentViewTrait(fastenerName: string, newComponentViewTrait: ComponentViewTrait<this, any, any> | null): void {
+  override setComponentViewTrait(fastenerName: string, newComponentViewTrait: ComponentViewTrait<this, any, any> | null): void {
     let componentViewTraits = this.componentViewTraits;
     if (componentViewTraits === null) {
       componentViewTraits = {};
@@ -810,14 +810,14 @@ export abstract class GenericComponent extends Component {
   }
 
   /** @hidden */
-  declare readonly componentFasteners: {[fastenerName: string]: ComponentFastener<Component, Component> | undefined} | null;
+  readonly componentFasteners!: {[fastenerName: string]: ComponentFastener<Component, Component> | undefined} | null;
 
-  hasComponentFastener(fastenerName: string): boolean {
+  override hasComponentFastener(fastenerName: string): boolean {
     const componentFasteners = this.componentFasteners;
     return componentFasteners !== null && componentFasteners[fastenerName] !== void 0;
   }
 
-  getComponentFastener(fastenerName: string): ComponentFastener<this, Component> | null {
+  override getComponentFastener(fastenerName: string): ComponentFastener<this, Component> | null {
     const componentFasteners = this.componentFasteners;
     if (componentFasteners !== null) {
       const componentFastener = componentFasteners[fastenerName];
@@ -828,7 +828,7 @@ export abstract class GenericComponent extends Component {
     return null;
   }
 
-  setComponentFastener(fastenerName: string, newComponentFastener: ComponentFastener<this, any> | null): void {
+  override setComponentFastener(fastenerName: string, newComponentFastener: ComponentFastener<this, any> | null): void {
     let componentFasteners = this.componentFasteners;
     if (componentFasteners === null) {
       componentFasteners = {};

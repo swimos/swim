@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {ContinuousScale} from "@swim/mapping";
-import {PointR2, BoxR2} from "@swim/math";
+import {R2Point, R2Box} from "@swim/math";
 import {View, ViewAnimator} from "@swim/view";
 import type {CanvasContext} from "@swim/graphics";
 import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
@@ -21,7 +21,7 @@ import type {TickView} from "../tick/TickView";
 import {AxisOrientation, AnyAxisView, AxisViewInit, AxisView} from "./AxisView";
 
 export class TopAxisView<X> extends AxisView<X> {
-  get orientation(): AxisOrientation {
+  override get orientation(): AxisOrientation {
     return "top";
   }
 
@@ -32,18 +32,18 @@ export class TopAxisView<X> extends AxisView<X> {
     state: null,
     updateFlags: View.NeedsLayout,
   })
-  declare scale: ContinuousScaleAnimator<this, X, number>;
+  override readonly scale!: ContinuousScaleAnimator<this, X, number>;
 
-  protected layoutTick(tick: TickView<X>, origin: PointR2, frame: BoxR2,
-                       scale: ContinuousScale<X, number>): void {
+  protected override layoutTick(tick: TickView<X>, origin: R2Point, frame: R2Box,
+                                scale: ContinuousScale<X, number>): void {
     if (tick.anchor.takesPrecedence(View.Intrinsic)) {
       const offset = scale(tick.value);
       tick.setOffset(offset);
-      tick.anchor.setState(new PointR2(frame.xMin + offset, origin.y), View.Intrinsic);
+      tick.anchor.setState(new R2Point(frame.xMin + offset, origin.y), View.Intrinsic);
     }
   }
 
-  protected renderDomain(context: CanvasContext, origin: PointR2, frame: BoxR2): void {
+  protected override renderDomain(context: CanvasContext, origin: R2Point, frame: R2Box): void {
     const borderColor = this.borderColor.value;
     const borderWidth = this.borderWidth.getValue();
     if (borderColor !== null && borderWidth !== 0) {
@@ -72,13 +72,13 @@ export class TopAxisView<X> extends AxisView<X> {
     return new TopAxisView<X>();
   }
 
-  static fromInit<X>(init: AxisViewInit<X>): TopAxisView<X> {
+  static override fromInit<X>(init: AxisViewInit<X>): TopAxisView<X> {
     const view = new TopAxisView<X>();
     view.initView(init)
     return view;
   }
 
-  static fromAny<X>(value: AnyAxisView<X> | true): TopAxisView<X> {
+  static override fromAny<X>(value: AnyAxisView<X> | true): TopAxisView<X> {
     if (value instanceof TopAxisView) {
       return value;
     } else if (value === true) {

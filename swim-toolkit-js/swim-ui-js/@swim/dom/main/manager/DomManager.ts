@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import {SvgView} from "../svg/SvgView";
 import type {DomManagerObserver} from "./DomManagerObserver";
 
 export class DomManager<V extends NodeView = NodeView> extends ViewManager<V> {
-  declare readonly viewManagerObservers: ReadonlyArray<DomManagerObserver>;
+  override readonly viewManagerObservers!: ReadonlyArray<DomManagerObserver>;
 
-  protected onInsertRootView(rootView: V): void {
+  protected override onInsertRootView(rootView: V): void {
     super.onInsertRootView(rootView);
     if (rootView instanceof ElementView && rootView.node.hasAttribute("swim-app")) {
       this.materializeViewController(rootView);

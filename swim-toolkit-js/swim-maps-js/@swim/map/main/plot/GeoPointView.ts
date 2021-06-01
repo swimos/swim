@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {AnyTiming} from "@swim/mapping";
-import {AnyLength, Length, AnyPointR2, PointR2, BoxR2} from "@swim/math";
+import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPointInit, GeoPointTuple, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewFlags, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
@@ -58,14 +58,14 @@ export interface GeoPointViewInit extends GeoViewInit {
 }
 
 export class GeoPointView extends GeoLayerView {
-  initView(init: GeoPointViewInit): void {
+  override initView(init: GeoPointViewInit): void {
     super.initView(init);
     this.setState(init);
   }
 
-  declare readonly viewController: GeoViewController<GeoPointView> & GeoPointViewObserver | null;
+  override readonly viewController!: GeoViewController<GeoPointView> & GeoPointViewObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<GeoPointViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<GeoPointViewObserver>;
 
   protected willSetGeoPoint(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
     const viewController = this.viewController;
@@ -111,31 +111,31 @@ export class GeoPointView extends GeoLayerView {
       this.owner.didSetGeoPoint(newGeoPoint, oldGeoPoint);
     },
   })
-  declare geoPoint: ViewAnimator<this, GeoPoint, AnyGeoPoint>;
+  readonly geoPoint!: ViewAnimator<this, GeoPoint, AnyGeoPoint>;
 
-  @ViewAnimator({type: PointR2, state: PointR2.origin()})
-  declare viewPoint: ViewAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator({type: R2Point, state: R2Point.origin()})
+  readonly viewPoint!: ViewAnimator<this, R2Point, AnyR2Point>;
 
   @ViewAnimator({type: Length, state: null})
-  declare radius: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly radius!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Color, state: null})
-  declare color: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly color!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Number})
-  declare opacity: ViewAnimator<this, number | undefined>;
+  readonly opacity!: ViewAnimator<this, number | undefined>;
 
   @ViewAnimator({type: Length, state: null})
-  declare labelPadding: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly labelPadding!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Font, state: null, inherit: true})
-  declare font: ViewAnimator<this, Font | null, AnyFont | null>;
+  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
 
   @ViewAnimator({type: Color, state: null, inherit: true})
-  declare textColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewProperty({type: Number})
-  declare hitRadius: ViewProperty<this, number | undefined>;
+  readonly hitRadius!: ViewProperty<this, number | undefined>;
 
   protected initLabel(labelView: GraphicsView): void {
     // hook
@@ -210,10 +210,10 @@ export class GeoPointView extends GeoLayerView {
       this.owner.didSetLabel(newLabelView, oldLabelView);
     },
   })
-  declare label: ViewFastener<this, GraphicsView, AnyTextRunView>;
+  readonly label!: ViewFastener<this, GraphicsView, AnyTextRunView>;
 
   @ViewProperty({type: String, state: "auto"})
-  declare labelPlacement: ViewProperty<this, GeoPointLabelPlacement>;
+  readonly labelPlacement!: ViewProperty<this, GeoPointLabelPlacement>;
 
   isGradientStop(): boolean {
     return this.color.value !== null || this.opacity.value !== void 0;
@@ -233,7 +233,7 @@ export class GeoPointView extends GeoLayerView {
     if (init.lng !== void 0 && init.lat !== void 0) {
       this.geoPoint(new GeoPoint(init.lng, init.lat), timing);
     } else if (init.x !== void 0 && init.y !== void 0) {
-      this.viewPoint(new PointR2(init.x, init.y), timing);
+      this.viewPoint(new R2Point(init.x, init.y), timing);
     }
 
     if (init.radius !== void 0) {
@@ -270,14 +270,14 @@ export class GeoPointView extends GeoLayerView {
     }
   }
 
-  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsProject) !== 0 && this.label.view !== null) {
       this.requireUpdate(View.NeedsLayout);
     }
     return processFlags;
   }
 
-  protected onProject(viewContext: ViewContextType<this>): void {
+  protected override onProject(viewContext: ViewContextType<this>): void {
     super.onProject(viewContext);
     if (this.viewPoint.takesPrecedence(View.Intrinsic)) {
       const viewPoint = viewContext.geoViewport.project(this.geoPoint.getValue());
@@ -295,7 +295,7 @@ export class GeoPointView extends GeoLayerView {
     }
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     const labelView = this.label.view;
     if (labelView !== null) {
@@ -303,7 +303,7 @@ export class GeoPointView extends GeoLayerView {
     }
   }
 
-  protected layoutLabel(labelView: GraphicsView, frame: BoxR2): void {
+  protected layoutLabel(labelView: GraphicsView, frame: R2Box): void {
     const placement = this.labelPlacement.state;
     // TODO: auto placement
 
@@ -320,23 +320,23 @@ export class GeoPointView extends GeoLayerView {
     if (TypesetView.is(labelView)) {
       labelView.textAlign.setState("center", View.Intrinsic);
       labelView.textBaseline.setState("bottom", View.Intrinsic);
-      labelView.textOrigin.setState(new PointR2(x, y1), View.Intrinsic);
+      labelView.textOrigin.setState(new R2Point(x, y1), View.Intrinsic);
     }
   }
 
-  protected updateGeoBounds(): void {
+  protected override updateGeoBounds(): void {
     // nop
   }
 
-  declare readonly viewBounds: BoxR2; // getter defined below to work around useDefineForClassFields lunacy
+  declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
-  get hitBounds(): BoxR2 {
+  override get hitBounds(): R2Box {
     const {x, y} = this.viewPoint.getValue();
     const hitRadius = this.hitRadius.getStateOr(0);
-    return new BoxR2(x - hitRadius, y - hitRadius, x + hitRadius, y + hitRadius);
+    return new R2Box(x - hitRadius, y - hitRadius, x + hitRadius, y + hitRadius);
   }
 
-  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -348,7 +348,7 @@ export class GeoPointView extends GeoLayerView {
     return hit;
   }
 
-  protected hitTestPoint(hx: number, hy: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
+  protected hitTestPoint(hx: number, hy: number, context: CanvasContext, frame: R2Box): GraphicsView | null {
     const {x, y} = this.viewPoint.getValue();
     const radius = this.radius.value;
 
@@ -427,9 +427,9 @@ export class GeoPointView extends GeoLayerView {
   }
 }
 Object.defineProperty(GeoPointView.prototype, "viewBounds", {
-  get(this: GeoPointView): BoxR2 {
+  get(this: GeoPointView): R2Box {
     const {x, y} = this.viewPoint.getValue();
-    return new BoxR2(x, y, x, y);
+    return new R2Box(x, y, x, y);
   },
   enumerable: true,
   configurable: true,

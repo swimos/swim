@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,9 +28,9 @@ export class WarpManager<M extends Model = Model> extends ModelManager<M> {
     });
   }
 
-  declare readonly client: WarpClient;
+  readonly client!: WarpClient;
 
-  declare readonly modelManagerObservers: ReadonlyArray<WarpManagerObserver>;
+  override readonly modelManagerObservers!: ReadonlyArray<WarpManagerObserver>;
 
   @Lazy
   static global<M extends Model>(): WarpManager<M> {

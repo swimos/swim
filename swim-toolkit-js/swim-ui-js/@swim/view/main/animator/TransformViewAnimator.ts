@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import {ViewAnimator} from "./ViewAnimator";
 
 /** @hidden */
 export abstract class TransformViewAnimator<V extends View> extends ViewAnimator<V, Transform | null | undefined, AnyTransform | null | undefined> {
-  fromAny(value: AnyTransform | null | undefined): Transform | null | undefined {
+  override fromAny(value: AnyTransform | null | undefined): Transform | null | undefined {
     return value !== void 0 && value !== null ? Transform.fromAny(value) : null;
   }
 }

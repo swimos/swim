@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@ import {ViewAnimatorConstraint} from "./ViewAnimatorConstraint";
 
 /** @hidden */
 export abstract class NumberViewAnimatorConstraint<V extends View> extends ViewAnimatorConstraint<V, number | null | undefined, number | string | null | undefined> {
-  toNumber(value: number | null): number {
+  override toNumber(value: number | null): number {
     return typeof value === "number" ? value : 0;
   }
 
-  fromAny(value: number | string): number {
+  override fromAny(value: number | string): number {
     if (typeof value === "number") {
       return value;
     } else if (typeof value === "string") {

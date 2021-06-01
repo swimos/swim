@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ export class RowTrait extends GenericTrait {
     });
   }
 
-  declare readonly traitObservers: ReadonlyArray<RowTraitObserver>;
+  override readonly traitObservers!: ReadonlyArray<RowTraitObserver>;
 
   insertCell(cellTrait: CellTrait, targetTrait: Trait | null = null): void {
     const cellFasteners = this.cellFasteners as TraitFastener<this, CellTrait>[];
@@ -130,7 +130,7 @@ export class RowTrait extends GenericTrait {
   }
 
   /** @hidden */
-  declare readonly cellFasteners: ReadonlyArray<TraitFastener<this, CellTrait>>;
+  readonly cellFasteners!: ReadonlyArray<TraitFastener<this, CellTrait>>;
 
   /** @hidden */
   protected mountCellFasteners(): void {
@@ -202,7 +202,7 @@ export class RowTrait extends GenericTrait {
     }
   }
 
-  protected didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
+  protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
     if (newModel !== null) {
       this.detectModels(newModel);
       this.detectTraits(newModel);
@@ -210,7 +210,7 @@ export class RowTrait extends GenericTrait {
     super.didSetModel(newModel, oldModel);
   }
 
-  protected onInsertChildModel(childModel: Model, targetModel: Model | null): void {
+  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
     super.onInsertChildModel(childModel, targetModel);
     const cellTrait = this.detectCellModel(childModel);
     if (cellTrait !== null) {
@@ -219,7 +219,7 @@ export class RowTrait extends GenericTrait {
     }
   }
 
-  protected onRemoveChildModel(childModel: Model): void {
+  protected override onRemoveChildModel(childModel: Model): void {
     super.onRemoveChildModel(childModel);
     const cellTrait = this.detectCellModel(childModel);
     if (cellTrait !== null) {
@@ -227,7 +227,7 @@ export class RowTrait extends GenericTrait {
     }
   }
 
-  protected onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
+  protected override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
     super.onInsertTrait(trait, targetTrait);
     const cellTrait = this.detectCellTrait(trait);
     if (cellTrait !== null) {
@@ -235,7 +235,7 @@ export class RowTrait extends GenericTrait {
     }
   }
 
-  protected onRemoveTrait(trait: Trait): void {
+  protected override onRemoveTrait(trait: Trait): void {
     super.onRemoveTrait(trait);
     const cellTrait = this.detectCellTrait(trait);
     if (cellTrait !== null) {
@@ -244,23 +244,23 @@ export class RowTrait extends GenericTrait {
   }
 
   /** @hidden */
-  protected mountTraitFasteners(): void {
+  protected override mountTraitFasteners(): void {
     super.mountTraitFasteners();
     this.mountCellFasteners();
   }
 
   /** @hidden */
-  protected unmountTraitFasteners(): void {
+  protected override unmountTraitFasteners(): void {
     this.unmountCellFasteners();
     super.unmountTraitFasteners();
   }
 
-  protected onStartConsuming(): void {
+  protected override onStartConsuming(): void {
     super.onStartConsuming();
     this.startConsumingCells();
   }
 
-  protected onStopConsuming(): void {
+  protected override onStopConsuming(): void {
     super.onStopConsuming();
     this.stopConsumingCells();
   }

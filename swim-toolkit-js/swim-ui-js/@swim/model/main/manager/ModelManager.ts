@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ export abstract class ModelManager<M extends Model = Model> {
     });
   }
 
-  declare readonly modelManagerObservers: ReadonlyArray<ModelManagerObserver>;
+  readonly modelManagerObservers!: ReadonlyArray<ModelManagerObserver>;
 
   addModelManagerObserver(modelManagerObserver: ModelManagerObserverType<this>): void {
     const oldModelManagerObservers = this.modelManagerObservers;
@@ -164,7 +164,7 @@ export abstract class ModelManager<M extends Model = Model> {
     }
   }
 
-  declare readonly rootModels: ReadonlyArray<M>;
+  readonly rootModels!: ReadonlyArray<M>;
 
   insertRootModel(rootModel: M): void {
     const oldRootModels = this.rootModels;

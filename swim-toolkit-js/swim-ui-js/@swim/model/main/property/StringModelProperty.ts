@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import {ModelProperty} from "./ModelProperty";
 
 /** @hidden */
 export abstract class StringModelProperty<M extends Model> extends ModelProperty<M, string | null | undefined> {
-  fromAny(value: string | null | undefined): string | null | undefined {
+  override fromAny(value: string | null | undefined): string | null | undefined {
     return value;
   }
 }

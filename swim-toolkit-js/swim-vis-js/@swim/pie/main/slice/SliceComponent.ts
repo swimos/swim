@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import {SliceLabel, SliceLegend, SliceTrait} from "./SliceTrait";
 import type {SliceComponentObserver} from "./SliceComponentObserver";
 
 export class SliceComponent extends CompositeComponent {
-  declare readonly componentObservers: ReadonlyArray<SliceComponentObserver>;
+  override readonly componentObservers!: ReadonlyArray<SliceComponentObserver>;
 
   protected initSliceTrait(sliceTrait: SliceTrait): void {
     // hook
@@ -312,7 +312,7 @@ export class SliceComponent extends CompositeComponent {
   }
 
   @ComponentProperty({type: Timing, inherit: true})
-  declare sliceTiming: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
+  readonly sliceTiming!: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
 
   /** @hidden */
   static SliceFastener = ComponentViewTrait.define<SliceComponent, SliceView, SliceTrait>({
@@ -371,7 +371,7 @@ export class SliceComponent extends CompositeComponent {
   @ComponentViewTrait<SliceComponent, SliceView, SliceTrait>({
     extends: SliceComponent.SliceFastener,
   })
-  declare slice: ComponentViewTrait<this, SliceView, SliceTrait>;
+  readonly slice!: ComponentViewTrait<this, SliceView, SliceTrait>;
 
   @ComponentView<SliceComponent, GraphicsView>({
     key: true,
@@ -385,7 +385,7 @@ export class SliceComponent extends CompositeComponent {
       this.owner.didSetLabelView(newLabelView, oldLabelView);
     },
   })
-  declare label: ComponentView<this, GraphicsView>;
+  readonly label!: ComponentView<this, GraphicsView>;
 
   @ComponentView<SliceComponent, GraphicsView>({
     key: true,
@@ -399,5 +399,5 @@ export class SliceComponent extends CompositeComponent {
       this.owner.didSetLegendView(newLegendView, oldLegendView);
     },
   })
-  declare legend: ComponentView<this, GraphicsView>;
+  readonly legend!: ComponentView<this, GraphicsView>;
 }

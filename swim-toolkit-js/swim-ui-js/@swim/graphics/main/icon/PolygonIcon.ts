@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 import {Equals, Equivalent} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 import type {Interpolate, Interpolator} from "@swim/mapping";
-import {AnyAngle, Angle, BoxR2} from "@swim/math";
+import {AnyAngle, Angle, R2Box} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
 import type {GraphicsRenderer} from "../graphics/GraphicsRenderer";
@@ -52,13 +52,13 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
     });
   }
 
-  declare readonly sides: number;
+  readonly sides!: number;
 
-  declare readonly rotation: Angle;
+  readonly rotation!: Angle;
 
-  declare readonly fillColor: Color | null;
+  override readonly fillColor!: Color | null;
 
-  withFillColor(fillColor: Color | null): PolygonIcon {
+  override withFillColor(fillColor: Color | null): PolygonIcon {
     if (Equals(this.fillColor, fillColor)) {
       return this;
     } else {
@@ -67,9 +67,9 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
     }
   }
 
-  declare readonly fillLook: Look<Color> | null;
+  override readonly fillLook!: Look<Color> | null;
 
-  withFillLook(fillLook: Look<Color> | null): PolygonIcon {
+  override withFillLook(fillLook: Look<Color> | null): PolygonIcon {
     if (this.fillLook === fillLook) {
       return this;
     } else {
@@ -78,9 +78,9 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
     }
   }
 
-  declare readonly moodModifier: MoodMatrix | null;
+  override readonly moodModifier!: MoodMatrix | null;
 
-  withMoodModifier(moodModifier: MoodMatrix | null): PolygonIcon {
+  override withMoodModifier(moodModifier: MoodMatrix | null): PolygonIcon {
     if (Equals(this.moodModifier, moodModifier)) {
       return this;
     } else {
@@ -89,7 +89,7 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
     }
   }
 
-  modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>): PolygonIcon {
+  override modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>): PolygonIcon {
     let oldMoodModifier = this.moodModifier;
     if (oldMoodModifier === null) {
       oldMoodModifier = MoodMatrix.empty();
@@ -102,11 +102,11 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
     }
   }
 
-  isThemed(): boolean {
+  override isThemed(): boolean {
     return this.fillColor !== null;
   }
 
-  withTheme(theme: ThemeMatrix, mood: MoodVector): PolygonIcon {
+  override withTheme(theme: ThemeMatrix, mood: MoodVector): PolygonIcon {
     const fillLook = this.fillLook;
     if (fillLook !== null) {
       const moodModifier = this.moodModifier;
@@ -119,7 +119,7 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
     }
   }
 
-  render(renderer: GraphicsRenderer, frame: BoxR2): void {
+  override render(renderer: GraphicsRenderer, frame: R2Box): void {
     if (renderer instanceof PaintingRenderer) {
       this.paint(renderer.context, frame);
     } else if (renderer instanceof DrawingRenderer) {
@@ -127,7 +127,7 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
     }
   }
 
-  paint(context: PaintingContext, frame: BoxR2): void {
+  override paint(context: PaintingContext, frame: R2Box): void {
     context.beginPath();
     this.draw(context, frame);
     if (this.fillColor !== null) {
@@ -136,7 +136,7 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
     context.fill();
   }
 
-  draw(context: DrawingContext, frame: BoxR2): void {
+  override draw(context: DrawingContext, frame: R2Box): void {
     const sides = this.sides;
     if (sides >= 3) {
       const centerX = (frame.xMin + frame.xMax) / 2;
@@ -208,7 +208,7 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
         .debug(this.moodModifier).write(41/*')'*/);
   }
 
-  toString(): string {
+  override toString(): string {
     return Format.debug(this);
   }
 

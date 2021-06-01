@@ -4,7 +4,7 @@
   "description": "Semantic looks and feels for mood-aware UX components",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/style",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2020 Swim inc.",
+  "copyright": "2015-2021 Swim inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-theme.js",

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -47,14 +47,14 @@ export class ColorStop implements Interpolate<ColorStop>, Equals, Equivalent {
     });
   }
 
-  declare readonly color: Color;
+  readonly color!: Color;
 
   withColor(color: AnyColor): ColorStop {
     color = Color.fromAny(color);
     return new ColorStop(color, this.stop, this.hint);
   }
 
-  declare readonly stop: Length | null;
+  readonly stop!: Length | null;
 
   withStop(stop: AnyLength | null): ColorStop {
     if (stop !== null) {
@@ -63,7 +63,7 @@ export class ColorStop implements Interpolate<ColorStop>, Equals, Equivalent {
     return new ColorStop(this.color, stop, this.hint);
   }
 
-  declare readonly hint: Length | null
+  readonly hint!: Length | null
 
   withHint(hint: AnyLength | null): ColorStop {
     if (hint !== null) {

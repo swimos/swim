@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ export class DataSetTrait<X, Y> extends GenericTrait {
     });
   }
 
-  declare readonly traitObservers: ReadonlyArray<DataSetTraitObserver<X, Y>>;
+  override readonly traitObservers!: ReadonlyArray<DataSetTraitObserver<X, Y>>;
 
   insertDataPoint(dataPointTrait: DataPointTrait<X, Y>, targetTrait: Trait | null = null): void {
     const dataPointFasteners = this.dataPointFasteners as TraitFastener<this, DataPointTrait<X, Y>>[];
@@ -130,7 +130,7 @@ export class DataSetTrait<X, Y> extends GenericTrait {
   }
 
   /** @hidden */
-  declare readonly dataPointFasteners: ReadonlyArray<TraitFastener<this, DataPointTrait<X, Y>>>;
+  readonly dataPointFasteners!: ReadonlyArray<TraitFastener<this, DataPointTrait<X, Y>>>;
 
   /** @hidden */
   protected mountDataPointFasteners(): void {
@@ -195,14 +195,14 @@ export class DataSetTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
+  protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
     if (newModel !== null) {
       this.detectModels(newModel);
     }
     super.didSetModel(newModel, oldModel);
   }
 
-  protected onInsertChildModel(childModel: Model, targetModel: Model | null): void {
+  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
     super.onInsertChildModel(childModel, targetModel);
     const dataPointTrait = this.detectDataPointModel(childModel);
     if (dataPointTrait !== null) {
@@ -211,7 +211,7 @@ export class DataSetTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected onRemoveChildModel(childModel: Model): void {
+  protected override onRemoveChildModel(childModel: Model): void {
     super.onRemoveChildModel(childModel);
     const dataPointTrait = this.detectDataPointModel(childModel);
     if (dataPointTrait !== null) {
@@ -220,23 +220,23 @@ export class DataSetTrait<X, Y> extends GenericTrait {
   }
 
   /** @hidden */
-  protected mountTraitFasteners(): void {
+  protected override mountTraitFasteners(): void {
     super.mountTraitFasteners();
     this.mountDataPointFasteners();
   }
 
   /** @hidden */
-  protected unmountTraitFasteners(): void {
+  protected override unmountTraitFasteners(): void {
     this.unmountDataPointFasteners();
     super.unmountTraitFasteners();
   }
 
-  protected onStartConsuming(): void {
+  protected override onStartConsuming(): void {
     super.onStartConsuming();
     this.startConsumingDataPoints();
   }
 
-  protected onStopConsuming(): void {
+  protected override onStopConsuming(): void {
     super.onStopConsuming();
     this.stopConsumingDataPoints();
   }

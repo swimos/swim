@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import {
   Constraint,
   ConstraintScope,
 } from "@swim/constraint";
-import {BoxR2, Transform} from "@swim/math";
+import {R2Box, Transform} from "@swim/math";
 import {Look, Feel, Mood, MoodVectorUpdates, MoodVector, ThemeMatrix} from "@swim/theme";
 import type {ViewContextType, ViewContext} from "./ViewContext";
 import type {
@@ -159,7 +159,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
     }
   }
 
-  declare readonly viewFlags: ViewFlags;
+  readonly viewFlags!: ViewFlags;
 
   setViewFlags(viewFlags: ViewFlags): void {
     Object.defineProperty(this, "viewFlags", {
@@ -169,7 +169,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
     });
   }
 
-  declare readonly viewController: ViewController | null;
+  readonly viewController!: ViewController | null;
 
   setViewController(newViewController: ViewControllerType<this> | null): void {
     const oldViewController = this.viewController;
@@ -203,7 +203,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
     // hook
   }
 
-  declare readonly viewObservers: ReadonlyArray<ViewObserver>;
+  readonly viewObservers!: ReadonlyArray<ViewObserver>;
 
   addViewObserver(viewObserver: ViewObserverType<this>): void {
     const oldViewObservers = this.viewObservers;
@@ -221,7 +221,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   }
 
   /** @hidden */
-  declare readonly viewObserverCache: ViewObserverCache<this>;
+  readonly viewObserverCache!: ViewObserverCache<this>;
 
   protected willAddViewObserver(viewObserver: ViewObserverType<this>): void {
     // hook
@@ -1266,7 +1266,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   }
 
   /** @hidden */
-  declare readonly animationTracks: ReadonlyArray<AnimationTrack>;
+  readonly animationTracks!: ReadonlyArray<AnimationTrack>;
 
   trackWillStartAnimating(track: AnimationTrack): void {
     Object.defineProperty(this, "animationTracks", {
@@ -1477,7 +1477,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
     }
   }
 
-  get pageBounds(): BoxR2 {
+  get pageBounds(): R2Box {
     const clientBounds = this.clientBounds;
     const clientTransform = this.clientTransform;
     return clientBounds.transform(clientTransform);
@@ -1487,7 +1487,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
    * Returns the bounding box, in page coordinates, the edges to which attached
    * popovers should point.
    */
-  get popoverFrame(): BoxR2 {
+  get popoverFrame(): R2Box {
     return this.pageBounds;
   }
 
@@ -1507,7 +1507,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
     return clientTransform.transform(pageTransform);
   }
 
-  abstract readonly clientBounds: BoxR2;
+  abstract readonly clientBounds: R2Box;
 
   intersectsViewport(): boolean {
     const bounds = this.clientBounds;

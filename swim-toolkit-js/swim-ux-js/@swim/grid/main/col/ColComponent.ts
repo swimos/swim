@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import {ColHeader, ColTrait} from "./ColTrait";
 import type {ColComponentObserver} from "./ColComponentObserver";
 
 export class ColComponent extends CompositeComponent {
-  declare readonly componentObservers: ReadonlyArray<ColComponentObserver>;
+  override readonly componentObservers!: ReadonlyArray<ColComponentObserver>;
 
   protected initColTrait(colTrait: ColTrait): void {
     // hook
@@ -257,7 +257,7 @@ export class ColComponent extends CompositeComponent {
   @ComponentViewTrait<ColComponent, ColView, ColTrait>({
     extends: ColComponent.ColFastener,
   })
-  declare col: ComponentViewTrait<this, ColView, ColTrait>;
+  readonly col!: ComponentViewTrait<this, ColView, ColTrait>;
 
   @ComponentView<ColComponent, HtmlView>({
     willSetView(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
@@ -270,5 +270,5 @@ export class ColComponent extends CompositeComponent {
       this.owner.didSetHeaderView(newHeaderView, oldHeaderView);
     },
   })
-  declare header: ComponentView<this, HtmlView>;
+  readonly header!: ComponentView<this, HtmlView>;
 }

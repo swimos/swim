@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ export class DataPointTrait<X, Y> extends GenericTrait {
     });
   }
 
-  declare readonly traitObservers: ReadonlyArray<DataPointTraitObserver<X, Y>>;
+  override readonly traitObservers!: ReadonlyArray<DataPointTraitObserver<X, Y>>;
 
   protected willSetX(newX: X, oldX: X): void {
     const traitObservers = this.traitObservers;
@@ -72,7 +72,7 @@ export class DataPointTrait<X, Y> extends GenericTrait {
       this.owner.didSetX(newX, oldX);
     },
   })
-  declare x: TraitProperty<this, X>;
+  readonly x!: TraitProperty<this, X>;
 
   protected willSetY(newY: Y, oldY: Y): void {
     const traitObservers = this.traitObservers;
@@ -107,7 +107,7 @@ export class DataPointTrait<X, Y> extends GenericTrait {
       this.owner.didSetY(newY, oldY);
     },
   })
-  declare y: TraitProperty<this, Y>;
+  readonly y!: TraitProperty<this, Y>;
 
   protected willSetY2(newY2: Y | undefined, oldY2: Y | undefined): void {
     const traitObservers = this.traitObservers;
@@ -142,7 +142,7 @@ export class DataPointTrait<X, Y> extends GenericTrait {
       this.owner.didSetY2(newY2, oldY2);
     },
   })
-  declare y2: TraitProperty<this, Y | undefined>;
+  readonly y2!: TraitProperty<this, Y | undefined>;
 
   protected willSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
     const traitObservers = this.traitObservers;
@@ -179,7 +179,7 @@ export class DataPointTrait<X, Y> extends GenericTrait {
       this.owner.didSetRadius(newRadius, oldRadius);
     },
   })
-  declare radius: TraitProperty<this, Length | null, AnyLength | null>;
+  readonly radius!: TraitProperty<this, Length | null, AnyLength | null>;
 
   protected willSetColor(newColor: Look<Color> | Color | null, oldColor: Look<Color> | Color | null): void {
     const traitObservers = this.traitObservers;
@@ -221,7 +221,7 @@ export class DataPointTrait<X, Y> extends GenericTrait {
       return color;
     },
   })
-  declare color: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly color!: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 
   protected willSetOpacity(newOpacity: number | undefined, oldOpacity: number | undefined): void {
     const traitObservers = this.traitObservers;
@@ -257,7 +257,7 @@ export class DataPointTrait<X, Y> extends GenericTrait {
       this.owner.didSetOpacity(newOpacity, oldOpacity);
     },
   })
-  declare opacity: TraitProperty<this, number | undefined>;
+  readonly opacity!: TraitProperty<this, number | undefined>;
 
   protected willSetLabel(newLabel: DataPointLabel<X, Y> | null, oldLabel: DataPointLabel<X, Y> | null): void {
     const traitObservers = this.traitObservers;
@@ -297,5 +297,5 @@ export class DataPointTrait<X, Y> extends GenericTrait {
       this.owner.didSetLabel(newLabel, oldLabel);
     },
   })
-  declare label: TraitProperty<this, DataPointLabel<X, Y> | null>;
+  readonly label!: TraitProperty<this, DataPointLabel<X, Y> | null>;
 }

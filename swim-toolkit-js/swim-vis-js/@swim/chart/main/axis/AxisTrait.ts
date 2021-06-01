@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,5 +16,5 @@ import {GenericTrait} from "@swim/model";
 import type {AxisTraitObserver} from "./AxisTraitObserver";
 
 export abstract class AxisTrait<D> extends GenericTrait {
-  declare readonly traitObservers: ReadonlyArray<AxisTraitObserver<D>>;
+  override readonly traitObservers!: ReadonlyArray<AxisTraitObserver<D>>;
 }

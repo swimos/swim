@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ export abstract class ComponentManager<C extends Component = Component> {
     });
   }
 
-  declare readonly componentManagerObservers: ReadonlyArray<ComponentManagerObserver>;
+  readonly componentManagerObservers!: ReadonlyArray<ComponentManagerObserver>;
 
   addComponentManagerObserver(componentManagerObserver: ComponentManagerObserverType<this>): void {
     const oldComponentManagerObservers = this.componentManagerObservers;
@@ -164,7 +164,7 @@ export abstract class ComponentManager<C extends Component = Component> {
     }
   }
 
-  declare readonly rootComponents: ReadonlyArray<C>;
+  readonly rootComponents!: ReadonlyArray<C>;
 
   insertRootComponent(rootComponent: C): void {
     const oldRootComponents = this.rootComponents;

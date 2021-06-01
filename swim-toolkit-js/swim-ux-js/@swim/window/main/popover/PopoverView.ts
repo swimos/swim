@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 import {Arrays} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
-import {AnyLength, Length, AnyBoxR2, BoxR2} from "@swim/math";
+import {AnyLength, Length, AnyR2Box, R2Box} from "@swim/math";
 import {Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {
@@ -38,7 +38,7 @@ export interface PopoverViewInit extends HtmlViewInit {
   viewController?: PopoverViewController;
   source?: View;
   placement?: PopoverPlacement[];
-  placementFrame?: BoxR2;
+  placementFrame?: R2Box;
   arrowWidth?: AnyLength;
   arrowHeight?: AnyLength;
 }
@@ -97,11 +97,11 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
     return arrow;
   }
 
-  declare readonly viewController: PopoverViewController | null;
+  override readonly viewController!: PopoverViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<PopoverViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<PopoverViewObserver>;
 
-  initView(init: PopoverViewInit): void {
+  override initView(init: PopoverViewInit): void {
     super.initView(init);
     if (init.source !== void 0) {
       this.setSource(init.source);
@@ -121,7 +121,7 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
   }
 
   /** @hidden */
-  declare readonly displayState: number;
+  readonly displayState!: number;
 
   /** @hidden */
   setDisplayState(displayState: number): void {
@@ -134,18 +134,18 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
 
   /** @hidden */
   @ViewAnimator({type: Number, state: 0})
-  declare displayPhase: ViewAnimator<this, number>; // 0 = hidden; 1 = shown
+  readonly displayPhase!: ViewAnimator<this, number>; // 0 = hidden; 1 = shown
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  declare placementGap: ViewAnimator<this, Length, AnyLength>;
+  readonly placementGap!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.px(10)})
-  declare arrowWidth: ViewAnimator<this, Length, AnyLength>;
+  readonly arrowWidth!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.px(8)})
-  declare arrowHeight: ViewAnimator<this, Length, AnyLength>;
+  readonly arrowHeight!: ViewAnimator<this, Length, AnyLength>;
 
-  declare readonly source: View | null;
+  readonly source!: View | null;
 
   setSource(newSource: View | null): void {
     const oldSource = this.source;
@@ -233,7 +233,7 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
     }
   }
 
-  declare readonly modality: boolean | number;
+  readonly modality!: boolean | number;
 
   showModal(options: ModalOptions, timing?: AnyTiming | boolean): void {
     if (this.isHidden()) {
@@ -354,7 +354,7 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
   }
 
   /** @hidden */
-  declare readonly allowedPlacement: PopoverPlacement[];
+  readonly allowedPlacement!: PopoverPlacement[];
 
   placement(): ReadonlyArray<PopoverPlacement>;
   placement(placement: ReadonlyArray<PopoverPlacement>): this;
@@ -372,19 +372,19 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
   }
 
   /** @hidden */
-  declare readonly currentPlacement: PopoverPlacement;
+  readonly currentPlacement!: PopoverPlacement;
 
-  @ViewProperty<PopoverView, BoxR2 | null, AnyBoxR2 | null>({
-    type: BoxR2,
+  @ViewProperty<PopoverView, R2Box | null, AnyR2Box | null>({
+    type: R2Box,
     state: null,
-    didSetState(placementFrame: BoxR2 | null): void {
+    didSetState(placementFrame: R2Box | null): void {
       this.owner.place();
     },
-    fromAny(value: AnyBoxR2 | null): BoxR2 | null {
-      return value !== null ? BoxR2.fromAny(value) : null;
+    fromAny(value: AnyR2Box | null): R2Box | null {
+      return value !== null ? R2Box.fromAny(value) : null;
     },
   })
-  declare placementFrame: ViewProperty<this, BoxR2 | null, AnyBoxR2 | null>;
+  readonly placementFrame!: ViewProperty<this, R2Box | null, AnyR2Box | null>;
 
   @ViewProperty<PopoverView, boolean>({
     type: Boolean,
@@ -393,9 +393,9 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
       this.owner.place();
     }
   })
-  declare dropdown: ViewProperty<this, boolean>;
+  readonly dropdown!: ViewProperty<this, boolean>;
 
-  protected onMount(): void {
+  protected override onMount(): void {
     super.onMount();
     this.attachEvents();
     if (this.source !== null) {
@@ -403,7 +403,7 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
     }
   }
 
-  protected onUnmount(): void {
+  protected override onUnmount(): void {
     super.onUnmount();
     this.detachEvents();
     if (this.source !== null) {
@@ -419,14 +419,14 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
     this.off("click", this.onClick);
   }
 
-  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & (View.NeedsScroll | View.NeedsAnimate)) !== 0) {
       this.requireUpdate(View.NeedsLayout);
     }
     return processFlags;
   }
 
-  protected onAnimate(viewContext: ViewContextType<this>): void {
+  protected override onAnimate(viewContext: ViewContextType<this>): void {
     super.onAnimate(viewContext);
     if (this.backgroundColor.takeUpdatedValue() !== void 0) {
       this.place(true);
@@ -460,13 +460,13 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
     }
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.place();
   }
 
   /** @hidden */
-  declare readonly sourceFrame: BoxR2 | null;
+  readonly sourceFrame!: R2Box | null;
 
   place(force: boolean = false): PopoverPlacement {
     const source = this.source;
@@ -491,7 +491,7 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
   }
 
   /** @hidden */
-  protected placePopover(source: View, sourceFrame: BoxR2): PopoverPlacement {
+  protected placePopover(source: View, sourceFrame: R2Box): PopoverPlacement {
     const node = this.node;
     const parent = node.offsetParent;
     if (parent === null) {
@@ -752,7 +752,7 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
   }
 
   /** @hidden */
-  protected placeArrow(source: View, sourceFrame: BoxR2, arrow: HtmlView,
+  protected placeArrow(source: View, sourceFrame: R2Box, arrow: HtmlView,
                        placement: PopoverPlacement): void {
     const node = this.node;
     const parent = node.offsetParent;

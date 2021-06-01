@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import {GeoPathComponent} from "./GeoPathComponent";
 import type {GeoAreaComponentObserver} from "./GeoAreaComponentObserver";
 
 export class GeoAreaComponent extends GeoPathComponent {
-  declare readonly componentObservers: ReadonlyArray<GeoAreaComponentObserver>;
+  override readonly componentObservers!: ReadonlyArray<GeoAreaComponentObserver>;
 
   protected initGeoTrait(geoTrait: GeoAreaTrait): void {
     // hook
@@ -388,5 +388,5 @@ export class GeoAreaComponent extends GeoPathComponent {
   @ComponentViewTrait<GeoAreaComponent, GeoAreaView, GeoAreaTrait>({
     extends: GeoAreaComponent.GetFastener,
   })
-  declare geo: ComponentViewTrait<this, GeoAreaView, GeoAreaTrait>;
+  readonly geo!: ComponentViewTrait<this, GeoAreaView, GeoAreaTrait>;
 }

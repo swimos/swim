@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,11 +42,11 @@ export class CanvasRenderer extends PaintingRenderer {
     });
   }
 
-  declare readonly context: CanvasContext;
+  override readonly context!: CanvasContext;
 
-  declare readonly pixelRatio: number;
+  override readonly pixelRatio!: number;
 
-  declare readonly theme: ThemeMatrix | null;
+  override readonly theme!: ThemeMatrix | null;
 
-  declare readonly mood: MoodVector | null;
+  override readonly mood!: MoodVector | null;
 }

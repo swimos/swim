@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -57,9 +57,9 @@ export class ButtonItem extends HtmlView {
   }
 
   @ViewAnimator({type: Number, inherit: true})
-  declare stackPhase: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
+  readonly stackPhase!: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     const label = this.label;
     if (label !== null && label.color.takesPrecedence(View.Intrinsic)) {
@@ -67,7 +67,7 @@ export class ButtonItem extends HtmlView {
     }
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     const phase = this.stackPhase.getValueOr(1);
     const button = this.button;
@@ -81,7 +81,7 @@ export class ButtonItem extends HtmlView {
     }
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     const childKey = childView.key;
     if (childKey === "button" && childView instanceof FloatingButton) {
@@ -91,7 +91,7 @@ export class ButtonItem extends HtmlView {
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     const childKey = childView.key;
     if (childKey === "button" && childView instanceof FloatingButton) {
       this.onRemoveButton(childView);

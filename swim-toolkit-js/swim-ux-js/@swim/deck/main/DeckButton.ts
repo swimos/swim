@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,26 +37,26 @@ export class DeckButton extends DeckSlot {
     this.cursor.setState("pointer", View.Intrinsic);
   }
 
-  declare readonly viewController: HtmlViewController & DeckButtonObserver | null;
+  override readonly viewController!: HtmlViewController & DeckButtonObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<DeckButtonObserver>;
+  override readonly viewObservers!: ReadonlyArray<DeckButtonObserver>;
 
   @ViewProperty({type: Length, state: Length.px(12)})
-  declare iconPadding: ViewProperty<this, Length, AnyLength>;
+  readonly iconPadding!: ViewProperty<this, Length, AnyLength>;
 
   @ViewAnimator({type: Number, inherit: true, updateFlags: View.NeedsLayout})
-  declare deckPhase: ViewAnimator<this, number | undefined>;
+  readonly deckPhase!: ViewAnimator<this, number | undefined>;
 
   @ViewAnimator({type: Number, state: 0})
-  declare slotAlign: ViewAnimator<this, number>;
+  readonly slotAlign!: ViewAnimator<this, number>;
 
-  get colorLook(): Look<Color> {
+  override get colorLook(): Look<Color> {
     return Look.accentColor;
   }
 
-  declare closeIcon: DeckButtonCloseIcon<this, SvgIconView>; // defined by DeckButtonCloseIcon
+  readonly closeIcon!: DeckButtonCloseIcon<this, SvgIconView>; // defined by DeckButtonCloseIcon
 
-  declare backIcon: DeckButtonBackIcon<this, SvgIconView>; // defined by DeckButtonBackIcon
+  readonly backIcon!: DeckButtonBackIcon<this, SvgIconView>; // defined by DeckButtonBackIcon
 
   /** @hidden */
   labelCount: number;
@@ -190,7 +190,7 @@ export class DeckButton extends DeckSlot {
     });
   }
 
-  protected didLayout(viewContext: ViewContextType<this>): void {
+  protected override didLayout(viewContext: ViewContextType<this>): void {
     if (!this.deckPhase.isAnimating()) {
       const deckPhase = this.deckPhase.takeUpdatedValue();
       if (deckPhase !== void 0) {
@@ -215,13 +215,13 @@ export class DeckButton extends DeckSlot {
 
 /** @hidden */
 export abstract class DeckButtonCloseIcon<V extends DeckButton, S extends SvgIconView> extends ViewFastener<V, S> {
-  onSetView(iconView: S | null): void {
+  override onSetView(iconView: S | null): void {
     if (iconView !== null) {
       this.initIcon(iconView);
     }
   }
 
-  insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
+  override insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
     parentView.prependChildView(childView, key);
   }
 
@@ -268,13 +268,13 @@ ViewFastener({
 
 /** @hidden */
 export abstract class DeckButtonBackIcon<V extends DeckButton, S extends SvgIconView> extends ViewFastener<V, S> {
-  onSetView(iconView: S | null): void {
+  override onSetView(iconView: S | null): void {
     if (iconView !== null) {
       this.initIcon(iconView);
     }
   }
 
-  insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
+  override insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
     parentView.prependChildView(childView, key);
   }
 
@@ -381,13 +381,13 @@ export abstract class DeckButtonLabel<V extends DeckButton, S extends HtmlView> 
   /** @hidden */
   layoutWidth: number;
 
-  onSetView(labelView: S | null): void {
+  override onSetView(labelView: S | null): void {
     if (labelView !== null) {
       this.initLabel(labelView);
     }
   }
 
-  insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
+  override insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
     const targetKey = "label" + (this.labelIndex + 1);
     targetView = parentView.getChildView(targetKey);
     parentView.insertChildView(childView, targetView, key);

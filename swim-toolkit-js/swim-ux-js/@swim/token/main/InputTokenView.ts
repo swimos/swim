@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,18 +33,18 @@ export class InputTokenView extends TokenView {
     this.onInputKey = this.onInputKey.bind(this);
   }
 
-  protected initToken(): void {
+  protected override initToken(): void {
     this.stylesheet.injectView();
     super.initToken();
     this.addClass("input-token");
     this.label.setView(this.label.createView());
   }
 
-  declare readonly viewController: InputTokenViewController | null;
+  override readonly viewController!: InputTokenViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<InputTokenViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<InputTokenViewObserver>;
 
-  initView(init: InputTokenViewInit): void {
+  override initView(init: InputTokenViewInit): void {
     super.initView(init);
   }
 
@@ -61,7 +61,7 @@ export class InputTokenView extends TokenView {
     css: "::placeholder {}",
   });
 
-  protected initLabel(labelView: HtmlView): void {
+  protected override initLabel(labelView: HtmlView): void {
     super.initLabel(labelView);
     labelView.paddingTop.setState(0, View.Intrinsic);
     labelView.paddingRight.setState(0, View.Intrinsic);
@@ -78,7 +78,7 @@ export class InputTokenView extends TokenView {
     labelView.pointerEvents.setState("auto", View.Intrinsic);
   }
 
-  protected createBodyGesture(bodyView: SvgView): PositionGesture<SvgView> | null {
+  protected override createBodyGesture(bodyView: SvgView): PositionGesture<SvgView> | null {
     return null;
   }
 
@@ -91,7 +91,7 @@ export class InputTokenView extends TokenView {
       this.owner.initStylesheet(styleView);
     },
   })
-  declare stylesheet: ViewFastener<this, StyleView>;
+  readonly stylesheet!: ViewFastener<this, StyleView>;
 
   @ViewFastener<InputTokenView, HtmlView>({
     child: false,
@@ -120,14 +120,14 @@ export class InputTokenView extends TokenView {
       labelView.off("keydown", this.owner.onInputKey);
     },
   })
-  declare label: ViewFastener<this, HtmlView>;
+  override readonly label!: ViewFastener<this, HtmlView>;
 
   /** @hidden */
   get placeholderLook(): Look<Color> {
     return Look.neutralColor;
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     const styleView = this.stylesheet.view;
     if (styleView !== null) {

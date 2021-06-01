@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ export type CellContent = CellContentFunction | string;
 export type CellContentFunction = (cellTrait: CellTrait) => HtmlView | string | null;
 
 export class CellTrait extends GenericTrait {
-  declare readonly traitObservers: ReadonlyArray<CellTraitObserver>;
+  override readonly traitObservers!: ReadonlyArray<CellTraitObserver>;
 
   protected willSetContent(newContent: CellContent | null, oldContent: CellContent | null): void {
     const traitObservers = this.traitObservers;
@@ -56,5 +56,5 @@ export class CellTrait extends GenericTrait {
       this.owner.didSetContent(newContent, oldContent);
     },
   })
-  declare content: TraitProperty<this, CellContent | null>;
+  readonly content!: TraitProperty<this, CellContent | null>;
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ import {View} from "@swim/view";
 import {TreeCell} from "./TreeCell";
 
 export class TitleTreeCell extends TreeCell {
-  protected initCell(): void {
+  protected override initCell(): void {
     super.initCell();
     this.addClass("title-tree-cell");
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     this.color.setState(theme.getOr(Look.accentColor, mood, null), timing, View.Intrinsic);
   }

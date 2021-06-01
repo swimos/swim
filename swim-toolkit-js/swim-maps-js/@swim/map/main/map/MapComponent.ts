@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ export abstract class MapComponent extends CompositeComponent {
     });
   }
 
-  declare readonly componentObservers: ReadonlyArray<MapComponentObserver>;
+  override readonly componentObservers!: ReadonlyArray<MapComponentObserver>;
 
   protected initMapTrait(mapTrait: MapTrait): void {
     // hook
@@ -261,7 +261,7 @@ export abstract class MapComponent extends CompositeComponent {
   @ComponentViewTrait<MapComponent, MapView, MapTrait>({
     extends: MapComponent.MapFastener,
   })
-  declare map: ComponentViewTrait<this, MapView, MapTrait>;
+  readonly map!: ComponentViewTrait<this, MapView, MapTrait>;
 
   protected initCanvasView(canvasView: CanvasView): void {
     // hook
@@ -322,7 +322,7 @@ export abstract class MapComponent extends CompositeComponent {
   @ComponentView<MapComponent, CanvasView>({
     extends: MapComponent.CanvasFastener,
   })
-  declare canvas: ComponentView<this, CanvasView>;
+  readonly canvas!: ComponentView<this, CanvasView>;
 
   protected initContainerView(containerView: HtmlView): void {
     const mapView = this.createMapView(containerView);
@@ -385,7 +385,7 @@ export abstract class MapComponent extends CompositeComponent {
   @ComponentView<MapComponent, HtmlView>({
     extends: MapComponent.ContainerFastener,
   })
-  declare container: ComponentView<this, HtmlView>;
+  readonly container!: ComponentView<this, HtmlView>;
 
   insertLayer(layerComponent: GeoComponent, targetComponent: Component | null = null): void {
     const layerFasteners = this.layerFasteners as ComponentFastener<this, GeoComponent>[];
@@ -663,7 +663,7 @@ export abstract class MapComponent extends CompositeComponent {
   }
 
   @ComponentProperty({type: Timing, state: true})
-  declare geoTiming: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
+  readonly geoTiming!: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
 
   /** @hidden */
   static LayerFastener = ComponentFastener.define<MapComponent, GeoComponent>({
@@ -707,7 +707,7 @@ export abstract class MapComponent extends CompositeComponent {
   }
 
   /** @hidden */
-  declare readonly layerFasteners: ReadonlyArray<ComponentFastener<this, GeoComponent>>;
+  readonly layerFasteners!: ReadonlyArray<ComponentFastener<this, GeoComponent>>;
 
   protected getLayerFastener(layerTrait: GeoTrait): ComponentFastener<this, GeoComponent> | null {
     const layerFasteners = this.layerFasteners;
@@ -743,7 +743,7 @@ export abstract class MapComponent extends CompositeComponent {
     return component instanceof GeoComponent ? component : null;
   }
 
-  protected onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
+  protected override onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
     super.onInsertChildComponent(childComponent, targetComponent);
     const layerComponent = this.detectLayerComponent(childComponent);
     if (layerComponent !== null) {
@@ -751,7 +751,7 @@ export abstract class MapComponent extends CompositeComponent {
     }
   }
 
-  protected onRemoveChildComponent(childComponent: Component): void {
+  protected override onRemoveChildComponent(childComponent: Component): void {
     super.onRemoveChildComponent(childComponent);
     const layerComponent = this.detectLayerComponent(childComponent);
     if (layerComponent !== null) {
@@ -760,13 +760,13 @@ export abstract class MapComponent extends CompositeComponent {
   }
 
   /** @hidden */
-  protected mountComponentFasteners(): void {
+  protected override mountComponentFasteners(): void {
     super.mountComponentFasteners();
     this.mountLayerFasteners();
   }
 
   /** @hidden */
-  protected unmountComponentFasteners(): void {
+  protected override unmountComponentFasteners(): void {
     this.unmountLayerFasteners();
     super.unmountComponentFasteners();
   }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyLength, Length, AnyAngle, Angle, AnyPointR2, PointR2, BoxR2} from "@swim/math";
+import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {ViewContextType, View, ViewAnimator, ViewFastener} from "@swim/view";
@@ -32,7 +32,7 @@ export type AnyGaugeView = GaugeView | GaugeViewInit;
 
 export interface GaugeViewInit extends GraphicsViewInit {
   limit?: number;
-  center?: AnyPointR2;
+  center?: AnyR2Point;
   innerRadius?: AnyLength;
   outerRadius?: AnyLength;
   startAngle?: AnyAngle;
@@ -63,7 +63,7 @@ export class GaugeView extends LayerView {
     });
   }
 
-  initView(init: GaugeViewInit): void {
+  override initView(init: GaugeViewInit): void {
     super.initView(init);
     if (init.limit !== void 0) {
       this.limit(init.limit);
@@ -131,66 +131,66 @@ export class GaugeView extends LayerView {
     }
   }
 
-  declare readonly viewController: GraphicsViewController & GaugeViewObserver | null;
+  override readonly viewController!: GraphicsViewController & GaugeViewObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<GaugeViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<GaugeViewObserver>;
 
   @ViewAnimator({type: Number, state: 0, updateFlags: View.NeedsLayout})
-  declare limit: ViewAnimator<this, number>;
+  readonly limit!: ViewAnimator<this, number>;
 
-  @ViewAnimator({type: PointR2, state: PointR2.origin(), updateFlags: View.NeedsLayout})
-  declare center: ViewAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator({type: R2Point, state: R2Point.origin(), updateFlags: View.NeedsLayout})
+  readonly center!: ViewAnimator<this, R2Point, AnyR2Point>;
 
   @ViewAnimator({type: Length, state: Length.pct(30), updateFlags: View.NeedsLayout})
-  declare innerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly innerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.pct(40), updateFlags: View.NeedsLayout})
-  declare outerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly outerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Angle, state: Angle.rad(-Math.PI / 2), updateFlags: View.NeedsLayout})
-  declare startAngle: ViewAnimator<this, Angle, AnyAngle>;
+  readonly startAngle!: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Angle, state: Angle.rad(2 * Math.PI), updateFlags: View.NeedsLayout})
-  declare sweepAngle: ViewAnimator<this, Angle, AnyAngle>;
+  readonly sweepAngle!: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Length, state: Length.pct(50)})
-  declare cornerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly cornerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.px(1), updateFlags: View.NeedsLayout})
-  declare dialSpacing: ViewAnimator<this, Length, AnyLength>;
+  readonly dialSpacing!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Color, state: null, look: Look.subduedColor})
-  declare dialColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly dialColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Color, state: null, look: Look.accentColor})
-  declare meterColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly meterColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Length, state: Length.pct(25)})
-  declare labelPadding: ViewAnimator<this, Length, AnyLength>;
+  readonly labelPadding!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Number, state: 1.0})
-  declare tickAlign: ViewAnimator<this, number>;
+  readonly tickAlign!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Length, state: Length.pct(45)})
-  declare tickRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly tickRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.pct(50)})
-  declare tickLength: ViewAnimator<this, Length, AnyLength>;
+  readonly tickLength!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.px(1)})
-  declare tickWidth: ViewAnimator<this, Length, AnyLength>;
+  readonly tickWidth!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.px(2)})
-  declare tickPadding: ViewAnimator<this, Length, AnyLength>;
+  readonly tickPadding!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Color, state: null, look: Look.neutralColor})
-  declare tickColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly tickColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Font, state: null, inherit: true})
-  declare font: ViewAnimator<this, Font | null, AnyFont | null>;
+  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
 
   @ViewAnimator({type: Color, state: null, look: Look.mutedColor})
-  declare textColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected initTitle(titleView: GraphicsView): void {
     if (TypesetView.is(titleView)) {
@@ -269,7 +269,7 @@ export class GaugeView extends LayerView {
       this.owner.didSetTitle(newTitleView, oldTitleView);
     },
   })
-  declare title: ViewFastener<this, GraphicsView, AnyTextRunView>;
+  readonly title!: ViewFastener<this, GraphicsView, AnyTextRunView>;
 
   insertDial(dialView: AnyDialView, targetView: View | null = null): void {
     dialView = DialView.fromAny(dialView);
@@ -422,7 +422,7 @@ export class GaugeView extends LayerView {
   }
 
   /** @hidden */
-  declare readonly dialFasteners: ReadonlyArray<ViewFastener<this, DialView>>;
+  readonly dialFasteners!: ReadonlyArray<ViewFastener<this, DialView>>;
 
   /** @hidden */
   protected mountDialFasteners(): void {
@@ -454,7 +454,7 @@ export class GaugeView extends LayerView {
     this.removeDial(dialView);
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     const dialView = this.detectDial(childView);
     if (dialView !== null) {
@@ -462,7 +462,7 @@ export class GaugeView extends LayerView {
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     super.onRemoveChildView(childView);
     const dialView = this.detectDial(childView);
     if (dialView !== null) {
@@ -470,16 +470,16 @@ export class GaugeView extends LayerView {
     }
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.layoutGauge(this.viewFrame);
   }
 
-  protected layoutGauge(frame: BoxR2): void {
+  protected layoutGauge(frame: R2Box): void {
     if (this.center.takesPrecedence(View.Intrinsic)) {
       const cx = (frame.xMin + frame.xMax) / 2;
       const cy = (frame.yMin + frame.yMax) / 2;
-      this.center.setState(new PointR2(cx, cy), View.Intrinsic);
+      this.center.setState(new R2Point(cx, cy), View.Intrinsic);
     }
 
     const dialFasteners = this.dialFasteners;
@@ -524,18 +524,18 @@ export class GaugeView extends LayerView {
   }
 
   /** @hidden */
-  protected mountViewFasteners(): void {
+  protected override mountViewFasteners(): void {
     super.mountViewFasteners();
     this.mountDialFasteners();
   }
 
   /** @hidden */
-  protected unmountViewFasteners(): void {
+  protected override unmountViewFasteners(): void {
     this.unmountDialFasteners();
     super.unmountViewFasteners();
   }
 
-  static create(): GaugeView {
+  static override create(): GaugeView {
     return new GaugeView();
   }
 

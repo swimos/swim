@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -56,22 +56,22 @@ export class HslColor extends Color {
     });
   }
 
-  isDefined(): boolean {
+  override isDefined(): boolean {
     return isFinite(this.h) && isFinite(this.s)
         && isFinite(this.l) && isFinite(this.a);
   }
 
-  declare readonly h: number;
+  readonly h!: number;
 
-  declare readonly s: number;
+  readonly s!: number;
 
-  declare readonly l: number;
+  readonly l!: number;
 
-  declare readonly a: number;
+  readonly a!: number;
 
-  alpha(): number;
-  alpha(a: number): HslColor;
-  alpha(a?: number): number | HslColor {
+  override alpha(): number;
+  override alpha(a: number): HslColor;
+  override alpha(a?: number): number | HslColor {
     if (a === void 0) {
       return this.a;
     } else if (this.a !== a) {
@@ -81,32 +81,32 @@ export class HslColor extends Color {
     }
   }
 
-  get lightness(): number {
+  override get lightness(): number {
     return this.l;
   }
 
-  plus(that: AnyColor): HslColor {
+  override plus(that: AnyColor): HslColor {
     that = Color.fromAny(that).hsl();
     return new HslColor(this.h + (that as HslColor).h, this.s + (that as HslColor).s,
                         this.l + (that as HslColor).l, this.a + (that as HslColor).a);
   }
 
-  times(scalar: number): HslColor {
+  override times(scalar: number): HslColor {
     return new HslColor(this.h * scalar, this.s * scalar, this.l * scalar, this.a * scalar);
   }
 
-  combine(that: AnyColor, scalar: number = 1): HslColor {
+  override combine(that: AnyColor, scalar: number = 1): HslColor {
     that = Color.fromAny(that).hsl();
     return new HslColor(this.h + (that as HslColor).h * scalar, this.s + (that as HslColor).s * scalar,
                         this.l + (that as HslColor).l * scalar, this.a + (that as HslColor).a * scalar);
   }
 
-  lighter(k?: number): HslColor {
+  override lighter(k?: number): HslColor {
     k = k === void 0 ? Color.Brighter : Math.pow(Color.Brighter, k);
     return k !== 1 ? new HslColor(this.h, this.s, this.l * k, this.a) : this;
   }
 
-  darker(k?: number): HslColor {
+  override darker(k?: number): HslColor {
     k = k === void 0 ? Color.Darker : Math.pow(Color.Darker, k);
     return k !== 1 ? new HslColor(this.h, this.s, this.l * k, this.a) : this;
   }
@@ -118,7 +118,7 @@ export class HslColor extends Color {
                                              : m1);
   }
 
-  rgb(): RgbColor {
+  override rgb(): RgbColor {
     const h = this.h % 360 + +(this.h < 0) * 360;
     const s = isNaN(h) || isNaN(this.s) ? 0 : this.s;
     const l = this.l;
@@ -130,14 +130,14 @@ export class HslColor extends Color {
                         this.a);
   }
 
-  hsl(): HslColor {
+  override hsl(): HslColor {
     return this;
   }
 
-  interpolateTo(that: HslColor): Interpolator<HslColor>;
-  interpolateTo(that: Color): Interpolator<Color>;
-  interpolateTo(that: unknown): Interpolator<Color> | null;
-  interpolateTo(that: unknown): Interpolator<Color> | null {
+  override interpolateTo(that: HslColor): Interpolator<HslColor>;
+  override interpolateTo(that: Color): Interpolator<Color>;
+  override interpolateTo(that: unknown): Interpolator<Color> | null;
+  override interpolateTo(that: unknown): Interpolator<Color> | null {
     if (that instanceof HslColor) {
       return HslColorInterpolator(this, that);
     } else {
@@ -145,7 +145,7 @@ export class HslColor extends Color {
     }
   }
 
-  equivalentTo(that: unknown, epsilon?: number): boolean {
+  override equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof Color) {
@@ -158,7 +158,7 @@ export class HslColor extends Color {
     return false;
   }
 
-  equals(that: unknown): boolean {
+  override equals(that: unknown): boolean {
     if (this === that) {
       return true;
     } else if (that instanceof HslColor) {
@@ -167,12 +167,12 @@ export class HslColor extends Color {
     return false;
   }
 
-  hashCode(): number {
+  override hashCode(): number {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Constructors.hash(HslColor),
         Numbers.hash(this.h)), Numbers.hash(this.s)), Numbers.hash(this.l)), Numbers.hash(this.a)));
   }
 
-  debug(output: Output): void {
+  override debug(output: Output): void {
     output = output.write("Color").write(46/*'.'*/).write("hsl").write(40/*'('*/)
         .debug(this.h).write(", ").debug(this.s).write(", ").debug(this.l);
     if (this.a !== 1) {
@@ -181,14 +181,14 @@ export class HslColor extends Color {
     output = output.write(41/*')'*/);
   }
 
-  toHexString(): string {
+  override toHexString(): string {
     return this.rgb().toHexString();
   }
 
   /** @hidden */
-  declare readonly stringValue: string | undefined;
+  readonly stringValue!: string | undefined;
 
-  toString(): string {
+  override toString(): string {
     let s = this.stringValue;
     if (s === void 0) {
       let a = this.a;
@@ -215,24 +215,24 @@ export class HslColor extends Color {
   }
 
   @Lazy
-  static transparent(): HslColor {
+  static override transparent(): HslColor {
     return new HslColor(0, 0, 0, 0);
   }
 
-  static black(alpha: number = 1): HslColor {
+  static override black(alpha: number = 1): HslColor {
     return new HslColor(0, 0, 0, alpha);
   }
 
-  static white(alpha: number = 1): HslColor {
+  static override white(alpha: number = 1): HslColor {
     return new HslColor(0, 1, 1, alpha);
   }
 
-  static fromInit(value: HslColorInit): HslColor {
+  static override fromInit(value: HslColorInit): HslColor {
     const h = typeof value.h === "number" ? value.h : Angle.fromAny(value.h).degValue();
     return new HslColor(h, value.s, value.l, value.a);
   }
 
-  static fromAny(value: AnyHslColor): HslColor {
+  static override fromAny(value: AnyHslColor): HslColor {
     if (value === void 0 || value === null || value instanceof HslColor) {
       return value;
     } else if (typeof value === "string") {
@@ -243,7 +243,7 @@ export class HslColor extends Color {
     throw new TypeError("" + value);
   }
 
-  static fromValue(value: Value): HslColor | null {
+  static override fromValue(value: Value): HslColor | null {
     const tag = value.tag;
     let positional: boolean;
     if (tag === "hsl" || tag === "hsla") {
@@ -286,12 +286,12 @@ export class HslColor extends Color {
     return null;
   }
 
-  static parse(str: string): HslColor {
+  static override parse(str: string): HslColor {
     return Color.parse(str).hsl();
   }
 
   /** @hidden */
-  static isInit(value: unknown): value is HslColorInit {
+  static override isInit(value: unknown): value is HslColorInit {
     if (typeof value === "object" && value !== null) {
       const init = value as HslColorInit;
       return Angle.isAny(init.h)
@@ -303,7 +303,7 @@ export class HslColor extends Color {
   }
 
   /** @hidden */
-  static isAny(value: unknown): value is AnyHslColor {
+  static override isAny(value: unknown): value is AnyHslColor {
     return value instanceof HslColor
         || HslColor.isInit(value)
         || typeof value === "string";

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -123,7 +123,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     });
   }
 
-  initView(init: ScaledViewInit<X, Y>): void {
+  override initView(init: ScaledViewInit<X, Y>): void {
     super.initView(init);
     if (init.xScale !== void 0) {
       this.xScale(init.xScale);
@@ -206,12 +206,12 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  declare readonly viewController: GraphicsViewController<ScaledView<X, Y>> & ScaledViewObserver<X, Y> | null;
+  override readonly viewController!: GraphicsViewController<ScaledView<X, Y>> & ScaledViewObserver<X, Y> | null;
 
-  declare readonly viewObservers: ReadonlyArray<ScaledViewObserver<X, Y>>;
+  override readonly viewObservers!: ReadonlyArray<ScaledViewObserver<X, Y>>;
 
   /** @hidden */
-  declare readonly scaledFlags: ScaledFlags;
+  readonly scaledFlags!: ScaledFlags;
 
   /** @hidden */
   setScaledFlags(scaledFlags: ScaledFlags): void {
@@ -283,7 +283,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       }
     },
   })
-  declare xScale: ContinuousScaleAnimator<this, X, number>;
+  readonly xScale!: ContinuousScaleAnimator<this, X, number>;
 
   protected willSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
     const viewController = this.viewController;
@@ -346,7 +346,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       }
     },
   })
-  declare yScale: ContinuousScaleAnimator<this, Y, number>;
+  readonly yScale!: ContinuousScaleAnimator<this, Y, number>;
 
   xDomain(): Domain<X> | null;
   xDomain(xDomain: Domain<X> | string | null, timing?: AnyTiming | boolean): this;
@@ -438,7 +438,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  declare readonly xDataDomain: Domain<X> | null;
+  readonly xDataDomain!: Domain<X> | null;
 
   protected setXDataDomain(newXDataDomain: Domain<X> | null): void {
     const oldXDataDomain = this.xDataDomain;
@@ -503,7 +503,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.setXDataDomain(xDataDomain);
   }
 
-  declare readonly yDataDomain: Domain<Y> | null;
+  readonly yDataDomain!: Domain<Y> | null;
 
   protected setYDataDomain(newYDataDomain: Domain<Y> | null): void {
     const oldYDataDomain = this.yDataDomain;
@@ -568,7 +568,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.setYDataDomain(yDataDomain);
   }
 
-  declare readonly xDataRange: Range<number> | null;
+  readonly xDataRange!: Range<number> | null;
 
   protected setXDataRange(xDataRange: Range<number> | null): void {
     Object.defineProperty(this, "xDataRange", {
@@ -590,7 +590,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  declare readonly yDataRange: Range<number> | null;
+  readonly yDataRange!: Range<number> | null;
 
   protected setYDataRange(yDataRange: Range<number> | null): void {
     Object.defineProperty(this, "yDataRange", {
@@ -612,7 +612,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  declare readonly xDataDomainPadded: Domain<X> | null;
+  readonly xDataDomainPadded!: Domain<X> | null;
 
   protected setXDataDomainPadded(xDataDomainPadded: Domain<X> | null): void {
     Object.defineProperty(this, "xDataDomainPadded", {
@@ -642,7 +642,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.setXDataDomainPadded(xDataDomainPadded);
   }
 
-  declare readonly yDataDomainPadded: Domain<Y> | null;
+  readonly yDataDomainPadded!: Domain<Y> | null;
 
   protected setYDataDomainPadded(yDataDomainPadded: Domain<Y> | null): void {
     Object.defineProperty(this, "yDataDomainPadded", {
@@ -678,7 +678,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return [true, true];
     },
   })
-  declare xDomainBounds: ViewProperty<this, readonly [X | boolean, X | boolean]>
+  readonly xDomainBounds!: ViewProperty<this, readonly [X | boolean, X | boolean]>
 
   @ViewProperty<ScaledView<X, Y>, readonly [Y | boolean, Y | boolean]>({
     updateFlags: View.NeedsLayout,
@@ -686,7 +686,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return [true, true];
     },
   })
-  declare yDomainBounds: ViewProperty<this, readonly [Y | boolean, Y | boolean]>
+  readonly yDomainBounds!: ViewProperty<this, readonly [Y | boolean, Y | boolean]>
 
   @ViewProperty<ScaledView<X, Y>, readonly [number | boolean, number | boolean]>({
     updateFlags: View.NeedsLayout,
@@ -694,7 +694,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return [true, true];
     },
   })
-  declare xZoomBounds: ViewProperty<this, readonly [number | boolean, number | boolean]>
+  readonly xZoomBounds!: ViewProperty<this, readonly [number | boolean, number | boolean]>
 
   @ViewProperty<ScaledView<X, Y>, readonly [number | boolean, number | boolean]>({
     updateFlags: View.NeedsLayout,
@@ -702,7 +702,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return [true, true];
     },
   })
-  declare yZoomBounds: ViewProperty<this, readonly [number | boolean, number | boolean]>
+  readonly yZoomBounds!: ViewProperty<this, readonly [number | boolean, number | boolean]>
 
   @ViewProperty<ScaledView<X, Y>, readonly [X | boolean, X | boolean]>({
     updateFlags: View.NeedsLayout,
@@ -710,7 +710,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return [false, false];
     },
   })
-  declare xDomainPadding: ViewProperty<this, readonly [X | boolean, X | boolean]>
+  readonly xDomainPadding!: ViewProperty<this, readonly [X | boolean, X | boolean]>
 
   @ViewProperty<ScaledView<X, Y>, readonly [Y | boolean, Y | boolean]>({
     updateFlags: View.NeedsLayout,
@@ -718,7 +718,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return [false, false];
     },
   })
-  declare yDomainPadding: ViewProperty<this, readonly [Y | boolean, Y | boolean]>
+  readonly yDomainPadding!: ViewProperty<this, readonly [Y | boolean, Y | boolean]>
 
   protected willSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
     const viewController = this.viewController;
@@ -776,7 +776,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       this.owner.didSetXRangePadding(newXRangePadding, oldXRangePadding);
     },
   })
-  declare xRangePadding: ViewProperty<this, readonly [number, number]>
+  readonly xRangePadding!: ViewProperty<this, readonly [number, number]>
 
   protected willSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
     const viewController = this.viewController;
@@ -834,7 +834,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       this.owner.didSetYRangePadding(newYRangePadding, oldYRangePadding);
     },
   })
-  declare yRangePadding: ViewProperty<this, readonly [number, number]>
+  readonly yRangePadding!: ViewProperty<this, readonly [number, number]>
 
   @ViewProperty<ScaledView<X, Y>, readonly [number, number], number>({
     type: Object,
@@ -849,7 +849,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       }
     },
   })
-  declare fitAlign: ViewProperty<this, readonly [number, number], number>;
+  readonly fitAlign!: ViewProperty<this, readonly [number, number], number>;
 
   xFitAlign(): number;
   xFitAlign(xFitAlign: number): this;
@@ -876,7 +876,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   @ViewProperty({type: Number})
-  declare fitAspectRatio: ViewProperty<this, number | undefined>;
+  readonly fitAspectRatio!: ViewProperty<this, number | undefined>;
 
   preserveAspectRatio(): boolean;
   preserveAspectRatio(preserveAspectRatio: boolean): this;
@@ -1057,7 +1057,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       }
     }
   })
-  declare scaleGesture: ViewProperty<this, ScaleGesture<X, Y> | null, boolean>;
+  readonly scaleGesture!: ViewProperty<this, ScaleGesture<X, Y> | null, boolean>;
 
   @ViewProperty<ScaledView<X, Y>, Timing | boolean | undefined, AnyTiming>({
     type: Timing,
@@ -1066,7 +1066,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return Easing.linear.withDuration(250);
     },
   })
-  declare rescaleTransition: ViewProperty<this, Timing | boolean | undefined, AnyTiming>;
+  readonly rescaleTransition!: ViewProperty<this, Timing | boolean | undefined, AnyTiming>;
 
   @ViewProperty<ScaledView<X, Y>, Timing | boolean | undefined, AnyTiming>({
     type: Timing,
@@ -1075,7 +1075,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       return Easing.cubicOut.withDuration(250);
     },
   })
-  declare reboundTransition: ViewProperty<this, Timing | boolean | undefined, AnyTiming>;
+  readonly reboundTransition!: ViewProperty<this, Timing | boolean | undefined, AnyTiming>;
 
   fitX(tween: boolean = false): void {
     this.setScaledFlags(this.scaledFlags | ScaledView.XFitFlag);
@@ -1252,7 +1252,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   /** @hidden */
-  declare readonly scaledFasteners: ReadonlyArray<ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>>;
+  readonly scaledFasteners!: ReadonlyArray<ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>>;
 
   /** @hidden */
   protected mountScaledFasteners(): void {
@@ -1284,7 +1284,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.removeScaled(scaledView);
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     const scaledView = this.detectScaled(childView);
     if (scaledView !== null) {
@@ -1292,7 +1292,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     super.onRemoveChildView(childView);
     const scaledView = this.detectScaled(childView);
     if (scaledView !== null) {
@@ -1300,7 +1300,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.xScale.onAnimate(viewContext.updateTime);
     this.yScale.onAnimate(viewContext.updateTime);
@@ -1570,9 +1570,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.setScaledFlags(this.scaledFlags & ~(ScaledView.InteractedFlag | ScaledView.RescaleFlag));
   }
 
-  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     let xScale: ContinuousScale<X, number> | null;
     let yScale: ContinuousScale<Y, number> | null;
     if ((displayFlags & View.NeedsLayout) !== 0 &&
@@ -1761,13 +1761,13 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   /** @hidden */
-  protected mountViewFasteners(): void {
+  protected override mountViewFasteners(): void {
     super.mountViewFasteners();
     this.mountScaledFasteners();
   }
 
   /** @hidden */
-  protected unmountViewFasteners(): void {
+  protected override unmountViewFasteners(): void {
     this.unmountScaledFasteners();
     super.unmountViewFasteners();
   }
@@ -1883,5 +1883,5 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   /** @hidden */
   static TimeZoomMax: number = 1;
 
-  static readonly insertChildFlags: ViewFlags = LayerView.insertChildFlags | View.NeedsResize;
+  static override readonly insertChildFlags: ViewFlags = LayerView.insertChildFlags | View.NeedsResize;
 }

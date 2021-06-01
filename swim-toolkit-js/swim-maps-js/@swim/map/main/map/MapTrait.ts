@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ export class MapTrait extends GeoTrait {
     });
   }
 
-  declare readonly traitObservers: ReadonlyArray<MapTraitObserver>;
+  override readonly traitObservers!: ReadonlyArray<MapTraitObserver>;
 
-  get geoBounds(): GeoBox {
+  override get geoBounds(): GeoBox {
     return GeoBox.globe();
   }
 
@@ -68,7 +68,7 @@ export class MapTrait extends GeoTrait {
       this.owner.didSetGeoPerspective(newGeoPerspective, oldGeoPerspective);
     },
   })
-  declare geoPerspective: TraitProperty<this, GeoPerspective | null, AnyGeoPerspective | null>;
+  readonly geoPerspective!: TraitProperty<this, GeoPerspective | null, AnyGeoPerspective | null>;
 
   insertLayer(layerTrait: GeoTrait, targetTrait: Trait | null = null): void {
     const layerFasteners = this.layerFasteners as TraitFastener<this, GeoTrait>[];
@@ -173,7 +173,7 @@ export class MapTrait extends GeoTrait {
   }
 
   /** @hidden */
-  declare readonly layerFasteners: ReadonlyArray<TraitFastener<this, GeoTrait>>;
+  readonly layerFasteners!: ReadonlyArray<TraitFastener<this, GeoTrait>>;
 
   /** @hidden */
   protected mountLayerFasteners(): void {
@@ -230,14 +230,14 @@ export class MapTrait extends GeoTrait {
     }
   }
 
-  protected didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
+  protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
     if (newModel !== null) {
       this.detectModels(newModel);
     }
     super.didSetModel(newModel, oldModel);
   }
 
-  protected onInsertChildModel(childModel: Model, targetModel: Model | null): void {
+  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
     super.onInsertChildModel(childModel, targetModel);
     const layerTrait = this.detectLayerModel(childModel);
     if (layerTrait !== null) {
@@ -246,7 +246,7 @@ export class MapTrait extends GeoTrait {
     }
   }
 
-  protected onRemoveChildModel(childModel: Model): void {
+  protected override onRemoveChildModel(childModel: Model): void {
     super.onRemoveChildModel(childModel);
     const layerTrait = this.detectLayerModel(childModel);
     if (layerTrait !== null) {
@@ -255,23 +255,23 @@ export class MapTrait extends GeoTrait {
   }
 
   /** @hidden */
-  protected mountTraitFasteners(): void {
+  protected override mountTraitFasteners(): void {
     super.mountTraitFasteners();
     this.mountLayerFasteners();
   }
 
   /** @hidden */
-  protected unmountTraitFasteners(): void {
+  protected override unmountTraitFasteners(): void {
     this.unmountLayerFasteners();
     super.unmountTraitFasteners();
   }
 
-  protected onStartConsuming(): void {
+  protected override onStartConsuming(): void {
     super.onStartConsuming();
     this.startConsumingLayers();
   }
 
-  protected onStopConsuming(): void {
+  protected override onStopConsuming(): void {
     super.onStopConsuming();
     this.stopConsumingLayers();
   }

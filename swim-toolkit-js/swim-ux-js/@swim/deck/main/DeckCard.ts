@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ export class DeckCard extends HtmlView {
     this.overflowScrolling.setState("touch", View.Intrinsic);
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       this.backgroundColor.setState(theme.getOr(Look.backgroundColor, mood, null), timing, View.Intrinsic);
@@ -39,20 +39,20 @@ export class DeckCard extends HtmlView {
   }
 
   @ViewProperty({type: Object, inherit: true, state: null})
-  declare edgeInsets: ViewProperty<this, ViewEdgeInsets | null>;
+  readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
 
   @ViewProperty({type: String})
-  declare cardTitle: ViewProperty<this, string | undefined>;
+  readonly cardTitle!: ViewProperty<this, string | undefined>;
 
   @ViewFastener({type: HtmlView, child: false})
-  declare backItem: ViewFastener<this, HtmlView>;
+  readonly backItem!: ViewFastener<this, HtmlView>;
 
   @ViewFastener({type: HtmlView, child: false})
-  declare titleView: ViewFastener<this, HtmlView>;
+  readonly titleView!: ViewFastener<this, HtmlView>;
 
   @ViewFastener({type: HtmlView, child: false})
-  declare leftItem: ViewFastener<this, HtmlView>;
+  readonly leftItem!: ViewFastener<this, HtmlView>;
 
   @ViewFastener({type: HtmlView, child: false})
-  declare rightItem: ViewFastener<this, HtmlView>;
+  readonly rightItem!: ViewFastener<this, HtmlView>;
 }

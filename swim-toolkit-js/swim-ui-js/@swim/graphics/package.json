@@ -4,7 +4,7 @@
   "description": "Canvas graphics views, with procedurally animated shapes, and procedurally styled typesetters",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/graphics",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2020 Swim inc.",
+  "copyright": "2015-2021 Swim inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-graphics.js",

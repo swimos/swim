@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {AnyTiming, Timing} from "@swim/mapping";
-import {Length, BoxR2} from "@swim/math";
+import {Length, R2Box} from "@swim/math";
 import {Look} from "@swim/theme";
 import {ViewContextType, ViewContext, ViewFlags, View, ViewProperty, ViewAnimator} from "@swim/view";
 import {HtmlViewConstructor, HtmlViewInit, HtmlView} from "@swim/dom";
@@ -40,7 +40,7 @@ export class TreeLimb extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
     Object.defineProperty(this, "visibleFrame", {
-      value: new BoxR2(0, 0, window.innerWidth, window.innerHeight),
+      value: new R2Box(0, 0, window.innerWidth, window.innerHeight),
       enumerable: true,
       configurable: true,
     });
@@ -52,13 +52,13 @@ export class TreeLimb extends HtmlView {
     this.position.setState("relative", View.Intrinsic);
   }
 
-  declare readonly viewController: TreeLimbController | null;
+  override readonly viewController!: TreeLimbController | null;
 
-  declare readonly viewObservers: ReadonlyArray<TreeLimbObserver>;
+  override readonly viewObservers!: ReadonlyArray<TreeLimbObserver>;
 
-  declare readonly viewContext: TreeViewContext;
+  override readonly viewContext!: TreeViewContext;
 
-  initView(init: TreeLimbInit): void {
+  override initView(init: TreeLimbInit): void {
     super.initView(init);
     if (init.expanded === true) {
       this.expand();
@@ -109,7 +109,7 @@ export class TreeLimb extends HtmlView {
   }
 
   @ViewProperty({type: TreeSeed, state: null, inherit: true})
-  declare seed: ViewProperty<this, TreeSeed | null, AnyTreeSeed | null>;
+  readonly seed!: ViewProperty<this, TreeSeed | null, AnyTreeSeed | null>;
 
   @ViewProperty<TreeLimb, number>({
     type: Number,
@@ -118,10 +118,10 @@ export class TreeLimb extends HtmlView {
       this.owner.onUpdateDepth(depth);
     },
   })
-  declare depth: ViewProperty<this, number>;
+  readonly depth!: ViewProperty<this, number>;
 
   @ViewProperty({type: String, state: "collapsed"})
-  declare disclosureState: ViewProperty<this, TreeLimbState>;
+  readonly disclosureState!: ViewProperty<this, TreeLimbState>;
 
   @ViewAnimator<TreeLimb, number>({
     type: Number,
@@ -138,13 +138,13 @@ export class TreeLimb extends HtmlView {
       }
     },
   })
-  declare disclosurePhase: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
+  readonly disclosurePhase!: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
 
   @ViewAnimator({type: Number, inherit: true, updateFlags: View.NeedsLayout})
-  declare disclosingPhase: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
+  readonly disclosingPhase!: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
 
   @ViewProperty({type: Number, inherit: true})
-  declare limbSpacing: ViewProperty<this, number | undefined>;
+  readonly limbSpacing!: ViewProperty<this, number | undefined>;
 
   expand(timing?: AnyTiming | boolean): void {
     const disclosurePhase = this.disclosurePhase.value;
@@ -287,17 +287,17 @@ export class TreeLimb extends HtmlView {
     }
   }
 
-  protected onCull(): void {
+  protected override onCull(): void {
     super.onCull();
     this.display.setState("none", View.Intrinsic);
   }
 
-  protected onUncull(): void {
+  protected override onUncull(): void {
     super.onUncull();
     this.display.setState("block", View.Intrinsic);
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     if (childView.key === "leaf" && childView instanceof TreeLeaf) {
       this.onInsertLeaf(childView);
@@ -306,7 +306,7 @@ export class TreeLimb extends HtmlView {
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     if (childView.key === "leaf" && childView instanceof TreeLeaf) {
       this.onRemoveLeaf(childView);
     } else if (childView.key === "subtree" && childView instanceof TreeView) {
@@ -354,35 +354,35 @@ export class TreeLimb extends HtmlView {
   }
 
   /** @hidden */
-  declare readonly visibleFrame: BoxR2;
+  readonly visibleFrame!: R2Box;
 
-  protected detectVisibleFrame(viewContext: ViewContext): BoxR2 {
+  protected detectVisibleFrame(viewContext: ViewContext): R2Box {
     const xBleed = 0;
     const yBleed = 64;
-    const parentVisibleFrame = (viewContext as TreeViewContext).visibleFrame as BoxR2 | undefined;
+    const parentVisibleFrame = (viewContext as TreeViewContext).visibleFrame as R2Box | undefined;
     if (parentVisibleFrame !== void 0) {
       const left = this.left.state;
       const x = left instanceof Length ? left.pxValue() : 0;
       const top = this.top.state;
       const y = top instanceof Length ? top.pxValue() : 0;
-      return new BoxR2(parentVisibleFrame.xMin - x - xBleed, parentVisibleFrame.yMin - y - yBleed,
+      return new R2Box(parentVisibleFrame.xMin - x - xBleed, parentVisibleFrame.yMin - y - yBleed,
                        parentVisibleFrame.xMax - x + xBleed, parentVisibleFrame.yMax - y + yBleed);
     } else {
       const {x, y} = this.node.getBoundingClientRect();
-      return new BoxR2(-x - xBleed,
+      return new R2Box(-x - xBleed,
                        -y - yBleed,
                        window.innerWidth - x + xBleed,
                        window.innerHeight - y + yBleed);
     }
   }
 
-  extendViewContext(viewContext: ViewContext): ViewContextType<this> {
+  override extendViewContext(viewContext: ViewContext): ViewContextType<this> {
     const treeViewContext = Object.create(viewContext);
     treeViewContext.visibleFrame = this.visibleFrame;
     return treeViewContext;
   }
 
-  protected onProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected override onProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     super.onProcess(processFlags, viewContext);
     const visibleFrame = this.detectVisibleFrame(Object.getPrototypeOf(viewContext));
     Object.defineProperty(this, "visibleFrame", {
@@ -393,7 +393,7 @@ export class TreeLimb extends HtmlView {
     (viewContext as any).visibleFrame = this.visibleFrame;
   }
 
-  protected onDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected override onDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     super.onDisplay(displayFlags, viewContext);
     const visibleFrame = this.detectVisibleFrame(Object.getPrototypeOf(viewContext));
     Object.defineProperty(this, "visibleFrame", {
@@ -405,7 +405,7 @@ export class TreeLimb extends HtmlView {
     this.setViewFlags(this.viewFlags & ~View.NeedsScroll);
   }
 
-  protected didLayout(viewContext: ViewContextType<this>): void {
+  protected override didLayout(viewContext: ViewContextType<this>): void {
     this.layoutLimb();
     super.didLayout(viewContext);
   }
@@ -462,9 +462,9 @@ export class TreeLimb extends HtmlView {
     return view;
   }
 
-  static fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
-  static fromAny(value: AnyTreeLimb): TreeLimb;
-  static fromAny(value: AnyTreeLimb): TreeLimb {
+  static override fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
+  static override fromAny(value: AnyTreeLimb): TreeLimb;
+  static override fromAny(value: AnyTreeLimb): TreeLimb {
     if (value instanceof this) {
       return value;
     } else if (value instanceof HTMLElement) {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,11 +41,11 @@ export class TreeStem extends HtmlView {
     this.overflowY.setState("hidden", View.Intrinsic);
   }
 
-  declare readonly viewController: TreeStemController | null;
+  override readonly viewController!: TreeStemController | null;
 
-  declare readonly viewObservers: ReadonlyArray<TreeStemObserver>;
+  override readonly viewObservers!: ReadonlyArray<TreeStemObserver>;
 
-  initView(init: TreeStemInit): void {
+  override initView(init: TreeStemInit): void {
     super.initView(init);
     if (init.veins !== void 0) {
       this.addVeins(init.veins);
@@ -68,16 +68,16 @@ export class TreeStem extends HtmlView {
   }
 
   @ViewProperty({type: TreeSeed, state: null, inherit: true})
-  declare seed: ViewProperty<this, TreeSeed | null, AnyTreeSeed | null>;
+  readonly seed!: ViewProperty<this, TreeSeed | null, AnyTreeSeed | null>;
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     if (childView instanceof TreeVein) {
       this.onInsertVein(childView);
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     if (childView instanceof TreeVein) {
       this.onRemoveVein(childView);
     }
@@ -94,9 +94,9 @@ export class TreeStem extends HtmlView {
     // hook
   }
 
-  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     if ((displayFlags & View.NeedsLayout) !== 0) {
       this.layoutChildViews(displayFlags, viewContext, displayChildView);
     } else {
@@ -138,9 +138,9 @@ export class TreeStem extends HtmlView {
     return view;
   }
 
-  static fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
-  static fromAny(value: AnyTreeStem): TreeStem;
-  static fromAny(value: AnyTreeStem): TreeStem {
+  static override fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
+  static override fromAny(value: AnyTreeStem): TreeStem;
+  static override fromAny(value: AnyTreeStem): TreeStem {
     if (value instanceof this) {
       return value;
     } else if (value instanceof HTMLElement) {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ export class LayoutManager<V extends View = View> extends ViewManager<V> {
     });
   }
 
-  declare readonly solver: ConstraintSolver;
+  readonly solver!: ConstraintSolver;
 
   /** @hidden */
   protected createSolver(): ConstraintSolver {
@@ -54,7 +54,7 @@ export class LayoutManager<V extends View = View> extends ViewManager<V> {
     this.solver.setConstraintVariable(constraintVariable, state);
   }
 
-  declare readonly viewManagerObservers: ReadonlyArray<LayoutManagerObserver>;
+  override readonly viewManagerObservers!: ReadonlyArray<LayoutManagerObserver>;
 
   @Lazy
   static global<V extends View>(): LayoutManager<V> {

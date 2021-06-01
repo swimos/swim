@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ export class RowComponent extends CompositeComponent {
     });
   }
 
-  declare readonly componentObservers: ReadonlyArray<RowComponentObserver>;
+  override readonly componentObservers!: ReadonlyArray<RowComponentObserver>;
 
   protected initRowTrait(rowTrait: RowTrait): void {
     // hook
@@ -196,7 +196,7 @@ export class RowComponent extends CompositeComponent {
   @ComponentViewTrait<RowComponent, RowView, RowTrait>({
     extends: RowComponent.RowFastener,
   })
-  declare row: ComponentViewTrait<this, RowView, RowTrait>;
+  readonly row!: ComponentViewTrait<this, RowView, RowTrait>;
 
   insertCell(cellComponent: CellComponent, targetComponent: Component | null = null): void {
     const cellFasteners = this.cellFasteners as ComponentFastener<this, CellComponent>[];
@@ -543,7 +543,7 @@ export class RowComponent extends CompositeComponent {
   }
 
   /** @hidden */
-  declare readonly cellFasteners: ReadonlyArray<ComponentFastener<this, CellComponent>>;
+  readonly cellFasteners!: ReadonlyArray<ComponentFastener<this, CellComponent>>;
 
   protected getCellFastener(cellTrait: CellTrait): ComponentFastener<this, CellComponent> | null {
     const cellFasteners = this.cellFasteners;
@@ -579,7 +579,7 @@ export class RowComponent extends CompositeComponent {
     return component instanceof CellComponent ? component : null;
   }
 
-  protected onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
+  protected override onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
     super.onInsertChildComponent(childComponent, targetComponent);
     const cellComponent = this.detectCellComponent(childComponent);
     if (cellComponent !== null) {
@@ -587,7 +587,7 @@ export class RowComponent extends CompositeComponent {
     }
   }
 
-  protected onRemoveChildComponent(childComponent: Component): void {
+  protected override onRemoveChildComponent(childComponent: Component): void {
     super.onRemoveChildComponent(childComponent);
     const cellComponent = this.detectCellComponent(childComponent);
     if (cellComponent !== null) {
@@ -596,13 +596,13 @@ export class RowComponent extends CompositeComponent {
   }
 
   /** @hidden */
-  protected mountComponentFasteners(): void {
+  protected override mountComponentFasteners(): void {
     super.mountComponentFasteners();
     this.mountCellFasteners();
   }
 
   /** @hidden */
-  protected unmountComponentFasteners(): void {
+  protected override unmountComponentFasteners(): void {
     this.unmountCellFasteners();
     super.unmountComponentFasteners();
   }

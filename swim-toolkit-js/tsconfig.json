@@ -25,6 +25,7 @@
 
     {"path": "./swim-maps-js/@swim/map"},
     {"path": "./swim-maps-js/@swim/mapbox"},
+    {"path": "./swim-maps-js/@swim/leaflet"},
     {"path": "./swim-maps-js/@swim/googlemap"},
     {"path": "./swim-maps-js/@swim/esrimap"},
     {"path": "./swim-maps-js/@swim/maps"},

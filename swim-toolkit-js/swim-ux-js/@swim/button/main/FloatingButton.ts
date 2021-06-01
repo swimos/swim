@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ export class FloatingButton extends ButtonMembrane implements PositionGestureDel
     this.cursor.setState("pointer", View.Intrinsic);
   }
 
-  declare readonly buttonType: FloatingButtonType;
+  readonly buttonType!: FloatingButtonType;
 
   setButtonType(buttonType: FloatingButtonType): void {
     if (this.buttonType !== buttonType) {
@@ -190,9 +190,9 @@ export class FloatingButton extends ButtonMembrane implements PositionGestureDel
   }
 
   @ViewAnimator({type: Number, inherit: true})
-  declare stackPhase: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
+  readonly stackPhase!: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
 
     this.backgroundColor.setState(theme.getOr(Look.accentColor, mood, null), timing, View.Intrinsic);
@@ -206,7 +206,7 @@ export class FloatingButton extends ButtonMembrane implements PositionGestureDel
     this.boxShadow.setState(shadow, timing, View.Intrinsic);
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
 
     let shadow = this.getLookOr(Look.shadow, Mood.floating, null);
@@ -234,7 +234,7 @@ export class FloatingButton extends ButtonMembrane implements PositionGestureDel
     }
   }
 
-  didMovePress(input: PositionGestureInput, event: Event | null): void {
+  override didMovePress(input: PositionGestureInput, event: Event | null): void {
     // nop
   }
 }

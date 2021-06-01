@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ import {GeoTrait} from "../geo/GeoTrait";
 import type {GeoPathTraitObserver} from "./GeoPathTraitObserver";
 
 export abstract class GeoPathTrait extends GeoTrait {
-  declare readonly traitObservers: ReadonlyArray<GeoPathTraitObserver>;
+  override readonly traitObservers!: ReadonlyArray<GeoPathTraitObserver>;
 
-  get geoBounds(): GeoBox {
+  override get geoBounds(): GeoBox {
     const geoPath = this.geoPath.state;
     return geoPath !== null ? geoPath.bounds : GeoBox.undefined();
   }
@@ -60,5 +60,5 @@ export abstract class GeoPathTrait extends GeoTrait {
       this.owner.didSetGeoPath(newGeoPath, oldGeoPath);
     },
   })
-  declare geoPath: TraitProperty<this, GeoPath | null, AnyGeoPath | null>;
+  readonly geoPath!: TraitProperty<this, GeoPath | null, AnyGeoPath | null>;
 }

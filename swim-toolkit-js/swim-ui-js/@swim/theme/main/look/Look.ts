@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import type {Mood} from "../mood/Mood";
 import type {MoodVector} from "../mood/MoodVector";
 
 export abstract class Look<T, U = never> implements Mood {
-  declare readonly name: string;
+  readonly name!: string;
 
   constructor(name: string) {
     Object.defineProperty(this, "name", {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,37 +41,37 @@ export class DeckBar extends HtmlView {
     }, View.Intrinsic);
   }
 
-  declare readonly viewController: HtmlViewController & DeckBarObserver | null;
+  override readonly viewController!: HtmlViewController & DeckBarObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<DeckBarObserver>;
+  override readonly viewObservers!: ReadonlyArray<DeckBarObserver>;
 
   protected initTheme(): void {
     this.modifyTheme(Feel.default, [[Feel.translucent, 1], [Feel.primary, 1]]);
   }
 
   @ViewProperty({type: DeckRail, state: null})
-  declare rail: ViewProperty<this, DeckRail | null, AnyDeckRail | null>;
+  readonly rail!: ViewProperty<this, DeckRail | null, AnyDeckRail | null>;
 
   @ViewAnimator({type: Number, inherit: true})
-  declare deckPhase: ViewAnimator<this, number | undefined>;
+  readonly deckPhase!: ViewAnimator<this, number | undefined>;
 
   @ViewProperty({type: Length, state: Length.px(48), updateFlags: View.NeedsLayout})
-  declare barHeight: ViewProperty<this, Length, AnyLength>;
+  readonly barHeight!: ViewProperty<this, Length, AnyLength>;
 
   @ViewProperty({type: Length, state: Length.zero(), updateFlags: View.NeedsResize})
-  declare itemSpacing: ViewProperty<this, Length | null, AnyLength | null>;
+  readonly itemSpacing!: ViewProperty<this, Length | null, AnyLength | null>;
 
   @ViewProperty({type: Object, inherit: true, state: null, updateFlags: View.NeedsResize})
-  declare edgeInsets: ViewProperty<this, ViewEdgeInsets | null>;
+  readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       this.backgroundColor.setState(theme.getOr(Look.backgroundColor, mood, null), timing, View.Intrinsic);
     }
   }
 
-  onInsertChildView(childView: View, targetView: View | null): void {
+  override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     if (childView instanceof DeckSlot) {
       this.onInsertSlot(childView);
@@ -82,7 +82,7 @@ export class DeckBar extends HtmlView {
     childView.position.setState("absolute", View.Intrinsic);
   }
 
-  protected onResize(viewContext: ViewContextType<this>): void {
+  protected override onResize(viewContext: ViewContextType<this>): void {
     super.onResize(viewContext);
     this.resizeBar(viewContext);
   }
@@ -120,7 +120,7 @@ export class DeckBar extends HtmlView {
     }
   }
 
-  onLayout(viewContext: ViewContextType<this>): void {
+  override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.layoutBar(viewContext);
   }
@@ -134,9 +134,9 @@ export class DeckBar extends HtmlView {
     this.height.setState(this.barHeight.state.plus(insetTop), View.Intrinsic);
   }
 
-  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     const needsLayout = (displayFlags & View.NeedsLayout) !== 0;
     if (needsLayout) {
       this.layoutChildViews(displayFlags, viewContext, displayChildView);

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,13 +36,13 @@ export class SvgRenderer extends PaintingRenderer {
     });
   }
 
-  declare readonly context: SvgContext;
+  override readonly context!: SvgContext;
 
-  get pixelRatio(): number {
+  override get pixelRatio(): number {
     return 1;
   }
 
-  declare readonly theme: ThemeMatrix | null;
+  override readonly theme!: ThemeMatrix | null;
 
-  declare readonly mood: MoodVector | null;
+  override readonly mood!: MoodVector | null;
 }

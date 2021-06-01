@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@ import {SeriesPlotComponent} from "./SeriesPlotComponent";
 import type {AreaPlotComponentObserver} from "./AreaPlotComponentObserver";
 
 export class AreaPlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
-  declare readonly componentObservers: ReadonlyArray<AreaPlotComponentObserver<X, Y>>;
+  override readonly componentObservers!: ReadonlyArray<AreaPlotComponentObserver<X, Y>>;
 
   protected detectDataSet(plotTrait: AreaPlotTrait<X, Y>): DataSetTrait<X, Y> | null {
     return plotTrait.getTrait(DataSetTrait);
   }
 
-  protected attachDataPoint(dataPointComponent: DataPointComponent<X, Y>, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected override attachDataPoint(dataPointComponent: DataPointComponent<X, Y>, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     super.attachDataPoint(dataPointComponent, dataPointFastener);
     const dataPointView = dataPointComponent.dataPoint.view;
     if (dataPointView !== null && dataPointView.parentView === null) {
@@ -247,5 +247,5 @@ export class AreaPlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
   @ComponentViewTrait<AreaPlotComponent<X, Y>, AreaPlotView<X, Y>, AreaPlotTrait<X, Y>>({
     extends: AreaPlotComponent.PlotFastener,
   })
-  declare plot: ComponentViewTrait<this, AreaPlotView<X, Y>, AreaPlotTrait<X, Y>>;
+  readonly plot!: ComponentViewTrait<this, AreaPlotView<X, Y>, AreaPlotTrait<X, Y>>;
 }

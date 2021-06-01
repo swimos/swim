@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ export abstract class Animator<T> implements AnimationTrack {
   }
 
   /** @hidden */
-  declare readonly ownValue: T;
+  readonly ownValue!: T;
 
   get value(): T {
     return this.ownValue;
@@ -149,7 +149,7 @@ export abstract class Animator<T> implements AnimationTrack {
   }
 
   /** @hidden */
-  declare readonly ownState: T;
+  readonly ownState!: T;
 
   get state(): T {
     return this.ownState;
@@ -277,7 +277,7 @@ export abstract class Animator<T> implements AnimationTrack {
   }
 
   /** @hidden */
-  declare readonly ownLook: Look<T> | null;
+  readonly ownLook!: Look<T> | null;
 
   get look(): Look<T> | null {
     return this.ownLook;
@@ -331,15 +331,15 @@ export abstract class Animator<T> implements AnimationTrack {
     // hook
   }
 
-  declare readonly timing: Timing | null;
+  readonly timing!: Timing | null;
 
-  declare readonly interpolator: Interpolator<T> | null;
+  readonly interpolator!: Interpolator<T> | null;
 
   takesPrecedence(precedence: ViewPrecedence): boolean {
     return precedence >= this.precedence;
   }
 
-  declare readonly precedence: ViewPrecedence;
+  readonly precedence!: ViewPrecedence;
 
   setPrecedence(newPrecedence: ViewPrecedence): void {
     const oldPrecedence = this.precedence;
@@ -371,7 +371,7 @@ export abstract class Animator<T> implements AnimationTrack {
   }
 
   /** @hidden */
-  declare readonly animatorFlags: AnimatorFlags;
+  readonly animatorFlags!: AnimatorFlags;
 
   /** @hidden */
   setAnimatorFlags(animatorFlags: AnimatorFlags): void {
@@ -511,13 +511,13 @@ export abstract class Animator<T> implements AnimationTrack {
       this.setValue(newValue);
 
       if (u >= 1) {
-        this.onEnd(newValue);
         this.stopAnimating();
         Object.defineProperty(this, "interpolator", {
           value: null,
           enumerable: true,
           configurable: true,
         });
+        this.onEnd(newValue);
       }
     }
   }

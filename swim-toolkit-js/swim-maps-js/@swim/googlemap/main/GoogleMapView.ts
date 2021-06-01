@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,17 +46,17 @@ export class GoogleMapView extends MapView {
     this.initMap(map);
   }
 
-  declare readonly viewController: GoogleMapViewController | null;
+  override readonly viewController!: GoogleMapViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<GoogleMapViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<GoogleMapViewObserver>;
 
-  declare readonly map: google.maps.Map;
+  readonly map!: google.maps.Map;
 
   protected initMap(map: google.maps.Map): void {
     map.addListener("idle", this.onMapIdle);
   }
 
-  declare readonly mapOverlay: google.maps.OverlayView;
+  readonly mapOverlay!: google.maps.OverlayView;
 
   protected createMapOverlay(map: google.maps.Map): google.maps.OverlayView {
     const mapOverlay = new GoogleMapView.MapOverlay(this);
@@ -76,24 +76,24 @@ export class GoogleMapView extends MapView {
           configurable: true,
         });
       }
-      declare readonly owner: GoogleMapView;
-      onAdd(): void {
+      readonly owner!: GoogleMapView;
+      override onAdd(): void {
         const containerView = this.owner.container.view;
         if (containerView !== null) {
           this.owner.initContainer(containerView);
           this.owner.attachContainer(containerView);
         }
       }
-      onRemove(): void {
+      override onRemove(): void {
         this.owner.canvas.removeView();
       }
-      draw(): void {
+      override draw(): void {
         this.owner.onMapDraw();
       }
     }
   }
 
-  declare readonly geoViewport: GoogleMapViewport;
+  override readonly geoViewport!: GoogleMapViewport;
 
   protected willSetGeoViewport(newGeoViewport: GoogleMapViewport, oldGeoViewport: GoogleMapViewport): void {
     const viewController = this.viewController;
@@ -144,7 +144,7 @@ export class GoogleMapView extends MapView {
     return false;
   }
 
-  willProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  override willProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     if ((this.viewFlags & View.NeedsProject) !== 0 && this.updateGeoViewport()) {
       (viewContext as any).geoViewport = this.geoViewport;
     }
@@ -162,7 +162,7 @@ export class GoogleMapView extends MapView {
     this.requireUpdate(View.NeedsProject);
   }
 
-  moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void {
+  override moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void {
     const geoViewport = this.geoViewport;
     let geoCenter = geoPerspective.geoCenter;
     if (geoCenter !== void 0 && geoCenter !== null) {
@@ -185,21 +185,21 @@ export class GoogleMapView extends MapView {
     }
   }
 
-  protected attachCanvas(canvasView: CanvasView): void {
+  protected override attachCanvas(canvasView: CanvasView): void {
     super.attachCanvas(canvasView);
     if (this.parentView === null) {
       canvasView.appendChildView(this);
     }
   }
 
-  protected detachCanvas(canvasView: CanvasView): void {
+  protected override detachCanvas(canvasView: CanvasView): void {
     if (this.parentView === canvasView) {
       canvasView.removeChildView(this);
     }
     super.detachCanvas(canvasView);
   }
 
-  protected initContainer(containerView: HtmlView): void {
+  protected override initContainer(containerView: HtmlView): void {
     super.initContainer(containerView);
     const mapPanes = this.mapOverlay.getPanes();
     if (mapPanes !== void 0 && mapPanes !== null) {
@@ -214,7 +214,7 @@ export class GoogleMapView extends MapView {
     }
   }
 
-  protected attachContainer(containerView: HtmlView): void {
+  protected override attachContainer(containerView: HtmlView): void {
     super.attachContainer(containerView);
     const mapPanes = this.mapOverlay.getPanes();
     if (mapPanes !== void 0 && mapPanes !== null) {
@@ -227,7 +227,7 @@ export class GoogleMapView extends MapView {
     }
   }
 
-  protected detachContainer(containerView: HtmlView): void {
+  protected override detachContainer(containerView: HtmlView): void {
     const canvasView = this.canvas.view;
     const mapPanes = this.mapOverlay.getPanes();
     if (mapPanes !== void 0 && mapPanes !== null) {

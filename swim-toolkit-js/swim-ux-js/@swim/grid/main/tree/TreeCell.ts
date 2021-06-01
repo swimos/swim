@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,11 +43,11 @@ export class TreeCell extends HtmlView {
     this.overflowY.setState("hidden", View.Intrinsic);
   }
 
-  declare readonly viewController: TreeCellController | null;
+  override readonly viewController!: TreeCellController | null;
 
-  declare readonly viewObservers: ReadonlyArray<TreeCellObserver>;
+  override readonly viewObservers!: ReadonlyArray<TreeCellObserver>;
 
-  initView(init: TreeCellInit): void {
+  override initView(init: TreeCellInit): void {
     super.initView(init);
   }
 
@@ -98,9 +98,9 @@ export class TreeCell extends HtmlView {
     return view;
   }
 
-  static fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
-  static fromAny(value: AnyTreeCell): TreeCell;
-  static fromAny(value: AnyTreeCell): TreeCell {
+  static override fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
+  static override fromAny(value: AnyTreeCell): TreeCell;
+  static override fromAny(value: AnyTreeCell): TreeCell {
     if (value instanceof this) {
       return value;
     } else if (value instanceof HTMLElement) {

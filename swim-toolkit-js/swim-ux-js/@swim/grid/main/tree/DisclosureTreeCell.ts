@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import {TreeLeaf} from "./TreeLeaf";
 import {TreeLimb} from "./TreeLimb";
 
 export class DisclosureTreeCell extends TreeCell {
-  protected initCell(): void {
+  protected override initCell(): void {
     super.initCell();
     this.addClass("disclosure-tree-cell");
     this.append(DisclosureButton, "button");
@@ -29,7 +29,7 @@ export class DisclosureTreeCell extends TreeCell {
     return this.getChildView("button") as DisclosureButton;
   }
 
-  didPress(input: PositionGestureInput, event: Event | null): void {
+  override didPress(input: PositionGestureInput, event: Event | null): void {
     input.preventDefault();
     const leaf = this.parentView;
     if (leaf instanceof TreeLeaf) {
@@ -41,14 +41,14 @@ export class DisclosureTreeCell extends TreeCell {
     super.didPress(input, event);
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     if (childView.key === "button" && childView instanceof DisclosureButton) {
       this.onInsertButton(childView);
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     if (childView.key === "button" && childView instanceof DisclosureButton) {
       this.onRemoveButton(childView);
     }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ import type {Look} from "../look/Look";
 import {Feel} from "../feel/Feel";
 
 export class OpacityFeel extends Feel {
-  combine<T>(look: Look<T, any>, combination: T | undefined,
-             value: T, weight?: number): T {
+  override combine<T>(look: Look<T, any>, combination: T | undefined,
+                      value: T, weight?: number): T {
     if (combination instanceof Color && value instanceof Color) {
       if (weight === void 0 || weight === 1) {
         return combination.alpha(value.alpha()) as unknown as T;

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,11 +25,11 @@ export abstract class EsriView extends MapView {
     EsriViewport.init();
   }
 
-  declare readonly viewController: EsriViewController | null;
+  override readonly viewController!: EsriViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<EsriViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<EsriViewObserver>;
 
   abstract readonly map: __esri.View;
 
-  abstract readonly geoViewport: EsriViewport;
+  abstract override readonly geoViewport: EsriViewport;
 }

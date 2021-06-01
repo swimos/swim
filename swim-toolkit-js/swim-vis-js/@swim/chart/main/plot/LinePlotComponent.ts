@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,13 +26,13 @@ import {SeriesPlotComponent} from "./SeriesPlotComponent";
 import type {LinePlotComponentObserver} from "./LinePlotComponentObserver";
 
 export class LinePlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
-  declare readonly componentObservers: ReadonlyArray<LinePlotComponentObserver<X, Y>>;
+  override readonly componentObservers!: ReadonlyArray<LinePlotComponentObserver<X, Y>>;
 
   protected detectDataSet(plotTrait: LinePlotTrait<X, Y>): DataSetTrait<X, Y> | null {
     return plotTrait.getTrait(DataSetTrait);
   }
 
-  protected attachDataPoint(dataPointComponent: DataPointComponent<X, Y>, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
+  protected override attachDataPoint(dataPointComponent: DataPointComponent<X, Y>, dataPointFastener: ComponentFastener<this, DataPointComponent<X, Y>>): void {
     super.attachDataPoint(dataPointComponent, dataPointFastener);
     const plotView = this.plot.view;
     if (plotView !== null) {
@@ -302,5 +302,5 @@ export class LinePlotComponent<X, Y> extends SeriesPlotComponent<X, Y> {
   @ComponentViewTrait<LinePlotComponent<X, Y>, LinePlotView<X, Y>, LinePlotTrait<X, Y>>({
     extends: LinePlotComponent.PlotFastener,
   })
-  declare plot: ComponentViewTrait<this, LinePlotView<X, Y>, LinePlotTrait<X, Y>>;
+  readonly plot!: ComponentViewTrait<this, LinePlotView<X, Y>, LinePlotTrait<X, Y>>;
 }

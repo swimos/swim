@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@ import {Arrays} from "@swim/util";
 import type {WarpRef} from "@swim/client";
 import type {ModelContextType, ModelContext} from "./ModelContext";
 import type {ModelObserverType, ModelObserver} from "./ModelObserver";
-import type {ModelControllerType, ModelController} from "./ModelController";
 import type {ModelConsumerType, ModelConsumer} from "./ModelConsumer";
 import type {TraitClass, Trait} from "./Trait";
 import type {ModelServiceConstructor, ModelService} from "./service/ModelService";
@@ -34,7 +33,6 @@ export type ModelPrecedence = number;
 
 export interface ModelInit {
   key?: string;
-  modelController?: ModelController;
 }
 
 export interface ModelPrototype extends ModelDownlinkContextPrototype {
@@ -83,11 +81,6 @@ export abstract class Model implements ModelDownlinkContext {
       enumerable: true,
       configurable: true,
     });
-    Object.defineProperty(this, "modelController", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
     Object.defineProperty(this, "modelObservers", {
       value: Arrays.empty,
       enumerable: true,
@@ -106,12 +99,10 @@ export abstract class Model implements ModelDownlinkContext {
   }
 
   initModel(init: ModelInit): void {
-    if (init.modelController !== void 0) {
-      this.setModelController(init.modelController as ModelControllerType<this>);
-    }
+    // hook
   }
 
-  declare readonly modelFlags: ModelFlags;
+  readonly modelFlags!: ModelFlags;
 
   setModelFlags(modelFlags: ModelFlags): void {
     Object.defineProperty(this, "modelFlags", {
@@ -121,41 +112,7 @@ export abstract class Model implements ModelDownlinkContext {
     });
   }
 
-  declare readonly modelController: ModelController | null;
-
-  setModelController(newModelController: ModelControllerType<this> | null): void {
-    const oldModelController = this.modelController;
-    if (oldModelController !== newModelController) {
-      this.willSetModelController(newModelController);
-      if (oldModelController !== null) {
-        oldModelController.setModel(null);
-      }
-      Object.defineProperty(this, "modelController", {
-        value: newModelController,
-        enumerable: true,
-        configurable: true,
-      });
-      if (newModelController !== null) {
-        newModelController.setModel(this);
-      }
-      this.onSetModelController(newModelController);
-      this.didSetModelController(newModelController);
-    }
-  }
-
-  protected willSetModelController(modelController: ModelControllerType<this> | null): void {
-    // hook
-  }
-
-  protected onSetModelController(modelController: ModelControllerType<this> | null): void {
-    // hook
-  }
-
-  protected didSetModelController(modelController: ModelControllerType<this> | null): void {
-    // hook
-  }
-
-  declare readonly modelObservers: ReadonlyArray<ModelObserver>;
+  readonly modelObservers!: ReadonlyArray<ModelObserver>;
 
   addModelObserver(modelObserver: ModelObserverType<this>): void {
     const oldModelObservers = this.modelObservers;
@@ -258,10 +215,6 @@ export abstract class Model implements ModelDownlinkContext {
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).willSetParentModel(newParentModel, oldParentModel);
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillSetParentModel !== void 0) {
-      modelController.modelWillSetParentModel(newParentModel, oldParentModel, this);
-    }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
       const modelObserver = modelObservers[i]!;
@@ -285,10 +238,6 @@ export abstract class Model implements ModelDownlinkContext {
       if (modelObserver.modelDidSetParentModel !== void 0) {
         modelObserver.modelDidSetParentModel(newParentModel, oldParentModel, this);
       }
-    }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidSetParentModel !== void 0) {
-      modelController.modelDidSetParentModel(newParentModel, oldParentModel, this);
     }
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
@@ -333,10 +282,6 @@ export abstract class Model implements ModelDownlinkContext {
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).willInsertChildModel(childModel, targetModel);
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillInsertChildModel !== void 0) {
-      modelController.modelWillInsertChildModel(childModel, targetModel, this);
-    }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
       const modelObserver = modelObservers[i]!;
@@ -362,10 +307,6 @@ export abstract class Model implements ModelDownlinkContext {
         modelObserver.modelDidInsertChildModel(childModel, targetModel, this);
       }
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidInsertChildModel !== void 0) {
-      modelController.modelDidInsertChildModel(childModel, targetModel, this);
-    }
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).didInsertChildModel(childModel, targetModel);
@@ -387,10 +328,6 @@ export abstract class Model implements ModelDownlinkContext {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).willRemoveChildModel(childModel);
-    }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillRemoveChildModel !== void 0) {
-      modelController.modelWillRemoveChildModel(childModel, this);
     }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
@@ -416,10 +353,6 @@ export abstract class Model implements ModelDownlinkContext {
       if (modelObserver.modelDidRemoveChildModel !== void 0) {
         modelObserver.modelDidRemoveChildModel(childModel, this);
       }
-    }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidRemoveChildModel !== void 0) {
-      modelController.modelDidRemoveChildModel(childModel, this);
     }
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
@@ -456,10 +389,10 @@ export abstract class Model implements ModelDownlinkContext {
     return this.traits.length;
   }
 
-  declare readonly traits: ReadonlyArray<Trait>;
+  readonly traits!: ReadonlyArray<Trait>;
 
   /** @hidden */
-  declare readonly traitMap: {[traitName: string]: Trait | undefined};
+  readonly traitMap!: {[traitName: string]: Trait | undefined};
 
   firstTrait(): Trait | null {
     const traits = this.traits;
@@ -636,10 +569,6 @@ export abstract class Model implements ModelDownlinkContext {
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).willInsertTrait(newTrait, targetTrait);
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillInsertTrait !== void 0) {
-      modelController.modelWillInsertTrait(newTrait, targetTrait, this);
-    }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
       const modelObserver = modelObservers[i]!;
@@ -664,10 +593,6 @@ export abstract class Model implements ModelDownlinkContext {
       if (modelObserver.modelDidInsertTrait !== void 0) {
         modelObserver.modelDidInsertTrait(newTrait, targetTrait, this);
       }
-    }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidInsertTrait !== void 0) {
-      modelController.modelDidInsertTrait(newTrait, targetTrait, this);
     }
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
@@ -715,10 +640,6 @@ export abstract class Model implements ModelDownlinkContext {
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).willRemoveTrait(oldTrait);
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillRemoveTrait !== void 0) {
-      modelController.modelWillRemoveTrait(oldTrait, this);
-    }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
       const modelObserver = modelObservers[i]!;
@@ -743,10 +664,6 @@ export abstract class Model implements ModelDownlinkContext {
       if (modelObserver.modelDidRemoveTrait !== void 0) {
         modelObserver.modelDidRemoveTrait(oldTrait, this);
       }
-    }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidRemoveTrait !== void 0) {
-      modelController.modelDidRemoveTrait(oldTrait, this);
     }
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
@@ -809,10 +726,6 @@ export abstract class Model implements ModelDownlinkContext {
   abstract cascadeMount(): void;
 
   protected willMount(): void {
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillMount !== void 0) {
-      modelController.modelWillMount(this);
-    }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
       const modelObserver = modelObservers[i]!;
@@ -835,19 +748,11 @@ export abstract class Model implements ModelDownlinkContext {
         modelObserver.modelDidMount(this);
       }
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidMount !== void 0) {
-      modelController.modelDidMount(this);
-    }
   }
 
   abstract cascadeUnmount(): void;
 
   protected willUnmount(): void {
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillUnmount !== void 0) {
-      modelController.modelWillUnmount(this);
-    }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
       const modelObserver = modelObservers[i]!;
@@ -869,10 +774,6 @@ export abstract class Model implements ModelDownlinkContext {
         modelObserver.modelDidUnmount(this);
       }
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidUnmount !== void 0) {
-      modelController.modelDidUnmount(this);
-    }
   }
 
   isPowered(): boolean {
@@ -886,10 +787,6 @@ export abstract class Model implements ModelDownlinkContext {
   abstract cascadePower(): void;
 
   protected willPower(): void {
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillPower !== void 0) {
-      modelController.modelWillPower(this);
-    }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
       const modelObserver = modelObservers[i]!;
@@ -912,19 +809,11 @@ export abstract class Model implements ModelDownlinkContext {
         modelObserver.modelDidPower(this);
       }
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidPower !== void 0) {
-      modelController.modelDidPower(this);
-    }
   }
 
   abstract cascadeUnpower(): void;
 
   protected willUnpower(): void {
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillUnpower !== void 0) {
-      modelController.modelWillUnpower(this);
-    }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
       const modelObserver = modelObservers[i]!;
@@ -945,10 +834,6 @@ export abstract class Model implements ModelDownlinkContext {
       if (modelObserver.modelDidUnpower !== void 0) {
         modelObserver.modelDidUnpower(this);
       }
-    }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidUnpower !== void 0) {
-      modelController.modelDidUnpower(this);
     }
   }
 
@@ -1084,10 +969,6 @@ export abstract class Model implements ModelDownlinkContext {
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).willMutate(modelContext);
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillMutate !== void 0) {
-      modelController.modelWillMutate(modelContext, this);
-    }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
       const modelObserver = modelObservers[i]!;
@@ -1112,10 +993,6 @@ export abstract class Model implements ModelDownlinkContext {
         modelObserver.modelDidMutate(modelContext, this);
       }
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidMutate !== void 0) {
-      modelController.modelDidMutate(modelContext, this);
-    }
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).didMutate(modelContext);
@@ -1126,10 +1003,6 @@ export abstract class Model implements ModelDownlinkContext {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).willAggregate(modelContext);
-    }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillAggregate !== void 0) {
-      modelController.modelWillAggregate(modelContext, this);
     }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
@@ -1155,10 +1028,6 @@ export abstract class Model implements ModelDownlinkContext {
         modelObserver.modelDidAggregate(modelContext, this);
       }
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidAggregate !== void 0) {
-      modelController.modelDidAggregate(modelContext, this);
-    }
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).didAggregate(modelContext);
@@ -1169,10 +1038,6 @@ export abstract class Model implements ModelDownlinkContext {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).willCorrelate(modelContext);
-    }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillCorrelate !== void 0) {
-      modelController.modelWillCorrelate(modelContext, this);
     }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
@@ -1197,10 +1062,6 @@ export abstract class Model implements ModelDownlinkContext {
       if (modelObserver.modelDidCorrelate !== void 0) {
         modelObserver.modelDidCorrelate(modelContext, this);
       }
-    }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidCorrelate !== void 0) {
-      modelController.modelDidCorrelate(modelContext, this);
     }
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
@@ -1312,10 +1173,6 @@ export abstract class Model implements ModelDownlinkContext {
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).willValidate(modelContext);
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillValidate !== void 0) {
-      modelController.modelWillValidate(modelContext, this);
-    }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
       const modelObserver = modelObservers[i]!;
@@ -1340,10 +1197,6 @@ export abstract class Model implements ModelDownlinkContext {
         modelObserver.modelDidValidate(modelContext, this);
       }
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidValidate !== void 0) {
-      modelController.modelDidValidate(modelContext, this);
-    }
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).didValidate(modelContext);
@@ -1354,10 +1207,6 @@ export abstract class Model implements ModelDownlinkContext {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
       (traits[i]! as any).willReconcile(modelContext);
-    }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillReconcile !== void 0) {
-      modelController.modelWillReconcile(modelContext, this);
     }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
@@ -1382,10 +1231,6 @@ export abstract class Model implements ModelDownlinkContext {
       if (modelObserver.modelDidReconcile !== void 0) {
         modelObserver.modelDidReconcile(modelContext, this);
       }
-    }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidReconcile !== void 0) {
-      modelController.modelDidReconcile(modelContext, this);
     }
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
@@ -1475,10 +1320,6 @@ export abstract class Model implements ModelDownlinkContext {
   }
 
   protected willStartConsuming(): void {
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillStartConsuming !== void 0) {
-      modelController.modelWillStartConsuming(this);
-    }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
       const modelObserver = modelObservers[i]!;
@@ -1500,10 +1341,6 @@ export abstract class Model implements ModelDownlinkContext {
         modelObserver.modelDidStartConsuming(this);
       }
     }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidStartConsuming !== void 0) {
-      modelController.modelDidStartConsuming(this);
-    }
   }
 
   get stopConsumingFlags(): ModelFlags {
@@ -1520,10 +1357,6 @@ export abstract class Model implements ModelDownlinkContext {
   }
 
   protected willStopConsuming(): void {
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelWillStopConsuming !== void 0) {
-      modelController.modelWillStopConsuming(this);
-    }
     const modelObservers = this.modelObservers;
     for (let i = 0, n = modelObservers.length; i < n; i += 1) {
       const modelObserver = modelObservers[i]!;
@@ -1544,10 +1377,6 @@ export abstract class Model implements ModelDownlinkContext {
       if (modelObserver.modelDidStopConsuming !== void 0) {
         modelObserver.modelDidStopConsuming(this);
       }
-    }
-    const modelController = this.modelController;
-    if (modelController !== null && modelController.modelDidStopConsuming !== void 0) {
-      modelController.modelDidStopConsuming(this);
     }
   }
 

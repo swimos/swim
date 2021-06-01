@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,21 +53,21 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
     this.userSelect.setState("none", View.Intrinsic);
   }
 
-  declare readonly viewController: ListItemController | null;
+  override readonly viewController!: ListItemController | null;
 
-  declare readonly viewObservers: ReadonlyArray<ListItemObserver>;
+  override readonly viewObservers!: ReadonlyArray<ListItemObserver>;
 
   @ViewProperty({type: Boolean, state: false})
-  declare highlighted: ViewProperty<this, boolean>;
+  readonly highlighted!: ViewProperty<this, boolean>;
 
   @ViewProperty({type: Object, inherit: true, state: null})
-  declare edgeInsets: ViewProperty<this, ViewEdgeInsets | null>;
+  readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
 
   @ViewAnimator({type: Length, inherit: true, state: null})
-  declare collapsedWidth: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly collapsedWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Number, inherit: true, updateFlags: View.NeedsAnimate})
-  declare drawerStretch: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
+  readonly drawerStretch!: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
 
   @ViewFastener<ListItem, HtmlView, Graphics>({
     key: true,
@@ -93,7 +93,7 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
       }
     },
   })
-  declare icon: ViewFastener<ListItem, HtmlView, Graphics>;
+  readonly icon!: ViewFastener<ListItem, HtmlView, Graphics>;
 
   protected createIconView(): HtmlIconView {
     return HtmlIconView.create();
@@ -137,7 +137,7 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
       }
     },
   })
-  declare label: ViewFastener<ListItem, HtmlView, string | undefined>;
+  readonly label!: ViewFastener<ListItem, HtmlView, string | undefined>;
 
   protected createLabelView(): HtmlView {
     const labelView = HtmlView.span.create();
@@ -188,7 +188,7 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
       }
     },
   })
-  declare accessory: ViewFastener<ListItem, HtmlView, Graphics | string>;
+  readonly accessory!: ViewFastener<ListItem, HtmlView, Graphics | string>;
 
   protected createAccessoryIconView(): HtmlIconView {
     return HtmlIconView.create();
@@ -219,7 +219,7 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
     }
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     const itemColor = theme.getOr(this.highlighted.state ? Look.color : Look.mutedColor, mood, null);
 
@@ -249,17 +249,17 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
     }
   }
 
-  protected onMount(): void {
+  protected override onMount(): void {
     super.onMount();
     this.on("click", this.onClick);
   }
 
-  protected onUnmount(): void {
+  protected override onUnmount(): void {
     this.off("click", this.onClick);
     super.onUnmount();
   }
 
-  protected onAnimate(viewContext: ViewContextType<this>): void {
+  protected override onAnimate(viewContext: ViewContextType<this>): void {
     super.onAnimate(viewContext);
     this.lineHeight.setState(this.height.state, View.Intrinsic);
     const drawerStretch = this.drawerStretch.value;
@@ -277,7 +277,7 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
     }
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     const edgeInsets = this.edgeInsets.state;
     if (edgeInsets !== null) {
@@ -372,7 +372,7 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
     return this;
   }
 
-  protected glow(input: PositionGestureInput): void {
+  protected override glow(input: PositionGestureInput): void {
     if (!this.highlighted.state) {
       super.glow(input);
     }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {AnyTiming} from "@swim/mapping";
-import {AnyLength, Length, AnyAngle, Angle, AnyPointR2, PointR2, BoxR2} from "@swim/math";
+import {AnyLength, Length, AnyAngle, Angle, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewAnimator} from "@swim/view";
 import type {GraphicsView} from "../graphics/GraphicsView";
@@ -30,43 +30,43 @@ export interface ArcViewInit extends FillViewInit, StrokeViewInit, ArcInit {
 }
 
 export class ArcView extends LayerView implements FillView, StrokeView {
-  initView(init: ArcViewInit): void {
+  override initView(init: ArcViewInit): void {
     super.initView(init);
     this.setState(init);
   }
 
-  @ViewAnimator({type: PointR2, state: PointR2.origin()})
-  declare center: ViewAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator({type: R2Point, state: R2Point.origin()})
+  readonly center!: ViewAnimator<this, R2Point, AnyR2Point>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  declare innerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly innerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  declare outerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly outerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Angle, state: Angle.zero()})
-  declare startAngle: ViewAnimator<this, Angle, AnyAngle>;
+  readonly startAngle!: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Angle, state: Angle.zero()})
-  declare sweepAngle: ViewAnimator<this, Angle, AnyAngle>;
+  readonly sweepAngle!: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Angle, state: Angle.zero()})
-  declare padAngle: ViewAnimator<this, Angle, AnyAngle>;
+  readonly padAngle!: ViewAnimator<this, Angle, AnyAngle>;
 
   @ViewAnimator({type: Length, state: null})
-  declare padRadius: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly padRadius!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  declare cornerRadius: ViewAnimator<this, Length, AnyLength>;
+  readonly cornerRadius!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Color, state: null, inherit: true})
-  declare fill: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Color, state: null, inherit: true})
-  declare stroke: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Length, state: null, inherit: true})
-  declare strokeWidth: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   get value(): Arc {
     return new Arc(this.center.value, this.innerRadius.value, this.outerRadius.value,
@@ -119,7 +119,7 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     }
   }
 
-  protected onRender(viewContext: ViewContextType<this>): void {
+  protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -130,7 +130,7 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     }
   }
 
-  protected renderArc(context: CanvasContext, frame: BoxR2): void {
+  protected renderArc(context: CanvasContext, frame: R2Box): void {
     const arc = this.value;
     arc.draw(context, frame);
     const fill = this.fill.value;
@@ -150,7 +150,7 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     }
   }
 
-  get popoverFrame(): BoxR2 {
+  override get popoverFrame(): R2Box {
     const frame = this.viewFrame;
     const size = Math.min(frame.width, frame.height);
     const inversePageTransform = this.pageTransform.inverse();
@@ -161,12 +161,12 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     const a = this.startAngle.getValue().radValue() + this.sweepAngle.getValue().radValue() / 2;
     const x = px + r * Math.cos(a);
     const y = py + r * Math.sin(a);
-    return new BoxR2(x, y, x, y);
+    return new R2Box(x, y, x, y);
   }
 
-  declare readonly viewBounds: BoxR2; // getter defined below to work around useDefineForClassFields lunacy
+  declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
-  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -182,7 +182,7 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     return hit;
   }
 
-  protected hitTestArc(x: number, y: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
+  protected hitTestArc(x: number, y: number, context: CanvasContext, frame: R2Box): GraphicsView | null {
     context.beginPath();
     const arc = this.value;
     arc.draw(context, frame);
@@ -201,7 +201,7 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     return null;
   }
 
-  static create(): ArcView {
+  static override create(): ArcView {
     return new ArcView();
   }
 
@@ -230,12 +230,12 @@ export class ArcView extends LayerView implements FillView, StrokeView {
   }
 }
 Object.defineProperty(ArcView.prototype, "viewBounds", {
-  get(this: ArcView): BoxR2 {
+  get(this: ArcView): R2Box {
     const frame = this.viewFrame;
     const size = Math.min(frame.width, frame.height);
     const center = this.center.getValue();
     const radius = this.outerRadius.getValue().pxValue(size);
-    return new BoxR2(center.x - radius, center.y - radius,
+    return new R2Box(center.x - radius, center.y - radius,
                      center.x + radius, center.y + radius);
   },
   enumerable: true,

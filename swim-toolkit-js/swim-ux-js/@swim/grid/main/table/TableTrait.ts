@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ export class TableTrait extends GenericTrait {
     });
   }
 
-  declare readonly traitObservers: ReadonlyArray<TableTraitObserver>;
+  override readonly traitObservers!: ReadonlyArray<TableTraitObserver>;
 
   protected createLayout(): TableLayout | null {
     const colLayouts: ColLayout[] = [];
@@ -91,7 +91,7 @@ export class TableTrait extends GenericTrait {
       this.owner.didSetLayout(newLayout, oldLayout);
     },
   })
-  declare layout: TraitProperty<this, TableLayout | null, AnyTableLayout | null>;
+  readonly layout!: TraitProperty<this, TableLayout | null, AnyTableLayout | null>;
 
   protected onSetColSpacing(newColSpacing: Length | null, oldColSpacing: Length | null): void {
     this.updateLayout();
@@ -104,7 +104,7 @@ export class TableTrait extends GenericTrait {
       this.owner.onSetColSpacing(newColSpacing, oldColSpacing);
     },
   })
-  declare colSpacing: TraitProperty<this, Length | null, AnyLength | null>;
+  readonly colSpacing!: TraitProperty<this, Length | null, AnyLength | null>;
 
   insertCol(colTrait: ColTrait, targetTrait: Trait | null = null): void {
     const colFasteners = this.colFasteners as TraitFastener<this, ColTrait>[];
@@ -219,7 +219,7 @@ export class TableTrait extends GenericTrait {
   }
 
   /** @hidden */
-  declare readonly colFasteners: ReadonlyArray<TraitFastener<this, ColTrait>>;
+  readonly colFasteners!: ReadonlyArray<TraitFastener<this, ColTrait>>;
 
   /** @hidden */
   protected mountColFasteners(): void {
@@ -364,7 +364,7 @@ export class TableTrait extends GenericTrait {
   }
 
   /** @hidden */
-  declare readonly rowFasteners: ReadonlyArray<TraitFastener<this, RowTrait>>;
+  readonly rowFasteners!: ReadonlyArray<TraitFastener<this, RowTrait>>;
 
   /** @hidden */
   protected mountRowFasteners(): void {
@@ -433,14 +433,14 @@ export class TableTrait extends GenericTrait {
     return trait instanceof ColTrait ? trait : null;
   }
 
-  protected didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
+  protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
     if (newModel !== null) {
       this.detectModels(newModel);
     }
     super.didSetModel(newModel, oldModel);
   }
 
-  protected onInsertChildModel(childModel: Model, targetModel: Model | null): void {
+  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
     super.onInsertChildModel(childModel, targetModel);
     const colTrait = this.detectColModel(childModel);
     if (colTrait !== null) {
@@ -454,7 +454,7 @@ export class TableTrait extends GenericTrait {
     }
   }
 
-  protected onRemoveChildModel(childModel: Model): void {
+  protected override onRemoveChildModel(childModel: Model): void {
     super.onRemoveChildModel(childModel);
     const colTrait = this.detectColModel(childModel);
     if (colTrait !== null) {
@@ -466,7 +466,7 @@ export class TableTrait extends GenericTrait {
     }
   }
 
-  protected onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
+  protected override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
     super.onInsertTrait(trait, targetTrait);
     const colTrait = this.detectColTrait(trait);
     if (colTrait !== null) {
@@ -474,7 +474,7 @@ export class TableTrait extends GenericTrait {
     }
   }
 
-  protected onRemoveTrait(trait: Trait): void {
+  protected override onRemoveTrait(trait: Trait): void {
     super.onRemoveTrait(trait);
     const colTrait = this.detectColTrait(trait);
     if (colTrait !== null) {
@@ -483,26 +483,26 @@ export class TableTrait extends GenericTrait {
   }
 
   /** @hidden */
-  protected mountTraitFasteners(): void {
+  protected override mountTraitFasteners(): void {
     super.mountTraitFasteners();
     this.mountColFasteners();
     this.mountRowFasteners();
   }
 
   /** @hidden */
-  protected unmountTraitFasteners(): void {
+  protected override unmountTraitFasteners(): void {
     this.unmountRowFasteners();
     this.unmountColFasteners();
     super.unmountTraitFasteners();
   }
 
-  protected onStartConsuming(): void {
+  protected override onStartConsuming(): void {
     super.onStartConsuming();
     this.startConsumingCols();
     this.startConsumingRows();
   }
 
-  protected onStopConsuming(): void {
+  protected override onStopConsuming(): void {
     super.onStopConsuming();
     this.stopConsumingRows();
     this.stopConsumingCols();

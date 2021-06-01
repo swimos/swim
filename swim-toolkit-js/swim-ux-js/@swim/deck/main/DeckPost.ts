@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -61,23 +61,23 @@ export class DeckPost implements Equals, Equivalent, Debug {
     });
   }
 
-  declare readonly key: string;
+  readonly key!: string;
 
-  declare readonly grow: number;
+  readonly grow!: number;
 
   withGrow(grow: number): DeckPost {
     return this.copy(this.key, grow, this.shrink, this.basis,
                      this.width, this.left, this.right);
   }
 
-  declare readonly shrink: number;
+  readonly shrink!: number;
 
   withShrink(shrink: number): DeckPost {
     return this.copy(this.key, this.grow, shrink, this.basis,
                      this.width, this.left, this.right);
   }
 
-  declare readonly basis: Length;
+  readonly basis!: Length;
 
   withBasis(basis: AnyLength): DeckPost {
     basis = Length.fromAny(basis);
@@ -85,11 +85,11 @@ export class DeckPost implements Equals, Equivalent, Debug {
                      this.width, this.left, this.right);
   }
 
-  declare readonly width: Length | null;
+  readonly width!: Length | null;
 
-  declare readonly left: Length | null;
+  readonly left!: Length | null;
 
-  declare readonly right: Length | null;
+  readonly right!: Length | null;
 
   resized(width: AnyLength | null, left: AnyLength | null, right: AnyLength | null): DeckPost {
     if (width !== null) {

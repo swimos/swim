@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,15 +32,15 @@ export interface GeoViewInit extends GraphicsViewInit {
 }
 
 export abstract class GeoView extends GraphicsView {
-  declare readonly viewController: GeoViewController | null;
+  override readonly viewController!: GeoViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<GeoViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<GeoViewObserver>;
 
-  initView(init: GeoViewInit): void {
+  override initView(init: GeoViewInit): void {
     super.initView(init);
   }
 
-  protected onAddViewObserver(viewObserver: ViewObserverType<this>): void {
+  protected override onAddViewObserver(viewObserver: ViewObserverType<this>): void {
     super.onAddViewObserver(viewObserver);
     if (viewObserver.viewWillProject !== void 0) {
       this.viewObserverCache.viewWillProjectObservers = Arrays.inserted(viewObserver as ViewWillProject, this.viewObserverCache.viewWillProjectObservers);
@@ -50,7 +50,7 @@ export abstract class GeoView extends GraphicsView {
     }
   }
 
-  protected onRemoveViewObserver(viewObserver: ViewObserverType<this>): void {
+  protected override onRemoveViewObserver(viewObserver: ViewObserverType<this>): void {
     super.onRemoveViewObserver(viewObserver);
     if (viewObserver.viewWillProject !== void 0) {
       this.viewObserverCache.viewWillProjectObservers = Arrays.removed(viewObserver as ViewWillProject, this.viewObserverCache.viewWillProjectObservers);
@@ -60,7 +60,7 @@ export abstract class GeoView extends GraphicsView {
     }
   }
 
-  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((this.viewFlags & View.NeedsAnimate) === 0) {
       processFlags &= ~View.NeedsAnimate;
     }
@@ -68,7 +68,7 @@ export abstract class GeoView extends GraphicsView {
   }
 
   /** @hidden */
-  protected doProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected override doProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     let cascadeFlags = processFlags;
     this.setViewFlags(this.viewFlags & ~View.NeedsProcess | (View.TraversingFlag | View.ProcessingFlag));
     try {
@@ -182,7 +182,7 @@ export abstract class GeoView extends GraphicsView {
     }
   }
 
-  protected onSetHidden(hidden: boolean): void {
+  protected override onSetHidden(hidden: boolean): void {
     const parentView = this.parentView;
     if (parentView instanceof GeoView) {
       parentView.onSetChildViewHidden(this, hidden);
@@ -200,7 +200,7 @@ export abstract class GeoView extends GraphicsView {
     this.setCulled(!geoFrame.intersects(this.geoBounds));
   }
 
-  declare readonly viewContext: GeoViewContext;
+  override readonly viewContext!: GeoViewContext;
 
   get geoViewport(): GeoViewport {
     return this.viewContext.geoViewport;
@@ -287,8 +287,8 @@ export abstract class GeoView extends GraphicsView {
     return geoBounds;
   }
 
-  static readonly mountFlags: ViewFlags = GraphicsView.mountFlags | View.NeedsProject;
-  static readonly uncullFlags: ViewFlags = GraphicsView.uncullFlags | View.NeedsProject;
+  static override readonly mountFlags: ViewFlags = GraphicsView.mountFlags | View.NeedsProject;
+  static override readonly uncullFlags: ViewFlags = GraphicsView.uncullFlags | View.NeedsProject;
 }
 Object.defineProperty(GeoView.prototype, "geoBounds", {
   get(this: GeoView): GeoBox {

@@ -27,6 +27,7 @@
       "@swim/component": ["../../../../swim-ui-js/@swim/component/main"],
       "@swim/map": ["../../map/main"],
       "@swim/mapbox": ["../../mapbox/main"],
+      "@swim/leaflet": ["../../leaflet/main"],
       "@swim/googlemap": ["../../googlemap/main"],
       "@swim/esrimap": ["../../esrimap/main"]
     },
@@ -35,6 +36,7 @@
   "references": [
     {"path": "../../map/main"},
     {"path": "../../mapbox/main"},
+    {"path": "../../leaflet/main"},
     {"path": "../../googlemap/main"},
     {"path": "../../esrimap/main"}
   ]

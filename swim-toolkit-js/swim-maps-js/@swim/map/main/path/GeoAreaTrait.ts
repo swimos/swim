@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import {GeoPathTrait} from "./GeoPathTrait";
 import type {GeoAreaTraitObserver} from "./GeoAreaTraitObserver";
 
 export abstract class GeoAreaTrait extends GeoPathTrait {
-  declare readonly traitObservers: ReadonlyArray<GeoAreaTraitObserver>;
+  override readonly traitObservers!: ReadonlyArray<GeoAreaTraitObserver>;
 
   protected willSetFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
     const traitObservers = this.traitObservers;
@@ -62,7 +62,7 @@ export abstract class GeoAreaTrait extends GeoPathTrait {
       return fill;
     },
   })
-  declare fill: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly fill!: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 
   protected willSetStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
     const traitObservers = this.traitObservers;
@@ -104,7 +104,7 @@ export abstract class GeoAreaTrait extends GeoPathTrait {
       return stroke;
     },
   })
-  declare stroke: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+  readonly stroke!: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 
   protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
     const traitObservers = this.traitObservers;
@@ -141,5 +141,5 @@ export abstract class GeoAreaTrait extends GeoPathTrait {
       this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
     },
   })
-  declare strokeWidth: TraitProperty<this, Length | null, AnyLength | null>;
+  readonly strokeWidth!: TraitProperty<this, Length | null, AnyLength | null>;
 }

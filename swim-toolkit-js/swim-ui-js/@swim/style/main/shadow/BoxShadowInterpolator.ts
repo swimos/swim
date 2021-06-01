@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,19 +21,19 @@ import {BoxShadow} from "./BoxShadow";
 /** @hidden */
 export declare abstract class BoxShadowInterpolator {
   /** @hidden */
-  declare readonly insetInterpolator: Interpolator<boolean>;
+  readonly insetInterpolator: Interpolator<boolean>;
   /** @hidden */
-  declare readonly offsetXInterpolator: Interpolator<Length>;
+  readonly offsetXInterpolator: Interpolator<Length>;
   /** @hidden */
-  declare readonly offsetYInterpolator: Interpolator<Length>;
+  readonly offsetYInterpolator: Interpolator<Length>;
   /** @hidden */
-  declare readonly blurRadiusInterpolator: Interpolator<Length>;
+  readonly blurRadiusInterpolator: Interpolator<Length>;
   /** @hidden */
-  declare readonly spreadRadiusInterpolator: Interpolator<Length>;
+  readonly spreadRadiusInterpolator: Interpolator<Length>;
   /** @hidden */
-  declare readonly colorInterpolator: Interpolator<Color>;
+  readonly colorInterpolator: Interpolator<Color>;
   /** @hidden */
-  declare readonly nextInterpolator: Interpolator<BoxShadow | null>;
+  readonly nextInterpolator: Interpolator<BoxShadow | null>;
 
   get 0(): BoxShadow;
 

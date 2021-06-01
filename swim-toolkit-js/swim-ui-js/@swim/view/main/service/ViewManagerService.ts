@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import type {ViewManagerObserverType} from "../manager/ViewManagerObserver";
 import {ViewService} from "./ViewService";
 
 export abstract class ViewManagerService<V extends View, VM extends ViewManager<V>> extends ViewService<V, VM> {
-  mount(): void {
+  override mount(): void {
     super.mount();
     const manager = this.manager;
     if (manager !== void 0) {
@@ -31,7 +31,7 @@ export abstract class ViewManagerService<V extends View, VM extends ViewManager<
     }
   }
 
-  unmount(): void {
+  override unmount(): void {
     const manager = this.manager;
     if (manager !== void 0) {
       if (this.observe !== false) {

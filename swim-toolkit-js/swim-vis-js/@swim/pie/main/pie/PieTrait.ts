@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ export class PieTrait extends GenericTrait {
     });
   }
 
-  declare readonly traitObservers: ReadonlyArray<PieTraitObserver>;
+  override readonly traitObservers!: ReadonlyArray<PieTraitObserver>;
 
   protected willSetTitle(newTitle: PieTitle | null, oldTitle: PieTitle | null): void {
     const traitObservers = this.traitObservers;
@@ -65,7 +65,7 @@ export class PieTrait extends GenericTrait {
       this.owner.didSetTitle(newTitle, oldTitle);
     },
   })
-  declare title: TraitProperty<this, PieTitle | null>;
+  readonly title!: TraitProperty<this, PieTitle | null>;
 
   insertSlice(sliceTrait: SliceTrait, targetTrait: Trait | null = null): void {
     const sliceFasteners = this.sliceFasteners as TraitFastener<this, SliceTrait>[];
@@ -170,7 +170,7 @@ export class PieTrait extends GenericTrait {
   }
 
   /** @hidden */
-  declare readonly sliceFasteners: ReadonlyArray<TraitFastener<this, SliceTrait>>;
+  readonly sliceFasteners!: ReadonlyArray<TraitFastener<this, SliceTrait>>;
 
   /** @hidden */
   protected mountSliceFasteners(): void {
@@ -227,14 +227,14 @@ export class PieTrait extends GenericTrait {
     }
   }
 
-  protected didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
+  protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
     if (newModel !== null) {
       this.detectModels(newModel);
     }
     super.didSetModel(newModel, oldModel);
   }
 
-  protected onInsertChildModel(childModel: Model, targetModel: Model | null): void {
+  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
     super.onInsertChildModel(childModel, targetModel);
     const sliceTrait = this.detectSliceModel(childModel);
     if (sliceTrait !== null) {
@@ -243,7 +243,7 @@ export class PieTrait extends GenericTrait {
     }
   }
 
-  protected onRemoveChildModel(childModel: Model): void {
+  protected override onRemoveChildModel(childModel: Model): void {
     super.onRemoveChildModel(childModel);
     const sliceTrait = this.detectSliceModel(childModel);
     if (sliceTrait !== null) {
@@ -252,23 +252,23 @@ export class PieTrait extends GenericTrait {
   }
 
   /** @hidden */
-  protected mountTraitFasteners(): void {
+  protected override mountTraitFasteners(): void {
     super.mountTraitFasteners();
     this.mountSliceFasteners();
   }
 
   /** @hidden */
-  protected unmountTraitFasteners(): void {
+  protected override unmountTraitFasteners(): void {
     this.unmountSliceFasteners();
     super.unmountTraitFasteners();
   }
 
-  protected onStartConsuming(): void {
+  protected override onStartConsuming(): void {
     super.onStartConsuming();
     this.startConsumingSlices();
   }
 
-  protected onStopConsuming(): void {
+  protected override onStopConsuming(): void {
     super.onStopConsuming();
     this.stopConsumingSlices();
   }

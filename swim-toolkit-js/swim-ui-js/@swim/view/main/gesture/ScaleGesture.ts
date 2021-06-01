@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {BoxR2} from "@swim/math";
+import type {R2Box} from "@swim/math";
 import type {AnyTiming, ContinuousScale} from "@swim/mapping";
 import type {ViewContext} from "../ViewContext";
 import {View} from "../View";
@@ -32,9 +32,9 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
     });
   }
 
-  declare readonly delegate: ScaleGestureDelegate<X, Y> | null
+  override readonly delegate!: ScaleGestureDelegate<X, Y> | null
 
-  setDelegate(delegate: ScaleGestureDelegate<X, Y> | null): void {
+  override setDelegate(delegate: ScaleGestureDelegate<X, Y> | null): void {
     Object.defineProperty(this, "delegate", {
       value: delegate,
       enumerable: true,
@@ -42,9 +42,9 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
     });
   }
 
-  declare readonly inputs: {readonly [inputId: string]: ScaleGestureInput<X, Y> | undefined};
+  override readonly inputs!: {readonly [inputId: string]: ScaleGestureInput<X, Y> | undefined};
 
-  getInput(inputId: string | number): ScaleGestureInput<X, Y> | null {
+  override getInput(inputId: string | number): ScaleGestureInput<X, Y> | null {
     if (typeof inputId === "number") {
       inputId = "" + inputId;
     }
@@ -52,13 +52,13 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
     return input !== void 0 ? input : null;
   }
 
-  protected createInput(inputId: string, inputType: GestureInputType, isPrimary: boolean,
-                        x: number, y: number, t: number): ScaleGestureInput<X, Y> {
+  protected override createInput(inputId: string, inputType: GestureInputType, isPrimary: boolean,
+                                 x: number, y: number, t: number): ScaleGestureInput<X, Y> {
     return new ScaleGestureInput<X, Y>(inputId, inputType, isPrimary, x, y, t);
   }
 
-  protected getOrCreateInput(inputId: string | number, inputType: GestureInputType, isPrimary: boolean,
-                             x: number, y: number, t: number): ScaleGestureInput<X, Y> {
+  protected override getOrCreateInput(inputId: string | number, inputType: GestureInputType, isPrimary: boolean,
+                                      x: number, y: number, t: number): ScaleGestureInput<X, Y> {
     if (typeof inputId === "number") {
       inputId = "" + inputId;
     }
@@ -166,7 +166,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
     }
   }
 
-  protected clientToRangeX(clientX: number, xScale: ContinuousScale<X, number>, bounds: BoxR2): number {
+  protected clientToRangeX(clientX: number, xScale: ContinuousScale<X, number>, bounds: R2Box): number {
     const viewX = clientX - bounds.xMin;
     const xRange = xScale.range;
     if (xRange[0] <= xRange[1]) {
@@ -176,7 +176,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
     }
   }
 
-  protected clientToRangeY(clientY: number, yScale: ContinuousScale<Y, number>, bounds: BoxR2): number {
+  protected clientToRangeY(clientY: number, yScale: ContinuousScale<Y, number>, bounds: R2Box): number {
     const viewY = clientY - bounds.yMin;
     const yRange = yScale.range;
     if (yRange[0] <= yRange[1]) {
@@ -186,25 +186,25 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
     }
   }
 
-  protected unscaleX(clientX: number, xScale: ContinuousScale<X, number>, bounds: BoxR2): X {
+  protected unscaleX(clientX: number, xScale: ContinuousScale<X, number>, bounds: R2Box): X {
     return xScale.inverse(this.clientToRangeX(clientX, xScale, bounds));
   }
 
-  protected unscaleY(clientY: number, yScale: ContinuousScale<Y, number>, bounds: BoxR2): Y {
+  protected unscaleY(clientY: number, yScale: ContinuousScale<Y, number>, bounds: R2Box): Y {
     return yScale.inverse(this.clientToRangeY(clientY, yScale, bounds));
   }
 
   /** @hidden */
-  declare readonly needsRescale: boolean;
+  readonly needsRescale!: boolean;
 
-  viewWillAnimate(viewContext: ViewContext): void {
+  override viewWillAnimate(viewContext: ViewContext): void {
     super.viewWillAnimate(viewContext);
     if (this.needsRescale) {
       this.rescale();
     }
   }
 
-  protected onBeginPress(input: ScaleGestureInput<X, Y>, event: Event | null): void {
+  protected override onBeginPress(input: ScaleGestureInput<X, Y>, event: Event | null): void {
     super.onBeginPress(input, event);
     this.updateInputDomain(input);
     this.view!.requireUpdate(View.NeedsAnimate);
@@ -215,7 +215,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
     });
   }
 
-  protected onMovePress(input: ScaleGestureInput<X, Y>, event: Event | null): void {
+  protected override onMovePress(input: ScaleGestureInput<X, Y>, event: Event | null): void {
     super.onMovePress(input, event);
     this.view!.requireUpdate(View.NeedsAnimate);
     Object.defineProperty(this, "needsRescale", {
@@ -225,7 +225,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
     });
   }
 
-  protected onEndPress(input: ScaleGestureInput<X, Y>, event: Event | null): void {
+  protected override onEndPress(input: ScaleGestureInput<X, Y>, event: Event | null): void {
     super.onEndPress(input, event);
     this.updateInputDomain(input);
     this.view!.requireUpdate(View.NeedsAnimate);
@@ -236,7 +236,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
     });
   }
 
-  protected onCancelPress(input: ScaleGestureInput<X, Y>, event: Event | null): void {
+  protected override onCancelPress(input: ScaleGestureInput<X, Y>, event: Event | null): void {
     super.onCancelPress(input, event);
     this.updateInputDomain(input);
     this.view!.requireUpdate(View.NeedsAnimate);
@@ -247,13 +247,13 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
     });
   }
 
-  beginCoast(input: ScaleGestureInput<X, Y>, event: Event | null): void {
+  override beginCoast(input: ScaleGestureInput<X, Y>, event: Event | null): void {
     if (this.coastCount < 2) {
       super.beginCoast(input, event);
     }
   }
 
-  protected onBeginCoast(input: ScaleGestureInput<X, Y>, event: Event | null): void {
+  protected override onBeginCoast(input: ScaleGestureInput<X, Y>, event: Event | null): void {
     super.onBeginCoast(input, event);
     this.updateInputDomain(input);
     this.conserveMomentum(input);
@@ -265,7 +265,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
     });
   }
 
-  protected onEndCoast(input: ScaleGestureInput<X, Y>, event: Event | null): void {
+  protected override onEndCoast(input: ScaleGestureInput<X, Y>, event: Event | null): void {
     super.onEndCoast(input, event);
     input.disableX = false;
     input.disableY = false;
@@ -277,7 +277,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
     });
   }
 
-  protected onCoast(): void {
+  protected override onCoast(): void {
     super.onCoast();
     this.view!.requireUpdate(View.NeedsAnimate);
     Object.defineProperty(this, "needsRescale", {
@@ -290,7 +290,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
   protected updateInputDomain(input: ScaleGestureInput<X, Y>,
                               xScale?: ContinuousScale<X, number> | null,
                               yScale?: ContinuousScale<Y, number> | null,
-                              bounds?: BoxR2): void {
+                              bounds?: R2Box): void {
     if (xScale === void 0) {
       xScale = this.xScale();
     }
@@ -380,7 +380,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
                           oldYScale: ContinuousScale<Y, number>,
                           input0: ScaleGestureInput<X, Y>,
                           input1: ScaleGestureInput<X, Y>,
-                          bounds: BoxR2): void {
+                          bounds: R2Box): void {
     const x0 = input0.xCoord!;
     const y0 = input0.yCoord!;
     const px0 = this.clientToRangeX(input0.x0, oldXScale, bounds);
@@ -564,7 +564,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
                       oldYScale: ContinuousScale<Y, number>,
                       input0: ScaleGestureInput<X, Y>,
                       input1: ScaleGestureInput<X, Y> | undefined,
-                      bounds: BoxR2): void {
+                      bounds: R2Box): void {
     const x0 = input0.xCoord!;
     const y0 = input0.yCoord!;
     let sx0 = this.clientToRangeX(input0.x, oldXScale, bounds);
@@ -647,7 +647,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
   protected rescaleX(oldXScale: ContinuousScale<X, number>,
                      input0: ScaleGestureInput<X, Y>,
                      input1: ScaleGestureInput<X, Y> | undefined,
-                     bounds: BoxR2): void {
+                     bounds: R2Box): void {
     const x0 = input0.xCoord!;
     let sx0 = this.clientToRangeX(input0.x, oldXScale, bounds);
     let sx1: number | undefined;
@@ -681,7 +681,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
   protected rescaleY(oldYScale: ContinuousScale<Y, number>,
                      input0: ScaleGestureInput<X, Y>,
                      input1: ScaleGestureInput<X, Y> | undefined,
-                     bounds: BoxR2): void {
+                     bounds: R2Box): void {
     const y0 = input0.yCoord!;
     let sy0 = this.clientToRangeY(input0.y, oldYScale, bounds);
     let sy1: number | undefined;
@@ -824,7 +824,7 @@ export class AbstractScaleGesture<X, Y, V extends View> extends AbstractMomentum
   }
 
   /** @hidden */
-  protected integrate(t: number): void {
+  protected override integrate(t: number): void {
     let coast0: ScaleGestureInput<X, Y> | undefined;
     let coast1: ScaleGestureInput<X, Y> | undefined;
     const inputs = this.inputs;
@@ -973,9 +973,9 @@ export class PointerScaleGesture<X, Y, V extends View> extends AbstractScaleGest
     this.initView(view);
   }
 
-  wheel(): boolean;
-  wheel(wheel: boolean): this;
-  wheel(wheel?: boolean): boolean | this {
+  override wheel(): boolean;
+  override wheel(wheel: boolean): this;
+  override wheel(wheel?: boolean): boolean | this {
     if (wheel === void 0) {
       return this.wheelZoom;
     } else {
@@ -993,38 +993,38 @@ export class PointerScaleGesture<X, Y, V extends View> extends AbstractScaleGest
     }
   }
 
-  protected attachEvents(view: V): void {
+  protected override attachEvents(view: V): void {
     super.attachEvents(view);
     if (this.wheelZoom) {
       this.attachWheelEvents(view);
     }
   }
 
-  protected detachEvents(view: V): void {
+  protected override detachEvents(view: V): void {
     super.detachEvents(view);
     this.detachWheelEvents(view);
   }
 
-  protected attachHoverEvents(view: V): void {
+  protected override attachHoverEvents(view: V): void {
     view.on("pointerenter", this.onPointerEnter as EventListener);
     view.on("pointerleave", this.onPointerLeave as EventListener);
     view.on("pointerdown", this.onPointerDown as EventListener);
   }
 
-  protected detachHoverEvents(view: V): void {
+  protected override detachHoverEvents(view: V): void {
     view.off("pointerenter", this.onPointerEnter as EventListener);
     view.off("pointerleave", this.onPointerLeave as EventListener);
     view.off("pointerdown", this.onPointerDown as EventListener);
   }
 
-  protected attachPressEvents(view: V): void {
+  protected override attachPressEvents(view: V): void {
     document.body.addEventListener("pointermove", this.onPointerMove);
     document.body.addEventListener("pointerup", this.onPointerUp);
     document.body.addEventListener("pointercancel", this.onPointerCancel);
     document.body.addEventListener("pointerleave", this.onPointerLeaveDocument);
   }
 
-  protected detachPressEvents(view: V): void {
+  protected override detachPressEvents(view: V): void {
     document.body.removeEventListener("pointermove", this.onPointerMove);
     document.body.removeEventListener("pointerup", this.onPointerUp);
     document.body.removeEventListener("pointercancel", this.onPointerCancel);
@@ -1162,21 +1162,21 @@ export class TouchScaleGesture<X, Y, V extends View> extends AbstractScaleGestur
     this.initView(view);
   }
 
-  protected attachHoverEvents(view: V): void {
+  protected override attachHoverEvents(view: V): void {
     view.on("touchstart", this.onTouchStart as EventListener);
   }
 
-  protected detachHoverEvents(view: V): void {
+  protected override detachHoverEvents(view: V): void {
     view.off("touchstart", this.onTouchStart as EventListener);
   }
 
-  protected attachPressEvents(view: V): void {
+  protected override attachPressEvents(view: V): void {
     view.on("touchmove", this.onTouchMove as EventListener);
     view.on("touchend", this.onTouchEnd as EventListener);
     view.on("touchcancel", this.onTouchCancel as EventListener);
   }
 
-  protected detachPressEvents(view: V): void {
+  protected override detachPressEvents(view: V): void {
     view.off("touchmove", this.onTouchMove as EventListener);
     view.off("touchend", this.onTouchEnd as EventListener);
     view.off("touchcancel", this.onTouchCancel as EventListener);
@@ -1269,9 +1269,9 @@ export class MouseScaleGesture<X, Y, V extends View> extends AbstractScaleGestur
     this.initView(view);
   }
 
-  wheel(): boolean;
-  wheel(wheel: boolean): this;
-  wheel(wheel?: boolean): boolean | this {
+  override wheel(): boolean;
+  override wheel(wheel: boolean): this;
+  override wheel(wheel?: boolean): boolean | this {
     if (wheel === void 0) {
       return this.wheelZoom;
     } else {
@@ -1289,37 +1289,37 @@ export class MouseScaleGesture<X, Y, V extends View> extends AbstractScaleGestur
     }
   }
 
-  protected attachEvents(view: V): void {
+  protected override attachEvents(view: V): void {
     super.attachEvents(view);
     if (this.wheelZoom) {
       this.attachWheelEvents(view);
     }
   }
 
-  protected detachEvents(view: V): void {
+  protected override detachEvents(view: V): void {
     super.detachEvents(view);
     this.detachWheelEvents(view);
   }
 
-  protected attachHoverEvents(view: V): void {
+  protected override attachHoverEvents(view: V): void {
     view.on("mouseenter", this.onMouseEnter as EventListener);
     view.on("mouseleave", this.onMouseLeave as EventListener);
     view.on("mousedown", this.onMouseDown as EventListener);
   }
 
-  protected detachHoverEvents(view: V): void {
+  protected override detachHoverEvents(view: V): void {
     view.off("mouseenter", this.onMouseEnter as EventListener);
     view.off("mouseleave", this.onMouseLeave as EventListener);
     view.off("mousedown", this.onMouseDown as EventListener);
   }
 
-  protected attachPressEvents(view: V): void {
+  protected override attachPressEvents(view: V): void {
     document.body.addEventListener("mousemove", this.onMouseMove);
     document.body.addEventListener("mouseup", this.onMouseUp);
     document.body.addEventListener("mouseleave", this.onMouseLeaveDocument);
   }
 
-  protected detachPressEvents(view: V): void {
+  protected override detachPressEvents(view: V): void {
     document.body.removeEventListener("mousemove", this.onMouseMove);
     document.body.removeEventListener("mouseup", this.onMouseUp);
     document.body.removeEventListener("mouseleave", this.onMouseLeaveDocument);

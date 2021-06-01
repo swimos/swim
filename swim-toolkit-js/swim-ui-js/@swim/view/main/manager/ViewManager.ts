@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ export abstract class ViewManager<V extends View = View> {
     });
   }
 
-  declare readonly viewManagerObservers: ReadonlyArray<ViewManagerObserver>;
+  readonly viewManagerObservers!: ReadonlyArray<ViewManagerObserver>;
 
   addViewManagerObserver(viewManagerObserver: ViewManagerObserverType<this>): void {
     const oldViewManagerObservers = this.viewManagerObservers;
@@ -164,7 +164,7 @@ export abstract class ViewManager<V extends View = View> {
     }
   }
 
-  declare readonly rootViews: ReadonlyArray<V>;
+  readonly rootViews!: ReadonlyArray<V>;
 
   insertRootView(rootView: V): void {
     const oldRootViews = this.rootViews;

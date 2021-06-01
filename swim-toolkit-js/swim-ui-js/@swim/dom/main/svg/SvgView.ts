@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -197,7 +197,7 @@ export class SvgView extends ElementView {
     super(node);
   }
 
-  initView(init: SvgViewInit): void {
+  override initView(init: SvgViewInit): void {
     super.initView(init);
     if (init.attributes !== void 0) {
       this.initAttributes(init.attributes);
@@ -372,11 +372,11 @@ export class SvgView extends ElementView {
     }
   }
 
-  declare readonly node: SVGElement;
+  override readonly node!: SVGElement;
 
-  declare readonly viewController: SvgViewController | null;
+  override readonly viewController!: SvgViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<SvgViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<SvgViewObserver>;
 
   append<V extends View>(childView: V, key?: string): V;
   append<V extends NodeView>(viewConstructor: NodeViewConstructor<V>, key?: string): V;
@@ -441,158 +441,158 @@ export class SvgView extends ElementView {
     return child;
   }
 
-  get parentTransform(): Transform {
+  override get parentTransform(): Transform {
     const transform = this.transform.value;
     return transform !== null ? transform : Transform.identity();
   }
 
-  on<T extends keyof SVGElementEventMap>(type: T, listener: (this: SVGElement, event: SVGElementEventMap[T]) => unknown,
-                                         options?: AddEventListenerOptions | boolean): this;
-  on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
-  on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
+  override on<T extends keyof SVGElementEventMap>(type: T, listener: (this: SVGElement, event: SVGElementEventMap[T]) => unknown,
+                                                  options?: AddEventListenerOptions | boolean): this;
+  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this;
+  override on(type: string, listener: EventListenerOrEventListenerObject, options?: AddEventListenerOptions | boolean): this {
     this.node.addEventListener(type, listener, options);
     return this;
   }
 
-  off<T extends keyof SVGElementEventMap>(type: T, listener: (this: SVGElement, event: SVGElementEventMap[T]) => unknown,
-                                          options?: EventListenerOptions | boolean): this;
-  off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
-  off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
+  override off<T extends keyof SVGElementEventMap>(type: T, listener: (this: SVGElement, event: SVGElementEventMap[T]) => unknown,
+                                                   options?: EventListenerOptions | boolean): this;
+  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this;
+  override off(type: string, listener: EventListenerOrEventListenerObject, options?: EventListenerOptions | boolean): this {
     this.node.removeEventListener(type, listener, options);
     return this;
   }
 
   @AttributeAnimator({attributeName: "alignment-baseline", type: String})
-  declare alignmentBaseline: AttributeAnimator<this, AlignmentBaseline>;
+  readonly alignmentBaseline!: AttributeAnimator<this, AlignmentBaseline>;
 
   @AttributeAnimator({attributeName: "clip-path", type: String})
-  declare clipPath: AttributeAnimator<this, string | undefined>;
+  readonly clipPath!: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "cursor", type: String})
-  declare cursor: AttributeAnimator<this, CssCursor | undefined>;
+  readonly cursor!: AttributeAnimator<this, CssCursor | undefined>;
 
   @AttributeAnimator({attributeName: "cx", type: Number})
-  declare cx: AttributeAnimator<this, number | undefined>;
+  readonly cx!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "cy", type: Number})
-  declare cy: AttributeAnimator<this, number | undefined>;
+  readonly cy!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "d", type: String})
-  declare d: AttributeAnimator<this, string | undefined>;
+  readonly d!: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "dx", type: Length, state: null})
-  declare dx: AttributeAnimator<this, Length | null, AnyLength | null>;
+  readonly dx!: AttributeAnimator<this, Length | null, AnyLength | null>;
 
   @AttributeAnimator({attributeName: "dy", type: Length, state: null})
-  declare dy: AttributeAnimator<this, Length | null, AnyLength | null>;
+  readonly dy!: AttributeAnimator<this, Length | null, AnyLength | null>;
 
   @AttributeAnimator({attributeName: "edgeMode", type: String})
-  declare edgeMode: AttributeAnimator<this, string | undefined>;
+  readonly edgeMode!: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "fill", type: Color, state: null})
-  declare fill: AttributeAnimator<this, Color | null, AnyColor | null>;
+  readonly fill!: AttributeAnimator<this, Color | null, AnyColor | null>;
 
   @AttributeAnimator({attributeName: "fill-rule", type: String})
-  declare fillRule: AttributeAnimator<this, FillRule | undefined>;
+  readonly fillRule!: AttributeAnimator<this, FillRule | undefined>;
 
   @AttributeAnimator({attributeName: "flood-color", type: Color, state: null})
-  declare floodColor: AttributeAnimator<this, Color | null, AnyColor | null>;
+  readonly floodColor!: AttributeAnimator<this, Color | null, AnyColor | null>;
 
   @AttributeAnimator({attributeName: "flood-opacity", type: Number})
-  declare floodOpacity: AttributeAnimator<this, number | undefined>;
+  readonly floodOpacity!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "height", type: Length, state: null})
-  declare height: AttributeAnimator<this, Length | null, AnyLength | null>;
+  readonly height!: AttributeAnimator<this, Length | null, AnyLength | null>;
 
   @AttributeAnimator({attributeName: "in", type: String})
-  declare in: AttributeAnimator<this, string | undefined>;
+  readonly in!: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "in2", type: String})
-  declare in2: AttributeAnimator<this, string | undefined>;
+  readonly in2!: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "lengthAdjust", type: String})
-  declare lengthAdjust: AttributeAnimator<this, "spacing" | "spacingAndGlyphs" | undefined>;
+  readonly lengthAdjust!: AttributeAnimator<this, "spacing" | "spacingAndGlyphs" | undefined>;
 
   @AttributeAnimator({attributeName: "mode", type: String})
-  declare mode: AttributeAnimator<this, string | undefined>;
+  readonly mode!: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "opacity", type: Number})
-  declare opacity: AttributeAnimator<this, number | undefined>;
+  readonly opacity!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "pointer-events", type: String})
-  declare pointerEvents: AttributeAnimator<this, SvgPointerEvents | undefined>;
+  readonly pointerEvents!: AttributeAnimator<this, SvgPointerEvents | undefined>;
 
   @AttributeAnimator({attributeName: "points", type: String})
-  declare points: AttributeAnimator<this, string | undefined>;
+  readonly points!: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "preserveAspectRatio", type: Boolean})
-  declare preserveAspectRatio: AttributeAnimator<this, boolean | undefined>;
+  readonly preserveAspectRatio!: AttributeAnimator<this, boolean | undefined>;
 
   @AttributeAnimator({attributeName: "r", type: Number})
-  declare r: AttributeAnimator<this, number | undefined>;
+  readonly r!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "result", type: String})
-  declare result: AttributeAnimator<this, string | undefined>;
+  readonly result!: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "stdDeviation", type: Number})
-  declare stdDeviation: AttributeAnimator<this, number | undefined>;
+  readonly stdDeviation!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "stroke", type: Color, state: null})
-  declare stroke: AttributeAnimator<this, Color | null, AnyColor | null>;
+  readonly stroke!: AttributeAnimator<this, Color | null, AnyColor | null>;
 
   @AttributeAnimator({attributeName: "stroke-dasharray", type: String})
-  declare strokeDasharray: AttributeAnimator<this, string | undefined>;
+  readonly strokeDasharray!: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "stroke-linecap", type: String})
-  declare strokeLinecap: AttributeAnimator<this, StrokeLinecap | undefined>;
+  readonly strokeLinecap!: AttributeAnimator<this, StrokeLinecap | undefined>;
 
   @AttributeAnimator({attributeName: "stroke-width", type: Number})
-  declare strokeWidth: AttributeAnimator<this, number | undefined>;
+  readonly strokeWidth!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "text-anchor", type: String})
-  declare textAnchor: AttributeAnimator<this, TextAnchor | undefined>;
+  readonly textAnchor!: AttributeAnimator<this, TextAnchor | undefined>;
 
   @AttributeAnimator({attributeName: "textLength", type: Length, state: null})
-  declare textLength: AttributeAnimator<this, Length | null, AnyLength | null>;
+  readonly textLength!: AttributeAnimator<this, Length | null, AnyLength | null>;
 
   @AttributeAnimator({attributeName: "transform", type: Transform, state: null})
-  declare transform: AttributeAnimator<this, Transform | null, AnyTransform | null>;
+  readonly transform!: AttributeAnimator<this, Transform | null, AnyTransform | null>;
 
   @AttributeAnimator({attributeName: "type", type: String})
-  declare type: AttributeAnimator<this, string | undefined>;
+  readonly type!: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "values", type: String})
-  declare values: AttributeAnimator<this, string | undefined>;
+  readonly values!: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "viewBox", type: String})
-  declare viewBox: AttributeAnimator<this, string | undefined>;
+  readonly viewBox!: AttributeAnimator<this, string | undefined>;
 
   @AttributeAnimator({attributeName: "width", type: Length, state: null})
-  declare width: AttributeAnimator<this, Length | null, AnyLength | null>;
+  readonly width!: AttributeAnimator<this, Length | null, AnyLength | null>;
 
   @AttributeAnimator({attributeName: "x", type: Number})
-  declare x: AttributeAnimator<this, number | undefined>;
+  readonly x!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "x1", type: Number})
-  declare x1: AttributeAnimator<this, number | undefined>;
+  readonly x1!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "x2", type: Number})
-  declare x2: AttributeAnimator<this, number | undefined>;
+  readonly x2!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "y", type: Number})
-  declare y: AttributeAnimator<this, number | undefined>;
+  readonly y!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "y1", type: Number})
-  declare y1: AttributeAnimator<this, number | undefined>;
+  readonly y1!: AttributeAnimator<this, number | undefined>;
 
   @AttributeAnimator({attributeName: "y2", type: Number})
-  declare y2: AttributeAnimator<this, number | undefined>;
+  readonly y2!: AttributeAnimator<this, number | undefined>;
 
   @StyleAnimator({propertyNames: "transform", type: Transform, state: null})
-  declare cssTransform: StyleAnimator<this, Transform | null, AnyTransform | null>;
+  readonly cssTransform!: StyleAnimator<this, Transform | null, AnyTransform | null>;
 
   @StyleAnimator({propertyNames: "filter", type: String})
-  declare filter: StyleAnimator<this, string | undefined>;
+  readonly filter!: StyleAnimator<this, string | undefined>;
 
   font(): Font | null;
   font(value: AnyFont | null, timing?: AnyTiming | boolean): this;
@@ -646,35 +646,35 @@ export class SvgView extends ElementView {
   }
 
   @StyleAnimator({propertyNames: "font-family", type: FontFamily})
-  declare fontFamily: StyleAnimator<this, FontFamily | FontFamily[] | undefined, FontFamily | ReadonlyArray<FontFamily> | undefined>;
+  readonly fontFamily!: StyleAnimator<this, FontFamily | FontFamily[] | undefined, FontFamily | ReadonlyArray<FontFamily> | undefined>;
 
   @StyleAnimator({propertyNames: "font-size", type: Length, state: null})
-  declare fontSize: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly fontSize!: StyleAnimator<this, Length | null, AnyLength | null>;
 
   @StyleAnimator({propertyNames: "font-stretch", type: String})
-  declare fontStretch: StyleAnimator<this, FontStretch | undefined>;
+  readonly fontStretch!: StyleAnimator<this, FontStretch | undefined>;
 
   @StyleAnimator({propertyNames: "font-style", type: String})
-  declare fontStyle: StyleAnimator<this, FontStyle | undefined>;
+  readonly fontStyle!: StyleAnimator<this, FontStyle | undefined>;
 
   @StyleAnimator({propertyNames: "font-variant", type: String})
-  declare fontVariant: StyleAnimator<this, FontVariant | undefined>;
+  readonly fontVariant!: StyleAnimator<this, FontVariant | undefined>;
 
   @StyleAnimator({propertyNames: "font-weight", type: String})
-  declare fontWeight: StyleAnimator<this, FontWeight | undefined>;
+  readonly fontWeight!: StyleAnimator<this, FontWeight | undefined>;
 
   @StyleAnimator({propertyNames: "line-height", type: Length, state: null})
-  declare lineHeight: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly lineHeight!: StyleAnimator<this, Length | null, AnyLength | null>;
 
   @StyleAnimator({propertyNames: "touch-action", type: String})
-  declare touchAction: StyleAnimator<this, TouchAction | undefined>;
+  readonly touchAction!: StyleAnimator<this, TouchAction | undefined>;
 
   /** @hidden */
-  static readonly tags: {[tag: string]: SvgViewConstructor<any> | undefined} = {};
+  static override readonly tags: {[tag: string]: SvgViewConstructor<any> | undefined} = {};
 
-  static readonly tag: string = "svg";
+  static override readonly tag: string = "svg";
 
-  static readonly namespace: string = "http://www.w3.org/2000/svg";
+  static override readonly namespace: string = "http://www.w3.org/2000/svg";
 
   static forTag(tag: string): SvgViewConstructor<SvgView> {
     if (tag === this.tag) {
@@ -694,9 +694,9 @@ export class SvgView extends ElementView {
     return this.fromTag(tag);
   }
 
-  static fromTag<S extends SvgViewConstructor<InstanceType<S>>>(this: S, tag: string): InstanceType<S>;
-  static fromTag(tag: string): ElementView;
-  static fromTag(tag: string): ElementView {
+  static override fromTag<S extends SvgViewConstructor<InstanceType<S>>>(this: S, tag: string): InstanceType<S>;
+  static override fromTag(tag: string): ElementView;
+  static override fromTag(tag: string): ElementView {
     let viewConstructor: SvgViewConstructor | undefined;
     if (Object.prototype.hasOwnProperty.call(this, "tags")) {
       viewConstructor = this.tags[tag];
@@ -708,9 +708,9 @@ export class SvgView extends ElementView {
     return new viewConstructor(node);
   }
 
-  static fromNode<S extends SvgViewConstructor<InstanceType<S>>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
-  static fromNode(node: ViewSvg): SvgView;
-  static fromNode(node: ViewSvg): SvgView {
+  static override fromNode<S extends SvgViewConstructor<InstanceType<S>>>(this: S, node: ViewNodeType<InstanceType<S>>): InstanceType<S>;
+  static override fromNode(node: ViewSvg): SvgView;
+  static override fromNode(node: ViewSvg): SvgView {
     if (node.view instanceof this) {
       return node.view;
     } else {
@@ -727,7 +727,7 @@ export class SvgView extends ElementView {
     }
   }
 
-  static fromAny<S extends SvgViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | SVGElement): InstanceType<S> {
+  static override fromAny<S extends SvgViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | SVGElement): InstanceType<S> {
     if (value instanceof this) {
       return value;
     } else if (value instanceof SVGElement) {

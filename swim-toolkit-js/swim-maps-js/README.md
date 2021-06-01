@@ -23,6 +23,8 @@ The **Swim Maps** framework consists of the following component libraries:
   including fully animatable views for lines, circles, and polygons.
 - [**@swim/mapbox**](@swim/mapbox) –
   **@swim/map** overlays for Mapbox maps.
+- [**@swim/leaflet**](@swim/leaflet) –
+  **@swim/map** overlays for Leaflet maps.
 - [**@swim/googlemap**](@swim/googlemap) –
   **@swim/map** overlays for Google maps.
 - [**@swim/esrimap**](@swim/esrimap) –

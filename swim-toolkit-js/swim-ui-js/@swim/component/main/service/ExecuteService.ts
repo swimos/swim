@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ export abstract class ExecuteService<C extends Component> extends ComponentManag
     return manager.updatedComponentContext();
   }
 
-  initManager(): ExecuteManager<C> {
+  override initManager(): ExecuteManager<C> {
     return ExecuteManager.global();
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import {CellContent, CellTrait} from "./CellTrait";
 import type {CellComponentObserver} from "./CellComponentObserver";
 
 export class CellComponent extends CompositeComponent {
-  declare readonly componentObservers: ReadonlyArray<CellComponentObserver>;
+  override readonly componentObservers!: ReadonlyArray<CellComponentObserver>;
 
   protected initCellTrait(cellTrait: CellTrait): void {
     // hook
@@ -226,7 +226,7 @@ export class CellComponent extends CompositeComponent {
   @ComponentViewTrait<CellComponent, CellView, CellTrait>({
     extends: CellComponent.CellFastener,
   })
-  declare cell: ComponentViewTrait<this, CellView, CellTrait>;
+  readonly cell!: ComponentViewTrait<this, CellView, CellTrait>;
 
   @ComponentView<CellComponent, HtmlView>({
     willSetView(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
@@ -239,5 +239,5 @@ export class CellComponent extends CompositeComponent {
       this.owner.didSetContentView(newContentView, oldContentView);
     },
   })
-  declare content: ComponentView<this, HtmlView>;
+  readonly content!: ComponentView<this, HtmlView>;
 }

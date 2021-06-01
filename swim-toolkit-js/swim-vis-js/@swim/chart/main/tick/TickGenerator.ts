@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -117,9 +117,9 @@ export class NumberTickGenerator extends TickGenerator<number> {
     this.n = Math.max(0, n);
   }
 
-  count(): number;
-  count(n: number): this;
-  count(n?: number): number | this {
+  override count(): number;
+  override count(n: number): this;
+  override count(n?: number): number | this {
     if (n === void 0) {
       return this.n;
     } else {
@@ -128,10 +128,10 @@ export class NumberTickGenerator extends TickGenerator<number> {
     }
   }
 
-  domain(): Domain<number>;
-  domain(xs: AnyDomain<number>): this;
-  domain(x0: number, x1: number): this;
-  domain(x0?: AnyDomain<number> | number, x1?: number): Domain<number> | this {
+  override domain(): Domain<number>;
+  override domain(xs: AnyDomain<number>): this;
+  override domain(x0: number, x1: number): this;
+  override domain(x0?: AnyDomain<number> | number, x1?: number): Domain<number> | this {
     if (x0 === void 0) {
       return LinearDomain(this.x0, this.x0 + this.dx);
     } else if (x1 === void 0) {
@@ -145,7 +145,7 @@ export class NumberTickGenerator extends TickGenerator<number> {
     }
   }
 
-  generate(): number[] {
+  override generate(): number[] {
     let x0: number;
     let x1: number;
     if (this.dx < 0) {
@@ -218,9 +218,9 @@ export class TimeTickGenerator extends TickGenerator<DateTime> {
     this.n = Math.max(0, n);
   }
 
-  count(): number;
-  count(n: number): this;
-  count(n?: number): number | this {
+  override count(): number;
+  override count(n: number): this;
+  override count(n?: number): number | this {
     if (n === void 0) {
       return this.n;
     } else {
@@ -229,11 +229,11 @@ export class TimeTickGenerator extends TickGenerator<DateTime> {
     }
   }
 
-  domain(): Domain<DateTime>;
-  domain(ts: AnyDomain<DateTime>): this;
-  domain(d0: AnyDateTime, d1: AnyDateTime): this;
-  domain(d0?: AnyDomain<DateTime> | AnyDateTime,
-         d1?: AnyDateTime): Domain<DateTime> | this {
+  override domain(): Domain<DateTime>;
+  override domain(ts: AnyDomain<DateTime>): this;
+  override domain(d0: AnyDateTime, d1: AnyDateTime): this;
+  override domain(d0?: AnyDomain<DateTime> | AnyDateTime,
+                  d1?: AnyDateTime): Domain<DateTime> | this {
     if (d0 === void 0) {
       return TimeDomain(new DateTime(this.t0, this.zone), new DateTime(this.t0 + this.dt, this.zone));
     } else {
@@ -251,7 +251,7 @@ export class TimeTickGenerator extends TickGenerator<DateTime> {
     }
   }
 
-  generate(interval?: TimeInterval | number): DateTime[] {
+  override generate(interval?: TimeInterval | number): DateTime[] {
     let t0: number;
     let t1: number;
     if (this.dt < 0) {
@@ -275,7 +275,7 @@ export class TimeTickGenerator extends TickGenerator<DateTime> {
     return ticks;
   }
 
-  format(tickValue: DateTime): string {
+  override format(tickValue: DateTime): string {
     if (TimeInterval.second.floor(tickValue) < tickValue) {
       return MILLISECOND_FORMAT.format(tickValue);
     } else if (TimeInterval.minute.floor(tickValue) < tickValue) {

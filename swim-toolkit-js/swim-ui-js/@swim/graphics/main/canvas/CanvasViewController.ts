@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {BoxR2} from "@swim/math";
+import {R2Box} from "@swim/math";
 import {HtmlViewController} from "@swim/dom";
 import type {CanvasView} from "./CanvasView";
 import type {CanvasViewObserver} from "./CanvasViewObserver";
@@ -31,18 +31,18 @@ export class CanvasViewController<V extends CanvasView = CanvasView> extends Htm
     // hook
   }
 
-  get viewFrame(): BoxR2 {
+  get viewFrame(): R2Box {
     const view = this.view;
-    return view !== null ? view.viewFrame : BoxR2.undefined();
+    return view !== null ? view.viewFrame : R2Box.undefined();
   }
 
-  get viewBounds(): BoxR2 {
+  get viewBounds(): R2Box {
     const view = this.view;
-    return view !== null ? view.viewBounds : BoxR2.undefined();
+    return view !== null ? view.viewBounds : R2Box.undefined();
   }
 
-  get hitBounds(): BoxR2 {
+  get hitBounds(): R2Box {
     const view = this.view;
-    return view !== null ? view.hitBounds : BoxR2.undefined();
+    return view !== null ? view.hitBounds : R2Box.undefined();
   }
 }

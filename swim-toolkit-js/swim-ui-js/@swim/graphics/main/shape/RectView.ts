@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {AnyTiming} from "@swim/mapping";
-import {AnyLength, Length, BoxR2} from "@swim/math";
+import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewAnimator} from "@swim/view";
 import type {GraphicsView} from "../graphics/GraphicsView";
@@ -34,31 +34,31 @@ export interface RectViewInit extends FillViewInit, StrokeViewInit {
 }
 
 export class RectView extends LayerView implements FillView, StrokeView {
-  initView(init: RectViewInit): void {
+  override initView(init: RectViewInit): void {
     super.initView(init);
     this.setState(init);
   }
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  declare x: ViewAnimator<this, Length, AnyLength>;
+  readonly x!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  declare y: ViewAnimator<this, Length, AnyLength>;
+  readonly y!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  declare width: ViewAnimator<this, Length, AnyLength>;
+  readonly width!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
-  declare height: ViewAnimator<this, Length, AnyLength>;
+  readonly height!: ViewAnimator<this, Length, AnyLength>;
 
   @ViewAnimator({type: Color, state: null, inherit: true})
-  declare fill: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Color, state: null, inherit: true})
-  declare stroke: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Length, state: null, inherit: true})
-  declare strokeWidth: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   get value(): Rect {
     return new Rect(this.x.getValue(), this.y.getValue(), this.width.getValue(), this.height.getValue());
@@ -95,7 +95,7 @@ export class RectView extends LayerView implements FillView, StrokeView {
     }
   }
 
-  protected onRender(viewContext: ViewContextType<this>): void {
+  protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -106,7 +106,7 @@ export class RectView extends LayerView implements FillView, StrokeView {
     }
   }
 
-  protected renderRect(context: CanvasContext, frame: BoxR2): void {
+  protected renderRect(context: CanvasContext, frame: R2Box): void {
     const x = this.x.getValue().pxValue(frame.width);
     const y = this.y.getValue().pxValue(frame.height);
     const width = this.width.getValue().pxValue(frame.width);
@@ -130,9 +130,9 @@ export class RectView extends LayerView implements FillView, StrokeView {
     }
   }
 
-  declare readonly viewBounds: BoxR2; // getter defined below to work around useDefineForClassFields lunacy
+  declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
-  protected doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     let hit = super.doHitTest(x, y, viewContext);
     if (hit === null) {
       const renderer = viewContext.renderer;
@@ -148,7 +148,7 @@ export class RectView extends LayerView implements FillView, StrokeView {
     return hit;
   }
 
-  protected hitTestRect(hx: number, hy: number, context: CanvasContext, frame: BoxR2): GraphicsView | null {
+  protected hitTestRect(hx: number, hy: number, context: CanvasContext, frame: R2Box): GraphicsView | null {
     const x = this.x.getValue().pxValue(frame.width);
     const y = this.y.getValue().pxValue(frame.height);
     const width = this.width.getValue().pxValue(frame.width);
@@ -170,7 +170,7 @@ export class RectView extends LayerView implements FillView, StrokeView {
     return null;
   }
 
-  static create(): RectView {
+  static override create(): RectView {
     return new RectView();
   }
 
@@ -199,13 +199,13 @@ export class RectView extends LayerView implements FillView, StrokeView {
   }
 }
 Object.defineProperty(RectView.prototype, "viewBounds", {
-  get(this: RectView): BoxR2 {
+  get(this: RectView): R2Box {
     const frame = this.viewFrame;
     const x = this.x.getValue().pxValue(frame.width);
     const y = this.y.getValue().pxValue(frame.height);
     const width = this.width.getValue().pxValue(frame.width);
     const height = this.height.getValue().pxValue(frame.height);
-    return new BoxR2(x, y, x + width, y + height);
+    return new R2Box(x, y, x + width, y + height);
   },
   enumerable: true,
   configurable: true,

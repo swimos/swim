@@ -19,6 +19,16 @@ const maps = [
     ],
   },
   {
+    id: "leaflet",
+    name: "@swim/leaflet",
+    targets: [
+      {
+        id: "main",
+        deps: ["map"],
+      },
+    ],
+  },
+  {
     id: "googlemap",
     name: "@swim/googlemap",
     targets: [
@@ -46,7 +56,7 @@ const maps = [
     targets: [
       {
         id: "main",
-        deps: ["map", "mapbox", "googlemap", "esrimap"],
+        deps: ["map", "mapbox", "leaflet", "googlemap", "esrimap"],
       },
     ],
   },

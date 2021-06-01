@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ export class BoxShadowParser extends Parser<BoxShadow | null> {
     this.step = step;
   }
 
-  feed(input: Input): Parser<BoxShadow | null> {
+  override feed(input: Input): Parser<BoxShadow | null> {
     return BoxShadowParser.parse(input, this.boxShadow, this.identOutput, this.offsetXParser,
                                  this.offsetYParser, this.blurRadiusParser, this.spreadRadiusParser,
                                  this.colorParser, this.step);

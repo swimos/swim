@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ export class AbstractPositionGesture<V extends View> implements ViewObserver<V> 
     });
   }
 
-  declare readonly view: V | null;
+  readonly view!: V | null;
 
   protected initView(view: V | null): void {
     if (view !== null) {
@@ -84,7 +84,7 @@ export class AbstractPositionGesture<V extends View> implements ViewObserver<V> 
     }
   }
 
-  declare readonly delegate: PositionGestureDelegate | null;
+  readonly delegate!: PositionGestureDelegate | null;
 
   setDelegate(delegate: PositionGestureDelegate | null): void {
     Object.defineProperty(this, "delegate", {
@@ -94,9 +94,9 @@ export class AbstractPositionGesture<V extends View> implements ViewObserver<V> 
     });
   }
 
-  declare readonly inputs: {readonly [inputId: string]: PositionGestureInput | undefined};
+  readonly inputs!: {readonly [inputId: string]: PositionGestureInput | undefined};
 
-  declare readonly inputCount: number;
+  readonly inputCount!: number;
 
   getInput(inputId: string | number): PositionGestureInput | null {
     if (typeof inputId === "number") {
@@ -195,7 +195,7 @@ export class AbstractPositionGesture<V extends View> implements ViewObserver<V> 
     // hook
   }
 
-  declare readonly hoverCount: number;
+  readonly hoverCount!: number;
 
   isHovering(): boolean {
     return this.hoverCount !== 0;
@@ -320,7 +320,7 @@ export class AbstractPositionGesture<V extends View> implements ViewObserver<V> 
     }
   }
 
-  declare readonly pressCount: number;
+  readonly pressCount!: number;
 
   isPressing(): boolean {
     return this.pressCount !== 0;
@@ -591,26 +591,26 @@ export class PointerPositionGesture<V extends View> extends AbstractPositionGest
     this.initView(view);
   }
 
-  protected attachHoverEvents(view: V): void {
+  protected override attachHoverEvents(view: V): void {
     view.on("pointerenter", this.onPointerEnter as EventListener);
     view.on("pointerleave", this.onPointerLeave as EventListener);
     view.on("pointerdown", this.onPointerDown as EventListener);
   }
 
-  protected detachHoverEvents(view: V): void {
+  protected override detachHoverEvents(view: V): void {
     view.off("pointerenter", this.onPointerEnter as EventListener);
     view.off("pointerleave", this.onPointerLeave as EventListener);
     view.off("pointerdown", this.onPointerDown as EventListener);
   }
 
-  protected attachPressEvents(view: V): void {
+  protected override attachPressEvents(view: V): void {
     document.body.addEventListener("pointermove", this.onPointerMove);
     document.body.addEventListener("pointerup", this.onPointerUp);
     document.body.addEventListener("pointercancel", this.onPointerCancel);
     document.body.addEventListener("pointerleave", this.onPointerLeaveDocument);
   }
 
-  protected detachPressEvents(view: V): void {
+  protected override detachPressEvents(view: V): void {
     document.body.removeEventListener("pointermove", this.onPointerMove);
     document.body.removeEventListener("pointerup", this.onPointerUp);
     document.body.removeEventListener("pointercancel", this.onPointerCancel);
@@ -731,21 +731,21 @@ export class TouchPositionGesture<V extends View> extends AbstractPositionGestur
     this.initView(view);
   }
 
-  protected attachHoverEvents(view: V): void {
+  protected override attachHoverEvents(view: V): void {
     view.on("touchstart", this.onTouchStart as EventListener);
   }
 
-  protected detachHoverEvents(view: V): void {
+  protected override detachHoverEvents(view: V): void {
     view.off("touchstart", this.onTouchStart as EventListener);
   }
 
-  protected attachPressEvents(view: V): void {
+  protected override attachPressEvents(view: V): void {
     view.on("touchmove", this.onTouchMove as EventListener);
     view.on("touchend", this.onTouchEnd as EventListener);
     view.on("touchcancel", this.onTouchCancel as EventListener);
   }
 
-  protected detachPressEvents(view: V): void {
+  protected override detachPressEvents(view: V): void {
     view.off("touchmove", this.onTouchMove as EventListener);
     view.off("touchend", this.onTouchEnd as EventListener);
     view.off("touchcancel", this.onTouchCancel as EventListener);
@@ -833,25 +833,25 @@ export class MousePositionGesture<V extends View> extends AbstractPositionGestur
     this.initView(view);
   }
 
-  protected attachHoverEvents(view: V): void {
+  protected override attachHoverEvents(view: V): void {
     view.on("mouseenter", this.onMouseEnter as EventListener);
     view.on("mouseleave", this.onMouseLeave as EventListener);
     view.on("mousedown", this.onMouseDown as EventListener);
   }
 
-  protected detachHoverEvents(view: V): void {
+  protected override detachHoverEvents(view: V): void {
     view.off("mouseenter", this.onMouseEnter as EventListener);
     view.off("mouseleave", this.onMouseLeave as EventListener);
     view.off("mousedown", this.onMouseDown as EventListener);
   }
 
-  protected attachPressEvents(view: V): void {
+  protected override attachPressEvents(view: V): void {
     document.body.addEventListener("mousemove", this.onMouseMove);
     document.body.addEventListener("mouseup", this.onMouseUp);
     document.body.addEventListener("mouseleave", this.onMouseLeaveDocument);
   }
 
-  protected detachPressEvents(view: V): void {
+  protected override detachPressEvents(view: V): void {
     document.body.removeEventListener("mousemove", this.onMouseMove);
     document.body.removeEventListener("mouseup", this.onMouseUp);
     document.body.removeEventListener("mouseleave", this.onMouseLeaveDocument);

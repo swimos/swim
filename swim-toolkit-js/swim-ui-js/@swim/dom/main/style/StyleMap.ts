@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -163,208 +163,208 @@ export interface StyleMapInit {
 }
 
 export interface StyleMap extends StyleContext {
-  alignContent: StyleAnimator<this, AlignContent | undefined>;
+  readonly alignContent: StyleAnimator<this, AlignContent | undefined>;
 
-  alignItems: StyleAnimator<this, AlignItems | undefined>;
+  readonly alignItems: StyleAnimator<this, AlignItems | undefined>;
 
-  alignSelf: StyleAnimator<this, AlignSelf | undefined>;
+  readonly alignSelf: StyleAnimator<this, AlignSelf | undefined>;
 
-  appearance: StyleAnimator<this, Appearance | undefined>;
+  readonly appearance: StyleAnimator<this, Appearance | undefined>;
 
-  backdropFilter: StyleAnimator<this, string | undefined>;
+  readonly backdropFilter: StyleAnimator<this, string | undefined>;
 
-  backgroundClip: StyleAnimator<this, BackgroundClip | undefined>;
+  readonly backgroundClip: StyleAnimator<this, BackgroundClip | undefined>;
 
-  backgroundColor: StyleAnimator<this, Color | null, AnyColor | null>;
+  readonly backgroundColor: StyleAnimator<this, Color | null, AnyColor | null>;
 
-  backgroundImage: StyleAnimator<this, LinearGradient | string | null, AnyLinearGradient | string | null>;
+  readonly backgroundImage: StyleAnimator<this, LinearGradient | string | null, AnyLinearGradient | string | null>;
 
-  borderCollapse: StyleAnimator<this, BorderCollapse | undefined>;
+  readonly borderCollapse: StyleAnimator<this, BorderCollapse | undefined>;
 
   borderColor(): [Color | null, Color | null, Color | null, Color | null] | Color | null;
   borderColor(value: [AnyColor | null, AnyColor | null, AnyColor | null, AnyColor | null] | AnyColor | null, timing?: AnyTiming | boolean, precedence?: number): this;
 
-  borderTopColor: StyleAnimator<this, Color | null, AnyColor | null>;
+  readonly borderTopColor: StyleAnimator<this, Color | null, AnyColor | null>;
 
-  borderRightColor: StyleAnimator<this, Color | null, AnyColor | null>;
+  readonly borderRightColor: StyleAnimator<this, Color | null, AnyColor | null>;
 
-  borderBottomColor: StyleAnimator<this, Color | null, AnyColor | null>;
+  readonly borderBottomColor: StyleAnimator<this, Color | null, AnyColor | null>;
 
-  borderLeftColor: StyleAnimator<this, Color | null, AnyColor | null>;
+  readonly borderLeftColor: StyleAnimator<this, Color | null, AnyColor | null>;
 
   borderRadius(): [Length | null, Length | null, Length | null, Length | null] | Length | null;
   borderRadius(value: [AnyLength | null, AnyLength | null, AnyLength | null, AnyLength | null] | AnyLength | null, timing?: AnyTiming | boolean, precedence?: number): this;
 
-  borderTopLeftRadius: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly borderTopLeftRadius: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  borderTopRightRadius: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly borderTopRightRadius: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  borderBottomRightRadius: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly borderBottomRightRadius: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  borderBottomLeftRadius: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly borderBottomLeftRadius: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  borderSpacing: StyleAnimator<this, string | undefined>;
+  readonly borderSpacing: StyleAnimator<this, string | undefined>;
 
   borderStyle(): [BorderStyle | undefined, BorderStyle | undefined, BorderStyle | undefined, BorderStyle | undefined] | BorderStyle | undefined;
   borderStyle(value: [BorderStyle | undefined, BorderStyle | undefined, BorderStyle | undefined, BorderStyle | undefined] | BorderStyle | undefined, timing?: AnyTiming | boolean, precedence?: number): this;
 
-  borderTopStyle: StyleAnimator<this, BorderStyle | undefined>;
+  readonly borderTopStyle: StyleAnimator<this, BorderStyle | undefined>;
 
-  borderRightStyle: StyleAnimator<this, BorderStyle | undefined>;
+  readonly borderRightStyle: StyleAnimator<this, BorderStyle | undefined>;
 
-  borderBottomStyle: StyleAnimator<this, BorderStyle | undefined>;
+  readonly borderBottomStyle: StyleAnimator<this, BorderStyle | undefined>;
 
-  borderLeftStyle: StyleAnimator<this, BorderStyle | undefined>;
+  readonly borderLeftStyle: StyleAnimator<this, BorderStyle | undefined>;
 
   borderWidth(): [Length | null, Length | null, Length | null, Length | null] | Length | null;
   borderWidth(value: [AnyLength | null, AnyLength | null, AnyLength | null, AnyLength | null] | AnyLength | null, timing?: AnyTiming | boolean, precedence?: number): this;
 
-  borderTopWidth: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly borderTopWidth: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  borderRightWidth: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly borderRightWidth: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  borderBottomWidth: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly borderBottomWidth: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  borderLeftWidth: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly borderLeftWidth: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  bottom: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly bottom: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  boxShadow: StyleAnimator<this, BoxShadow | null, AnyBoxShadow | null>;
+  readonly boxShadow: StyleAnimator<this, BoxShadow | null, AnyBoxShadow | null>;
 
-  boxSizing: StyleAnimator<this, BoxSizing | undefined>;
+  readonly boxSizing: StyleAnimator<this, BoxSizing | undefined>;
 
-  color: StyleAnimator<this, Color | null, AnyColor | null>;
+  readonly color: StyleAnimator<this, Color | null, AnyColor | null>;
 
-  cursor: StyleAnimator<this, CssCursor | undefined>;
+  readonly cursor: StyleAnimator<this, CssCursor | undefined>;
 
-  display: StyleAnimator<this, CssDisplay | undefined>;
+  readonly display: StyleAnimator<this, CssDisplay | undefined>;
 
-  filter: StyleAnimator<this, string | undefined>;
+  readonly filter: StyleAnimator<this, string | undefined>;
 
-  flexBasis: StyleAnimator<this, Length | FlexBasis | null, AnyLength | FlexBasis | null>;
+  readonly flexBasis: StyleAnimator<this, Length | FlexBasis | null, AnyLength | FlexBasis | null>;
 
-  flexDirection: StyleAnimator<this, FlexDirection | string>;
+  readonly flexDirection: StyleAnimator<this, FlexDirection | string>;
 
-  flexGrow: StyleAnimator<this, number | undefined>;
+  readonly flexGrow: StyleAnimator<this, number | undefined>;
 
-  flexShrink: StyleAnimator<this, number | undefined>;
+  readonly flexShrink: StyleAnimator<this, number | undefined>;
 
-  flexWrap: StyleAnimator<this, FlexWrap | undefined>;
+  readonly flexWrap: StyleAnimator<this, FlexWrap | undefined>;
 
   font(): Font | null;
   font(value: AnyFont | null, timing?: AnyTiming | boolean, precedence?: number): this;
 
-  fontFamily: StyleAnimator<this, FontFamily | FontFamily[] | undefined, FontFamily | ReadonlyArray<FontFamily> | undefined>;
+  readonly fontFamily: StyleAnimator<this, FontFamily | FontFamily[] | undefined, FontFamily | ReadonlyArray<FontFamily> | undefined>;
 
-  fontSize: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly fontSize: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  fontStretch: StyleAnimator<this, FontStretch | undefined>;
+  readonly fontStretch: StyleAnimator<this, FontStretch | undefined>;
 
-  fontStyle: StyleAnimator<this, FontStyle | undefined>;
+  readonly fontStyle: StyleAnimator<this, FontStyle | undefined>;
 
-  fontVariant: StyleAnimator<this, FontVariant | undefined>;
+  readonly fontVariant: StyleAnimator<this, FontVariant | undefined>;
 
-  fontWeight: StyleAnimator<this, FontWeight | undefined>;
+  readonly fontWeight: StyleAnimator<this, FontWeight | undefined>;
 
-  height: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly height: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  justifyContent: StyleAnimator<this, JustifyContent | undefined>;
+  readonly justifyContent: StyleAnimator<this, JustifyContent | undefined>;
 
-  left: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly left: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  lineHeight: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly lineHeight: StyleAnimator<this, Length | null, AnyLength | null>;
 
   margin(): [Length | null, Length | null, Length | null, Length | null] | Length | null;
   margin(value: [AnyLength | null, AnyLength | null, AnyLength | null, AnyLength | null] | AnyLength | null, timing?: AnyTiming | boolean, precedence?: number): this;
 
-  marginTop: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly marginTop: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  marginRight: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly marginRight: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  marginBottom: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly marginBottom: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  marginLeft: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly marginLeft: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  maxHeight: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly maxHeight: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  maxWidth: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly maxWidth: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  minHeight: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly minHeight: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  minWidth: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly minWidth: StyleAnimator<this, Length | null, AnyLength | null>;
 
-  opacity: StyleAnimator<this, number | undefined>;
+  readonly opacity: StyleAnimator<this, number | undefined>;
 
-  order: StyleAnimator<this, number | undefined>;
+  readonly order: StyleAnimator<this, number | undefined>;
 
-  outlineColor: StyleAnimator<this, Color | null, AnyColor | null>;
+  readonly outlineColor: StyleAnimator<this, Color | null, AnyColor | null>;
 
-  outlineStyle: StyleAnimator<this, BorderStyle | undefined>;
+  readonly outlineStyle: StyleAnimator<this, BorderStyle | undefined>;
 
-  outlineWidth: StyleAnimator<this, Length | null, AnyLength | null>;
+  readonly outlineWidth: StyleAnimator<this, Length | null, AnyLength | null>;
 
   overflow(): [Overflow | undefined, Overflow | undefined] | Overflow | undefined;
   overflow(value: [Overflow | undefined, Overflow | undefined] | Overflow | undefined, timing?: AnyTiming | boolean, precedence?: number): this;
 
-  overflowX: StyleAnimator<this, Overflow | undefined>;
+  readonly overflowX: StyleAnimator<this, Overflow | undefined>;
 
-  overflowY: StyleAnimator<this, Overflow | undefined>;
+  readonly overflowY: StyleAnimator<this, Overflow | undefined>;
 
-  overflowScrolling: StyleAnimator<this, "auto" | "touch" | undefined>;
+  readonly overflowScrolling: StyleAnimator<this, "auto" | "touch" | undefined>;
 
   overscrollBehavior(): [OverscrollBehavior | undefined, OverscrollBehavior | undefined] | OverscrollBehavior | undefined;
   overscrollBehavior(value: [OverscrollBehavior | undefined, OverscrollBehavior | undefined] | OverscrollBehavior | undefined, timing?: AnyTiming | boolean, precedence?: number): this;
 
-  overscrollBehaviorX: StyleAnimator<this, OverscrollBehavior | undefined>;
+  readonly overscrollBehaviorX: StyleAnimator<this, OverscrollBehavior | undefined>;
 
-  overscrollBehaviorY: StyleAnimator<this, OverscrollBehavior | undefined>;
+  readonly overscrollBehaviorY: StyleAnimator<this, OverscrollBehavior | undefined>;
 
   padding(): [Length | null, Length | null, Length | null, Length | null] | Length | null;
   padding(value: [AnyLength | null, AnyLength | null, AnyLength | null, AnyLength | null] | AnyLength | null, timing?: AnyTiming | boolean, precedence?: number): this;
 
-  paddingTop: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly paddingTop: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  paddingRight: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly paddingRight: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  paddingBottom: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly paddingBottom: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  paddingLeft: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly paddingLeft: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  pointerEvents: StyleAnimator<this, PointerEvents | undefined>;
+  readonly pointerEvents: StyleAnimator<this, PointerEvents | undefined>;
 
-  position: StyleAnimator<this, Position | undefined>;
+  readonly position: StyleAnimator<this, Position | undefined>;
 
-  right: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly right: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  textAlign: StyleAnimator<this, TextAlign | undefined>;
+  readonly textAlign: StyleAnimator<this, TextAlign | undefined>;
 
-  textDecorationColor: StyleAnimator<this, Color | null, AnyColor | null>;
+  readonly textDecorationColor: StyleAnimator<this, Color | null, AnyColor | null>;
 
-  textDecorationLine: StyleAnimator<this, string | undefined>;
+  readonly textDecorationLine: StyleAnimator<this, string | undefined>;
 
-  textDecorationStyle: StyleAnimator<this, TextDecorationStyle | undefined>;
+  readonly textDecorationStyle: StyleAnimator<this, TextDecorationStyle | undefined>;
 
-  textOverflow: StyleAnimator<this, string | undefined>;
+  readonly textOverflow: StyleAnimator<this, string | undefined>;
 
-  textTransform: StyleAnimator<this, TextTransform | undefined>;
+  readonly textTransform: StyleAnimator<this, TextTransform | undefined>;
 
-  top: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly top: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  touchAction: StyleAnimator<this, TouchAction | undefined>;
+  readonly touchAction: StyleAnimator<this, TouchAction | undefined>;
 
-  transform: StyleAnimator<this, Transform | null, AnyTransform | null>;
+  readonly transform: StyleAnimator<this, Transform | null, AnyTransform | null>;
 
-  userSelect: StyleAnimator<this, UserSelect | undefined>;
+  readonly userSelect: StyleAnimator<this, UserSelect | undefined>;
 
-  verticalAlign: StyleAnimator<this, VerticalAlign | undefined, AnyLength | VerticalAlign | undefined>;
+  readonly verticalAlign: StyleAnimator<this, VerticalAlign | undefined, AnyLength | VerticalAlign | undefined>;
 
-  visibility: StyleAnimator<this, Visibility | undefined>;
+  readonly visibility: StyleAnimator<this, Visibility | undefined>;
 
-  whiteSpace: StyleAnimator<this, WhiteSpace | undefined>;
+  readonly whiteSpace: StyleAnimator<this, WhiteSpace | undefined>;
 
-  width: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  readonly width: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  zIndex: StyleAnimator<this, number | undefined>;
+  readonly zIndex: StyleAnimator<this, number | undefined>;
 }
 
 /** @hidden */

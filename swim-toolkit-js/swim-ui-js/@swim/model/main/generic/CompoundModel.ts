@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,39 +30,39 @@ export class CompoundModel extends GenericModel {
     });
   }
 
-  declare readonly childModels: ReadonlyArray<Model>;
+  override readonly childModels!: ReadonlyArray<Model>;
 
-  get childModelCount(): number {
+  override get childModelCount(): number {
     return this.childModels.length;
   }
 
-  firstChildModel(): Model | null {
+  override firstChildModel(): Model | null {
     const childModels = this.childModels;
     return childModels.length !== 0 ? childModels[0]! : null;
   }
 
-  lastChildModel(): Model | null {
+  override lastChildModel(): Model | null {
     const childModels = this.childModels;
     return childModels.length !== 0 ? childModels[childModels.length - 1]! : null;
   }
 
-  nextChildModel(targetModel: Model): Model | null {
+  override nextChildModel(targetModel: Model): Model | null {
     const childModels = this.childModels;
     const targetIndex = childModels.indexOf(targetModel);
     return targetIndex >= 0 && targetIndex + 1 < childModels.length ? childModels[targetIndex + 1]! : null;
   }
 
-  previousChildModel(targetModel: Model): Model | null {
+  override previousChildModel(targetModel: Model): Model | null {
     const childModels = this.childModels;
     const targetIndex = childModels.indexOf(targetModel);
     return targetIndex - 1 >= 0 ? childModels[targetIndex - 1]! : null;
   }
 
-  forEachChildModel<T>(callback: (childModel: Model) => T | void): T | undefined;
-  forEachChildModel<T, S>(callback: (this: S, childModel: Model) => T | void,
-                          thisArg: S): T | undefined;
-  forEachChildModel<T, S>(callback: (this: S | undefined, childModel: Model) => T | void,
-                          thisArg?: S): T | undefined {
+  override forEachChildModel<T>(callback: (childModel: Model) => T | void): T | undefined;
+  override forEachChildModel<T, S>(callback: (this: S, childModel: Model) => T | void,
+                                   thisArg: S): T | undefined;
+  override forEachChildModel<T, S>(callback: (this: S | undefined, childModel: Model) => T | void,
+                                   thisArg?: S): T | undefined {
     let result: T | undefined;
     const childModels = this.childModels;
     let i = 0;
@@ -80,9 +80,9 @@ export class CompoundModel extends GenericModel {
   }
 
   /** @hidden */
-  declare readonly childModelMap: {[key: string]: Model | undefined} | null;
+  readonly childModelMap!: {[key: string]: Model | undefined} | null;
 
-  getChildModel(key: string): Model | null {
+  override getChildModel(key: string): Model | null {
     const childModelMap = this.childModelMap;
     if (childModelMap !== null) {
       const childModel = childModelMap[key];
@@ -93,7 +93,7 @@ export class CompoundModel extends GenericModel {
     return null;
   }
 
-  setChildModel(key: string, newChildModel: Model | null): Model | null {
+  override setChildModel(key: string, newChildModel: Model | null): Model | null {
     let targetModel: Model | null = null;
     const childModels = this.childModels as Model[];
     if (newChildModel !== null) {
@@ -161,7 +161,7 @@ export class CompoundModel extends GenericModel {
     }
   }
 
-  appendChildModel(childModel: Model, key?: string): void {
+  override appendChildModel(childModel: Model, key?: string): void {
     childModel.remove();
     if (key !== void 0) {
       this.removeChildModel(key);
@@ -176,7 +176,7 @@ export class CompoundModel extends GenericModel {
     childModel.cascadeInsert();
   }
 
-  prependChildModel(childModel: Model, key?: string): void {
+  override prependChildModel(childModel: Model, key?: string): void {
     childModel.remove();
     if (key !== void 0) {
       this.removeChildModel(key);
@@ -193,7 +193,7 @@ export class CompoundModel extends GenericModel {
     childModel.cascadeInsert();
   }
 
-  insertChildModel(childModel: Model, targetModel: Model | null, key?: string): void {
+  override insertChildModel(childModel: Model, targetModel: Model | null, key?: string): void {
     if (targetModel !== null && targetModel.parentModel !== this) {
       throw new TypeError("" + targetModel);
     }
@@ -217,9 +217,9 @@ export class CompoundModel extends GenericModel {
     childModel.cascadeInsert();
   }
 
-  removeChildModel(key: string): Model | null;
-  removeChildModel(childModel: Model): void;
-  removeChildModel(key: string | Model): Model | null | void {
+  override removeChildModel(key: string): Model | null;
+  override removeChildModel(childModel: Model): void;
+  override removeChildModel(key: string | Model): Model | null | void {
     let childModel: Model | null;
     if (typeof key === "string") {
       childModel = this.getChildModel(key);
@@ -248,7 +248,7 @@ export class CompoundModel extends GenericModel {
     }
   }
 
-  removeAll(): void {
+  override removeAll(): void {
     const childModels = this.childModels as Model[];
     do {
       const count = childModels.length;
@@ -268,7 +268,7 @@ export class CompoundModel extends GenericModel {
   }
 
   /** @hidden */
-  protected doMountChildModels(): void {
+  protected override doMountChildModels(): void {
     const childModels = this.childModels;
     let i = 0;
     while (i < childModels.length) {
@@ -284,7 +284,7 @@ export class CompoundModel extends GenericModel {
   }
 
   /** @hidden */
-  protected doUnmountChildModels(): void {
+  protected override doUnmountChildModels(): void {
     const childModels = this.childModels;
     let i = 0;
     while (i < childModels.length) {
@@ -300,7 +300,7 @@ export class CompoundModel extends GenericModel {
   }
 
   /** @hidden */
-  protected doPowerChildModels(): void {
+  protected override doPowerChildModels(): void {
     const childModels = this.childModels;
     let i = 0;
     while (i < childModels.length) {
@@ -316,7 +316,7 @@ export class CompoundModel extends GenericModel {
   }
 
   /** @hidden */
-  protected doUnpowerChildModels(): void {
+  protected override doUnpowerChildModels(): void {
     const childModels = this.childModels;
     let i = 0;
     while (i < childModels.length) {
@@ -332,9 +332,9 @@ export class CompoundModel extends GenericModel {
   }
 
   /** @hidden */
-  protected analyzeOwnChildModels(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>,
-                                  analyzeChildModel: (this: this, childModel: Model, analyzeFlags: ModelFlags,
-                                                      modelContext: ModelContextType<this>) => void): void {
+  protected override analyzeOwnChildModels(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>,
+                                           analyzeChildModel: (this: this, childModel: Model, analyzeFlags: ModelFlags,
+                                                               modelContext: ModelContextType<this>) => void): void {
     const childModels = this.childModels;
     let i = 0;
     while (i < childModels.length) {
@@ -350,9 +350,9 @@ export class CompoundModel extends GenericModel {
   }
 
   /** @hidden */
-  protected refreshOwnChildModels(refreshFlags: ModelFlags, modelContext: ModelContextType<this>,
-                                  refreshChildModel: (this: this, childModel: Model, refreshFlags: ModelFlags,
-                                                      modelContext: ModelContextType<this>) => void): void {
+  protected override refreshOwnChildModels(refreshFlags: ModelFlags, modelContext: ModelContextType<this>,
+                                           refreshChildModel: (this: this, childModel: Model, refreshFlags: ModelFlags,
+                                                               modelContext: ModelContextType<this>) => void): void {
     const childModels = this.childModels;
     let i = 0;
     while (i < childModels.length) {

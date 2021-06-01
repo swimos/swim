@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ export class ScrimView extends HtmlView implements ModalManagerObserver {
   }
 
   /** @hidden */
-  declare readonly displayState: number;
+  readonly displayState!: number;
 
   /** @hidden */
   setDisplayState(displayState: number): void {
@@ -87,7 +87,7 @@ export class ScrimView extends HtmlView implements ModalManagerObserver {
       }
     },
   })
-  declare backgroundColor: StyleAnimator<this, Color | null, AnyColor | null>;
+  override readonly backgroundColor!: StyleAnimator<this, Color | null, AnyColor | null>;
 
   isShown(): boolean {  
     switch (this.displayState) {
@@ -164,7 +164,7 @@ export class ScrimView extends HtmlView implements ModalManagerObserver {
     this.display.setState("none", View.Intrinsic);
   }
 
-  protected onMount(): void {
+  protected override onMount(): void {
     super.onMount();
     const modalManager = this.modalService.manager;
     if (modalManager !== void 0) {
@@ -173,7 +173,7 @@ export class ScrimView extends HtmlView implements ModalManagerObserver {
     }
   }
 
-  protected onUnmount(): void {
+  protected override onUnmount(): void {
     const modalManager = this.modalService.manager;
     if (modalManager !== void 0) {
       modalManager.removeViewManagerObserver(this);

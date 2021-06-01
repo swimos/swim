@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ export class ButtonGlow extends HtmlView {
     this.pointerEvents.setState("none", View.Intrinsic);
   }
 
-  declare readonly glowState: ButtonGlowState;
+  readonly glowState!: ButtonGlowState;
 
   /** @hidden */
   glowTimer: number;
@@ -61,7 +61,7 @@ export class ButtonGlow extends HtmlView {
       this.owner.didGlow();
     },
   })
-  declare left: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
+  override readonly left!: StyleAnimatorConstraint<this, Length | null, AnyLength | null>;
 
   @StyleAnimator<ButtonGlow, number | undefined>({
     propertyNames: "opacity",
@@ -74,9 +74,9 @@ export class ButtonGlow extends HtmlView {
       }
     },
   })
-  declare opacity: StyleAnimator<this, number | undefined>;
+  override readonly opacity!: StyleAnimator<this, number | undefined>;
 
-  protected didMount(): void {
+  protected override didMount(): void {
     if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       let highlightColor = this.getLookOr(Look.highlightColor, null);
       if (highlightColor !== null) {
@@ -87,7 +87,7 @@ export class ButtonGlow extends HtmlView {
     super.didMount();
   }
 
-  protected onUnmount(): void {
+  protected override onUnmount(): void {
     Object.defineProperty(this, "glowState", {
       value: "ready",
       enumerable: true,
@@ -98,7 +98,7 @@ export class ButtonGlow extends HtmlView {
     super.onUnmount();
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
       let highlightColor = theme.getOr(Look.highlightColor, mood, null);

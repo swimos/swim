@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 import {Equals, Equivalent} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 import type {Interpolate, Interpolator} from "@swim/mapping";
-import {BoxR2, AnyPathR2, PathR2, Transform} from "@swim/math";
+import {AnyR2Path, R2Path, R2Box, Transform} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
 import type {GraphicsRenderer} from "../graphics/GraphicsRenderer";
@@ -27,7 +27,7 @@ import {FilledIcon} from "./FilledIcon";
 import {VectorIconInterpolator} from "../"; // forward import
 
 export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, Equals, Equivalent, Debug {
-  constructor(path: PathR2, fillRule: PaintingFillRule, fillColor: Color | null,
+  constructor(path: R2Path, fillRule: PaintingFillRule, fillColor: Color | null,
               fillLook: Look<Color> | null, moodModifier: MoodMatrix | null) {
     super();
     Object.defineProperty(this, "path", {
@@ -52,9 +52,9 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
     });
   }
 
-  declare readonly path: PathR2;
+  readonly path!: R2Path;
 
-  declare readonly fillRule: PaintingFillRule;
+  readonly fillRule!: PaintingFillRule;
 
   withFillRule(fillRule: PaintingFillRule): VectorIcon {
     if (Equals(this.fillRule, fillRule)) {
@@ -65,9 +65,9 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
     }
   }
 
-  declare readonly fillColor: Color | null;
+  override readonly fillColor!: Color | null;
 
-  withFillColor(fillColor: Color | null): VectorIcon {
+  override withFillColor(fillColor: Color | null): VectorIcon {
     if (Equals(this.fillColor, fillColor)) {
       return this;
     } else {
@@ -76,9 +76,9 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
     }
   }
 
-  declare readonly fillLook: Look<Color> | null;
+  override readonly fillLook!: Look<Color> | null;
 
-  withFillLook(fillLook: Look<Color> | null): VectorIcon {
+  override withFillLook(fillLook: Look<Color> | null): VectorIcon {
     if (this.fillLook === fillLook) {
       return this;
     } else {
@@ -87,9 +87,9 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
     }
   }
 
-  declare readonly moodModifier: MoodMatrix | null;
+  override readonly moodModifier!: MoodMatrix | null;
 
-  withMoodModifier(moodModifier: MoodMatrix | null): VectorIcon {
+  override withMoodModifier(moodModifier: MoodMatrix | null): VectorIcon {
     if (Equals(this.moodModifier, moodModifier)) {
       return this;
     } else {
@@ -98,7 +98,7 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
     }
   }
 
-  modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>): VectorIcon {
+  override modifyMood(feel: Feel, updates: MoodVectorUpdates<Feel>): VectorIcon {
     let oldMoodModifier = this.moodModifier;
     if (oldMoodModifier === null) {
       oldMoodModifier = MoodMatrix.empty();
@@ -111,11 +111,11 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
     }
   }
 
-  isThemed(): boolean {
+  override isThemed(): boolean {
     return this.fillColor !== null;
   }
 
-  withTheme(theme: ThemeMatrix, mood: MoodVector): VectorIcon {
+  override withTheme(theme: ThemeMatrix, mood: MoodVector): VectorIcon {
     const fillLook = this.fillLook;
     if (fillLook !== null) {
       const moodModifier = this.moodModifier;
@@ -128,7 +128,7 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
     }
   }
 
-  render(renderer: GraphicsRenderer, frame: BoxR2): void {
+  override render(renderer: GraphicsRenderer, frame: R2Box): void {
     if (renderer instanceof PaintingRenderer) {
       this.paint(renderer.context, frame);
     } else if (renderer instanceof DrawingRenderer) {
@@ -136,7 +136,7 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
     }
   }
 
-  paint(context: PaintingContext, frame: BoxR2): void {
+  override paint(context: PaintingContext, frame: R2Box): void {
     context.beginPath();
     this.draw(context, frame);
     if (this.fillColor !== null) {
@@ -145,12 +145,12 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
     context.fill(this.fillRule);
   }
 
-  draw(context: DrawingContext, frame: BoxR2): void {
+  override draw(context: DrawingContext, frame: R2Box): void {
     this.path.transformDraw(context, Transform.scale(frame.width, frame.height)
                                               .translate(frame.x, frame.y));
   }
 
-  protected copy(path: PathR2, fillRule: PaintingFillRule, fillColor: Color | null,
+  protected copy(path: R2Path, fillRule: PaintingFillRule, fillColor: Color | null,
                  fillLook: Look<Color> | null, moodModifier: MoodMatrix | null): VectorIcon {
     return new VectorIcon(path, fillRule, fillColor, fillLook, moodModifier);
   }
@@ -200,13 +200,13 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
         .debug(this.moodModifier).write(41/*')'*/);
   }
 
-  toString(): string {
+  override toString(): string {
     return Format.debug(this);
   }
 
-  static create(width: number, height: number, path: AnyPathR2,
+  static create(width: number, height: number, path: AnyR2Path,
                 fillRule?: PaintingFillRule): VectorIcon {
-    path = PathR2.fromAny(path);
+    path = R2Path.fromAny(path);
     if (width !== 1 || height !== 1) {
       path = path.transform(Transform.scale(1 / width, 1 / height));
     }

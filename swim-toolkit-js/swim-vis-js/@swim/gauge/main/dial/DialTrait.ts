@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ export type DialLegend = DialLegendFunction | string;
 export type DialLegendFunction = (dialTrait: DialTrait) => GraphicsView | string | null;
 
 export class DialTrait extends GenericTrait {
-  declare readonly traitObservers: ReadonlyArray<DialTraitObserver>;
+  override readonly traitObservers!: ReadonlyArray<DialTraitObserver>;
 
   protected willSetValue(newValue: number, oldValue: number): void {
     const traitObservers = this.traitObservers;
@@ -60,7 +60,7 @@ export class DialTrait extends GenericTrait {
       this.owner.didSetValue(newValue, oldValue);
     },
   })
-  declare value: TraitProperty<this, number>;
+  readonly value!: TraitProperty<this, number>;
 
   protected willSetLimit(newLimit: number, oldLimit: number): void {
     const traitObservers = this.traitObservers;
@@ -97,7 +97,7 @@ export class DialTrait extends GenericTrait {
       this.owner.didSetLimit(newLimit, oldLimit);
     },
   })
-  declare limit: TraitProperty<this, number>;
+  readonly limit!: TraitProperty<this, number>;
 
   protected willSetLabel(newLabel: DialLabel | null, oldLabel: DialLabel | null): void {
     const traitObservers = this.traitObservers;
@@ -137,7 +137,7 @@ export class DialTrait extends GenericTrait {
       this.owner.didSetLabel(newLabel, oldLabel);
     },
   })
-  declare label: TraitProperty<this, DialLabel | null>;
+  readonly label!: TraitProperty<this, DialLabel | null>;
 
   protected willSetLegend(newLegend: DialLegend | null, oldLegend: DialLegend | null): void {
     const traitObservers = this.traitObservers;
@@ -177,5 +177,5 @@ export class DialTrait extends GenericTrait {
       this.owner.didSetLegend(newLegend, oldLegend);
     },
   })
-  declare legend: TraitProperty<this, DialLegend | null>;
+  readonly legend!: TraitProperty<this, DialLegend | null>;
 }

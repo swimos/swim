@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import type {IconView} from "./IconView";
 
 /** @hidden */
 export abstract class IconViewAnimator<V extends IconView> extends ViewAnimator<V, Graphics | null | undefined> {
-  fromAny(value: Graphics | null | undefined): Graphics | null | undefined {
+  override fromAny(value: Graphics | null | undefined): Graphics | null | undefined {
     if (value instanceof Icon) {
       const iconColor = this.owner.iconColor.state;
       if (iconColor !== null && value instanceof FilledIcon) {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyLength, Length, BoxR2} from "@swim/math";
+import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
@@ -28,7 +28,7 @@ export interface LinePlotViewInit<X, Y> extends SeriesPlotViewInit<X, Y>, Stroke
 }
 
 export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeView {
-  initView(init: LinePlotViewInit<X, Y>): void {
+  override initView(init: LinePlotViewInit<X, Y>): void {
     super.initView(init);
      if (init.hitWidth !== void 0) {
       this.hitWidth(init.hitWidth);
@@ -42,11 +42,11 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
     }
   }
 
-  declare readonly viewController: GraphicsViewController<LinePlotView<X, Y>> & LinePlotViewObserver<X, Y> | null;
+  override readonly viewController!: GraphicsViewController<LinePlotView<X, Y>> & LinePlotViewObserver<X, Y> | null;
 
-  declare readonly viewObservers: ReadonlyArray<LinePlotViewObserver<X, Y>>;
+  override readonly viewObservers!: ReadonlyArray<LinePlotViewObserver<X, Y>>;
 
-  get plotType(): SeriesPlotType {
+  override get plotType(): SeriesPlotType {
     return "line";
   }
 
@@ -94,7 +94,7 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
       this.owner.didSetStroke(newStroke, oldStroke);
     },
   })
-  declare stroke: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
     const viewController = this.viewController;
@@ -146,12 +146,12 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
       this.owner.didSetStrokeWidth(newStrokeWidth, oldStrokeWidth);
     },
   })
-  declare strokeWidth: ViewAnimator<this, Length | null, AnyLength | null>;
+  readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   @ViewProperty({type: Number, state: 5})
-  declare hitWidth: ViewProperty<this, number>;
+  readonly hitWidth!: ViewProperty<this, number>;
 
-  protected renderPlot(context: CanvasContext, frame: BoxR2): void {
+  protected renderPlot(context: CanvasContext, frame: R2Box): void {
     const size = Math.min(frame.width, frame.height);
     const stroke = this.stroke.getValueOr(Color.transparent());
     const strokeWidth = this.strokeWidth.getValueOr(Length.zero()).pxValue(size);
@@ -247,13 +247,13 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
     return new LinePlotView<X, Y>();
   }
 
-  static fromInit<X, Y>(init: LinePlotViewInit<X, Y>): LinePlotView<X, Y> {
+  static override fromInit<X, Y>(init: LinePlotViewInit<X, Y>): LinePlotView<X, Y> {
     const view = new LinePlotView<X, Y>();
     view.initView(init);
     return view;
   }
 
-  static fromAny<X, Y>(value: AnyLinePlotView<X, Y>): LinePlotView<X, Y> {
+  static override fromAny<X, Y>(value: AnyLinePlotView<X, Y>): LinePlotView<X, Y> {
     if (value instanceof LinePlotView) {
       return value;
     } else if (typeof value === "object" && value !== null) {

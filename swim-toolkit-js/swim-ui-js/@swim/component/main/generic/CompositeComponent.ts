@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,17 +30,17 @@ export class CompositeComponent extends GenericComponent {
     });
   }
 
-  declare readonly childComponents: ReadonlyArray<Component>;
+  override readonly childComponents!: ReadonlyArray<Component>;
 
-  get childComponentCount(): number {
+  override get childComponentCount(): number {
     return this.childComponents.length;
   }
 
-  forEachChildComponent<T>(callback: (childComponent: Component) => T | void): T | undefined;
-  forEachChildComponent<T, S>(callback: (this: S, childComponent: Component) => T | void,
-                              thisArg: S): T | undefined;
-  forEachChildComponent<T, S>(callback: (this: S | undefined, childComponent: Component) => T | void,
-                               thisArg?: S): T | undefined {
+  override forEachChildComponent<T>(callback: (childComponent: Component) => T | void): T | undefined;
+  override forEachChildComponent<T, S>(callback: (this: S, childComponent: Component) => T | void,
+                                       thisArg: S): T | undefined;
+  override forEachChildComponent<T, S>(callback: (this: S | undefined, childComponent: Component) => T | void,
+                                        thisArg?: S): T | undefined {
     let result: T | undefined;
     const childComponents = this.childComponents;
     let i = 0;
@@ -57,32 +57,32 @@ export class CompositeComponent extends GenericComponent {
     return result;
   }
 
-  firstChildComponent(): Component | null {
+  override firstChildComponent(): Component | null {
     const childComponents = this.childComponents;
     return childComponents.length !== 0 ? childComponents[0]! : null;
   }
 
-  lastChildComponent(): Component | null {
+  override lastChildComponent(): Component | null {
     const childComponents = this.childComponents;
     return childComponents.length !== 0 ? childComponents[childComponents.length - 1]! : null;
   }
 
-  nextChildComponent(targetComponent: Component): Component | null {
+  override nextChildComponent(targetComponent: Component): Component | null {
     const childComponents = this.childComponents;
     const targetIndex = childComponents.indexOf(targetComponent);
     return targetIndex >= 0 && targetIndex + 1 < childComponents.length ? childComponents[targetIndex + 1]! : null;
   }
 
-  previousChildComponent(targetComponent: Component): Component | null {
+  override previousChildComponent(targetComponent: Component): Component | null {
     const childComponents = this.childComponents;
     const targetIndex = childComponents.indexOf(targetComponent);
     return targetIndex - 1 >= 0 ? childComponents[targetIndex - 1]! : null;
   }
 
   /** @hidden */
-  declare readonly childComponentMap: {[key: string]: Component | undefined} | null;
+  readonly childComponentMap!: {[key: string]: Component | undefined} | null;
 
-  getChildComponent(key: string): Component | null {
+  override getChildComponent(key: string): Component | null {
     const childComponentMap = this.childComponentMap;
     if (childComponentMap !== null) {
       const childComponent = childComponentMap[key];
@@ -93,7 +93,7 @@ export class CompositeComponent extends GenericComponent {
     return null;
   }
 
-  setChildComponent(key: string, newChildComponent: Component | null): Component | null {
+  override setChildComponent(key: string, newChildComponent: Component | null): Component | null {
     let targetComponent: Component | null = null;
     const childComponents = this.childComponents as Component[];
     if (newChildComponent !== null) {
@@ -161,7 +161,7 @@ export class CompositeComponent extends GenericComponent {
     }
   }
 
-  appendChildComponent(childComponent: Component, key?: string): void {
+  override appendChildComponent(childComponent: Component, key?: string): void {
     childComponent.remove();
     if (key !== void 0) {
       this.removeChildComponent(key);
@@ -176,7 +176,7 @@ export class CompositeComponent extends GenericComponent {
     childComponent.cascadeInsert();
   }
 
-  prependChildComponent(childComponent: Component, key?: string): void {
+  override prependChildComponent(childComponent: Component, key?: string): void {
     childComponent.remove();
     if (key !== void 0) {
       this.removeChildComponent(key);
@@ -193,7 +193,7 @@ export class CompositeComponent extends GenericComponent {
     childComponent.cascadeInsert();
   }
 
-  insertChildComponent(childComponent: Component, targetComponent: Component | null, key?: string): void {
+  override insertChildComponent(childComponent: Component, targetComponent: Component | null, key?: string): void {
     if (targetComponent !== null && targetComponent.parentComponent !== this) {
       throw new TypeError("" + targetComponent);
     }
@@ -217,9 +217,9 @@ export class CompositeComponent extends GenericComponent {
     childComponent.cascadeInsert();
   }
 
-  removeChildComponent(key: string): Component | null;
-  removeChildComponent(childComponent: Component): void;
-  removeChildComponent(key: string | Component): Component | null | void {
+  override removeChildComponent(key: string): Component | null;
+  override removeChildComponent(childComponent: Component): void;
+  override removeChildComponent(key: string | Component): Component | null | void {
     let childComponent: Component | null;
     if (typeof key === "string") {
       childComponent = this.getChildComponent(key);
@@ -248,7 +248,7 @@ export class CompositeComponent extends GenericComponent {
     }
   }
 
-  removeAll(): void {
+  override removeAll(): void {
     const childComponents = this.childComponents as Component[];
     do {
       const count = childComponents.length;
@@ -268,7 +268,7 @@ export class CompositeComponent extends GenericComponent {
   }
 
   /** @hidden */
-  protected doMountChildComponents(): void {
+  protected override doMountChildComponents(): void {
     const childComponents = this.childComponents;
     let i = 0;
     while (i < childComponents.length) {
@@ -284,7 +284,7 @@ export class CompositeComponent extends GenericComponent {
   }
 
   /** @hidden */
-  protected doUnmountChildComponents(): void {
+  protected override doUnmountChildComponents(): void {
     const childComponents = this.childComponents;
     let i = 0;
     while (i < childComponents.length) {
@@ -300,7 +300,7 @@ export class CompositeComponent extends GenericComponent {
   }
 
   /** @hidden */
-  protected doPowerChildComponents(): void {
+  protected override doPowerChildComponents(): void {
     const childComponents = this.childComponents;
     let i = 0;
     while (i < childComponents.length) {
@@ -316,7 +316,7 @@ export class CompositeComponent extends GenericComponent {
   }
 
   /** @hidden */
-  protected doUnpowerChildComponents(): void {
+  protected override doUnpowerChildComponents(): void {
     const childComponents = this.childComponents;
     let i = 0;
     while (i < childComponents.length) {
@@ -331,9 +331,9 @@ export class CompositeComponent extends GenericComponent {
     }
   }
 
-  protected compileChildComponents(compileFlags: ComponentFlags, componentContext: ComponentContextType<this>,
-                                   compileChildComponent: (this: this, childComponent: Component, compileFlags: ComponentFlags,
-                                                           componentContext: ComponentContextType<this>) => void): void {
+  protected override compileChildComponents(compileFlags: ComponentFlags, componentContext: ComponentContextType<this>,
+                                            compileChildComponent: (this: this, childComponent: Component, compileFlags: ComponentFlags,
+                                                                    componentContext: ComponentContextType<this>) => void): void {
     const childComponents = this.childComponents;
     let i = 0;
     while (i < childComponents.length) {
@@ -348,9 +348,9 @@ export class CompositeComponent extends GenericComponent {
     }
   }
 
-  protected executeChildComponents(executeFlags: ComponentFlags, componentContext: ComponentContextType<this>,
-                                   executeChildComponent: (this: this, childComponent: Component, executeFlags: ComponentFlags,
-                                                           componentContext: ComponentContextType<this>) => void): void {
+  protected override executeChildComponents(executeFlags: ComponentFlags, componentContext: ComponentContextType<this>,
+                                            executeChildComponent: (this: this, childComponent: Component, executeFlags: ComponentFlags,
+                                                                    componentContext: ComponentContextType<this>) => void): void {
     const childComponents = this.childComponents;
     let i = 0;
     while (i < childComponents.length) {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ import {DrawingRenderer} from "../drawing/DrawingRenderer";
 import type {PaintingContext} from "./PaintingContext";
 
 export abstract class PaintingRenderer extends DrawingRenderer {
-  abstract readonly context: PaintingContext;
+  abstract override readonly context: PaintingContext;
 
   abstract readonly theme: ThemeMatrix | null;
 

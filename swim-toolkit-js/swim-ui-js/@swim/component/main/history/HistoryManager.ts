@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ export class HistoryManager<C extends Component = Component> extends ComponentMa
   }
 
   /** @hidden */
-  declare readonly historyState: HistoryState;
+  readonly historyState!: HistoryState;
 
   get historyUri(): Uri {
     return HistoryState.toUri(this.historyState);
@@ -168,14 +168,14 @@ export class HistoryManager<C extends Component = Component> extends ComponentMa
     }
   }
 
-  declare readonly componentManagerObservers: ReadonlyArray<HistoryManagerObserver>;
+  override readonly componentManagerObservers!: ReadonlyArray<HistoryManagerObserver>;
 
-  protected onAttach(): void {
+  protected override onAttach(): void {
     super.onAttach();
     this.attachEvents();
   }
 
-  protected onDetach(): void {
+  protected override onDetach(): void {
     this.detachEvents();
     super.onDetach();
   }

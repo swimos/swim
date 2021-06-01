@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/mapping";
-import {AnyPointR2, PointR2, BoxR2} from "@swim/math";
+import {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewAnimator, ViewFastener} from "@swim/view";
 import {
@@ -87,7 +87,7 @@ export abstract class TickView<D> extends LayerView {
     });
   }
 
-  initView(init: TickViewInit<D>): void {
+  override initView(init: TickViewInit<D>): void {
     super.initView(init);
     if (init.tickMarkColor !== void 0) {
       this.tickMarkColor(init.tickMarkColor);
@@ -121,16 +121,16 @@ export abstract class TickView<D> extends LayerView {
     }
   }
 
-  declare readonly viewController: GraphicsViewController & TickViewObserver<D> | null;
+  override readonly viewController!: GraphicsViewController & TickViewObserver<D> | null;
 
-  declare readonly viewObservers: ReadonlyArray<TickViewObserver<D>>;
+  override readonly viewObservers!: ReadonlyArray<TickViewObserver<D>>;
 
   abstract readonly orientation: TickOrientation;
 
-  declare readonly value: D;
+  readonly value!: D;
 
   /** @hidden */
-  declare readonly offset: number;
+  readonly offset!: number;
 
   /** @hidden */
   setOffset(offset: number): void {
@@ -142,37 +142,37 @@ export abstract class TickView<D> extends LayerView {
   }
 
   /** @hidden */
-  declare readonly tickState: TickState;
+  readonly tickState!: TickState;
 
-  @ViewAnimator({type: PointR2, state: PointR2.origin()})
-  declare anchor: ViewAnimator<this, PointR2, AnyPointR2>;
+  @ViewAnimator({type: R2Point, state: R2Point.origin()})
+  readonly anchor!: ViewAnimator<this, R2Point, AnyR2Point>;
 
   @ViewAnimator({type: Number, state: 1})
-  declare opacity: ViewAnimator<this, number>;
+  readonly opacity!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Color, inherit: true, state: null})
-  declare tickMarkColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly tickMarkColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Number, inherit: true, state: 1})
-  declare tickMarkWidth: ViewAnimator<this, number>;
+  readonly tickMarkWidth!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Number, inherit: true, state: 6})
-  declare tickMarkLength: ViewAnimator<this, number>;
+  readonly tickMarkLength!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Number, inherit: true, state: 2})
-  declare tickLabelPadding: ViewAnimator<this, number>;
+  readonly tickLabelPadding!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Color, inherit: true, state: null})
-  declare gridLineColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly gridLineColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({type: Number, inherit: true, state: 0})
-  declare gridLineWidth: ViewAnimator<this, number>;
+  readonly gridLineWidth!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Font, inherit: true, state: null})
-  declare font: ViewAnimator<this, Font | null, AnyFont | null>;
+  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
 
   @ViewAnimator({type: Color, inherit: true, state: null})
-  declare textColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected initLabel(labelView: GraphicsView): void {
     // hook
@@ -247,10 +247,10 @@ export abstract class TickView<D> extends LayerView {
       this.owner.didSetLabel(newLabelView, oldLabelView);
     },
   })
-  declare label: ViewFastener<this, GraphicsView, AnyTextRunView>;
+  readonly label!: ViewFastener<this, GraphicsView, AnyTextRunView>;
 
   /** @hidden */
-  declare readonly preserved: boolean;
+  readonly preserved!: boolean;
 
   preserve(): boolean;
   preserve(preserve: boolean): this;
@@ -289,7 +289,7 @@ export abstract class TickView<D> extends LayerView {
     }
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     const labelView = this.label.view;
     if (labelView !== null) {
@@ -297,7 +297,7 @@ export abstract class TickView<D> extends LayerView {
     }
   }
 
-  protected willRender(viewContext: ViewContextType<this>): void {
+  protected override willRender(viewContext: ViewContextType<this>): void {
     super.willRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
@@ -306,7 +306,7 @@ export abstract class TickView<D> extends LayerView {
     }
   }
 
-  protected onRender(viewContext: ViewContextType<this>): void {
+  protected override onRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
       const context = renderer.context;
@@ -315,7 +315,7 @@ export abstract class TickView<D> extends LayerView {
     }
   }
 
-  protected didRender(viewContext: ViewContextType<this>): void {
+  protected override didRender(viewContext: ViewContextType<this>): void {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
@@ -326,7 +326,7 @@ export abstract class TickView<D> extends LayerView {
 
   protected abstract layoutLabel(labelView: GraphicsView): void;
 
-  protected abstract renderTick(context: CanvasContext, frame: BoxR2): void;
+  protected abstract renderTick(context: CanvasContext, frame: R2Box): void;
 
   static top<D>(value: D): TopTickView<D> {
     return new TopTickView(value);

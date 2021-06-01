@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 /// <reference types="arcgis-js-api"/>
 
 import type {Equals} from "@swim/util";
-import type {AnyPointR2, PointR2} from "@swim/math";
+import type {AnyR2Point, R2Point} from "@swim/math";
 import type {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import type {GeoViewport} from "@swim/map";
 
@@ -48,22 +48,22 @@ export abstract class EsriViewport implements GeoViewport, Equals {
     });
   }
 
-  declare readonly map: __esri.View;
+  readonly map!: __esri.View;
 
-  declare readonly geoFrame: GeoBox;
+  readonly geoFrame!: GeoBox;
 
-  declare readonly geoCenter: GeoPoint;
+  readonly geoCenter!: GeoPoint;
 
-  declare readonly zoom: number;
+  readonly zoom!: number;
 
-  declare readonly heading: number;
+  readonly heading!: number;
 
-  declare readonly tilt: number;
+  readonly tilt!: number;
 
-  abstract project(geoPoint: AnyGeoPoint): PointR2;
-  abstract project(lng: number, lat: number): PointR2;
+  abstract project(geoPoint: AnyGeoPoint): R2Point;
+  abstract project(lng: number, lat: number): R2Point;
 
-  abstract unproject(viewPoint: AnyPointR2): GeoPoint;
+  abstract unproject(viewPoint: AnyR2Point): GeoPoint;
   abstract unproject(x: number, y: number): GeoPoint;
 
   equals(that: unknown): boolean {

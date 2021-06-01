@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import {DataPointLabel, DataPointTrait} from "./DataPointTrait";
 import type {DataPointComponentObserver} from "./DataPointComponentObserver";
 
 export class DataPointComponent<X, Y> extends CompositeComponent {
-  declare readonly componentObservers: ReadonlyArray<DataPointComponentObserver<X, Y>>;
+  override readonly componentObservers!: ReadonlyArray<DataPointComponentObserver<X, Y>>;
 
   protected initDataPointTrait(dataPointTrait: DataPointTrait<X, Y>): void {
     // hook
@@ -466,7 +466,7 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
   }
 
   @ComponentProperty({type: Timing, inherit: true})
-  declare dataPointTiming: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
+  readonly dataPointTiming!: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
 
   /** @hidden */
   static DataPointFastener = ComponentViewTrait.define<DataPointComponent<unknown, unknown>, DataPointView<unknown, unknown>, DataPointTrait<unknown, unknown>>({
@@ -569,7 +569,7 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
   @ComponentViewTrait<DataPointComponent<X, Y>, DataPointView<X, Y>, DataPointTrait<X, Y>>({
     extends: DataPointComponent.DataPointFastener,
   })
-  declare dataPoint: ComponentViewTrait<this, DataPointView<X, Y>, DataPointTrait<X, Y>>;
+  readonly dataPoint!: ComponentViewTrait<this, DataPointView<X, Y>, DataPointTrait<X, Y>>;
 
   @ComponentView<DataPointComponent<X, Y>, GraphicsView>({
     key: true,
@@ -583,5 +583,5 @@ export class DataPointComponent<X, Y> extends CompositeComponent {
       this.owner.didSetLabelView(newLabelView, oldLabelView);
     },
   })
-  declare label: ComponentView<this, GraphicsView>;
+  readonly label!: ComponentView<this, GraphicsView>;
 }

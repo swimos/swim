@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {AnyTiming} from "@swim/mapping";
-import {BoxR2} from "@swim/math";
+import {R2Box} from "@swim/math";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import type {CanvasView} from "@swim/graphics";
@@ -34,11 +34,11 @@ export class WorldMapView extends MapView {
     });
   }
 
-  declare readonly viewController: WorldMapViewController | null;
+  override readonly viewController!: WorldMapViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<WorldMapViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<WorldMapViewObserver>;
 
-  declare readonly geoViewport: WorldMapViewport;
+  override readonly geoViewport!: WorldMapViewport;
 
   protected willSetGeoViewport(newGeoViewport: WorldMapViewport, oldGeoViewport: WorldMapViewport): void {
     const viewController = this.viewController;
@@ -89,7 +89,7 @@ export class WorldMapView extends MapView {
     return false;
   }
 
-  willProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  override willProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     if ((processFlags & View.NeedsProject) !== 0) {
       this.updateGeoViewport();
       (viewContext as any).geoViewport = this.geoViewport;
@@ -97,30 +97,30 @@ export class WorldMapView extends MapView {
     super.willProcess(processFlags, viewContext);
   }
 
-  moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void {
+  override moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void {
     // nop
   }
 
-  protected attachCanvas(canvasView: CanvasView): void {
+  protected override attachCanvas(canvasView: CanvasView): void {
     super.attachCanvas(canvasView);
     if (this.parentView === null) {
       canvasView.appendChildView(this);
     }
   }
 
-  protected detachCanvas(canvasView: CanvasView): void {
+  protected override detachCanvas(canvasView: CanvasView): void {
     if (this.parentView === canvasView) {
       canvasView.removeChildView(this);
     }
     super.detachCanvas(canvasView);
   }
 
-  protected attachContainer(containerView: HtmlView): void {
+  protected override attachContainer(containerView: HtmlView): void {
     super.attachContainer(containerView);
     this.canvas.injectView(containerView);
   }
 
-  protected detachContainer(containerView: HtmlView): void {
+  protected override detachContainer(containerView: HtmlView): void {
     const canvasView = this.canvas.view;
     if (canvasView !== null && canvasView.parentView === containerView) {
       containerView.removeChildView(containerView);
@@ -130,7 +130,7 @@ export class WorldMapView extends MapView {
 
   static create(geoViewport?: WorldMapViewport): WorldMapView {
     if (geoViewport === void 0) {
-      geoViewport = new EquirectangularMapViewport(BoxR2.undefined());
+      geoViewport = new EquirectangularMapViewport(R2Box.undefined());
     }
     return new WorldMapView(geoViewport);
   }

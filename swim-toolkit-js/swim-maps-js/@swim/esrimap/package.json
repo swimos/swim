@@ -4,14 +4,14 @@
   "description": "@swim/map overlays for ArcGIS maps",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-maps-js/@swim/esrimap",
   "author": "Chris Sachs <chris@swimos.org>",
-  "copyright": "2015-2020 Swim inc.",
+  "copyright": "2015-2021 Swim inc.",
   "license": "Apache-2.0",
   "repository": "https://github.com/swimos/swim.git",
   "main": "dist/main/swim-esrimap.js",
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "devDependencies": {
-    "@types/arcgis-js-api": "4.18"
+    "@types/arcgis-js-api": "4.19"
   },
   "dependencies": {
     "@swim/util": "3.11.0-dev.20210415",

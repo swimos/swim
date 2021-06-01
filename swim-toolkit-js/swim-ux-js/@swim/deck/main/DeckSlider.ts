@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,17 +34,17 @@ export class DeckSlider extends DeckSlot {
     this.position.setState("relative", View.Intrinsic);
   }
 
-  declare readonly viewController: HtmlViewController & DeckSliderObserver | null;
+  override readonly viewController!: HtmlViewController & DeckSliderObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<DeckSliderObserver>;
+  override readonly viewObservers!: ReadonlyArray<DeckSliderObserver>;
 
   @ViewAnimator({type: Number, inherit: true, updateFlags: View.NeedsLayout})
-  declare deckPhase: ViewAnimator<this, number | undefined>;
+  override readonly deckPhase!: ViewAnimator<this, number | undefined>;
 
   @ViewAnimator({type: Number, state: 0.5})
-  declare slotAlign: ViewAnimator<this, number>;
+  override readonly slotAlign!: ViewAnimator<this, number>;
 
-  get colorLook(): Look<Color> {
+  override get colorLook(): Look<Color> {
     return Look.color;
   }
 
@@ -180,7 +180,7 @@ export class DeckSlider extends DeckSlot {
     });
   }
 
-  protected didLayout(viewContext: ViewContextType<this>): void {
+  protected override didLayout(viewContext: ViewContextType<this>): void {
     if (!this.deckPhase.isAnimating()) {
       const deckPhase = this.deckPhase.takeUpdatedValue();
       if (deckPhase !== void 0) {
@@ -216,13 +216,13 @@ export abstract class DeckSliderItem<V extends DeckSlider, S extends HtmlView> e
   /** @hidden */
   itemWidth: Length | string | null;
 
-  onSetView(itemView: S | null): void {
+  override onSetView(itemView: S | null): void {
     if (itemView !== null) {
       this.initItem(itemView);
     }
   }
 
-  insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
+  override insertView(parentView: View, childView: S, targetView: View | null, key: string | undefined): void {
     const targetKey = "item" + (this.itemIndex + 1);
     targetView = parentView.getChildView(targetKey);
     parentView.insertChildView(childView, targetView, key);

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ import {StyleAnimator} from "./StyleAnimator";
 
 /** @hidden */
 export abstract class BoxShadowStyleAnimator<V extends StyleContext> extends StyleAnimator<V, BoxShadow | null, AnyBoxShadow | null> {
-  parse(value: string): BoxShadow | null {
+  override parse(value: string): BoxShadow | null {
     return BoxShadow.parse(value);
   }
 
-  fromAny(value: AnyBoxShadow): BoxShadow | null {
+  override fromAny(value: AnyBoxShadow): BoxShadow | null {
     return BoxShadow.fromAny(value);
   }
 }

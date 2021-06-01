@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import {GeoTrait} from "../geo/GeoTrait";
 import type {GeoIconTraitObserver} from "./GeoIconTraitObserver";
 
 export class GeoIconTrait extends GeoTrait {
-  declare readonly traitObservers: ReadonlyArray<GeoIconTraitObserver>;
+  override readonly traitObservers!: ReadonlyArray<GeoIconTraitObserver>;
 
-  get geoBounds(): GeoBox {
+  override get geoBounds(): GeoBox {
     const geoCenter = this.geoCenter.state;
     return geoCenter !== null ? geoCenter.bounds : GeoBox.undefined();
   }
@@ -61,7 +61,7 @@ export class GeoIconTrait extends GeoTrait {
       this.owner.didSetGeoCenter(newGeoCenter, oldGeoCenter);
     },
   })
-  declare geoCenter: TraitProperty<this, GeoPoint | null, AnyGeoPoint | null>;
+  readonly geoCenter!: TraitProperty<this, GeoPoint | null, AnyGeoPoint | null>;
 
   protected willSetIconLayout(newIconLayout: IconLayout | null, oldIconLayout: IconLayout | null): void {
     const traitObservers = this.traitObservers;
@@ -98,7 +98,7 @@ export class GeoIconTrait extends GeoTrait {
       this.owner.didSetIconLayout(newIconLayout, oldIconLayout);
     },
   })
-  declare iconLayout: TraitProperty<this, IconLayout | null, AnyIconLayout | null>;
+  readonly iconLayout!: TraitProperty<this, IconLayout | null, AnyIconLayout | null>;
 
   protected willSetGraphics(newGraphics: Graphics | null, oldGraphics: Graphics | null): void {
     const traitObservers = this.traitObservers;
@@ -134,5 +134,5 @@ export class GeoIconTrait extends GeoTrait {
       this.owner.didSetGraphics(newGraphics, oldGraphics);
     },
   })
-  declare graphics: TraitProperty<this, Graphics | null>;
+  readonly graphics!: TraitProperty<this, Graphics | null>;
 }

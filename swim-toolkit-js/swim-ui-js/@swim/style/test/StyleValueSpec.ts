@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -110,6 +110,7 @@ export class StyleValueSpec extends Spec {
     exam.equal(StyleValue.parse("translateX(2)"), Transform.translateX(2));
     exam.equal(StyleValue.parse("translateY(3)"), Transform.translateY(3));
     exam.equal(StyleValue.parse("translate(5,7)"), Transform.translate(5, 7));
+    exam.equal(StyleValue.parse("translate3d(5,7,0)"), Transform.translate(5, 7));
     exam.equal(StyleValue.parse("scaleX(2)"), Transform.scaleX(2));
     exam.equal(StyleValue.parse("scaleY(3)"), Transform.scaleY(3));
     exam.equal(StyleValue.parse("scale(5,7)"), Transform.scale(5, 7));

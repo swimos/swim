@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ export abstract class Component {
     // hook
   }
 
-  declare readonly componentFlags: ComponentFlags;
+  readonly componentFlags!: ComponentFlags;
 
   setComponentFlags(componentFlags: ComponentFlags): void {
     Object.defineProperty(this, "componentFlags", {
@@ -104,7 +104,7 @@ export abstract class Component {
     });
   }
 
-  declare readonly componentObservers: ReadonlyArray<ComponentObserver>;
+  readonly componentObservers!: ReadonlyArray<ComponentObserver>;
 
   addComponentObserver(componentObserver: ComponentObserverType<this>): void {
     const oldComponentObservers = this.componentObservers;

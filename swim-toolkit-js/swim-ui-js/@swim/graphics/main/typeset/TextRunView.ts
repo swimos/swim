@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {AnyTiming} from "@swim/mapping";
-import {AnyPointR2, PointR2} from "@swim/math";
+import {AnyR2Point, R2Point} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewAnimator} from "@swim/view";
 import {LayerView} from "../layer/LayerView";
@@ -29,28 +29,28 @@ export interface TextRunViewInit extends TypesetViewInit {
 }
 
 export class TextRunView extends LayerView implements TypesetView {
-  initView(init: TextRunViewInit): void {
+  override initView(init: TextRunViewInit): void {
     super.initView(init);
     this.setState(init);
   }
 
   @ViewAnimator({type: String, state: ""})
-  declare text: ViewAnimator<this, string>;
+  readonly text!: ViewAnimator<this, string>;
 
   @ViewAnimator({type: Font, state: null, inherit: true})
-  declare font: ViewAnimator<this, Font | null, AnyFont | null>;
+  readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
 
   @ViewAnimator({type: String, inherit: true})
-  declare textAlign: ViewAnimator<this, CanvasTextAlign | undefined>;
+  readonly textAlign!: ViewAnimator<this, CanvasTextAlign | undefined>;
 
   @ViewAnimator({type: String, inherit: true})
-  declare textBaseline: ViewAnimator<this, CanvasTextBaseline | undefined>;
+  readonly textBaseline!: ViewAnimator<this, CanvasTextBaseline | undefined>;
 
-  @ViewAnimator({type: PointR2, state: null, inherit: true})
-  declare textOrigin: ViewAnimator<this, PointR2 | null, AnyPointR2 | null>;
+  @ViewAnimator({type: R2Point, state: null, inherit: true})
+  readonly textOrigin!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
 
   @ViewAnimator({type: Color, state: null, inherit: true})
-  declare textColor: ViewAnimator<this, Color | null, AnyColor | null>;
+  readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   get value(): TextRun {
     return new TextRun(this.text.getValue(), this.font.getValue(), this.textAlign.getValue(),
@@ -90,7 +90,7 @@ export class TextRunView extends LayerView implements TypesetView {
     }
   }
 
-  protected onRender(viewContext: ViewContextType<this>): void {
+  protected override onRender(viewContext: ViewContextType<this>): void {
     super.onRender(viewContext);
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
@@ -116,7 +116,7 @@ export class TextRunView extends LayerView implements TypesetView {
     }
     let textOrigin = this.textOrigin.value;
     if (textOrigin === null) {
-      textOrigin = PointR2.origin();
+      textOrigin = R2Point.origin();
     }
     const textColor = this.textColor.value;
     if (textColor !== null) {
@@ -125,7 +125,7 @@ export class TextRunView extends LayerView implements TypesetView {
     context.fillText(this.text.getValue(), textOrigin.x, textOrigin.y);
   }
 
-  static create(): TextRunView {
+  static override create(): TextRunView {
     return new TextRunView();
   }
 

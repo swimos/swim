@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ export class DrawerButton extends IconButton {
     this.initIcon();
   }
 
-  protected initButton(): void {
+  protected override initButton(): void {
     super.initButton();
     this.addClass("drawer-button");
   }
@@ -37,7 +37,7 @@ export class DrawerButton extends IconButton {
     this.pushIcon(DrawerButton.hamburgerIcon);
   }
 
-  declare readonly drawerView: DrawerView | null;
+  readonly drawerView!: DrawerView | null;
 
   setDrawerView(drawerView: DrawerView | null): void {
     Object.defineProperty(this, "drawerView", {
@@ -47,7 +47,7 @@ export class DrawerButton extends IconButton {
     });
   }
 
-  protected onClick(event: MouseEvent): void {
+  protected override onClick(event: MouseEvent): void {
     super.onClick(event);
     const drawerView = this.drawerView;
     if (drawerView !== null) {

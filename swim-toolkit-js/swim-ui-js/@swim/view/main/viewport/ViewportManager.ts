@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ export class ViewportManager<V extends View = View> extends ViewManager<V> {
     this.throttleReorientation = this.throttleReorientation.bind(this);
   }
 
-  declare readonly viewContext: ViewportContext;
+  readonly viewContext!: ViewportContext;
 
   protected initViewContext(): ViewportContext {
     return {
@@ -155,22 +155,22 @@ export class ViewportManager<V extends View = View> extends ViewManager<V> {
     }
   }
 
-  declare readonly viewManagerObservers: ReadonlyArray<ViewportManagerObserver>;
+  override readonly viewManagerObservers!: ReadonlyArray<ViewportManagerObserver>;
 
-  protected onAddViewManagerObserver(viewManagerObserver: ViewManagerObserverType<this>): void {
+  protected override onAddViewManagerObserver(viewManagerObserver: ViewManagerObserverType<this>): void {
     super.onAddViewManagerObserver(viewManagerObserver);
     if (this.isAttached()) {
       this.updateViewIdiom(this.viewport);
     }
   }
 
-  protected onAttach(): void {
+  protected override onAttach(): void {
     super.onAttach();
     this.attachEvents();
     this.updateViewIdiom(this.viewport);
   }
 
-  protected onDetach(): void {
+  protected override onDetach(): void {
     this.detachEvents();
     super.onDetach();
   }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,15 +39,15 @@ export class TreeVein extends HtmlView {
     this.overflowY.setState("hidden", View.Intrinsic);
   }
 
-  declare readonly viewController: TreeVeinController | null;
+  override readonly viewController!: TreeVeinController | null;
 
-  declare readonly viewObservers: ReadonlyArray<TreeVeinObserver>;
+  override readonly viewObservers!: ReadonlyArray<TreeVeinObserver>;
 
-  initView(init: TreeVeinInit): void {
+  override initView(init: TreeVeinInit): void {
     super.initView(init);
   }
 
-  protected onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
+  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
     this.color.setState(theme.getOr(Look.neutralColor, mood, null), timing, View.Intrinsic);
   }
@@ -58,9 +58,9 @@ export class TreeVein extends HtmlView {
     return view;
   }
 
-  static fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
-  static fromAny(value: AnyTreeVein): TreeVein;
-  static fromAny(value: AnyTreeVein): TreeVein {
+  static override fromAny<S extends HtmlViewConstructor<InstanceType<S>>>(this: S, value: InstanceType<S> | HTMLElement): InstanceType<S>;
+  static override fromAny(value: AnyTreeVein): TreeVein;
+  static override fromAny(value: AnyTreeVein): TreeVein {
     if (value instanceof this) {
       return value;
     } else if (value instanceof HTMLElement) {

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import {LeftAxisTrait} from "../axis/LeftAxisTrait";
 import type {ChartTraitObserver} from "./ChartTraitObserver";
 
 export class ChartTrait<X, Y> extends GenericTrait {
-  declare readonly traitObservers: ReadonlyArray<ChartTraitObserver<X, Y>>;
+  override readonly traitObservers!: ReadonlyArray<ChartTraitObserver<X, Y>>;
 
   protected initGraph(graphTrait: GraphTrait<X, Y>): void {
     // hook
@@ -83,7 +83,7 @@ export class ChartTrait<X, Y> extends GenericTrait {
       this.owner.didSetGraph(newGraphTrait, oldGraphTrait, targetTrait);
     },
   })
-  declare graph: TraitFastener<this, GraphTrait<X, Y>>;
+  readonly graph!: TraitFastener<this, GraphTrait<X, Y>>;
 
   protected initTopAxis(topAxisTrait: AxisTrait<X>): void {
     // hook
@@ -143,7 +143,7 @@ export class ChartTrait<X, Y> extends GenericTrait {
       this.owner.didSetTopAxis(newTopAxisTrait, oldTopAxisTrait, targetTrait);
     },
   })
-  declare topAxis: TraitFastener<this, AxisTrait<X>>;
+  readonly topAxis!: TraitFastener<this, AxisTrait<X>>;
 
   protected initRightAxis(rightAxisTrait: AxisTrait<Y>): void {
     // hook
@@ -203,7 +203,7 @@ export class ChartTrait<X, Y> extends GenericTrait {
       this.owner.didSetRightAxis(newRightAxisTrait, oldRightAxisTrait, targetTrait);
     },
   })
-  declare rightAxis: TraitFastener<this, AxisTrait<Y>>;
+  readonly rightAxis!: TraitFastener<this, AxisTrait<Y>>;
 
   protected initBottomAxis(bottomAxisTrait: AxisTrait<X>): void {
     // hook
@@ -263,7 +263,7 @@ export class ChartTrait<X, Y> extends GenericTrait {
       this.owner.didSetBottomAxis(newBottomAxisTrrait, oldBottomAxisTrait, targetTrait);
     },
   })
-  declare bottomAxis: TraitFastener<this, AxisTrait<X>>;
+  readonly bottomAxis!: TraitFastener<this, AxisTrait<X>>;
 
   protected initLeftAxis(leftAxisTrait: AxisTrait<Y>): void {
     // hook
@@ -323,7 +323,7 @@ export class ChartTrait<X, Y> extends GenericTrait {
       this.owner.didSetLeftAxis(newLeftAxisTrait, oldLeftAxisTrait, targetTrait);
     },
   })
-  declare leftAxis: TraitFastener<this, AxisTrait<Y>>;
+  readonly leftAxis!: TraitFastener<this, AxisTrait<Y>>;
 
   protected detectGraphTrait(trait: Trait): GraphTrait<X, Y> | null {
     return trait instanceof GraphTrait ? trait : null;
@@ -382,14 +382,14 @@ export class ChartTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
+  protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
     if (newModel !== null) {
       this.detectTraits(newModel);
     }
     super.didSetModel(newModel, oldModel);
   }
 
-  protected onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
+  protected override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
     super.onInsertTrait(trait, targetTrait);
     if (this.graph.trait === null) {
       const graphTrait = this.detectGraphTrait(trait);
@@ -423,7 +423,7 @@ export class ChartTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected onRemoveTrait(trait: Trait): void {
+  protected override onRemoveTrait(trait: Trait): void {
     super.onRemoveTrait(trait);
     const graphTrait = this.detectGraphTrait(trait);
     if (graphTrait !== null && this.graph.trait === graphTrait) {
@@ -447,7 +447,7 @@ export class ChartTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected onStartConsuming(): void {
+  protected override onStartConsuming(): void {
     super.onStartConsuming();
     const graphTrait = this.graph.trait;
     if (graphTrait !== null) {
@@ -471,7 +471,7 @@ export class ChartTrait<X, Y> extends GenericTrait {
     }
   }
 
-  protected onStopConsuming(): void {
+  protected override onStopConsuming(): void {
     super.onStopConsuming();
     const graphTrait = this.graph.trait;
     if (graphTrait !== null) {

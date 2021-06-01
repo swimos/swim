@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,9 +48,9 @@ export class SvgContext implements PaintingContext {
     this.strokeStyle = "";
   }
 
-  declare readonly view: SvgView;
+  readonly view!: SvgView;
 
-  declare readonly precision: number;
+  readonly precision!: number;
 
   setPrecision(precision: number): void {
     Object.defineProperty(this, "precision", {
@@ -61,7 +61,7 @@ export class SvgContext implements PaintingContext {
   }
 
   /** @hidden */
-  declare readonly pathContext: PathContext;
+  readonly pathContext!: PathContext;
 
   protected getPathContext(): PathContext {
     const pathContext = this.pathContext;
@@ -97,7 +97,7 @@ export class SvgContext implements PaintingContext {
   }
 
   /** @hidden */
-  declare readonly pathView: SvgView | null;
+  readonly pathView!: SvgView | null;
 
   /** @hidden */
   setPathView(pathView: SvgView | null): void {
@@ -158,7 +158,7 @@ export class SvgContext implements PaintingContext {
   }
 
   /** @hidden */
-  declare readonly pathFlags: number;
+  readonly pathFlags!: number;
 
   /** @hidden */
   setPathFlags(pathFlags: number): void {

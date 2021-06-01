@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import {DialLabel, DialLegend, DialTrait} from "./DialTrait";
 import type {DialComponentObserver} from "./DialComponentObserver";
 
 export class DialComponent extends CompositeComponent {
-  declare readonly componentObservers: ReadonlyArray<DialComponentObserver>;
+  override readonly componentObservers!: ReadonlyArray<DialComponentObserver>;
 
   protected initDialTrait(dialTrait: DialTrait): void {
     // hook
@@ -358,7 +358,7 @@ export class DialComponent extends CompositeComponent {
   }
 
   @ComponentProperty({type: Timing, inherit: true})
-  declare dialTiming: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
+  readonly dialTiming!: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
 
   /** @hidden */
   static DialFastener = ComponentViewTrait.define<DialComponent, DialView, DialTrait>({
@@ -427,7 +427,7 @@ export class DialComponent extends CompositeComponent {
   @ComponentViewTrait<DialComponent, DialView, DialTrait>({
     extends: DialComponent.DialFastener,
   })
-  declare dial: ComponentViewTrait<this, DialView, DialTrait>;
+  readonly dial!: ComponentViewTrait<this, DialView, DialTrait>;
 
   @ComponentView<DialComponent, GraphicsView>({
     key: true,
@@ -441,7 +441,7 @@ export class DialComponent extends CompositeComponent {
       this.owner.didSetLabelView(newLabelView, oldLabelView);
     },
   })
-  declare label: ComponentView<this, GraphicsView>;
+  readonly label!: ComponentView<this, GraphicsView>;
 
   @ComponentView<DialComponent, GraphicsView>({
     key: true,
@@ -455,5 +455,5 @@ export class DialComponent extends CompositeComponent {
       this.owner.didSetLegendView(newLegendView, oldLegendView);
     },
   })
-  declare legend: ComponentView<this, GraphicsView>;
+  readonly legend!: ComponentView<this, GraphicsView>;
 }

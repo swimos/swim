@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import type {ModelManagerObserverType} from "../manager/ModelManagerObserver";
 import {ModelService} from "./ModelService";
 
 export abstract class ModelManagerService<M extends Model, MM extends ModelManager<M>> extends ModelService<M, MM> {
-  mount(): void {
+  override mount(): void {
     super.mount();
     const manager = this.manager;
     if (manager !== void 0) {
@@ -31,7 +31,7 @@ export abstract class ModelManagerService<M extends Model, MM extends ModelManag
     }
   }
 
-  unmount(): void {
+  override unmount(): void {
     const manager = this.manager;
     if (manager !== void 0) {
       if (this.observe !== false) {

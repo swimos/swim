@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,17 +43,17 @@ export class EsriSceneView extends EsriView {
     this.initMap(map);
   }
 
-  declare readonly viewController: EsriSceneViewController | null;
+  override readonly viewController!: EsriSceneViewController | null;
 
-  declare readonly viewObservers: ReadonlyArray<EsriSceneViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<EsriSceneViewObserver>;
 
-  declare readonly map: __esri.SceneView;
+  override readonly map!: __esri.SceneView;
 
   protected initMap(map: __esri.SceneView): void {
     map.watch("extent", this.onMapRender);
   }
 
-  declare readonly geoViewport: EsriSceneViewport;
+  override readonly geoViewport!: EsriSceneViewport;
 
   protected willSetGeoViewport(newGeoViewport: EsriSceneViewport, oldGeoViewport: EsriSceneViewport): void {
     const viewController = this.viewController;
@@ -111,7 +111,7 @@ export class EsriSceneView extends EsriView {
     }
   }
 
-  moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void {
+  override moveTo(geoPerspective: AnyGeoPerspective, timing?: AnyTiming | boolean): void {
     const target: __esri.GoToTarget3D = {};
     const options: __esri.GoToOptions3D = {};
     const geoViewport = this.geoViewport;
@@ -145,7 +145,7 @@ export class EsriSceneView extends EsriView {
     this.map.goTo(target, options);
   }
 
-  protected attachCanvas(canvasView: CanvasView): void {
+  protected override attachCanvas(canvasView: CanvasView): void {
     super.attachCanvas(canvasView);
     if (this.parentView === null) {
       canvasView.appendChildView(this);
@@ -153,21 +153,21 @@ export class EsriSceneView extends EsriView {
     }
   }
 
-  protected detachCanvas(canvasView: CanvasView): void {
+  protected override detachCanvas(canvasView: CanvasView): void {
     if (this.parentView === canvasView) {
       canvasView.removeChildView(this);
     }
     super.detachCanvas(canvasView);
   }
 
-  protected initContainer(containerView: HtmlView): void {
+  protected override initContainer(containerView: HtmlView): void {
     super.initContainer(containerView);
     const esriContainerView = HtmlView.fromNode(this.map.container);
     const esriRootView = HtmlView.fromNode(esriContainerView.node.querySelector(".esri-view-root") as HTMLDivElement);
     HtmlView.fromNode(esriRootView.node.querySelector(".esri-overlay-surface") as HTMLDivElement);
   }
 
-  protected attachContainer(containerView: HtmlView): void {
+  protected override attachContainer(containerView: HtmlView): void {
     super.attachContainer(containerView);
     const esriContainerView = HtmlView.fromNode(this.map.container);
     const esriRootView = HtmlView.fromNode(esriContainerView.node.querySelector(".esri-view-root") as HTMLDivElement);
@@ -175,7 +175,7 @@ export class EsriSceneView extends EsriView {
     this.canvas.injectView(esriOverlayView);
   }
 
-  protected detachContainer(containerView: HtmlView): void {
+  protected override detachContainer(containerView: HtmlView): void {
     const canvasView = this.canvas.view;
     const esriContainerView = HtmlView.fromNode(this.map.container);
     const esriRootView = HtmlView.fromNode(esriContainerView.node.querySelector(".esri-view-root") as HTMLDivElement);

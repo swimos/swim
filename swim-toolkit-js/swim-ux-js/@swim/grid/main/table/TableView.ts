@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyLength, Length, BoxR2} from "@swim/math";
+import {AnyLength, Length, R2Box} from "@swim/math";
 import {Look} from "@swim/theme";
 import {ViewContextType, ViewFlags, View, ViewEdgeInsets, ViewProperty, ViewFastener} from "@swim/view";
 import {HtmlView, HtmlViewController} from "@swim/dom";
@@ -33,7 +33,7 @@ export class TableView extends HtmlView {
       configurable: true,
     });
     Object.defineProperty(this, "visibleFrame", {
-      value: new BoxR2(0, 0, window.innerWidth, window.innerHeight),
+      value: new R2Box(0, 0, window.innerWidth, window.innerHeight),
       enumerable: true,
       configurable: true,
     });
@@ -44,21 +44,21 @@ export class TableView extends HtmlView {
     this.addClass("table");
   }
 
-  declare readonly viewController: HtmlViewController & TableViewObserver | null;
+  override readonly viewController!: HtmlViewController & TableViewObserver | null;
 
-  declare readonly viewObservers: ReadonlyArray<TableViewObserver>;
+  override readonly viewObservers!: ReadonlyArray<TableViewObserver>;
 
   @ViewProperty({type: TableLayout, state: null, updateFlags: View.NeedsLayout})
-  declare layout: ViewProperty<this, TableLayout | null, AnyTableLayout | null>;
+  readonly layout!: ViewProperty<this, TableLayout | null, AnyTableLayout | null>;
 
   @ViewProperty({type: Length, state: Length.zero()})
-  declare rowSpacing: ViewProperty<this, Length, AnyLength>;
+  readonly rowSpacing!: ViewProperty<this, Length, AnyLength>;
 
   @ViewProperty({type: Length, state: Length.px(24)})
-  declare rowHeight: ViewProperty<this, Length, AnyLength>;
+  readonly rowHeight!: ViewProperty<this, Length, AnyLength>;
 
   @ViewProperty({type: Object, inherit: true, state: null})
-  declare edgeInsets: ViewProperty<this, ViewEdgeInsets | null>;
+  readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
 
   insertRow(rowView: RowView, targetView: View | null = null): void {
     const rowFasteners = this.rowFasteners as ViewFastener<this, RowView>[];
@@ -175,7 +175,7 @@ export class TableView extends HtmlView {
   }
 
   /** @hidden */
-  declare readonly rowFasteners: ReadonlyArray<ViewFastener<this, RowView>>;
+  readonly rowFasteners!: ReadonlyArray<ViewFastener<this, RowView>>;
 
   /** @hidden */
   protected mountRowFasteners(): void {
@@ -199,7 +199,7 @@ export class TableView extends HtmlView {
     return view instanceof RowView ? view : null;
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     const rowView = this.detectRow(childView);
     if (rowView !== null) {
@@ -207,7 +207,7 @@ export class TableView extends HtmlView {
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     super.onRemoveChildView(childView);
     const rowView = this.detectRow(childView);
     if (rowView !== null) {
@@ -216,12 +216,12 @@ export class TableView extends HtmlView {
   }
 
   /** @hidden */
-  declare readonly visibleViews: ReadonlyArray<View>;
+  readonly visibleViews!: ReadonlyArray<View>;
 
   /** @hidden */
-  declare readonly visibleFrame: BoxR2;
+  readonly visibleFrame!: R2Box;
 
-  protected detectVisibleFrame(): BoxR2 {
+  protected detectVisibleFrame(): R2Box {
     const xBleed = 0;
     const yBleed = 64;
     const bounds = this.node.getBoundingClientRect();
@@ -229,17 +229,17 @@ export class TableView extends HtmlView {
     const yMin = -bounds.y - yBleed;
     const xMax = window.innerWidth - bounds.x + xBleed;
     const yMax = window.innerHeight - bounds.y + yBleed;
-    return new BoxR2(xMin, yMin, xMax, yMax);
+    return new R2Box(xMin, yMin, xMax, yMax);
   }
 
-  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsResize) !== 0) {
       processFlags |= View.NeedsScroll;
     }
     return processFlags;
   }
 
-  protected onResize(viewContext: ViewContextType<this>): void {
+  protected override onResize(viewContext: ViewContextType<this>): void {
     super.onResize(viewContext);
     this.resizeTable();
   }
@@ -280,9 +280,9 @@ export class TableView extends HtmlView {
     }
   }
 
-  protected processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              processChildView: (this: this, childView: View, processFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       processChildView: (this: this, childView: View, processFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     if (!this.isCulled()) {
       if ((processFlags & View.NeedsScroll) !== 0) {
         this.scrollChildViews(processFlags, viewContext, processChildView);
@@ -351,9 +351,9 @@ export class TableView extends HtmlView {
     }
   }
 
-  protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
-                              displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
-                                                 viewContext: ViewContextType<this>) => void): void {
+  protected override displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
+                                       displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
+                                                          viewContext: ViewContextType<this>) => void): void {
     if ((displayFlags & View.NeedsLayout) !== 0) {
       this.layoutChildViews(displayFlags, viewContext, displayChildView);
     } else {
@@ -429,13 +429,13 @@ export class TableView extends HtmlView {
   }
 
   /** @hidden */
-  protected mountViewFasteners(): void {
+  protected override mountViewFasteners(): void {
     super.mountViewFasteners();
     this.mountRowFasteners();
   }
 
   /** @hidden */
-  protected unmountViewFasteners(): void {
+  protected override unmountViewFasteners(): void {
     this.unmountRowFasteners();
     super.unmountViewFasteners();
   }

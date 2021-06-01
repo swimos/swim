@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ export class GaugeComponent extends CompositeComponent {
     });
   }
 
-  declare readonly componentObservers: ReadonlyArray<GaugeComponentObserver>;
+  override readonly componentObservers!: ReadonlyArray<GaugeComponentObserver>;
 
   protected initGaugeTrait(gaugeTrait: GaugeTrait): void {
     // hook
@@ -281,7 +281,7 @@ export class GaugeComponent extends CompositeComponent {
   @ComponentViewTrait<GaugeComponent, GaugeView, GaugeTrait>({
     extends: GaugeComponent.GaugeFastener,
   })
-  declare gauge: ComponentViewTrait<this, GaugeView, GaugeTrait>;
+  readonly gauge!: ComponentViewTrait<this, GaugeView, GaugeTrait>;
 
   @ComponentView<GaugeComponent, GraphicsView>({
     key: true,
@@ -295,7 +295,7 @@ export class GaugeComponent extends CompositeComponent {
       this.owner.didSetTitleView(newTitleView, oldTitleView);
     },
   })
-  declare title: ComponentView<this, GraphicsView>;
+  readonly title!: ComponentView<this, GraphicsView>;
 
   insertDial(dialComponent: DialComponent, targetComponent: Component | null = null): void {
     const dialFasteners = this.dialFasteners as ComponentFastener<this, DialComponent>[];
@@ -712,7 +712,7 @@ export class GaugeComponent extends CompositeComponent {
   }
 
   @ComponentProperty({type: Timing, state: true})
-  declare dialTiming: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
+  readonly dialTiming!: ComponentProperty<this, Timing | boolean | undefined, AnyTiming>;
 
   /** @hidden */
   static DialFastener = ComponentFastener.define<GaugeComponent, DialComponent>({
@@ -777,7 +777,7 @@ export class GaugeComponent extends CompositeComponent {
   }
 
   /** @hidden */
-  declare readonly dialFasteners: ReadonlyArray<ComponentFastener<this, DialComponent>>;
+  readonly dialFasteners!: ReadonlyArray<ComponentFastener<this, DialComponent>>;
 
   protected getDialastener(dialTrait: DialTrait): ComponentFastener<this, DialComponent> | null {
     const dialFasteners = this.dialFasteners;
@@ -813,7 +813,7 @@ export class GaugeComponent extends CompositeComponent {
     return component instanceof DialComponent ? component : null;
   }
 
-  protected onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
+  protected override onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
     super.onInsertChildComponent(childComponent, targetComponent);
     const dialComponent = this.detectDialComponent(childComponent);
     if (dialComponent !== null) {
@@ -821,7 +821,7 @@ export class GaugeComponent extends CompositeComponent {
     }
   }
 
-  protected onRemoveChildComponent(childComponent: Component): void {
+  protected override onRemoveChildComponent(childComponent: Component): void {
     super.onRemoveChildComponent(childComponent);
     const dialComponent = this.detectDialComponent(childComponent);
     if (dialComponent !== null) {
@@ -830,13 +830,13 @@ export class GaugeComponent extends CompositeComponent {
   }
 
   /** @hidden */
-  protected mountComponentFasteners(): void {
+  protected override mountComponentFasteners(): void {
     super.mountComponentFasteners();
     this.mountDialFasteners();
   }
 
   /** @hidden */
-  protected unmountComponentFasteners(): void {
+  protected override unmountComponentFasteners(): void {
     this.unmountDialFasteners();
     super.unmountComponentFasteners();
   }

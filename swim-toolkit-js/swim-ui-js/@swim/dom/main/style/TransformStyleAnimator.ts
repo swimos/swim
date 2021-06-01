@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,15 +18,15 @@ import {StyleAnimator} from "./StyleAnimator";
 
 /** @hidden */
 export abstract class TransformStyleAnimator<V extends StyleContext> extends StyleAnimator<V, Transform | null, AnyTransform | null> {
-  parse(value: string): Transform | null {
+  override parse(value: string): Transform | null {
     return Transform.parse(value);
   }
 
-  fromCssValue(value: CSSStyleValue): Transform | null {
+  override fromCssValue(value: CSSStyleValue): Transform | null {
     return Transform.fromCssValue(value);
   }
 
-  fromAny(value: AnyTransform): Transform | null {
+  override fromAny(value: AnyTransform): Transform | null {
     try {
       return Transform.fromAny(value);
     } catch (swallow) {

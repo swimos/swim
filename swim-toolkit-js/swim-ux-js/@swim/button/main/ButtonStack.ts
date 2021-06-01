@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -78,21 +78,21 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
     }
   }
 
-  declare readonly viewController: ButtonStackController | null;
+  override readonly viewController!: ButtonStackController | null;
 
-  declare readonly viewObservers: ReadonlyArray<ButtonStackObserver>;
+  override readonly viewObservers!: ReadonlyArray<ButtonStackObserver>;
 
-  declare readonly stackState: ButtonStackState
+  readonly stackState!: ButtonStackState
 
   /** @hidden */
-  declare readonly stackHeight: number;
+  readonly stackHeight!: number;
 
   protected createButton(): HtmlView | null {
     return FloatingButton.create();
   }
 
   /** @hidden */
-  declare readonly gesture: PositionGesture<HtmlView> | null;
+  readonly gesture!: PositionGesture<HtmlView> | null;
 
   isExpanded(): boolean {
     return this.stackState === "expanded" || this.stackState === "expanding";
@@ -115,13 +115,13 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
       }
     },
   })
-  declare stackPhase: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
+  readonly stackPhase!: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
 
   @ViewAnimator({type: Number, state: 28, updateFlags: View.NeedsLayout})
-  declare buttonSpacing: ViewAnimator<this, number>;
+  readonly buttonSpacing!: ViewAnimator<this, number>;
 
   @ViewAnimator({type: Number, state: 20, updateFlags: View.NeedsLayout})
-  declare itemSpacing: ViewAnimator<this, number>;
+  readonly itemSpacing!: ViewAnimator<this, number>;
 
   @StyleAnimator<ButtonStack, number | undefined>({
     propertyNames: "opacity",
@@ -134,7 +134,7 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
       }
     },
   })
-  declare opacity: StyleAnimator<this, number | undefined>;
+  override readonly opacity!: StyleAnimator<this, number | undefined>;
 
   get modalView(): View | null {
     return null;
@@ -205,19 +205,19 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
     }
   }
 
-  protected onMount(): void {
+  protected override onMount(): void {
     super.onMount();
     this.on("click", this.onClick);
     this.on("contextmenu", this.onContextMenu);
   }
 
-  protected onUnmount(): void {
+  protected override onUnmount(): void {
     this.off("click", this.onClick);
     this.off("contextmenu", this.onContextMenu);
     super.onUnmount();
   }
 
-  protected onLayout(viewContext: ViewContextType<this>): void {
+  protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
     this.layoutStack();
     const modalManager = this.modalService.manager;
@@ -276,7 +276,7 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
     });
   }
 
-  protected onInsertChildView(childView: View, targetView: View | null): void {
+  protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     const childKey = childView.key;
     if (childKey === "button" && childView instanceof HtmlView) {
@@ -286,7 +286,7 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
     }
   }
 
-  protected onRemoveChildView(childView: View): void {
+  protected override onRemoveChildView(childView: View): void {
     const childKey = childView.key;
     if (childKey === "button" && childView instanceof HtmlView) {
       this.onRemoveButton(childView);
