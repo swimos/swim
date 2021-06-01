@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,48 +29,15 @@ import swim.util.PairBuilder;
 
 public abstract class Record extends Value implements List<Item>, Builder<Item, Record>, PairBuilder<Value, Value, Record> {
 
-  protected static final AtomicIntegerFieldUpdater<Record> FLAGS =
-      AtomicIntegerFieldUpdater.newUpdater(Record.class, "flags");
-  static final int ALIASED = 1 << 0;
-  static final int IMMUTABLE = 1 << 1;
   volatile int flags;
 
   protected Record() {
     // stub
   }
 
-  public static Record empty() {
-    return RecordMap.empty();
-  }
-
-  public static Record create() {
-    return RecordMap.create();
-  }
-
-  public static Record create(int initialSize) {
-    return RecordMap.create(initialSize);
-  }
-
-  public static Record of() {
-    return RecordMap.of();
-  }
-
-  public static Record of(Object object) {
-    return RecordMap.of(object);
-  }
-
-  public static Record of(Object... objects) {
-    return RecordMap.of(objects);
-  }
-
-  static int expand(int n) {
-    n = Math.max(8, n) - 1;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
-    return n + 1;
+  @Override
+  public boolean isDefinite() {
+    return !this.isEmpty();
   }
 
   /**
@@ -1707,5 +1674,45 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
       output = output.write(')');
     }
   }
+
+  public static Record empty() {
+    return RecordMap.empty();
+  }
+
+  public static Record create() {
+    return RecordMap.create();
+  }
+
+  public static Record create(int initialSize) {
+    return RecordMap.create(initialSize);
+  }
+
+  public static Record of() {
+    return RecordMap.of();
+  }
+
+  public static Record of(Object object) {
+    return RecordMap.of(object);
+  }
+
+  public static Record of(Object... objects) {
+    return RecordMap.of(objects);
+  }
+
+  static int expand(int n) {
+    n = Math.max(8, n) - 1;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    return n + 1;
+  }
+
+  protected static final AtomicIntegerFieldUpdater<Record> FLAGS =
+      AtomicIntegerFieldUpdater.newUpdater(Record.class, "flags");
+
+  static final int ALIASED = 1 << 0;
+  static final int IMMUTABLE = 1 << 1;
 
 }

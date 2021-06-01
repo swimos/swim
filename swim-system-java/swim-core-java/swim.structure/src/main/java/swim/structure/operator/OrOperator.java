@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public final class OrOperator extends BinaryOperator {
     interpreter.willOperate(this);
     final Item result;
     final Item argument1 = this.operand1.evaluate(interpreter);
-    if (argument1.booleanValue(false)) {
+    if (argument1.isDefinite()) {
       result = argument1;
     } else {
       final Item argument2 = this.operand2.evaluate(interpreter);

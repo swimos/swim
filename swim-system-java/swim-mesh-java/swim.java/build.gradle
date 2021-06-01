@@ -1,9 +1,12 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Java kernel runtime'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.java'
 ext.moduleName = 'swim.java'
 
 dependencies {
-    api project(':swim-kernel')
+  api project(':swim-kernel')
 }

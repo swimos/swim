@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,12 @@ final class PrefixOperatorWriter<I, V> extends Writer<Object, Object> {
     this.precedence = precedence;
     this.part = part;
     this.step = step;
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.recon, this.operator, this.rhs,
+                 this.precedence, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, String operator, I rhs, int precedence) {
@@ -112,12 +118,6 @@ final class PrefixOperatorWriter<I, V> extends Writer<Object, Object> {
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon,
                                              String operator, I rhs, int precedence) {
     return write(output, recon, operator, rhs, precedence, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.operator, this.rhs,
-        this.precedence, this.part, this.step);
   }
 
 }

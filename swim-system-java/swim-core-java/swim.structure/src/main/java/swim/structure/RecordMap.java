@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.HashSet;
 
 final class RecordMap extends Record {
 
-  private static RecordMap empty;
   Item[] array;
   Field[] table;
   int itemCount;
@@ -32,69 +31,6 @@ final class RecordMap extends Record {
     this.itemCount = itemCount;
     this.fieldCount = fieldCount;
     this.flags = flags;
-  }
-
-  static void put(Field[] table, Field field) {
-    if (table == null) {
-      return;
-    }
-    final int n = table.length;
-    final int x = Math.abs(field.getKey().hashCode() % n);
-    int i = x;
-    do {
-      final Field item = table[i];
-      if (item != null) {
-        if (field.keyEquals(item)) {
-          table[i] = field;
-          return;
-        }
-      } else {
-        table[i] = field;
-        return;
-      }
-      i = (i + 1) % n;
-    } while (i != x);
-    throw new AssertionError();
-  }
-
-  public static RecordMap empty() {
-    if (empty == null) {
-      empty = new RecordMap(null, null, 0, 0, ALIASED | IMMUTABLE);
-    }
-    return empty;
-  }
-
-  public static RecordMap create() {
-    return new RecordMap(null, null, 0, 0, ALIASED);
-  }
-
-  public static RecordMap create(int initialCapacity) {
-    return new RecordMap(new Item[initialCapacity], null, 0, 0, 0);
-  }
-
-  public static RecordMap of() {
-    return new RecordMap(null, null, 0, 0, ALIASED);
-  }
-
-  public static Record of(Object object) {
-    final Item[] array = new Item[1];
-    final Item item = Item.fromObject(object);
-    array[0] = item;
-    return new RecordMap(array, null, 1, item instanceof Field ? 1 : 0, 0);
-  }
-
-  public static RecordMap of(Object... objects) {
-    final int itemCount = objects.length;
-    int fieldCount = 0;
-    final Item[] array = new Item[itemCount];
-    for (int i = 0; i < itemCount; i += 1) {
-      final Item item = Item.fromObject(objects[i]);
-      array[i] = item;
-      if (item instanceof Field) {
-        fieldCount += 1;
-      }
-    }
-    return new RecordMap(array, null, itemCount, fieldCount, 0);
   }
 
   @Override
@@ -1570,6 +1506,71 @@ final class RecordMap extends Record {
       throw new IndexOutOfBoundsException(fromIndex + ", " + toIndex);
     }
     return new RecordMapView(this, fromIndex, toIndex);
+  }
+
+  private static RecordMap empty;
+
+  public static RecordMap empty() {
+    if (empty == null) {
+      empty = new RecordMap(null, null, 0, 0, ALIASED | IMMUTABLE);
+    }
+    return empty;
+  }
+
+  public static RecordMap create() {
+    return new RecordMap(null, null, 0, 0, ALIASED);
+  }
+
+  public static RecordMap create(int initialCapacity) {
+    return new RecordMap(new Item[initialCapacity], null, 0, 0, 0);
+  }
+
+  public static RecordMap of() {
+    return new RecordMap(null, null, 0, 0, ALIASED);
+  }
+
+  public static Record of(Object object) {
+    final Item[] array = new Item[1];
+    final Item item = Item.fromObject(object);
+    array[0] = item;
+    return new RecordMap(array, null, 1, item instanceof Field ? 1 : 0, 0);
+  }
+
+  public static RecordMap of(Object... objects) {
+    final int itemCount = objects.length;
+    int fieldCount = 0;
+    final Item[] array = new Item[itemCount];
+    for (int i = 0; i < itemCount; i += 1) {
+      final Item item = Item.fromObject(objects[i]);
+      array[i] = item;
+      if (item instanceof Field) {
+        fieldCount += 1;
+      }
+    }
+    return new RecordMap(array, null, itemCount, fieldCount, 0);
+  }
+
+  static void put(Field[] table, Field field) {
+    if (table == null) {
+      return;
+    }
+    final int n = table.length;
+    final int x = Math.abs(field.getKey().hashCode() % n);
+    int i = x;
+    do {
+      final Field item = table[i];
+      if (item != null) {
+        if (field.keyEquals(item)) {
+          table[i] = field;
+          return;
+        }
+      } else {
+        table[i] = field;
+        return;
+      }
+      i = (i + 1) % n;
+    } while (i != x);
+    throw new AssertionError();
   }
 
 }

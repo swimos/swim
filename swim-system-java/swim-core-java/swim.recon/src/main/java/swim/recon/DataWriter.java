@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,6 +30,11 @@ final class DataWriter extends Writer<Object, Object> {
     this.buffer = buffer;
     this.part = part;
     this.step = step;
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.buffer, this.part, this.step);
   }
 
   static int sizeOf(int length) {
@@ -65,11 +70,6 @@ final class DataWriter extends Writer<Object, Object> {
 
   static Writer<Object, Object> write(Output<?> output, ByteBuffer buffer) {
     return write(output, buffer, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.buffer, this.part, this.step);
   }
 
 }

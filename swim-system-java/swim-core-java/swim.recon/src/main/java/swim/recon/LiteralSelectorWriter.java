@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,6 +32,11 @@ final class LiteralSelectorWriter<I, V> extends Writer<Object, Object> {
     this.then = then;
     this.part = part;
     this.step = step;
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.recon, this.item, this.then, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, I item, V then) {
@@ -96,11 +101,6 @@ final class LiteralSelectorWriter<I, V> extends Writer<Object, Object> {
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon, I item, V then) {
     return write(output, recon, item, then, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.item, this.then, this.part, this.step);
   }
 
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,6 +38,16 @@ final class ReconFormWriter<T> extends Writer<T, T> {
     this(recon, form, null, null);
   }
 
+  @Override
+  public Writer<T, T> feed(T object) {
+    return new ReconFormWriter<T>(recon, form, object, null);
+  }
+
+  @Override
+  public Writer<T, T> pull(Output<?> output) {
+    return write(output, this.recon, this.form, this.object, this.part);
+  }
+
   static <T> Writer<T, T> write(Output<?> output, ReconWriter<Item, Value> recon,
                                 Form<T> form, T object, Writer<?, ?> part) {
     if (output == null) {
@@ -60,16 +70,6 @@ final class ReconFormWriter<T> extends Writer<T, T> {
   static <T> Writer<T, T> write(Output<T> output, ReconWriter<Item, Value> recon,
                                 Form<T> form, T object) {
     return write(output, recon, form, object, null);
-  }
-
-  @Override
-  public Writer<T, T> feed(T object) {
-    return new ReconFormWriter<T>(recon, form, object, null);
-  }
-
-  @Override
-  public Writer<T, T> pull(Output<?> output) {
-    return write(output, this.recon, this.form, this.object, this.part);
   }
 
 }

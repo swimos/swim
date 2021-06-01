@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,6 +40,11 @@ final class BlockParser<I, V> extends Parser<V> {
     this(recon, null, null, null, 1);
   }
 
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.builder, this.keyParser, this.valueParser, this.step);
+  }
+
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
                                 Parser<V> keyParser, Parser<V> valueParser, int step) {
     int c = 0;
@@ -58,7 +63,7 @@ final class BlockParser<I, V> extends Parser<V> {
           if (c == '!' || c == '"' || c == '$' || c == '%'
               || c == '\'' || c == '(' || c == '+' || c == '-'
               || c >= '0' && c <= '9' || c == '@'
-              || c == '[' || c == '{' || c == '~'
+              || c == '[' || c == '{' || c == '`' || c == '~'
               || Recon.isIdentStartChar(c)) {
             if (builder == null) {
               builder = recon.valueBuilder();
@@ -192,11 +197,6 @@ final class BlockParser<I, V> extends Parser<V> {
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
     return parse(input, recon, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.keyParser, this.valueParser, this.step);
   }
 
 }

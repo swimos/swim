@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,6 +29,11 @@ final class IdentParser<I, V> extends Parser<V> {
     this.recon = recon;
     this.output = output;
     this.step = step;
+  }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.output, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Output<V> output, int step) {
@@ -76,11 +81,6 @@ final class IdentParser<I, V> extends Parser<V> {
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
     return parse(input, recon, null, 1);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.output, this.step);
   }
 
 }

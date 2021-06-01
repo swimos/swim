@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ import swim.util.Builder;
 
 public abstract class AvroArrayType<I, T> extends AvroComplexType<T> {
 
-  public abstract AvroType<I> itemType();
+  public abstract AvroType<? extends I> itemType();
 
   public abstract Builder<I, T> arrayBuilder();
 

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,11 +21,6 @@ import swim.util.HashGenCacheSet;
 
 final class NumI32 extends Num {
 
-  static final int UINT32 = 1 << 0;
-  private static NumI32 zero;
-  private static NumI32 positiveOne;
-  private static NumI32 negativeOne;
-  private static ThreadLocal<HashGenCacheSet<NumI32>> cache = new ThreadLocal<>();
   final int value;
   int flags;
 
@@ -36,58 +31,6 @@ final class NumI32 extends Num {
 
   NumI32(int value) {
     this(value, 0);
-  }
-
-  static NumI32 zero() {
-    if (zero == null) {
-      zero = new NumI32(0);
-    }
-    return zero;
-  }
-
-  static NumI32 positiveOne() {
-    if (positiveOne == null) {
-      positiveOne = new NumI32(1);
-    }
-    return positiveOne;
-  }
-
-  static NumI32 negativeOne() {
-    if (negativeOne == null) {
-      negativeOne = new NumI32(-1);
-    }
-    return negativeOne;
-  }
-
-  public static NumI32 from(int value) {
-    if (value == 0) {
-      return zero();
-    } else if (value == 1) {
-      return positiveOne();
-    } else if (value == -1) {
-      return negativeOne();
-    } else {
-      return cache().put(new NumI32(value));
-    }
-  }
-
-  public static NumI32 uint32(int value) {
-    return new NumI32(value, UINT32);
-  }
-
-  static HashGenCacheSet<NumI32> cache() {
-    HashGenCacheSet<NumI32> cache = NumI32.cache.get();
-    if (cache == null) {
-      int cacheSize;
-      try {
-        cacheSize = Integer.parseInt(System.getProperty("swim.structure.num.i32.cache.size"));
-      } catch (NumberFormatException e) {
-        cacheSize = 16;
-      }
-      cache = new HashGenCacheSet<NumI32>(cacheSize);
-      NumI32.cache.set(cache);
-    }
-    return cache;
   }
 
   @Override
@@ -379,6 +322,66 @@ final class NumI32 extends Num {
   @Override
   public void display(Output<?> output) {
     Format.debugInt(this.value, output);
+  }
+
+  static final int UINT32 = 1 << 0;
+
+  private static NumI32 zero;
+  private static NumI32 positiveOne;
+  private static NumI32 negativeOne;
+
+  static NumI32 zero() {
+    if (zero == null) {
+      zero = new NumI32(0);
+    }
+    return zero;
+  }
+
+  static NumI32 positiveOne() {
+    if (positiveOne == null) {
+      positiveOne = new NumI32(1);
+    }
+    return positiveOne;
+  }
+
+  static NumI32 negativeOne() {
+    if (negativeOne == null) {
+      negativeOne = new NumI32(-1);
+    }
+    return negativeOne;
+  }
+
+  public static NumI32 from(int value) {
+    if (value == 0) {
+      return zero();
+    } else if (value == 1) {
+      return positiveOne();
+    } else if (value == -1) {
+      return negativeOne();
+    } else {
+      return cache().put(new NumI32(value));
+    }
+  }
+
+  public static NumI32 uint32(int value) {
+    return new NumI32(value, UINT32);
+  }
+
+  private static ThreadLocal<HashGenCacheSet<NumI32>> cache = new ThreadLocal<>();
+
+  static HashGenCacheSet<NumI32> cache() {
+    HashGenCacheSet<NumI32> cache = NumI32.cache.get();
+    if (cache == null) {
+      int cacheSize;
+      try {
+        cacheSize = Integer.parseInt(System.getProperty("swim.structure.num.i32.cache.size"));
+      } catch (NumberFormatException e) {
+        cacheSize = 16;
+      }
+      cache = new HashGenCacheSet<NumI32>(cacheSize);
+      NumI32.cache.set(cache);
+    }
+    return cache;
   }
 
 }

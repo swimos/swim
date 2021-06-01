@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,16 +18,15 @@ import swim.codec.Output;
 
 public final class Bool extends Value {
 
-  private static final Bool TRUE = new Bool(true);
-  private static final Bool FALSE = new Bool(false);
   final boolean value;
 
   private Bool(boolean value) {
     this.value = value;
   }
 
-  public static Bool from(boolean value) {
-    return value ? TRUE : FALSE;
+  @Override
+  public boolean isDefinite() {
+    return this.value;
   }
 
   @Override
@@ -125,5 +124,12 @@ public final class Bool extends Value {
   public void display(Output<?> output) {
     output = output.write(this.value ? "true" : "false");
   }
+
+  public static Bool from(boolean value) {
+    return value ? TRUE : FALSE;
+  }
+
+  private static final Bool TRUE = new Bool(true);
+  private static final Bool FALSE = new Bool(false);
 
 }

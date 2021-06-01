@@ -1,11 +1,14 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Protocol Buffers (protobuf) codec that incrementally parses and writes swim-structure values'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.protobuf'
 ext.moduleName = 'swim.protobuf'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-codec')
-    api project(':swim-structure')
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
 }

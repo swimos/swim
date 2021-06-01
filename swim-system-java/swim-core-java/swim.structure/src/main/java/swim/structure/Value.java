@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,44 +39,6 @@ public abstract class Value extends Item {
     // stub
   }
 
-  public static Builder<Item, Value> builder() {
-    return new ValueBuilder();
-  }
-
-  public static Value empty() {
-    return Record.empty();
-  }
-
-  public static Value extant() {
-    return Extant.extant();
-  }
-
-  public static Value absent() {
-    return Absent.absent();
-  }
-
-  public static Value fromObject(Object object) {
-    if (object == null) {
-      return Value.extant();
-    } else if (object instanceof Value) {
-      return (Value) object;
-    } else if (object instanceof String) {
-      return Text.from((String) object);
-    } else if (object instanceof Number) {
-      return Num.from((Number) object);
-    } else if (object instanceof Character) {
-      return Num.from(((Character) object).charValue());
-    } else if (object instanceof Boolean) {
-      return Bool.from(((Boolean) object).booleanValue());
-    } else if (object instanceof ByteBuffer) {
-      return Data.from((ByteBuffer) object);
-    } else if (object instanceof byte[]) {
-      return Data.wrap((byte[]) object);
-    } else {
-      throw new IllegalArgumentException(object.toString());
-    }
-  }
-
   /**
    * Returns {@code true} if this {@code Value} is not {@link Absent}.
    */
@@ -91,6 +53,15 @@ public abstract class Value extends Item {
    */
   @Override
   public boolean isDistinct() {
+    return true;
+  }
+
+  /**
+   * Returns {@code true} if this {@code Value} is not one of: an empty
+   * {@code Record}, {@code False}, {@code Extant}, or {@code Absent}.
+   */
+  @Override
+  public boolean isDefinite() {
     return true;
   }
 
@@ -1049,6 +1020,44 @@ public abstract class Value extends Item {
   @Override
   public boolean keyEquals(Object key) {
     return false;
+  }
+
+  public static Builder<Item, Value> builder() {
+    return new ValueBuilder();
+  }
+
+  public static Value empty() {
+    return Record.empty();
+  }
+
+  public static Value extant() {
+    return Extant.extant();
+  }
+
+  public static Value absent() {
+    return Absent.absent();
+  }
+
+  public static Value fromObject(Object object) {
+    if (object == null) {
+      return Value.extant();
+    } else if (object instanceof Value) {
+      return (Value) object;
+    } else if (object instanceof String) {
+      return Text.from((String) object);
+    } else if (object instanceof Number) {
+      return Num.from((Number) object);
+    } else if (object instanceof Character) {
+      return Num.from(((Character) object).charValue());
+    } else if (object instanceof Boolean) {
+      return Bool.from(((Boolean) object).booleanValue());
+    } else if (object instanceof ByteBuffer) {
+      return Data.from((ByteBuffer) object);
+    } else if (object instanceof byte[]) {
+      return Data.wrap((byte[]) object);
+    } else {
+      throw new IllegalArgumentException(object.toString());
+    }
   }
 
 }

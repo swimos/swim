@@ -1,22 +1,14 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'java.base dynamic language bindings'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-polyglot-java/swim.dynamic.java'
 ext.moduleName = 'swim.dynamic.java'
 
 dependencies {
-    api project(':swim-dynamic')
+  api project(':swim-dynamic')
 
-    testImplementation project(":swim-vm-js")
-}
-
-test {
-    if (useModules) {
-        doFirst {
-            jvmArgs += [
-                    '--add-reads', 'swim.dynamic.java=org.graalvm.sdk',
-                    '--add-reads', 'swim.dynamic.java=swim.vm',
-            ]
-        }
-    }
+  testImplementation project(":swim-vm-js")
 }

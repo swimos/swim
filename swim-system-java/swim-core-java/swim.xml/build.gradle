@@ -1,11 +1,14 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'eXtensible Markup Language (XML) codec that incrementally parses and writes swim-structure values'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.xml'
 ext.moduleName = 'swim.xml'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-codec')
-    api project(':swim-structure')
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
 }

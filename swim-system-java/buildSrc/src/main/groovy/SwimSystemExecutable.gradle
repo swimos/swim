@@ -1,0 +1,74 @@
+plugins {
+  id 'application'
+}
+
+ext.nativeImageArgs = ['--no-server',
+                       '--no-fallback',
+                       '--initialize-at-build-time',
+                       '--enable-all-security-services']
+ext.jlinkArgs = ['--vm', 'server',
+                 '--compress', '2',
+                 '--strip-debug',
+                 '--no-header-files',
+                 '--no-man-pages']
+
+gradle.projectsEvaluated {
+  ext.javaHome = System.getenv('JAVA_HOME')
+  ext.dependencyProjects = resolveDependencyProjects(project, new HashSet())
+
+  task nativeImage(type: Exec) {
+    dependencyProjects.each { dependencyProject ->
+      dependsOn dependencyProject.jar
+    }
+    dependsOn jar
+
+    def outDir = "${buildDir}/native"
+    doFirst {
+      mkdir outDir
+    }
+
+    workingDir projectDir
+    doFirst {
+      commandLine [
+        "${javaHome}/bin/native-image",
+        '-cp', sourceSets.main.runtimeClasspath.asPath,
+        "-H:Path=${outDir}",
+        "-H:Name=${project.name}",
+      ] + nativeImageArgs + [
+        "${mainClassName}",
+      ]
+    }
+  }
+
+  task jlink(type: Exec) {
+    dependencyProjects.each { dependencyProject ->
+      dependsOn dependencyProject.jar
+    }
+    dependsOn jar
+
+    workingDir projectDir
+    doFirst {
+      commandLine [
+        "${javaHome}/bin/jlink",
+        '--module-path', sourceSets.main.runtimeClasspath.asPath,
+        '--add-modules', moduleName,
+        '--launcher', "${project.name}=${moduleName}/${mainClassName}",
+        '--output', "${buildDir}/distribution/${project.name}",
+      ] + jlinkArgs
+    }
+  }
+}
+
+def resolveDependencyProjects(project, dependencyProjects) {
+  def dependencies = project.configurations.api.dependencies + project.configurations.implementation.dependencies
+  dependencies.each { dependency ->
+    if (dependency instanceof ProjectDependency) {
+      def dependencyProject = dependency.dependencyProject;
+      if (!dependencyProjects.contains(dependencyProject)) {
+        dependencyProjects.add(dependencyProject)
+        resolveDependencyProjects(dependencyProject, dependencyProjects)
+      }
+    }
+  }
+  return dependencyProjects;
+}

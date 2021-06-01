@@ -1,12 +1,15 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'MQTT packet model and wire protocol codec that incrementally decodes and encodes MQTT streams without intermediate buffering'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.mqtt'
 ext.moduleName = 'swim.mqtt'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-codec')
-    api project(':swim-structure')
-    api project(':swim-collections')
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-collections')
 }

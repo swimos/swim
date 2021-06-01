@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,28 +32,28 @@ public class FloatFormSpec {
 
   @Test
   public void castNumsToFloats() {
-    assertEquals(Form.forFloat().cast(Num.from(42)), 42f);
-    assertEquals(Form.forFloat().cast(Num.from(-1)), -1f);
-    assertEquals(Form.forFloat().cast(Num.from(2.5)), 2.5f);
+    assertEquals(Form.forFloat().cast(Num.from(42)), Float.valueOf(42f));
+    assertEquals(Form.forFloat().cast(Num.from(-1)), Float.valueOf(-1f));
+    assertEquals(Form.forFloat().cast(Num.from(2.5)), Float.valueOf(2.5f));
   }
 
   @Test
   public void castStringsToFloats() {
-    assertEquals(Form.forFloat().cast(Text.from("42")), 42f);
-    assertEquals(Form.forFloat().cast(Text.from("-1")), -1f);
+    assertEquals(Form.forFloat().cast(Text.from("42")), Float.valueOf(42f));
+    assertEquals(Form.forFloat().cast(Text.from("-1")), Float.valueOf(-1f));
   }
 
   @Test
   public void castFieldsToFloats() {
-    assertEquals(Form.forFloat().cast(Attr.of("a", 42)), 42f);
-    assertEquals(Form.forFloat().cast(Slot.of("a", -1)), -1f);
-    assertEquals(Form.forFloat().cast(Attr.of("a", "42")), 42f);
-    assertEquals(Form.forFloat().cast(Slot.of("a", "-1")), -1f);
+    assertEquals(Form.forFloat().cast(Attr.of("a", 42)), Float.valueOf(42f));
+    assertEquals(Form.forFloat().cast(Slot.of("a", -1)), Float.valueOf(-1f));
+    assertEquals(Form.forFloat().cast(Attr.of("a", "42")), Float.valueOf(42f));
+    assertEquals(Form.forFloat().cast(Slot.of("a", "-1")), Float.valueOf(-1f));
   }
 
   @Test
   public void castAttributedNumsToFloats() {
-    assertEquals(Form.forFloat().cast(Record.of(Attr.of("test"), 42)), 42f);
+    assertEquals(Form.forFloat().cast(Record.of(Attr.of("test"), 42)), Float.valueOf(42f));
   }
 
 }

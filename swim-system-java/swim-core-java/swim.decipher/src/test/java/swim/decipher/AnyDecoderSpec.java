@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,15 +65,6 @@ public class AnyDecoderSpec {
     assertDecodes("@test", Record.of(Attr.of("test")));
     assertDecodes("1,2,3,4", Record.of(1, 2, 3, 4));
     assertDecodes("{1,2,3,4}", Record.of(1, 2, 3, 4));
-  }
-
-  @Test
-  public void decodeAnyProtobuf() {
-    assertDecodes(Data.fromBase16("089601"), Record.of(Slot.of(Num.from(1), 150)));
-    assertDecodes(Data.fromBase16("120774657374696E67"),
-        Record.of(Slot.of(Num.from(2), "testing")));
-    assertDecodes(Data.fromBase16("1A03089601"),
-        Record.of(Slot.of(Num.from(3), Record.of(Slot.of(Num.from(1), 150)))));
   }
 
   @Test

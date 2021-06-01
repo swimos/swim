@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,6 +34,11 @@ final class AnyParser<I, V> extends Parser<V> {
 
   AnyParser(DecipherParser<I, V> decipher) {
     this(decipher, null, null, null);
+  }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.decipher, this.xmlParser, this.jsonParser, this.reconParser);
   }
 
   static <I, V> Parser<V> parse(Input input, DecipherParser<I, V> decipher, Parser<V> xmlParser,
@@ -90,11 +95,6 @@ final class AnyParser<I, V> extends Parser<V> {
 
   static <I, V> Parser<V> parse(Input input, DecipherParser<I, V> decipher) {
     return parse(input, decipher, null, null, null);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.decipher, this.xmlParser, this.jsonParser, this.reconParser);
   }
 
 }

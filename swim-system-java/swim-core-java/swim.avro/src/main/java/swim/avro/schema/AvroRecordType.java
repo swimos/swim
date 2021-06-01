@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ public abstract class AvroRecordType<T, R> extends AvroNamedType<T> {
   @Override
   public abstract AvroRecordType<T, R> alias(AvroName alias);
 
-  public abstract AvroFieldType<R, ?> getField(int index);
+  public abstract AvroFieldType<?, R> getField(int index);
 
-  public abstract AvroRecordType<T, R> field(AvroFieldType<R, ?> field);
+  public abstract AvroRecordType<T, R> field(AvroFieldType<?, R> field);
 
   public abstract R create();
 

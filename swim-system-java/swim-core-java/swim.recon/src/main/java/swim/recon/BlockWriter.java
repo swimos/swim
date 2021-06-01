@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,6 +49,13 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
     this.next = next;
     this.part = part;
     this.step = step;
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.recon, this.items, this.inBlock, this.inMarkup,
+                 this.inBraces, this.inBrackets, this.first, this.markupSafe,
+                 this.item, this.next, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, Iterator<I> items,
@@ -379,13 +386,6 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
     } else {
       return recon.writeItem(item, output);
     }
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.items, this.inBlock, this.inMarkup,
-        this.inBraces, this.inBrackets, this.first, this.markupSafe,
-        this.item, this.next, this.part, this.step);
   }
 
 }

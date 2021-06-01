@@ -1,13 +1,16 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'WebSocket protocol for dynamically multiplexing large numbers of bidirectional links to streaming API endpoints, called lanes, of URI-addressed distributed objects, called nodes, that run stateful distributed processes, called Web Agents'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.warp'
 ext.moduleName = 'swim.warp'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-codec')
-    api project(':swim-structure')
-    implementation project(':swim-recon')
-    api project(':swim-uri')
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  implementation project(':swim-recon')
+  api project(':swim-uri')
 }

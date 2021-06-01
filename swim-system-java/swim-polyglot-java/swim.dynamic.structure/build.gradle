@@ -1,24 +1,16 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'swim.structure dynamic language bindings'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-polyglot-java/swim.dynamic.structure'
 ext.moduleName = 'swim.dynamic.structure'
 
 dependencies {
-    api group: 'org.swimos', name: 'swim-structure', version: version
-    api project(':swim-dynamic')
-    api project(':swim-dynamic-java')
+  api group: 'org.swimos', name: 'swim-structure', version: project.version
+  api project(':swim-dynamic')
+  api project(':swim-dynamic-java')
 
-    testImplementation project(":swim-vm-js")
-}
-
-test {
-    if (useModules) {
-        doFirst {
-            jvmArgs += [
-                    '--add-reads', 'swim.dynamic.structure=org.graalvm.sdk',
-                    '--add-reads', 'swim.dynamic.structure=swim.vm',
-            ]
-        }
-    }
+  testImplementation project(":swim-vm-js")
 }

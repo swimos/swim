@@ -1,11 +1,14 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Swim meta runtime'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.meta'
 ext.moduleName = 'swim.meta'
 
 dependencies {
-    implementation group: 'org.swimos', name: 'swim-recon', version: version
-    api project(':swim-runtime')
-    api project(':swim-kernel')
+  implementation group: 'org.swimos', name: 'swim-recon', version: project.version
+  api project(':swim-runtime')
+  api project(':swim-kernel')
 }

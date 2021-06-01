@@ -1,15 +1,18 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'WebSocket frame model and wire protocol codec that incrementally decodes and encodes fragmented WebSocket streams without intermediate buffering'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.ws'
 ext.moduleName = 'swim.ws'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-codec')
-    api project(':swim-structure')
-    api project(':swim-collections')
-    api project(':swim-uri')
-    api project(':swim-deflate')
-    api project(':swim-http')
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-collections')
+  api project(':swim-uri')
+  api project(':swim-deflate')
+  api project(':swim-http')
 }

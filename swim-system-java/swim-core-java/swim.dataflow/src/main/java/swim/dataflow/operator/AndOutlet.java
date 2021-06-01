@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public final class AndOutlet extends AbstractOutlet<Value> {
     final Outlet<? extends Value> operand1Input = this.operand1Inlet.input();
     final Value argument1 = operand1Input != null ? operand1Input.get() : null;
     if (argument1 != null) {
-      if (argument1.booleanValue(false)) {
+      if (argument1.isDefinite()) {
         final Outlet<? extends Value> operand2Input = this.operand2Inlet.input();
         final Value argument2 = operand2Input != null ? operand2Input.get() : null;
         if (argument2 != null) {

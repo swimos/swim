@@ -1,79 +1,18 @@
-apply from: '../project.gradle'
-apply plugin: 'application'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemExecutable'
+  id 'SwimSystemPublish'
+}
 
 description = 'Swim Command Line Interface'
-mainClassName = 'swim.cli.Main'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.cli'
 ext.moduleName = 'swim.cli'
 
+mainClassName = 'swim.cli.Main'
+
 dependencies {
-    api group: 'org.swimos', name: 'swim-args', version: version
-    api group: 'org.swimos', name: 'swim-recon', version: version
-    api group: 'org.swimos', name: 'swim-json', version: version
-    api project(':swim-client')
-
-    implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.62'
-}
-
-afterEvaluate {
-    ext.dependencyProjects = new HashSet()
-    ext.resolveDependencyProjects = { project ->
-        def dependencies = project.configurations.api.dependencies + project.configurations.implementation.dependencies
-        dependencies.each { dependency ->
-            if (dependency instanceof ProjectDependency) {
-                def dependencyProject = dependency.dependencyProject;
-                if (!ext.dependencyProjects.contains(dependencyProject)) {
-                    ext.dependencyProjects.add(dependencyProject)
-                    ext.resolveDependencyProjects(dependencyProject)
-                }
-            }
-        }
-    }
-    ext.resolveDependencyProjects(project)
-
-    ext.javaHome = System.getenv('JAVA_HOME')
-
-    task nativeImage(type: Exec) {
-        dependencyProjects.each { dependencyProject ->
-            dependsOn dependencyProject.jar
-        }
-        dependsOn jar
-
-        def outDir = "${buildDir}/native"
-        doFirst {
-            mkdir outDir
-        }
-
-        workingDir project.projectDir
-        commandLine "${javaHome}/bin/native-image",
-                '-cp', sourceSets.main.runtimeClasspath.asPath,
-                "-H:Path=${outDir}",
-                "-H:Name=${project.name}",
-                '--no-server',
-                '--no-fallback',
-                '--initialize-at-build-time',
-                '--enable-all-security-services',
-                '--initialize-at-run-time=org.bouncycastle.crypto.prng.SP800SecureRandom,org.bouncycastle.jcajce.provider.drbg.DRBG$Default,org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV',
-                '-J-Djava.security.properties=native-java.security.overrides',
-                "${mainClassName}"
-    }
-
-    task jlink(type: Exec) {
-        dependencyProjects.each { dependencyProject ->
-            dependsOn dependencyProject.jar
-        }
-        dependsOn jar
-
-        workingDir project.projectDir
-        commandLine "${javaHome}/bin/jlink",
-                '--module-path', sourceSets.main.runtimeClasspath.asPath,
-                '--add-modules', moduleName,
-                '--launcher', "${project.name}=${moduleName}/${mainClassName}",
-                '--output', "${buildDir}/distribution/${project.name}",
-                '--vm', 'server',
-                '--compress', '2',
-                '--strip-debug',
-                '--no-header-files',
-                '--no-man-pages'
-    }
+  api group: 'org.swimos', name: 'swim-args', version: project.version
+  api group: 'org.swimos', name: 'swim-recon', version: project.version
+  api group: 'org.swimos', name: 'swim-json', version: project.version
+  api project(':swim-client')
 }

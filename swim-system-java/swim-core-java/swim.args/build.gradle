@@ -1,11 +1,14 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Composable command line argument parser'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.args'
 ext.moduleName = 'swim.args'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-codec')
-    api project(':swim-collections')
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-collections')
 }

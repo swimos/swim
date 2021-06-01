@@ -1,10 +1,13 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'DEFLATE codec that incrementally compresses and decompresses streams'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.deflate'
 ext.moduleName = 'swim.deflate'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-codec')
+  implementation project(':swim-util')
+  api project(':swim-codec')
 }

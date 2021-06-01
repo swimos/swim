@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public final class ConditionalOutlet extends AbstractOutlet<Value> {
     if (ifInput != null) {
       final Value ifTerm = ifInput.get();
       if (ifTerm != null) {
-        if (ifTerm.booleanValue(false)) {
+        if (ifTerm.isDefinite()) {
           final Outlet<? extends Value> thenInput = this.thenInlet.input();
           if (thenInput != null) {
             final Value thenTerm = thenInput.get();

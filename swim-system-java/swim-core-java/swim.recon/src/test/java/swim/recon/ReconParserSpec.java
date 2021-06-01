@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -114,6 +114,35 @@ public class ReconParserSpec {
   public void parseStringsWithEscapes() {
     assertParses("\"\\\"\\\\\\/\\@\\{\\}\\[\\]\\b\\f\\n\\r\\t\"", Text.from("\"\\/@{}[]\b\f\n\r\t"));
     assertParses("'\\\'\\\\\\/\\@\\{\\}\\[\\]\\b\\f\\n\\r\\t'", Text.from("'\\/@{}[]\b\f\n\r\t"));
+  }
+
+  @Test
+  public void parseEmptyRawStrings() {
+    assertParses("``", Text.empty());
+    assertParses(" `` ", Text.empty());
+    assertParses("``````", Text.empty());
+    assertParses(" `````` ", Text.empty());
+  }
+
+  @Test
+  public void parseNonEmptyRawStrings() {
+    assertParses("`test`", Text.from("test"));
+    assertParses("```test```", Text.from("test"));
+  }
+
+  @Test
+  public void parseRawStringsWithBackticks() {
+    assertParses("``` ` ```", Text.from(" ` "));
+    assertParses("``` `` ```", Text.from(" `` "));
+    assertParses("``` \\` ```", Text.from(" ` "));
+    assertParses("``` \\`\\` ```", Text.from(" `` "));
+    assertParses("``` \\`\\`\\` ```", Text.from(" ``` "));
+  }
+
+  @Test
+  public void parseRawStringsWithBackslashes() {
+    assertParses("``` \\ ```", Text.from(" \\ "));
+    assertParses("``` \\\\` ```", Text.from(" \\` "));
   }
 
   @Test

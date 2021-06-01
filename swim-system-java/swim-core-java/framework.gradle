@@ -1,0 +1,100 @@
+ext.includeSwimCore = { frameworkDir ->
+  include 'swim-core'
+  project(':swim-core').projectDir = frameworkDir
+
+  include 'swim-util'
+  project(':swim-util').projectDir = file("${frameworkDir}/swim.util")
+
+  include 'swim-codec'
+  project(':swim-codec').projectDir = file("${frameworkDir}/swim.codec")
+
+  include 'swim-collections'
+  project(':swim-collections').projectDir = file("${frameworkDir}/swim.collections")
+
+  include 'swim-args'
+  project(':swim-args').projectDir = file("${frameworkDir}/swim.args")
+
+  include 'swim-structure'
+  project(':swim-structure').projectDir = file("${frameworkDir}/swim.structure")
+
+  include 'swim-recon'
+  project(':swim-recon').projectDir = file("${frameworkDir}/swim.recon")
+
+  include 'swim-json'
+  project(':swim-json').projectDir = file("${frameworkDir}/swim.json")
+
+  include 'swim-xml'
+  project(':swim-xml').projectDir = file("${frameworkDir}/swim.xml")
+
+  include 'swim-csv'
+  project(':swim-csv').projectDir = file("${frameworkDir}/swim.csv")
+
+  include 'swim-avro'
+  project(':swim-avro').projectDir = file("${frameworkDir}/swim.avro")
+
+  include 'swim-protobuf'
+  project(':swim-protobuf').projectDir = file("${frameworkDir}/swim.protobuf")
+
+  include 'swim-decipher'
+  project(':swim-decipher').projectDir = file("${frameworkDir}/swim.decipher")
+
+  include 'swim-math'
+  project(':swim-math').projectDir = file("${frameworkDir}/swim.math")
+
+  include 'swim-security'
+  project(':swim-security').projectDir = file("${frameworkDir}/swim.security")
+
+  include 'swim-spatial'
+  project(':swim-spatial').projectDir = file("${frameworkDir}/swim.spatial")
+
+  include 'swim-streamlet'
+  project(':swim-streamlet').projectDir = file("${frameworkDir}/swim.streamlet")
+
+  include 'swim-dataflow'
+  project(':swim-dataflow').projectDir = file("${frameworkDir}/swim.dataflow")
+
+  include 'swim-observable'
+  project(':swim-observable').projectDir = file("${frameworkDir}/swim.observable")
+
+  include 'swim-uri'
+  project(':swim-uri').projectDir = file("${frameworkDir}/swim.uri")
+
+  include 'swim-deflate'
+  project(':swim-deflate').projectDir = file("${frameworkDir}/swim.deflate")
+
+  include 'swim-mqtt'
+  project(':swim-mqtt').projectDir = file("${frameworkDir}/swim.mqtt")
+
+  include 'swim-http'
+  project(':swim-http').projectDir = file("${frameworkDir}/swim.http")
+
+  include 'swim-ws'
+  project(':swim-ws').projectDir = file("${frameworkDir}/swim.ws")
+
+  include 'swim-warp'
+  project(':swim-warp').projectDir = file("${frameworkDir}/swim.warp")
+
+  include 'swim-concurrent'
+  project(':swim-concurrent').projectDir = file("${frameworkDir}/swim.concurrent")
+
+  include 'swim-db'
+  project(':swim-db').projectDir = file("${frameworkDir}/swim.db")
+
+  include 'swim-io'
+  project(':swim-io').projectDir = file("${frameworkDir}/swim.io")
+
+  include 'swim-io-mqtt'
+  project(':swim-io-mqtt').projectDir = file("${frameworkDir}/swim.io.mqtt")
+
+  include 'swim-io-http'
+  project(':swim-io-http').projectDir = file("${frameworkDir}/swim.io.http")
+
+  include 'swim-io-ws'
+  project(':swim-io-ws').projectDir = file("${frameworkDir}/swim.io.ws")
+
+  include 'swim-io-warp'
+  project(':swim-io-warp').projectDir = file("${frameworkDir}/swim.io.warp")
+
+  include 'swim-web'
+  project(':swim-web').projectDir = file("${frameworkDir}/swim.web")
+}

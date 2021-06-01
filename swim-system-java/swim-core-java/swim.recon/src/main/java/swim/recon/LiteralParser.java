@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,6 +31,11 @@ final class LiteralParser<I, V> extends Parser<V> {
     this.builder = builder;
     this.valueParser = valueParser;
     this.step = step;
+  }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.builder, this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -66,6 +71,9 @@ final class LiteralParser<I, V> extends Parser<V> {
           step = 2;
         } else if (c == '"' || c == '\'') {
           valueParser = recon.parseString(input);
+          step = 2;
+        } else if (c == '`') {
+          valueParser = recon.parseRawString(input);
           step = 2;
         } else if (c == '-' || c >= '0' && c <= '9') {
           valueParser = recon.parseNumber(input);
@@ -158,11 +166,6 @@ final class LiteralParser<I, V> extends Parser<V> {
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
     return parse(input, recon, builder, null, 1);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.valueParser, this.step);
   }
 
 }

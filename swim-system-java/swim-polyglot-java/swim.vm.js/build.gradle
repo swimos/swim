@@ -1,24 +1,17 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Swim JavaScript language integration'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-polyglot-java/swim.vm.js'
 ext.moduleName = 'swim.vm.js'
 
 dependencies {
-    implementation group: 'org.swimos', name: 'swim-json', version: version
-    api group: 'org.swimos', name: 'swim-uri', version: version
-    api project(':swim-vm')
-    implementation group: 'org.graalvm.js', name: 'js', version: graalVersion
+  implementation group: 'org.swimos', name: 'swim-json', version: project.version
+  api group: 'org.swimos', name: 'swim-uri', version: project.version
+  api project(':swim-vm')
+  implementation group: 'org.graalvm.js', name: 'js', version: property('graal.version')
 
-    testImplementation project(":swim-dynamic-structure")
-}
-
-test {
-    if (useModules) {
-        doFirst {
-            jvmArgs += [
-                    '--add-reads', 'swim.vm.js=swim.dynamic.structure',
-            ]
-        }
-    }
+  testImplementation project(":swim-dynamic-structure")
 }

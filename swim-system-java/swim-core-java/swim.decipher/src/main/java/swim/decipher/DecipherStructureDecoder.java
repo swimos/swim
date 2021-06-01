@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,10 @@
 
 package swim.decipher;
 
-import swim.codec.Decoder;
 import swim.codec.Input;
-import swim.codec.InputBuffer;
 import swim.codec.Output;
 import swim.codec.Parser;
 import swim.json.Json;
-import swim.protobuf.Protobuf;
 import swim.recon.Recon;
 import swim.structure.Data;
 import swim.structure.Item;
@@ -58,16 +55,6 @@ public class DecipherStructureDecoder extends DecipherDecoder<Item, Value> {
   @Override
   public Parser<Value> parseRecon(Input input) {
     return Recon.structureParser().parseBlock(input);
-  }
-
-  @Override
-  public Decoder<Value> protobufDecoder() {
-    return Protobuf.structureDecoder().payloadDecoder();
-  }
-
-  @Override
-  public Decoder<Value> decodeProtobuf(InputBuffer input) {
-    return Protobuf.structureDecoder().decodePayload(input);
   }
 
   @SuppressWarnings("unchecked")

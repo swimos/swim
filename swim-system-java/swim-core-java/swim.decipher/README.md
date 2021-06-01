@@ -7,7 +7,7 @@
 <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/marlin-blue.svg" align="left"></a>
 
 **swim-decipher** implements a universal decoder that detects and incrementally
-parses Recon, JSON, XML, Protobuf, raw text, and binary data formats as
+parses Recon, JSON, XML, plain text, and binary data formats as
 [**swim-structure**](https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.structure)
 values.  **swim-decipher** is part of the
 [**Swim Core**](https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java) framework.

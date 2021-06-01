@@ -1,4 +1,7 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Extended collection, iterator, and builder interfaces, lightweight cache sets and maps, and other foundational utilities'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.util'

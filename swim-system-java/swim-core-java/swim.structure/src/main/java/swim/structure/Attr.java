@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,130 +37,6 @@ public final class Attr extends Field {
 
   Attr(Text key, Value value) {
     this(key, value, 0);
-  }
-
-  public static Attr of(Text key, Value value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    if (value == null) {
-      throw new NullPointerException("value");
-    }
-    return new Attr(key, value);
-  }
-
-  public static Attr of(Text key, String value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    if (value == null) {
-      throw new NullPointerException("value");
-    }
-    return new Attr(key, Text.from(value));
-  }
-
-  public static Attr of(Text key, int value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Attr(key, Num.from(value));
-  }
-
-  public static Attr of(Text key, long value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Attr(key, Num.from(value));
-  }
-
-  public static Attr of(Text key, float value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Attr(key, Num.from(value));
-  }
-
-  public static Attr of(Text key, double value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Attr(key, Num.from(value));
-  }
-
-  public static Attr of(Text key, boolean value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Attr(key, Bool.from(value));
-  }
-
-  public static Attr of(String key, Value value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    if (value == null) {
-      throw new NullPointerException("value");
-    }
-    return new Attr(Text.from(key), value);
-  }
-
-  public static Attr of(String key, String value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    if (value == null) {
-      throw new NullPointerException("value");
-    }
-    return new Attr(Text.from(key), Text.from(value));
-  }
-
-  public static Attr of(String key, int value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Attr(Text.from(key), Num.from(value));
-  }
-
-  public static Attr of(String key, long value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Attr(Text.from(key), Num.from(value));
-  }
-
-  public static Attr of(String key, float value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Attr(Text.from(key), Num.from(value));
-  }
-
-  public static Attr of(String key, double value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Attr(Text.from(key), Num.from(value));
-  }
-
-  public static Attr of(String key, boolean value) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Attr(Text.from(key), Bool.from(value));
-  }
-
-  public static Attr of(Text key) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Attr(key, Value.extant());
-  }
-
-  public static Attr of(String key) {
-    if (key == null) {
-      throw new NullPointerException("key");
-    }
-    return new Attr(Text.from(key), Value.extant());
   }
 
   @Override
@@ -535,6 +411,130 @@ public final class Attr extends Field {
       output = output.write(", ").display(this.value);
     }
     output = output.write(')');
+  }
+
+  public static Attr of(Text key, Value value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    if (value == null) {
+      throw new NullPointerException("value");
+    }
+    return new Attr(key, value);
+  }
+
+  public static Attr of(Text key, String value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    if (value == null) {
+      throw new NullPointerException("value");
+    }
+    return new Attr(key, Text.from(value));
+  }
+
+  public static Attr of(Text key, int value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Attr(key, Num.from(value));
+  }
+
+  public static Attr of(Text key, long value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Attr(key, Num.from(value));
+  }
+
+  public static Attr of(Text key, float value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Attr(key, Num.from(value));
+  }
+
+  public static Attr of(Text key, double value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Attr(key, Num.from(value));
+  }
+
+  public static Attr of(Text key, boolean value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Attr(key, Bool.from(value));
+  }
+
+  public static Attr of(String key, Value value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    if (value == null) {
+      throw new NullPointerException("value");
+    }
+    return new Attr(Text.from(key), value);
+  }
+
+  public static Attr of(String key, String value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    if (value == null) {
+      throw new NullPointerException("value");
+    }
+    return new Attr(Text.from(key), Text.from(value));
+  }
+
+  public static Attr of(String key, int value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Attr(Text.from(key), Num.from(value));
+  }
+
+  public static Attr of(String key, long value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Attr(Text.from(key), Num.from(value));
+  }
+
+  public static Attr of(String key, float value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Attr(Text.from(key), Num.from(value));
+  }
+
+  public static Attr of(String key, double value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Attr(Text.from(key), Num.from(value));
+  }
+
+  public static Attr of(String key, boolean value) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Attr(Text.from(key), Bool.from(value));
+  }
+
+  public static Attr of(Text key) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Attr(key, Value.extant());
+  }
+
+  public static Attr of(String key) {
+    if (key == null) {
+      throw new NullPointerException("key");
+    }
+    return new Attr(Text.from(key), Value.extant());
   }
 
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,68 +22,10 @@ import swim.util.HashGenCacheMap;
 
 public class Text extends Value {
 
-  private static ThreadLocal<HashGenCacheMap<String, Text>> cache = new ThreadLocal<>();
-  private static Text empty;
   protected final String value;
 
   protected Text(String value) {
     this.value = value;
-  }
-
-  public static Output<Text> output(OutputSettings settings) {
-    return new TextOutput(new StringBuilder(), settings);
-  }
-
-  public static Output<Text> output() {
-    return new TextOutput(new StringBuilder(), OutputSettings.standard());
-  }
-
-  public static Text empty() {
-    if (empty == null) {
-      empty = new Text("");
-    }
-    return empty;
-  }
-
-  public static Text from(String value) {
-    final int n = value.length();
-    if (n == 0) {
-      return empty();
-    } else if (n <= 64) {
-      final HashGenCacheMap<String, Text> cache = cache();
-      Text text = cache.get(value);
-      if (text == null) {
-        text = cache.put(value, new Text(value));
-      }
-      return text;
-    } else {
-      return new Text(value);
-    }
-  }
-
-  public static Text fromObject(Object object) {
-    if (object instanceof Text) {
-      return (Text) object;
-    } else if (object instanceof String) {
-      return Text.from((String) object);
-    } else {
-      throw new IllegalArgumentException(object.toString());
-    }
-  }
-
-  static HashGenCacheMap<String, Text> cache() {
-    HashGenCacheMap<String, Text> cache = Text.cache.get();
-    if (cache == null) {
-      int cacheSize;
-      try {
-        cacheSize = Integer.parseInt(System.getProperty("swim.structure.text.cache.size"));
-      } catch (NumberFormatException e) {
-        cacheSize = 128;
-      }
-      cache = new HashGenCacheMap<String, Text>(cacheSize);
-      Text.cache.set(cache);
-    }
-    return cache;
   }
 
   @Override
@@ -350,6 +292,66 @@ public class Text extends Value {
   @Override
   public void display(Output<?> output) {
     Format.debug(this.value, output);
+  }
+
+  private static Text empty;
+
+  public static Text empty() {
+    if (empty == null) {
+      empty = new Text("");
+    }
+    return empty;
+  }
+
+  public static Text from(String value) {
+    final int n = value.length();
+    if (n == 0) {
+      return empty();
+    } else if (n <= 64) {
+      final HashGenCacheMap<String, Text> cache = cache();
+      Text text = cache.get(value);
+      if (text == null) {
+        text = cache.put(value, new Text(value));
+      }
+      return text;
+    } else {
+      return new Text(value);
+    }
+  }
+
+  public static Text fromObject(Object object) {
+    if (object instanceof Text) {
+      return (Text) object;
+    } else if (object instanceof String) {
+      return Text.from((String) object);
+    } else {
+      throw new IllegalArgumentException(object.toString());
+    }
+  }
+
+  public static Output<Text> output(OutputSettings settings) {
+    return new TextOutput(new StringBuilder(), settings);
+  }
+
+  public static Output<Text> output() {
+    return new TextOutput(new StringBuilder(), OutputSettings.standard());
+  }
+
+  private static ThreadLocal<HashGenCacheMap<String, Text>> cache = new ThreadLocal<>();
+
+  static HashGenCacheMap<String, Text> cache() {
+    HashGenCacheMap<String, Text> cache = Text.cache.get();
+    if (cache == null) {
+      int cacheSize;
+      try {
+        cacheSize = Integer.parseInt(System.getProperty("swim.structure.text.cache.size"));
+      } catch (NumberFormatException e) {
+        cacheSize = 128;
+      }
+      cache = new HashGenCacheMap<String, Text>(cacheSize);
+      Text.cache.set(cache);
+    }
+    return cache;
   }
 
 }

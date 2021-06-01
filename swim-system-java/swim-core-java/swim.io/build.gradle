@@ -1,12 +1,15 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Explicitly flow-controlled, non-blocking, parallel I/O engine, with swim-codec-modulated socket modems, and TCP and TLS transports'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.io'
 ext.moduleName = 'swim.io'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-codec')
-    api project(':swim-structure')
-    api project(':swim-concurrent')
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-concurrent')
 }

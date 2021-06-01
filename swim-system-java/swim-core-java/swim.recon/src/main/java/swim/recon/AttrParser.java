@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,6 +30,11 @@ final class AttrParser<I, V> extends Parser<I> {
     this.keyParser = keyParser;
     this.valueParser = valueParser;
     this.step = step;
+  }
+
+  @Override
+  public Parser<I> feed(Input input) {
+    return parse(input, this.recon, this.keyParser, this.valueParser, this.step);
   }
 
   static <I, V> Parser<I> parse(Input input, ReconParser<I, V> recon, Parser<V> keyParser,
@@ -142,11 +147,6 @@ final class AttrParser<I, V> extends Parser<I> {
 
   static <I, V> Parser<I> parse(Input input, ReconParser<I, V> recon) {
     return parse(input, recon, null, null, 1);
-  }
-
-  @Override
-  public Parser<I> feed(Input input) {
-    return parse(input, this.recon, this.keyParser, this.valueParser, this.step);
   }
 
 }

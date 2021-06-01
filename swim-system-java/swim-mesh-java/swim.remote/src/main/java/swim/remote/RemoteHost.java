@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import swim.runtime.Push;
 import swim.runtime.TierContext;
 import swim.runtime.UplinkError;
 import swim.runtime.WarpBinding;
+import swim.runtime.WarpContext;
 import swim.runtime.agent.AgentNode;
 import swim.runtime.profile.HostProfile;
 import swim.runtime.reflect.AgentPulse;
@@ -792,12 +793,12 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     downlink.queueUp(resolvedEnvelope);
   }
 
-  protected void didOpenDownlink(RemoteWarpDownlink downlink) {
+  protected void didOpenDownlink(WarpBinding downlink) {
     DOWNLINK_OPEN_DELTA.incrementAndGet(this);
     flushMetrics();
   }
 
-  protected void didCloseDownlink(RemoteWarpDownlink downlink) {
+  protected void didCloseDownlink(WarpBinding downlink) {
     DOWNLINK_CLOSE_DELTA.incrementAndGet(this);
     flushMetrics();
   }
@@ -820,12 +821,12 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     }
   }
 
-  protected void didOpenUplink(RemoteWarpUplink uplink) {
+  protected void didOpenUplink(WarpContext uplink) {
     UPLINK_OPEN_DELTA.incrementAndGet(this);
     flushMetrics();
   }
 
-  protected void didCloseUplink(RemoteWarpUplink uplink) {
+  protected void didCloseUplink(WarpContext uplink) {
     UPLINK_CLOSE_DELTA.incrementAndGet(this);
     flushMetrics();
   }

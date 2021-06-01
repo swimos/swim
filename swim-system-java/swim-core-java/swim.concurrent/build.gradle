@@ -1,9 +1,12 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Timer, task, and continuation passing style interfaces, with lightweight scheduler and execution stage implementations'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.concurrent'
 ext.moduleName = 'swim.concurrent'
 
 dependencies {
-    api project(':swim-structure')
+  api project(':swim-structure')
 }

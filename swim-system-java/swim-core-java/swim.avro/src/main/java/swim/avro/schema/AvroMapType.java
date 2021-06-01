@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ public abstract class AvroMapType<K, V, T> extends AvroComplexType<T> {
 
   public abstract Parser<K> parseKey(Input input);
 
-  public abstract AvroType<V> valueType();
+  public abstract AvroType<? extends V> valueType();
 
   public abstract PairBuilder<K, V, T> mapBuilder();
 

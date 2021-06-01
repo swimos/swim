@@ -1,11 +1,14 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Generic structured data model, with support for selectors, expressions, and lambda functions'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.structure'
 ext.moduleName = 'swim.structure'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-codec')
-    api project(':swim-collections')
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-collections')
 }

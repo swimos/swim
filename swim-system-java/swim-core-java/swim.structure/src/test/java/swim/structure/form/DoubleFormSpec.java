@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,28 +32,28 @@ public class DoubleFormSpec {
 
   @Test
   public void castNumsToDoubles() {
-    assertEquals(Form.forDouble().cast(Num.from(42)), 42.);
-    assertEquals(Form.forDouble().cast(Num.from(-1)), -1.);
-    assertEquals(Form.forDouble().cast(Num.from(2.5)), 2.5);
+    assertEquals(Form.forDouble().cast(Num.from(42)), Double.valueOf(42.));
+    assertEquals(Form.forDouble().cast(Num.from(-1)), Double.valueOf(-1.));
+    assertEquals(Form.forDouble().cast(Num.from(2.5)), Double.valueOf(2.5));
   }
 
   @Test
   public void castStringsToDoubles() {
-    assertEquals(Form.forDouble().cast(Text.from("42")), 42.);
-    assertEquals(Form.forDouble().cast(Text.from("-1")), -1.);
+    assertEquals(Form.forDouble().cast(Text.from("42")), Double.valueOf(42.));
+    assertEquals(Form.forDouble().cast(Text.from("-1")), Double.valueOf(-1.));
   }
 
   @Test
   public void castFieldsToDoubles() {
-    assertEquals(Form.forDouble().cast(Attr.of("a", 42)), 42.);
-    assertEquals(Form.forDouble().cast(Slot.of("a", -1)), -1.);
-    assertEquals(Form.forDouble().cast(Attr.of("a", "42")), 42.);
-    assertEquals(Form.forDouble().cast(Slot.of("a", "-1")), -1.);
+    assertEquals(Form.forDouble().cast(Attr.of("a", 42)), Double.valueOf(42.));
+    assertEquals(Form.forDouble().cast(Slot.of("a", -1)), Double.valueOf(-1.));
+    assertEquals(Form.forDouble().cast(Attr.of("a", "42")), Double.valueOf(42.));
+    assertEquals(Form.forDouble().cast(Slot.of("a", "-1")), Double.valueOf(-1.));
   }
 
   @Test
   public void castAttributedNumsToDoubles() {
-    assertEquals(Form.forDouble().cast(Record.of(Attr.of("test"), 42)), 42.);
+    assertEquals(Form.forDouble().cast(Record.of(Attr.of("test"), 42)), Double.valueOf(42.));
   }
 
 }

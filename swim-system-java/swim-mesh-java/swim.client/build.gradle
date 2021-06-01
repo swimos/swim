@@ -1,10 +1,13 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Web Agent client runtime'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.client'
 ext.moduleName = 'swim.client'
 
 dependencies {
-    api project(':swim-runtime')
-    api project(':swim-remote')
+  api project(':swim-runtime')
+  api project(':swim-remote')
 }

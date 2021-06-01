@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -104,8 +104,8 @@ final class Utf8EncodedOutput<T> extends Output<T> {
       c3 = 0xc0 | (c >>> 6);
       c4 = 0x80 | (c & 0x3f);
       index = 2;
-    } else if (c >= 0x0800 && c <= 0xffff || // U+0800..U+D7FF
-        c >= 0xe000 && c <= 0xffff) { // U+E000..U+FFFF
+    } else if (c >= 0x0800 && c <= 0xffff // U+0800..U+D7FF
+            || c >= 0xe000 && c <= 0xffff) { // U+E000..U+FFFF
       c2 = 0xe0 | (c >>> 12);
       c3 = 0x80 | ((c >>> 6) & 0x3f);
       c4 = 0x80 | (c & 0x3f);

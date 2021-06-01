@@ -1,13 +1,16 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'HTTP client and server socket modems for pipelining and concurrently transporting explicitly flow-controlled HTTP streams over a network without blocking or intermediate buffering'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.io.http'
 ext.moduleName = 'swim.io.http'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-codec')
-    implementation project(':swim-collections')
-    api project(':swim-http')
-    api project(':swim-io')
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  implementation project(':swim-collections')
+  api project(':swim-http')
+  api project(':swim-io')
 }

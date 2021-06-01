@@ -1,22 +1,25 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Agent programming interface'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.api'
 ext.moduleName = 'swim.api'
 
 dependencies {
-    api group: 'org.swimos', name: 'swim-util', version: version
-    api group: 'org.swimos', name: 'swim-codec', version: version
-    api group: 'org.swimos', name: 'swim-structure', version: version
-    api group: 'org.swimos', name: 'swim-math', version: version
-    api group: 'org.swimos', name: 'swim-spatial', version: version
-    api group: 'org.swimos', name: 'swim-streamlet', version: version
-    api group: 'org.swimos', name: 'swim-dataflow', version: version
-    api group: 'org.swimos', name: 'swim-observable', version: version
-    api group: 'org.swimos', name: 'swim-http', version: version
-    api group: 'org.swimos', name: 'swim-ws', version: version
-    api group: 'org.swimos', name: 'swim-mqtt', version: version
-    api group: 'org.swimos', name: 'swim-warp', version: version
-    api group: 'org.swimos', name: 'swim-concurrent', version: version
-    api group: 'org.swimos', name: 'swim-io', version: version
+  api group: 'org.swimos', name: 'swim-util', version: project.version
+  api group: 'org.swimos', name: 'swim-codec', version: project.version
+  api group: 'org.swimos', name: 'swim-structure', version: project.version
+  api group: 'org.swimos', name: 'swim-math', version: project.version
+  api group: 'org.swimos', name: 'swim-spatial', version: project.version
+  api group: 'org.swimos', name: 'swim-streamlet', version: project.version
+  api group: 'org.swimos', name: 'swim-dataflow', version: project.version
+  api group: 'org.swimos', name: 'swim-observable', version: project.version
+  api group: 'org.swimos', name: 'swim-http', version: project.version
+  api group: 'org.swimos', name: 'swim-ws', version: project.version
+  api group: 'org.swimos', name: 'swim-mqtt', version: project.version
+  api group: 'org.swimos', name: 'swim-warp', version: project.version
+  api group: 'org.swimos', name: 'swim-concurrent', version: project.version
+  api group: 'org.swimos', name: 'swim-io', version: project.version
 }

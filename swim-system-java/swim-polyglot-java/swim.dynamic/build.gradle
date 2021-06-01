@@ -1,9 +1,12 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Language binding interfaces'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-polyglot-java/swim.dynamic'
 ext.moduleName = 'swim.dynamic'
 
 dependencies {
-    implementation group: 'org.swimos', name: 'swim-collections', version: version
+  implementation group: 'org.swimos', name: 'swim-collections', version: project.version
 }

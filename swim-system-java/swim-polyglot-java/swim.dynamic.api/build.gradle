@@ -1,25 +1,17 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'swim.api dynamic language bindings'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-polyglot-java/swim.dynamic.api'
 ext.moduleName = 'swim.dynamic.api'
 
 dependencies {
-    api group: 'org.swimos', name: 'swim-api', version: version
-    api project(':swim-dynamic')
-    api project(':swim-dynamic-java')
-    api project(':swim-dynamic-observable')
+  api group: 'org.swimos', name: 'swim-api', version: project.version
+  api project(':swim-dynamic')
+  api project(':swim-dynamic-java')
+  api project(':swim-dynamic-observable')
 
-    testImplementation project(":swim-vm-js")
-}
-
-test {
-    if (useModules) {
-        doFirst {
-            jvmArgs += [
-                    '--add-reads', 'swim.dynamic.api=org.graalvm.sdk',
-                    '--add-reads', 'swim.dynamic.api=swim.vm',
-            ]
-        }
-    }
+  testImplementation project(":swim-vm-js")
 }

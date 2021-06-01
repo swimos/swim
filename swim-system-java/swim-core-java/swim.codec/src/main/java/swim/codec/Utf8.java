@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,8 +43,8 @@ public final class Utf8 {
       return 1;
     } else if (c >= 0x0080 && c <= 0x07FF) { // U+0080..U+07FF
       return 2;
-    } else if (c >= 0x0800 && c <= 0xFFFF || // U+0800..U+D7FF
-        c >= 0xE000 && c <= 0xFFFF) { // U+E000..U+FFFF
+    } else if (c >= 0x0800 && c <= 0xFFFF // U+0800..U+D7FF
+            || c >= 0xE000 && c <= 0xFFFF) { // U+E000..U+FFFF
       return 3;
     } else if (c >= 0x10000 && c <= 0x10FFFF) { // U+10000..U+10FFFF
       return 4;
@@ -67,8 +67,8 @@ public final class Utf8 {
       return 1;
     } else if (c >= 0x0080 && c <= 0x07FF) { // U+0080..U+07FF
       return 2;
-    } else if (c >= 0x0800 && c <= 0xFFFF || // U+0800..U+D7FF
-        c >= 0xE000 && c <= 0xFFFF) { // U+E000..U+FFFF
+    } else if (c >= 0x0800 && c <= 0xFFFF // U+0800..U+D7FF
+            || c >= 0xE000 && c <= 0xFFFF) { // U+E000..U+FFFF
       return 3;
     } else if (c >= 0x10000 && c <= 0x10FFFF) { // U+10000..U+10FFFF
       return 4;

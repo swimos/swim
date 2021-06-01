@@ -1,12 +1,15 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'Compiler from swim-structure expressions to live-updated data models'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.dataflow'
 ext.moduleName = 'swim.dataflow'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-structure')
-    api project(':swim-collections')
-    api project(':swim-streamlet')
+  implementation project(':swim-util')
+  api project(':swim-structure')
+  api project(':swim-collections')
+  api project(':swim-streamlet')
 }

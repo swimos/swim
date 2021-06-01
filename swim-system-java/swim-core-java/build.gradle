@@ -1,58 +1,49 @@
 plugins {
-    id 'com.jfrog.bintray' version '1.8.4'
+  id 'SwimSystemFramework'
+  id 'SwimSystemPublish'
 }
 
-// Build with `gradle -Pno-modules` to force compatibility with legacy JVMs.
-def javaVersion = System.getProperty('java.version').split('\\.')
-ext.jvmVersion = (javaVersion[0] as Integer) > 1 ? javaVersion[0] as Integer : javaVersion[1] as Integer
-ext.useModules = jvmVersion >= 9 && !hasProperty('no-modules')
+description = 'Swim Core'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java'
+ext.moduleName = null
 
-gradle.projectsEvaluated {
-    apply plugin: 'java'
+dependencies {
+  api project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-collections')
+  api project(':swim-args')
+  api project(':swim-structure')
+  api project(':swim-recon')
+  api project(':swim-json')
+  api project(':swim-xml')
+  api project(':swim-csv')
+  api project(':swim-avro')
+  api project(':swim-protobuf')
+  api project(':swim-decipher')
+  api project(':swim-math')
+  api project(':swim-security')
+  api project(':swim-spatial')
+  api project(':swim-streamlet')
+  api project(':swim-dataflow')
+  api project(':swim-observable')
+  api project(':swim-uri')
+  api project(':swim-deflate')
+  api project(':swim-mqtt')
+  api project(':swim-http')
+  api project(':swim-ws')
+  api project(':swim-warp')
+  api project(':swim-concurrent')
+  api project(':swim-db')
+  api project(':swim-io')
+  api project(':swim-io-mqtt')
+  api project(':swim-io-http')
+  api project(':swim-io-ws')
+  api project(':swim-io-warp')
+  api project(':swim-web')
+}
 
-    def javaProjects = subprojects.findAll { subproject -> subproject.plugins.hasPlugin(JavaPlugin) }
-
-    if (useModules) {
-        javaProjects.each { project ->
-            compileJava.dependsOn project.tasks.compileModuleInfoJava
-        }
-    }
-
-    javadoc {
-        title 'Swim Core'
-        options.overview = "${projectDir}/overview.html"
-
-        source javaProjects.collect { project -> project.sourceSets.main.allJava }
-        doFirst {
-            if (useModules) {
-                def modules = javaProjects.collect { project -> project.moduleName }
-                options.addStringOption('-module', modules.join(','))
-                options.addStringOption('-module-source-path', "${projectDir}/*/src/main/java")
-                options.addStringOption('-module-path', classpath.asPath)
-                classpath = files()
-            } else {
-                exclude '*module-info*'
-            }
-            options.addBooleanOption('Xdoclint:all,-missing', true)
-            options.charSet = 'UTF-8'
-            options.encoding = 'UTF-8'
-            if (jvmVersion >= 9) {
-                options.addBooleanOption('html5', true)
-            }
-            if (jvmVersion >= 11) {
-                options.links += ["https://docs.oracle.com/en/java/javase/" + jvmVersion + "/docs/api/"]
-            } else {
-                options.links += ["https://docs.oracle.com/javase/" + jvmVersion + "/docs/api/"]
-            }
-        }
-    }
-
-    task javadocJar(type: Jar) {
-        archiveClassifier = 'javadoc'
-        from javadoc
-    }
-
-    artifacts {
-        archives javadocJar
-    }
+javadoc {
+  title 'Swim Core'
+  options.overview = "${projectDir}/overview.html"
+  options.addStringOption('-module-source-path', "${projectDir}/*/src/main/java")
 }

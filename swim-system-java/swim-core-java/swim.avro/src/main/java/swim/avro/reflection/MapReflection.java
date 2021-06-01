@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ import swim.util.PairBuilder;
 
 final class MapReflection<V> extends AvroMapType<String, V, Map<String, V>> {
 
-  final Constructor<Map<String, V>> constructor;
-  final AvroType<V> valueType;
+  final Constructor<? extends Map<String, V>> constructor;
+  final AvroType<? extends V> valueType;
 
-  MapReflection(Constructor<Map<String, V>> constructor, AvroType<V> valueType) {
+  MapReflection(Constructor<? extends Map<String, V>> constructor, AvroType<? extends V> valueType) {
     this.constructor = constructor;
     this.valueType = valueType;
   }
@@ -40,7 +40,7 @@ final class MapReflection<V> extends AvroMapType<String, V, Map<String, V>> {
   }
 
   @Override
-  public AvroType<V> valueType() {
+  public AvroType<? extends V> valueType() {
     return this.valueType;
   }
 
@@ -53,10 +53,10 @@ final class MapReflection<V> extends AvroMapType<String, V, Map<String, V>> {
 
 final class MapReflectionBuilder<V> implements PairBuilder<String, V, Map<String, V>> {
 
-  final Constructor<Map<String, V>> constructor;
+  final Constructor<? extends Map<String, V>> constructor;
   Map<String, V> map;
 
-  MapReflectionBuilder(Constructor<Map<String, V>> constructor) {
+  MapReflectionBuilder(Constructor<? extends Map<String, V>> constructor) {
     this.constructor = constructor;
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,12 +33,12 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
   final long keyLength;
   final int shift;
   final Parser<K> keyParser;
-  final Decoder<V> valueDecoder;
+  final Decoder<? extends V> valueDecoder;
   final int step;
 
   MapDecoder(AvroDecoder avro, AvroMapType<K, V, T> type, PairBuilder<K, V, T> builder,
              long count, long blockSize, long keyLength, int shift, Parser<K> keyParser,
-             Decoder<V> valueDecoder, int step) {
+             Decoder<? extends V> valueDecoder, int step) {
     this.avro = avro;
     this.type = type;
     this.builder = builder;
@@ -58,7 +58,7 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
   static <K, V, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroMapType<K, V, T> type,
                                      PairBuilder<K, V, T> builder, long count, long blockSize,
                                      long keyLength, int shift, Parser<K> keyParser,
-                                     Decoder<V> valueDecoder, int step) {
+                                     Decoder<? extends V> valueDecoder, int step) {
     do {
       if (step == 1) {
         while (input.isCont()) {
@@ -190,7 +190,7 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
       return error(input.trap());
     }
     return new MapDecoder<K, V, T>(avro, type, builder, count, blockSize, keyLength,
-        shift, keyParser, valueDecoder, step);
+                                   shift, keyParser, valueDecoder, step);
   }
 
   static <K, V, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroMapType<K, V, T> type) {

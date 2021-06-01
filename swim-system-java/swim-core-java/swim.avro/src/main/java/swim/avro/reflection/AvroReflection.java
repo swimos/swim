@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -175,7 +175,7 @@ public final class AvroReflection {
   }
 
   @SuppressWarnings("unchecked")
-  public static <I, T> AvroArrayType<I, T> arrayType(Class<?> itemClass, AvroType<I> itemType) {
+  public static <I, T> AvroArrayType<I, T> arrayType(Class<?> itemClass, AvroType<? extends I> itemType) {
     return (AvroArrayType<I, T>) new ArrayReflection<I>(itemClass, itemType);
   }
 
@@ -184,7 +184,7 @@ public final class AvroReflection {
   }
 
   @SuppressWarnings("unchecked")
-  public static <V, T extends Map<String, V>> AvroMapType<String, V, T> mapType(Class<?> mapClass, AvroType<V> valueType) {
+  public static <V, T extends Map<String, V>> AvroMapType<String, V, T> mapType(Class<?> mapClass, AvroType<? extends V> valueType) {
     if (mapClass == Map.class) {
       mapClass = HashMap.class;
     } else if (mapClass == SortedMap.class) {
@@ -199,7 +199,7 @@ public final class AvroReflection {
     }
   }
 
-  public static <V> AvroMapType<String, V, Map<String, V>> mapType(AvroType<V> valueType) {
+  public static <V> AvroMapType<String, V, Map<String, V>> mapType(AvroType<? extends V> valueType) {
     return mapType(Map.class, valueType);
   }
 
@@ -215,7 +215,7 @@ public final class AvroReflection {
     return fixedType(AvroName.parse(fullName), size);
   }
 
-  public static <R, V> AvroFieldType<R, V> field(Field field, AvroType<? extends V> valueType) {
+  public static <R, V> AvroFieldType<V, R> field(Field field, AvroType<? extends V> valueType) {
     return new FieldReflection<R, V>(field, valueType);
   }
 
@@ -350,13 +350,21 @@ public final class AvroReflection {
         return (AvroType<T>) arrayType((Class<?>) componentType);
       }
     }
+    final Type[] typeArguments;
     if (genericType instanceof ParameterizedType) {
-      genericType = ((ParameterizedType) genericType).getRawType();
+      final ParameterizedType parameterizedType = (ParameterizedType) genericType;
+      genericType = parameterizedType.getRawType();
+      typeArguments = parameterizedType.getActualTypeArguments();
+    } else {
+      typeArguments = null;
     }
     if (genericType instanceof Class<?>) {
       final Class<Object> type = (Class<Object>) genericType;
       if (type.isArray()) {
         return (AvroType<T>) arrayType(type.getComponentType());
+      } else if (type.isAssignableFrom(Map.class) && typeArguments != null && typeArguments.length == 2 && typeArguments[0] == String.class) {
+        final AvroType<?> valueType = reflectGenericType(typeArguments[1]);
+        return (AvroType<T>) mapType(type, valueType);
       } else {
         return classType(type);
       }
@@ -388,7 +396,10 @@ public final class AvroReflection {
       if (name == null || name.length() == 0) {
         name = field.getName();
       }
-      recordType = recordType.field(field(field, reflectGenericType(field.getGenericType())));
+      final AvroType<?> valueType = reflectGenericType(field.getGenericType());
+      if (valueType != null) {
+        recordType = recordType.field(field(field, valueType));
+      }
     }
     return recordType;
   }

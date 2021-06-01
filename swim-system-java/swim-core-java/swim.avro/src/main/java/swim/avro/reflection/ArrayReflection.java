@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,15 +23,15 @@ import swim.util.Builder;
 final class ArrayReflection<I> extends AvroArrayType<I, Object> {
 
   final Class<?> itemClass;
-  final AvroType<I> itemType;
+  final AvroType<? extends I> itemType;
 
-  ArrayReflection(Class<?> itemClass, AvroType<I> itemType) {
+  ArrayReflection(Class<?> itemClass, AvroType<? extends I> itemType) {
     this.itemClass = itemClass;
     this.itemType = itemType;
   }
 
   @Override
-  public AvroType<I> itemType() {
+  public AvroType<? extends I> itemType() {
     return this.itemType;
   }
 

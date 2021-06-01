@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ final class RecordReflection<T> extends AvroRecordType<T, T> {
   final Constructor<T> constructor;
   final String doc;
   final FingerTrieSeq<AvroName> aliases;
-  final FingerTrieSeq<AvroFieldType<T, ?>> fields;
+  final FingerTrieSeq<AvroFieldType<?, T>> fields;
 
   RecordReflection(AvroName fullName, Constructor<T> constructor, String doc,
-                   FingerTrieSeq<AvroName> aliases, FingerTrieSeq<AvroFieldType<T, ?>> fields) {
+                   FingerTrieSeq<AvroName> aliases, FingerTrieSeq<AvroFieldType<?, T>> fields) {
     this.fullName = fullName;
     this.constructor = constructor;
     this.doc = doc;
@@ -80,12 +80,12 @@ final class RecordReflection<T> extends AvroRecordType<T, T> {
   }
 
   @Override
-  public AvroFieldType<T, ?> getField(int index) {
+  public AvroFieldType<?, T> getField(int index) {
     return this.fields.get(index);
   }
 
   @Override
-  public AvroRecordType<T, T> field(AvroFieldType<T, ?> field) {
+  public AvroRecordType<T, T> field(AvroFieldType<?, T> field) {
     return new RecordReflection<T>(this.fullName, this.constructor, this.doc,
         this.aliases, this.fields.appended(field));
   }

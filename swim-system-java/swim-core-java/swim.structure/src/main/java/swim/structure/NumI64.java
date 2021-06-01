@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,11 +21,6 @@ import swim.util.HashGenCacheSet;
 
 final class NumI64 extends Num {
 
-  static final int UINT64 = 1 << 0;
-  private static NumI64 zero;
-  private static NumI64 positiveOne;
-  private static NumI64 negativeOne;
-  private static ThreadLocal<HashGenCacheSet<NumI64>> cache = new ThreadLocal<>();
   final long value;
   int flags;
 
@@ -36,58 +31,6 @@ final class NumI64 extends Num {
 
   NumI64(long value) {
     this(value, 0);
-  }
-
-  static NumI64 zero() {
-    if (zero == null) {
-      zero = new NumI64(0L);
-    }
-    return zero;
-  }
-
-  static NumI64 positiveOne() {
-    if (positiveOne == null) {
-      positiveOne = new NumI64(1L);
-    }
-    return positiveOne;
-  }
-
-  static NumI64 negativeOne() {
-    if (negativeOne == null) {
-      negativeOne = new NumI64(-1L);
-    }
-    return negativeOne;
-  }
-
-  public static NumI64 from(long value) {
-    if (value == 0L) {
-      return zero();
-    } else if (value == 1L) {
-      return positiveOne();
-    } else if (value == -1L) {
-      return negativeOne();
-    } else {
-      return cache().put(new NumI64(value));
-    }
-  }
-
-  public static NumI64 uint64(long value) {
-    return new NumI64(value, UINT64);
-  }
-
-  static HashGenCacheSet<NumI64> cache() {
-    HashGenCacheSet<NumI64> cache = NumI64.cache.get();
-    if (cache == null) {
-      int cacheSize;
-      try {
-        cacheSize = Integer.parseInt(System.getProperty("swim.structure.num.i64.cache.size"));
-      } catch (NumberFormatException e) {
-        cacheSize = 16;
-      }
-      cache = new HashGenCacheSet<NumI64>(cacheSize);
-      NumI64.cache.set(cache);
-    }
-    return cache;
   }
 
   @Override
@@ -379,6 +322,66 @@ final class NumI64 extends Num {
   @Override
   public void display(Output<?> output) {
     Format.debugLong(this.value, output);
+  }
+
+  static final int UINT64 = 1 << 0;
+
+  private static NumI64 zero;
+  private static NumI64 positiveOne;
+  private static NumI64 negativeOne;
+
+  static NumI64 zero() {
+    if (zero == null) {
+      zero = new NumI64(0L);
+    }
+    return zero;
+  }
+
+  static NumI64 positiveOne() {
+    if (positiveOne == null) {
+      positiveOne = new NumI64(1L);
+    }
+    return positiveOne;
+  }
+
+  static NumI64 negativeOne() {
+    if (negativeOne == null) {
+      negativeOne = new NumI64(-1L);
+    }
+    return negativeOne;
+  }
+
+  public static NumI64 from(long value) {
+    if (value == 0L) {
+      return zero();
+    } else if (value == 1L) {
+      return positiveOne();
+    } else if (value == -1L) {
+      return negativeOne();
+    } else {
+      return cache().put(new NumI64(value));
+    }
+  }
+
+  public static NumI64 uint64(long value) {
+    return new NumI64(value, UINT64);
+  }
+
+  private static ThreadLocal<HashGenCacheSet<NumI64>> cache = new ThreadLocal<>();
+
+  static HashGenCacheSet<NumI64> cache() {
+    HashGenCacheSet<NumI64> cache = NumI64.cache.get();
+    if (cache == null) {
+      int cacheSize;
+      try {
+        cacheSize = Integer.parseInt(System.getProperty("swim.structure.num.i64.cache.size"));
+      } catch (NumberFormatException e) {
+        cacheSize = 16;
+      }
+      cache = new HashGenCacheSet<NumI64>(cacheSize);
+      NumI64.cache.set(cache);
+    }
+    return cache;
   }
 
 }

@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,63 +20,10 @@ import swim.util.HashGenCacheSet;
 
 final class NumInt extends Num {
 
-  private static NumInt zero;
-  private static NumInt positiveOne;
-  private static NumInt negativeOne;
-  private static ThreadLocal<HashGenCacheSet<NumInt>> cache = new ThreadLocal<>();
   final BigInteger value;
 
   NumInt(BigInteger value) {
     this.value = value;
-  }
-
-  static NumInt zero() {
-    if (zero == null) {
-      zero = new NumInt(BigInteger.ZERO);
-    }
-    return zero;
-  }
-
-  static NumInt positiveOne() {
-    if (positiveOne == null) {
-      positiveOne = new NumInt(BigInteger.ONE);
-    }
-    return positiveOne;
-  }
-
-  static NumInt negativeOne() {
-    if (negativeOne == null) {
-      negativeOne = new NumInt(BigInteger.ONE.negate());
-    }
-    return negativeOne;
-  }
-
-  public static NumInt from(BigInteger value) {
-    final double doubleValue = value.doubleValue();
-    if (doubleValue == 0.0) {
-      return zero();
-    } else if (doubleValue == 1.0) {
-      return positiveOne();
-    } else if (doubleValue == -1.0) {
-      return negativeOne();
-    } else {
-      return cache().put(new NumInt(value));
-    }
-  }
-
-  static HashGenCacheSet<NumInt> cache() {
-    HashGenCacheSet<NumInt> cache = NumInt.cache.get();
-    if (cache == null) {
-      int cacheSize;
-      try {
-        cacheSize = Integer.parseInt(System.getProperty("swim.structure.num.int.cache.size"));
-      } catch (NumberFormatException e) {
-        cacheSize = 16;
-      }
-      cache = new HashGenCacheSet<NumInt>(cacheSize);
-      NumInt.cache.set(cache);
-    }
-    return cache;
   }
 
   @Override
@@ -363,6 +310,61 @@ final class NumInt extends Num {
   @Override
   public void display(Output<?> output) {
     output.debug(this.value.toString());
+  }
+
+  private static NumInt zero;
+  private static NumInt positiveOne;
+  private static NumInt negativeOne;
+
+  static NumInt zero() {
+    if (zero == null) {
+      zero = new NumInt(BigInteger.ZERO);
+    }
+    return zero;
+  }
+
+  static NumInt positiveOne() {
+    if (positiveOne == null) {
+      positiveOne = new NumInt(BigInteger.ONE);
+    }
+    return positiveOne;
+  }
+
+  static NumInt negativeOne() {
+    if (negativeOne == null) {
+      negativeOne = new NumInt(BigInteger.ONE.negate());
+    }
+    return negativeOne;
+  }
+
+  public static NumInt from(BigInteger value) {
+    final double doubleValue = value.doubleValue();
+    if (doubleValue == 0.0) {
+      return zero();
+    } else if (doubleValue == 1.0) {
+      return positiveOne();
+    } else if (doubleValue == -1.0) {
+      return negativeOne();
+    } else {
+      return cache().put(new NumInt(value));
+    }
+  }
+
+  private static ThreadLocal<HashGenCacheSet<NumInt>> cache = new ThreadLocal<>();
+
+  static HashGenCacheSet<NumInt> cache() {
+    HashGenCacheSet<NumInt> cache = NumInt.cache.get();
+    if (cache == null) {
+      int cacheSize;
+      try {
+        cacheSize = Integer.parseInt(System.getProperty("swim.structure.num.int.cache.size"));
+      } catch (NumberFormatException e) {
+        cacheSize = 16;
+      }
+      cache = new HashGenCacheSet<NumInt>(cacheSize);
+      NumInt.cache.set(cache);
+    }
+    return cache;
   }
 
 }

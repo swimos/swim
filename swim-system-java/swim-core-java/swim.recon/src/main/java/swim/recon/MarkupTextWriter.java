@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,6 +32,11 @@ final class MarkupTextWriter extends Writer<Object, Object> {
     this.index = index;
     this.escape = escape;
     this.step = step;
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.text, this.index, this.escape, this.step);
   }
 
   static int sizeOf(String text) {
@@ -124,11 +129,6 @@ final class MarkupTextWriter extends Writer<Object, Object> {
 
   static Writer<Object, Object> write(Output<?> output, String text) {
     return write(output, text, 0, 0, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.text, this.index, this.escape, this.step);
   }
 
 }

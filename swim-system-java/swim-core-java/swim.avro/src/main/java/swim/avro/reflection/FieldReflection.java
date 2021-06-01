@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import swim.avro.schema.AvroOrder;
 import swim.avro.schema.AvroType;
 import swim.collections.FingerTrieSeq;
 
-final class FieldReflection<R, V> extends AvroFieldType<R, V> {
+final class FieldReflection<R, V> extends AvroFieldType<V, R> {
 
   final Field field;
   final String doc;
@@ -55,7 +55,7 @@ final class FieldReflection<R, V> extends AvroFieldType<R, V> {
   }
 
   @Override
-  public AvroFieldType<R, V> doc(String doc) {
+  public AvroFieldType<V, R> doc(String doc) {
     return new FieldReflection<R, V>(this.field, doc, this.valueType, this.defaultValue,
         this.order, this.aliases);
   }
@@ -86,7 +86,7 @@ final class FieldReflection<R, V> extends AvroFieldType<R, V> {
   }
 
   @Override
-  public AvroFieldType<R, V> alias(String alias) {
+  public AvroFieldType<V, R> alias(String alias) {
     return new FieldReflection<R, V>(this.field, this.doc, this.valueType, this.defaultValue,
         this.order, this.aliases.appended(alias));
   }
@@ -94,7 +94,7 @@ final class FieldReflection<R, V> extends AvroFieldType<R, V> {
   @Override
   public R updated(R record, V value) {
     try {
-      field.set(record, value);
+      this.field.set(record, value);
       return record;
     } catch (IllegalAccessException cause) {
       throw new AvroException(cause);

@@ -1,12 +1,15 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'In-memory storage runtime'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java/swim.store.mem'
 ext.moduleName = 'swim.store.mem'
 
 dependencies {
-    api group: 'org.swimos', name: 'swim-collections', version: version
-    api group: 'org.swimos', name: 'swim-spatial', version: version
-    api project(':swim-store')
-    api project(':swim-kernel')
+  api group: 'org.swimos', name: 'swim-collections', version: project.version
+  api group: 'org.swimos', name: 'swim-spatial', version: project.version
+  api project(':swim-store')
+  api project(':swim-kernel')
 }

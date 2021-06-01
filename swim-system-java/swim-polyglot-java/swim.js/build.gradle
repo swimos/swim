@@ -1,31 +1,24 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'JavaScript kernel runtime'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-polyglot-java/swim.js'
 ext.moduleName = 'swim.js'
 
 dependencies {
-    implementation group: 'org.swimos', name: 'swim-json', version: version
-    api group: 'org.swimos', name: 'swim-kernel', version: version
-    implementation project(':swim-dynamic-java')
-    implementation project(':swim-dynamic-structure')
-    implementation project(':swim-dynamic-observable')
-    implementation project(':swim-dynamic-api')
-    api project(':swim-vm-js')
+  implementation group: 'org.swimos', name: 'swim-json', version: project.version
+  api group: 'org.swimos', name: 'swim-kernel', version: project.version
+  implementation project(':swim-dynamic-java')
+  implementation project(':swim-dynamic-structure')
+  implementation project(':swim-dynamic-observable')
+  implementation project(':swim-dynamic-api')
+  api project(':swim-vm-js')
 
-    testImplementation group: 'org.swimos', name: 'swim-server', version: version
+  testImplementation group: 'org.swimos', name: 'swim-server', version: project.version
 }
 
 test {
-    if (useModules) {
-        doFirst {
-            jvmArgs += [
-                    '--add-reads', 'swim.js=swim.actor',
-                    '--add-reads', 'swim.js=swim.server',
-                    '--add-reads', 'swim.js=swim.service.web',
-            ]
-        }
-    }
-
-    systemProperty "project.dir", projectDir
+  systemProperty "project.dir", projectDir
 }

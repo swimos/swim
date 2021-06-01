@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
 
 package swim.avro.schema;
 
-public abstract class AvroFieldType<R, V> {
+public abstract class AvroFieldType<V, R> {
 
   public abstract String name();
 
   public abstract String doc();
 
-  public abstract AvroFieldType<R, V> doc(String doc);
+  public abstract AvroFieldType<V, R> doc(String doc);
 
   public abstract AvroType<? extends V> valueType();
 
@@ -32,7 +32,7 @@ public abstract class AvroFieldType<R, V> {
 
   public abstract String getAlias(int index);
 
-  public abstract AvroFieldType<R, V> alias(String alias);
+  public abstract AvroFieldType<V, R> alias(String alias);
 
   public abstract R updated(R record, V value);
 

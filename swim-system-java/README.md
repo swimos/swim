@@ -60,7 +60,7 @@ of the following component libraries:
   **swim-structure** values.
 - [**swim-decipher**](swim-core-java/swim.decipher) –
   universal decoder that detects and incrementally parses Recon, JSON, XML,
-  Protobuf, raw text, and binary data formats as **swim-structure** values.
+  plain text, and binary data formats as **swim-structure** values.
 - [**swim-math**](swim-core-java/swim.math) –
   mathematical and geometric structures, including rings, fields, vector
   modules and spaces, affine spaces, tensor spaces, probability distributions,

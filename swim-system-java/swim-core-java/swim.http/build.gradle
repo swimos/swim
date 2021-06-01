@@ -1,17 +1,20 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'HTTP message model and wire protocol codec that incrementally decodes and encodes HTTP streams without intermediate buffering'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.http'
 ext.moduleName = 'swim.http'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-codec')
-    api project(':swim-structure')
-    api project(':swim-collections')
-    api project(':swim-uri')
-    implementation project(':swim-recon')
-    implementation project(':swim-json')
-    implementation project(':swim-xml')
-    implementation project(':swim-decipher')
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-collections')
+  api project(':swim-uri')
+  implementation project(':swim-recon')
+  implementation project(':swim-json')
+  implementation project(':swim-xml')
+  implementation project(':swim-decipher')
 }

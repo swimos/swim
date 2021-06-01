@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,11 @@ final class StringParser<I, V> extends Parser<V> {
     this.step = step;
   }
 
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.output, this.quote, this.code, this.step);
+  }
+
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Output<V> output,
                                 int quote, int code, int step) {
     int c = 0;
@@ -63,8 +68,7 @@ final class StringParser<I, V> extends Parser<V> {
         return error(Diagnostic.expected("string", input));
       }
     }
-    string:
-    do {
+    string: do {
       if (step == 2) {
         while (input.isCont()) {
           c = input.head();
@@ -171,11 +175,6 @@ final class StringParser<I, V> extends Parser<V> {
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Output<V> output) {
     return parse(input, recon, output, 0, 0, 1);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.output, this.quote, this.code, this.step);
   }
 
 }

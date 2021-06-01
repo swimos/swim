@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import swim.util.PairBuilder;
 
 final class MapStructure<V extends Value> extends AvroMapType<Value, V, Record> {
 
-  final AvroType<V> valueType;
+  final AvroType<? extends V> valueType;
 
-  MapStructure(AvroType<V> valueType) {
+  MapStructure(AvroType<? extends V> valueType) {
     this.valueType = valueType;
   }
 
@@ -39,7 +39,7 @@ final class MapStructure<V extends Value> extends AvroMapType<Value, V, Record> 
   }
 
   @Override
-  public AvroType<V> valueType() {
+  public AvroType<? extends V> valueType() {
     return this.valueType;
   }
 

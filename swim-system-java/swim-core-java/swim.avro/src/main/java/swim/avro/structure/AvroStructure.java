@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -137,11 +137,11 @@ public final class AvroStructure {
     return enumType(AvroName.parse(fullName), symbols);
   }
 
-  public static <I extends Item> AvroArrayType<I, Record> arrayType(AvroType<I> itemType) {
+  public static <I extends Item> AvroArrayType<I, Record> arrayType(AvroType<? extends I> itemType) {
     return new ArrayStructure<I>(itemType);
   }
 
-  public static <V extends Value> AvroMapType<Value, V, Record> mapType(AvroType<V> valueType) {
+  public static <V extends Value> AvroMapType<Value, V, Record> mapType(AvroType<? extends V> valueType) {
     return new MapStructure<V>(valueType);
   }
 
@@ -157,7 +157,7 @@ public final class AvroStructure {
     return fixedType(AvroName.parse(fullName), size);
   }
 
-  public static AvroFieldType<Record, Value> field(String name, AvroType<? extends Value> valueType) {
+  public static AvroFieldType<Value, Record> field(String name, AvroType<? extends Value> valueType) {
     return new FieldStructure(name, valueType);
   }
 

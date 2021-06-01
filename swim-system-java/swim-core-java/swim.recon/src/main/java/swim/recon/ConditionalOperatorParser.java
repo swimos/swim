@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,12 @@ final class ConditionalOperatorParser<I, V> extends Parser<V> {
     this.thenParser = thenParser;
     this.elseParser = elseParser;
     this.step = step;
+  }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return parse(input, this.recon, this.builder, this.ifParser, this.thenParser,
+                 this.elseParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -132,12 +138,6 @@ final class ConditionalOperatorParser<I, V> extends Parser<V> {
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
     return parse(input, recon, builder, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.ifParser, this.thenParser,
-        this.elseParser, this.step);
   }
 
 }

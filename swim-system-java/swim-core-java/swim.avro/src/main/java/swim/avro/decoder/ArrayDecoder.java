@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,11 +28,11 @@ final class ArrayDecoder<I, T> extends Decoder<T> {
   final long count;
   final long blockSize;
   final int shift;
-  final Decoder<I> itemDecoder;
+  final Decoder<? extends I> itemDecoder;
   final int step;
 
   ArrayDecoder(AvroDecoder avro, AvroArrayType<I, T> type, Builder<I, T> builder,
-               long count, long blockSize, int shift, Decoder<I> itemDecoder, int step) {
+               long count, long blockSize, int shift, Decoder<? extends I> itemDecoder, int step) {
     this.avro = avro;
     this.type = type;
     this.builder = builder;
@@ -49,7 +49,7 @@ final class ArrayDecoder<I, T> extends Decoder<T> {
 
   static <I, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroArrayType<I, T> type,
                                   Builder<I, T> builder, long count, long blockSize,
-                                  int shift, Decoder<I> itemDecoder, int step) {
+                                  int shift, Decoder<? extends I> itemDecoder, int step) {
     do {
       if (step == 1) {
         while (input.isCont()) {

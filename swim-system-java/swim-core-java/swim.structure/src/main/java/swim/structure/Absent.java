@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,15 +20,8 @@ import swim.util.Murmur3;
 
 public final class Absent extends Value {
 
-  private static final Absent VALUE = new Absent();
-  private static int hashSeed;
-
   private Absent() {
     // stub
-  }
-
-  public static Absent absent() {
-    return VALUE;
   }
 
   /**
@@ -37,6 +30,14 @@ public final class Absent extends Value {
    */
   @Override
   public boolean isDefined() {
+    return false;
+  }
+
+  /**
+   * Always returns {@code false} because {@code Absent} is not a definite value.
+   */
+  @Override
+  public boolean isDefinite() {
     return false;
   }
 
@@ -194,5 +195,12 @@ public final class Absent extends Value {
   public void debug(Output<?> output) {
     output = output.write("Value").write('.').write("absent").write('(').write(')');
   }
+
+  public static Absent absent() {
+    return VALUE;
+  }
+
+  private static final Absent VALUE = new Absent();
+  private static int hashSeed;
 
 }

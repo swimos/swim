@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,6 +31,11 @@ final class IdentWriter extends Writer<Object, Object> {
 
   static int sizeOf(String ident) {
     return Utf8.sizeOf(ident);
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return write(output, this.ident, this.index);
   }
 
   static Writer<Object, Object> write(Output<?> output, String ident, int index) {
@@ -68,11 +73,6 @@ final class IdentWriter extends Writer<Object, Object> {
 
   static Writer<Object, Object> write(Output<?> output, String ident) {
     return write(output, ident, 0);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.ident, this.index);
   }
 
 }

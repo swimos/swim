@@ -1,15 +1,18 @@
-apply from: '../project.gradle'
+plugins {
+  id 'SwimSystemLibrary'
+  id 'SwimSystemPublish'
+}
 
 description = 'WebSocket modem for concurrently transporting explicitly flow-controlled WebSocket streams over a network without blocking or intermediate buffering, and swim-io-http requesters and responders for upgrading HTTP client and server modems to WebSocket modems'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java/swim.io.ws'
 ext.moduleName = 'swim.io.ws'
 
 dependencies {
-    implementation project(':swim-util')
-    api project(':swim-codec')
-    api project(':swim-structure')
-    api project(':swim-http')
-    api project(':swim-ws')
-    api project(':swim-io')
-    api project(':swim-io-http')
+  implementation project(':swim-util')
+  api project(':swim-codec')
+  api project(':swim-structure')
+  api project(':swim-http')
+  api project(':swim-ws')
+  api project(':swim-io')
+  api project(':swim-io-http')
 }

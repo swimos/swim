@@ -1,4 +1,4 @@
-// Copyright 2015-2020 Swim inc.
+// Copyright 2015-2021 Swim inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public final class ConditionalOperator extends Operator {
     interpreter.willOperate(this);
     final Item result;
     final Item ifTerm = this.ifTerm.evaluate(interpreter);
-    if (ifTerm.booleanValue(false)) {
+    if (ifTerm.isDefinite()) {
       final Item thenTerm = this.thenTerm.evaluate(interpreter);
       result = thenTerm;
     } else {
