@@ -16,7 +16,7 @@
     "@typescript-eslint/eslint-plugin": "4",
     "@typescript-eslint/parser": "4",
     "eslint": "7",
-    "prismjs": "1",
+    "prismjs": ">= 1.23.0",
     "rollup": "2.51",
     "rollup-plugin-sourcemaps": "0.6",
     "terser": "5",

@@ -12,7 +12,7 @@
   "types": "lib/main/index.d.ts",
   "devDependencies": {
     "@types/prismjs": "1",
-    "prismjs": "1"
+    "prismjs": ">= 1.23.0"
   },
   "dependencies": {
     "@swim/util": "3.11.0-dev.20210415",
