@@ -17,11 +17,11 @@
     "@typescript-eslint/eslint-plugin": "4",
     "@typescript-eslint/parser": "4",
     "eslint": "7",
-    "rollup": "2.50",
+    "rollup": "2.51",
     "rollup-plugin-sourcemaps": "0.6",
     "terser": "5",
     "tslib": "2",
-    "typedoc": "0.20",
+    "typedoc": "0.21.0-beta.2",
     "typescript": "4.3"
   },
   "dependencies": {
