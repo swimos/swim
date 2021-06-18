@@ -129,8 +129,8 @@ export const Format = {} as {
 Object.defineProperty(Format, "lineSeparator", {
   get(): string {
     let lineSeparator: string | undefined;
-    if (typeof exports === "object" && typeof module !== "undefined" && typeof require === "function") {
-      const os = require("os");
+    if (typeof global !== "undefined" && typeof global.require === "function") {
+      const os = global.require("os");
       if (typeof os === "object" && os !== null) {
         lineSeparator = os.EOL;
       }
