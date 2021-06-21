@@ -53,6 +53,19 @@ final class UriSchemeLiteral extends UriSchemePattern {
   }
 
   @Override
+  boolean matchesPrefix(UriScheme scheme, UriAuthority authority, UriPath path,
+                        UriQuery query, UriFragment fragment) {
+    if (this.scheme.equals(scheme)) {
+      if (this.rest instanceof UriTerminalPattern) {
+        return true;
+      }
+      return this.rest.matchesPrefix(authority, path, query, fragment);
+    } else {
+      return false;
+    }
+  }
+
+  @Override
   boolean matches(UriScheme scheme, UriAuthority authority, UriPath path,
                   UriQuery query, UriFragment fragment) {
     if (this.scheme.equals(scheme)) {

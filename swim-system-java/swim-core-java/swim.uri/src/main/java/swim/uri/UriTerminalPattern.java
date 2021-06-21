@@ -40,4 +40,12 @@ abstract class UriTerminalPattern extends UriFragmentPattern {
     }
   }
 
+  @Override
+  boolean matchesPrefix(UriFragment fragment) {
+    if (!fragment.isDefined()) {
+      return matches();
+    } else {
+      return false;
+    }
+  }
 }

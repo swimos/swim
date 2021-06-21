@@ -55,4 +55,8 @@ final class UriFragmentLiteral extends UriFragmentPattern {
     }
   }
 
+  @Override
+  boolean matchesPrefix(UriFragment fragment) {
+    return matches(fragment);
+  }
 }

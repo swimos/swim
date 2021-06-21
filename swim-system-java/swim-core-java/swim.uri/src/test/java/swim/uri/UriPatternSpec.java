@@ -73,8 +73,26 @@ public class UriPatternSpec {
   }
 
   @Test
+  public void matchPrefixPathSegments() {
+    assertTrue(UriPattern.parse("/:entity").matchesPrefix("/foo"));
+    assertTrue(UriPattern.parse("/:entity").matchesPrefix("/foo/bar"));
+    assertTrue(UriPattern.parse("/test/:id").matchesPrefix("/test/bar"));
+    assertTrue(UriPattern.parse("/test/:id").matchesPrefix("/test/bar/baz"));
+    assertTrue(UriPattern.parse("/:entity/:id").matchesPrefix("/foo/bar"));
+    assertTrue(UriPattern.parse("/:entity/:id").matchesPrefix("/foo/bar/baz"));
+    assertTrue(UriPattern.parse("http://example.com/:entity/info").matches("http://example.com/foo/info"));
+  }
+
+  @Test
+  public void matchPrefixScheme() {
+    assertTrue(UriPattern.parse("http:").matchesPrefix("http://swimos.org"));
+  }
+
+  @Test
   public void matchAllParts() {
     assertTrue(UriPattern.parse("http://example.com/:entity/info?q#f").matches("http://example.com/foo/info?q#f"));
+
+    assertTrue(UriPattern.parse("http://example.com/:entity/info?q#f").matchesPrefix("http://example.com/foo/info?q#f"));
   }
 
   @Test
@@ -83,6 +101,11 @@ public class UriPatternSpec {
     assertFalse(UriPattern.parse("/:entity/:id").matches("/foo/"));
     assertFalse(UriPattern.parse("/a/:id").matches("/b/c"));
     assertFalse(UriPattern.parse("/a/:id/b/:prop").matches("/a/b/c/d"));
+
+    assertFalse(UriPattern.parse("/:entity/:id").matchesPrefix("/foo"));
+    assertFalse(UriPattern.parse("/:entity/:id").matchesPrefix("/foo/"));
+    assertFalse(UriPattern.parse("/a/:id").matchesPrefix("/b/c"));
+    assertFalse(UriPattern.parse("/a/:id/b/:prop").matchesPrefix("/a/b/c/d"));
   }
 
   @Test
@@ -94,6 +117,15 @@ public class UriPatternSpec {
     assertFalse(UriPattern.parse("http://example.com/:entity#f1").matches("http://example.com/foo#f2"));
     assertFalse(UriPattern.parse("http://example.com/:entity?q1#f1").matches("http://example.com/foo?q1#f2"));
     assertFalse(UriPattern.parse("http://example.com/:entity?q1#f1").matches("http://example.com/foo?q2#f1"));
+
+    assertFalse(UriPattern.parse("http://example.com/:entity").matchesPrefix("/foo"));
+    assertFalse(UriPattern.parse("http://example.com/:entity").matchesPrefix("https://example.com/foo"));
+    assertFalse(UriPattern.parse("http://example.com/:entity").matchesPrefix("http://www.example.com/foo"));
+    assertFalse(UriPattern.parse("http://example.com/:entity?q1").matchesPrefix("http://example.com/foo?q2"));
+    assertFalse(UriPattern.parse("http://example.com/:entity#f1").matchesPrefix("http://example.com/foo#f2"));
+    assertFalse(UriPattern.parse("http://example.com/:entity?q1#f1").matchesPrefix("http://example.com/foo?q1#f2"));
+    assertFalse(UriPattern.parse("http://example.com/:entity?q1#f1").matchesPrefix("http://example.com/foo?q2#f1"));
+    assertFalse(UriPattern.parse("http://").matchesPrefix("http://swimos.org")); // scheme, empty path
   }
 
   @Test

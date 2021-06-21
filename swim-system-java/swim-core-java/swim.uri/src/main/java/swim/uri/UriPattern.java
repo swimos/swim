@@ -108,6 +108,12 @@ public abstract class UriPattern implements Debug, Display {
     return matches(Uri.parse(uri));
   }
 
+  public abstract boolean matchesPrefix(Uri uri);
+
+  public boolean matchesPrefix(String uri) {
+    return matchesPrefix(Uri.parse(uri));
+  }
+
   @Override
   public boolean equals(Object other) {
     if (this == other) {

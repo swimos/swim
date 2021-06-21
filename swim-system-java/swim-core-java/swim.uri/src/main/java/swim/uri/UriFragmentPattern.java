@@ -44,4 +44,10 @@ abstract class UriFragmentPattern extends UriQueryPattern {
     }
   }
 
+  abstract boolean matchesPrefix(UriFragment fragment);
+
+  @Override
+  boolean matchesPrefix(UriQuery query, UriFragment fragment) {
+    return matches(query, fragment);
+  }
 }

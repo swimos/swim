@@ -56,4 +56,15 @@ final class UriQueryLiteral extends UriQueryPattern {
     }
   }
 
+  @Override
+  boolean matchesPrefix(UriQuery query, UriFragment fragment) {
+    if (this.query.equals(query)) {
+      if (this.rest instanceof UriTerminalPattern) {
+        return true;
+      }
+      return this.rest.matchesPrefix(fragment);
+    } else {
+      return false;
+    }
+  }
 }
