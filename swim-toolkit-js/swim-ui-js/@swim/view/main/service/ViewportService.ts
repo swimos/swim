@@ -58,4 +58,8 @@ export abstract class ViewportService<V extends View> extends ViewManagerService
   }
 }
 
-ViewService({type: ViewportManager, observe: false})(View.prototype, "viewportService");
+ViewService({
+  extends: ViewportService,
+  type: ViewportManager,
+  observe: false,
+})(View.prototype, "viewportService");

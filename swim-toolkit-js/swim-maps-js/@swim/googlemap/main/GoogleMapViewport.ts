@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="googlemaps"/>
+/// <reference types="google.maps"/>
 
 import type {Equals} from "@swim/util";
 import {AnyR2Point, R2Point} from "@swim/math";
@@ -74,10 +74,11 @@ export class GoogleMapViewport implements GeoViewport, Equals {
         geoPoint = new google.maps.LatLng(lng.lat, lng.lng);
       }
       const point = projection.fromLatLngToContainerPixel(geoPoint);
-      return new R2Point(point.x, point.y);
-    } else {
-      return R2Point.undefined();
+      if (point !== null) {
+        return new R2Point(point.x, point.y);
+      }
     }
+    return R2Point.undefined();
   }
 
   unproject(viewPoint: AnyR2Point): GeoPoint;
@@ -94,10 +95,11 @@ export class GoogleMapViewport implements GeoViewport, Equals {
         viewPoint = new google.maps.Point(x.x, x.y);
       }
       const point = projection.fromContainerPixelToLatLng(viewPoint);
-      return new GeoPoint(point.lng(), point.lat());
-    } else {
-      return GeoPoint.undefined();
+      if (point !== null) {
+        return new GeoPoint(point.lng(), point.lat());
+      }
     }
+    return GeoPoint.undefined();
   }
 
   equals(that: unknown): boolean {
@@ -128,10 +130,19 @@ export class GoogleMapViewport implements GeoViewport, Equals {
       geoFrame = GeoBox.undefined();
     }
     const mapCenter = map.getCenter();
-    const geoCenter = new GeoPoint(mapCenter.lng(), mapCenter.lat());
-    const zoom = map.getZoom();
-    const heading = map.getHeading();
-    const tilt = map.getTilt();
+    const geoCenter = mapCenter !== void 0 ? new GeoPoint(mapCenter.lng(), mapCenter.lat()) : GeoPoint.origin();
+    let zoom = map.getZoom();
+    if (zoom === void 0) {
+      zoom = 0;
+    }
+    let heading = map.getHeading();
+    if (heading === void 0) {
+      heading = 0;
+    }
+    let tilt = map.getTilt();
+    if (tilt === void 0) {
+      tilt = 0;
+    }
     return new GoogleMapViewport(projection, geoFrame, geoCenter, zoom, heading, tilt);
   }
 }

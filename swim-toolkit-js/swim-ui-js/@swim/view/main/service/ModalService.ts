@@ -48,4 +48,8 @@ export abstract class ModalService<V extends View> extends ViewManagerService<V,
   }
 }
 
-ViewService({type: ModalManager, observe: false})(View.prototype, "modalService");
+ViewService({
+  extends: ModalService,
+  type: ModalManager,
+  observe: false,
+})(View.prototype, "modalService");

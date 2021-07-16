@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// <reference types="googlemaps"/>
+/// <reference types="google.maps"/>
 
 import {Equivalent, Lazy} from "@swim/util";
 import type {AnyTiming} from "@swim/mapping";

@@ -14,11 +14,13 @@
 
 export * from "./geo";
 
-export * from "./tree";
-
 export * from "./layer";
 
 export * from "./raster";
+
+export * from "./tree";
+
+export * from "./grid";
 
 export * from "./effect";
 

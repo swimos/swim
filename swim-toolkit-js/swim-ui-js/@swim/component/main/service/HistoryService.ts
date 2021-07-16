@@ -36,4 +36,8 @@ export abstract class HistoryService<C extends Component> extends ComponentManag
   }
 }
 
-ComponentService({type: HistoryManager, observe: false})(Component.prototype, "historyService");
+ComponentService({
+  extends: HistoryService,
+  type: HistoryManager,
+  observe: false,
+})(Component.prototype, "historyService");

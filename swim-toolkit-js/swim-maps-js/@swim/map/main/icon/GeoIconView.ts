@@ -17,7 +17,7 @@ import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box} from "@swim/ma
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
 import {
   Graphics,
   GraphicsView,
@@ -382,6 +382,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
     //const graphics = this.graphics.value;
     //if (graphics !== null) {
     //  const context = renderer.context;
+    //  context.beginPath();
     //  graphics.render(renderer, frame);
     //  if (context.isPointInPath(x * renderer.pixelRatio, y * renderer.pixelRatio)) {
     //    return this;
@@ -412,6 +413,10 @@ export class GeoIconView extends GeoLayerView implements IconView {
     }
     throw new TypeError("" + value);
   }
+
+  static override readonly mountFlags: ViewFlags = GeoLayerView.mountFlags | View.NeedsRasterize;
+  static override readonly powerFlags: ViewFlags = GeoLayerView.powerFlags | View.NeedsRasterize;
+  static override readonly uncullFlags: ViewFlags = GeoLayerView.uncullFlags | View.NeedsRasterize;
 }
 Object.defineProperty(GeoIconView.prototype, "viewBounds", {
   get(this: GeoIconView): R2Box {

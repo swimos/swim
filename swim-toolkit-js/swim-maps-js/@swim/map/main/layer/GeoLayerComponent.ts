@@ -600,20 +600,28 @@ export class GeoLayerComponent extends GeoComponent {
     return component instanceof GeoComponent ? component : null;
   }
 
-  protected override onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
-    super.onInsertChildComponent(childComponent, targetComponent);
+  protected detectInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
     const featureComponent = this.detectFeatureComponent(childComponent);
     if (featureComponent !== null) {
       this.insertFeature(featureComponent, targetComponent);
     }
   }
 
-  protected override onRemoveChildComponent(childComponent: Component): void {
-    super.onRemoveChildComponent(childComponent);
+  protected override onInsertChildComponent(childComponent: Component, targetComponent: Component | null): void {
+    super.onInsertChildComponent(childComponent, targetComponent);
+    this.detectInsertChildComponent(childComponent, targetComponent);
+  }
+
+  protected detectRemoveChildComponent(childComponent: Component): void {
     const featureComponent = this.detectFeatureComponent(childComponent);
     if (featureComponent !== null) {
       this.removeFeature(featureComponent);
     }
+  }
+
+  protected override onRemoveChildComponent(childComponent: Component): void {
+    super.onRemoveChildComponent(childComponent);
+    this.detectRemoveChildComponent(childComponent);
   }
 
   /** @hidden */

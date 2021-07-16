@@ -40,4 +40,8 @@ export abstract class ExecuteService<C extends Component> extends ComponentManag
   }
 }
 
-ComponentService({type: ExecuteManager, observe: false})(Component.prototype, "executeService");
+ComponentService({
+  extends: ExecuteService,
+  type: ExecuteManager,
+  observe: false,
+})(Component.prototype, "executeService");

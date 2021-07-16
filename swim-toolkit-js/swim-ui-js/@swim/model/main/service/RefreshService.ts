@@ -41,6 +41,7 @@ export abstract class RefreshService<M extends Model> extends ModelManagerServic
 }
 
 ModelService({
+  extends: RefreshService,
   type: RefreshManager,
   observe: false,
 })(Model.prototype, "refreshService");

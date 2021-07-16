@@ -222,14 +222,18 @@ export class GeoLayerTrait extends GeoTrait {
     return model.getTrait(GeoTrait);
   }
 
+  protected detectChildModel(childModel: Model): void {
+    const featureTrait = this.detectFeatureModel(childModel);
+    if (featureTrait !== null) {
+      this.insertFeature(featureTrait);
+    }
+  }
+
   protected detectModels(model: TraitModelType<this>): void {
     const childModels = model.childModels;
     for (let i = 0, n = childModels.length; i < n; i += 1) {
       const childModel = childModels[i]!;
-      const featureTrait = this.detectFeatureModel(childModel);
-      if (featureTrait !== null) {
-        this.insertFeature(featureTrait);
-      }
+      this.detectChildModel(childModel);
     }
   }
 
@@ -240,8 +244,7 @@ export class GeoLayerTrait extends GeoTrait {
     super.didSetModel(newModel, oldModel);
   }
 
-  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
-    super.onInsertChildModel(childModel, targetModel);
+  protected detectInsertChildModel(childModel: Model, targetModel: Model | null): void {
     const featureTrait = this.detectFeatureModel(childModel);
     if (featureTrait !== null) {
       const targetTrait = targetModel !== null ? this.detectFeatureModel(targetModel) : null;
@@ -249,12 +252,21 @@ export class GeoLayerTrait extends GeoTrait {
     }
   }
 
-  protected override onRemoveChildModel(childModel: Model): void {
-    super.onRemoveChildModel(childModel);
+  protected override onInsertChildModel(childModel: Model, targetModel: Model | null): void {
+    super.onInsertChildModel(childModel, targetModel);
+    this.detectInsertChildModel(childModel, targetModel);
+  }
+
+  protected detectRemoveChildModel(childModel: Model): void {
     const featureTrait = this.detectFeatureModel(childModel);
     if (featureTrait !== null) {
       this.removeFeature(featureTrait);
     }
+  }
+
+  protected override onRemoveChildModel(childModel: Model): void {
+    super.onRemoveChildModel(childModel);
+    this.detectRemoveChildModel(childModel);
   }
 
   /** @hidden */

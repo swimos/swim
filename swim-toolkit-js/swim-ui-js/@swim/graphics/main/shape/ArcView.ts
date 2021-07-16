@@ -131,6 +131,7 @@ export class ArcView extends LayerView implements FillView, StrokeView {
   }
 
   protected renderArc(context: CanvasContext, frame: R2Box): void {
+    context.beginPath();
     const arc = this.value;
     arc.draw(context, frame);
     const fill = this.fill.value;

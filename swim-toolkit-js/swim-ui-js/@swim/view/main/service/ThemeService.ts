@@ -40,4 +40,8 @@ export abstract class ThemeService<V extends View> extends ViewManagerService<V,
   }
 }
 
-ViewService({type: ThemeManager, observe: false})(View.prototype, "themeService");
+ViewService({
+  extends: ThemeService,
+  type: ThemeManager,
+  observe: false,
+})(View.prototype, "themeService");

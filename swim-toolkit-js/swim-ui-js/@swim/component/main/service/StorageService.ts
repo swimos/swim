@@ -41,4 +41,8 @@ export abstract class StorageService<C extends Component> extends ComponentManag
   }
 }
 
-ComponentService({type: StorageManager, observe: false})(Component.prototype, "storageService");
+ComponentService({
+  extends: StorageService,
+  type: StorageManager,
+  observe: false,
+})(Component.prototype, "storageService");

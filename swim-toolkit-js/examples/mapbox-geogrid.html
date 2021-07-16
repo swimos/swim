@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Swim Mapbox Component</title>
+    <title>Swim GeoGrid</title>
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
     <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.3.0/mapbox-gl.css">
   </head>
@@ -36,56 +36,62 @@ class ExampleMapboxComponent extends swim.MapComponent {
     canvasView.pointerEventsEnabled(true).touchAction("manipulation");
   }
   createLayer(layerTrait) {
-    if (layerTrait instanceof swim.GeoLayerTrait) {
-      return new ExampleLayerComponent();
+    if (layerTrait instanceof ExampleGridTrait) {
+      return new ExampleGridComponent(swim.GeoTile.root());
     } else {
       return super.createLayer(layerTrait);
     }
   }
 }
 
-class ExampleLayerComponent extends swim.GeoLayerComponent {
+class ExampleGridComponent extends swim.GeoGridComponent {
   initGeoView(layerView) {
     super.initGeoView(layerView);
-    //layerView.treeOutlineColor("#008f11");
+    layerView.gridOutlineColor("#008f11");
   }
   projectGeoView(viewContext, layerView) {
     super.projectGeoView(viewContext, layerView);
-    //console.log(viewContext.geoViewport);
   }
-  initFeatureView(featureView) {
-    super.initFeatureView(featureView);
-    //if (featureView instanceof swim.GeoIconView) {
-    //  featureView.iconWidth(24).iconHeight(24);
-    //}
+  createTile(tileTrait) {
+    return new ExampleGridComponent(tileTrait.geoTile);
+  }
+  initTileView(tileView) {
+    super.initTileView(tileView);
   }
 }
+
+class ExampleGridTrait extends swim.GeoGridTrait {
+  constructor(geoTile) {
+    super(geoTile);
+    const tileId = geoTile.x + "," + geoTile.y + "," + geoTile.z;
+    this.vehiclesDownlink.nodeUri(swim.Uri.path(swim.UriPath.of("/", "map", "/", tileId)));
+  }
+  createTileTrait(geoTile) {
+    return new ExampleGridTrait(geoTile);
+  }
+  onStartConsuming() {
+    super.onStartConsuming();
+    console.log("onStartConsuming " + this.geoTile);
+  }
+  onStopConsuming() {
+    super.onStopConsuming();
+    console.log("onStopConsuming " + this.geoTile);
+  }
+}
+swim.ModelMapDownlink({
+  consume: true,
+  laneUri: "vehicles",
+  didUpdate(key, value) {
+    console.log(this.nodeUri() + " updateVehicle " + key.toAny() + ":", value.toAny());
+  },
+})(ExampleGridTrait.prototype, "vehiclesDownlink")
 
 const layerModel = new swim.CompoundModel();
-const layerTrait = new swim.GeoLayerTrait();
+const layerTrait = new ExampleGridTrait(swim.GeoTile.root());
 layerModel.setTrait("layer", layerTrait);
 
-function addFeature(featureId, layerModel) {
-  const featureModel = new swim.CompoundModel();
-  const featureTrait = new swim.GeoIconTrait()
-    .iconLayout({iconWidth: 16, iconHeight: 16})
-    .graphics(swim.CircleIcon.create());
-  featureModel.setTrait("feature", featureTrait);
-  layerModel.appendChildModel(featureModel, "feature" + featureId);
-  setInterval(function () {
-    const lng = Math.random() * 360 - 180;
-    const lat = Math.random() * 120 - 60;
-    featureTrait.geoCenter.setState([lng, lat]);
-    //const iconSize = 8 + 16 * Math.random();
-    //featureTrait.iconLayout.setState({iconWidth: iconSize, iconHeight: iconSize});
-  }, 1000);
-}
-const featureCount = 32;
-for (let featureId = 0; featureId < featureCount; featureId += 1) {
-  addFeature(featureId, layerModel);
-}
-
 const mapModel = new swim.CompoundModel();
+mapModel.warpRef.setState(swim.client.hostRef("warps://transit.swim.services"));
 mapModel.mount();
 const mapTrait = new swim.MapTrait();
 mapModel.setTrait("map", mapTrait);

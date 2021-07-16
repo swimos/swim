@@ -32,4 +32,8 @@ export abstract class DisplayService<V extends View> extends ViewManagerService<
   }
 }
 
-ViewService({type: DisplayManager, observe: false})(View.prototype, "displayService");
+ViewService({
+  extends: DisplayService,
+  type: DisplayManager,
+  observe: false,
+})(View.prototype, "displayService");

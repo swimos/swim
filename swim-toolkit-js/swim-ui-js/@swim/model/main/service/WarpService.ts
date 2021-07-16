@@ -31,6 +31,7 @@ export abstract class WarpService<M extends Model> extends ModelManagerService<M
 }
 
 ModelService({
+  extends: WarpService,
   type: WarpManager,
   observe: false,
 })(Model.prototype, "warpService");
@@ -39,6 +40,7 @@ TraitService({
   type: WarpManager,
   observe: false,
   modelService: {
+    extends: WarpService,
     type: WarpManager,
     observe: false,
   },

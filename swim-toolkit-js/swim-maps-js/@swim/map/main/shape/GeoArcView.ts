@@ -259,6 +259,7 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
   protected renderArc(context: CanvasContext, frame: R2Box): void {
     const arc = this.value;
     if (arc !== null && frame.isDefined()) {
+      context.beginPath();
       arc.draw(context, frame);
       const fill = this.fill.value;
       if (fill !== null) {

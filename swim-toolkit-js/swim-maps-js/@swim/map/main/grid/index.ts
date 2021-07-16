@@ -12,19 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {View} from "../View";
-import {LayoutManager} from "../layout/LayoutManager";
-import {ViewService} from "./ViewService";
-import {ViewManagerService} from "./ViewManagerService";
+export {
+  GeoGridViewInit,
+  GeoGridView,
+} from "./GeoGridView";
 
-export abstract class LayoutService<V extends View> extends ViewManagerService<V, LayoutManager<V>> {
-  override initManager(): LayoutManager<V> {
-    return LayoutManager.global();
-  }
-}
+export {GeoGridTrait} from "./GeoGridTrait";
+export {GeoGridTraitObserver} from "./GeoGridTraitObserver";
 
-ViewService({
-  extends: LayoutService,
-  type: LayoutManager,
-  observe: false,
-})(View.prototype, "layoutService");
+export {GeoGridComponent} from "./GeoGridComponent";
+export {GeoGridComponentObserver} from "./GeoGridComponentObserver";
