@@ -1,6 +1,6 @@
 {
   "name": "@swim/codec",
-  "version": "3.11.0-dev.20210618",
+  "version": "3.11.0-dev.20210702",
   "description": "Incremental I/O; functional parsers and writers; display, debug, and diagnostic formatters; and Unicode and binary codecs",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/codec",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -23,6 +23,6 @@
     "writer"
   ],
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210618"
+    "@swim/util": "3.11.0-dev.20210702"
   }
 }

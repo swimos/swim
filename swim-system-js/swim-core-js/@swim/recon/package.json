@@ -1,6 +1,6 @@
 {
   "name": "@swim/recon",
-  "version": "3.11.0-dev.20210618",
+  "version": "3.11.0-dev.20210702",
   "description": "Object notation with attributes, like if JSON and XML had a baby",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/recon",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -19,9 +19,9 @@
     "swim"
   ],
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210618",
-    "@swim/codec": "3.11.0-dev.20210618",
-    "@swim/mapping": "3.11.0-dev.20210618",
-    "@swim/structure": "3.11.0-dev.20210618"
+    "@swim/util": "3.11.0-dev.20210702",
+    "@swim/codec": "3.11.0-dev.20210702",
+    "@swim/mapping": "3.11.0-dev.20210702",
+    "@swim/structure": "3.11.0-dev.20210702"
   }
 }

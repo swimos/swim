@@ -1,6 +1,6 @@
 {
   "name": "@swim/core",
-  "version": "3.11.0-dev.20210618",
+  "version": "3.11.0-dev.20210702",
   "description": "Swim Core TypeScript Framework",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js",
   "author": "Chris Sachs <chris@swimos.org>",

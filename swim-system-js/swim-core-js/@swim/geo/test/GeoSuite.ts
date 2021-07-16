@@ -14,6 +14,7 @@
 
 import {Spec, Unit} from "@swim/unit";
 import {GeoPointSpec} from "./GeoPointSpec";
+import {GeoTileSpec} from "./GeoTileSpec";
 import {GeoSplineBuilderSpec} from "./GeoSplineBuilderSpec";
 import {GeoPathBuilderSpec} from "./GeoPathBuilderSpec";
 import {GeoJsonSpec} from "./GeoJsonSpec";
@@ -23,6 +24,11 @@ export class GeoSuite extends Spec {
   @Unit
   geoPointSpec(): Spec {
     return new GeoPointSpec();
+  }
+
+  @Unit
+  geoTileSpec(): Spec {
+    return new GeoTileSpec();
   }
 
   @Unit

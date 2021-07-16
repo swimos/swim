@@ -13,6 +13,7 @@
 // limitations under the License.
 
 export {GeoPointSpec} from "./GeoPointSpec";
+export {GeoTileSpec} from "./GeoTileSpec";
 export {GeoSplineBuilderSpec} from "./GeoSplineBuilderSpec";
 export {GeoPathBuilderSpec} from "./GeoPathBuilderSpec";
 export {GeoJsonSpec} from "./GeoJsonSpec";

@@ -21,8 +21,8 @@ export {
 
 export {
   AnyGeoPoint,
-  GeoPointTuple,
   GeoPointInit,
+  GeoPointTuple,
   GeoPoint,
 } from "./GeoPoint";
 export {GeoPointInterpolator} from "./GeoPointInterpolator";
@@ -53,6 +53,13 @@ export {
   GeoPath,
 } from "./GeoPath";
 export {GeoPathBuilder} from "./GeoPathBuilder";
+
+export {
+  AnyGeoTile,
+  GeoTileInit,
+  GeoTileTuple,
+  GeoTile,
+} from "./GeoTile";
 
 export {
   AnyGeoBox,

@@ -1,6 +1,6 @@
 {
   "name": "@swim/macro",
-  "version": "3.11.0-dev.20210618",
+  "version": "3.11.0-dev.20210702",
   "description": "Recon-based macro engine",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/macro",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -15,12 +15,12 @@
     "prismjs": ">= 1.23.0"
   },
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210618",
-    "@swim/codec": "3.11.0-dev.20210618",
-    "@swim/args": "3.11.0-dev.20210618",
-    "@swim/mapping": "3.11.0-dev.20210618",
-    "@swim/structure": "3.11.0-dev.20210618",
-    "@swim/recon": "3.11.0-dev.20210618"
+    "@swim/util": "3.11.0-dev.20210702",
+    "@swim/codec": "3.11.0-dev.20210702",
+    "@swim/args": "3.11.0-dev.20210702",
+    "@swim/mapping": "3.11.0-dev.20210702",
+    "@swim/structure": "3.11.0-dev.20210702",
+    "@swim/recon": "3.11.0-dev.20210702"
   },
   "bin": {
     "swim-macro": "./dist/cli/swim-macro.js"

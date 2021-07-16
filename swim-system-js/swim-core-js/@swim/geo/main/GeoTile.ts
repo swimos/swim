@@ -13,58 +13,62 @@
 // limitations under the License.
 
 import {Equivalent, HashCode, Lazy, Murmur3, Numbers, Constructors} from "@swim/util";
-import {Debug, Format, Output} from "@swim/codec";
-import type {Interpolate, Interpolator} from "@swim/mapping";
+import {Output, Debug, Format} from "@swim/codec";
 import {R2Box} from "@swim/math";
 import type {GeoProjection} from "./GeoProjection";
 import {AnyGeoShape, GeoShape} from "./GeoShape";
-import {AnyGeoPoint, GeoPoint} from "./GeoPoint";
+import {GeoPoint} from "./GeoPoint";
+import {GeoBox} from "./GeoBox";
 import {GeoSegment} from "./GeoSegment";
-import {GeoTile} from "./GeoTile";
-import {GeoBoxInterpolator} from "./"; // forward import
 
-export type AnyGeoBox = GeoBox | GeoBoxInit;
+export type AnyGeoTile = GeoTile | GeoTileInit | GeoTileTuple;
 
-export interface GeoBoxInit {
-  lngMin: number;
-  latMin: number;
-  lngMax: number;
-  latMax: number;
+export interface GeoTileInit {
+  x: number;
+  y: number;
+  z: number;
 }
 
-export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, Equivalent, Debug {
-  constructor(lngMin: number, latMin: number, lngMax: number, latMax: number) {
+export type GeoTileTuple = [number, number, number];
+
+export class GeoTile extends GeoShape implements HashCode, Equivalent, Debug {
+  constructor(x: number, y: number, z: number) {
     super();
-    Object.defineProperty(this, "lngMin", {
-      value: lngMin,
+    Object.defineProperty(this, "x", {
+      value: x,
       enumerable: true,
     });
-    Object.defineProperty(this, "latMin", {
-      value: latMin,
+    Object.defineProperty(this, "y", {
+      value: y,
       enumerable: true,
     });
-    Object.defineProperty(this, "lngMax", {
-      value: lngMax,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "latMax", {
-      value: latMax,
+    Object.defineProperty(this, "z", {
+      value: z,
       enumerable: true,
     });
   }
 
-  isDefined(): boolean {
-    return isFinite(this.lngMin) && isFinite(this.latMin)
-        && isFinite(this.lngMax) && isFinite(this.latMax);
+  readonly x!: number;
+
+  readonly y!: number;
+
+  readonly z!: number;
+
+  override get lngMin(): number {
+    return GeoTile.unprojectX(this.x / (1 << this.z));
   }
 
-  readonly lngMin!: number;
+  override get latMin(): number {
+    return GeoTile.unprojectY(this.y / (1 << this.z));
+  }
 
-  readonly latMin!: number;
+  override get lngMax(): number {
+    return GeoTile.unprojectX((this.x + 1) / (1 << this.z));
+  }
 
-  readonly lngMax!: number;
-
-  readonly latMax!: number;
+  override get latMax(): number {
+    return GeoTile.unprojectY((this.y + 1) / (1 << this.z));
+  }
 
   get west(): number {
     return this.lngMin;
@@ -103,12 +107,32 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
                         (this.latMin + this.latMax) / 2);
   }
 
-  override contains(that: AnyGeoPoint | AnyGeoBox): boolean;
+  get southWestTile(): GeoTile {
+    return new GeoTile(this.x * 2, this.y * 2, this.z + 1);
+  }
+
+  get northWestTile(): GeoTile {
+    return new GeoTile(this.x * 2, this.y * 2 + 1, this.z + 1);
+  }
+
+  get southEastTile(): GeoTile {
+    return new GeoTile(this.x * 2 + 1, this.y * 2, this.z + 1);
+  }
+
+  get northEastTile(): GeoTile {
+    return new GeoTile(this.x * 2 + 1, this.y * 2 + 1, this.z + 1);
+  }
+
+  get parentTile(): GeoTile {
+    return new GeoTile(this.x >> 1, this.y >> 1, this.z - 1);
+  }
+
+  override contains(that: AnyGeoShape): boolean;
   override contains(lng: number, lat: number): boolean;
-  override contains(that: AnyGeoPoint | AnyGeoBox | number, y?: number): boolean {
+  override contains(that: AnyGeoShape | number, lat?: number): boolean {
     if (typeof that === "number") {
       return this.lngMin <= that && that <= this.lngMax
-          && this.latMin <= y! && y! <= this.latMax;
+          && this.latMin <= lat! && lat! <= this.latMax;
     } else if (GeoPoint.isAny(that)) {
       return this.containsPoint(GeoPoint.fromAny(that));
     } else if (GeoSegment.isAny(that)) {
@@ -148,7 +172,7 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
         && this.latMin <= that.latMin && that.latMax <= this.latMax;
   }
 
-  override intersects(that: AnyGeoPoint | AnyGeoBox): boolean {
+  override intersects(that: AnyGeoShape): boolean {
     if (GeoPoint.isAny(that)) {
       return this.intersectsPoint(GeoPoint.fromAny(that));
     } else if (GeoSegment.isAny(that)) {
@@ -205,10 +229,6 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
         && this.latMin <= that.latMax && that.latMin <= this.latMax;
   }
 
-  override union(that: AnyGeoShape): GeoBox {
-    return super.union(that) as GeoBox;
-  }
-
   override project(f: GeoProjection): R2Box {
     const bottomLeft = f.project(this.lngMin, this.latMin);
     const topRight = f.project(this.lngMax, this.latMax);
@@ -241,37 +261,21 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
     return new R2Box(xMin, yMin, xMax, yMax);
   }
 
-  override get bounds(): GeoBox {
-    return this;
-  }
-
-  toAny(): GeoBoxInit {
+  toAny(): GeoTileInit {
     return {
-      lngMin: this.lngMin,
-      latMin: this.latMin,
-      lngMax: this.lngMax,
-      latMax: this.latMax,
+      x: this.x,
+      y: this.y,
+      z: this.z,
     };
-  }
-
-  interpolateTo(that: GeoBox): Interpolator<GeoBox>;
-  interpolateTo(that: unknown): Interpolator<GeoBox> | null;
-  interpolateTo(that: unknown): Interpolator<GeoBox> | null {
-    if (that instanceof GeoBox) {
-      return GeoBoxInterpolator(this, that);
-    } else {
-      return null;
-    }
   }
 
   equivalentTo(that: unknown, epsilon?: number): boolean {
     if (this === that) {
       return true;
-    } else if (that instanceof GeoBox) {
-      return Numbers.equivalent(this.lngMin, that.lngMin, epsilon)
-          && Numbers.equivalent(this.latMin, that.latMin, epsilon)
-          && Numbers.equivalent(this.lngMax, that.lngMax, epsilon)
-          && Numbers.equivalent(this.latMax, that.latMax, epsilon);
+    } else if (that instanceof GeoTile) {
+      return Numbers.equivalent(this.x, that.x, epsilon)
+          && Numbers.equivalent(this.y, that.y, epsilon)
+          && Numbers.equivalent(this.z, that.z, epsilon);
     }
     return false;
   }
@@ -279,23 +283,20 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
   override equals(that: unknown): boolean {
     if (this === that) {
       return true;
-    } else if (that instanceof GeoBox) {
-      return this.lngMin === that.lngMin && this.latMin === that.latMin
-          && this.lngMax === that.lngMax && this.latMax === that.latMax;
+    } else if (that instanceof GeoTile) {
+      return this.x === that.x && this.y === that.y && this.z === that.z;
     }
     return false;
   }
 
   hashCode(): number {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Constructors.hash(GeoBox), Numbers.hash(this.lngMin)), Numbers.hash(this.latMin)),
-        Numbers.hash(this.lngMax)), Numbers.hash(this.latMax)));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Constructors.hash(GeoTile),
+        Numbers.hash(this.x)), Numbers.hash(this.y)), Numbers.hash(this.z)));
   }
 
   debug(output: Output): void {
-    output.write("GeoBox").write(46/*'.'*/).write("of").write(40/*'('*/)
-        .debug(this.lngMin).write(", ").debug(this.latMin).write(", ")
-        .debug(this.lngMax).write(", ").debug(this.latMax).write(41/*')'*/);
+    output = output.write("GeoTile").write(46/*'.'*/).write("of").write(40/*'('*/)
+        .debug(this.x).write(", ").debug(this.y).write(", ").debug(this.z).write(41/*')'*/);
   }
 
   override toString(): string {
@@ -303,53 +304,67 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
   }
 
   @Lazy
-  static undefined(): GeoBox {
-    return new GeoBox(Infinity, Infinity, -Infinity, -Infinity);
+  static root(): GeoTile {
+    return new GeoTile(0, 0, 0);
   }
 
-  @Lazy
-  static globe(): GeoBox {
-    return new GeoBox(-180, -90, 180, 90);
+  static of(x: number, y: number, z: number): GeoTile {
+    return new GeoTile(x, y, z);
   }
 
-  static of(lngMin: number, latMin: number, lngMax?: number, latMax?: number): GeoBox {
-    if (lngMax === void 0) {
-      lngMax = lngMin;
-    }
-    if (latMax === void 0) {
-      latMax = latMin;
-    }
-    return new GeoBox(lngMin, latMin, lngMax, latMax);
+  static fromInit(value: GeoTileInit): GeoTile {
+    return new GeoTile(value.x, value.y, value.z);
   }
 
-  static fromInit(value: GeoBoxInit): GeoBox {
-    return new GeoBox(value.lngMin, value.latMin, value.lngMax, value.latMax);
+  static fromTuple(value: GeoTileTuple): GeoTile {
+    return new GeoTile(value[0], value[1], value[2]);
   }
 
-  static override fromAny(value: AnyGeoBox): GeoBox {
-    if (value === void 0 || value === null || value instanceof GeoBox) {
+  static override fromAny(value: AnyGeoTile): GeoTile {
+    if (value === void 0 || value === null || value instanceof GeoTile) {
       return value;
-    } else if (GeoBox.isInit(value)) {
-      return GeoBox.fromInit(value);
+    } else if (GeoTile.isInit(value)) {
+      return GeoTile.fromInit(value);
+    } else if (GeoTile.isTuple(value)) {
+      return GeoTile.fromTuple(value);
     }
     throw new TypeError("" + value);
   }
 
   /** @hidden */
-  static isInit(value: unknown): value is GeoBoxInit {
+  static isInit(value: unknown): value is GeoTileInit {
     if (typeof value === "object" && value !== null) {
-      const init = value as GeoBoxInit;
-      return typeof init.lngMin === "number"
-          && typeof init.latMin === "number"
-          && typeof init.lngMax === "number"
-          && typeof init.latMax === "number";
+      const init = value as GeoTileInit;
+      return typeof init.x === "number"
+          && typeof init.y === "number"
+          && typeof init.z === "number";
     }
     return false;
   }
 
   /** @hidden */
-  static override isAny(value: unknown): value is AnyGeoBox {
-    return value instanceof GeoBox
-        || GeoBox.isInit(value);
+  static isTuple(value: unknown): value is GeoTileTuple {
+    return Array.isArray(value)
+        && value.length === 3
+        && typeof value[0] === "number"
+        && typeof value[1] === "number"
+        && typeof value[2] === "number";
+  }
+
+  /** @hidden */
+  static override isAny(value: unknown): value is AnyGeoTile {
+    return value instanceof GeoTile
+        || GeoTile.isInit(value)
+        || GeoTile.isTuple(value);
+  }
+
+  /** @hidden */
+  static unprojectX(x: number): number {
+    return (x * Math.PI * 2 - Math.PI) * (180 / Math.PI);
+  }
+
+  /** @hidden */
+  static unprojectY(y: number): number {
+    return (Math.atan(Math.exp(y * Math.PI * 2 - Math.PI)) * 2 - Math.PI / 2) * (180 / Math.PI);
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@swim/warp",
-  "version": "3.11.0-dev.20210618",
+  "version": "3.11.0-dev.20210702",
   "description": "WebSocket protocol for dynamically multiplexing large numbers of bidirectional links to streaming API endpoints, called lanes, of URI-addressed distributed objects, called nodes, that run stateful distributed processes, called Web Agents",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-mesh-js/@swim/warp",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -18,11 +18,11 @@
     "websocket"
   ],
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210618",
-    "@swim/codec": "3.11.0-dev.20210618",
-    "@swim/mapping": "3.11.0-dev.20210618",
-    "@swim/structure": "3.11.0-dev.20210618",
-    "@swim/recon": "3.11.0-dev.20210618",
-    "@swim/uri": "3.11.0-dev.20210618"
+    "@swim/util": "3.11.0-dev.20210702",
+    "@swim/codec": "3.11.0-dev.20210702",
+    "@swim/mapping": "3.11.0-dev.20210702",
+    "@swim/structure": "3.11.0-dev.20210702",
+    "@swim/recon": "3.11.0-dev.20210702",
+    "@swim/uri": "3.11.0-dev.20210702"
   }
 }

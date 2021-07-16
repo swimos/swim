@@ -18,8 +18,9 @@ import type {GeoProjection} from "./GeoProjection";
 import {GeoPointInit, GeoPointTuple, GeoPoint} from "./"; // forward import
 import {GeoSegmentInit, GeoSegment} from "./"; // forward import
 import {GeoBoxInit, GeoBox} from "./"; // forward import
+import {GeoTileInit, GeoTileTuple, GeoTile} from "./"; // forward import
 
-export type AnyGeoShape = GeoShape | GeoPointInit | GeoPointTuple | GeoSegmentInit | GeoBoxInit;
+export type AnyGeoShape = GeoShape | GeoPointInit | GeoPointTuple | GeoSegmentInit | GeoTileInit | GeoTileTuple | GeoBoxInit;
 
 export abstract class GeoShape implements Equals {
   abstract readonly lngMin: number;
@@ -61,6 +62,10 @@ export abstract class GeoShape implements Equals {
       return GeoPoint.fromTuple(value);
     } else if (GeoSegment.isInit(value)) {
       return GeoSegment.fromInit(value);
+    } else if (GeoTile.isInit(value)) {
+      return GeoTile.fromInit(value);
+    } else if (GeoTile.isTuple(value)) {
+      return GeoTile.fromTuple(value);
     } else if (GeoBox.isInit(value)) {
       return GeoBox.fromInit(value);
     }
@@ -73,6 +78,7 @@ export abstract class GeoShape implements Equals {
         || GeoPoint.isInit(value)
         || GeoPoint.isTuple(value)
         || GeoSegment.isInit(value)
+        || GeoTile.isInit(value)
         || GeoBox.isInit(value);
   }
 }

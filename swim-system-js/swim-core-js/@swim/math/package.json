@@ -1,6 +1,6 @@
 {
   "name": "@swim/math",
-  "version": "3.11.0-dev.20210618",
+  "version": "3.11.0-dev.20210702",
   "description": "Mathematical and geometric structures and operators",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/math",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,9 +11,9 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210618",
-    "@swim/codec": "3.11.0-dev.20210618",
-    "@swim/mapping": "3.11.0-dev.20210618",
-    "@swim/structure": "3.11.0-dev.20210618"
+    "@swim/util": "3.11.0-dev.20210702",
+    "@swim/codec": "3.11.0-dev.20210702",
+    "@swim/mapping": "3.11.0-dev.20210702",
+    "@swim/structure": "3.11.0-dev.20210702"
   }
 }

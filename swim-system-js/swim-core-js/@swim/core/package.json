@@ -1,6 +1,6 @@
 {
   "name": "@swim/core",
-  "version": "3.11.0-dev.20210618",
+  "version": "3.11.0-dev.20210702",
   "description": "Lightweight, portable, dependency-free, and strongly typed foundation framework",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/core",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,18 +11,18 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210618",
-    "@swim/codec": "3.11.0-dev.20210618",
-    "@swim/mapping": "3.11.0-dev.20210618",
-    "@swim/collections": "3.11.0-dev.20210618",
-    "@swim/constraint": "3.11.0-dev.20210618",
-    "@swim/structure": "3.11.0-dev.20210618",
-    "@swim/streamlet": "3.11.0-dev.20210618",
-    "@swim/dataflow": "3.11.0-dev.20210618",
-    "@swim/recon": "3.11.0-dev.20210618",
-    "@swim/uri": "3.11.0-dev.20210618",
-    "@swim/math": "3.11.0-dev.20210618",
-    "@swim/geo": "3.11.0-dev.20210618",
-    "@swim/time": "3.11.0-dev.20210618"
+    "@swim/util": "3.11.0-dev.20210702",
+    "@swim/codec": "3.11.0-dev.20210702",
+    "@swim/mapping": "3.11.0-dev.20210702",
+    "@swim/collections": "3.11.0-dev.20210702",
+    "@swim/constraint": "3.11.0-dev.20210702",
+    "@swim/structure": "3.11.0-dev.20210702",
+    "@swim/streamlet": "3.11.0-dev.20210702",
+    "@swim/dataflow": "3.11.0-dev.20210702",
+    "@swim/recon": "3.11.0-dev.20210702",
+    "@swim/uri": "3.11.0-dev.20210702",
+    "@swim/math": "3.11.0-dev.20210702",
+    "@swim/geo": "3.11.0-dev.20210702",
+    "@swim/time": "3.11.0-dev.20210702"
   }
 }
