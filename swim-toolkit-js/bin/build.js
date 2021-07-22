@@ -1,2 +1,3 @@
-#!/usr/bin/env node --max_old_space_size=8192
+#!/bin/sh
+":" //#; exec /usr/bin/env node --max-old-space-size=16384 "$0" "$@"
 require("../../swim-system-js/swim-core-js/@swim/build/dist/main/swim-build.js");

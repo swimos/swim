@@ -297,7 +297,7 @@ export class HtmlView extends ElementView {
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
-    if (this.node === document.body) {
+    if (this.node.hasAttribute("swim-theme")) {
       this.applyRootTheme(theme, mood, timing);
     }
   }
@@ -330,9 +330,36 @@ export class HtmlView extends ElementView {
     this.color.setState(theme.getOr(Look.color, Mood.ambient, null), timing, View.Intrinsic);
   }
 
-  isPositioned(): boolean {
-    const style = window.getComputedStyle(this.node);
+  /** @hidden */
+  static isPositioned(element: HTMLElement): boolean {
+    const style = window.getComputedStyle(element);
     return style.position === "relative" || style.position === "absolute";
+  }
+
+  isPositioned(): boolean {
+    return HtmlView.isPositioned(this.node);
+  }
+
+  /** @hidden */
+  static parentTransform(element: HTMLElement): Transform {
+    if (HtmlView.isPositioned(element)) {
+      const dx = element.offsetLeft;
+      const dy = element.offsetTop;
+      if (dx !== 0 || dy !== 0) {
+        return Transform.translate(-dx, -dy);
+      }
+    }
+    return Transform.identity();
+  }
+
+  /** @hidden */
+  static pageTransform(element: HTMLElement): Transform {
+    const parentNode = element.parentNode;
+    if (parentNode instanceof HTMLElement) {
+      return HtmlView.pageTransform(parentNode).transform(HtmlView.parentTransform(element));
+    } else {
+      return Transform.identity();
+    }
   }
 
   override get parentTransform(): Transform {
@@ -347,6 +374,20 @@ export class HtmlView extends ElementView {
       }
     }
     return Transform.identity();
+  }
+
+  override get pageTransform(): Transform {
+    const parentView = this.parentView;
+    if (parentView !== null) {
+      return parentView.pageTransform.transform(this.parentTransform);
+    } else {
+      const parentNode = this.node.parentNode;
+      if (parentNode instanceof HTMLElement) {
+        return HtmlView.pageTransform(parentNode).transform(this.parentTransform);
+      } else {
+        return Transform.identity();
+      }
+    }
   }
 
   override on<T extends keyof HTMLElementEventMap>(type: T, listener: (this: HTMLElement, event: HTMLElementEventMap[T]) => unknown,

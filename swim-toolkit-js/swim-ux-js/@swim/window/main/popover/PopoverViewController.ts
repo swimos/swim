@@ -18,16 +18,16 @@ import type {PopoverPlacement, PopoverView} from "./PopoverView";
 import type {PopoverViewObserver} from "./PopoverViewObserver";
 
 export class PopoverViewController<V extends PopoverView = PopoverView> extends HtmlViewController<V> implements PopoverViewObserver<V> {
-  get source(): View | null {
+  get sourceView(): View | null {
     const view = this.view;
-    return view !== null ? view.source : null;
+    return view !== null ? view.source.view : null;
   }
 
-  popoverWillSetSource(source: View | null, view: V): void {
+  popoverWillSetSource(newSourceView: View | null, oldSourceView: View | null, view: V): void {
     // hook
   }
 
-  popoverDidSetSource(source: View | null, view: V): void {
+  popoverDidSetSource(newSourceView: View | null, oldSourceView: View | null, view: V): void {
     // hook
   }
 

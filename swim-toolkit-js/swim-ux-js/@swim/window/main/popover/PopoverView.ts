@@ -27,6 +27,7 @@ import {
   ModalOptions,
   ModalState,
   Modal,
+  ViewFastener,
 } from "@swim/view";
 import {HtmlViewInit, HtmlView, HtmlViewObserver} from "@swim/dom";
 import type {PopoverViewObserver} from "./PopoverViewObserver";
@@ -43,14 +44,9 @@ export interface PopoverViewInit extends HtmlViewInit {
   arrowHeight?: AnyLength;
 }
 
-export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
+export class PopoverView extends HtmlView implements Modal {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "source", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
     Object.defineProperty(this, "sourceFrame", {
       value: null,
       enumerable: true,
@@ -104,7 +100,7 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
   override initView(init: PopoverViewInit): void {
     super.initView(init);
     if (init.source !== void 0) {
-      this.setSource(init.source);
+      this.source.setView(init.source);
     }
     if (init.placement !== void 0) {
       this.placement(init.placement);
@@ -145,58 +141,106 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
   @ViewAnimator({type: Length, state: Length.px(8)})
   readonly arrowHeight!: ViewAnimator<this, Length, AnyLength>;
 
-  readonly source!: View | null;
-
-  setSource(newSource: View | null): void {
-    const oldSource = this.source;
-    if (oldSource !== newSource) {
-      this.willSetSource(newSource);
-      if (oldSource !== null && this.isMounted()) {
-        oldSource.removeViewObserver(this);
-      }
-      Object.defineProperty(this, "source", {
-        value: newSource,
-        enumerable: true,
-        configurable: true,
-      });
-      this.onSetSource(newSource);
-      if (newSource !== null && this.isMounted()) {
-        newSource.addViewObserver(this);
-      }
-      this.didSetSource(newSource);
-    }
+  protected initSourceView(sourceView: View): void {
+    // hook
   }
 
-  protected willSetSource(source: View | null): void {
+  protected attachSourceView(sourceView: View): void {
+    // hook
+  }
+
+  protected detachSourceView(sourceView: View): void {
+    // hook
+  }
+
+  protected willSetSourceView(newSourceView: View | null, oldSourceView: View | null): void {
     const viewController = this.viewController;
     if (viewController !== null && viewController.popoverWillSetSource !== void 0) {
-      viewController.popoverWillSetSource(source, this);
+      viewController.popoverWillSetSource(newSourceView, oldSourceView, this);
     }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
       if (viewObserver.popoverWillSetSource !== void 0) {
-        viewObserver.popoverWillSetSource(source, this);
+        viewObserver.popoverWillSetSource(newSourceView, oldSourceView, this);
       }
     }
   }
 
-  protected onSetSource(source: View | null): void {
+  protected onSetSourceView(newSourceView: View | null, oldSourceView: View | null): void {
     this.requireUpdate(View.NeedsLayout);
   }
 
-  protected didSetSource(source: View | null): void {
+  protected didSetSourceView(newSourceView: View | null, oldSourceView: View | null): void {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
       if (viewObserver.popoverDidSetSource !== void 0) {
-        viewObserver.popoverDidSetSource(source, this);
+        viewObserver.popoverDidSetSource(newSourceView, oldSourceView, this);
       }
     }
     const viewController = this.viewController;
     if (viewController !== null && viewController.popoverDidSetSource !== void 0) {
-      viewController.popoverDidSetSource(source, this);
+      viewController.popoverDidSetSource(newSourceView, oldSourceView, this);
     }
+  }
+
+  /** @hidden */
+  static SourceFastener = ViewFastener.define<PopoverView, View, never, HtmlViewObserver>({
+    child: false,
+    observe: true,
+    willSetView(newSourceView: View | null, oldSourceView: View | null, popoverView: PopoverView): void {
+      this.owner.willSetSourceView(newSourceView, oldSourceView);
+    },
+    onSetView(newSourceView: View | null, oldSourceView: View | null, popoverView: PopoverView): void {
+      if (oldSourceView !== null) {
+        this.owner.detachSourceView(oldSourceView);
+      }
+      this.owner.onSetSourceView(newSourceView, oldSourceView);
+      if (newSourceView !== null) {
+        this.owner.attachSourceView(newSourceView);
+        this.owner.initSourceView(newSourceView);
+      }
+    },
+    didSetView(newSourceView: View | null, oldSourceView: View | null, popoverView: PopoverView): void {
+      this.owner.didSetSourceView(newSourceView, oldSourceView);
+    },
+    viewDidMount(view: View): void {
+      this.owner.place();
+    },
+    viewDidPower(view: View): void {
+      this.owner.place();
+    },
+    viewDidResize(viewContext: ViewContext, view: View): void {
+      this.owner.place();
+    },
+    viewDidScroll(viewContext: ViewContext, view: View): void {
+      this.owner.place();
+    },
+    viewDidAnimate(viewContext: ViewContext, view: View): void {
+      this.owner.place();
+    },
+    viewDidLayout(viewContext: ViewContext, view: View): void {
+      this.owner.place();
+    },
+    viewDidProject(viewContext: ViewContext, view: View): void {
+      this.owner.place();
+    },
+    viewDidSetAttribute(name: string, value: unknown, view: HtmlView): void {
+      this.owner.place();
+    },
+    viewDidSetStyle(name: string, value: unknown, priority: string | undefined, view: HtmlView): void {
+      this.owner.place();
+    },
+  });
+
+  @ViewFastener<PopoverView, View>({
+    extends: PopoverView.SourceFastener,
+  })
+  readonly source!: ViewFastener<this, View>;
+
+  setSource(sourceView: View | null): void {
+    this.source.setView(sourceView);
   }
 
   get modalView(): View | null {
@@ -398,17 +442,11 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
   protected override onMount(): void {
     super.onMount();
     this.attachEvents();
-    if (this.source !== null) {
-      this.source.addViewObserver(this);
-    }
   }
 
   protected override onUnmount(): void {
     super.onUnmount();
     this.detachEvents();
-    if (this.source !== null) {
-      this.source.removeViewObserver(this);
-    }
   }
 
   protected attachEvents(): void {
@@ -469,9 +507,9 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
   readonly sourceFrame!: R2Box | null;
 
   place(force: boolean = false): PopoverPlacement {
-    const source = this.source;
+    const sourceView = this.source.view;
     const oldSourceFrame = this.sourceFrame;
-    const newSourceFrame = source !== null ? source.popoverFrame : null;
+    const newSourceFrame = sourceView !== null ? sourceView.popoverFrame : null;
     if (newSourceFrame !== null && this.allowedPlacement.length !== 0 &&
         (force || !newSourceFrame.equals(oldSourceFrame))) {
       Object.defineProperty(this, "newSourceFrame", {
@@ -479,10 +517,10 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
         enumerable: true,
         configurable: true,
       });
-      const placement = this.placePopover(source!, newSourceFrame);
+      const placement = this.placePopover(sourceView!, newSourceFrame);
       const arrow = this.getChildView("arrow");
       if (arrow instanceof HtmlView) {
-        this.placeArrow(source!, newSourceFrame, arrow, placement);
+        this.placeArrow(sourceView!, newSourceFrame, arrow, placement);
       }
       return placement;
     } else {
@@ -491,7 +529,7 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
   }
 
   /** @hidden */
-  protected placePopover(source: View, sourceFrame: R2Box): PopoverPlacement {
+  protected placePopover(sourceView: View, sourceFrame: R2Box): PopoverPlacement {
     const node = this.node;
     const parent = node.offsetParent;
     if (parent === null) {
@@ -752,7 +790,7 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
   }
 
   /** @hidden */
-  protected placeArrow(source: View, sourceFrame: R2Box, arrow: HtmlView,
+  protected placeArrow(sourceView: View, sourceFrame: R2Box, arrow: HtmlView,
                        placement: PopoverPlacement): void {
     const node = this.node;
     const parent = node.offsetParent;
@@ -878,42 +916,6 @@ export class PopoverView extends HtmlView implements Modal, HtmlViewObserver {
       // no arrow
       arrow.display.setState("none", View.Intrinsic);
     }
-  }
-
-  viewDidMount(view: View): void {
-    this.place();
-  }
-
-  viewDidPower(view: View): void {
-    this.place();
-  }
-
-  viewDidResize(viewContext: ViewContext, view: View): void {
-    this.place();
-  }
-
-  viewDidScroll(viewContext: ViewContext, view: View): void {
-    this.place();
-  }
-
-  viewDidAnimate(viewContext: ViewContext, view: View): void {
-    this.place();
-  }
-
-  viewDidLayout(viewContext: ViewContext, view: View): void {
-    this.place();
-  }
-
-  viewDidProject(viewContext: ViewContext, view: View): void {
-    this.place();
-  }
-
-  viewDidSetAttribute(name: string, value: unknown, view: HtmlView): void {
-    this.place();
-  }
-
-  viewDidSetStyle(name: string, value: unknown, priority: string | undefined, view: HtmlView): void {
-    this.place();
   }
 
   protected onClick(event: Event): void {

@@ -17,9 +17,9 @@ import type {HtmlViewObserver} from "@swim/dom";
 import type {PopoverPlacement, PopoverView} from "./PopoverView";
 
 export interface PopoverViewObserver<V extends PopoverView = PopoverView> extends HtmlViewObserver<V> {
-  popoverWillSetSource?(source: View | null, view: V): void;
+  popoverWillSetSource?(newSourceView: View | null, oldSourceView: View | null, view: V): void;
 
-  popoverDidSetSource?(source: View | null, view: V): void;
+  popoverDidSetSource?(newSourceView: View | null, oldSourceView: View | null, view: V): void;
 
   popoverWillPlace?(placement: PopoverPlacement, view: V): void;
 

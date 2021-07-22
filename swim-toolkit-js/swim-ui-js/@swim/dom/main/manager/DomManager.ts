@@ -16,7 +16,7 @@ import {Lazy} from "@swim/util";
 import {ViewManager} from "@swim/view";
 import type {ViewNode, NodeView} from "../node/NodeView";
 import type {TextView} from "../text/TextView";
-import {ElementView} from "../element/ElementView";
+import {ViewElement, ElementView} from "../element/ElementView";
 import type {ElementViewController} from "../element/ElementViewController";
 import {HtmlView} from "../html/HtmlView";
 import {SvgView} from "../svg/SvgView";
@@ -115,28 +115,31 @@ export class DomManager<V extends NodeView = NodeView> extends ViewManager<V> {
     return views;
   }
 
-  static bootElement(node: Element): ElementView {
-    let viewClass: typeof ElementView | undefined;
-    const viewClassName = node.getAttribute("swim-app");
-    if (viewClassName !== null && viewClassName !== "") {
-      viewClass = DomManager.eval(viewClassName) as typeof ElementView | undefined;
-      if (typeof viewClass !== "function") {
-        throw new TypeError(viewClassName);
+  static bootElement(node: ViewElement): ElementView {
+    let view = node.view;
+    if (view === void 0) {
+      let viewClass: typeof ElementView | undefined;
+      const viewClassName = node.getAttribute("swim-app");
+      if (viewClassName !== null && viewClassName !== "") {
+        viewClass = DomManager.eval(viewClassName) as typeof ElementView | undefined;
+        if (typeof viewClass !== "function") {
+          throw new TypeError(viewClassName);
+        }
       }
-    }
-    if (viewClass === void 0) {
-      if (node instanceof HTMLElement) {
-        viewClass = HtmlView;
-      } else if (node instanceof SVGElement) {
-        viewClass = SvgView;
-      } else {
-        viewClass = ElementView;
+      if (viewClass === void 0) {
+        if (node instanceof HTMLElement) {
+          viewClass = HtmlView;
+        } else if (node instanceof SVGElement) {
+          viewClass = SvgView;
+        } else {
+          viewClass = ElementView;
+        }
       }
-    }
-    const view = new viewClass(node);
-    viewClass.mount(view);
-    if ((view as any).domService === void 0) {
-      throw new Error("DomService not available");
+      view = new viewClass(node);
+      viewClass.mount(view);
+      if ((view as any).domService === void 0) {
+        throw new Error("DomService not available");
+      }
     }
     return view;
   }
