@@ -29,5 +29,8 @@ dependencies {
 javadoc {
   title 'Swim Mesh'
   options.overview = "${projectDir}/overview.html"
-  options.addStringOption('-module-source-path', "${projectDir}/*/src/main/java")
+  options.addStringOption('-module-source-path', [
+                          "${projectDir}/*/src/main/java",
+                          "${projectDir}/../swim-core-java/*/src/main/java"].join(':'))
+
 }
