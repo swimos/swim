@@ -12,27 +12,29 @@ publishing {
   publications {
     mavenJava(MavenPublication) {
       from components.java
-      pom {
-        name = project.name
-        description = project.description
-        url = project.homepage
-        licenses {
-          license {
-            name = 'The Apache Software License, Version 2.0'
-            url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+      afterEvaluate {
+        pom {
+          name = project.name
+          description = project.description
+          url = project.homepage
+          licenses {
+            license {
+              name = 'The Apache Software License, Version 2.0'
+              url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+            }
           }
-        }
-        developers {
-          developer {
-            id = 'c9r'
-            name = 'Chris Sachs'
-            email = 'chris@swimos.org'
+          developers {
+            developer {
+              id = 'c9r'
+              name = 'Chris Sachs'
+              email = 'chris@swimos.org'
+            }
           }
-        }
-        scm {
-          url = 'https://github.com/swimos/swim'
-          connection = 'scm:git:https://github.com/swimos/swim.git'
-          developerConnection = 'scm:git:git@github.com:swimos/swim.git'
+          scm {
+            url = 'https://github.com/swimos/swim'
+            connection = 'scm:git:https://github.com/swimos/swim.git'
+            developerConnection = 'scm:git:git@github.com:swimos/swim.git'
+          }
         }
       }
     }
