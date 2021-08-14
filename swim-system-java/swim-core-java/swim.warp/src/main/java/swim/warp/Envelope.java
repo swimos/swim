@@ -27,25 +27,71 @@ import swim.uri.Uri;
 
 public abstract class Envelope implements Debug {
 
-  private static Decoder<Envelope> decoder;
-  private static Encoder<Envelope, Envelope> encoder;
-
   Envelope() {
-    // stub
+    // sealed
   }
+
+  public abstract String tag();
+
+  public abstract Form<? extends Envelope> form();
+
+  public abstract Uri nodeUri();
+
+  public abstract Uri laneUri();
+
+  public abstract Value body();
+
+  public abstract Envelope nodeUri(Uri node);
+
+  public abstract Envelope laneUri(Uri lane);
+
+  public abstract Envelope body(Value body);
+
+  @SuppressWarnings("unchecked")
+  public Value toValue() {
+    return ((Form<Envelope>) this.form()).mold(this).toValue();
+  }
+
+  public Encoder<?, Envelope> reconEncoder() {
+    return new EnvelopeEncoder(this);
+  }
+
+  public Writer<?, ?> reconWriter() {
+    return Recon.write(this.toValue(), Output.full());
+  }
+
+  public Writer<?, ?> writeRecon(Output<?> output) {
+    return Recon.write(this.toValue(), output);
+  }
+
+  public String toRecon() {
+    return Recon.toString(this.toValue());
+  }
+
+  @Override
+  public abstract <T> Output<T> debug(Output<T> output);
+
+  @Override
+  public String toString() {
+    return Format.debug(this);
+  }
+
+  private static Decoder<Envelope> decoder;
 
   public static Decoder<Envelope> decoder() {
-    if (decoder == null) {
-      decoder = new EnvelopeDecoder();
+    if (Envelope.decoder == null) {
+      Envelope.decoder = new EnvelopeDecoder();
     }
-    return decoder;
+    return Envelope.decoder;
   }
 
+  private static Encoder<Envelope, Envelope> encoder;
+
   public static Encoder<Envelope, Envelope> encoder() {
-    if (encoder == null) {
-      encoder = new EnvelopeEncoder();
+    if (Envelope.encoder == null) {
+      Envelope.encoder = new EnvelopeEncoder();
     }
-    return encoder;
+    return Envelope.encoder;
   }
 
   public static Envelope fromValue(Value value) {
@@ -60,7 +106,7 @@ public abstract class Envelope implements Debug {
 
   public static Envelope parseRecon(String recon) {
     final Value value = Recon.parse(recon);
-    return fromValue(value);
+    return Envelope.fromValue(value);
   }
 
   @SuppressWarnings("unchecked")
@@ -91,51 +137,6 @@ public abstract class Envelope implements Debug {
       return (Form<E>) DeauthedResponse.FORM;
     }
     return null;
-  }
-
-  public abstract String tag();
-
-  public abstract Form<? extends Envelope> form();
-
-  public abstract Uri nodeUri();
-
-  public abstract Uri laneUri();
-
-  public abstract Value body();
-
-  public abstract Envelope nodeUri(Uri node);
-
-  public abstract Envelope laneUri(Uri lane);
-
-  public abstract Envelope body(Value body);
-
-  @SuppressWarnings("unchecked")
-  public Value toValue() {
-    return ((Form<Envelope>) form()).mold(this).toValue();
-  }
-
-  public Encoder<?, Envelope> reconEncoder() {
-    return new EnvelopeEncoder(this);
-  }
-
-  public Writer<?, ?> reconWriter() {
-    return Recon.write(toValue(), Output.full());
-  }
-
-  public Writer<?, ?> writeRecon(Output<?> output) {
-    return Recon.write(toValue(), output);
-  }
-
-  public String toRecon() {
-    return Recon.toString(toValue());
-  }
-
-  @Override
-  public abstract void debug(Output<?> output);
-
-  @Override
-  public String toString() {
-    return Format.debug(this);
   }
 
 }

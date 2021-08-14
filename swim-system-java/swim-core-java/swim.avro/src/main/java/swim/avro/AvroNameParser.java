@@ -37,6 +37,11 @@ final class AvroNameParser extends Parser<AvroName> {
     this(null, null, 1);
   }
 
+  @Override
+  public Parser<AvroName> feed(Input input) {
+    return AvroNameParser.parse(input, this.builder, this.output, this.step);
+  }
+
   static Parser<AvroName> parse(Input input, Builder<String, AvroNamespace> builder,
                                 Output<String> output, int step) {
     int c = 0;
@@ -50,10 +55,10 @@ final class AvroNameParser extends Parser<AvroName> {
             output = output.write(c);
             step = 2;
           } else {
-            return error(Diagnostic.expected("name", input));
+            return Parser.error(Diagnostic.expected("name", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("name", input));
+          return Parser.error(Diagnostic.expected("name", input));
         }
       }
       if (step == 2) {
@@ -76,24 +81,19 @@ final class AvroNameParser extends Parser<AvroName> {
           step = 1;
           continue;
         } else if (!input.isEmpty()) {
-          return done(new AvroName(builder != null ? builder.bind() : AvroNamespace.empty(), output.bind()));
+          return Parser.done(new AvroName(builder != null ? builder.bind() : AvroNamespace.empty(), output.bind()));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new AvroNameParser(builder, output, step);
   }
 
   static Parser<AvroName> parse(Input input) {
-    return parse(input, null, null, 1);
-  }
-
-  @Override
-  public Parser<AvroName> feed(Input input) {
-    return parse(input, this.builder, this.output, this.step);
+    return AvroNameParser.parse(input, null, null, 1);
   }
 
 }

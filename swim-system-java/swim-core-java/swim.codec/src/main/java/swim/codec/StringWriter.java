@@ -34,33 +34,6 @@ final class StringWriter extends Writer<Object, Object> {
     this(null, "", 0);
   }
 
-  static Writer<Object, Object> write(Output<?> output, Object value, String input, int index) {
-    final int length = input != null ? input.length() : 0;
-    while (index < length && output.isCont()) {
-      output = output.write(input.codePointAt(index));
-      index = input.offsetByCodePoints(index, 1);
-    }
-    if (index == length) {
-      return done(value);
-    }
-    if (output.isDone()) {
-      return error(new WriterException("truncated"));
-    } else if (output.isError()) {
-      return error(output.trap());
-    }
-    return new StringWriter(value, input, index);
-  }
-
-  static Writer<Object, Object> write(Output<?> output, Object value, Object input) {
-    if (input instanceof Integer) {
-      return Base10IntegerWriter.write(output, value, ((Integer) input).longValue());
-    } else if (input instanceof Long) {
-      return Base10IntegerWriter.write(output, value, ((Long) input).longValue());
-    } else {
-      return write(output, value, input != null ? input.toString() : "null", 0);
-    }
-  }
-
   @Override
   public Writer<Object, Object> feed(Object input) {
     if (input instanceof Integer) {
@@ -74,7 +47,34 @@ final class StringWriter extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, value, input, index);
+    return StringWriter.write(output, this.value, this.input, this.index);
+  }
+
+  static Writer<Object, Object> write(Output<?> output, Object value, String input, int index) {
+    final int length = input != null ? input.length() : 0;
+    while (index < length && output.isCont()) {
+      output = output.write(input.codePointAt(index));
+      index = input.offsetByCodePoints(index, 1);
+    }
+    if (index == length) {
+      return Writer.done(value);
+    }
+    if (output.isDone()) {
+      return Writer.error(new WriterException("truncated"));
+    } else if (output.isError()) {
+      return Writer.error(output.trap());
+    }
+    return new StringWriter(value, input, index);
+  }
+
+  static Writer<Object, Object> write(Output<?> output, Object value, Object input) {
+    if (input instanceof Integer) {
+      return Base10IntegerWriter.write(output, value, ((Integer) input).longValue());
+    } else if (input instanceof Long) {
+      return Base10IntegerWriter.write(output, value, ((Long) input).longValue());
+    } else {
+      return StringWriter.write(output, value, input != null ? input.toString() : "null", 0);
+    }
   }
 
 }

@@ -20,13 +20,9 @@ import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 
 final class FilePageLoader extends PageLoader {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<FilePageLoader, HashTrieMap<Integer, FileChannel>> CHANNELS =
-      AtomicReferenceFieldUpdater.newUpdater(FilePageLoader.class, (Class<HashTrieMap<Integer, FileChannel>>) (Class<?>) HashTrieMap.class, "channels");
   final FileStore store;
   final TreeDelegate treeDelegate;
   final boolean isResident;
@@ -50,7 +46,7 @@ final class FilePageLoader extends PageLoader {
       final int zoneId = pageRef.zone();
       this.store.openZoneAsync(zoneId, new LoadPage(this, pageRef, cont));
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -68,7 +64,7 @@ final class FilePageLoader extends PageLoader {
         if (oldChannel == null) {
           channel = zone.openReadChannel();
           final HashTrieMap<Integer, FileChannel> newChannels = oldChannels.updated(zoneId, channel);
-          if (CHANNELS.compareAndSet(this, oldChannels, newChannels)) {
+          if (FilePageLoader.CHANNELS.compareAndSet(this, oldChannels, newChannels)) {
             break;
           }
         } else {
@@ -88,7 +84,7 @@ final class FilePageLoader extends PageLoader {
     } catch (IOException cause) {
       cont.trap(cause);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -102,7 +98,7 @@ final class FilePageLoader extends PageLoader {
       final HashTrieMap<Integer, FileChannel> oldChannels = this.channels;
       final HashTrieMap<Integer, FileChannel> newChannels = HashTrieMap.empty();
       if (oldChannels != newChannels) {
-        if (CHANNELS.compareAndSet(this, oldChannels, newChannels)) {
+        if (FilePageLoader.CHANNELS.compareAndSet(this, oldChannels, newChannels)) {
           final Iterator<FileChannel> channelIterator = oldChannels.valueIterator();
           while (channelIterator.hasNext()) {
             try {
@@ -118,6 +114,10 @@ final class FilePageLoader extends PageLoader {
       }
     } while (true);
   }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<FilePageLoader, HashTrieMap<Integer, FileChannel>> CHANNELS =
+      AtomicReferenceFieldUpdater.newUpdater(FilePageLoader.class, (Class<HashTrieMap<Integer, FileChannel>>) (Class<?>) HashTrieMap.class, "channels");
 
   static final class LoadPage implements Cont<Zone> {
 
@@ -136,7 +136,7 @@ final class FilePageLoader extends PageLoader {
       try {
         this.pageLoader.loadPageAsync((FileZone) zone, this.pageRef, this.cont);
       } catch (Throwable cause) {
-        if (Conts.isNonFatal(cause)) {
+        if (Cont.isNonFatal(cause)) {
           this.cont.trap(cause);
         } else {
           throw cause;

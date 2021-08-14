@@ -43,6 +43,12 @@ final class MqttPublishDecoder<T> extends Decoder<MqttPublish<T>> {
     this(mqtt, payload, 0, null, 0, 0, 1);
   }
 
+  @Override
+  public Decoder<MqttPublish<T>> feed(InputBuffer input) {
+    return MqttPublishDecoder.decode(input, this.mqtt, this.payload, this.packetFlags,
+                                     this.topicName, this.packetId, this.remaining, this.step);
+  }
+
   static <T> Decoder<MqttPublish<T>> decode(InputBuffer input, MqttDecoder mqtt, Decoder<T> payload,
                                             int packetFlags, Decoder<String> topicName,
                                             int packetId, int remaining, int step) {
@@ -61,7 +67,7 @@ final class MqttPublishDecoder<T> extends Decoder<MqttPublish<T>> {
       } else if (step < 5) {
         step += 1;
       } else {
-        return error(new MqttException("packet length too long"));
+        return MqttPublishDecoder.error(new MqttException("packet length too long"));
       }
     }
     if (step == 6) {
@@ -121,28 +127,22 @@ final class MqttPublishDecoder<T> extends Decoder<MqttPublish<T>> {
       }
     }
     if (step == 10 && remaining == 0) {
-      return done(mqtt.publish(packetFlags, topicName.bind(), packetId,
-          MqttValue.from(payload.bind())));
+      return Decoder.done(mqtt.publish(packetFlags, topicName.bind(), packetId,
+                                       MqttValue.create(payload.bind())));
     }
     if (remaining < 0) {
-      return error(new MqttException("packet length too short"));
+      return Decoder.error(new MqttException("packet length too short"));
     } else if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new MqttPublishDecoder<T>(mqtt, payload, packetFlags, topicName, packetId, remaining, step);
   }
 
   static <T> Decoder<MqttPublish<T>> decode(InputBuffer input, MqttDecoder mqtt,
                                             Decoder<T> payload) {
-    return decode(input, mqtt, payload, 0, null, 0, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttPublish<T>> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.payload, this.packetFlags,
-        this.topicName, this.packetId, this.remaining, this.step);
+    return MqttPublishDecoder.decode(input, mqtt, payload, 0, null, 0, 0, 1);
   }
 
 }

@@ -61,7 +61,7 @@ public class ListDataProxy implements ListDataBinding, ListDataContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapData(Class<T> dataClass) {
-    if (dataClass.isAssignableFrom(getClass())) {
+    if (dataClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.dataBinding.unwrapData(dataClass);
@@ -95,7 +95,7 @@ public class ListDataProxy implements ListDataBinding, ListDataContext {
 
   @Override
   public <V> ListData<V> valueClass(Class<V> valueClass) {
-    return valueForm(Form.<V>forClass(valueClass));
+    return this.valueForm(Form.<V>forClass(valueClass));
   }
 
   @Override

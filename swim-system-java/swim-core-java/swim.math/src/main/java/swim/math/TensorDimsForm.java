@@ -47,7 +47,7 @@ final class TensorDimsForm extends Form<TensorDims> {
       if (!dim.isPacked()) {
         header.slot("stride", dim.stride);
       }
-      record.attr(tag(), header);
+      record.attr(this.tag(), header);
       dim = dim.next;
     } while (dim != null);
     return record;
@@ -59,7 +59,7 @@ final class TensorDimsForm extends Form<TensorDims> {
     TensorDims next = null;
     for (int i = value.length() - 1; i >= 0; i -= 1) {
       final Item member = value.getItem(i);
-      if (member instanceof Attr && tag().equals(member.key().stringValue(null))) {
+      if (member instanceof Attr && this.tag().equals(member.key().stringValue(null))) {
         final Value header = member.toValue();
         final Value size = header.get("size");
         if (size instanceof Num) {

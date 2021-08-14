@@ -38,7 +38,7 @@ final class ReconFormParser<T> extends Parser<T> {
 
   @Override
   public Parser<T> feed(Input input) {
-    return parse(input, this.recon, this.form, this.parser);
+    return ReconFormParser.parse(input, this.recon, this.form, this.parser);
   }
 
   static <T> Parser<T> parse(Input input, ReconParser<Item, Value> recon,
@@ -50,7 +50,7 @@ final class ReconFormParser<T> extends Parser<T> {
     }
     if (parser.isDone()) {
       final Value value = parser.bind();
-      return done(form.cast(value));
+      return Parser.done(form.cast(value));
     } else if (parser.isError()) {
       return parser.asError();
     }
@@ -58,7 +58,7 @@ final class ReconFormParser<T> extends Parser<T> {
   }
 
   static <T> Parser<T> parse(Input input, ReconParser<Item, Value> recon, Form<T> form) {
-    return parse(input, recon, form, null);
+    return ReconFormParser.parse(input, recon, form, null);
   }
 
 }

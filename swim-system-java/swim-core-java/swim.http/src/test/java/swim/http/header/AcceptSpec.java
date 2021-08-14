@@ -23,36 +23,36 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class AcceptSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseAcceptHeaders() {
-    assertParses("Accept: */*", Accept.from(MediaRange.from("*", "*")));
+    assertParses("Accept: */*", Accept.create(MediaRange.create("*", "*")));
     assertParses("Accept: text/*;q=0.5;charset=UTF-8",
-        Accept.from(MediaRange.from("text", "*", 0.5f).param("charset", "UTF-8")));
+                 Accept.create(MediaRange.create("text", "*", 0.5f).param("charset", "UTF-8")));
     assertParses("Accept: text/* ; q=0.5 ; charset = UTF-8",
-        Accept.from(MediaRange.from("text", "*", 0.5f).param("charset", "UTF-8")));
+                 Accept.create(MediaRange.create("text", "*", 0.5f).param("charset", "UTF-8")));
     assertParses("Accept: text/*;q=0.3, text/html;q=0.7, text/html;level=1, text/html;q=0.4;level=2, */*;q=0.5",
-        Accept.from(MediaRange.from("text", "*", 0.3f),
-            MediaRange.from("text", "html", 0.7f),
-            MediaRange.from("text", "html").param("level", "1"),
-            MediaRange.from("text", "html", 0.4f).param("level", "2"),
-            MediaRange.from("*", "*", 0.5f)));
+                 Accept.create(MediaRange.create("text", "*", 0.3f),
+                               MediaRange.create("text", "html", 0.7f),
+                               MediaRange.create("text", "html").param("level", "1"),
+                               MediaRange.create("text", "html", 0.4f).param("level", "2"),
+                               MediaRange.create("*", "*", 0.5f)));
   }
 
   @Test
   public void writeAcceptHeaders() {
-    assertWrites(Accept.from(MediaRange.from("*", "*")), "Accept: */*");
-    assertWrites(Accept.from(MediaRange.from("text", "*", 0.5f).param("charset", "UTF-8")),
-        "Accept: text/*; q=0.5; charset=UTF-8");
-    assertWrites(Accept.from(MediaRange.from("text", "*", 0.3f),
-        MediaRange.from("text", "html", 0.7f),
-        MediaRange.from("text", "html").param("level", "1"),
-        MediaRange.from("text", "html", 0.4f).param("level", "2"),
-        MediaRange.from("*", "*", 0.5f)),
-        "Accept: text/*; q=0.3, text/html; q=0.7, text/html; level=1, text/html; q=0.4; level=2, */*; q=0.5");
+    assertWrites(Accept.create(MediaRange.create("*", "*")), "Accept: */*");
+    assertWrites(Accept.create(MediaRange.create("text", "*", 0.5f).param("charset", "UTF-8")),
+                 "Accept: text/*; q=0.5; charset=UTF-8");
+    assertWrites(Accept.create(MediaRange.create("text", "*", 0.3f),
+                               MediaRange.create("text", "html", 0.7f),
+                               MediaRange.create("text", "html").param("level", "1"),
+                               MediaRange.create("text", "html", 0.4f).param("level", "2"),
+                               MediaRange.create("*", "*", 0.5f)),
+                 "Accept: text/*; q=0.3, text/html; q=0.7, text/html; level=1, text/html; q=0.4; level=2, */*; q=0.5");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

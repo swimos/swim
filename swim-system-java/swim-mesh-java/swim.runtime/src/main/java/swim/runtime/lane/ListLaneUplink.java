@@ -50,7 +50,7 @@ public class ListLaneUplink extends ListUplinkModem {
     int index = 0;
     while (items.hasNext()) {
       final Map.Entry<Object, Value> item = items.next();
-      queueDown(ListLinkDelta.update(index, Value.fromObject(item.getKey()), item.getValue()));
+      this.queueDown(ListLinkDelta.update(index, Value.fromObject(item.getKey()), item.getValue()));
       index += 1;
     }
     super.willSync(request);

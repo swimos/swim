@@ -37,7 +37,8 @@ final class AttrExpressionParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.fieldParser, this.valueParser, this.step);
+    return AttrExpressionParser.parse(input, this.recon, this.builder, this.fieldParser,
+                                      this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -70,15 +71,15 @@ final class AttrExpressionParser<I, V> extends Parser<V> {
                   || Recon.isIdentStartChar(c)) {
             step = 3;
           } else if (builder == null) {
-            return done(recon.extant());
+            return Parser.done(recon.extant());
           } else {
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           }
         } else if (input.isDone()) {
           if (builder == null) {
-            return done(recon.extant());
+            return Parser.done(recon.extant());
           } else {
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           }
         }
       }
@@ -165,22 +166,22 @@ final class AttrExpressionParser<I, V> extends Parser<V> {
             step = 1;
             continue;
           } else {
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           }
         } else if (input.isDone()) {
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new AttrExpressionParser<I, V>(recon, builder, fieldParser, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, null, 1);
+    return AttrExpressionParser.parse(input, recon, builder, null, null, 1);
   }
 
 }

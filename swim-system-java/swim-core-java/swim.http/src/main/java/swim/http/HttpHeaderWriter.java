@@ -36,6 +36,11 @@ final class HttpHeaderWriter extends Writer<Object, Object> {
     this(http, header, null, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return HttpHeaderWriter.write(output, this.http, this.header, this.part, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, HttpWriter http,
                                       HttpHeader header, Writer<?, ?> part, int step) {
     if (step == 1) {
@@ -54,7 +59,7 @@ final class HttpHeaderWriter extends Writer<Object, Object> {
     if (step == 2 && output.isCont()) {
       output = output.write(':');
       if (header.isBlank()) {
-        return done();
+        return Writer.done();
       } else {
         step = 3;
       }
@@ -70,26 +75,21 @@ final class HttpHeaderWriter extends Writer<Object, Object> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new HttpHeaderWriter(http, header, part, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, HttpHeader header) {
-    return write(output, http, header, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.header, this.part, this.step);
+    return HttpHeaderWriter.write(output, http, header, null, 1);
   }
 
 }

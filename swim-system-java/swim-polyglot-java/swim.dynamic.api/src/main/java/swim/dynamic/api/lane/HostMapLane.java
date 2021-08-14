@@ -24,6 +24,10 @@ import swim.dynamic.observable.HostObservableSortedMap;
 
 public final class HostMapLane {
 
+  private HostMapLane() {
+    // static
+  }
+
   public static final HostObjectType<MapLane<Object, Object>> TYPE;
 
   static {
@@ -35,10 +39,6 @@ public final class HostMapLane {
     type.addMember(new HostMapLaneIsTransient());
     type.addMember(new HostMapLaneObserve());
     type.addMember(new HostMapLaneUnobserve());
-  }
-
-  private HostMapLane() {
-    // static
   }
 
 }

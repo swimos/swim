@@ -22,22 +22,22 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class MaxForwardsSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseMaxForwardsHeaders() {
-    assertParses("Max-Forwards: 0", MaxForwards.from(0));
-    assertParses("Max-Forwards: 1", MaxForwards.from(1));
-    assertParses("Max-Forwards: 15", MaxForwards.from(15));
+    assertParses("Max-Forwards: 0", MaxForwards.create(0));
+    assertParses("Max-Forwards: 1", MaxForwards.create(1));
+    assertParses("Max-Forwards: 15", MaxForwards.create(15));
   }
 
   @Test
   public void writeMaxForwardsHeaders() {
-    assertWrites(MaxForwards.from(0), "Max-Forwards: 0");
-    assertWrites(MaxForwards.from(1), "Max-Forwards: 1");
-    assertWrites(MaxForwards.from(15), "Max-Forwards: 15");
+    assertWrites(MaxForwards.create(0), "Max-Forwards: 0");
+    assertWrites(MaxForwards.create(1), "Max-Forwards: 1");
+    assertWrites(MaxForwards.create(15), "Max-Forwards: 15");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

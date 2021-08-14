@@ -68,9 +68,9 @@ public abstract class MqttSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
+      this.bind(endpoint, service);
       serverBind.await();
-      connect(endpoint, client);
+      this.connect(endpoint, client);
       serverConnect.await();
       clientConnect.await();
     } catch (InterruptedException cause) {
@@ -95,8 +95,8 @@ public abstract class MqttSocketBehaviors {
     final AbstractMqttSocket<String, String> client = new AbstractMqttSocket<String, String>() {
       @Override
       public void didConnect() {
-        read(Utf8.stringParser());
-        write(MqttPublish.from("test").payload("@clientToServer"));
+        this.read(Utf8.stringParser());
+        this.write(MqttPublish.create("test").payload("@clientToServer"));
       }
 
       @Override
@@ -115,8 +115,8 @@ public abstract class MqttSocketBehaviors {
     final AbstractMqttSocket<String, String> server = new AbstractMqttSocket<String, String>() {
       @Override
       public void didConnect() {
-        read(Utf8.stringParser());
-        write(MqttPublish.from("test").payload("@serverToClient"));
+        this.read(Utf8.stringParser());
+        this.write(MqttPublish.create("test").payload("@serverToClient"));
       }
 
       @Override
@@ -142,8 +142,8 @@ public abstract class MqttSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       clientWrite.await();
       serverWrite.await();
       clientRead.await();
@@ -172,7 +172,7 @@ public abstract class MqttSocketBehaviors {
       stage.start();
       endpoint.start();
       System.out.println("Warming up for " + duration + " milliseconds...");
-      bind(endpoint, new AbstractMqttService() {
+      this.bind(endpoint, new AbstractMqttService() {
         @Override
         public MqttSocket<?, ?> createSocket() {
           return new AbstractMqttSocket<String, String>() {
@@ -181,8 +181,8 @@ public abstract class MqttSocketBehaviors {
             @Override
             public void didConnect() {
               t0.compareAndSet(0L, System.currentTimeMillis());
-              read(Utf8.stringParser());
-              write(MqttPublish.from("test").payload(payload));
+              this.read(Utf8.stringParser());
+              this.write(MqttPublish.create("test").payload(payload));
             }
 
             @Override
@@ -194,9 +194,9 @@ public abstract class MqttSocketBehaviors {
                 newDt = System.currentTimeMillis() - t0.get();
               } while ((oldDt < 2L * duration || newDt < 2L * duration) && !dt.compareAndSet(oldDt, newDt));
               if (newDt >= 2L * duration) {
-                if (!closed) {
-                  closed = true;
-                  close();
+                if (!this.closed) {
+                  this.closed = true;
+                  this.close();
                 }
                 return;
               } else if (newDt >= duration) {
@@ -205,7 +205,7 @@ public abstract class MqttSocketBehaviors {
                 }
                 count.incrementAndGet();
               }
-              write(MqttPublish.from("test").payload(payload));
+              this.write(MqttPublish.create("test").payload(payload));
             }
 
             @Override
@@ -217,15 +217,15 @@ public abstract class MqttSocketBehaviors {
       });
       final IpSocketRef[] clients = new IpSocketRef[connections];
       for (int connection = 0; connection < connections; connection += 1) {
-        clients[connection] = connect(endpoint, new AbstractMqttSocket<String, String>() {
+        clients[connection] = this.connect(endpoint, new AbstractMqttSocket<String, String>() {
           @Override
           public void didConnect() {
-            read(Utf8.stringParser());
+            this.read(Utf8.stringParser());
           }
 
           @Override
           public void didRead(MqttPacket<? extends String> packet) {
-            read(Utf8.stringParser());
+            this.read(Utf8.stringParser());
           }
 
           @Override
@@ -255,7 +255,7 @@ public abstract class MqttSocketBehaviors {
     for (int i = 0; i < 32; i += 1) {
       payload.append("test");
     }
-    benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, payload.toString());
+    this.benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, payload.toString());
   }
 
   @Test(groups = {"benchmark"})
@@ -264,7 +264,7 @@ public abstract class MqttSocketBehaviors {
     for (int i = 0; i < 256; i += 1) {
       payload.append("test");
     }
-    benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, payload.toString());
+    this.benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, payload.toString());
   }
 
 }

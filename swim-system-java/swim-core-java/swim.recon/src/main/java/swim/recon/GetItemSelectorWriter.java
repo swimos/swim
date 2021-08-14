@@ -36,7 +36,7 @@ final class GetItemSelectorWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.index, this.then, this.part, this.step);
+    return GetItemSelectorWriter.write(output, this.recon, this.index, this.then, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, V index, V then) {
@@ -77,19 +77,19 @@ final class GetItemSelectorWriter<I, V> extends Writer<Object, Object> {
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new GetItemSelectorWriter<I, V>(recon, index, then, part, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon, V index, V then) {
-    return write(output, recon, index, then, null, 1);
+    return GetItemSelectorWriter.write(output, recon, index, then, null, 1);
   }
 
   static <I, V> Writer<Object, Object> writeThen(Output<?> output, ReconWriter<I, V> recon, V index, V then) {
-    return write(output, recon, index, then, null, 2);
+    return GetItemSelectorWriter.write(output, recon, index, then, null, 2);
   }
 
 }

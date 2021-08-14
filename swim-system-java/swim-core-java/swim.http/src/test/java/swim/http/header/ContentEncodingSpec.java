@@ -22,22 +22,22 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class ContentEncodingSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseContentEncodingHeaders() {
-    assertParses("Content-Encoding: gzip", ContentEncoding.from("gzip"));
-    assertParses("Content-Encoding: identity,gzip", ContentEncoding.from("identity", "gzip"));
-    assertParses("Content-Encoding: identity, gzip", ContentEncoding.from("identity", "gzip"));
-    assertParses("Content-Encoding: identity , gzip", ContentEncoding.from("identity", "gzip"));
+    assertParses("Content-Encoding: gzip", ContentEncoding.create("gzip"));
+    assertParses("Content-Encoding: identity,gzip", ContentEncoding.create("identity", "gzip"));
+    assertParses("Content-Encoding: identity, gzip", ContentEncoding.create("identity", "gzip"));
+    assertParses("Content-Encoding: identity , gzip", ContentEncoding.create("identity", "gzip"));
   }
 
   @Test
   public void writeContentEncodingHeaders() {
-    assertWrites(ContentEncoding.from("gzip"), "Content-Encoding: gzip");
-    assertWrites(ContentEncoding.from("identity", "gzip"), "Content-Encoding: identity, gzip");
+    assertWrites(ContentEncoding.create("gzip"), "Content-Encoding: gzip");
+    assertWrites(ContentEncoding.create("identity", "gzip"), "Content-Encoding: identity, gzip");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

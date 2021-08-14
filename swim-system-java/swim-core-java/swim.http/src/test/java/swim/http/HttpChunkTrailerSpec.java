@@ -20,10 +20,6 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpChunkTrailerSpec {
 
-  public void assertParses(String string, HttpChunkTrailer chunkTrailer) {
-    HttpAssertions.assertParses(Http.standardParser().chunkTrailerParser(), string, chunkTrailer);
-  }
-
   @Test
   public void parseEmptyChunkTrailer() {
     assertParses("\r\n", HttpChunkTrailer.empty());
@@ -31,16 +27,16 @@ public class HttpChunkTrailerSpec {
 
   @Test
   public void parseChunkTrailersWithASingleHeader() {
-    assertParses("Key: Value\r\n\r\n", HttpChunkTrailer.from(RawHeader.from("Key", "Value")));
+    assertParses("Key: Value\r\n\r\n", HttpChunkTrailer.create(RawHeader.create("Key", "Value")));
   }
 
   @Test
   public void parseChunkTrailersWithMultipleHeaders() {
     assertParses("Key: Value\r\n"
-            + "Foo: Bar\r\n"
-            + "\r\n",
-        HttpChunkTrailer.from(RawHeader.from("Key", "Value"),
-            RawHeader.from("Foo", "Bar")));
+               + "Foo: Bar\r\n"
+               + "\r\n",
+                 HttpChunkTrailer.create(RawHeader.create("Key", "Value"),
+                                         RawHeader.create("Foo", "Bar")));
   }
 
   @Test
@@ -50,16 +46,20 @@ public class HttpChunkTrailerSpec {
 
   @Test
   public void writeChunkTrailersWithASingleHeader() {
-    assertWrites(HttpChunkTrailer.from(RawHeader.from("Key", "Value")), "Key: Value\r\n\r\n");
+    assertWrites(HttpChunkTrailer.create(RawHeader.create("Key", "Value")), "Key: Value\r\n\r\n");
   }
 
   @Test
   public void writeChunkTrailersWithMultipleHeaders() {
-    assertWrites(HttpChunkTrailer.from(RawHeader.from("Key", "Value"),
-        RawHeader.from("Foo", "Bar")),
-        "Key: Value\r\n"
-            + "Foo: Bar\r\n"
-            + "\r\n");
+    assertWrites(HttpChunkTrailer.create(RawHeader.create("Key", "Value"),
+                                         RawHeader.create("Foo", "Bar")),
+                 "Key: Value\r\n"
+               + "Foo: Bar\r\n"
+               + "\r\n");
+  }
+
+  public static void assertParses(String string, HttpChunkTrailer chunkTrailer) {
+    HttpAssertions.assertParses(Http.standardParser().chunkTrailerParser(), string, chunkTrailer);
   }
 
 }

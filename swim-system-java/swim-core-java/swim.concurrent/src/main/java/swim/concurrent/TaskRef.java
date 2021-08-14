@@ -16,8 +16,8 @@ package swim.concurrent;
 
 /**
  * External handle to a {@link TaskFunction} bound to an execution {@link
- * Stage}.  A {@code TaskRef} is used to cue a task for execution, and to
- * cancel the execution of a cued task.  {@code TaskRef} is thread safe.
+ * Stage}. A {@code TaskRef} is used to cue a task for execution, and to
+ * cancel the execution of a cued task. {@code TaskRef} is thread safe.
  *
  * @see Stage
  */
@@ -29,19 +29,19 @@ public interface TaskRef {
   boolean isCued();
 
   /**
-   * Schedules the task to execute as a sequential process.  Returns {@code
+   * Schedules the task to execute as a sequential process. Returns {@code
    * true} if this operation caused the scheduling of the task; returns {@code
-   * false} if the task was already scheduled to execute.  {@link
+   * false} if the task was already scheduled to execute. {@link
    * TaskFunction#runTask()} will be concurrently invoked exactly once for
    * each time {@code cue()} returns {@code true}, minus the number of times
-   * {@code cancel()} returns {@code true}.  The task becomes uncued prior to
+   * {@code cancel()} returns {@code true}. The task becomes uncued prior to
    * the invocation of {@code runTask()}, enabling the task to re-cue itself
    * while running.
    */
   boolean cue();
 
   /**
-   * Cancels the task to prevent it from executing.  Returns {@code true} if
+   * Cancels the task to prevent it from executing. Returns {@code true} if
    * this operation caused the cancellation of the task; returns {@code false}
    * if the task was not scheduled to execute.
    */

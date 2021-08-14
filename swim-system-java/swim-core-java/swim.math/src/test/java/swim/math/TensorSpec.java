@@ -31,8 +31,8 @@ public class TensorSpec {
     final Tensor v = new Tensor(vd, new double[] {4, 5, 6});
     final MutableTensor w = MutableTensor.zero(wd, Precision.f64());
     Tensor.multiplyMatrix(u.dims, u.array, 0, false,
-        v.dims, v.array, 0, false,
-        w.dims, w.array, 0, false);
+                          v.dims, v.array, 0, false,
+                          w.dims, w.array, 0, false);
     assertEquals(w, new Tensor(wd, new double[] {32}));
   }
 
@@ -48,8 +48,8 @@ public class TensorSpec {
     final Tensor v = new Tensor(vd, new double[] {4, 5, 6});
     final MutableTensor w = MutableTensor.zero(wd, Precision.f64());
     Tensor.multiplyMatrix(u.dims, u.array, 0, false,
-        v.dims, v.array, 0, false,
-        w.dims, w.array, 0, false);
+                          v.dims, v.array, 0, false,
+                          w.dims, w.array, 0, false);
     assertEquals(w, new Tensor(wd, new double[] {4, 10, 18, 4, 10, 18, 4, 10, 18}));
   }
 

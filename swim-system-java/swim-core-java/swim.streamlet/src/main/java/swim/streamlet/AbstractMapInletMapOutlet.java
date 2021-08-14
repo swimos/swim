@@ -57,7 +57,7 @@ public abstract class AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> implements
   @Override
   public void bindInput(Outlet<? extends I> input) {
     if (input instanceof MapOutlet<?, ?, ?>) {
-      bindInput((MapOutlet<KI, VI, ? extends I>) input);
+      this.bindInput((MapOutlet<KI, VI, ? extends I>) input);
     } else {
       throw new IllegalArgumentException(input.toString());
     }
@@ -190,11 +190,11 @@ public abstract class AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> implements
   public void decohereOutputKey(KI key, KeyEffect effect) {
     final HashTrieMap<KI, KeyEffect> oldOutputEffects = this.outputEffects;
     if (oldOutputEffects.get(key) != effect) {
-      willDecohereOutputKey(key, effect);
+      this.willDecohereOutputKey(key, effect);
       this.outputEffects = oldOutputEffects.updated(key, effect);
       this.version = -1;
-      onDecohereOutputKey(key, effect);
-      didDecohereOutputKey(key, effect);
+      this.onDecohereOutputKey(key, effect);
+      this.didDecohereOutputKey(key, effect);
     }
   }
 
@@ -203,10 +203,10 @@ public abstract class AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> implements
   public void decohereInputKey(KO key, KeyEffect effect) {
     final HashTrieMap<KO, KeyEffect> oldInputEffects = this.inputEffects;
     if (oldInputEffects.get(key) != effect) {
-      willDecohereInputKey(key, effect);
+      this.willDecohereInputKey(key, effect);
       this.inputEffects = oldInputEffects.updated(key, effect);
       this.version = -1;
-      onDecohereInputKey(key, effect);
+      this.onDecohereInputKey(key, effect);
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         final Inlet<?> output = this.outputs[i];
@@ -220,25 +220,25 @@ public abstract class AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> implements
       if (outlet != null) {
         outlet.decohereInput();
       }
-      didDecohereInputKey(key, effect);
+      this.didDecohereInputKey(key, effect);
     }
   }
 
   @Override
   public void decohereOutput() {
-    decohere();
+    this.decohere();
   }
 
   @Override
   public void decohereInput() {
-    decohere();
+    this.decohere();
   }
 
   public void decohere() {
     if (this.version >= 0) {
-      willDecohere();
+      this.willDecohere();
       this.version = -1;
-      onDecohere();
+      this.onDecohere();
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         this.outputs[i].decohereOutput();
@@ -247,7 +247,7 @@ public abstract class AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> implements
       while (outlets.hasNext()) {
         outlets.next().decohereInput();
       }
-      didDecohere();
+      this.didDecohere();
     }
   }
 
@@ -257,13 +257,13 @@ public abstract class AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> implements
       final HashTrieMap<KI, KeyEffect> oldOutputEffects = this.outputEffects;
       final KeyEffect effect = oldOutputEffects.get(key);
       if (effect != null) {
-        willRecohereOutputKey(key, effect, version);
+        this.willRecohereOutputKey(key, effect, version);
         this.outputEffects = oldOutputEffects.removed(key);
         if (this.input != null) {
           this.input.recohereInputKey(key, version);
         }
-        onRecohereOutputKey(key, effect, version);
-        didRecohereOutputKey(key, effect, version);
+        this.onRecohereOutputKey(key, effect, version);
+        this.didRecohereOutputKey(key, effect, version);
       }
     }
   }
@@ -275,12 +275,12 @@ public abstract class AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> implements
       final HashTrieMap<KO, KeyEffect> oldInputEffects = this.inputEffects;
       final KeyEffect oldEffect = oldInputEffects.get(key);
       if (oldEffect != null) {
-        final KeyEffect newEffect = willRecohereInputKey(key, oldEffect, version);
+        final KeyEffect newEffect = this.willRecohereInputKey(key, oldEffect, version);
         if (oldEffect != newEffect) {
-          decohereInputKey(key, newEffect);
+          this.decohereInputKey(key, newEffect);
         }
         this.inputEffects = oldInputEffects.removed(key);
-        onRecohereInputKey(key, newEffect, version);
+        this.onRecohereInputKey(key, newEffect, version);
         for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
           final Inlet<?> output = this.outputs[i];
           if (output instanceof MapInlet<?, ?, ?>) {
@@ -291,38 +291,38 @@ public abstract class AbstractMapInletMapOutlet<KI, KO, VI, VO, I, O> implements
         if (outlet != null) {
           outlet.recohereInput(version);
         }
-        didRecohereInputKey(key, newEffect, version);
+        this.didRecohereInputKey(key, newEffect, version);
       }
     }
   }
 
   @Override
   public void recohereOutput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   @Override
   public void recohereInput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   public void recohere(int version) {
     if (this.version < 0) {
-      willRecohere(version);
+      this.willRecohere(version);
       final Iterator<KI> outputKeys = this.outputEffects.keyIterator();
       while (outputKeys.hasNext()) {
-        recohereOutputKey(outputKeys.next(), version);
+        this.recohereOutputKey(outputKeys.next(), version);
       }
       final Iterator<KO> inputKeys = this.inputEffects.keyIterator();
       while (inputKeys.hasNext()) {
-        recohereInputKey(inputKeys.next(), version);
+        this.recohereInputKey(inputKeys.next(), version);
       }
       this.version = version;
-      onRecohere(version);
+      this.onRecohere(version);
       for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
         this.outputs[i].recohereOutput(version);
       }
-      didRecohere(version);
+      this.didRecohere(version);
     }
   }
 

@@ -33,9 +33,6 @@ import swim.util.Log;
 
 public class ServicePort implements ServiceContext {
 
-  protected static final int STARTED = 0x01;
-  protected static final AtomicIntegerFieldUpdater<ServicePort> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(ServicePort.class, "status");
   protected final String serviceName;
   protected final KernelContext kernel;
   protected Service service;
@@ -47,6 +44,11 @@ public class ServicePort implements ServiceContext {
   public ServicePort(String serviceName, KernelContext kernel) {
     this.serviceName = serviceName;
     this.kernel = kernel;
+    this.service = null;
+    this.status = 0;
+    this.log = null;
+    this.policy = null;
+    this.stage = null;
   }
 
   public final String serviceName() {
@@ -101,29 +103,31 @@ public class ServicePort implements ServiceContext {
   }
 
   public void start() {
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus | STARTED;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if ((oldStatus & STARTED) == 0) {
-      willStart();
-      didStart();
-    }
+      final int oldStatus = ServicePort.STATUS.get(this);
+      final int newStatus = oldStatus | ServicePort.STARTED;
+      if (ServicePort.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if ((oldStatus & ServicePort.STARTED) == 0) {
+          this.willStart();
+          this.didStart();
+        }
+        break;
+      }
+    } while (true);
   }
 
   public void stop() {
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus & ~STARTED;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if ((oldStatus & STARTED) != 0) {
-      willStop();
-      didStop();
-    }
+      final int oldStatus = ServicePort.STATUS.get(this);
+      final int newStatus = oldStatus & ~ServicePort.STARTED;
+      if (ServicePort.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if ((oldStatus & ServicePort.STARTED) != 0) {
+          this.willStop();
+          this.didStop();
+        }
+        break;
+      }
+    } while (true);
   }
 
   @Override
@@ -217,5 +221,10 @@ public class ServicePort implements ServiceContext {
       this.kernel.fail(message);
     }
   }
+
+  protected static final int STARTED = 0x01;
+
+  protected static final AtomicIntegerFieldUpdater<ServicePort> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(ServicePort.class, "status");
 
 }

@@ -38,12 +38,12 @@ public abstract class ListUplinkModem extends WarpUplinkModem {
   }
 
   public void sendDown(ListLinkDelta delta) {
-    queueDown(delta);
+    this.queueDown(delta);
     do {
-      final int oldStatus = this.status;
-      final int newStatus = oldStatus | FEEDING_DOWN;
+      final int oldStatus = WarpUplinkModem.STATUS.get(this);
+      final int newStatus = oldStatus | WarpUplinkModem.FEEDING_DOWN;
       if (oldStatus != newStatus) {
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if (WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.linkBinding.feedDown();
           break;
         }

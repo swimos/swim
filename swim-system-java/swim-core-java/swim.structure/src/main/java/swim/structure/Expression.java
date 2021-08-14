@@ -37,20 +37,18 @@ import swim.structure.operator.PositiveOperator;
 import swim.structure.operator.TimesOperator;
 
 /**
- * A combination of operators, constants, and variables.  Every {@code Item}
- * in the Swim data model can be {@link #evaluate(Interpreter) evaluated}
- * against a scope.  An {@code Expression} is some {@code Value} that, when
- * evaluated, may yield a different value than the {@code Expression} itself.
- * Note that this is a stricter definition than that of a logical expression;
- * for example, the number {@code 2} is a valid expression, but it is not an
- * {@code Expression}.
+ * A combination of operators, constants, and variables. Every {@code Item}
+ * in the data model can be {@link #evaluate(Interpreter) evaluated} against
+ * a scope. An {@code Expression} is some {@code Value} that, when evaluated,
+ * may yield a different value than the {@code Expression} itself. Note that
+ * this is a stricter definition than that of a logical expression; for example,
+ * the number {@code 2} is a valid expression, but it is not an {@code Expression}.
  * <p>
- * An {@code Expression} can be either a {@link Selector} or an {@link
- * Operator}.  A {@code Selector} references specific attributes of a Swim model
- * instance.  An {@code Operator} identifies an operation on constants,
- * variables, or {@code Selector} expressions. Together, these form a foundation
- * for building expression languages that can both manipulate and read Swim
- * objects.
+ * An {@code Expression} can be either a {@link Selector} or an {@link Operator}.
+ * A {@code Selector} references specific attributes of a model instance. An
+ * {@code Operator} identifies an operation on constants, variables, or {@code
+ * Selector} expressions. Together, these form a foundation for building
+ * expression languages that can both manipulate and read structured objects.
  */
 public abstract class Expression extends Value {
 

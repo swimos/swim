@@ -29,9 +29,6 @@ import swim.util.Murmur3;
  */
 public class TransportSettings implements Debug {
 
-  private static int hashSeed;
-  private static TransportSettings standard;
-  private static Form<TransportSettings> form;
   protected final int backlog;
   protected final long idleInterval;
   protected final long idleTimeout;
@@ -40,48 +37,6 @@ public class TransportSettings implements Debug {
     this.backlog = backlog;
     this.idleInterval = idleInterval;
     this.idleTimeout = idleTimeout;
-  }
-
-  /**
-   * Returns the default {@code TransportSettings} instance.
-   */
-  public static TransportSettings standard() {
-    if (standard == null) {
-      int backlog;
-      try {
-        backlog = Integer.parseInt(System.getProperty("swim.transport.backlog"));
-      } catch (NumberFormatException error) {
-        backlog = 0;
-      }
-
-      long idleInterval;
-      try {
-        idleInterval = Long.parseLong(System.getProperty("swim.transport.idle.interval"));
-      } catch (NumberFormatException error) {
-        idleInterval = 30000L; // 30 seconds
-      }
-
-      long idleTimeout;
-      try {
-        idleTimeout = Long.parseLong(System.getProperty("swim.transport.idle.timeout"));
-      } catch (NumberFormatException error) {
-        idleTimeout = 90000L; // 90 seconds
-      }
-
-      standard = new TransportSettings(backlog, idleInterval, idleTimeout);
-    }
-    return standard;
-  }
-
-  /**
-   * Returns the structural {@code Form} of {@code TransportSettings}.
-   */
-  @Kind
-  public static Form<TransportSettings> form() {
-    if (form == null) {
-      form = new TransportSettingsForm();
-    }
-    return form;
   }
 
   /**
@@ -97,7 +52,7 @@ public class TransportSettings implements Debug {
    * connections.
    */
   public TransportSettings backlog(int backlog) {
-    return copy(backlog, this.idleInterval, this.idleTimeout);
+    return this.copy(backlog, this.idleInterval, this.idleTimeout);
   }
 
   /**
@@ -112,7 +67,7 @@ public class TransportSettings implements Debug {
    * given {@code idleInterval} for transport idle checks.
    */
   public TransportSettings idleInterval(long idleInterval) {
-    return copy(this.backlog, idleInterval, this.idleTimeout);
+    return this.copy(this.backlog, idleInterval, this.idleTimeout);
   }
 
   /**
@@ -128,7 +83,7 @@ public class TransportSettings implements Debug {
    * given {@code idleTimeout} for transport idle timeouts
    */
   public TransportSettings idleTimeout(long idleTimeout) {
-    return copy(this.backlog, this.idleInterval, idleTimeout);
+    return this.copy(this.backlog, this.idleInterval, idleTimeout);
   }
 
   /**
@@ -145,7 +100,7 @@ public class TransportSettings implements Debug {
    * TransportSettings}.
    */
   public Value toValue() {
-    return form().mold(this).toValue();
+    return TransportSettings.form().mold(this).toValue();
   }
 
   /**
@@ -169,26 +124,75 @@ public class TransportSettings implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(TransportSettings.class);
+    if (TransportSettings.hashSeed == 0) {
+      TransportSettings.hashSeed = Murmur3.seed(TransportSettings.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed, backlog),
-        Murmur3.hash(this.idleInterval)), Murmur3.hash(this.idleTimeout)));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(TransportSettings.hashSeed,
+        this.backlog), Murmur3.hash(this.idleInterval)), Murmur3.hash(this.idleTimeout)));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("TransportSettings").write('.').write("standard").write('(').write(')')
-        .write('.').write("backlog").write('(').debug(this.backlog).write(')')
-        .write('.').write("idleInterval").write('(').debug(this.idleInterval).write(')')
-        .write('.').write("idleTimeout").write('(').debug(this.idleTimeout).write(')');
+                   .write('.').write("backlog").write('(').debug(this.backlog).write(')')
+                   .write('.').write("idleInterval").write('(').debug(this.idleInterval).write(')')
+                   .write('.').write("idleTimeout").write('(').debug(this.idleTimeout).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static TransportSettings standard;
+
+  /**
+   * Returns the default {@code TransportSettings} instance.
+   */
+  public static TransportSettings standard() {
+    if (TransportSettings.standard == null) {
+      int backlog;
+      try {
+        backlog = Integer.parseInt(System.getProperty("swim.transport.backlog"));
+      } catch (NumberFormatException error) {
+        backlog = 0;
+      }
+
+      long idleInterval;
+      try {
+        idleInterval = Long.parseLong(System.getProperty("swim.transport.idle.interval"));
+      } catch (NumberFormatException error) {
+        idleInterval = 30000L; // 30 seconds
+      }
+
+      long idleTimeout;
+      try {
+        idleTimeout = Long.parseLong(System.getProperty("swim.transport.idle.timeout"));
+      } catch (NumberFormatException error) {
+        idleTimeout = 90000L; // 90 seconds
+      }
+
+      TransportSettings.standard = new TransportSettings(backlog, idleInterval, idleTimeout);
+    }
+    return TransportSettings.standard;
+  }
+
+  private static Form<TransportSettings> form;
+
+  /**
+   * Returns the structural {@code Form} of {@code TransportSettings}.
+   */
+  @Kind
+  public static Form<TransportSettings> form() {
+    if (TransportSettings.form == null) {
+      TransportSettings.form = new TransportSettingsForm();
+    }
+    return TransportSettings.form;
   }
 
 }
@@ -214,7 +218,7 @@ final class TransportSettingsForm extends Form<TransportSettings> {
   public Item mold(TransportSettings settings) {
     if (settings != null) {
       final TransportSettings standard = TransportSettings.standard();
-      final Record record = Record.create(4).attr(tag());
+      final Record record = Record.create(4).attr(this.tag());
       if (settings.backlog != standard.backlog) {
         record.slot("backlog", settings.backlog);
       }
@@ -233,7 +237,7 @@ final class TransportSettingsForm extends Form<TransportSettings> {
   @Override
   public TransportSettings cast(Item item) {
     final Value value = item.toValue();
-    if (value.getAttr(tag()).isDefined()) {
+    if (value.getAttr(this.tag()).isDefined()) {
       final TransportSettings standard = TransportSettings.standard();
       final int backlog = value.get("backlog").intValue(standard.backlog);
       final long idleInterval = value.get("idleInterval").longValue(standard.idleInterval);

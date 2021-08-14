@@ -44,17 +44,17 @@ public class JsNodeModuleResolver implements JsModuleResolver {
   @Override
   public UriPath resolveModulePath(UriPath basePath, UriPath modulePath) {
     if (JsModuleSystem.isRelativeModulePath(modulePath)) {
-      return resolveRelativeModulePath(basePath, modulePath);
+      return this.resolveRelativeModulePath(basePath, modulePath);
     } else {
-      return resolveAbsoluteModulePath(basePath, modulePath);
+      return this.resolveAbsoluteModulePath(basePath, modulePath);
     }
   }
 
   protected UriPath resolveRelativeModulePath(UriPath basePath, UriPath modulePath) {
     final UriPath absolutePath = basePath.appended(modulePath).removeDotSegments();
-    UriPath moduleId = resolveModuleScript(absolutePath, "js");
+    UriPath moduleId = this.resolveModuleScript(absolutePath, "js");
     if (moduleId == null) {
-      moduleId = resolveModuleDirectory(absolutePath);
+      moduleId = this.resolveModuleDirectory(absolutePath);
     }
     return moduleId;
   }
@@ -63,7 +63,7 @@ public class JsNodeModuleResolver implements JsModuleResolver {
     UriPath directoryPath = basePath.base();
     UriPath moduleId;
     do {
-      moduleId = resolveNodeModulesPath(directoryPath, modulePath);
+      moduleId = this.resolveNodeModulesPath(directoryPath, modulePath);
       if (moduleId != null) {
         break;
       }
@@ -76,7 +76,7 @@ public class JsNodeModuleResolver implements JsModuleResolver {
     final UriPath nodeModulesDirectoryPath = directoryPath.appendedSegment("node_modules");
     final File nodeModulesDirectory = new File(nodeModulesDirectoryPath.toString());
     if (nodeModulesDirectory.isDirectory()) {
-      return resolveRelativeModulePath(nodeModulesDirectoryPath, modulePath);
+      return this.resolveRelativeModulePath(nodeModulesDirectoryPath, modulePath);
     }
     return null;
   }
@@ -97,9 +97,9 @@ public class JsNodeModuleResolver implements JsModuleResolver {
   public UriPath resolveModuleDirectory(UriPath directoryPath) {
     final File directory = new File(directoryPath.toString());
     if (directory.isDirectory()) {
-      UriPath modulePath = resolveModuleDirectoryPackage(directoryPath);
+      UriPath modulePath = this.resolveModuleDirectoryPackage(directoryPath);
       if (modulePath == null) {
-        modulePath = resolveModuleDirectoryIndex(directoryPath, "js");
+        modulePath = this.resolveModuleDirectoryIndex(directoryPath, "js");
       }
       return modulePath;
     }
@@ -120,14 +120,14 @@ public class JsNodeModuleResolver implements JsModuleResolver {
     final UriPath packagePath = directoryPath.appendedSegment("package.json");
     final File packageFile = new File(packagePath.toString());
     if (packageFile.exists()) {
-      return resolveModulePackage(packagePath);
+      return this.resolveModulePackage(packagePath);
     }
     return null;
   }
 
   public UriPath resolveModulePackage(UriPath packagePath) {
     // TODO: cache package values
-    final Value packageValue = loadPackage(packagePath);
+    final Value packageValue = this.loadPackage(packagePath);
     final String main = packageValue.get("main").stringValue(null);
     if (main != null) {
       final UriPath scriptPath = packagePath.resolve(UriPath.parse(main));
@@ -173,10 +173,10 @@ public class JsNodeModuleResolver implements JsModuleResolver {
     try {
       sourceInput = new FileInputStream(moduleName.toString());
       final StringBuilder sourceBuilder = new StringBuilder();
-      prefixModuleSource(moduleId, sourceBuilder);
+      this.prefixModuleSource(moduleId, sourceBuilder);
       final Decoder<String> sourceDecoder = Utf8.decode(Unicode.stringParser(sourceBuilder), sourceInput);
       if (sourceDecoder.isDone()) {
-        suffixModuleSource(moduleId, sourceBuilder);
+        this.suffixModuleSource(moduleId, sourceBuilder);
         final String source = sourceBuilder.toString();
         return Source.newBuilder("js", source, moduleName).buildLiteral();
       } else {

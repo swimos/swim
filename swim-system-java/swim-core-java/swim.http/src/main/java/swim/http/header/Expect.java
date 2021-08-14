@@ -25,19 +25,10 @@ import swim.util.Murmur3;
 
 public final class Expect extends HttpHeader {
 
-  private static int hashSeed;
   final String value;
 
   Expect(String value) {
     this.value = value;
-  }
-
-  public static Expect from(String value) {
-    return new Expect(value);
-  }
-
-  public static Parser<Expect> parseHttpValue(Input input, HttpParser http) {
-    return ExpectParser.parse(input);
   }
 
   @Override
@@ -80,17 +71,29 @@ public final class Expect extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Expect.class);
+    if (Expect.hashSeed == 0) {
+      Expect.hashSeed = Murmur3.seed(Expect.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.value.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Expect.hashSeed, this.value.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("Expect").write('.').write("from").write('(').debug(this.value).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Expect").write('.').write("create").write('(')
+                   .debug(this.value).write(')');
+    return output;
+  }
+
+  public static Expect create(String value) {
+    return new Expect(value);
+  }
+
+  public static Parser<Expect> parseHttpValue(Input input, HttpParser http) {
+    return ExpectParser.parse(input);
   }
 
 }

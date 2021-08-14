@@ -17,7 +17,6 @@ package swim.db;
 import swim.codec.Output;
 import swim.codec.Unicode;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.recon.Recon;
 import swim.structure.Num;
 import swim.structure.Record;
@@ -28,7 +27,6 @@ import swim.util.Cursor;
 
 public final class STreeLeaf extends STreePage {
 
-  static final Slot[] EMPTY_SLOTS = new Slot[0];
   final STreePageRef pageRef;
   final long version;
   final Slot[] slots;
@@ -37,45 +35,6 @@ public final class STreeLeaf extends STreePage {
     this.pageRef = pageRef;
     this.version = version;
     this.slots = slots;
-  }
-
-  public static STreeLeaf create(PageContext context, int stem, long version,
-                                 int zone, long base, Value fold, Slot[] slots) {
-    final STreePageRef pageRef = new STreePageRef(context, PageType.LEAF, stem, zone,
-        zone, base, slots.length, fold);
-    final STreeLeaf page = new STreeLeaf(pageRef, version, slots);
-    pageRef.page = page;
-    return page;
-  }
-
-  public static STreeLeaf create(PageContext context, int stem, long version,
-                                 Value fold, Slot[] slots) {
-    return create(context, stem, version, 0, 0L, fold, slots);
-  }
-
-  public static STreeLeaf empty(PageContext context, int stem, long version) {
-    return create(context, stem, version, 0, 0L, Value.absent(), EMPTY_SLOTS);
-  }
-
-  public static STreeLeaf fromValue(STreePageRef pageRef, Value value) {
-    Throwable cause = null;
-    try {
-      final Value header = value.header("sleaf");
-      final long version = header.get("v").longValue();
-      final Record tail = value.tail();
-      final Slot[] slots = new Slot[tail.size()];
-      tail.toArray(slots);
-      return new STreeLeaf(pageRef, version, slots);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        cause = error;
-      } else {
-        throw error;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed sleaf: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), cause);
   }
 
   @Override
@@ -160,7 +119,7 @@ public final class STreeLeaf extends STreePage {
   @Override
   public STreePage updated(long index, Value newValue, long newVersion) {
     if (0L <= index && index < this.slots.length) {
-      return updatedSlot((int) index, newValue, newVersion);
+      return this.updatedSlot((int) index, newValue, newVersion);
     } else {
       throw new IndexOutOfBoundsException();
     }
@@ -174,7 +133,7 @@ public final class STreeLeaf extends STreePage {
       final Slot[] newSlots = new Slot[n];
       System.arraycopy(oldSlots, 0, newSlots, 0, n);
       newSlots[index] = oldSlot.updatedValue(newValue).commit();
-      return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+      return STreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
     } else {
       return this;
     }
@@ -183,7 +142,7 @@ public final class STreeLeaf extends STreePage {
   @Override
   public STreePage inserted(long index, Value key, Value newValue, long newVersion) {
     if (0L <= index && index <= this.slots.length) {
-      return insertedSlot((int) index, key, newValue, newVersion);
+      return this.insertedSlot((int) index, key, newValue, newVersion);
     } else {
       throw new IndexOutOfBoundsException();
     }
@@ -196,16 +155,16 @@ public final class STreeLeaf extends STreePage {
     System.arraycopy(oldSlots, 0, newSlots, 0, index);
     newSlots[index] = Slot.of(key, newValue).commit();
     System.arraycopy(oldSlots, index, newSlots, index + 1, n - (index + 1));
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    return STreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   @Override
   public STreeLeaf removed(long index, long newVersion) {
     if (0L <= index && index < this.slots.length) {
       if (this.slots.length > 1) {
-        return removedSlot((int) index, newVersion);
+        return this.removedSlot((int) index, newVersion);
       } else {
-        return empty(this.pageRef.context, this.pageRef.stem, newVersion);
+        return STreeLeaf.empty(this.pageRef.context, this.pageRef.stem, newVersion);
       }
     } else {
       throw new IndexOutOfBoundsException();
@@ -218,17 +177,17 @@ public final class STreeLeaf extends STreePage {
     final Slot[] newSlots = new Slot[n];
     System.arraycopy(oldSlots, 0, newSlots, 0, index);
     System.arraycopy(oldSlots, index + 1, newSlots, index, n - index);
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    return STreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   @Override
   public STreeLeaf removed(Object object, long newVersion) {
-    final int i = (int) indexOf(object);
+    final int i = (int) this.indexOf(object);
     if (i >= 0) {
       if (this.slots.length > 1) {
-        return removedSlot(i, newVersion);
+        return this.removedSlot(i, newVersion);
       } else {
-        return empty(this.pageRef.context, this.pageRef.stem, newVersion);
+        return STreeLeaf.empty(this.pageRef.context, this.pageRef.stem, newVersion);
       }
     } else {
       return this;
@@ -245,9 +204,9 @@ public final class STreeLeaf extends STreePage {
         final int n = k - x;
         final Slot[] newSlots = new Slot[n];
         System.arraycopy(slots, x, newSlots, 0, n);
-        return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+        return STreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
       } else {
-        return empty(this.pageRef.context, this.pageRef.stem, newVersion);
+        return STreeLeaf.empty(this.pageRef.context, this.pageRef.stem, newVersion);
       }
     } else {
       return this;
@@ -262,9 +221,9 @@ public final class STreeLeaf extends STreePage {
         final int n = (int) upper;
         final Slot[] newSlots = new Slot[n];
         System.arraycopy(slots, 0, newSlots, 0, n);
-        return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+        return STreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
       } else {
-        return empty(this.pageRef.context, this.pageRef.stem, newVersion);
+        return STreeLeaf.empty(this.pageRef.context, this.pageRef.stem, newVersion);
       }
     } else {
       return this;
@@ -304,7 +263,7 @@ public final class STreeLeaf extends STreePage {
     final int n = this.slots.length;
     if (n > 1 && this.pageRef.context.pageShouldSplit(this)) {
       final int x = n >>> 1;
-      return split(x, newVersion);
+      return this.split(x, newVersion);
     } else {
       return this;
     }
@@ -313,8 +272,8 @@ public final class STreeLeaf extends STreePage {
   @Override
   public STreeNode split(int x, long newVersion) {
     final STreePageRef[] newChildRefs = new STreePageRef[2];
-    final STreeLeaf newLeftPage = splitLeft(x, newVersion);
-    final STreeLeaf newRightPage = splitRight(x, newVersion);
+    final STreeLeaf newLeftPage = this.splitLeft(x, newVersion);
+    final STreeLeaf newRightPage = this.splitRight(x, newVersion);
     newChildRefs[0] = newLeftPage.pageRef();
     newChildRefs[1] = newRightPage.pageRef();
 
@@ -322,7 +281,7 @@ public final class STreeLeaf extends STreePage {
     newKnotIndexes[0] = x;
 
     return STreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
-        this.slots.length, Value.absent(), newChildRefs, newKnotIndexes);
+                            this.slots.length, Value.absent(), newChildRefs, newKnotIndexes);
   }
 
   @Override
@@ -330,7 +289,7 @@ public final class STreeLeaf extends STreePage {
     final Slot[] oldSlots = this.slots;
     final Slot[] newSlots = new Slot[x];
     System.arraycopy(oldSlots, 0, newSlots, 0, x);
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    return STreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   @Override
@@ -339,7 +298,7 @@ public final class STreeLeaf extends STreePage {
     final int y = oldSlots.length - x;
     final Slot[] newSlots = new Slot[y];
     System.arraycopy(oldSlots, x, newSlots, 0, y);
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    return STreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   @Override
@@ -385,15 +344,14 @@ public final class STreeLeaf extends STreePage {
 
   @Override
   public Value toHeader() {
-    final Record header = Record.create(2)
-        .slot("stem", this.pageRef.stem)
-        .slot("v", this.version);
+    final Record header = Record.create(2).slot("stem", this.pageRef.stem)
+                                          .slot("v", this.version);
     return Record.create(1).attr("sleaf", header);
   }
 
   @Override
   public Value toValue() {
-    final Record record = (Record) toHeader();
+    final Record record = (Record) this.toHeader();
     final Slot[] slots = this.slots;
     for (int i = 0, n = slots.length; i < n; i += 1) {
       record.add(slots[i]);
@@ -409,14 +367,14 @@ public final class STreeLeaf extends STreePage {
     for (int i = 0, n = slots.length; i < n; i += 1) {
       fold = accumulator.combine(fold, slots[i].value());
     }
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, fold, slots);
+    return STreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, fold, slots);
   }
 
   @Override
   public STreeLeaf evacuated(int post, long version) {
     final int oldPost = this.pageRef.post;
     if (oldPost != 0 && oldPost < post) {
-      return create(this.pageRef.context, this.pageRef.stem, version, this.pageRef.fold, this.slots);
+      return STreeLeaf.create(this.pageRef.context, this.pageRef.stem, version, this.pageRef.fold, this.slots);
     } else {
       return this;
     }
@@ -424,18 +382,18 @@ public final class STreeLeaf extends STreePage {
 
   @Override
   public STreeLeaf committed(int zone, long base, long version) {
-    return create(this.pageRef.context, this.pageRef.stem, version, zone, base, this.pageRef.fold, this.slots);
+    return STreeLeaf.create(this.pageRef.context, this.pageRef.stem, version, zone, base, this.pageRef.fold, this.slots);
   }
 
   @Override
   public STreeLeaf uncommitted(long version) {
-    return create(this.pageRef.context, this.pageRef.stem, version, this.pageRef.fold, this.slots);
+    return STreeLeaf.create(this.pageRef.context, this.pageRef.stem, version, this.pageRef.fold, this.slots);
   }
 
   @Override
   public void writePage(Output<?> output) {
-    Recon.write(toHeader(), output);
-    writePageContent(output);
+    Recon.write(this.toHeader(), output);
+    this.writePageContent(output);
     output.write('\n');
   }
 
@@ -455,16 +413,16 @@ public final class STreeLeaf extends STreePage {
 
   @Override
   public void writeDiff(Output<?> output) {
-    writePage(output);
+    this.writePage(output);
   }
 
   @Override
   public void loadTreeAsync(PageLoader pageLoader, Cont<Page> cont) {
     try {
       // Call continuation on fresh stack
-      this.pageRef.context.stage().execute(Conts.async(cont, this));
+      this.pageRef.context.stage().execute(Cont.async(cont, this));
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -484,13 +442,13 @@ public final class STreeLeaf extends STreePage {
 
   @Override
   public Cursor<Slot> depthCursor(int maxDepth) {
-    return cursor();
+    return this.cursor();
   }
 
   @Override
   public Cursor<Slot> deltaCursor(long sinceVersion) {
-    if (sinceVersion <= version) {
-      return cursor();
+    if (sinceVersion <= this.version) {
+      return this.cursor();
     } else {
       return Cursor.empty();
     }
@@ -498,10 +456,51 @@ public final class STreeLeaf extends STreePage {
 
   @Override
   public String toString() {
-    final Output<String> output = Unicode.stringOutput(pageSize() - 1); // ignore trailing '\n'
-    Recon.write(toHeader(), output);
-    writePageContent(output);
+    final Output<String> output = Unicode.stringOutput(this.pageSize() - 1); // ignore trailing '\n'
+    Recon.write(this.toHeader(), output);
+    this.writePageContent(output);
     return output.bind();
+  }
+
+  static final Slot[] EMPTY_SLOTS = new Slot[0];
+
+  public static STreeLeaf create(PageContext context, int stem, long version,
+                                 int zone, long base, Value fold, Slot[] slots) {
+    final STreePageRef pageRef = new STreePageRef(context, PageType.LEAF, stem, zone,
+                                                  zone, base, slots.length, fold);
+    final STreeLeaf page = new STreeLeaf(pageRef, version, slots);
+    pageRef.page = page;
+    return page;
+  }
+
+  public static STreeLeaf create(PageContext context, int stem, long version,
+                                 Value fold, Slot[] slots) {
+    return STreeLeaf.create(context, stem, version, 0, 0L, fold, slots);
+  }
+
+  public static STreeLeaf empty(PageContext context, int stem, long version) {
+    return STreeLeaf.create(context, stem, version, 0, 0L, Value.absent(), STreeLeaf.EMPTY_SLOTS);
+  }
+
+  public static STreeLeaf fromValue(STreePageRef pageRef, Value value) {
+    Throwable cause = null;
+    try {
+      final Value header = value.header("sleaf");
+      final long version = header.get("v").longValue();
+      final Record tail = value.tail();
+      final Slot[] slots = new Slot[tail.size()];
+      tail.toArray(slots);
+      return new STreeLeaf(pageRef, version, slots);
+    } catch (Throwable error) {
+      if (Cont.isNonFatal(error)) {
+        cause = error;
+      } else {
+        throw error;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed sleaf: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), cause);
   }
 
 }

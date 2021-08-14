@@ -19,6 +19,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import org.testng.TestException;
 import org.testng.annotations.Test;
+import swim.concurrent.PullContext;
+import swim.concurrent.PullRequest;
+import swim.concurrent.StayContext;
 import swim.concurrent.Theater;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
@@ -87,9 +90,9 @@ public abstract class WarpSocketBehaviors {
     final AbstractWarpServer server = new AbstractWarpServer(WarpSocketBehaviors.this.warpSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
-        final WsRequest wsRequest = WsRequest.from(httpRequest);
+        final WsRequest wsRequest = WsRequest.create(httpRequest);
         final WsResponse wsResponse = wsRequest.accept(WarpSocketBehaviors.this.warpSettings.wsSettings());
-        return upgrade(serverSocket, wsResponse);
+        return this.upgrade(serverSocket, wsResponse);
       }
     };
     final AbstractHttpService service = new AbstractHttpService() {
@@ -107,9 +110,9 @@ public abstract class WarpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
+      this.bind(endpoint, service);
       serverBind.await();
-      connect(endpoint, clientSocket);
+      this.connect(endpoint, clientSocket);
       serverConnect.await();
       clientConnect.await();
       serverUpgrade.await();
@@ -138,7 +141,7 @@ public abstract class WarpSocketBehaviors {
     final AbstractWarpSocket clientSocket = new AbstractWarpSocket() {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-        feed(clientToServerCommand);
+        this.feed(clientToServerCommand);
       }
 
       @Override
@@ -156,7 +159,7 @@ public abstract class WarpSocketBehaviors {
     final AbstractWarpSocket serverSocket = new AbstractWarpSocket() {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-        feed(serverToClientCommand);
+        this.feed(serverToClientCommand);
       }
 
       @Override
@@ -174,9 +177,9 @@ public abstract class WarpSocketBehaviors {
     final AbstractWarpServer server = new AbstractWarpServer(WarpSocketBehaviors.this.warpSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
-        final WsRequest wsRequest = WsRequest.from(httpRequest);
+        final WsRequest wsRequest = WsRequest.create(httpRequest);
         final WsResponse wsResponse = wsRequest.accept(WarpSocketBehaviors.this.warpSettings.wsSettings());
-        return upgrade(serverSocket, wsResponse);
+        return this.upgrade(serverSocket, wsResponse);
       }
     };
     final AbstractHttpService service = new AbstractHttpService() {
@@ -189,8 +192,8 @@ public abstract class WarpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, clientSocket);
+      this.bind(endpoint, service);
+      this.connect(endpoint, clientSocket);
       clientWrite.await();
       serverWrite.await();
       clientRead.await();
@@ -219,7 +222,7 @@ public abstract class WarpSocketBehaviors {
     final AbstractWarpSocket clientSocket = new AbstractWarpSocket() {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-        feed(linkRequest);
+        this.feed(linkRequest);
       }
 
       @Override
@@ -239,7 +242,7 @@ public abstract class WarpSocketBehaviors {
       public void didRead(Envelope envelope) {
         assertEquals(envelope, linkRequest);
         serverRead.countDown();
-        feed(linkedResponse);
+        this.feed(linkedResponse);
       }
 
       @Override
@@ -251,9 +254,9 @@ public abstract class WarpSocketBehaviors {
     final AbstractWarpServer server = new AbstractWarpServer(WarpSocketBehaviors.this.warpSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
-        final WsRequest wsRequest = WsRequest.from(httpRequest);
+        final WsRequest wsRequest = WsRequest.create(httpRequest);
         final WsResponse wsResponse = wsRequest.accept(WarpSocketBehaviors.this.warpSettings.wsSettings());
-        return upgrade(serverSocket, wsResponse);
+        return this.upgrade(serverSocket, wsResponse);
       }
     };
     final AbstractHttpService service = new AbstractHttpService() {
@@ -266,8 +269,8 @@ public abstract class WarpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, clientSocket);
+      this.bind(endpoint, service);
+      this.connect(endpoint, clientSocket);
       clientWrite.await();
       serverWrite.await();
       clientRead.await();
@@ -299,21 +302,21 @@ public abstract class WarpSocketBehaviors {
       stage.start();
       endpoint.start();
       System.out.println("Warming up for " + warmupDuration + " milliseconds...");
-      bind(endpoint, new AbstractHttpService() {
+      this.bind(endpoint, new AbstractHttpService() {
         @Override
         public HttpServer createServer() {
           return new AbstractWarpServer(WarpSocketBehaviors.this.warpSettings) {
             @Override
             public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
-              final WsRequest wsRequest = WsRequest.from(httpRequest);
+              final WsRequest wsRequest = WsRequest.create(httpRequest);
               final WsResponse wsResponse = wsRequest.accept(WarpSocketBehaviors.this.warpSettings.wsSettings());
-              return upgrade(new AbstractWarpSocket() {
+              return this.upgrade(new AbstractWarpSocket() {
                 boolean closed;
 
                 @Override
                 public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
                   t0.compareAndSet(0L, System.currentTimeMillis());
-                  feed(envelope);
+                  this.feed(envelope);
                 }
 
                 @Override
@@ -325,9 +328,9 @@ public abstract class WarpSocketBehaviors {
                     newDt = System.currentTimeMillis() - t0.get();
                   } while ((oldDt < testDuration || newDt < testDuration) && !dt.compareAndSet(oldDt, newDt));
                   if (newDt >= testDuration) {
-                    if (!closed) {
-                      closed = true;
-                      write(WsClose.from(1000));
+                    if (!this.closed) {
+                      this.closed = true;
+                      this.write(WsClose.create(1000));
                     }
                     return;
                   } else if (newDt >= warmupDuration) {
@@ -353,14 +356,14 @@ public abstract class WarpSocketBehaviors {
                     }
                     break;
                   } while (true);
-                  feed(new swim.concurrent.PullRequest<Envelope>() {
+                  this.feed(new PullRequest<Envelope>() {
                     @Override
                     public float prio() {
                       return 0.0f;
                     }
 
                     @Override
-                    public void pull(swim.concurrent.PullContext<? super Envelope> context) {
+                    public void pull(PullContext<? super Envelope> context) {
                       permits.incrementAndGet();
                       context.push(envelope);
                     }
@@ -372,7 +375,7 @@ public abstract class WarpSocketBehaviors {
                     }
 
                     @Override
-                    public boolean stay(swim.concurrent.StayContext context, int backlog) {
+                    public boolean stay(StayContext context, int backlog) {
                       return true;
                     }
                   });
@@ -391,7 +394,7 @@ public abstract class WarpSocketBehaviors {
       });
       final IpSocketRef[] clients = new IpSocketRef[connections];
       for (int connection = 0; connection < connections; connection += 1) {
-        clients[connection] = connect(endpoint, new AbstractWarpSocket() {
+        clients[connection] = this.connect(endpoint, new AbstractWarpSocket() {
           @Override
           public void didRead(WsControl<?, ?> frame) {
             if (frame instanceof WsClose<?, ?>) {
@@ -419,7 +422,7 @@ public abstract class WarpSocketBehaviors {
   public void benchmarkCommands() {
     final Value value = Record.create(1).attr("test");
     final CommandMessage envelope = new CommandMessage("node", "lane", value);
-    benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, envelope);
+    this.benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, envelope);
   }
 
 }

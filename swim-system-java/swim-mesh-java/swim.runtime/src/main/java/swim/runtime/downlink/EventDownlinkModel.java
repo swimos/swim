@@ -15,7 +15,6 @@
 package swim.runtime.downlink;
 
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.runtime.DownlinkRelay;
 import swim.runtime.Push;
 import swim.runtime.warp.SupplyDownlinkModem;
@@ -34,12 +33,12 @@ public class EventDownlinkModel extends SupplyDownlinkModem<EventDownlinkView<?>
   @Override
   protected void pushDownEvent(Push<EventMessage> push) {
     final EventMessage message = push.message();
-    onEvent(message);
+    this.onEvent(message);
     new EventDownlinkRelayOnEvent(this, message, push.cont()).run();
   }
 
   public void command(Value body) {
-    pushUp(body);
+    this.pushUp(body);
   }
 
 }
@@ -55,6 +54,8 @@ final class EventDownlinkRelayOnEvent extends DownlinkRelay<EventDownlinkModel, 
     super(model, 3);
     this.message = message;
     this.cont = cont;
+    this.valueForm = null;
+    this.object = null;
   }
 
   @SuppressWarnings("unchecked")
@@ -69,7 +70,7 @@ final class EventDownlinkRelayOnEvent extends DownlinkRelay<EventDownlinkModel, 
       final Form<Object> valueForm = (Form<Object>) view.valueForm;
       if (this.valueForm != valueForm && valueForm != null) {
         this.valueForm = valueForm;
-        this.object = valueForm.cast(message.body());
+        this.object = valueForm.cast(this.message.body());
         if (this.object == null) {
           this.object = valueForm.unit();
         }
@@ -95,7 +96,7 @@ final class EventDownlinkRelayOnEvent extends DownlinkRelay<EventDownlinkModel, 
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;

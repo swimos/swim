@@ -47,7 +47,7 @@ public class HashTrieSetSpec {
   public void testComposeSets() {
     for (int k = 4; k <= 20; k += 4) {
       final int n = 1 << k;
-      testCompose(n);
+      this.testCompose(n);
     }
   }
 
@@ -75,13 +75,13 @@ public class HashTrieSetSpec {
   @Test
   public void testDecomposeSmallSets() {
     for (int n = 4; n <= 1024; n *= 2) {
-      testDecompose(n);
+      this.testDecompose(n);
     }
   }
 
   @Test(groups = {"slow"})
   public void testDecomposeLargeSets() {
-    testDecompose(1 << 15);
+    this.testDecompose(1 << 15);
   }
 
   private void testDecompose(int n) {

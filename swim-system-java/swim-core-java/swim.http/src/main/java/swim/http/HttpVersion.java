@@ -22,31 +22,12 @@ import swim.util.Murmur3;
 
 public final class HttpVersion extends HttpPart implements Debug {
 
-  public static final HttpVersion HTTP_1_1 = new HttpVersion(1, 1);
-  public static final HttpVersion HTTP_1_0 = new HttpVersion(1, 0);
-  private static int hashSeed;
   final int major;
   final int minor;
 
   HttpVersion(int major, int minor) {
     this.major = major;
     this.minor = minor;
-  }
-
-  public static HttpVersion from(int major, int minor) {
-    if (major == 1 && minor == 1) {
-      return HTTP_1_1;
-    } else if (major == 1 && minor == 0) {
-      return HTTP_1_0;
-    } else if (major >= 0 && minor >= 0) {
-      return new HttpVersion(major, minor);
-    } else {
-      throw new IllegalArgumentException(major + ", " + minor);
-    }
-  }
-
-  public static HttpVersion parseHttp(String string) {
-    return Http.standardParser().parseVersionString(string);
   }
 
   public int major() {
@@ -78,27 +59,49 @@ public final class HttpVersion extends HttpPart implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(HttpVersion.class);
+    if (HttpVersion.hashSeed == 0) {
+      HttpVersion.hashSeed = Murmur3.seed(HttpVersion.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed, this.major), this.minor));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpVersion.hashSeed, this.major), this.minor));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("HttpVersion").write('.');
     if (this.major == 1 && (this.minor == 1 || this.minor == 0)) {
       output = output.write("HTTP").write('_').debug(this.major).write('_').debug(this.minor);
     } else {
-      output = output.write("from").write('(').debug(this.major).write(", ").debug(this.minor).write(')');
+      output = output.write("create").write('(').debug(this.major).write(", ").debug(this.minor).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static final HttpVersion HTTP_1_1 = new HttpVersion(1, 1);
+  public static final HttpVersion HTTP_1_0 = new HttpVersion(1, 0);
+
+  public static HttpVersion create(int major, int minor) {
+    if (major == 1 && minor == 1) {
+      return HttpVersion.HTTP_1_1;
+    } else if (major == 1 && minor == 0) {
+      return HttpVersion.HTTP_1_0;
+    } else if (major >= 0 && minor >= 0) {
+      return new HttpVersion(major, minor);
+    } else {
+      throw new IllegalArgumentException(major + ", " + minor);
+    }
+  }
+
+  public static HttpVersion parseHttp(String string) {
+    return Http.standardParser().parseVersionString(string);
   }
 
 }

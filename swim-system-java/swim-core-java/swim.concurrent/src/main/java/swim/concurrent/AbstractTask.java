@@ -45,12 +45,12 @@ public abstract class AbstractTask implements Task {
 
   @Override
   public void taskWillCue() {
-    // stub
+    // hook
   }
 
   @Override
   public void taskDidCancel() {
-    // stub
+    // hook
   }
 
   /**
@@ -78,11 +78,11 @@ public abstract class AbstractTask implements Task {
   }
 
   /**
-   * Schedules this task to execute as a sequential process.  Returns {@code
+   * Schedules this task to execute as a sequential process. Returns {@code
    * true} if this operation caused the scheduling of this task; returns {@code
-   * false} if this task was already scheduled to execute.  This task becomes
+   * false} if this task was already scheduled to execute. This task becomes
    * uncued prior to the the invocation of {@code runTask()}, enabling this
-   * task to re-cue itself while running.  Delegates to the assigned {@link
+   * task to re-cue itself while running. Delegates to the assigned {@link
    * #taskContext}.
    *
    * @throws TaskException if {@link #taskContext} is {@code null}.
@@ -96,9 +96,9 @@ public abstract class AbstractTask implements Task {
   }
 
   /**
-   * Cancels this task to prevent it from executing.  Returns {@code true} if
+   * Cancels this task to prevent it from executing. Returns {@code true} if
    * this operation caused the cancellation of this task; returns {@code false}
-   * if this task was not scheduled to execute.  Delegates to the assigned
+   * if this task was not scheduled to execute. Delegates to the assigned
    * {@link #taskContext}.
    */
   public boolean cancel() {

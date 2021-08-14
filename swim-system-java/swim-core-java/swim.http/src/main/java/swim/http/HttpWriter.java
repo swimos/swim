@@ -206,9 +206,9 @@ public class HttpWriter {
 
   public Writer<?, ?> writeValue(String value, Output<?> output) {
     if (Http.isToken(value)) {
-      return writeToken(value, output);
+      return this.writeToken(value, output);
     } else {
-      return writeQuoted(value, output);
+      return this.writeQuoted(value, output);
     }
   }
 

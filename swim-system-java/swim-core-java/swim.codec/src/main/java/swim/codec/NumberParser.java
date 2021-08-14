@@ -31,6 +31,11 @@ final class NumberParser extends Parser<Number> {
     this.step = step;
   }
 
+  @Override
+  public Parser<Number> feed(Input input) {
+    return NumberParser.parse(input, this.sign, this.value, this.mode, this.step);
+  }
+
   static Parser<Number> parse(Input input, int sign, long value, int mode, int step) {
     int c = 0;
     if (step == 1) {
@@ -42,7 +47,7 @@ final class NumberParser extends Parser<Number> {
         }
         step = 2;
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("number", input));
+        return Parser.error(Diagnostic.expected("number", input));
       }
     }
     if (step == 2) {
@@ -56,10 +61,10 @@ final class NumberParser extends Parser<Number> {
           value = sign * (c - '0');
           step = 3;
         } else {
-          return error(Diagnostic.expected("digit", input));
+          return Parser.error(Diagnostic.expected("digit", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("digit", input));
+        return Parser.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 3) {
@@ -80,7 +85,7 @@ final class NumberParser extends Parser<Number> {
       if (input.isCont()) {
         step = 4;
       } else if (input.isDone()) {
-        return done(valueOf(value));
+        return Parser.done(valueOf(value));
       }
     }
     if (step == 4) {
@@ -92,28 +97,28 @@ final class NumberParser extends Parser<Number> {
           input = input.step();
           return HexadecimalParser.parse(input);
         } else {
-          return done(value);
+          return Parser.done(value);
         }
       } else if (input.isDone()) {
-        return done(value);
+        return Parser.done(value);
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new NumberParser(sign, value, mode, step);
   }
 
   static Parser<Number> parseNumber(Input input) {
-    return parse(input, 1, 0L, 2, 1);
+    return NumberParser.parse(input, 1, 0L, 2, 1);
   }
 
   static Parser<Number> parseDecimal(Input input) {
-    return parse(input, 1, 0L, 1, 1);
+    return NumberParser.parse(input, 1, 0L, 1, 1);
   }
 
   static Parser<Number> parseInteger(Input input) {
-    return parse(input, 1, 0L, 0, 1);
+    return NumberParser.parse(input, 1, 0L, 0, 1);
   }
 
   static Parser<Number> numberParser() {
@@ -158,11 +163,6 @@ final class NumberParser extends Parser<Number> {
     }
   }
 
-  @Override
-  public Parser<Number> feed(Input input) {
-    return parse(input, this.sign, this.value, this.mode, this.step);
-  }
-
 }
 
 final class BigIntegerParser extends Parser<Number> {
@@ -173,6 +173,11 @@ final class BigIntegerParser extends Parser<Number> {
   BigIntegerParser(int sign, BigInteger value) {
     this.sign = sign;
     this.value = value;
+  }
+
+  @Override
+  public Parser<Number> feed(Input input) {
+    return BigIntegerParser.parse(input, this.sign, this.value);
   }
 
   static Parser<Number> parse(Input input, int sign, BigInteger value) {
@@ -186,14 +191,9 @@ final class BigIntegerParser extends Parser<Number> {
       }
     }
     if (!input.isEmpty()) {
-      return done(value);
+      return Parser.done(value);
     }
     return new BigIntegerParser(sign, value);
-  }
-
-  @Override
-  public Parser<Number> feed(Input input) {
-    return parse(input, this.sign, this.value);
   }
 
 }
@@ -210,6 +210,11 @@ final class DecimalParser extends Parser<Number> {
     this.step = step;
   }
 
+  @Override
+  public Parser<Number> feed(Input input) {
+    return DecimalParser.parse(input, this.builder, this.mode, this.step);
+  }
+
   static Parser<Number> parse(Input input, StringBuilder builder, int mode, int step) {
     int c = 0;
     if (step == 1) {
@@ -224,10 +229,10 @@ final class DecimalParser extends Parser<Number> {
           builder.appendCodePoint(c);
           step = 5;
         } else {
-          return error(Diagnostic.expected("decimal or exponent", input));
+          return Parser.error(Diagnostic.expected("decimal or exponent", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("decimal or exponent", input));
+        return Parser.error(Diagnostic.expected("decimal or exponent", input));
       }
     }
     if (step == 2) {
@@ -238,10 +243,10 @@ final class DecimalParser extends Parser<Number> {
           builder.appendCodePoint(c);
           step = 3;
         } else {
-          return error(Diagnostic.expected("digit", input));
+          return Parser.error(Diagnostic.expected("digit", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("digit", input));
+        return Parser.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 3) {
@@ -259,10 +264,10 @@ final class DecimalParser extends Parser<Number> {
           step = 4;
         } else {
           final String value = builder.toString();
-          return done(NumberParser.valueOf(builder.toString()));
+          return Parser.done(NumberParser.valueOf(builder.toString()));
         }
       } else if (input.isDone()) {
-        return done(NumberParser.valueOf(builder.toString()));
+        return Parser.done(NumberParser.valueOf(builder.toString()));
       }
     }
     if (step == 4) {
@@ -272,7 +277,7 @@ final class DecimalParser extends Parser<Number> {
         builder.appendCodePoint(c);
         step = 5;
       } else {
-        return done(NumberParser.valueOf(builder.toString()));
+        return Parser.done(NumberParser.valueOf(builder.toString()));
       }
     }
     if (step == 5) {
@@ -284,7 +289,7 @@ final class DecimalParser extends Parser<Number> {
         }
         step = 6;
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     if (step == 6) {
@@ -295,10 +300,10 @@ final class DecimalParser extends Parser<Number> {
           builder.appendCodePoint(c);
           step = 7;
         } else {
-          return error(Diagnostic.expected("digit", input));
+          return Parser.error(Diagnostic.expected("digit", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("digit", input));
+        return Parser.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 7) {
@@ -312,11 +317,11 @@ final class DecimalParser extends Parser<Number> {
         }
       }
       if (!input.isEmpty()) {
-        return done(NumberParser.valueOf(builder.toString()));
+        return Parser.done(NumberParser.valueOf(builder.toString()));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new DecimalParser(builder, mode, step);
   }
@@ -328,12 +333,7 @@ final class DecimalParser extends Parser<Number> {
     } else {
       builder.append(value);
     }
-    return parse(input, builder, mode, 1);
-  }
-
-  @Override
-  public Parser<Number> feed(Input input) {
-    return parse(input, this.builder, this.mode, this.step);
+    return DecimalParser.parse(input, builder, mode, 1);
   }
 
 }
@@ -346,6 +346,11 @@ final class HexadecimalParser extends Parser<Number> {
   HexadecimalParser(long value, int size) {
     this.value = value;
     this.size = size;
+  }
+
+  @Override
+  public Parser<Number> feed(Input input) {
+    return HexadecimalParser.parse(input, this.value, this.size);
   }
 
   static Parser<Number> parse(Input input, long value, int size) {
@@ -363,27 +368,22 @@ final class HexadecimalParser extends Parser<Number> {
     if (!input.isEmpty()) {
       if (size > 0) {
         if (size <= 8) {
-          return done(Integer.valueOf((int) value));
+          return Parser.done(Integer.valueOf((int) value));
         } else {
-          return done(Long.valueOf(value));
+          return Parser.done(Long.valueOf(value));
         }
       } else {
-        return error(Diagnostic.expected("hex digit", input));
+        return Parser.error(Diagnostic.expected("hex digit", input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new HexadecimalParser(value, size);
   }
 
   static Parser<Number> parse(Input input) {
-    return parse(input, 0L, 0);
-  }
-
-  @Override
-  public Parser<Number> feed(Input input) {
-    return parse(input, this.value, this.size);
+    return HexadecimalParser.parse(input, 0L, 0);
   }
 
 }

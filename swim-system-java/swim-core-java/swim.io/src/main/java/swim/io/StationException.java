@@ -19,8 +19,6 @@ package swim.io;
  */
 public class StationException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public StationException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -36,5 +34,7 @@ public class StationException extends RuntimeException {
   public StationException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

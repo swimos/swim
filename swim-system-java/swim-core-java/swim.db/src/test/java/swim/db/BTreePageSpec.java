@@ -93,7 +93,7 @@ public class BTreePageSpec {
     for (int n = 4; n <= 4096; n *= 2) {
       System.out.println("Dropping prefixes of " + n + " slots ...");
       for (int i = 0; i < n; i += 1) {
-        testDrop(i, n);
+        this.testDrop(i, n);
       }
     }
   }
@@ -128,7 +128,7 @@ public class BTreePageSpec {
     for (int n = 4; n <= 4096; n *= 2) {
       System.out.println("Taking prefixes of " + n + " slots ...");
       for (int i = 0; i < n; i += 1) {
-        testTake(i, n);
+        this.testTake(i, n);
       }
     }
   }

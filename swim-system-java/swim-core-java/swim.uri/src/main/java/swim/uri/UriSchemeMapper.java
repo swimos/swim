@@ -18,22 +18,12 @@ import swim.collections.HashTrieMap;
 
 abstract class UriSchemeMapper<T> extends UriMapper<T> {
 
-  static <T> UriSchemeMapper<T> compile(Uri pattern, UriScheme scheme, UriAuthority authority,
-                                        UriPath path, UriQuery query, UriFragment fragment, T value) {
-    if (scheme.isDefined()) {
-      return new UriSchemeMapping<T>(HashTrieMap.<String, UriAuthorityMapper<T>>empty().updated(scheme.name(),
-          UriAuthorityMapper.compile(pattern, authority, path, query, fragment, value)));
-    } else {
-      return UriAuthorityMapper.compile(pattern, authority, path, query, fragment, value);
-    }
-  }
-
   abstract UriMapper<T> getSuffix(UriScheme scheme, UriAuthority authority, UriPath path,
                                   UriQuery query, UriFragment fragment);
 
   @Override
   public UriMapper<T> getSuffix(Uri uri) {
-    return getSuffix(uri.scheme(), uri.authority(), uri.path(), uri.query(), uri.fragment());
+    return this.getSuffix(uri.scheme(), uri.authority(), uri.path(), uri.query(), uri.fragment());
   }
 
   abstract T get(UriScheme scheme, UriAuthority authority, UriPath path,
@@ -41,7 +31,7 @@ abstract class UriSchemeMapper<T> extends UriMapper<T> {
 
   @Override
   public T get(Uri uri) {
-    return get(uri.scheme(), uri.authority(), uri.path(), uri.query(), uri.fragment());
+    return this.get(uri.scheme(), uri.authority(), uri.path(), uri.query(), uri.fragment());
   }
 
   abstract UriSchemeMapper<T> merged(UriSchemeMapper<T> that);
@@ -49,7 +39,7 @@ abstract class UriSchemeMapper<T> extends UriMapper<T> {
   @Override
   public UriMapper<T> merged(UriMapper<T> that) {
     if (that instanceof UriSchemeMapper<?>) {
-      return merged((UriSchemeMapper<T>) that);
+      return this.merged((UriSchemeMapper<T>) that);
     } else {
       return that;
     }
@@ -60,8 +50,8 @@ abstract class UriSchemeMapper<T> extends UriMapper<T> {
 
   @Override
   public UriMapper<T> removed(Uri pattern) {
-    return removed(pattern.scheme(), pattern.authority(), pattern.path(),
-        pattern.query(), pattern.fragment());
+    return this.removed(pattern.scheme(), pattern.authority(), pattern.path(),
+                        pattern.query(), pattern.fragment());
   }
 
   abstract UriSchemeMapper<T> unmerged(UriSchemeMapper<T> that);
@@ -69,9 +59,19 @@ abstract class UriSchemeMapper<T> extends UriMapper<T> {
   @Override
   public UriMapper<T> unmerged(UriMapper<T> that) {
     if (that instanceof UriSchemeMapper<?>) {
-      return unmerged((UriSchemeMapper<T>) that);
+      return this.unmerged((UriSchemeMapper<T>) that);
     } else {
       return this;
+    }
+  }
+
+  static <T> UriSchemeMapper<T> compile(Uri pattern, UriScheme scheme, UriAuthority authority,
+                                        UriPath path, UriQuery query, UriFragment fragment, T value) {
+    if (scheme.isDefined()) {
+      return new UriSchemeMapping<T>(HashTrieMap.<String, UriAuthorityMapper<T>>empty().updated(scheme.name(),
+                                     UriAuthorityMapper.compile(pattern, authority, path, query, fragment, value)));
+    } else {
+      return UriAuthorityMapper.compile(pattern, authority, path, query, fragment, value);
     }
   }
 

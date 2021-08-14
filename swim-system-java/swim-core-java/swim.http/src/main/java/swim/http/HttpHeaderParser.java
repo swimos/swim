@@ -36,6 +36,11 @@ final class HttpHeaderParser extends Parser<HttpHeader> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<HttpHeader> feed(Input input) {
+    return HttpHeaderParser.parse(input, this.http, this.name, this.value, this.step);
+  }
+
   @SuppressWarnings("unchecked")
   static Parser<HttpHeader> parse(Input input, HttpParser http, StringBuilder name,
                                   Parser<? extends HttpHeader> value, int step) {
@@ -51,10 +56,10 @@ final class HttpHeaderParser extends Parser<HttpHeader> {
           name.appendCodePoint(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("HTTP header name", input));
+          return Parser.error(Diagnostic.expected("HTTP header name", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("HTTP header name", input));
+        return Parser.error(Diagnostic.expected("HTTP header name", input));
       }
     }
     if (step == 2) {
@@ -70,7 +75,7 @@ final class HttpHeaderParser extends Parser<HttpHeader> {
       if (input.isCont()) {
         step = 3;
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     if (step == 3) {
@@ -78,7 +83,7 @@ final class HttpHeaderParser extends Parser<HttpHeader> {
         input = input.step();
         step = 4;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected(':', input));
+        return Parser.error(Diagnostic.expected(':', input));
       }
     }
     if (step == 4) {
@@ -120,18 +125,13 @@ final class HttpHeaderParser extends Parser<HttpHeader> {
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new HttpHeaderParser(http, name, value, step);
   }
 
   static Parser<HttpHeader> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<HttpHeader> feed(Input input) {
-    return parse(input, this.http, this.name, this.value, this.step);
+    return HttpHeaderParser.parse(input, http, null, null, 1);
   }
 
 }

@@ -19,8 +19,6 @@ package swim.codec;
  */
 public class ParserException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   private final Diagnostic diagnostic;
 
   public ParserException(Diagnostic diagnostic) {
@@ -60,5 +58,7 @@ public class ParserException extends RuntimeException {
       return super.toString();
     }
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

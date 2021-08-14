@@ -23,7 +23,7 @@ import swim.structure.Kind;
 
 public abstract class PrivateKeyDef extends KeyDef {
 
-  private static Form<PrivateKeyDef> privateKeyForm;
+  public abstract PrivateKey privateKey();
 
   public static PrivateKeyDef from(PrivateKey key) {
     if (key instanceof ECPrivateKey) {
@@ -34,15 +34,15 @@ public abstract class PrivateKeyDef extends KeyDef {
     throw new IllegalArgumentException(key.toString());
   }
 
+  private static Form<PrivateKeyDef> privateKeyForm;
+
   @Kind
   public static Form<PrivateKeyDef> privateKeyForm() {
-    if (privateKeyForm == null) {
-      privateKeyForm = new PrivateKeyForm();
+    if (PrivateKeyDef.privateKeyForm == null) {
+      PrivateKeyDef.privateKeyForm = new PrivateKeyForm();
     }
-    return privateKeyForm;
+    return PrivateKeyDef.privateKeyForm;
   }
-
-  public abstract PrivateKey privateKey();
 
 }
 

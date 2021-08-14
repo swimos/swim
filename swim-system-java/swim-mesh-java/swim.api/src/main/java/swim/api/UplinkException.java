@@ -16,8 +16,6 @@ package swim.api;
 
 public class UplinkException extends LinkException {
 
-  private static final long serialVersionUID = 1L;
-
   public UplinkException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class UplinkException extends LinkException {
   public UplinkException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

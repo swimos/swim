@@ -88,7 +88,7 @@ final class UriQueryUndefined extends UriQuery {
 
   @Override
   public UriQuery appended(String... keyValuePairs) {
-    return UriQuery.from(keyValuePairs);
+    return UriQuery.of(keyValuePairs);
   }
 
   @Override
@@ -108,7 +108,7 @@ final class UriQueryUndefined extends UriQuery {
 
   @Override
   public UriQuery prepended(String... keyValuePairs) {
-    return UriQuery.from(keyValuePairs);
+    return UriQuery.of(keyValuePairs);
   }
 
   @Override
@@ -117,13 +117,14 @@ final class UriQueryUndefined extends UriQuery {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("UriQuery").write('.').write("undefined").write('(').write(')');
+    return output;
   }
 
   @Override
-  public void display(Output<?> output) {
-    // nop
+  public <T> Output<T> display(Output<T> output) {
+    return output; // blank
   }
 
   @Override

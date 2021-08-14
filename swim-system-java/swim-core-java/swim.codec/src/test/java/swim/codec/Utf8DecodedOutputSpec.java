@@ -21,83 +21,6 @@ import static org.testng.Assert.assertTrue;
 
 public class Utf8DecodedOutputSpec {
 
-  static void decodeWellFormedCodeUnitSequence(byte[] codeUnits, int codePoint) {
-    final int n = codeUnits.length;
-    // Decode complete code unit sequence.
-    Output<String> output = Utf8.decodedOutput(Unicode.stringOutput());
-    for (int i = 0; i < n; i += 1) {
-      assertTrue(output.isCont());
-      assertFalse(output.isFull());
-      assertFalse(output.isDone());
-      assertFalse(output.isError());
-      output = output.write(codeUnits[i] & 0xff);
-    }
-    assertEquals(output.bind(), new StringBuilder().appendCodePoint(codePoint).toString());
-  }
-
-  static void decodeMaximalSubpartOfIllFormedCodeUnitSequence(byte[] codeUnits) {
-    final int n = codeUnits.length;
-    final StringBuilder sb = new StringBuilder();
-    sb.appendCodePoint(0xfffd);
-    if (n > 1) {
-      sb.appendCodePoint(0xfffd);
-    }
-    final String expected = sb.toString();
-
-    // Decode complete code unit sequence with replacement.
-    Output<String> output = Utf8.decodedOutput(Unicode.stringOutput(), UtfErrorMode.replacement());
-    for (int i = 0; i < n; i += 1) {
-      assertTrue(output.isCont());
-      assertFalse(output.isFull());
-      assertFalse(output.isDone());
-      assertFalse(output.isError());
-      output = output.write(codeUnits[i] & 0xff);
-    }
-    assertEquals(output.bind(), expected);
-
-    // Decode complete code unit sequence with failure.
-    output = Utf8.decodedOutput(Unicode.stringOutput(), UtfErrorMode.fatal());
-    for (int i = 0; i < n; i += 1) {
-      assertTrue(output.isCont());
-      assertFalse(output.isFull());
-      assertFalse(output.isDone());
-      assertFalse(output.isError());
-      output = output.write(codeUnits[i] & 0xff);
-    }
-    assertFalse(output.isCont());
-    assertFalse(output.isFull());
-    assertFalse(output.isDone());
-    assertTrue(output.isError());
-  }
-
-  static void recoverFromIllFormedCodeUnitSequence(byte[] codeUnits, int codePoint) {
-    final int n = codeUnits.length;
-    final StringBuilder sb = new StringBuilder();
-    sb.appendCodePoint(0xfffd);
-    sb.appendCodePoint(codePoint);
-    final String expected = sb.toString();
-
-    // Decode complete code unit sequence with replacement.
-    Output<String> output = Utf8.decodedOutput(Unicode.stringOutput(), UtfErrorMode.replacement());
-    for (int i = 0; i < n; i += 1) {
-      assertTrue(output.isCont());
-      assertFalse(output.isFull());
-      assertFalse(output.isDone());
-      assertFalse(output.isError());
-      output = output.write(codeUnits[i] & 0xff);
-    }
-    assertEquals(output.bind(), expected);
-  }
-
-  static byte[] byteArray(int... xs) {
-    final int n = xs.length;
-    final byte[] bytes = new byte[n];
-    for (int i = 0; i < n; i += 1) {
-      bytes[i] = (byte) xs[i];
-    }
-    return bytes;
-  }
-
   @Test
   public void decodeWellFormed1ByteCodeUnitSequences() {
     // Unicode 11.0.0 § 3.9
@@ -228,6 +151,83 @@ public class Utf8DecodedOutputSpec {
     recoverFromIllFormedCodeUnitSequence(byteArray(0xf3, 0xbf, 0xbf, 0x7f), 0x7f);
     recoverFromIllFormedCodeUnitSequence(byteArray(0xf4, 0x80, 0x80, 0x7f), 0x7f);
     recoverFromIllFormedCodeUnitSequence(byteArray(0xf4, 0x8f, 0xbf, 0x7f), 0x7f);
+  }
+
+  static void decodeWellFormedCodeUnitSequence(byte[] codeUnits, int codePoint) {
+    final int n = codeUnits.length;
+    // Decode complete code unit sequence.
+    Output<String> output = Utf8.decodedOutput(Unicode.stringOutput());
+    for (int i = 0; i < n; i += 1) {
+      assertTrue(output.isCont());
+      assertFalse(output.isFull());
+      assertFalse(output.isDone());
+      assertFalse(output.isError());
+      output = output.write(codeUnits[i] & 0xff);
+    }
+    assertEquals(output.bind(), new StringBuilder().appendCodePoint(codePoint).toString());
+  }
+
+  static void decodeMaximalSubpartOfIllFormedCodeUnitSequence(byte[] codeUnits) {
+    final int n = codeUnits.length;
+    final StringBuilder sb = new StringBuilder();
+    sb.appendCodePoint(0xfffd);
+    if (n > 1) {
+      sb.appendCodePoint(0xfffd);
+    }
+    final String expected = sb.toString();
+
+    // Decode complete code unit sequence with replacement.
+    Output<String> output = Utf8.decodedOutput(Unicode.stringOutput(), UtfErrorMode.replacement());
+    for (int i = 0; i < n; i += 1) {
+      assertTrue(output.isCont());
+      assertFalse(output.isFull());
+      assertFalse(output.isDone());
+      assertFalse(output.isError());
+      output = output.write(codeUnits[i] & 0xff);
+    }
+    assertEquals(output.bind(), expected);
+
+    // Decode complete code unit sequence with failure.
+    output = Utf8.decodedOutput(Unicode.stringOutput(), UtfErrorMode.fatal());
+    for (int i = 0; i < n; i += 1) {
+      assertTrue(output.isCont());
+      assertFalse(output.isFull());
+      assertFalse(output.isDone());
+      assertFalse(output.isError());
+      output = output.write(codeUnits[i] & 0xff);
+    }
+    assertFalse(output.isCont());
+    assertFalse(output.isFull());
+    assertFalse(output.isDone());
+    assertTrue(output.isError());
+  }
+
+  static void recoverFromIllFormedCodeUnitSequence(byte[] codeUnits, int codePoint) {
+    final int n = codeUnits.length;
+    final StringBuilder sb = new StringBuilder();
+    sb.appendCodePoint(0xfffd);
+    sb.appendCodePoint(codePoint);
+    final String expected = sb.toString();
+
+    // Decode complete code unit sequence with replacement.
+    Output<String> output = Utf8.decodedOutput(Unicode.stringOutput(), UtfErrorMode.replacement());
+    for (int i = 0; i < n; i += 1) {
+      assertTrue(output.isCont());
+      assertFalse(output.isFull());
+      assertFalse(output.isDone());
+      assertFalse(output.isError());
+      output = output.write(codeUnits[i] & 0xff);
+    }
+    assertEquals(output.bind(), expected);
+  }
+
+  static byte[] byteArray(int... xs) {
+    final int n = xs.length;
+    final byte[] bytes = new byte[n];
+    for (int i = 0; i < n; i += 1) {
+      bytes[i] = (byte) xs[i];
+    }
+    return bytes;
   }
 
 }

@@ -41,7 +41,7 @@ public final class UriQueryBuilder implements EntryBuilder<String, String, UriQu
     if (value == null) {
       throw new NullPointerException();
     }
-    return addParam(key, value);
+    return this.addParam(key, value);
   }
 
   @Override
@@ -49,7 +49,7 @@ public final class UriQueryBuilder implements EntryBuilder<String, String, UriQu
     if (param == null) {
       throw new NullPointerException();
     }
-    return addParam(param.getKey(), param.getValue());
+    return this.addParam(param.getKey(), param.getValue());
   }
 
   @Override
@@ -59,7 +59,7 @@ public final class UriQueryBuilder implements EntryBuilder<String, String, UriQu
     }
     boolean modified = false;
     for (Map.Entry<String, String> param : params) {
-      modified = add(param) || modified;
+      modified = this.add(param) || modified;
     }
     return modified;
   }
@@ -70,11 +70,11 @@ public final class UriQueryBuilder implements EntryBuilder<String, String, UriQu
       throw new NullPointerException();
     }
     if (params instanceof UriQuery) {
-      return addQuery((UriQuery) params);
+      return this.addQuery((UriQuery) params);
     } else {
       boolean modified = false;
       for (Map.Entry<? extends String, ? extends String> param : params.entrySet()) {
-        modified = addParam(param.getKey(), param.getValue()) || modified;
+        modified = this.addParam(param.getKey(), param.getValue()) || modified;
       }
       return modified;
     }
@@ -95,7 +95,7 @@ public final class UriQueryBuilder implements EntryBuilder<String, String, UriQu
     if (size == 0) {
       this.first = tail;
     } else {
-      dealias(size - 1).setTail(tail);
+      this.dealias(size - 1).setTail(tail);
     }
     this.last = tail;
     this.size = size + 1;
@@ -104,7 +104,7 @@ public final class UriQueryBuilder implements EntryBuilder<String, String, UriQu
   }
 
   public boolean addParam(String value) {
-    return addParam(null, value);
+    return this.addParam(null, value);
   }
 
   public boolean addQuery(UriQuery query) {
@@ -113,7 +113,7 @@ public final class UriQueryBuilder implements EntryBuilder<String, String, UriQu
       if (size == 0) {
         this.first = query;
       } else {
-        dealias(size - 1).setTail(query);
+        this.dealias(size - 1).setTail(query);
       }
       size += 1;
       do {
@@ -159,7 +159,7 @@ public final class UriQueryBuilder implements EntryBuilder<String, String, UriQu
       this.aliased = i;
     } else if (n == 0) {
       xi = this.first;
-    } else if (n == size - 1) {
+    } else if (n == this.size - 1) {
       xi = this.last;
     } else {
       while (i <= n) {

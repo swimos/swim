@@ -16,8 +16,6 @@ package swim.ws;
 
 public class WsException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public WsException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -29,5 +27,7 @@ public class WsException extends RuntimeException {
   public WsException(Throwable cause) {
     super(cause);
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

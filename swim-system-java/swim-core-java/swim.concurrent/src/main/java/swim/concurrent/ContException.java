@@ -20,8 +20,6 @@ package swim.concurrent;
  */
 public class ContException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public ContException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -37,5 +35,7 @@ public class ContException extends RuntimeException {
   public ContException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

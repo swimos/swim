@@ -22,7 +22,6 @@ import swim.structure.Value;
 
 public class WarpLanePulse extends LanePulse {
 
-  private static Form<WarpLanePulse> form;
   protected final long laneCount;
   protected final WarpDownlinkPulse downlinkPulse;
   protected final WarpUplinkPulse uplinkPulse;
@@ -31,14 +30,6 @@ public class WarpLanePulse extends LanePulse {
     this.laneCount = laneCount;
     this.downlinkPulse = downlinkPulse;
     this.uplinkPulse = uplinkPulse;
-  }
-
-  @Kind
-  public static Form<WarpLanePulse> form() {
-    if (form == null) {
-      form = new WarpLanePulseForm();
-    }
-    return form;
   }
 
   @Override
@@ -61,7 +52,17 @@ public class WarpLanePulse extends LanePulse {
 
   @Override
   public Value toValue() {
-    return form().mold(this).toValue();
+    return WarpLanePulse.form().mold(this).toValue();
+  }
+
+  private static Form<WarpLanePulse> form;
+
+  @Kind
+  public static Form<WarpLanePulse> form() {
+    if (WarpLanePulse.form == null) {
+      WarpLanePulse.form = new WarpLanePulseForm();
+    }
+    return WarpLanePulse.form;
   }
 
 }

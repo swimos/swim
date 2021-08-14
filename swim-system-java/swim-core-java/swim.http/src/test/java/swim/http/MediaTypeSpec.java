@@ -19,32 +19,32 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class MediaTypeSpec {
 
-  public void assertParses(String string, MediaType mediaType) {
-    HttpAssertions.assertParses(Http.standardParser().mediaTypeParser(), string, mediaType);
-  }
-
   @Test
   public void parseMediaTypes() {
-    assertParses("text/plain", MediaType.from("text", "plain"));
+    assertParses("text/plain", MediaType.create("text", "plain"));
   }
 
   @Test
   public void writeMediaTypes() {
-    assertWrites(MediaType.from("text", "plain"), "text/plain");
+    assertWrites(MediaType.create("text", "plain"), "text/plain");
   }
 
   @Test
   public void parseMediaTypesWithParams() {
     assertParses("text/html;charset=UTF-8",
-        MediaType.from("text", "html").param("charset", "UTF-8"));
+                 MediaType.create("text", "html").param("charset", "UTF-8"));
     assertParses("text/html ; charset = UTF-8",
-        MediaType.from("text", "html").param("charset", "UTF-8"));
+                 MediaType.create("text", "html").param("charset", "UTF-8"));
   }
 
   @Test
   public void writeMediaTypesWithParams() {
-    assertWrites(MediaType.from("text", "html").param("charset", "UTF-8"),
-        "text/html; charset=UTF-8");
+    assertWrites(MediaType.create("text", "html").param("charset", "UTF-8"),
+                 "text/html; charset=UTF-8");
+  }
+
+  public static void assertParses(String string, MediaType mediaType) {
+    HttpAssertions.assertParses(Http.standardParser().mediaTypeParser(), string, mediaType);
   }
 
 }

@@ -21,8 +21,8 @@ public interface Preemptive {
 
   /**
    * Returns {@code true} if callers can safely invoke this function object
-   * concurrently.  Returns {@code false} if this function object is not
-   * thread safe.  Returns {@code false} by default.
+   * concurrently. Returns {@code false} if this function object is not
+   * thread safe. Returns {@code false} by default.
    */
   default boolean isPreemptive() {
     return false;

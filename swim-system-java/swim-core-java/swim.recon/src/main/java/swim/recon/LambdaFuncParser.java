@@ -37,7 +37,8 @@ final class LambdaFuncParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.bindingsParser, this.templateParser, this.step);
+    return LambdaFuncParser.parse(input, this.recon, this.builder, this.bindingsParser,
+                                  this.templateParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -80,19 +81,19 @@ final class LambdaFuncParser<I, V> extends Parser<V> {
       if (templateParser.isDone()) {
         final V bindings = bindingsParser.bind();
         final V template = templateParser.bind();
-        return done(recon.lambda(bindings, template));
+        return Parser.done(recon.lambda(bindings, template));
       } else if (templateParser.isError()) {
         return templateParser.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new LambdaFuncParser<I, V>(recon, builder, bindingsParser, templateParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, null, 1);
+    return LambdaFuncParser.parse(input, recon, builder, null, null, 1);
   }
 
 }

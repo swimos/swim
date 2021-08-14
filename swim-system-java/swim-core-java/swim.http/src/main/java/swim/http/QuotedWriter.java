@@ -36,6 +36,11 @@ final class QuotedWriter extends Writer<Object, Object> {
     this(quoted, 0, 0, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return QuotedWriter.write(output, this.quoted, this.index, this.escape, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, String quoted,
                                       int index, int escape, int step) {
     final int length = quoted.length();
@@ -54,7 +59,7 @@ final class QuotedWriter extends Writer<Object, Object> {
             escape = c;
             step = 3;
           } else {
-            return error(new HttpException("invalid quoted: " + quoted));
+            return Writer.error(new HttpException("invalid quoted: " + quoted));
           }
           index = quoted.offsetByCodePoints(index, 1);
           continue;
@@ -73,23 +78,18 @@ final class QuotedWriter extends Writer<Object, Object> {
     } while (true);
     if (step == 4 && output.isCont()) {
       output = output.write('"');
-      return done();
+      return Writer.done();
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new QuotedWriter(quoted, index, escape, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, String quoted) {
-    return write(output, quoted, 0, 0, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.quoted, this.index, this.escape, this.step);
+    return QuotedWriter.write(output, quoted, 0, 0, 1);
   }
 
 }

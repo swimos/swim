@@ -30,8 +30,6 @@ import swim.util.Murmur3;
 
 public class RsaPublicKeyDef extends PublicKeyDef implements RsaKeyDef {
 
-  private static int hashSeed;
-  private static Form<RsaPublicKeyDef> form;
   protected final BigInteger modulus;
   protected final BigInteger publicExponent;
   protected RSAPublicKey publicKey;
@@ -44,18 +42,6 @@ public class RsaPublicKeyDef extends PublicKeyDef implements RsaKeyDef {
 
   public RsaPublicKeyDef(BigInteger modulus, BigInteger publicExponent) {
     this(modulus, publicExponent, null);
-  }
-
-  public static RsaPublicKeyDef from(RSAPublicKey key) {
-    return new RsaPublicKeyDef(key.getModulus(), key.getPublicExponent(), key);
-  }
-
-  @Kind
-  public static Form<RsaPublicKeyDef> form() {
-    if (form == null) {
-      form = new RsaPublicKeyForm();
-    }
-    return form;
   }
 
   @Override
@@ -85,12 +71,12 @@ public class RsaPublicKeyDef extends PublicKeyDef implements RsaKeyDef {
 
   @Override
   public Key key() {
-    return publicKey();
+    return this.publicKey();
   }
 
   @Override
   public Value toValue() {
-    return form().mold(this).toValue();
+    return RsaPublicKeyDef.form().mold(this).toValue();
   }
 
   @Override
@@ -104,13 +90,29 @@ public class RsaPublicKeyDef extends PublicKeyDef implements RsaKeyDef {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(RsaPublicKeyDef.class);
+    if (RsaPublicKeyDef.hashSeed == 0) {
+      RsaPublicKeyDef.hashSeed = Murmur3.seed(RsaPublicKeyDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(RsaPublicKeyDef.hashSeed,
         this.modulus.hashCode()), this.publicExponent.hashCode()));
+  }
+
+  public static RsaPublicKeyDef from(RSAPublicKey key) {
+    return new RsaPublicKeyDef(key.getModulus(), key.getPublicExponent(), key);
+  }
+
+  private static Form<RsaPublicKeyDef> form;
+
+  @Kind
+  public static Form<RsaPublicKeyDef> form() {
+    if (RsaPublicKeyDef.form == null) {
+      RsaPublicKeyDef.form = new RsaPublicKeyForm();
+    }
+    return RsaPublicKeyDef.form;
   }
 
 }
@@ -130,15 +132,15 @@ final class RsaPublicKeyForm extends Form<RsaPublicKeyDef> {
   @Override
   public Item mold(RsaPublicKeyDef keyDef) {
     return Record.create(3)
-        .attr(tag())
-        .slot("modulus", Num.from(keyDef.modulus))
-        .slot("publicExponent", Num.from(keyDef.publicExponent));
+                 .attr(this.tag())
+                 .slot("modulus", Num.from(keyDef.modulus))
+                 .slot("publicExponent", Num.from(keyDef.publicExponent));
   }
 
   @Override
   public RsaPublicKeyDef cast(Item item) {
     final Value value = item.toValue();
-    if (value.getAttr(tag()).isDefined()) {
+    if (value.getAttr(this.tag()).isDefined()) {
       final BigInteger modulus = value.get("modulus").integerValue(null);
       final BigInteger publicExponent = value.get("publicExponent").integerValue(null);
       if (modulus != null && publicExponent != null) {

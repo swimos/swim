@@ -21,31 +21,10 @@ import swim.util.Murmur3;
 
 public final class MqttSubStatus implements Debug {
 
-  public static final MqttSubStatus AT_MOST_ONCE = new MqttSubStatus(0x00);
-  public static final MqttSubStatus AT_LEAST_ONCE = new MqttSubStatus(0x01);
-  public static final MqttSubStatus EXACTLY_ONCE = new MqttSubStatus(0x02);
-  public static final MqttSubStatus FAILURE = new MqttSubStatus(0x80);
-  static final int MAX_QOS_MASK = 0x3;
-  private static int hashSeed;
   public final int code;
 
   MqttSubStatus(int code) {
     this.code = code;
-  }
-
-  public static MqttSubStatus from(int code) {
-    switch (code) {
-      case 0:
-        return AT_MOST_ONCE;
-      case 1:
-        return AT_LEAST_ONCE;
-      case 2:
-        return EXACTLY_ONCE;
-      case 3:
-        return FAILURE;
-      default:
-        return new MqttSubStatus(code);
-    }
   }
 
   public boolean isSuccess() {
@@ -69,7 +48,7 @@ public final class MqttSubStatus implements Debug {
   }
 
   public MqttQoS maxQoS() {
-    return MqttQoS.from(this.code & MAX_QOS_MASK);
+    return MqttQoS.from(this.code & MqttSubStatus.MAX_QOS_MASK);
   }
 
   @Override
@@ -83,38 +62,49 @@ public final class MqttSubStatus implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttSubStatus.class);
+    if (MqttSubStatus.hashSeed == 0) {
+      MqttSubStatus.hashSeed = Murmur3.seed(MqttSubStatus.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.code));
+    return Murmur3.mash(Murmur3.mix(MqttSubStatus.hashSeed, this.code));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("MqttSubStatus").write('.');
-    switch (code) {
-      case 0x00:
-        output.write("AT_MOST_ONCE");
-        break;
-      case 0x01:
-        output.write("AT_LEAST_ONCE");
-        break;
-      case 0x02:
-        output.write("EXACTLY_ONCE");
-        break;
-      case 0x80:
-        output.write("FAILURE");
-        break;
-      default:
-        output.write("from").write('(').debug(this.code).write(')');
+    switch (this.code) {
+      case 0x00: output = output.write("AT_MOST_ONCE"); break;
+      case 0x01: output = output.write("AT_LEAST_ONCE"); break;
+      case 0x02: output = output.write("EXACTLY_ONCE");  break;
+      case 0x80: output = output.write("FAILURE"); break;
+      default: output = output.write("create").write('(').debug(this.code).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  static final int MAX_QOS_MASK = 0x3;
+
+  public static final MqttSubStatus AT_MOST_ONCE = new MqttSubStatus(0x00);
+  public static final MqttSubStatus AT_LEAST_ONCE = new MqttSubStatus(0x01);
+  public static final MqttSubStatus EXACTLY_ONCE = new MqttSubStatus(0x02);
+  public static final MqttSubStatus FAILURE = new MqttSubStatus(0x80);
+
+  public static MqttSubStatus create(int code) {
+    switch (code) {
+      case 0: return MqttSubStatus.AT_MOST_ONCE;
+      case 1: return MqttSubStatus.AT_LEAST_ONCE;
+      case 2: return MqttSubStatus.EXACTLY_ONCE;
+      case 3: return MqttSubStatus.FAILURE;
+      default: return new MqttSubStatus(code);
+    }
   }
 
 }

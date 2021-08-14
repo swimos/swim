@@ -74,7 +74,7 @@ abstract class QTreeNodeCursor implements Cursor<Slot> {
         if (childIndex < childRefs.length) {
           final QTreePageRef childRef = childRefs[childIndex];
           if (BitInterval.intersects(x, y, childRef.x, childRef.y)) {
-            this.childCursor = childCursor(childRef);
+            this.childCursor = this.childCursor(childRef);
           } else {
             this.index += childRef.span();
           }
@@ -114,7 +114,7 @@ abstract class QTreeNodeCursor implements Cursor<Slot> {
         if (childIndex < childRefs.length) {
           final QTreePageRef childRef = childRefs[childIndex];
           if (BitInterval.intersects(x, y, childRef.x, childRef.y)) {
-            this.childCursor = childCursor(childRef);
+            this.childCursor = this.childCursor(childRef);
           } else {
             this.index += childRef.span();
           }
@@ -157,7 +157,7 @@ abstract class QTreeNodeCursor implements Cursor<Slot> {
         if (childIndex < childRefs.length) {
           final QTreePageRef childRef = childRefs[childIndex];
           if (BitInterval.intersects(x, y, childRef.x, childRef.y)) {
-            this.childCursor = childCursor(childRef);
+            this.childCursor = this.childCursor(childRef);
           } else {
             this.index += childRef.span();
           }
@@ -189,7 +189,7 @@ abstract class QTreeNodeCursor implements Cursor<Slot> {
           final long childSpan = childRef.span();
           this.childIndex = childIndex + 1;
           if (childSpan < count) {
-            this.childCursor = childCursor(childRef);
+            this.childCursor = this.childCursor(childRef);
             if (count > 0L) {
               this.index += count;
               this.childCursor.skip(count);
@@ -237,7 +237,7 @@ abstract class QTreeNodeCursor implements Cursor<Slot> {
         if (childIndex < childRefs.length) {
           final QTreePageRef childRef = childRefs[childIndex];
           if (BitInterval.intersects(x, y, childRef.x, childRef.y)) {
-            this.childCursor = childCursor(childRef);
+            this.childCursor = this.childCursor(childRef);
           } else {
             this.index += childRef.span();
           }
@@ -285,7 +285,7 @@ abstract class QTreeNodeCursor implements Cursor<Slot> {
         if (childIndex < childRefs.length) {
           final QTreePageRef childRef = childRefs[childIndex];
           if (BitInterval.intersects(x, y, childRef.x, childRef.y)) {
-            this.childCursor = childCursor(childRef);
+            this.childCursor = this.childCursor(childRef);
           } else {
             this.index += childRef.span();
           }
@@ -315,7 +315,7 @@ abstract class QTreeNodeCursor implements Cursor<Slot> {
         if (childIndex >= 0) {
           final QTreePageRef childRef = childRefs[childIndex];
           if (BitInterval.intersects(x, y, childRef.x, childRef.y)) {
-            this.childCursor = childCursor(childRef);
+            this.childCursor = this.childCursor(childRef);
           } else {
             this.index -= childRef.span();
           }
@@ -364,7 +364,7 @@ abstract class QTreeNodeCursor implements Cursor<Slot> {
         if (childIndex < childRefs.length) {
           final QTreePageRef childRef = childRefs[childIndex];
           if (BitInterval.intersects(x, y, childRef.x, childRef.y)) {
-            this.childCursor = childCursor(childRef);
+            this.childCursor = this.childCursor(childRef);
           } else {
             this.index -= childRef.span();
           }
@@ -392,8 +392,8 @@ abstract class QTreeNodeCursor implements Cursor<Slot> {
   @Override
   public void load() throws InterruptedException {
     final Sync<Page> syncPage = new Sync<Page>();
-    page.pageRef.loadTreeAsync(false, syncPage);
-    syncPage.await(page.pageRef.settings().pageLoadTimeout);
+    this.page.pageRef.loadTreeAsync(false, syncPage);
+    syncPage.await(this.page.pageRef.settings().pageLoadTimeout);
   }
 
 }

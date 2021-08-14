@@ -24,7 +24,6 @@ import swim.util.Murmur3;
 
 public class JavaAgentDef implements AgentDef, Debug {
 
-  private static int hashSeed;
   final String className;
   final Value id;
   final Value props;
@@ -35,16 +34,12 @@ public class JavaAgentDef implements AgentDef, Debug {
     this.props = props;
   }
 
-  public static JavaAgentDef fromClassName(String className) {
-    return new JavaAgentDef(className, Text.from(className), Value.absent());
-  }
-
   public final String className() {
     return this.className;
   }
 
   public JavaAgentDef className(String className) {
-    return copy(className, this.id, this.props);
+    return this.copy(className, this.id, this.props);
   }
 
   @Override
@@ -53,7 +48,7 @@ public class JavaAgentDef implements AgentDef, Debug {
   }
 
   public JavaAgentDef id(Value id) {
-    return copy(this.className, id, this.props);
+    return this.copy(this.className, id, this.props);
   }
 
   @Override
@@ -62,7 +57,7 @@ public class JavaAgentDef implements AgentDef, Debug {
   }
 
   public JavaAgentDef props(Value props) {
-    return copy(this.className, this.id, props);
+    return this.copy(this.className, this.id, props);
   }
 
   protected JavaAgentDef copy(String className, Value id, Value props) {
@@ -81,30 +76,37 @@ public class JavaAgentDef implements AgentDef, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(JavaAgentDef.class);
+    if (JavaAgentDef.hashSeed == 0) {
+      JavaAgentDef.hashSeed = Murmur3.seed(JavaAgentDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(JavaAgentDef.hashSeed,
         Murmur3.hash(this.className)), this.id.hashCode()), this.props.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("JavaAgentDef").write('.').write("fromClassName").write('(')
-        .debug(this.className).write(')');
+                   .debug(this.className).write(')');
     if (this.id.isDefined()) {
       output = output.write('.').write("id").write('(').debug(this.id).write(')');
     }
     if (this.props.isDefined()) {
       output = output.write('.').write("props").write('(').debug(this.props).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static JavaAgentDef fromClassName(String className) {
+    return new JavaAgentDef(className, Text.from(className), Value.absent());
   }
 
 }

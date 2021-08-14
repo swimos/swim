@@ -23,7 +23,7 @@ import swim.codec.Decoder;
 import swim.codec.Encoder;
 import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 
 /**
  * Adapter from a flow-controlled {@link IpSocket} to a decoder/encoder
@@ -185,7 +185,7 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
           context = this.context;
           if (context != null) {
             context.flowControl(FlowModifier.DISABLE_READ);
-            reconcileReadFlowControl();
+            this.reconcileReadFlowControl();
           }
           break;
         }
@@ -227,7 +227,7 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
         final IpSocketContext context = this.context;
         if (context != null) {
           context.flowControl(FlowModifier.DISABLE_WRITE);
-          reconcileWriteFlowControl();
+          this.reconcileWriteFlowControl();
         }
         return;
       }
@@ -243,7 +243,7 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
     } while (oldIndex != newIndex && outputBuffer.isCont() && writer.isCont());
     this.writing = writer;
     if (newIndex == 0) {
-      didWrite();
+      this.didWrite();
     }
   }
 
@@ -267,7 +267,7 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
           final IpSocketContext context = this.context;
           if (context != null) {
             context.flowControl(FlowModifier.DISABLE_WRITE);
-            reconcileWriteFlowControl();
+            this.reconcileWriteFlowControl();
           }
         }
       }
@@ -353,7 +353,7 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
         try {
           reader.feed(InputBuffer.done());
         } catch (Throwable cause) {
-          if (!Conts.isNonFatal(cause)) {
+          if (!Cont.isNonFatal(cause)) {
             // Rethrow fatal exception.
             throw cause;
           }
@@ -369,7 +369,7 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
         try {
           writer.pull(OutputBuffer.done());
         } catch (Throwable cause) {
-          if (!Conts.isNonFatal(cause)) {
+          if (!Cont.isNonFatal(cause)) {
             // Rethrow fatal exception.
             throw cause;
           }
@@ -381,13 +381,13 @@ public class IpSocketModem<I, O> implements IpSocket, IpModemContext<I, O> {
     try {
       this.modem.didDisconnect();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         // Rethrow fatal exception.
         throw cause;
       }
       failure = cause;
     }
-    close();
+    this.close();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {

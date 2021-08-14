@@ -24,145 +24,104 @@ import swim.util.Murmur3;
 
 public class AvroReflectionDecoderSpec {
 
-  public static <T> void assertDecodes(AvroType<T> type, Data data, T expected) {
-    Assertions.assertDecodes(Avro.typeDecoder(type), data, expected);
-  }
-
   @Test
   public void decodeNullReflections() {
     assertDecodes(AvroReflection.nullType(),
-        Data.empty(), null);
+                  Data.empty(), null);
   }
 
   @Test
   public void decodeBooleanReflections() {
     assertDecodes(AvroReflection.booleanType(),
-        Data.fromBase16("00"), false);
+                  Data.fromBase16("00"), false);
     assertDecodes(AvroReflection.booleanType(),
-        Data.fromBase16("01"), true);
+                  Data.fromBase16("01"), true);
   }
 
   @Test
   public void decodeIntReflections() {
     assertDecodes(AvroReflection.intType(),
-        Data.fromBase16("00"), 0);
+                  Data.fromBase16("00"), 0);
     assertDecodes(AvroReflection.intType(),
-        Data.fromBase16("01"), -1);
+                  Data.fromBase16("01"), -1);
     assertDecodes(AvroReflection.intType(),
-        Data.fromBase16("02"), 1);
+                  Data.fromBase16("02"), 1);
     assertDecodes(AvroReflection.intType(),
-        Data.fromBase16("03"), -2);
+                  Data.fromBase16("03"), -2);
     assertDecodes(AvroReflection.intType(),
-        Data.fromBase16("04"), 2);
+                  Data.fromBase16("04"), 2);
     assertDecodes(AvroReflection.intType(),
-        Data.fromBase16("7f"), -64);
+                  Data.fromBase16("7f"), -64);
     assertDecodes(AvroReflection.intType(),
-        Data.fromBase16("8001"), 64);
+                  Data.fromBase16("8001"), 64);
   }
 
   @Test
   public void decodeLongReflections() {
     assertDecodes(AvroReflection.longType(),
-        Data.fromBase16("00"), 0L);
+                  Data.fromBase16("00"), 0L);
     assertDecodes(AvroReflection.longType(),
-        Data.fromBase16("01"), -1L);
+                  Data.fromBase16("01"), -1L);
     assertDecodes(AvroReflection.longType(),
-        Data.fromBase16("02"), 1L);
+                  Data.fromBase16("02"), 1L);
     assertDecodes(AvroReflection.longType(),
-        Data.fromBase16("03"), -2L);
+                  Data.fromBase16("03"), -2L);
     assertDecodes(AvroReflection.longType(),
-        Data.fromBase16("04"), 2L);
+                  Data.fromBase16("04"), 2L);
     assertDecodes(AvroReflection.longType(),
-        Data.fromBase16("7f"), -64L);
+                  Data.fromBase16("7f"), -64L);
     assertDecodes(AvroReflection.longType(),
-        Data.fromBase16("8001"), 64L);
+                  Data.fromBase16("8001"), 64L);
   }
 
   @Test
   public void decodeFloatReflections() {
     assertDecodes(AvroReflection.floatType(),
-        Data.fromBase16("00000000"), 0.0f);
+                  Data.fromBase16("00000000"), 0.0f);
     assertDecodes(AvroReflection.floatType(),
-        Data.fromBase16("0000803f"), 1.0f);
+                  Data.fromBase16("0000803f"), 1.0f);
     assertDecodes(AvroReflection.floatType(),
-        Data.fromBase16("000080bf"), -1.0f);
+                  Data.fromBase16("000080bf"), -1.0f);
     assertDecodes(AvroReflection.floatType(),
-        Data.fromBase16("0000c07f"), Float.NaN);
+                  Data.fromBase16("0000c07f"), Float.NaN);
     assertDecodes(AvroReflection.floatType(),
-        Data.fromBase16("0000807f"), Float.POSITIVE_INFINITY);
+                  Data.fromBase16("0000807f"), Float.POSITIVE_INFINITY);
     assertDecodes(AvroReflection.floatType(),
-        Data.fromBase16("000080ff"), Float.NEGATIVE_INFINITY);
+                  Data.fromBase16("000080ff"), Float.NEGATIVE_INFINITY);
   }
 
   @Test
   public void decodeDoubleReflections() {
     assertDecodes(AvroReflection.doubleType(),
-        Data.fromBase16("0000000000000000"), 0.0);
+                  Data.fromBase16("0000000000000000"), 0.0);
     assertDecodes(AvroReflection.doubleType(),
-        Data.fromBase16("000000000000f03f"), 1.0);
+                  Data.fromBase16("000000000000f03f"), 1.0);
     assertDecodes(AvroReflection.doubleType(),
-        Data.fromBase16("000000000000f0bf"), -1.0);
+                  Data.fromBase16("000000000000f0bf"), -1.0);
     assertDecodes(AvroReflection.doubleType(),
-        Data.fromBase16("000000000000f87f"), Double.NaN);
+                  Data.fromBase16("000000000000f87f"), Double.NaN);
     assertDecodes(AvroReflection.doubleType(),
-        Data.fromBase16("000000000000f07f"), Double.POSITIVE_INFINITY);
+                  Data.fromBase16("000000000000f07f"), Double.POSITIVE_INFINITY);
     assertDecodes(AvroReflection.doubleType(),
-        Data.fromBase16("000000000000f0ff"), Double.NEGATIVE_INFINITY);
+                  Data.fromBase16("000000000000f0ff"), Double.NEGATIVE_INFINITY);
   }
 
   @Test
   public void decodeDataReflections() {
     assertDecodes(AvroReflection.dataType(),
-        Data.fromBase16("08f0e1d2c3"), Data.fromBase16("f0e1d2c3").toByteBuffer());
+                  Data.fromBase16("08f0e1d2c3"), Data.fromBase16("f0e1d2c3").toByteBuffer());
   }
 
   @Test
   public void decodeStringReflections() {
     assertDecodes(AvroReflection.stringType(),
-        Data.fromBase16("06666f6f"), "foo");
+                  Data.fromBase16("06666f6f"), "foo");
   }
 
   @Test
   public void decodeRecordReflections() {
     assertDecodes(AvroReflection.classType(TestRecord.class),
-        Data.fromBase16("3606666f6f"), new TestRecord(27, "foo"));
-  }
-
-  @Test
-  public void decodeEnumReflections() {
-    assertDecodes(AvroReflection.enumType(TestEnum.class),
-        Data.fromBase16("04"), TestEnum.C);
-  }
-
-  @Test
-  public void decodeArrayReflections() {
-    assertDecodes(AvroReflection.arrayType(Long.TYPE, AvroReflection.longType()),
-        Data.fromBase16("04063600"), new long[] {3, 27});
-  }
-
-  @Test
-  public void decodeMapReflections() {
-    final Map<String, Long> map = new HashMap<String, Long>();
-    map.put("a", 3L);
-    map.put("b", 27L);
-    assertDecodes(AvroReflection.mapType(AvroReflection.longType()),
-        Data.fromBase16("0402610602623600"), map);
-  }
-
-  @Test
-  public void decodeUnionReflections() {
-    assertDecodes(AvroReflection.unionType().variant(AvroReflection.nullType())
-            .variant(AvroReflection.stringType()),
-        Data.fromBase16("00"), null);
-    assertDecodes(AvroReflection.unionType().variant(AvroReflection.nullType())
-            .variant(AvroReflection.stringType()),
-        Data.fromBase16("020261"), "a");
-  }
-
-  @Test
-  public void decodeFixedReflections() {
-    assertDecodes(AvroReflection.fixedType("quad", 4),
-        Data.fromBase16("f0e1d2c3"), new byte[] {(byte) 0xf0, (byte) 0xe1, (byte) 0xd2, (byte) 0xc3});
+                  Data.fromBase16("3606666f6f"), new TestRecord(27, "foo"));
   }
 
   public static class TestRecord {
@@ -176,7 +135,7 @@ public class AvroReflectionDecoderSpec {
     }
 
     public TestRecord() {
-      // stub
+      // default
     }
 
     @Override
@@ -201,11 +160,52 @@ public class AvroReflectionDecoderSpec {
 
   }
 
+  @Test
+  public void decodeEnumReflections() {
+    assertDecodes(AvroReflection.enumType(TestEnum.class),
+                  Data.fromBase16("04"), TestEnum.C);
+  }
+
   public enum TestEnum {
     A,
     B,
     C,
     D;
+  }
+
+  @Test
+  public void decodeArrayReflections() {
+    assertDecodes(AvroReflection.arrayType(Long.TYPE, AvroReflection.longType()),
+                  Data.fromBase16("04063600"), new long[] {3, 27});
+  }
+
+  @Test
+  public void decodeMapReflections() {
+    final Map<String, Long> map = new HashMap<String, Long>();
+    map.put("a", 3L);
+    map.put("b", 27L);
+    assertDecodes(AvroReflection.mapType(AvroReflection.longType()),
+                  Data.fromBase16("0402610602623600"), map);
+  }
+
+  @Test
+  public void decodeUnionReflections() {
+    assertDecodes(AvroReflection.unionType().variant(AvroReflection.nullType())
+                                            .variant(AvroReflection.stringType()),
+                  Data.fromBase16("00"), null);
+    assertDecodes(AvroReflection.unionType().variant(AvroReflection.nullType())
+                                            .variant(AvroReflection.stringType()),
+                  Data.fromBase16("020261"), "a");
+  }
+
+  @Test
+  public void decodeFixedReflections() {
+    assertDecodes(AvroReflection.fixedType("quad", 4),
+                  Data.fromBase16("f0e1d2c3"), new byte[] {(byte) 0xf0, (byte) 0xe1, (byte) 0xd2, (byte) 0xc3});
+  }
+
+  public static <T> void assertDecodes(AvroType<T> type, Data data, T expected) {
+    AvroAssertions.assertDecodes(Avro.typeDecoder(type), data, expected);
   }
 
 }

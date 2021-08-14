@@ -39,6 +39,11 @@ final class HttpStatusParser extends Parser<HttpStatus> {
     this(http, 0, null, 1);
   }
 
+  @Override
+  public Parser<HttpStatus> feed(Input input) {
+    return HttpStatusParser.parse(input, this.http, this.code, this.phrase, this.step);
+  }
+
   static Parser<HttpStatus> parse(Input input, HttpParser http, int code,
                                   Output<String> phrase, int step) {
     int c = 0;
@@ -51,10 +56,10 @@ final class HttpStatusParser extends Parser<HttpStatus> {
           step += 1;
           continue;
         } else {
-          return error(Diagnostic.expected("status code", input));
+          return Parser.error(Diagnostic.expected("status code", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("status code", input));
+        return Parser.error(Diagnostic.expected("status code", input));
       }
       break;
     }
@@ -63,7 +68,7 @@ final class HttpStatusParser extends Parser<HttpStatus> {
         input = input.step();
         step = 5;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected("space", input));
+        return Parser.error(Diagnostic.expected("space", input));
       }
     }
     if (step == 5) {
@@ -80,22 +85,17 @@ final class HttpStatusParser extends Parser<HttpStatus> {
         }
       }
       if (!input.isEmpty()) {
-        return done(http.status(code, phrase.bind()));
+        return Parser.done(http.status(code, phrase.bind()));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new HttpStatusParser(http, code, phrase, step);
   }
 
   static Parser<HttpStatus> parse(Input input, HttpParser http) {
-    return parse(input, http, 0, null, 1);
-  }
-
-  @Override
-  public Parser<HttpStatus> feed(Input input) {
-    return parse(input, this.http, this.code, this.phrase, this.step);
+    return HttpStatusParser.parse(input, http, 0, null, 1);
   }
 
 }

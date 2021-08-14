@@ -32,7 +32,7 @@ import static org.testng.Assert.fail;
 public final class MqttAssertions {
 
   private MqttAssertions() {
-    // stub
+    // static
   }
 
   public static <T> void assertDecodes(Decoder<T> decodee, InputBuffer input, T expected) {

@@ -22,18 +22,18 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class ExpectSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseExpectHeaders() {
-    assertParses("Expect: 100-continue", Expect.from("100-continue"));
+    assertParses("Expect: 100-continue", Expect.create("100-continue"));
   }
 
   @Test
   public void writeExpectHeaders() {
-    assertWrites(Expect.from("100-continue"), "Expect: 100-continue");
+    assertWrites(Expect.create("100-continue"), "Expect: 100-continue");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

@@ -22,6 +22,65 @@ import swim.util.Murmur3;
 
 public final class HttpStatus extends HttpPart implements Debug {
 
+  final int code;
+  final String phrase;
+
+  HttpStatus(int code, String phrase) {
+    this.code = code;
+    this.phrase = phrase;
+  }
+
+  public int code() {
+    return this.code;
+  }
+
+  public String phrase() {
+    return this.phrase;
+  }
+
+  @Override
+  public Writer<?, ?> httpWriter(HttpWriter http) {
+    return http.statusWriter(this.code, this.phrase);
+  }
+
+  @Override
+  public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
+    return http.writeStatus(this.code, this.phrase, output);
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof HttpStatus) {
+      final HttpStatus that = (HttpStatus) other;
+      return this.code == that.code && this.phrase.equals(that.phrase);
+    }
+    return false;
+  }
+
+  private static int hashSeed;
+
+  @Override
+  public int hashCode() {
+    if (HttpStatus.hashSeed == 0) {
+      HttpStatus.hashSeed = Murmur3.seed(HttpStatus.class);
+    }
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpStatus.hashSeed, this.code), this.phrase.hashCode()));
+  }
+
+  @Override
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("HttpStatus").write('.').write("create").write('(')
+                   .debug(this.code).write(", ").debug(this.phrase).write(')');
+    return output;
+  }
+
+  @Override
+  public String toString() {
+    return Format.debug(this);
+  }
+
   public static final HttpStatus CONTINUE = new HttpStatus(100, "Continue");
   public static final HttpStatus SWITCHING_PROTOCOLS = new HttpStatus(101, "Switching Protocols");
   public static final HttpStatus OK = new HttpStatus(200, "OK");
@@ -63,187 +122,137 @@ public final class HttpStatus extends HttpPart implements Debug {
   public static final HttpStatus SERVICE_UNAVAILABLE = new HttpStatus(503, "Service Unavailable");
   public static final HttpStatus GATEWAY_TIMEOUT = new HttpStatus(504, "Gateway Timeout");
   public static final HttpStatus HTTP_VERSION_NOT_SUPPORTED = new HttpStatus(505, "HTTP Version Not Supported");
-  private static int hashSeed;
-  final int code;
-  final String phrase;
-
-  HttpStatus(int code, String phrase) {
-    this.code = code;
-    this.phrase = phrase;
-  }
 
   public static HttpStatus from(int code) {
     switch (code) {
-      case 100:
-        return CONTINUE;
-      case 101:
-        return SWITCHING_PROTOCOLS;
-      case 200:
-        return OK;
-      case 201:
-        return CREATED;
-      case 202:
-        return ACCEPTED;
-      case 203:
-        return NON_AUTHORITATIVE_INFORMATION;
-      case 204:
-        return NO_CONTENT;
-      case 205:
-        return RESET_CONTENT;
-      case 206:
-        return PARTIAL_CONTENT;
-      case 300:
-        return MULTIPLE_CHOICES;
-      case 301:
-        return MOVED_PERMANENTLY;
-      case 302:
-        return FOUND;
-      case 303:
-        return SEE_OTHER;
-      case 304:
-        return NOT_MODIFIED;
-      case 305:
-        return USE_PROXY;
-      case 307:
-        return TEMPORARY_REDIRECT;
-      case 400:
-        return BAD_REQUEST;
-      case 401:
-        return UNAUTHORIZED;
-      case 402:
-        return PAYMENT_REQUIRED;
-      case 403:
-        return FORBIDDEN;
-      case 404:
-        return NOT_FOUND;
-      case 405:
-        return METHOD_NOT_ALLOWED;
-      case 406:
-        return NOT_ACCEPTABLE;
-      case 407:
-        return PROXY_AUTHENTICATION_REQUIRED;
-      case 408:
-        return REQUEST_TIMEOUT;
-      case 409:
-        return CONFLICT;
-      case 410:
-        return GONE;
-      case 411:
-        return LENGTH_REQUIRED;
-      case 412:
-        return PRECONDITION_FAILED;
-      case 413:
-        return PAYLOAD_TOO_LARGE;
-      case 414:
-        return URI_TOO_LONG;
-      case 415:
-        return UNSUPPORTED_MEDIA_TYPE;
-      case 416:
-        return RANGE_NOT_SATISFIABLE;
-      case 417:
-        return EXPECTATION_FAILED;
-      case 426:
-        return UPGRADE_REQUIRED;
-      case 500:
-        return INTERNAL_SERVER_ERROR;
-      case 501:
-        return NOT_IMPLEMENTED;
-      case 502:
-        return BAD_GATEWAY;
-      case 503:
-        return SERVICE_UNAVAILABLE;
-      case 504:
-        return GATEWAY_TIMEOUT;
-      case 505:
-        return HTTP_VERSION_NOT_SUPPORTED;
-      default:
-        return new HttpStatus(code, "");
+      case 100: return HttpStatus.CONTINUE;
+      case 101: return HttpStatus.SWITCHING_PROTOCOLS;
+      case 200: return HttpStatus.OK;
+      case 201: return HttpStatus.CREATED;
+      case 202: return HttpStatus.ACCEPTED;
+      case 203: return HttpStatus.NON_AUTHORITATIVE_INFORMATION;
+      case 204: return HttpStatus.NO_CONTENT;
+      case 205: return HttpStatus.RESET_CONTENT;
+      case 206: return HttpStatus.PARTIAL_CONTENT;
+      case 300: return HttpStatus.MULTIPLE_CHOICES;
+      case 301: return HttpStatus.MOVED_PERMANENTLY;
+      case 302: return HttpStatus.FOUND;
+      case 303: return HttpStatus.SEE_OTHER;
+      case 304: return HttpStatus.NOT_MODIFIED;
+      case 305: return HttpStatus.USE_PROXY;
+      case 307: return HttpStatus.TEMPORARY_REDIRECT;
+      case 400: return HttpStatus.BAD_REQUEST;
+      case 401: return HttpStatus.UNAUTHORIZED;
+      case 402: return HttpStatus.PAYMENT_REQUIRED;
+      case 403: return HttpStatus.FORBIDDEN;
+      case 404: return HttpStatus.NOT_FOUND;
+      case 405: return HttpStatus.METHOD_NOT_ALLOWED;
+      case 406: return HttpStatus.NOT_ACCEPTABLE;
+      case 407: return HttpStatus.PROXY_AUTHENTICATION_REQUIRED;
+      case 408: return HttpStatus.REQUEST_TIMEOUT;
+      case 409: return HttpStatus.CONFLICT;
+      case 410: return HttpStatus.GONE;
+      case 411: return HttpStatus.LENGTH_REQUIRED;
+      case 412: return HttpStatus.PRECONDITION_FAILED;
+      case 413: return HttpStatus.PAYLOAD_TOO_LARGE;
+      case 414: return HttpStatus.URI_TOO_LONG;
+      case 415: return HttpStatus.UNSUPPORTED_MEDIA_TYPE;
+      case 416: return HttpStatus.RANGE_NOT_SATISFIABLE;
+      case 417: return HttpStatus.EXPECTATION_FAILED;
+      case 426: return HttpStatus.UPGRADE_REQUIRED;
+      case 500: return HttpStatus.INTERNAL_SERVER_ERROR;
+      case 501: return HttpStatus.NOT_IMPLEMENTED;
+      case 502: return HttpStatus.BAD_GATEWAY;
+      case 503: return HttpStatus.SERVICE_UNAVAILABLE;
+      case 504: return HttpStatus.GATEWAY_TIMEOUT;
+      case 505: return HTTP_VERSION_NOT_SUPPORTED;
+      default: return new HttpStatus(code, "");
     }
   }
 
-  public static HttpStatus from(int code, String phrase) {
-    if (code == 100 && phrase.equals("Continue")) {
-      return CONTINUE;
-    } else if (code == 101 && phrase.equals("Switching Protocols")) {
-      return SWITCHING_PROTOCOLS;
-    } else if (code == 200 && phrase.equals("OK")) {
-      return OK;
-    } else if (code == 201 && phrase.equals("Created")) {
-      return CREATED;
-    } else if (code == 202 && phrase.equals("Accepted")) {
-      return ACCEPTED;
-    } else if (code == 203 && phrase.equals("Non-Authoritative Information")) {
-      return NON_AUTHORITATIVE_INFORMATION;
-    } else if (code == 204 && phrase.equals("No Content")) {
-      return NO_CONTENT;
-    } else if (code == 205 && phrase.equals("Reset Content")) {
-      return RESET_CONTENT;
-    } else if (code == 206 && phrase.equals("Partial Content")) {
-      return PARTIAL_CONTENT;
-    } else if (code == 300 && phrase.equals("Multiple Choices")) {
-      return MULTIPLE_CHOICES;
-    } else if (code == 301 && phrase.equals("Moved Permanently")) {
-      return MOVED_PERMANENTLY;
-    } else if (code == 302 && phrase.equals("Found")) {
-      return FOUND;
-    } else if (code == 303 && phrase.equals("See Other")) {
-      return SEE_OTHER;
-    } else if (code == 304 && phrase.equals("Not Modified")) {
-      return NOT_MODIFIED;
-    } else if (code == 305 && phrase.equals("Use Proxy")) {
-      return USE_PROXY;
-    } else if (code == 307 && phrase.equals("Temporary Redirect")) {
-      return TEMPORARY_REDIRECT;
-    } else if (code == 400 && phrase.equals("Bad Request")) {
-      return BAD_REQUEST;
-    } else if (code == 401 && phrase.equals("Unauthorized")) {
-      return UNAUTHORIZED;
-    } else if (code == 402 && phrase.equals("Payment Required")) {
-      return PAYMENT_REQUIRED;
-    } else if (code == 403 && phrase.equals("Forbidden")) {
-      return FORBIDDEN;
-    } else if (code == 404 && phrase.equals("Not Found")) {
-      return NOT_FOUND;
-    } else if (code == 405 && phrase.equals("Method Not Allowed")) {
-      return METHOD_NOT_ALLOWED;
-    } else if (code == 406 && phrase.equals("Not Acceptable")) {
-      return NOT_ACCEPTABLE;
-    } else if (code == 407 && phrase.equals("Proxy Authentication Required")) {
-      return PROXY_AUTHENTICATION_REQUIRED;
-    } else if (code == 408 && phrase.equals("Request Timeout")) {
-      return REQUEST_TIMEOUT;
-    } else if (code == 409 && phrase.equals("Conflict")) {
-      return CONFLICT;
-    } else if (code == 410 && phrase.equals("Gone")) {
-      return GONE;
-    } else if (code == 411 && phrase.equals("Length Required")) {
-      return LENGTH_REQUIRED;
-    } else if (code == 412 && phrase.equals("Precondition Failed")) {
-      return PRECONDITION_FAILED;
-    } else if (code == 413 && phrase.equals("Payload Too Large")) {
-      return PAYLOAD_TOO_LARGE;
-    } else if (code == 414 && phrase.equals("URI Too Long")) {
-      return URI_TOO_LONG;
-    } else if (code == 415 && phrase.equals("Unsupported Media Type")) {
-      return UNSUPPORTED_MEDIA_TYPE;
-    } else if (code == 416 && phrase.equals("Range Not Satisfiable")) {
-      return RANGE_NOT_SATISFIABLE;
-    } else if (code == 417 && phrase.equals("Expectation Failed")) {
-      return EXPECTATION_FAILED;
-    } else if (code == 426 && phrase.equals("Upgrade Required")) {
-      return UPGRADE_REQUIRED;
-    } else if (code == 500 && phrase.equals("Internal Server Error")) {
-      return INTERNAL_SERVER_ERROR;
-    } else if (code == 501 && phrase.equals("Not Implemented")) {
-      return NOT_IMPLEMENTED;
-    } else if (code == 502 && phrase.equals("Bad Gateway")) {
-      return BAD_GATEWAY;
-    } else if (code == 503 && phrase.equals("Service Unavailable")) {
-      return SERVICE_UNAVAILABLE;
-    } else if (code == 504 && phrase.equals("Gateway Timeout")) {
-      return GATEWAY_TIMEOUT;
-    } else if (code == 505 && phrase.equals("HTTP Version Not Supported")) {
-      return HTTP_VERSION_NOT_SUPPORTED;
+  public static HttpStatus create(int code, String phrase) {
+    if (code == 100 && (phrase == null || phrase.equals("Continue"))) {
+      return HttpStatus.CONTINUE;
+    } else if (code == 101 && (phrase == null || phrase.equals("Switching Protocols"))) {
+      return HttpStatus.SWITCHING_PROTOCOLS;
+    } else if (code == 200 && (phrase == null || phrase.equals("OK"))) {
+      return HttpStatus.OK;
+    } else if (code == 201 && (phrase == null || phrase.equals("Created"))) {
+      return HttpStatus.CREATED;
+    } else if (code == 202 && (phrase == null || phrase.equals("Accepted"))) {
+      return HttpStatus.ACCEPTED;
+    } else if (code == 203 && (phrase == null || phrase.equals("Non-Authoritative Information"))) {
+      return HttpStatus.NON_AUTHORITATIVE_INFORMATION;
+    } else if (code == 204 && (phrase == null || phrase.equals("No Content"))) {
+      return HttpStatus.NO_CONTENT;
+    } else if (code == 205 && (phrase == null || phrase.equals("Reset Content"))) {
+      return HttpStatus.RESET_CONTENT;
+    } else if (code == 206 && (phrase == null || phrase.equals("Partial Content"))) {
+      return HttpStatus.PARTIAL_CONTENT;
+    } else if (code == 300 && (phrase == null || phrase.equals("Multiple Choices"))) {
+      return HttpStatus.MULTIPLE_CHOICES;
+    } else if (code == 301 && (phrase == null || phrase.equals("Moved Permanently"))) {
+      return HttpStatus.MOVED_PERMANENTLY;
+    } else if (code == 302 && (phrase == null || phrase.equals("Found"))) {
+      return HttpStatus.FOUND;
+    } else if (code == 303 && (phrase == null || phrase.equals("See Other"))) {
+      return HttpStatus.SEE_OTHER;
+    } else if (code == 304 && (phrase == null || phrase.equals("Not Modified"))) {
+      return HttpStatus.NOT_MODIFIED;
+    } else if (code == 305 && (phrase == null || phrase.equals("Use Proxy"))) {
+      return HttpStatus.USE_PROXY;
+    } else if (code == 307 && (phrase == null || phrase.equals("Temporary Redirect"))) {
+      return HttpStatus.TEMPORARY_REDIRECT;
+    } else if (code == 400 && (phrase == null || phrase.equals("Bad Request"))) {
+      return HttpStatus.BAD_REQUEST;
+    } else if (code == 401 && (phrase == null || phrase.equals("Unauthorized"))) {
+      return HttpStatus.UNAUTHORIZED;
+    } else if (code == 402 && (phrase == null || phrase.equals("Payment Required"))) {
+      return HttpStatus.PAYMENT_REQUIRED;
+    } else if (code == 403 && (phrase == null || phrase.equals("Forbidden"))) {
+      return HttpStatus.FORBIDDEN;
+    } else if (code == 404 && (phrase == null || phrase.equals("Not Found"))) {
+      return HttpStatus.NOT_FOUND;
+    } else if (code == 405 && (phrase == null || phrase.equals("Method Not Allowed"))) {
+      return HttpStatus.METHOD_NOT_ALLOWED;
+    } else if (code == 406 && (phrase == null || phrase.equals("Not Acceptable"))) {
+      return HttpStatus.NOT_ACCEPTABLE;
+    } else if (code == 407 && (phrase == null || phrase.equals("Proxy Authentication Required"))) {
+      return HttpStatus.PROXY_AUTHENTICATION_REQUIRED;
+    } else if (code == 408 && (phrase == null || phrase.equals("Request Timeout"))) {
+      return HttpStatus.REQUEST_TIMEOUT;
+    } else if (code == 409 && (phrase == null || phrase.equals("Conflict"))) {
+      return HttpStatus.CONFLICT;
+    } else if (code == 410 && (phrase == null || phrase.equals("Gone"))) {
+      return HttpStatus.GONE;
+    } else if (code == 411 && (phrase == null || phrase.equals("Length Required"))) {
+      return HttpStatus.LENGTH_REQUIRED;
+    } else if (code == 412 && (phrase == null || phrase.equals("Precondition Failed"))) {
+      return HttpStatus.PRECONDITION_FAILED;
+    } else if (code == 413 && (phrase == null || phrase.equals("Payload Too Large"))) {
+      return HttpStatus.PAYLOAD_TOO_LARGE;
+    } else if (code == 414 && (phrase == null || phrase.equals("URI Too Long"))) {
+      return HttpStatus.URI_TOO_LONG;
+    } else if (code == 415 && (phrase == null || phrase.equals("Unsupported Media Type"))) {
+      return HttpStatus.UNSUPPORTED_MEDIA_TYPE;
+    } else if (code == 416 && (phrase == null || phrase.equals("Range Not Satisfiable"))) {
+      return HttpStatus.RANGE_NOT_SATISFIABLE;
+    } else if (code == 417 && (phrase == null || phrase.equals("Expectation Failed"))) {
+      return HttpStatus.EXPECTATION_FAILED;
+    } else if (code == 426 && (phrase == null || phrase.equals("Upgrade Required"))) {
+      return HttpStatus.UPGRADE_REQUIRED;
+    } else if (code == 500 && (phrase == null || phrase.equals("Internal Server Error"))) {
+      return HttpStatus.INTERNAL_SERVER_ERROR;
+    } else if (code == 501 && (phrase == null || phrase.equals("Not Implemented"))) {
+      return HttpStatus.NOT_IMPLEMENTED;
+    } else if (code == 502 && (phrase == null || phrase.equals("Bad Gateway"))) {
+      return HttpStatus.BAD_GATEWAY;
+    } else if (code == 503 && (phrase == null || phrase.equals("Service Unavailable"))) {
+      return HttpStatus.SERVICE_UNAVAILABLE;
+    } else if (code == 504 && (phrase == null || phrase.equals("Gateway Timeout"))) {
+      return HttpStatus.GATEWAY_TIMEOUT;
+    } else if (code == 505 && (phrase == null || phrase.equals("HTTP Version Not Supported"))) {
+      return HttpStatus.HTTP_VERSION_NOT_SUPPORTED;
     } else {
       return new HttpStatus(code, phrase);
     }
@@ -251,54 +260,6 @@ public final class HttpStatus extends HttpPart implements Debug {
 
   public static HttpStatus parseHttp(String string) {
     return Http.standardParser().parseStatusString(string);
-  }
-
-  public int code() {
-    return this.code;
-  }
-
-  public String phrase() {
-    return this.phrase;
-  }
-
-  @Override
-  public Writer<?, ?> httpWriter(HttpWriter http) {
-    return http.statusWriter(this.code, this.phrase);
-  }
-
-  @Override
-  public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeStatus(this.code, this.phrase, output);
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    } else if (other instanceof HttpStatus) {
-      final HttpStatus that = (HttpStatus) other;
-      return this.code == that.code && this.phrase.equals(that.phrase);
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(HttpStatus.class);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed, this.code), this.phrase.hashCode()));
-  }
-
-  @Override
-  public void debug(Output<?> output) {
-    output = output.write("HttpStatus").write('.').write("from").write('(')
-        .debug(this.code).write(", ").debug(this.phrase).write(')');
-  }
-
-  @Override
-  public String toString() {
-    return Format.debug(this);
   }
 
 }

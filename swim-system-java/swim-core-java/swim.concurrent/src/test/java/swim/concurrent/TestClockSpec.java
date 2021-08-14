@@ -146,9 +146,9 @@ public class TestClockSpec {
 
         @Override
         public void runTimer() {
-          if (!rescheduled) {
+          if (!this.rescheduled) {
             assertEquals(fire.getCount(), 2);
-            rescheduled = true;
+            this.rescheduled = true;
             reschedule(10L);
           } else {
             assertEquals(fire.getCount(), 1);
@@ -181,7 +181,7 @@ public class TestClockSpec {
               for (int j = 0; j < timerCount; j += 1) {
                 final int k = j;
                 // A 1ms timer deadline will usually round up to 2ms, which equals
-                // one full revolution of the clock.  By continually setting timers
+                // one full revolution of the clock. By continually setting timers
                 // for several clock revolutions, it becomes highly likely that
                 // we will add a timer to a clock phase while the clock thread
                 // concurrently executes the same phase.
@@ -268,7 +268,7 @@ public class TestClockSpec {
     }
   }
 
-  @Test//(groups = {"slow"})
+  @Test(groups = {"slow"})
   public void concurrentSchedulingLongevity() {
     final int threadCount = 8;
     final int timerCount = 10000000;

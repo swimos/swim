@@ -27,17 +27,17 @@ final class MqttPacketDecoder<T> extends Decoder<MqttPacket<T>> {
     this.content = content;
   }
 
+  @Override
+  public Decoder<MqttPacket<T>> feed(InputBuffer input) {
+    return MqttPacketDecoder.decode(input, this.mqtt, this.content);
+  }
+
   static <T> Decoder<MqttPacket<T>> decode(InputBuffer input, MqttDecoder mqtt, Decoder<T> content) {
     if (input.isCont()) {
       final int packetType = (input.head() & 0xf0) >>> 4;
       return mqtt.decodePacketType(packetType, content, input);
     }
     return new MqttPacketDecoder<T>(mqtt, content);
-  }
-
-  @Override
-  public Decoder<MqttPacket<T>> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.content);
   }
 
 }

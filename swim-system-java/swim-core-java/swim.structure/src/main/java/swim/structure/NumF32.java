@@ -70,7 +70,7 @@ final class NumF32 extends Num {
 
   @Override
   public boolean isValidInteger() {
-    return integerValue().floatValue() == this.value;
+    return this.integerValue().floatValue() == this.value;
   }
 
   @Override
@@ -153,8 +153,8 @@ final class NumF32 extends Num {
       return NumF32.from(this.value + ((NumF32) that).value);
     } else if (that instanceof NumF64) {
       return NumF64.from((double) this.value + ((NumF64) that).value);
-    } else if (that instanceof NumInt) {
-      return NumF64.from((double) this.value + ((NumInt) that).value.doubleValue());
+    } else if (that instanceof NumInteger) {
+      return NumF64.from((double) this.value + ((NumInteger) that).value.doubleValue());
     } else {
       throw new AssertionError();
     }
@@ -170,8 +170,8 @@ final class NumF32 extends Num {
       return NumF32.from(this.value - ((NumF32) that).value);
     } else if (that instanceof NumF64) {
       return NumF64.from((double) this.value - ((NumF64) that).value);
-    } else if (that instanceof NumInt) {
-      return NumF64.from((double) this.value - ((NumInt) that).value.doubleValue());
+    } else if (that instanceof NumInteger) {
+      return NumF64.from((double) this.value - ((NumInteger) that).value.doubleValue());
     } else {
       throw new AssertionError();
     }
@@ -187,8 +187,8 @@ final class NumF32 extends Num {
       return NumF32.from(this.value * ((NumF32) that).value);
     } else if (that instanceof NumF64) {
       return NumF64.from((double) this.value * ((NumF64) that).value);
-    } else if (that instanceof NumInt) {
-      return NumF64.from((double) this.value * ((NumInt) that).value.doubleValue());
+    } else if (that instanceof NumInteger) {
+      return NumF64.from((double) this.value * ((NumInteger) that).value.doubleValue());
     } else {
       throw new AssertionError();
     }
@@ -204,8 +204,8 @@ final class NumF32 extends Num {
       return NumF64.from((double) this.value / (double) ((NumF32) that).value);
     } else if (that instanceof NumF64) {
       return NumF64.from((double) this.value / ((NumF64) that).value);
-    } else if (that instanceof NumInt) {
-      return NumF64.from((double) this.value / ((NumInt) that).value.doubleValue());
+    } else if (that instanceof NumInteger) {
+      return NumF64.from((double) this.value / ((NumInteger) that).value.doubleValue());
     } else {
       throw new AssertionError();
     }
@@ -221,8 +221,8 @@ final class NumF32 extends Num {
       return NumF32.from(this.value % ((NumF32) that).value);
     } else if (that instanceof NumF64) {
       return NumF64.from((double) this.value % ((NumF64) that).value);
-    } else if (that instanceof NumInt) {
-      return NumF64.from((double) this.value % ((NumInt) that).value.doubleValue());
+    } else if (that instanceof NumInteger) {
+      return NumF64.from((double) this.value % ((NumInteger) that).value.doubleValue());
     } else {
       throw new AssertionError();
     }
@@ -274,8 +274,9 @@ final class NumF32 extends Num {
   }
 
   @Override
-  public void display(Output<?> output) {
-    Format.debugFloat(this.value, output);
+  public <T> Output<T> display(Output<T> output) {
+    output = Format.debugFloat(this.value, output);
+    return output;
   }
 
   private static NumF32 positiveZero;
@@ -285,55 +286,55 @@ final class NumF32 extends Num {
   private static NumF32 nan;
 
   static NumF32 positiveZero() {
-    if (positiveZero == null) {
-      positiveZero = new NumF32(0.0f);
+    if (NumF32.positiveZero == null) {
+      NumF32.positiveZero = new NumF32(0.0f);
     }
-    return positiveZero;
+    return NumF32.positiveZero;
   }
 
   static NumF32 negativeZero() {
-    if (negativeZero == null) {
-      negativeZero = new NumF32(-0.0f);
+    if (NumF32.negativeZero == null) {
+      NumF32.negativeZero = new NumF32(-0.0f);
     }
-    return negativeZero;
+    return NumF32.negativeZero;
   }
 
   static NumF32 positiveOne() {
-    if (positiveOne == null) {
-      positiveOne = new NumF32(1.0f);
+    if (NumF32.positiveOne == null) {
+      NumF32.positiveOne = new NumF32(1.0f);
     }
-    return positiveOne;
+    return NumF32.positiveOne;
   }
 
   static NumF32 negativeOne() {
-    if (negativeOne == null) {
-      negativeOne = new NumF32(-1.0f);
+    if (NumF32.negativeOne == null) {
+      NumF32.negativeOne = new NumF32(-1.0f);
     }
-    return negativeOne;
+    return NumF32.negativeOne;
   }
 
   static NumF32 nan() {
-    if (nan == null) {
-      nan = new NumF32(Float.NaN);
+    if (NumF32.nan == null) {
+      NumF32.nan = new NumF32(Float.NaN);
     }
-    return nan;
+    return NumF32.nan;
   }
 
   public static NumF32 from(float value) {
     if (value == 0.0f) {
       if (Math.copySign(1.0f, value) == 1.0f) {
-        return positiveZero();
+        return NumF32.positiveZero();
       } else {
-        return negativeZero();
+        return NumF32.negativeZero();
       }
     } else if (value == 1.0f) {
-      return positiveOne();
+      return NumF32.positiveOne();
     } else if (value == -1.0f) {
-      return negativeOne();
+      return NumF32.negativeOne();
     } else if (Float.isNaN(value)) {
-      return nan();
+      return NumF32.nan();
     } else {
-      return cache().put(new NumF32(value));
+      return NumF32.cache().put(new NumF32(value));
     }
   }
 

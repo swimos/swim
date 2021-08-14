@@ -35,6 +35,11 @@ final class HttpVersionWriter extends Writer<Object, Object> {
     this(major, minor, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return HttpVersionWriter.write(output, this.major, this.minor, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, int major, int minor, int step) {
     if (step == 1 && output.isCont()) {
       output = output.write('H');
@@ -66,23 +71,18 @@ final class HttpVersionWriter extends Writer<Object, Object> {
     }
     if (step == 8 && output.isCont()) {
       output = output.write(Base10.encodeDigit(minor % 10));
-      return done();
+      return Writer.done();
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new HttpVersionWriter(major, minor, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, int major, int minor) {
-    return write(output, major, minor, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.major, this.minor, this.step);
+    return HttpVersionWriter.write(output, major, minor, 1);
   }
 
 }

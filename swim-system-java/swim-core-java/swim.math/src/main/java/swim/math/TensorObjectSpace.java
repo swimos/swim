@@ -85,9 +85,10 @@ final class TensorObjectSpace implements TensorSpace<Tensor, Double>, Debug {
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.write("Tensor").write('.').write("space").write('(')
-        .debug(this.next).write(", ").debug(this.dims).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Tensor").write('.').write("space").write('(')
+                   .debug(this.next).write(", ").debug(this.dims).write(')');
+    return output;
   }
 
   @Override

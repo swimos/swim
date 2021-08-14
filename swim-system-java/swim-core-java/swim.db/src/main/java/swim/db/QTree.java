@@ -16,7 +16,6 @@ package swim.db;
 
 import swim.codec.Output;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Sync;
 import swim.structure.Slot;
 import swim.structure.Value;
@@ -116,7 +115,7 @@ public final class QTree extends Tree {
   }
 
   public boolean containsKey(Value key) {
-    final Cursor<Slot> cursor = cursor();
+    final Cursor<Slot> cursor = this.cursor();
     while (cursor.hasNext()) {
       if (key.equals(cursor.next().key())) {
         return true;
@@ -126,7 +125,7 @@ public final class QTree extends Tree {
   }
 
   public boolean containsValue(Value value) {
-    final Cursor<Slot> cursor = cursor();
+    final Cursor<Slot> cursor = this.cursor();
     while (cursor.hasNext()) {
       if (value.equals(cursor.next().toValue())) {
         return true;
@@ -140,7 +139,7 @@ public final class QTree extends Tree {
   }
 
   public Value get(Value key) {
-    final Cursor<Slot> cursor = cursor();
+    final Cursor<Slot> cursor = this.cursor();
     while (cursor.hasNext()) {
       final Slot slot = cursor.next();
       if (key.equals(slot.key())) {
@@ -153,10 +152,11 @@ public final class QTree extends Tree {
   public QTree updated(Value key, long x, long y, Value newValue, long newVersion, int newPost) {
     final QTreePage oldRoot = this.rootRef.page();
     final QTreePage newRoot = oldRoot.updated(key, x, y, newValue, newVersion)
-        .balanced(newVersion).evacuated(newPost, newVersion);
+                                     .balanced(newVersion)
+                                     .evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new QTree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -166,13 +166,13 @@ public final class QTree extends Tree {
                      Value newValue, long newVersion, int newPost) {
     final QTreePage oldRoot = this.rootRef.page();
     final QTreePage newRoot = oldRoot.removed(key, oldX, oldY, newVersion)
-        .balanced(newVersion)
-        .updated(key, newX, newY, newValue, newVersion)
-        .balanced(newVersion)
-        .evacuated(newPost, newVersion);
+                                     .balanced(newVersion)
+                                     .updated(key, newX, newY, newValue, newVersion)
+                                     .balanced(newVersion)
+                                     .evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new QTree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -181,10 +181,11 @@ public final class QTree extends Tree {
   public QTree removed(Value key, long x, long y, long newVersion, int newPost) {
     final QTreePage oldRoot = this.rootRef.page();
     final QTreePage newRoot = oldRoot.removed(key, x, y, newVersion)
-        .balanced(newVersion).evacuated(newPost, newVersion);
+                                     .balanced(newVersion)
+                                     .evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new QTree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -194,7 +195,7 @@ public final class QTree extends Tree {
     if (!this.rootRef.isEmpty()) {
       final QTreePage newRoot = QTreePage.empty(this.treeContext, this.seed.stem, newVersion);
       return new QTree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -218,7 +219,7 @@ public final class QTree extends Tree {
                        CombinerFunction<Value, Value> combiner, long newVersion, int newPost) {
     final QTreePageRef oldRootRef = this.rootRef;
     final QTreePageRef newRootRef = oldRootRef.reduced(identity, accumulator, combiner, newVersion)
-        .evacuated(newPost, newVersion);
+                                              .evacuated(newPost, newVersion);
     if (oldRootRef != newRootRef) {
       return new QTree(this.treeContext, newRootRef, this.seed, this.isResident, this.isTransient);
     } else {
@@ -270,10 +271,10 @@ public final class QTree extends Tree {
   @Override
   public void loadAsync(Cont<Tree> cont) {
     try {
-      final Cont<Page> andThen = Conts.constant(cont, this);
+      final Cont<Page> andThen = Cont.constant(cont, this);
       this.rootRef.loadTreeAsync(this.isResident, andThen);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
+      if (Cont.isNonFatal(error)) {
         cont.trap(new StoreException(this.rootRef.toDebugString(), error));
       } else {
         throw error;
@@ -284,8 +285,8 @@ public final class QTree extends Tree {
   @Override
   public QTree load() throws InterruptedException {
     final Sync<Tree> syncTree = new Sync<Tree>();
-    loadAsync(syncTree);
-    return (QTree) syncTree.await(settings().treeLoadTimeout);
+    this.loadAsync(syncTree);
+    return (QTree) syncTree.await(this.settings().treeLoadTimeout);
   }
 
   @Override

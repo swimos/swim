@@ -33,10 +33,11 @@ final class DataParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.base64Parser, this.step);
+    return DataParser.parse(input, this.recon, this.base64Parser, this.step);
   }
 
-  static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Parser<V> base64Parser, int step) {
+  static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon,
+                                Parser<V> base64Parser, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
@@ -45,10 +46,10 @@ final class DataParser<I, V> extends Parser<V> {
           input = input.step();
           step = 2;
         } else {
-          return error(Diagnostic.expected('%', input));
+          return Parser.error(Diagnostic.expected('%', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('%', input));
+        return Parser.error(Diagnostic.expected('%', input));
       }
     }
     if (step == 2) {
@@ -65,13 +66,13 @@ final class DataParser<I, V> extends Parser<V> {
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new DataParser<I, V>(recon, base64Parser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
-    return parse(input, recon, null, 1);
+    return DataParser.parse(input, recon, null, 1);
   }
 
 }

@@ -53,7 +53,7 @@ abstract class BTreeNodeCursor implements OrderedMapCursor<Value, Value> {
         final BTreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex + 1;
         } else {
           return true;
@@ -76,7 +76,7 @@ abstract class BTreeNodeCursor implements OrderedMapCursor<Value, Value> {
         final BTreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex + 1;
         } else {
           throw new NoSuchElementException();
@@ -100,7 +100,7 @@ abstract class BTreeNodeCursor implements OrderedMapCursor<Value, Value> {
         final BTreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex + 1;
         } else {
           throw new UnsupportedOperationException();
@@ -129,7 +129,7 @@ abstract class BTreeNodeCursor implements OrderedMapCursor<Value, Value> {
           final long childSpan = childRef.span();
           this.childIndex = childIndex + 1;
           if (childSpan < count) {
-            this.childCursor = childCursor(childRef);
+            this.childCursor = this.childCursor(childRef);
             if (count > 0L) {
               this.index += count;
               this.childCursor.skip(count);
@@ -161,7 +161,7 @@ abstract class BTreeNodeCursor implements OrderedMapCursor<Value, Value> {
         final BTreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex + 1;
         } else {
           return false;
@@ -189,7 +189,7 @@ abstract class BTreeNodeCursor implements OrderedMapCursor<Value, Value> {
         final BTreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex + 1;
         } else {
           throw new NoSuchElementException();
@@ -213,7 +213,7 @@ abstract class BTreeNodeCursor implements OrderedMapCursor<Value, Value> {
         final BTreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex + 1;
         } else {
           throw new NoSuchElementException();
@@ -236,7 +236,7 @@ abstract class BTreeNodeCursor implements OrderedMapCursor<Value, Value> {
         final BTreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex - 1;
         if (childIndex >= 0) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex;
         } else {
           return false;
@@ -264,7 +264,7 @@ abstract class BTreeNodeCursor implements OrderedMapCursor<Value, Value> {
         final BTreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex - 1;
         if (childIndex >= 0) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex;
         } else {
           throw new NoSuchElementException();
@@ -288,7 +288,7 @@ abstract class BTreeNodeCursor implements OrderedMapCursor<Value, Value> {
         final BTreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex - 1;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex;
         } else {
           throw new NoSuchElementException();

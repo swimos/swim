@@ -21,55 +21,58 @@ import swim.math.Z2ToR2Operator;
 
 public final class GeoProjection {
 
-  private static WGS84 wgs84;
-  private static WGS84Inverse wgs84Inverse;
-  private static SphericalMercator sphericalMercator;
-  private static SphericalMercatorInverse sphericalMercatorInverse;
-
   private GeoProjection() {
-    // stub
+    // static
   }
+
+  private static WGS84 wgs84;
 
   public static R2ToZ2Operator wgs84() {
-    if (wgs84 == null) {
-      wgs84 = new WGS84();
+    if (GeoProjection.wgs84 == null) {
+      GeoProjection.wgs84 = new WGS84();
     }
-    return wgs84;
+    return GeoProjection.wgs84;
   }
 
+  private static WGS84Inverse wgs84Inverse;
+
   public static Z2ToR2Operator wgs84Inverse() {
-    if (wgs84Inverse == null) {
-      wgs84Inverse = new WGS84Inverse();
+    if (GeoProjection.wgs84Inverse == null) {
+      GeoProjection.wgs84Inverse = new WGS84Inverse();
     }
-    return wgs84Inverse;
+    return GeoProjection.wgs84Inverse;
   }
 
   public static Z2Form<R2Shape> wgs84Form() {
-    if (wgs84 == null) {
-      wgs84 = new WGS84();
+    if (GeoProjection.wgs84 == null) {
+      GeoProjection.wgs84 = new WGS84();
     }
-    return wgs84;
+    return GeoProjection.wgs84;
   }
+
+  private static SphericalMercator sphericalMercator;
 
   public static R2ToZ2Operator sphericalMercator() {
-    if (sphericalMercator == null) {
-      sphericalMercator = new SphericalMercator();
+    if (GeoProjection.sphericalMercator == null) {
+      GeoProjection.sphericalMercator = new SphericalMercator();
     }
-    return sphericalMercator;
+    return GeoProjection.sphericalMercator;
   }
 
+  private static SphericalMercatorInverse sphericalMercatorInverse;
+
   public static Z2ToR2Operator sphericalMercatorInverse() {
-    if (sphericalMercatorInverse == null) {
-      sphericalMercatorInverse = new SphericalMercatorInverse();
+    if (GeoProjection.sphericalMercatorInverse == null) {
+      GeoProjection.sphericalMercatorInverse = new SphericalMercatorInverse();
     }
-    return sphericalMercatorInverse;
+    return GeoProjection.sphericalMercatorInverse;
   }
 
   public static Z2Form<R2Shape> sphericalMercatorForm() {
-    if (sphericalMercator == null) {
-      sphericalMercator = new SphericalMercator();
+    if (GeoProjection.sphericalMercator == null) {
+      GeoProjection.sphericalMercator = new SphericalMercator();
     }
-    return sphericalMercator;
+    return GeoProjection.sphericalMercator;
   }
 
 }

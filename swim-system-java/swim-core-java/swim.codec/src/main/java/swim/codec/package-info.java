@@ -14,26 +14,26 @@
 
 /**
  * Incremental I/O; functional parsers and writers; display, debug, and
- * diagnostic formatters; and Unicode and binary codecs.  {@code swim.codec}
+ * diagnostic formatters; and Unicode and binary codecs. {@code swim.codec}
  * enables efficient, interruptible transcoding of network protocols and data
  * formats, without blocking or intermediate buffering.
  *
  * <h2>Inputs and Outputs</h2>
  *
  * <p>An {@link Input} reader abstracts over a non-blocking token input stream,
- * with single token lookahead.  An {@link Output} writer abstracts over a
+ * with single token lookahead. An {@link Output} writer abstracts over a
  * non-blocking token output stream.</p>
  *
  * <h2>Parsers and Writers</h2>
  *
  * <p>A {@link Parser} incrementally reads from a sequence of {@link Input}
- * chunks to produce a parsed result.  A {@link Writer} incrementally writes
+ * chunks to produce a parsed result. A {@link Writer} incrementally writes
  * to a sequence of {@link Output} chunks.</p>
  *
  * <h2>Decoders and Encoders</h2>
  *
  * <p>A {@link Decoder} incrementally decodes a sequence of {@link InputBuffer
- * input buffers} to produce a decoded result.  An {@link Encoder}
+ * input buffers} to produce a decoded result. An {@link Encoder}
  * incrementally encodes a value into a sequence of {@link OutputBuffer output
  * buffers}.</p>
  *
@@ -73,20 +73,20 @@
  * <h2>Formatters</h2>
  *
  * <p>The {@link Display} interface provides a standard way for implementing
- * classes to directly output human readable display strings.  Similarly, the
+ * classes to directly output human readable display strings. Similarly, the
  * {@link Debug} interface provides a standard way for implementing classes to
  * directly output developer readable debug strings.</p>
  *
  * <p>{@link Format} provides extension methods to output display and debug
- * strings for all types, including builtin Java types.  {@link OutputStyle}
+ * strings for all types, including builtin Java types. {@link OutputStyle}
  * provides helper functions to conditionally emit ASCII escape codes to
  * stylize text for console output.</p>
  *
  * <h2>Diagnostics</h2>
  *
- * <p>A {@link Tag} abstracts over a source input location.  A {@link Mark}
+ * <p>A {@link Tag} abstracts over a source input location. A {@link Mark}
  * describes a source input position, and a {@link Span} describes a source
- * input range.  A {@link Diagnostic} attaches an informational message to a
+ * input range. A {@link Diagnostic} attaches an informational message to a
  * source input location, and supports displaying the diagnostic as an
  * annotated snippet of the relevant source input.</p>
  */

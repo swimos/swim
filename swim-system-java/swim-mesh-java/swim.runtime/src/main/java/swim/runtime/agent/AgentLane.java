@@ -49,6 +49,13 @@ public class AgentLane implements LaneContext {
     this.node = node;
     this.lane = lane;
     this.laneAddress = laneAddress;
+
+    this.metaTraceLog = null;
+    this.metaDebugLog = null;
+    this.metaInfoLog = null;
+    this.metaWarnLog = null;
+    this.metaErrorLog = null;
+    this.metaFailLog = null;
   }
 
   @Override
@@ -64,7 +71,7 @@ public class AgentLane implements LaneContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapLane(Class<T> laneClass) {
-    if (laneClass.isAssignableFrom(getClass())) {
+    if (laneClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -74,7 +81,7 @@ public class AgentLane implements LaneContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T bottomLane(Class<T> laneClass) {
-    if (laneClass.isAssignableFrom(getClass())) {
+    if (laneClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -143,37 +150,31 @@ public class AgentLane implements LaneContext {
 
   @Override
   public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
-    openMetaLanes(lane, (AgentNode) metaLane);
+    this.openMetaLanes(lane, (AgentNode) metaLane);
     this.node.openMetaLane(lane, metaLane);
   }
 
   protected void openMetaLanes(LaneBinding lane, AgentNode metaLane) {
-    openLogLanes(lane, metaLane);
+    this.openLogLanes(lane, metaLane);
   }
 
   protected void openLogLanes(LaneBinding lane, AgentNode metaLane) {
-    this.metaTraceLog = metaLane.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaTraceLog = metaLane.supplyLane().valueForm(LogEntry.form());
     metaLane.openLane(LogEntry.TRACE_LOG_URI, this.metaTraceLog);
 
-    this.metaDebugLog = metaLane.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaDebugLog = metaLane.supplyLane().valueForm(LogEntry.form());
     metaLane.openLane(LogEntry.DEBUG_LOG_URI, this.metaDebugLog);
 
-    this.metaInfoLog = metaLane.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaInfoLog = metaLane.supplyLane().valueForm(LogEntry.form());
     metaLane.openLane(LogEntry.INFO_LOG_URI, this.metaInfoLog);
 
-    this.metaWarnLog = metaLane.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaWarnLog = metaLane.supplyLane().valueForm(LogEntry.form());
     metaLane.openLane(LogEntry.WARN_LOG_URI, this.metaWarnLog);
 
-    this.metaErrorLog = metaLane.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaErrorLog = metaLane.supplyLane().valueForm(LogEntry.form());
     metaLane.openLane(LogEntry.ERROR_LOG_URI, this.metaErrorLog);
 
-    this.metaFailLog = metaLane.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaFailLog = metaLane.supplyLane().valueForm(LogEntry.form());
     metaLane.openLane(LogEntry.FAIL_LOG_URI, this.metaFailLog);
   }
 

@@ -40,6 +40,11 @@ final class HttpResponseWriter<T> extends Writer<Object, HttpResponse<T>> {
     this(http, response, null, null, 1);
   }
 
+  @Override
+  public Writer<Object, HttpResponse<T>> pull(Output<?> output) {
+    return HttpResponseWriter.write(output, this.http, this.response, this.headers, this.part, this.step);
+  }
+
   static <T> Writer<Object, HttpResponse<T>> write(Output<?> output, HttpWriter http, HttpResponse<T> response,
                                                    Iterator<HttpHeader> headers, Writer<?, ?> part, int step) {
     if (step == 1) {
@@ -119,24 +124,19 @@ final class HttpResponseWriter<T> extends Writer<Object, HttpResponse<T>> {
     }
     if (step == 10 && output.isCont()) {
       output = output.write('\n');
-      return done(response);
+      return Writer.done(response);
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new HttpResponseWriter<T>(http, response, headers, part, step);
   }
 
   static <T> Writer<Object, HttpResponse<T>> write(Output<?> output, HttpWriter http,
                                                    HttpResponse<T> response) {
-    return write(output, http, response, null, null, 1);
-  }
-
-  @Override
-  public Writer<Object, HttpResponse<T>> pull(Output<?> output) {
-    return write(output, this.http, this.response, this.headers, this.part, this.step);
+    return HttpResponseWriter.write(output, http, response, null, null, 1);
   }
 
 }

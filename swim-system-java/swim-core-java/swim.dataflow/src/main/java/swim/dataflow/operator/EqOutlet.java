@@ -20,8 +20,8 @@ import swim.structure.Value;
 public final class EqOutlet extends BinaryOutlet {
 
   @Override
-  protected Item evaluate(Value argument1, Value argument2) {
-    return argument1.eq(argument2);
+  protected Item evaluate(Value lhs, Value rhs) {
+    return lhs.eq(rhs);
   }
 
 }

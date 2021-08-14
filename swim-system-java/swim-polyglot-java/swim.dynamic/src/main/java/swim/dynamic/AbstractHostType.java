@@ -22,7 +22,7 @@ public abstract class AbstractHostType<T> implements HostType<T> {
 
   @Override
   public String typeName() {
-    return hostClass().getSimpleName();
+    return this.hostClass().getSimpleName();
   }
 
   @Override
@@ -44,7 +44,7 @@ public abstract class AbstractHostType<T> implements HostType<T> {
     if (superType == this) {
       return true;
     } else {
-      final List<HostType<? super T>> baseTypes = baseTypes();
+      final List<HostType<? super T>> baseTypes = this.baseTypes();
       for (int i = baseTypes.size() - 1; i >= 0; i -= 1) {
         final HostType<? super T> baseType = baseTypes.get(i);
         if (superType == baseType) {
@@ -63,9 +63,9 @@ public abstract class AbstractHostType<T> implements HostType<T> {
 
   @Override
   public HostStaticMember getStaticMember(Bridge bridge, String key) {
-    HostStaticMember staticMember = getOwnStaticMember(bridge, key);
+    HostStaticMember staticMember = this.getOwnStaticMember(bridge, key);
     if (staticMember == null) {
-      final List<HostType<? super T>> baseTypes = baseTypes();
+      final List<HostType<? super T>> baseTypes = this.baseTypes();
       for (int i = baseTypes.size() - 1; i >= 0; i -= 1) {
         final HostType<? super T> baseType = baseTypes.get(i);
         staticMember = baseType.getOwnStaticMember(bridge, key);
@@ -80,14 +80,14 @@ public abstract class AbstractHostType<T> implements HostType<T> {
   @Override
   public Collection<HostStaticMember> staticMembers(Bridge bridge) {
     HashTrieMap<String, HostStaticMember> staticMembers = HashTrieMap.empty();
-    final List<HostType<? super T>> baseTypes = baseTypes();
+    final List<HostType<? super T>> baseTypes = this.baseTypes();
     for (int i = 0, n = baseTypes.size(); i < n; i += 1) {
       final HostType<? super T> baseType = baseTypes.get(i);
       for (HostStaticMember baseStaticMember : baseType.ownStaticMembers(bridge)) {
         staticMembers = staticMembers.updated(baseStaticMember.key(), baseStaticMember);
       }
     }
-    for (HostStaticMember staticMember : ownStaticMembers(bridge)) {
+    for (HostStaticMember staticMember : this.ownStaticMembers(bridge)) {
       staticMembers = staticMembers.updated(staticMember.key(), staticMember);
     }
     return staticMembers.values();

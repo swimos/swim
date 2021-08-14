@@ -59,7 +59,7 @@ public abstract class LaneAddressed extends Envelope {
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other != null && getClass() == other.getClass()) {
+    } else if (other != null && this.getClass() == other.getClass()) {
       final LaneAddressed that = (LaneAddressed) other;
       return this.nodeUri.equals(that.nodeUri) && this.laneUri.equals(that.laneUri)
           && this.body.equals(that.body);
@@ -69,18 +69,19 @@ public abstract class LaneAddressed extends Envelope {
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.seed(getClass()),
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.seed(this.getClass()),
         this.nodeUri.hashCode()), this.laneUri.hashCode()), this.body.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("new").write(' ').write(getClass().getSimpleName()).write('(')
-        .debug(this.nodeUri).write(", ").debug(this.laneUri);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("new").write(' ').write(this.getClass().getSimpleName()).write('(')
+                   .debug(this.nodeUri).write(", ").debug(this.laneUri);
     if (this.body.isDefined()) {
       output = output.write(", ").debug(this.body);
     }
     output = output.write(')');
+    return output;
   }
 
 }

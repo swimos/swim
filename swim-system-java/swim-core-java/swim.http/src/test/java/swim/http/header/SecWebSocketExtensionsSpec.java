@@ -22,32 +22,32 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class SecWebSocketExtensionsSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseSecWebSocketExtensionsHeaders() {
     assertParses("Sec-WebSocket-Extensions: foo",
-        SecWebSocketExtensions.from("foo"));
+                 SecWebSocketExtensions.create("foo"));
     assertParses("Sec-WebSocket-Extensions: bar;baz=2",
-        SecWebSocketExtensions.from("bar; baz=2"));
+                 SecWebSocketExtensions.create("bar; baz=2"));
     assertParses("Sec-WebSocket-Extensions: foo , bar ; baz = 2",
-        SecWebSocketExtensions.from("foo", "bar; baz=2"));
+                 SecWebSocketExtensions.create("foo", "bar; baz=2"));
     assertParses("Sec-WebSocket-Extensions: mux; max-channels=\"inf\"; flow-control, deflate-stream",
-        SecWebSocketExtensions.from("mux; max-channels=inf; flow-control", "deflate-stream"));
+                 SecWebSocketExtensions.create("mux; max-channels=inf; flow-control", "deflate-stream"));
   }
 
   @Test
   public void writeSecWebSocketExtensionsHeaders() {
-    assertWrites(SecWebSocketExtensions.from("foo"),
-        "Sec-WebSocket-Extensions: foo");
-    assertWrites(SecWebSocketExtensions.from("bar; baz=2"),
-        "Sec-WebSocket-Extensions: bar; baz=2");
-    assertWrites(SecWebSocketExtensions.from("foo", "bar; baz=2"),
-        "Sec-WebSocket-Extensions: foo, bar; baz=2");
-    assertWrites(SecWebSocketExtensions.from("mux; max-channels=\"inf\"; flow-control", "deflate-stream"),
-        "Sec-WebSocket-Extensions: mux; max-channels=inf; flow-control, deflate-stream");
+    assertWrites(SecWebSocketExtensions.create("foo"),
+                 "Sec-WebSocket-Extensions: foo");
+    assertWrites(SecWebSocketExtensions.create("bar; baz=2"),
+                 "Sec-WebSocket-Extensions: bar; baz=2");
+    assertWrites(SecWebSocketExtensions.create("foo", "bar; baz=2"),
+                 "Sec-WebSocket-Extensions: foo, bar; baz=2");
+    assertWrites(SecWebSocketExtensions.create("mux; max-channels=\"inf\"; flow-control", "deflate-stream"),
+                 "Sec-WebSocket-Extensions: mux; max-channels=inf; flow-control, deflate-stream");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

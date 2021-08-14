@@ -25,8 +25,6 @@ import swim.structure.Value;
 
 public class ValueDataModel implements ValueDataBinding {
 
-  static final AtomicReferenceFieldUpdater<ValueDataModel, Value> VALUE =
-      AtomicReferenceFieldUpdater.newUpdater(ValueDataModel.class, Value.class, "value");
   protected final Value name;
   protected volatile Value value;
   protected ValueDataContext dataContext;
@@ -35,6 +33,8 @@ public class ValueDataModel implements ValueDataBinding {
   public ValueDataModel(Value name, Value value) {
     this.name = name;
     this.value = value.commit();
+    this.dataContext = null;
+    this.storeBinding = null;
   }
 
   @Override
@@ -60,7 +60,7 @@ public class ValueDataModel implements ValueDataBinding {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapData(Class<T> dataClass) {
-    if (dataClass.isAssignableFrom(getClass())) {
+    if (dataClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -89,7 +89,7 @@ public class ValueDataModel implements ValueDataBinding {
 
   @Override
   public <V2> ValueData<V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override
@@ -114,15 +114,15 @@ public class ValueDataModel implements ValueDataBinding {
 
   @Override
   public Value get() {
-    return this.value;
+    return ValueDataModel.VALUE.get(this);
   }
 
   @Override
   public Value set(Value newValue) {
     do {
-      final Value oldValue = this.value;
+      final Value oldValue = ValueDataModel.VALUE.get(this);
       if (!oldValue.equals(newValue)) {
-        if (VALUE.compareAndSet(this, oldValue, newValue.commit())) {
+        if (ValueDataModel.VALUE.compareAndSet(this, oldValue, newValue.commit())) {
           return oldValue;
         }
       } else {
@@ -138,5 +138,8 @@ public class ValueDataModel implements ValueDataBinding {
       storeBinding.closeData(this.name);
     }
   }
+
+  static final AtomicReferenceFieldUpdater<ValueDataModel, Value> VALUE =
+      AtomicReferenceFieldUpdater.newUpdater(ValueDataModel.class, Value.class, "value");
 
 }

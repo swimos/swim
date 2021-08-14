@@ -20,11 +20,11 @@ public class MersenneTwister64 extends Random {
   int index;
 
   public MersenneTwister64(long seed) {
-    state = new long[312];
-    index = 0;
-    state[0] = seed;
+    this.state = new long[312];
+    this.index = 0;
+    this.state[0] = seed;
     for (int i = 1; i < 312; i += 1) {
-      state[i] = 6364136223846793005L * (state[i - 1] ^ state[i - 1] >>> 62) + (long) i;
+      this.state[i] = 6364136223846793005L * (this.state[i - 1] ^ this.state[i - 1] >>> 62) + (long) i;
     }
   }
 
@@ -34,11 +34,11 @@ public class MersenneTwister64 extends Random {
     int j = 0;
     int k = Math.max(312, key.length);
     while (k != 0) {
-      state[i] = (state[i] ^ ((state[i - 1] ^ state[i - 1] >>> 62) * 3935559000370003845L)) + key[j] + (long) j;
+      this.state[i] = (this.state[i] ^ ((this.state[i - 1] ^ this.state[i - 1] >>> 62) * 3935559000370003845L)) + key[j] + (long) j;
       i += 1;
       j += 1;
       if (i > 311) {
-        state[0] = state[311];
+        this.state[0] = this.state[311];
         i = 1;
       }
       if (j >= key.length) {
@@ -48,15 +48,15 @@ public class MersenneTwister64 extends Random {
     }
     k = 311;
     while (k != 0) {
-      state[i] = (state[i] ^ ((state[i - 1] ^ state[i - 1] >>> 62) * 2862933555777941757L)) - (long) i;
+      this.state[i] = (this.state[i] ^ ((this.state[i - 1] ^ this.state[i - 1] >>> 62) * 2862933555777941757L)) - (long) i;
       i += 1;
       if (i > 311) {
-        state[0] = state[311];
+        this.state[0] = this.state[311];
         i = 1;
       }
       k -= 1;
     }
-    state[0] = 1L << 63;
+    this.state[0] = 1L << 63;
   }
 
   public MersenneTwister64() {
@@ -82,54 +82,54 @@ public class MersenneTwister64 extends Random {
   }
 
   long next() {
-    if (index >= 312) {
-      generate();
-      index = 0;
+    if (this.index >= 312) {
+      this.generate();
+      this.index = 0;
     }
 
-    long x = state[index];
+    long x = this.state[this.index];
     x ^= x >>> 29 & 0x5555555555555555L;
     x ^= x << 17 & 0x71d67fffeda60000L;
     x ^= x << 37 & 0xfff7eee000000000L;
     x ^= x >>> 43;
 
-    index += 1;
+    this.index += 1;
     return x;
   }
 
   @Override
   public byte nextByte() {
-    return (byte) next();
+    return (byte) this.next();
   }
 
   @Override
   public short nextShort() {
-    return (short) next();
+    return (short) this.next();
   }
 
   @Override
   public int nextInt() {
-    return (int) next();
+    return (int) this.next();
   }
 
   @Override
   public long nextLong() {
-    return next();
+    return this.next();
   }
 
   @Override
   public float nextFloat() {
-    return (float) (nextInt() >>> 8) / (float) (1 << 24);
+    return (float) (this.nextInt() >>> 8) / (float) (1 << 24);
   }
 
   @Override
   public double nextDouble() {
-    return (double) (nextLong() >>> 11) / (double) (1L << 53);
+    return (double) (this.nextLong() >>> 11) / (double) (1L << 53);
   }
 
   @Override
   public boolean nextBoolean() {
-    return (next() >>> 63) != 0;
+    return (this.next() >>> 63) != 0;
   }
 
 }

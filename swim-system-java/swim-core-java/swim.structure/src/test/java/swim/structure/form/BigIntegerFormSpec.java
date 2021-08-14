@@ -26,10 +26,8 @@ import static org.testng.Assert.assertEquals;
 
 public class BigIntegerFormSpec {
 
-  private static final BigInteger POS = BigInteger.valueOf(Long.MAX_VALUE)
-      .add(BigInteger.valueOf(Long.MAX_VALUE >> 4));
-  private static final BigInteger NEG = BigInteger.valueOf(Long.MIN_VALUE)
-      .subtract(BigInteger.valueOf(Long.MAX_VALUE >> 4));
+  private static final BigInteger POS = BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.valueOf(Long.MAX_VALUE >> 4));
+  private static final BigInteger NEG = BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.valueOf(Long.MAX_VALUE >> 4));
 
   @Test
   public void moldBigIntegersToNums() {

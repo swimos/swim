@@ -106,7 +106,7 @@ public abstract class JsonParser<I, V> {
     while (input.isCont() && Json.isWhitespace(input.head())) {
       input = input.step();
     }
-    Parser<V> parser = parseValue(input);
+    Parser<V> parser = this.parseValue(input);
     if (parser.isDone()) {
       while (input.isCont() && Json.isWhitespace(input.head())) {
         input = input.step();
@@ -125,7 +125,7 @@ public abstract class JsonParser<I, V> {
     while (input.isCont() && Json.isWhitespace(input.head())) {
       input = input.step();
     }
-    Parser<V> parser = parseObject(input);
+    Parser<V> parser = this.parseObject(input);
     if (parser.isDone()) {
       while (input.isCont() && Json.isWhitespace(input.head())) {
         input = input.step();

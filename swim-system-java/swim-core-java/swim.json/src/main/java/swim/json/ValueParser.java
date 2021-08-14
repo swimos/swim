@@ -26,6 +26,11 @@ final class ValueParser<I, V> extends Parser<V> {
     this.json = json;
   }
 
+  @Override
+  public Parser<V> feed(Input input) {
+    return ValueParser.parse(input, this.json);
+  }
+
   static <I, V> Parser<V> parse(Input input, JsonParser<I, V> json) {
     int c = 0;
     while (input.isCont()) {
@@ -48,19 +53,14 @@ final class ValueParser<I, V> extends Parser<V> {
       } else if (c == '-' || c >= '0' && c <= '9') {
         return json.parseNumber(input);
       } else {
-        return error(Diagnostic.expected("value", input));
+        return Parser.error(Diagnostic.expected("value", input));
       }
     } else if (input.isDone()) {
-      return error(Diagnostic.expected("value", input));
+      return Parser.error(Diagnostic.expected("value", input));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ValueParser<I, V>(json);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.json);
   }
 
 }

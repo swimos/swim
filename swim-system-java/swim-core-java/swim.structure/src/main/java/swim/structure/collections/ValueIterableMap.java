@@ -34,7 +34,7 @@ public class ValueIterableMap<K, V> extends ValueMap<K, V> implements IterableMa
   }
 
   public <K2> ValueIterableMap<K2, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   public <V2> ValueIterableMap<K, V2> valueForm(Form<V2> valueForm) {
@@ -42,7 +42,7 @@ public class ValueIterableMap<K, V> extends ValueMap<K, V> implements IterableMa
   }
 
   public <V2> ValueIterableMap<K, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @SuppressWarnings("unchecked")

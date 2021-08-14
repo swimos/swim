@@ -37,6 +37,11 @@ final class AvroNamespaceParser extends Parser<AvroNamespace> {
     this(null, null, 1);
   }
 
+  @Override
+  public Parser<AvroNamespace> feed(Input input) {
+    return AvroNamespaceParser.parse(input, this.builder, this.output, this.step);
+  }
+
   static Parser<AvroNamespace> parse(Input input, Builder<String, AvroNamespace> builder,
                                      Output<String> output, int step) {
     int c = 0;
@@ -50,10 +55,10 @@ final class AvroNamespaceParser extends Parser<AvroNamespace> {
             output = output.write(c);
             step = 2;
           } else {
-            return error(Diagnostic.expected("name", input));
+            return Parser.error(Diagnostic.expected("name", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("name", input));
+          return Parser.error(Diagnostic.expected("name", input));
         }
       }
       if (step == 2) {
@@ -80,24 +85,19 @@ final class AvroNamespaceParser extends Parser<AvroNamespace> {
             builder = AvroNamespace.builder();
           }
           builder.add(output.bind());
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new AvroNamespaceParser(builder, output, step);
   }
 
   static Parser<AvroNamespace> parse(Input input) {
-    return parse(input, null, null, 1);
-  }
-
-  @Override
-  public Parser<AvroNamespace> feed(Input input) {
-    return parse(input, this.builder, this.output, this.step);
+    return AvroNamespaceParser.parse(input, null, null, 1);
   }
 
 }

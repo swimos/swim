@@ -39,13 +39,6 @@ import swim.vm.js.JsRuntime;
 
 public class JsKernel extends KernelProxy {
 
-  static final AtomicReferenceFieldUpdater<JsKernel, Engine> JS_ENGINE =
-      AtomicReferenceFieldUpdater.newUpdater(JsKernel.class, Engine.class, "jsEngine");
-  static final AtomicReferenceFieldUpdater<JsKernel, JsRuntime> JS_RUNTIME =
-      AtomicReferenceFieldUpdater.newUpdater(JsKernel.class, JsRuntime.class, "jsRuntime");
-  static final AtomicReferenceFieldUpdater<JsKernel, UriPath> ROOT_PATH =
-      AtomicReferenceFieldUpdater.newUpdater(JsKernel.class, UriPath.class, "rootPath");
-  private static final double KERNEL_PRIORITY = 1.75;
   final double kernelPriority;
   volatile Engine jsEngine;
   volatile JsRuntime jsRuntime;
@@ -53,20 +46,13 @@ public class JsKernel extends KernelProxy {
 
   public JsKernel(double kernelPriority) {
     this.kernelPriority = kernelPriority;
+    this.jsEngine = null;
+    this.jsRuntime = null;
+    this.rootPath = null;
   }
 
   public JsKernel() {
-    this(KERNEL_PRIORITY);
-  }
-
-  public static JsKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || JsKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new JsKernel(kernelPriority);
-    }
-    return null;
+    this(JsKernel.KERNEL_PRIORITY);
   }
 
   @Override
@@ -76,20 +62,19 @@ public class JsKernel extends KernelProxy {
 
   protected Engine createJsEngine() {
     // TODO: configure from moduleConfig
-    return Engine.newBuilder()
-        .build();
+    return Engine.newBuilder().build();
   }
 
   protected JsModuleResolver createJsModuleResolver() {
     // TODO: configure module resolution strategy
-    JsModuleResolver moduleResolver = new JsNodeModuleResolver(rootPath());
+    JsModuleResolver moduleResolver = new JsNodeModuleResolver(this.rootPath());
     // TODO: configure source cache
     moduleResolver = new JsCachedModuleResolver(moduleResolver);
     return moduleResolver;
   }
 
   protected JsRuntime createJsRuntime() {
-    final JsModuleResolver moduleResolver = createJsModuleResolver();
+    final JsModuleResolver moduleResolver = this.createJsModuleResolver();
     final JsHostRuntime runtime = new JsHostRuntime(moduleResolver);
 
     runtime.addHostLibrary(JavaBase.LIBRARY);
@@ -114,7 +99,7 @@ public class JsKernel extends KernelProxy {
     Engine jsEngine;
     Engine newJsEngine = null;
     do {
-      final Engine oldJsEngine = this.jsEngine;
+      final Engine oldJsEngine = JsKernel.JS_ENGINE.get(this);
       if (oldJsEngine != null) {
         jsEngine = oldJsEngine;
         if (newJsEngine != null) {
@@ -124,9 +109,9 @@ public class JsKernel extends KernelProxy {
         }
       } else {
         if (newJsEngine == null) {
-          newJsEngine = createJsEngine();
+          newJsEngine = this.createJsEngine();
         }
-        if (JS_ENGINE.compareAndSet(this, oldJsEngine, newJsEngine)) {
+        if (JsKernel.JS_ENGINE.compareAndSet(this, oldJsEngine, newJsEngine)) {
           jsEngine = newJsEngine;
         } else {
           continue;
@@ -141,7 +126,7 @@ public class JsKernel extends KernelProxy {
     JsRuntime jsRuntime;
     JsRuntime newJsRuntime = null;
     do {
-      final JsRuntime oldJsRuntime = this.jsRuntime;
+      final JsRuntime oldJsRuntime = JsKernel.JS_RUNTIME.get(this);
       if (oldJsRuntime != null) {
         jsRuntime = oldJsRuntime;
         if (newJsRuntime != null) {
@@ -150,9 +135,9 @@ public class JsKernel extends KernelProxy {
         }
       } else {
         if (newJsRuntime == null) {
-          newJsRuntime = createJsRuntime();
+          newJsRuntime = this.createJsRuntime();
         }
-        if (JS_RUNTIME.compareAndSet(this, oldJsRuntime, newJsRuntime)) {
+        if (JsKernel.JS_RUNTIME.compareAndSet(this, oldJsRuntime, newJsRuntime)) {
           jsRuntime = newJsRuntime;
         } else {
           continue;
@@ -167,7 +152,7 @@ public class JsKernel extends KernelProxy {
     UriPath rootPath;
     UriPath newRootPath = null;
     do {
-      final UriPath oldRootPath = this.rootPath;
+      final UriPath oldRootPath = JsKernel.ROOT_PATH.get(this);
       if (oldRootPath != null) {
         rootPath = oldRootPath;
         if (newRootPath != null) {
@@ -176,9 +161,9 @@ public class JsKernel extends KernelProxy {
         }
       } else {
         if (newRootPath == null) {
-          newRootPath = createRootPath();
+          newRootPath = this.createRootPath();
         }
-        if (ROOT_PATH.compareAndSet(this, oldRootPath, newRootPath)) {
+        if (JsKernel.ROOT_PATH.compareAndSet(this, oldRootPath, newRootPath)) {
           rootPath = newRootPath;
         } else {
           continue;
@@ -195,7 +180,7 @@ public class JsKernel extends KernelProxy {
 
   @Override
   public PlaneDef definePlane(Item planeConfig) {
-    final PlaneDef planeDef = defineJsPlane(planeConfig);
+    final PlaneDef planeDef = this.defineJsPlane(planeConfig);
     return planeDef != null ? planeDef : super.definePlane(planeConfig);
   }
 
@@ -215,19 +200,19 @@ public class JsKernel extends KernelProxy {
   @Override
   public PlaneFactory<?> createPlaneFactory(PlaneDef planeDef, ClassLoader classLoader) {
     if (planeDef instanceof JsPlaneDef) {
-      return createJsPlaneFactory((JsPlaneDef) planeDef);
+      return this.createJsPlaneFactory((JsPlaneDef) planeDef);
     } else {
       return super.createPlaneFactory(planeDef, classLoader);
     }
   }
 
   public JsPlaneFactory createJsPlaneFactory(JsPlaneDef planeDef) {
-    return new JsPlaneFactory(this, rootPath(), planeDef);
+    return new JsPlaneFactory(this, this.rootPath(), planeDef);
   }
 
   @Override
   public AgentDef defineAgent(Item agentConfig) {
-    final AgentDef agentDef = defineJsAgent(agentConfig);
+    final AgentDef agentDef = this.defineJsAgent(agentConfig);
     return agentDef != null ? agentDef : super.defineAgent(agentConfig);
   }
 
@@ -251,7 +236,7 @@ public class JsKernel extends KernelProxy {
   @Override
   public AgentFactory<?> createAgentFactory(AgentDef agentDef, ClassLoader classLoader) {
     if (agentDef instanceof JsAgentDef) {
-      return createJsAgentFactory((JsAgentDef) agentDef);
+      return this.createJsAgentFactory((JsAgentDef) agentDef);
     } else {
       return super.createAgentFactory(agentDef, classLoader);
     }
@@ -260,14 +245,33 @@ public class JsKernel extends KernelProxy {
   @Override
   public AgentFactory<?> createAgentFactory(NodeBinding node, AgentDef agentDef) {
     if (agentDef instanceof JsAgentDef) {
-      return createJsAgentFactory((JsAgentDef) agentDef);
+      return this.createJsAgentFactory((JsAgentDef) agentDef);
     } else {
       return super.createAgentFactory(node, agentDef);
     }
   }
 
   public JsAgentFactory createJsAgentFactory(JsAgentDef agentDef) {
-    return new JsAgentFactory(this, rootPath(), agentDef);
+    return new JsAgentFactory(this, this.rootPath(), agentDef);
+  }
+
+  static final AtomicReferenceFieldUpdater<JsKernel, Engine> JS_ENGINE =
+      AtomicReferenceFieldUpdater.newUpdater(JsKernel.class, Engine.class, "jsEngine");
+  static final AtomicReferenceFieldUpdater<JsKernel, JsRuntime> JS_RUNTIME =
+      AtomicReferenceFieldUpdater.newUpdater(JsKernel.class, JsRuntime.class, "jsRuntime");
+  static final AtomicReferenceFieldUpdater<JsKernel, UriPath> ROOT_PATH =
+      AtomicReferenceFieldUpdater.newUpdater(JsKernel.class, UriPath.class, "rootPath");
+
+  private static final double KERNEL_PRIORITY = 1.75;
+
+  public static JsKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || JsKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(JsKernel.KERNEL_PRIORITY);
+      return new JsKernel(kernelPriority);
+    }
+    return null;
   }
 
 }

@@ -24,16 +24,6 @@ import swim.util.Murmur3;
 
 public final class TensorDims implements Debug {
 
-  private static int hashSeed;
-  private static TensorDims undefined;
-  private static TensorDims d1;
-  private static TensorDims d2;
-  private static TensorDims d3;
-  private static TensorDims d4;
-  private static TensorDims d2x2;
-  private static TensorDims d3x3;
-  private static TensorDims d4x4;
-  private static Form<TensorDims> form;
   public final int size;
   public final int stride;
   final TensorDims next;
@@ -42,126 +32,6 @@ public final class TensorDims implements Debug {
     this.size = size;
     this.stride = stride;
     this.next = next;
-  }
-
-  private static boolean conforms(TensorDims these, TensorDims those) {
-    do {
-      if (these.size != those.size) {
-        return false;
-      }
-      these = these.next;
-      those = those.next;
-    } while (these != null && those != null);
-    return these == null && those == null;
-  }
-
-  static boolean equals(TensorDims these, TensorDims those) {
-    do {
-      if (these.size != those.size || these.stride != those.stride) {
-        return false;
-      }
-      these = these.next;
-      those = those.next;
-    } while (these != null && those != null);
-    return these == null && those == null;
-  }
-
-  static int hash(int code, TensorDims dim) {
-    do {
-      code = Murmur3.mix(Murmur3.mix(code, dim.size), dim.stride);
-      dim = dim.next;
-    } while (dim != null);
-    return code;
-  }
-
-  public static TensorDims undefined() {
-    if (undefined == null) {
-      undefined = new TensorDims(0, 0, null);
-    }
-    return undefined;
-  }
-
-  public static TensorDims d1() {
-    if (d1 == null) {
-      d1 = new TensorDims(1, 1, null);
-    }
-    return d1;
-  }
-
-  public static TensorDims d2() {
-    if (d2 == null) {
-      d2 = new TensorDims(2, 1, null);
-    }
-    return d2;
-  }
-
-  public static TensorDims d3() {
-    if (d3 == null) {
-      d3 = new TensorDims(3, 1, null);
-    }
-    return d3;
-  }
-
-  public static TensorDims d4() {
-    if (d4 == null) {
-      d4 = new TensorDims(4, 1, null);
-    }
-    return d4;
-  }
-
-  public static TensorDims d2x2() {
-    if (d2x2 == null) {
-      d2x2 = new TensorDims(2, 2, d2());
-    }
-    return d2x2;
-  }
-
-  public static TensorDims d3x3() {
-    if (d3x3 == null) {
-      d3x3 = new TensorDims(3, 3, d3());
-    }
-    return d3x3;
-  }
-
-  public static TensorDims d4x4() {
-    if (d4x4 == null) {
-      d4x4 = new TensorDims(4, 4, d4());
-    }
-    return d4x4;
-  }
-
-  public static TensorDims of(int size, int stride) {
-    if (size == 0 && stride == 0) {
-      return undefined();
-    } else if (stride == 1) {
-      return of(size);
-    } else {
-      return new TensorDims(size, stride, null);
-    }
-  }
-
-  public static TensorDims of(int size) {
-    if (size == 0) {
-      return undefined();
-    } else if (size == 1) {
-      return d1();
-    } else if (size == 2) {
-      return d2();
-    } else if (size == 3) {
-      return d3();
-    } else if (size == 4) {
-      return d4();
-    } else {
-      return new TensorDims(size, 1, null);
-    }
-  }
-
-  @Kind
-  public static Form<TensorDims> form() {
-    if (form == null) {
-      form = new TensorDimsForm();
-    }
-    return form;
   }
 
   public boolean isDefined() {
@@ -206,24 +76,24 @@ public final class TensorDims implements Debug {
   }
 
   public TensorDims by(int size, int stride) {
-    if (!isDefined()) {
-      return of(size, stride);
+    if (!this.isDefined()) {
+      return TensorDims.of(size, stride);
     } else if (stride == this.size * this.stride) {
-      return by(size);
+      return this.by(size);
     } else {
       return new TensorDims(size, stride, this);
     }
   }
 
   public TensorDims by(int size) {
-    if (!isDefined()) {
-      return of(size);
+    if (!this.isDefined()) {
+      return TensorDims.of(size);
     } else if (size == 2 && this == d2()) {
-      return d2x2();
+      return TensorDims.d2x2();
     } else if (size == 3 && this == d3()) {
-      return d3x3();
+      return TensorDims.d3x3();
     } else if (size == 4 && this == d4()) {
-      return d4x4();
+      return TensorDims.d4x4();
     } else {
       return new TensorDims(size, this.size * this.stride, this);
     }
@@ -240,7 +110,7 @@ public final class TensorDims implements Debug {
       }
       dim = dim.next;
     } while (dim != null);
-    return of(size);
+    return TensorDims.of(size);
   }
 
   public int[] toSizeArray(int[] sizes) {
@@ -255,8 +125,8 @@ public final class TensorDims implements Debug {
   }
 
   public int[] toSizeArray() {
-    final int[] sizes = new int[rank()];
-    return toSizeArray(sizes);
+    final int[] sizes = new int[this.rank()];
+    return this.toSizeArray(sizes);
   }
 
   public int[] toStrideArray(int[] strides) {
@@ -271,16 +141,27 @@ public final class TensorDims implements Debug {
   }
 
   public int[] toStrideArray() {
-    final int[] strides = new int[rank()];
-    return toStrideArray(strides);
+    final int[] strides = new int[this.rank()];
+    return this.toStrideArray(strides);
   }
 
   public Value toValue() {
-    return form().mold(this).toValue();
+    return TensorDims.form().mold(this).toValue();
   }
 
   public boolean conforms(TensorDims that) {
-    return conforms(this, that);
+    return TensorDims.conforms(this, that);
+  }
+
+  private static boolean conforms(TensorDims these, TensorDims those) {
+    do {
+      if (these.size != those.size) {
+        return false;
+      }
+      these = these.next;
+      those = those.next;
+    } while (these != null && those != null);
+    return these == null && those == null;
   }
 
   @Override
@@ -288,39 +169,169 @@ public final class TensorDims implements Debug {
     if (this == other) {
       return true;
     } else if (other instanceof TensorDims) {
-      return equals(this, (TensorDims) other);
+      return TensorDims.equals(this, (TensorDims) other);
     }
     return false;
   }
 
+  static boolean equals(TensorDims these, TensorDims those) {
+    do {
+      if (these.size != those.size || these.stride != those.stride) {
+        return false;
+      }
+      these = these.next;
+      those = those.next;
+    } while (these != null && those != null);
+    return these == null && those == null;
+  }
+
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(TensorDims.class);
+    if (TensorDims.hashSeed == 0) {
+      TensorDims.hashSeed = Murmur3.seed(TensorDims.class);
     }
-    return Murmur3.mash(hash(hashSeed, this));
+    return Murmur3.mash(TensorDims.hash(TensorDims.hashSeed, this));
+  }
+
+  static int hash(int code, TensorDims dim) {
+    do {
+      code = Murmur3.mix(Murmur3.mix(code, dim.size), dim.stride);
+      dim = dim.next;
+    } while (dim != null);
+    return code;
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     if (this.next != null) {
       output = output.debug(this.next).write('.').write("by").write('(').debug(this.size);
-      if (!isPacked()) {
+      if (!this.isPacked()) {
         output = output.write(", ").debug(this.stride);
       }
       output = output.write(')');
     } else {
       output = output.write("TensorDims").write('.').write("of").write('(').debug(this.size);
-      if (!isPacked()) {
+      if (!this.isPacked()) {
         output = output.write(", ").debug(this.stride);
       }
       output = output.write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static TensorDims undefined;
+
+  public static TensorDims undefined() {
+    if (TensorDims.undefined == null) {
+      TensorDims.undefined = new TensorDims(0, 0, null);
+    }
+    return TensorDims.undefined;
+  }
+
+  private static TensorDims d1;
+
+  public static TensorDims d1() {
+    if (TensorDims.d1 == null) {
+      TensorDims.d1 = new TensorDims(1, 1, null);
+    }
+    return TensorDims.d1;
+  }
+
+  private static TensorDims d2;
+
+  public static TensorDims d2() {
+    if (TensorDims.d2 == null) {
+      TensorDims.d2 = new TensorDims(2, 1, null);
+    }
+    return TensorDims.d2;
+  }
+
+  private static TensorDims d3;
+
+  public static TensorDims d3() {
+    if (TensorDims.d3 == null) {
+      TensorDims.d3 = new TensorDims(3, 1, null);
+    }
+    return TensorDims.d3;
+  }
+
+  private static TensorDims d4;
+
+  public static TensorDims d4() {
+    if (TensorDims.d4 == null) {
+      TensorDims.d4 = new TensorDims(4, 1, null);
+    }
+    return TensorDims.d4;
+  }
+
+  private static TensorDims d2x2;
+
+  public static TensorDims d2x2() {
+    if (TensorDims.d2x2 == null) {
+      TensorDims.d2x2 = new TensorDims(2, 2, TensorDims.d2());
+    }
+    return TensorDims.d2x2;
+  }
+
+  private static TensorDims d3x3;
+
+  public static TensorDims d3x3() {
+    if (TensorDims.d3x3 == null) {
+      TensorDims.d3x3 = new TensorDims(3, 3, TensorDims.d3());
+    }
+    return TensorDims.d3x3;
+  }
+
+  private static TensorDims d4x4;
+
+  public static TensorDims d4x4() {
+    if (TensorDims.d4x4 == null) {
+      TensorDims.d4x4 = new TensorDims(4, 4, TensorDims.d4());
+    }
+    return TensorDims.d4x4;
+  }
+
+  public static TensorDims of(int size, int stride) {
+    if (size == 0 && stride == 0) {
+      return TensorDims.undefined();
+    } else if (stride == 1) {
+      return TensorDims.of(size);
+    } else {
+      return new TensorDims(size, stride, null);
+    }
+  }
+
+  public static TensorDims of(int size) {
+    if (size == 0) {
+      return TensorDims.undefined();
+    } else if (size == 1) {
+      return TensorDims.d1();
+    } else if (size == 2) {
+      return TensorDims.d2();
+    } else if (size == 3) {
+      return TensorDims.d3();
+    } else if (size == 4) {
+      return TensorDims.d4();
+    } else {
+      return new TensorDims(size, 1, null);
+    }
+  }
+
+  private static Form<TensorDims> form;
+
+  @Kind
+  public static Form<TensorDims> form() {
+    if (TensorDims.form == null) {
+      TensorDims.form = new TensorDimsForm();
+    }
+    return TensorDims.form;
   }
 
 }

@@ -51,7 +51,7 @@ public final class ArrayForm extends Form<Object> {
 
   @Override
   public Class<?> type() {
-    return unit().getClass();
+    return this.unit().getClass();
   }
 
   @Override

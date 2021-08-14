@@ -19,14 +19,6 @@ import static org.testng.Assert.assertEquals;
 
 public class Murmur3Spec {
 
-  static byte[] bytes(int... xs) {
-    final byte[] bs = new byte[xs.length];
-    for (int i = 0; i < xs.length; i += 1) {
-      bs[i] = (byte) xs[i];
-    }
-    return bs;
-  }
-
   @Test
   public void hashBytes() {
     assertEquals(Murmur3.mash(Murmur3.mix(0, bytes())), 0);
@@ -70,6 +62,14 @@ public class Murmur3Spec {
     assertEquals(Murmur3.mash(Murmur3.mix(0, "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq")), 0xee925b90);
 
     assertEquals(Murmur3.mash(Murmur3.mix(0x9747b28c, "The quick brown fox jumps over the lazy dog")), 0x2fa826cd);
+  }
+
+  static byte[] bytes(int... xs) {
+    final byte[] bs = new byte[xs.length];
+    for (int i = 0; i < xs.length; i += 1) {
+      bs[i] = (byte) xs[i];
+    }
+    return bs;
   }
 
 }

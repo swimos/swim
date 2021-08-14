@@ -34,7 +34,7 @@ public abstract class MapFieldValuesOperator<K, VI, VO, I> extends AbstractMapIn
   @Override
   public VO get(K key) {
     if (this.input != null) {
-      return evaluate(key, this.input.get(key));
+      return this.evaluate(key, this.input.get(key));
     } else {
       return null;
     }
@@ -43,10 +43,10 @@ public abstract class MapFieldValuesOperator<K, VI, VO, I> extends AbstractMapIn
   @Override
   public Map<K, VO> get() {
     HashTrieMap<K, VO> output = HashTrieMap.empty();
-    final Iterator<K> keys = keyIterator();
+    final Iterator<K> keys = this.keyIterator();
     while (keys.hasNext()) {
       final K key = keys.next();
-      final VO value = evaluate(key, this.input.get(key));
+      final VO value = this.evaluate(key, this.input.get(key));
       if (value != null) {
         output = output.updated(key, value);
       }

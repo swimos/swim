@@ -19,10 +19,6 @@ import swim.util.Cursor;
 
 public abstract class STreePage<T> {
 
-  public static <T> STreePage<T> empty() {
-    return STreeLeaf.empty();
-  }
-
   public abstract boolean isEmpty();
 
   public abstract int size();
@@ -44,11 +40,11 @@ public abstract class STreePage<T> {
   public abstract STreePage<T> inserted(int index, T newValue, Object id, STreeContext<T> tree);
 
   public STreePage<T> appended(T newValue, Object id, STreeContext<T> tree) {
-    return inserted(size(), newValue, id, tree);
+    return this.inserted(this.size(), newValue, id, tree);
   }
 
   public STreePage<T> prepended(T newValue, Object id, STreeContext<T> tree) {
-    return inserted(0, newValue, id, tree);
+    return this.inserted(0, newValue, id, tree);
   }
 
   public abstract STreePage<T> removed(int index, STreeContext<T> tree);
@@ -88,5 +84,9 @@ public abstract class STreePage<T> {
   }
 
   public abstract Cursor<Map.Entry<Object, T>> reverseEntryIterator();
+
+  public static <T> STreePage<T> empty() {
+    return STreeLeaf.empty();
+  }
 
 }

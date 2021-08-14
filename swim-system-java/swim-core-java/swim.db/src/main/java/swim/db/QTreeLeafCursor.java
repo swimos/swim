@@ -70,7 +70,7 @@ class QTreeLeafCursor implements Cursor<Slot> {
       final long xt = tile.getItem(0).longValue();
       final long yt = tile.getItem(1).longValue();
       if (BitInterval.intersects(x, y, xt, yt)) {
-        return getSlot(slot);
+        return this.getSlot(slot);
       }
     }
     throw new NoSuchElementException();
@@ -122,7 +122,7 @@ class QTreeLeafCursor implements Cursor<Slot> {
 
   @Override
   public long nextIndexLong() {
-    return (long) nextIndex();
+    return (long) this.nextIndex();
   }
 
   @Override
@@ -142,7 +142,7 @@ class QTreeLeafCursor implements Cursor<Slot> {
       final long yt = tile.getItem(1).longValue();
       this.index += 1;
       if (BitInterval.intersects(x, y, xt, yt)) {
-        return getSlot(slot);
+        return this.getSlot(slot);
       }
     }
     throw new NoSuchElementException();
@@ -168,7 +168,7 @@ class QTreeLeafCursor implements Cursor<Slot> {
 
   @Override
   public long previousIndexLong() {
-    return (long) previousIndex();
+    return (long) this.previousIndex();
   }
 
   @Override
@@ -188,7 +188,7 @@ class QTreeLeafCursor implements Cursor<Slot> {
       final long yt = tile.getItem(1).longValue();
       this.index -= 1;
       if (BitInterval.intersects(x, y, xt, yt)) {
-        return getSlot(slot);
+        return this.getSlot(slot);
       }
     }
     throw new NoSuchElementException();

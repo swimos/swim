@@ -155,7 +155,7 @@ final class ByteBufferInput extends InputBuffer {
       return this;
     } else {
       final Throwable error = new InputException("invalid step");
-      return InputBuffer.error(error, this.id, mark(), this.settings);
+      return InputBuffer.error(error, this.id, this.mark(), this.settings);
     }
   }
 
@@ -169,7 +169,7 @@ final class ByteBufferInput extends InputBuffer {
       return this;
     } else {
       final Throwable error = new InputException("invalid step");
-      return InputBuffer.error(error, this.id, mark(), this.settings);
+      return InputBuffer.error(error, this.id, this.mark(), this.settings);
     }
   }
 
@@ -184,7 +184,7 @@ final class ByteBufferInput extends InputBuffer {
         return this;
       } else {
         final Throwable error = new InputException("invalid seek to " + mark);
-        return InputBuffer.error(error, this.id, mark(), this.settings);
+        return InputBuffer.error(error, this.id, this.mark(), this.settings);
       }
     } else {
       this.offset -= (long) buffer.position();
@@ -244,7 +244,7 @@ final class ByteBufferInput extends InputBuffer {
   @Override
   public InputBuffer clone() {
     return new ByteBufferInput(this.buffer.duplicate(), this.id, this.offset,
-        this.settings, this.isPart);
+                               this.settings, this.isPart);
   }
 
 }

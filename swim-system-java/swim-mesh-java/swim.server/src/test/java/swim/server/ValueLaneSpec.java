@@ -52,7 +52,7 @@ public class ValueLaneSpec {
   public void testLinkToValueLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestValuePlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestValuePlane.class);
+                                       .openPlane("test", TestValuePlane.class);
 
     final String testValue = "Hello, world!";
     final CountDownLatch linkDidReceive = new CountDownLatch(1);
@@ -160,7 +160,7 @@ public class ValueLaneSpec {
   public void testHalfOpenLinkToValueLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestValuePlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestValuePlane.class);
+                                       .openPlane("test", TestValuePlane.class);
 
     final String testValue = "Hello, world!";
     class HalfOpenValueLinkController implements WillSet<String>, DidSet<String>,

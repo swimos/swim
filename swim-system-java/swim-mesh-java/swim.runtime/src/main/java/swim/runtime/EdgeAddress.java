@@ -34,7 +34,7 @@ public final class EdgeAddress implements EdgeAddressed, Debug {
   }
 
   public EdgeAddress edgeName(String edgeName) {
-    return copy(edgeName);
+    return this.copy(edgeName);
   }
 
   EdgeAddress copy(String edgeName) {
@@ -48,7 +48,7 @@ public final class EdgeAddress implements EdgeAddressed, Debug {
 
   @Override
   public MeshAddress meshUri(String meshUri) {
-    return meshUri(Uri.parse(meshUri));
+    return this.meshUri(Uri.parse(meshUri));
   }
 
   @Override
@@ -62,18 +62,21 @@ public final class EdgeAddress implements EdgeAddressed, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.hash(EdgeAddress.class);
+    if (EdgeAddress.hashSeed == 0) {
+      EdgeAddress.hashSeed = Murmur3.hash(EdgeAddress.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.edgeName.hashCode()));
+    return Murmur3.mash(Murmur3.mix(EdgeAddress.hashSeed, this.edgeName.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("EdgeAddress").write('.').write("from").write('(')
-        .debug(this.edgeName).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("EdgeAddress").write('.').write("create").write('(')
+                   .debug(this.edgeName).write(')');
+    return output;
   }
 
   @Override
@@ -81,9 +84,7 @@ public final class EdgeAddress implements EdgeAddressed, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static EdgeAddress from(String edgeName) {
+  public static EdgeAddress create(String edgeName) {
     return new EdgeAddress(edgeName);
   }
 

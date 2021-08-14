@@ -42,7 +42,7 @@ public class ValueIterable<T> implements Iterable<T> {
   }
 
   public <T2> ValueIterable<T2> valueClass(Class<T2> valueClass) {
-    return valueForm(Form.<T2>forClass(valueClass));
+    return this.valueForm(Form.<T2>forClass(valueClass));
   }
 
   @SuppressWarnings("unchecked")

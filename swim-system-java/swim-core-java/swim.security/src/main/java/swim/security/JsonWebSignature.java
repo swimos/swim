@@ -48,7 +48,6 @@ import swim.util.Murmur3;
 
 public class JsonWebSignature implements Debug {
 
-  private static int hashSeed;
   protected final Value unprotectedHeader;
   protected final Value protectedHeader;
   protected final Data signingInput;
@@ -62,223 +61,6 @@ public class JsonWebSignature implements Debug {
     this.signingInput = signingInput;
     this.payloadData = payloadData;
     this.signatureData = signatureData;
-  }
-
-  public static JsonWebSignature from(Value unprotectedHeader, Data signingInput, Data protectedHeaderData,
-                                      Data payloadData, Data signatureData) {
-    final Value protectedHeader = Json.structureParser().parseObject(Utf8.decodedInput(protectedHeaderData.toInputBuffer())).bind();
-    return new JsonWebSignature(unprotectedHeader, protectedHeader, signingInput, payloadData, signatureData);
-  }
-
-  public static JsonWebSignature from(Data signingInput, Data protectedHeaderData,
-                                      Data payloadData, Data signatureData) {
-    return from(Value.absent(), signingInput, protectedHeaderData, payloadData, signatureData);
-  }
-
-  public static JsonWebSignature from(Value unprotectedHeader, Data protectedHeaderData,
-                                      Data payloadData, Data signatureData) {
-    final Output<Data> signingInput = Data.output();
-    Base64.urlUnpadded().writeByteBuffer(protectedHeaderData.asByteBuffer(), signingInput);
-    signingInput.write('.');
-    Base64.urlUnpadded().writeByteBuffer(payloadData.asByteBuffer(), signingInput);
-    return from(unprotectedHeader, signingInput.bind(), protectedHeaderData, payloadData, signatureData);
-  }
-
-  public static JsonWebSignature from(Data protectedHeaderData, Data payloadData, Data signatureData) {
-    return from(Value.absent(), protectedHeaderData, payloadData, signatureData);
-  }
-
-  public static JsonWebSignature hmacSHA(Mac mac, Key symmetricKey, Value unprotectedHeader,
-                                         Value protectedHeader, Data signingInput, Data payloadData) {
-    try {
-      mac.init(symmetricKey);
-      mac.update(signingInput.asByteBuffer());
-      final Data signatureData = Data.wrap(mac.doFinal());
-      return new JsonWebSignature(unprotectedHeader, protectedHeader, signingInput,
-          payloadData, signatureData);
-    } catch (GeneralSecurityException cause) {
-      throw new RuntimeException(cause);
-    }
-  }
-
-  public static JsonWebSignature hmacSHA(Mac mac, Key symmetricKey, Value unprotectedHeader,
-                                         Value protectedHeader, Data payloadData) {
-    final Data protectedHeaderData = Json.toData(protectedHeader);
-    final Output<Data> signingInput = Data.output();
-    Base64.urlUnpadded().writeByteBuffer(protectedHeaderData.asByteBuffer(), signingInput);
-    signingInput.write('.');
-    Base64.urlUnpadded().writeByteBuffer(payloadData.asByteBuffer(), signingInput);
-    return hmacSHA(mac, symmetricKey, unprotectedHeader, protectedHeader,
-        signingInput.bind(), payloadData);
-  }
-
-  public static JsonWebSignature hmacSHA(Key symmetricKey, Value unprotectedHeader,
-                                         Value protectedHeader, Data payloadData) {
-    final String algorithm = symmetricKey.getAlgorithm();
-    final Mac mac;
-    try {
-      if ("HmacSHA256".equals(algorithm)) {
-        protectedHeader = protectedHeader.updatedSlot("alg", "HS256");
-        mac = Mac.getInstance("HmacSHA256");
-      } else if ("HmacSHA384".equals(algorithm)) {
-        protectedHeader = protectedHeader.updatedSlot("alg", "HS384");
-        mac = Mac.getInstance("HmacSHA384");
-      } else if ("HmacSHA512".equals(algorithm)) {
-        protectedHeader = protectedHeader.updatedSlot("alg", "HS512");
-        mac = Mac.getInstance("HmacSHA512");
-      } else {
-        throw new IllegalArgumentException("unsupported key size");
-      }
-      return hmacSHA(mac, symmetricKey, unprotectedHeader, protectedHeader, payloadData);
-    } catch (GeneralSecurityException cause) {
-      throw new RuntimeException(cause);
-    }
-  }
-
-  public static JsonWebSignature mac(Key symmetricKey, Value unprotectedHeader,
-                                     Value protectedHeader, Data payloadData) {
-    return hmacSHA(symmetricKey, unprotectedHeader, protectedHeader, payloadData);
-  }
-
-  public static JsonWebSignature mac(Key symmetricKey, Value protectedHeader, Data payloadData) {
-    return mac(symmetricKey, Value.absent(), protectedHeader, payloadData);
-  }
-
-  public static JsonWebSignature mac(Key symmetricKey, Data payloadData) {
-    return mac(symmetricKey, Value.absent(), Value.absent(), payloadData);
-  }
-
-  public static JsonWebSignature signRSA(Signature signature, PrivateKey privateKey, int keyLength,
-                                         Value unprotectedHeader, Value protectedHeader,
-                                         Data signingInput, Data payloadData) {
-    try {
-      signature.initSign(privateKey);
-      signature.update(signingInput.asByteBuffer());
-      final Data signatureData = Data.wrap(signature.sign());
-      return new JsonWebSignature(unprotectedHeader, protectedHeader, signingInput,
-          payloadData, signatureData);
-    } catch (GeneralSecurityException cause) {
-      throw new RuntimeException(cause);
-    }
-  }
-
-  public static JsonWebSignature signRSA(Signature signature, PrivateKey privateKey, int keyLength,
-                                         Value unprotectedHeader, Value protectedHeader, Data payloadData) {
-    final Data protectedHeaderData = Json.toData(protectedHeader);
-    final Output<Data> signingInput = Data.output();
-    Base64.urlUnpadded().writeByteBuffer(protectedHeaderData.asByteBuffer(), signingInput);
-    signingInput.write('.');
-    Base64.urlUnpadded().writeByteBuffer(payloadData.asByteBuffer(), signingInput);
-    return signRSA(signature, privateKey, keyLength, unprotectedHeader, protectedHeader,
-        signingInput.bind(), payloadData);
-  }
-
-  public static JsonWebSignature signRSA(PrivateKey privateKey, Value unprotectedHeader,
-                                         Value protectedHeader, Data payloadData) {
-    final int keyLength = rsaKeyLength(privateKey);
-    final Signature signature;
-    try {
-      if (keyLength == 32) {
-        protectedHeader = protectedHeader.updatedSlot("alg", "RS256");
-        signature = Signature.getInstance("SHA256withRSA");
-      } else if (keyLength == 48) {
-        protectedHeader = protectedHeader.updatedSlot("alg", "RS384");
-        signature = Signature.getInstance("SHA384withRSA");
-      } else if (keyLength == 64) {
-        protectedHeader = protectedHeader.updatedSlot("alg", "RS512");
-        signature = Signature.getInstance("SHA512withRSA");
-      } else {
-        throw new IllegalArgumentException("unsupported key size");
-      }
-      return signRSA(signature, privateKey, keyLength, unprotectedHeader,
-          protectedHeader, payloadData);
-    } catch (GeneralSecurityException cause) {
-      throw new RuntimeException(cause);
-    }
-  }
-
-  public static JsonWebSignature signECDSA(Signature signature, PrivateKey privateKey, int keyLength,
-                                           Value unprotectedHeader, Value protectedHeader,
-                                           Data signingInput, Data payloadData) {
-    try {
-      signature.initSign(privateKey);
-      signature.update(signingInput.asByteBuffer());
-      Data signatureData = Data.wrap(signature.sign());
-      signatureData = derDecodeECDSASignature(signatureData, keyLength);
-      return new JsonWebSignature(unprotectedHeader, protectedHeader, signingInput,
-          payloadData, signatureData);
-    } catch (GeneralSecurityException cause) {
-      throw new RuntimeException(cause);
-    }
-  }
-
-  public static JsonWebSignature signECDSA(Signature signature, PrivateKey privateKey, int keyLength,
-                                           Value unprotectedHeader, Value protectedHeader, Data payloadData) {
-    final Data protectedHeaderData = Json.toData(protectedHeader);
-    final Output<Data> signingInput = Data.output();
-    Base64.urlUnpadded().writeByteBuffer(protectedHeaderData.asByteBuffer(), signingInput);
-    signingInput.write('.');
-    Base64.urlUnpadded().writeByteBuffer(payloadData.asByteBuffer(), signingInput);
-    return signECDSA(signature, privateKey, keyLength, unprotectedHeader, protectedHeader,
-        signingInput.bind(), payloadData);
-  }
-
-  public static JsonWebSignature signECDSA(PrivateKey privateKey, Value unprotectedHeader,
-                                           Value protectedHeader, Data payloadData) {
-    final int keyLength = ecKeyLength(privateKey);
-    final Signature signature;
-    try {
-      if (keyLength == 32) {
-        protectedHeader = protectedHeader.updatedSlot("alg", "ES256");
-        signature = Signature.getInstance("SHA256withECDSA");
-      } else if (keyLength == 48) {
-        protectedHeader = protectedHeader.updatedSlot("alg", "ES384");
-        signature = Signature.getInstance("SHA384withECDSA");
-      } else if (keyLength == 66) {
-        protectedHeader = protectedHeader.updatedSlot("alg", "ES512");
-        signature = Signature.getInstance("SHA512withECDSA");
-      } else {
-        throw new IllegalArgumentException("unsupported key size");
-      }
-      return signECDSA(signature, privateKey, keyLength, unprotectedHeader,
-          protectedHeader, payloadData);
-    } catch (GeneralSecurityException cause) {
-      throw new RuntimeException(cause);
-    }
-  }
-
-  public static JsonWebSignature sign(PrivateKey privateKey, Value unprotectedHeader,
-                                      Value protectedHeader, Data payloadData) {
-    if (privateKey instanceof ECKey) {
-      return signECDSA(privateKey, unprotectedHeader, protectedHeader, payloadData);
-    } else if (privateKey instanceof RSAKey) {
-      return signRSA(privateKey, unprotectedHeader, protectedHeader, payloadData);
-    } else {
-      throw new IllegalArgumentException("unsupported signing key type");
-    }
-  }
-
-  public static JsonWebSignature sign(PrivateKey privateKey, Value protectedHeader, Data payloadData) {
-    return sign(privateKey, Value.absent(), protectedHeader, payloadData);
-  }
-
-  public static JsonWebSignature sign(PrivateKey privateKey, Data payloadData) {
-    return sign(privateKey, Value.absent(), Value.absent(), payloadData);
-  }
-
-  public static Parser<JsonWebSignature> parser() {
-    return new JsonWebSignatureParser();
-  }
-
-  public static JsonWebSignature parse(String jws) {
-    final Input input = Unicode.stringInput(jws);
-    Parser<JsonWebSignature> parser = JsonWebSignatureParser.parse(input);
-    if (input.isCont() && !parser.isError()) {
-      parser = Parser.error(Diagnostic.unexpected(input));
-    } else if (input.isError()) {
-      parser = Parser.error(input.trap());
-    }
-    return parser.bind();
   }
 
   static boolean compareSignatureData(Data actual, Data expected) {
@@ -355,7 +137,7 @@ public class JsonWebSignature implements Debug {
 
   public JsonWebSignature unprotectedHeader(Value unprotectedHeader) {
     return new JsonWebSignature(unprotectedHeader, this.protectedHeader, this.signingInput,
-        this.payloadData, this.signatureData);
+                                this.payloadData, this.signatureData);
   }
 
   public final Value protectedHeader() {
@@ -371,7 +153,7 @@ public class JsonWebSignature implements Debug {
   }
 
   public final <T> T payload(Decoder<T> decoder) {
-    decoder = decoder.feed(payloadData.toInputBuffer());
+    decoder = decoder.feed(this.payloadData.toInputBuffer());
     if (decoder.isDone()) {
       return decoder.bind();
     } else {
@@ -385,11 +167,11 @@ public class JsonWebSignature implements Debug {
   }
 
   public final <T> T payload(Form<T> form) {
-    return payload(Json.formDecoder(form));
+    return this.payload(Json.formDecoder(form));
   }
 
   public final Value payload() {
-    return payload(Form.forValue());
+    return this.payload(Form.forValue());
   }
 
   public final Data signatureData() {
@@ -405,28 +187,28 @@ public class JsonWebSignature implements Debug {
   }
 
   public String algorithm() {
-    return get("alg").stringValue(null);
+    return this.get("alg").stringValue(null);
   }
 
   public String jsonWebKeySetUrl() {
-    return get("jku").stringValue(null);
+    return this.get("jku").stringValue(null);
   }
 
   public JsonWebKey jsonWebKey() {
-    return JsonWebKey.from(get("jwk"));
+    return JsonWebKey.from(this.get("jwk"));
   }
 
   public String keyId() {
-    return get("kid").stringValue(null);
+    return this.get("kid").stringValue(null);
   }
 
   public String x509Url() {
-    return get("x5u").stringValue(null);
+    return this.get("x5u").stringValue(null);
   }
 
   public FingerTrieSeq<String> x509CertificateChain() {
     FingerTrieSeq<String> x509CertificateChain = FingerTrieSeq.empty();
-    for (Item member : get("x5c")) {
+    for (Item member : this.get("x5c")) {
       final String x509Certificate = member.stringValue(null);
       if (x509Certificate != null) {
         x509CertificateChain = x509CertificateChain.appended(x509Certificate);
@@ -436,24 +218,24 @@ public class JsonWebSignature implements Debug {
   }
 
   public String x509Sha1Thumbprint() {
-    return get("x5t").stringValue(null);
+    return this.get("x5t").stringValue(null);
   }
 
   public String x509Sha256Thumbprint() {
-    return get("x5t#S256").stringValue(null);
+    return this.get("x5t#S256").stringValue(null);
   }
 
   public String type() {
-    return get("typ").stringValue(null);
+    return this.get("typ").stringValue(null);
   }
 
   public String contentType() {
-    return get("cty").stringValue(null);
+    return this.get("cty").stringValue(null);
   }
 
   public HashTrieSet<String> critical() {
     HashTrieSet<String> critical = HashTrieSet.empty();
-    for (Item member : get("crit")) {
+    for (Item member : this.get("crit")) {
       final String name = member.stringValue(null);
       if (name != null) {
         critical = critical.added(name);
@@ -463,14 +245,14 @@ public class JsonWebSignature implements Debug {
   }
 
   public boolean verifyMac(Key symmetricKey) {
-    final String algorithm = algorithm();
+    final String algorithm = this.algorithm();
     try {
       if ("HS256".equals(algorithm)) {
-        return verifyMac(Mac.getInstance("HmacSHA256"), symmetricKey);
+        return this.verifyMac(Mac.getInstance("HmacSHA256"), symmetricKey);
       } else if ("HS384".equals(algorithm)) {
-        return verifyMac(Mac.getInstance("HmacSHA384"), symmetricKey);
+        return this.verifyMac(Mac.getInstance("HmacSHA384"), symmetricKey);
       } else if ("HS512".equals(algorithm)) {
-        return verifyMac(Mac.getInstance("HmacSHA512"), symmetricKey);
+        return this.verifyMac(Mac.getInstance("HmacSHA512"), symmetricKey);
       } else {
         return false;
       }
@@ -482,29 +264,29 @@ public class JsonWebSignature implements Debug {
   public boolean verifyMac(Mac mac, Key symmetricKey) {
     try {
       mac.init(symmetricKey);
-      mac.update(signingInput.asByteBuffer());
+      mac.update(this.signingInput.asByteBuffer());
       final Data signatureData = Data.wrap(mac.doFinal());
-      return compareSignatureData(signatureData, this.signatureData);
+      return JsonWebSignature.compareSignatureData(signatureData, this.signatureData);
     } catch (GeneralSecurityException cause) {
       throw new RuntimeException(cause);
     }
   }
 
   public boolean verifySignature(PublicKey publicKey) {
-    final String algorithm = algorithm();
+    final String algorithm = this.algorithm();
     try {
       if ("ES256".equals(algorithm)) {
-        return verifyECDSASignature(Signature.getInstance("SHA256withECDSA"), publicKey);
+        return this.verifyECDSASignature(Signature.getInstance("SHA256withECDSA"), publicKey);
       } else if ("ES384".equals(algorithm)) {
-        return verifyECDSASignature(Signature.getInstance("SHA384withECDSA"), publicKey);
+        return this.verifyECDSASignature(Signature.getInstance("SHA384withECDSA"), publicKey);
       } else if ("ES512".equals(algorithm)) {
-        return verifyECDSASignature(Signature.getInstance("SHA512withECDSA"), publicKey);
+        return this.verifyECDSASignature(Signature.getInstance("SHA512withECDSA"), publicKey);
       } else if ("RS256".equals(algorithm)) {
-        return verifyRSASignature(Signature.getInstance("SHA256withRSA"), publicKey);
+        return this.verifyRSASignature(Signature.getInstance("SHA256withRSA"), publicKey);
       } else if ("RS384".equals(algorithm)) {
-        return verifyRSASignature(Signature.getInstance("SHA384withRSA"), publicKey);
+        return this.verifyRSASignature(Signature.getInstance("SHA384withRSA"), publicKey);
       } else if ("RS512".equals(algorithm)) {
-        return verifyRSASignature(Signature.getInstance("SHA512withRSA"), publicKey);
+        return this.verifyRSASignature(Signature.getInstance("SHA512withRSA"), publicKey);
       } else {
         return false;
       }
@@ -516,18 +298,18 @@ public class JsonWebSignature implements Debug {
   public boolean verifyRSASignature(Signature signature, PublicKey publicKey) {
     try {
       signature.initVerify(publicKey);
-      signature.update(signingInput.asByteBuffer());
-      return signature.verify(signatureData.asByteArray(), 0, signatureData.size());
+      signature.update(this.signingInput.asByteBuffer());
+      return signature.verify(this.signatureData.asByteArray(), 0, this.signatureData.size());
     } catch (GeneralSecurityException cause) {
       throw new RuntimeException(cause);
     }
   }
 
   public boolean verifyECDSASignature(Signature signature, PublicKey publicKey) {
-    final Data signatureData = derEncodeECDSASignature(this.signatureData);
+    final Data signatureData = JsonWebSignature.derEncodeECDSASignature(this.signatureData);
     try {
       signature.initVerify(publicKey);
-      signature.update(signingInput.asByteBuffer());
+      signature.update(this.signingInput.asByteBuffer());
       return signature.verify(signatureData.asByteArray(), 0, signatureData.size());
     } catch (GeneralSecurityException cause) {
       throw new RuntimeException(cause);
@@ -540,7 +322,7 @@ public class JsonWebSignature implements Debug {
 
   public String toJws() {
     final Output<String> output = Unicode.stringOutput();
-    writeJws(output);
+    this.writeJws(output).bind();
     return output.bind();
   }
 
@@ -559,28 +341,242 @@ public class JsonWebSignature implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(JsonWebSignature.class);
+    if (JsonWebSignature.hashSeed == 0) {
+      JsonWebSignature.hashSeed = Murmur3.seed(JsonWebSignature.class);
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        hashSeed, this.unprotectedHeader.hashCode()), this.protectedHeader.hashCode()),
-        this.signingInput.hashCode()), this.payloadData.hashCode()),
-        this.signatureData.hashCode()));
+        JsonWebSignature.hashSeed, this.unprotectedHeader.hashCode()),
+        this.protectedHeader.hashCode()), this.signingInput.hashCode()),
+        this.payloadData.hashCode()), this.signatureData.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.write("JsonWebSignature").write('.').write("from").write('(')
-        .debug(unprotectedHeader).write(", ").debug(protectedHeader).write(", ")
-        .debug(signingInput).write(", ").debug(payloadData).write(", ")
-        .debug(signatureData).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("JsonWebSignature").write('.').write("create").write('(')
+                   .debug(this.unprotectedHeader).write(", ").debug(this.protectedHeader).write(", ")
+                   .debug(this.signingInput).write(", ").debug(this.payloadData).write(", ")
+                   .debug(this.signatureData).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static JsonWebSignature create(Value unprotectedHeader, Data signingInput, Data protectedHeaderData,
+                                        Data payloadData, Data signatureData) {
+    final Value protectedHeader = Json.structureParser().parseObject(Utf8.decodedInput(protectedHeaderData.toInputBuffer())).bind();
+    return new JsonWebSignature(unprotectedHeader, protectedHeader, signingInput, payloadData, signatureData);
+  }
+
+  public static JsonWebSignature create(Data signingInput, Data protectedHeaderData,
+                                        Data payloadData, Data signatureData) {
+    return JsonWebSignature.create(Value.absent(), signingInput, protectedHeaderData, payloadData, signatureData);
+  }
+
+  public static JsonWebSignature create(Value unprotectedHeader, Data protectedHeaderData,
+                                        Data payloadData, Data signatureData) {
+    final Output<Data> signingInput = Data.output();
+    Base64.urlUnpadded().writeByteBuffer(protectedHeaderData.asByteBuffer(), signingInput);
+    signingInput.write('.');
+    Base64.urlUnpadded().writeByteBuffer(payloadData.asByteBuffer(), signingInput);
+    return JsonWebSignature.create(unprotectedHeader, signingInput.bind(), protectedHeaderData, payloadData, signatureData);
+  }
+
+  public static JsonWebSignature create(Data protectedHeaderData, Data payloadData, Data signatureData) {
+    return JsonWebSignature.create(Value.absent(), protectedHeaderData, payloadData, signatureData);
+  }
+
+  public static JsonWebSignature hmacSHA(Mac mac, Key symmetricKey, Value unprotectedHeader,
+                                         Value protectedHeader, Data signingInput, Data payloadData) {
+    try {
+      mac.init(symmetricKey);
+      mac.update(signingInput.asByteBuffer());
+      final Data signatureData = Data.wrap(mac.doFinal());
+      return new JsonWebSignature(unprotectedHeader, protectedHeader, signingInput, payloadData, signatureData);
+    } catch (GeneralSecurityException cause) {
+      throw new RuntimeException(cause);
+    }
+  }
+
+  public static JsonWebSignature hmacSHA(Mac mac, Key symmetricKey, Value unprotectedHeader,
+                                         Value protectedHeader, Data payloadData) {
+    final Data protectedHeaderData = Json.toData(protectedHeader);
+    final Output<Data> signingInput = Data.output();
+    Base64.urlUnpadded().writeByteBuffer(protectedHeaderData.asByteBuffer(), signingInput);
+    signingInput.write('.');
+    Base64.urlUnpadded().writeByteBuffer(payloadData.asByteBuffer(), signingInput);
+    return JsonWebSignature.hmacSHA(mac, symmetricKey, unprotectedHeader, protectedHeader, signingInput.bind(), payloadData);
+  }
+
+  public static JsonWebSignature hmacSHA(Key symmetricKey, Value unprotectedHeader,
+                                         Value protectedHeader, Data payloadData) {
+    final String algorithm = symmetricKey.getAlgorithm();
+    final Mac mac;
+    try {
+      if ("HmacSHA256".equals(algorithm)) {
+        protectedHeader = protectedHeader.updatedSlot("alg", "HS256");
+        mac = Mac.getInstance("HmacSHA256");
+      } else if ("HmacSHA384".equals(algorithm)) {
+        protectedHeader = protectedHeader.updatedSlot("alg", "HS384");
+        mac = Mac.getInstance("HmacSHA384");
+      } else if ("HmacSHA512".equals(algorithm)) {
+        protectedHeader = protectedHeader.updatedSlot("alg", "HS512");
+        mac = Mac.getInstance("HmacSHA512");
+      } else {
+        throw new IllegalArgumentException("unsupported key size");
+      }
+      return JsonWebSignature.hmacSHA(mac, symmetricKey, unprotectedHeader, protectedHeader, payloadData);
+    } catch (GeneralSecurityException cause) {
+      throw new RuntimeException(cause);
+    }
+  }
+
+  public static JsonWebSignature mac(Key symmetricKey, Value unprotectedHeader,
+                                     Value protectedHeader, Data payloadData) {
+    return JsonWebSignature.hmacSHA(symmetricKey, unprotectedHeader, protectedHeader, payloadData);
+  }
+
+  public static JsonWebSignature mac(Key symmetricKey, Value protectedHeader, Data payloadData) {
+    return JsonWebSignature.mac(symmetricKey, Value.absent(), protectedHeader, payloadData);
+  }
+
+  public static JsonWebSignature mac(Key symmetricKey, Data payloadData) {
+    return JsonWebSignature.mac(symmetricKey, Value.absent(), Value.absent(), payloadData);
+  }
+
+  public static JsonWebSignature signRSA(Signature signature, PrivateKey privateKey, int keyLength,
+                                         Value unprotectedHeader, Value protectedHeader,
+                                         Data signingInput, Data payloadData) {
+    try {
+      signature.initSign(privateKey);
+      signature.update(signingInput.asByteBuffer());
+      final Data signatureData = Data.wrap(signature.sign());
+      return new JsonWebSignature(unprotectedHeader, protectedHeader, signingInput, payloadData, signatureData);
+    } catch (GeneralSecurityException cause) {
+      throw new RuntimeException(cause);
+    }
+  }
+
+  public static JsonWebSignature signRSA(Signature signature, PrivateKey privateKey, int keyLength,
+                                         Value unprotectedHeader, Value protectedHeader, Data payloadData) {
+    final Data protectedHeaderData = Json.toData(protectedHeader);
+    final Output<Data> signingInput = Data.output();
+    Base64.urlUnpadded().writeByteBuffer(protectedHeaderData.asByteBuffer(), signingInput);
+    signingInput.write('.');
+    Base64.urlUnpadded().writeByteBuffer(payloadData.asByteBuffer(), signingInput);
+    return JsonWebSignature.signRSA(signature, privateKey, keyLength, unprotectedHeader,
+                                    protectedHeader, signingInput.bind(), payloadData);
+  }
+
+  public static JsonWebSignature signRSA(PrivateKey privateKey, Value unprotectedHeader,
+                                         Value protectedHeader, Data payloadData) {
+    final int keyLength = JsonWebSignature.rsaKeyLength(privateKey);
+    final Signature signature;
+    try {
+      if (keyLength == 32) {
+        protectedHeader = protectedHeader.updatedSlot("alg", "RS256");
+        signature = Signature.getInstance("SHA256withRSA");
+      } else if (keyLength == 48) {
+        protectedHeader = protectedHeader.updatedSlot("alg", "RS384");
+        signature = Signature.getInstance("SHA384withRSA");
+      } else if (keyLength == 64) {
+        protectedHeader = protectedHeader.updatedSlot("alg", "RS512");
+        signature = Signature.getInstance("SHA512withRSA");
+      } else {
+        throw new IllegalArgumentException("unsupported key size");
+      }
+      return JsonWebSignature.signRSA(signature, privateKey, keyLength, unprotectedHeader, protectedHeader, payloadData);
+    } catch (GeneralSecurityException cause) {
+      throw new RuntimeException(cause);
+    }
+  }
+
+  public static JsonWebSignature signECDSA(Signature signature, PrivateKey privateKey, int keyLength,
+                                           Value unprotectedHeader, Value protectedHeader,
+                                           Data signingInput, Data payloadData) {
+    try {
+      signature.initSign(privateKey);
+      signature.update(signingInput.asByteBuffer());
+      Data signatureData = Data.wrap(signature.sign());
+      signatureData = JsonWebSignature.derDecodeECDSASignature(signatureData, keyLength);
+      return new JsonWebSignature(unprotectedHeader, protectedHeader, signingInput, payloadData, signatureData);
+    } catch (GeneralSecurityException cause) {
+      throw new RuntimeException(cause);
+    }
+  }
+
+  public static JsonWebSignature signECDSA(Signature signature, PrivateKey privateKey, int keyLength,
+                                           Value unprotectedHeader, Value protectedHeader, Data payloadData) {
+    final Data protectedHeaderData = Json.toData(protectedHeader);
+    final Output<Data> signingInput = Data.output();
+    Base64.urlUnpadded().writeByteBuffer(protectedHeaderData.asByteBuffer(), signingInput);
+    signingInput.write('.');
+    Base64.urlUnpadded().writeByteBuffer(payloadData.asByteBuffer(), signingInput);
+    return JsonWebSignature.signECDSA(signature, privateKey, keyLength, unprotectedHeader,
+                                      protectedHeader, signingInput.bind(), payloadData);
+  }
+
+  public static JsonWebSignature signECDSA(PrivateKey privateKey, Value unprotectedHeader,
+                                           Value protectedHeader, Data payloadData) {
+    final int keyLength = JsonWebSignature.ecKeyLength(privateKey);
+    final Signature signature;
+    try {
+      if (keyLength == 32) {
+        protectedHeader = protectedHeader.updatedSlot("alg", "ES256");
+        signature = Signature.getInstance("SHA256withECDSA");
+      } else if (keyLength == 48) {
+        protectedHeader = protectedHeader.updatedSlot("alg", "ES384");
+        signature = Signature.getInstance("SHA384withECDSA");
+      } else if (keyLength == 66) {
+        protectedHeader = protectedHeader.updatedSlot("alg", "ES512");
+        signature = Signature.getInstance("SHA512withECDSA");
+      } else {
+        throw new IllegalArgumentException("unsupported key size");
+      }
+      return JsonWebSignature.signECDSA(signature, privateKey, keyLength, unprotectedHeader, protectedHeader, payloadData);
+    } catch (GeneralSecurityException cause) {
+      throw new RuntimeException(cause);
+    }
+  }
+
+  public static JsonWebSignature sign(PrivateKey privateKey, Value unprotectedHeader,
+                                      Value protectedHeader, Data payloadData) {
+    if (privateKey instanceof ECKey) {
+      return JsonWebSignature.signECDSA(privateKey, unprotectedHeader, protectedHeader, payloadData);
+    } else if (privateKey instanceof RSAKey) {
+      return JsonWebSignature.signRSA(privateKey, unprotectedHeader, protectedHeader, payloadData);
+    } else {
+      throw new IllegalArgumentException("unsupported signing key type");
+    }
+  }
+
+  public static JsonWebSignature sign(PrivateKey privateKey, Value protectedHeader, Data payloadData) {
+    return JsonWebSignature.sign(privateKey, Value.absent(), protectedHeader, payloadData);
+  }
+
+  public static JsonWebSignature sign(PrivateKey privateKey, Data payloadData) {
+    return JsonWebSignature.sign(privateKey, Value.absent(), Value.absent(), payloadData);
+  }
+
+  public static Parser<JsonWebSignature> parser() {
+    return new JsonWebSignatureParser();
+  }
+
+  public static JsonWebSignature parse(String jws) {
+    final Input input = Unicode.stringInput(jws);
+    Parser<JsonWebSignature> parser = JsonWebSignatureParser.parse(input);
+    if (input.isCont() && !parser.isError()) {
+      parser = Parser.error(Diagnostic.unexpected(input));
+    } else if (input.isError()) {
+      parser = Parser.error(input.trap());
+    }
+    return parser.bind();
   }
 
 }

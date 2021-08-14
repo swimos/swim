@@ -16,12 +16,9 @@ package swim.db;
 
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 
 public final class Commit {
 
-  private static Commit closed;
-  private static Commit forced;
   final boolean isClosed;
   final boolean isForced;
   final boolean isShifted;
@@ -37,20 +34,6 @@ public final class Commit {
 
   public Commit(boolean isClosed, boolean isForced, boolean isShifted) {
     this(isClosed, isForced, isShifted, FingerTrieSeq.<Cont<Chunk>>empty());
-  }
-
-  public static Commit closed() {
-    if (closed == null) {
-      closed = new Commit(true, true, false);
-    }
-    return closed;
-  }
-
-  public static Commit forced() {
-    if (forced == null) {
-      forced = new Commit(false, true, false);
-    }
-    return forced;
   }
 
   public boolean isClosed() {
@@ -86,11 +69,11 @@ public final class Commit {
   }
 
   public void bind(Chunk chunk) {
-    for (Cont<Chunk> cont : conts) {
+    for (Cont<Chunk> cont : this.conts) {
       try {
         cont.bind(chunk);
       } catch (Throwable cause) {
-        if (Conts.isNonFatal(cause)) {
+        if (Cont.isNonFatal(cause)) {
           cont.trap(cause);
         } else {
           throw cause;
@@ -100,11 +83,11 @@ public final class Commit {
   }
 
   public void trap(Throwable error) {
-    for (Cont<Chunk> cont : conts) {
+    for (Cont<Chunk> cont : this.conts) {
       try {
         cont.trap(error);
       } catch (Throwable cause) {
-        if (Conts.isNonFatal(cause)) {
+        if (Cont.isNonFatal(cause)) {
           cause.printStackTrace(); // swallow
         } else {
           throw cause;
@@ -119,6 +102,24 @@ public final class Commit {
     final boolean isShifted = this.isShifted || that.isShifted;
     final FingerTrieSeq<Cont<Chunk>> conts = this.conts.appended(that.conts);
     return new Commit(isClosed, isForced, isShifted, conts);
+  }
+
+  private static Commit closed;
+
+  public static Commit closed() {
+    if (Commit.closed == null) {
+      Commit.closed = new Commit(true, true, false);
+    }
+    return Commit.closed;
+  }
+
+  private static Commit forced;
+
+  public static Commit forced() {
+    if (Commit.forced == null) {
+      Commit.forced = new Commit(false, true, false);
+    }
+    return Commit.forced;
   }
 
 }

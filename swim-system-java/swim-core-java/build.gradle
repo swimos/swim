@@ -3,7 +3,7 @@ plugins {
   id 'SwimSystemPublish'
 }
 
-description = 'Swim Core'
+description = 'Swim Core Framework'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-core-java'
 ext.moduleName = null
 
@@ -19,7 +19,6 @@ dependencies {
   api project(':swim-csv')
   api project(':swim-avro')
   api project(':swim-protobuf')
-  api project(':swim-decipher')
   api project(':swim-math')
   api project(':swim-security')
   api project(':swim-spatial')
@@ -43,7 +42,7 @@ dependencies {
 }
 
 javadoc {
-  title 'Swim Core'
+  title 'Swim Core Framework'
   options.overview = "${projectDir}/overview.html"
   options.addStringOption('-module-source-path', "${projectDir}/*/src/main/java")
 }

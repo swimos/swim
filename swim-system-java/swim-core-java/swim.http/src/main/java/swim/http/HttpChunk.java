@@ -26,39 +26,12 @@ import swim.util.Murmur3;
 
 public final class HttpChunk implements Debug {
 
-  private static int hashSeed;
-  private static HttpChunk last;
   final HttpChunkHeader header;
   final Encoder<?, ?> content;
 
   public HttpChunk(HttpChunkHeader header, Encoder<?, ?> content) {
     this.header = header;
     this.content = content;
-  }
-
-  public static HttpChunk last() {
-    if (last == null) {
-      last = new HttpChunk(HttpChunkHeader.sentinel(), Encoder.done());
-    }
-    return last;
-  }
-
-  public static HttpChunk from(int length, Encoder<?, ?> content) {
-    final HttpChunkHeader header = HttpChunkHeader.from(length);
-    return new HttpChunk(header, content);
-  }
-
-  public static HttpChunk from(ByteBuffer data) {
-    final HttpChunkHeader header = HttpChunkHeader.from(data.remaining());
-    return new HttpChunk(header, Binary.byteBufferWriter(data));
-  }
-
-  public static HttpChunk from(String text) {
-    Output<ByteBuffer> output = Utf8.encodedOutput(Binary.byteBufferOutput(text.length()));
-    output = output.write(text);
-    final ByteBuffer data = output.bind();
-    final HttpChunkHeader header = HttpChunkHeader.from(data.remaining());
-    return new HttpChunk(header, Binary.byteBufferWriter(data));
   }
 
   public boolean isEmpty() {
@@ -82,7 +55,7 @@ public final class HttpChunk implements Debug {
   }
 
   public Encoder<?, ?> httpEncoder() {
-    return httpEncoder(Http.standardWriter());
+    return this.httpEncoder(Http.standardWriter());
   }
 
   public Encoder<?, ?> encodeHttp(OutputBuffer<?> output, HttpWriter http) {
@@ -94,7 +67,7 @@ public final class HttpChunk implements Debug {
   }
 
   public Encoder<?, ?> encodeHttp(OutputBuffer<?> output) {
-    return encodeHttp(output, Http.standardWriter());
+    return this.encodeHttp(output, Http.standardWriter());
   }
 
   @Override
@@ -108,28 +81,59 @@ public final class HttpChunk implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(HttpChunk.class);
+    if (HttpChunk.hashSeed == 0) {
+      HttpChunk.hashSeed = Murmur3.seed(HttpChunk.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpChunk.hashSeed,
         this.header.hashCode()), this.content.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("HttpChunk").write('.');
-    if (header != HttpChunkHeader.sentinel()) {
-      output = output.write("from").write('(').debug(this.header).write(", ").debug(this.content).write(')');
+    if (this.header != HttpChunkHeader.sentinel()) {
+      output = output.write("create").write('(').debug(this.header)
+                     .write(", ").debug(this.content).write(')');
     } else {
       output = output.write("last").write('(').write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static HttpChunk last;
+
+  public static HttpChunk last() {
+    if (HttpChunk.last == null) {
+      HttpChunk.last = new HttpChunk(HttpChunkHeader.sentinel(), Encoder.done());
+    }
+    return HttpChunk.last;
+  }
+
+  public static HttpChunk create(int length, Encoder<?, ?> content) {
+    final HttpChunkHeader header = HttpChunkHeader.create(length);
+    return new HttpChunk(header, content);
+  }
+
+  public static HttpChunk create(ByteBuffer data) {
+    final HttpChunkHeader header = HttpChunkHeader.create(data.remaining());
+    return new HttpChunk(header, Binary.byteBufferWriter(data));
+  }
+
+  public static HttpChunk create(String text) {
+    Output<ByteBuffer> output = Utf8.encodedOutput(Binary.byteBufferOutput(text.length()));
+    output = output.write(text);
+    final ByteBuffer data = output.bind();
+    final HttpChunkHeader header = HttpChunkHeader.create(data.remaining());
+    return new HttpChunk(header, Binary.byteBufferWriter(data));
   }
 
 }

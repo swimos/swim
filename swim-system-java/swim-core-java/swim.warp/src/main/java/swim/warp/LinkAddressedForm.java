@@ -23,7 +23,7 @@ import swim.uri.Uri;
 
 abstract class LinkAddressedForm<E extends LinkAddressed> extends Form<E> {
 
-  abstract E from(Uri nodeUri, Uri laneUri, float prio, float rate, Value body);
+  abstract E create(Uri nodeUri, Uri laneUri, float prio, float rate, Value body);
 
   @Override
   public E unit() {
@@ -33,9 +33,8 @@ abstract class LinkAddressedForm<E extends LinkAddressed> extends Form<E> {
   @Override
   public Item mold(E envelope) {
     if (envelope != null) {
-      final Record headers = Record.create(4)
-          .slot("node", envelope.nodeUri.toString())
-          .slot("lane", envelope.laneUri.toString());
+      final Record headers = Record.create(4).slot("node", envelope.nodeUri.toString())
+                                             .slot("lane", envelope.laneUri.toString());
       final float prio = envelope.prio;
       if (prio != 0f && !Float.isNaN(prio)) {
         headers.slot("prio", prio);
@@ -44,7 +43,7 @@ abstract class LinkAddressedForm<E extends LinkAddressed> extends Form<E> {
       if (rate != 0f && !Float.isNaN(rate)) {
         headers.slot("rate", rate);
       }
-      return Attr.of(tag(), headers).concat(envelope.body());
+      return Attr.of(this.tag(), headers).concat(envelope.body());
     } else {
       return Item.extant();
     }
@@ -53,7 +52,7 @@ abstract class LinkAddressedForm<E extends LinkAddressed> extends Form<E> {
   @Override
   public E cast(Item item) {
     final Value value = item.toValue();
-    final Record headers = value.headers(tag());
+    final Record headers = value.headers(this.tag());
     Uri nodeUri = null;
     Uri laneUri = null;
     float prio = 0f;
@@ -81,7 +80,7 @@ abstract class LinkAddressedForm<E extends LinkAddressed> extends Form<E> {
     }
     if (nodeUri != null && laneUri != null) {
       final Value body = value.body();
-      return from(nodeUri, laneUri, prio, rate, body);
+      return this.create(nodeUri, laneUri, prio, rate, body);
     }
     return null;
   }

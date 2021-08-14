@@ -40,6 +40,11 @@ final class MediaTypeParser extends Parser<MediaType> {
     this(http, null, null, null, 1);
   }
 
+  @Override
+  public Parser<MediaType> feed(Input input) {
+    return MediaTypeParser.parse(input, this.http, this.type, this.subtype, this.params, this.step);
+  }
+
   static Parser<MediaType> parse(Input input, HttpParser http, StringBuilder type, StringBuilder subtype,
                                  Parser<HashTrieMap<String, String>> params, int step) {
     int c = 0;
@@ -54,10 +59,10 @@ final class MediaTypeParser extends Parser<MediaType> {
           type.appendCodePoint(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("media type", input));
+          return Parser.error(Diagnostic.expected("media type", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("media type", input));
+        return Parser.error(Diagnostic.expected("media type", input));
       }
     }
     if (step == 2) {
@@ -74,7 +79,7 @@ final class MediaTypeParser extends Parser<MediaType> {
         input = input.step();
         step = 3;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected('/', input));
+        return Parser.error(Diagnostic.expected('/', input));
       }
     }
     if (step == 3) {
@@ -88,10 +93,10 @@ final class MediaTypeParser extends Parser<MediaType> {
           subtype.appendCodePoint(c);
           step = 4;
         } else {
-          return error(Diagnostic.expected("media subtype", input));
+          return Parser.error(Diagnostic.expected("media subtype", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("media subtype", input));
+        return Parser.error(Diagnostic.expected("media subtype", input));
       }
     }
     if (step == 4) {
@@ -115,24 +120,19 @@ final class MediaTypeParser extends Parser<MediaType> {
         params = params.feed(input);
       }
       if (params.isDone()) {
-        return done(http.mediaType(type.toString(), subtype.toString(), params.bind()));
+        return Parser.done(http.mediaType(type.toString(), subtype.toString(), params.bind()));
       } else if (params.isError()) {
         return params.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new MediaTypeParser(http, type, subtype, params, step);
   }
 
   static Parser<MediaType> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<MediaType> feed(Input input) {
-    return parse(input, this.http, this.type, this.subtype, this.params, this.step);
+    return MediaTypeParser.parse(input, http, null, null, null, 1);
   }
 
 }

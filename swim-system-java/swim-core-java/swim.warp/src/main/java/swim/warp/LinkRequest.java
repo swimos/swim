@@ -21,9 +21,6 @@ import swim.uri.Uri;
 
 public final class LinkRequest extends LinkAddressed {
 
-  @Kind
-  public static final Form<LinkRequest> FORM = new LinkRequestForm();
-
   public LinkRequest(Uri nodeUri, Uri laneUri, float prio, float rate, Value body) {
     super(nodeUri, laneUri, prio, rate, body);
   }
@@ -63,7 +60,7 @@ public final class LinkRequest extends LinkAddressed {
 
   @Override
   public Form<LinkRequest> form() {
-    return FORM;
+    return LinkRequest.FORM;
   }
 
   @Override
@@ -81,6 +78,9 @@ public final class LinkRequest extends LinkAddressed {
     return new LinkRequest(this.nodeUri, this.laneUri, this.prio, this.rate, body);
   }
 
+  @Kind
+  public static final Form<LinkRequest> FORM = new LinkRequestForm();
+
 }
 
 final class LinkRequestForm extends LinkAddressedForm<LinkRequest> {
@@ -96,7 +96,7 @@ final class LinkRequestForm extends LinkAddressedForm<LinkRequest> {
   }
 
   @Override
-  public LinkRequest from(Uri nodeUri, Uri laneUri, float prio, float rate, Value body) {
+  public LinkRequest create(Uri nodeUri, Uri laneUri, float prio, float rate, Value body) {
     return new LinkRequest(nodeUri, laneUri, prio, rate, body);
   }
 

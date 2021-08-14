@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import swim.api.LinkException;
 import swim.api.auth.Identity;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
 import swim.concurrent.StayContext;
@@ -68,6 +68,9 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
     this.rate = rate;
     this.body = body;
     this.upQueue = new ConcurrentLinkedQueue<Envelope>();
+    this.linkContext = null;
+    this.pullContext = null;
+    this.status = 0;
   }
 
   @Override
@@ -98,7 +101,7 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapLink(Class<T> linkClass) {
-    if (linkClass.isAssignableFrom(getClass())) {
+    if (linkClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else if (this.linkContext != null) {
       return this.linkContext.unwrapLink(linkClass);
@@ -114,7 +117,7 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
     if (this.linkContext != null) {
       link = this.linkContext.bottomLink(linkClass);
     }
-    if (link == null && linkClass.isAssignableFrom(getClass())) {
+    if (link == null && linkClass.isAssignableFrom(this.getClass())) {
       link = (T) this;
     }
     return link;
@@ -157,7 +160,7 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
 
   @Override
   public LinkAddress cellAddressDown() {
-    return this.host.cellAddress().nodeUri(this.nodeUri).laneUri(this.laneUri).linkKey(linkKey());
+    return this.host.cellAddress().nodeUri(this.nodeUri).laneUri(this.laneUri).linkKey(this.linkKey());
   }
 
   @Override
@@ -252,22 +255,24 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
 
   @Override
   public void feedDown() {
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      if ((oldStatus & PULLING_DOWN) == 0) {
-        newStatus = oldStatus & ~FEEDING_DOWN | PULLING_DOWN;
+      final int oldStatus = RemoteWarpDownlink.STATUS.get(this);
+      final int newStatus;
+      if ((oldStatus & RemoteWarpDownlink.PULLING_DOWN) == 0) {
+        newStatus = oldStatus & ~RemoteWarpDownlink.FEEDING_DOWN | RemoteWarpDownlink.PULLING_DOWN;
       } else {
-        newStatus = oldStatus | FEEDING_DOWN;
+        newStatus = oldStatus | RemoteWarpDownlink.FEEDING_DOWN;
       }
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if ((oldStatus & PULLING_DOWN) == 0) {
-      final WarpSocketContext warpSocketContext = this.host.warpSocketContext;
-      if (warpSocketContext != null) {
-        warpSocketContext.feed(this);
+      if (RemoteWarpDownlink.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if ((oldStatus & RemoteWarpDownlink.PULLING_DOWN) == 0) {
+          final WarpSocketContext warpSocketContext = this.host.warpSocketContext;
+          if (warpSocketContext != null) {
+            warpSocketContext.feed(this);
+          }
+        }
+        break;
       }
-    }
+    } while (true);
   }
 
   @Override
@@ -290,24 +295,25 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   public void pushDown(Push<?> push) {
     final Object message = push.message();
     if (message instanceof Envelope) {
-      int oldStatus;
-      int newStatus;
       do {
-        oldStatus = this.status;
-        newStatus = oldStatus & ~PULLING_DOWN;
-      } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-      if (oldStatus != newStatus) {
-        final Envelope remoteEnvelope = ((Envelope) message).nodeUri(this.remoteNodeUri);
-        final PullContext<? super Envelope> pullContext = this.pullContext;
-        if (pullContext != null) {
-          pullContext.push(remoteEnvelope);
-          this.pullContext = null;
-          if (remoteEnvelope instanceof EventMessage) {
-            RemoteHost.DOWNLINK_EVENT_DELTA.incrementAndGet(this.host);
-            this.host.didUpdateMetrics();
+        final int oldStatus = RemoteWarpDownlink.STATUS.get(this);
+        final int newStatus = oldStatus & ~RemoteWarpDownlink.PULLING_DOWN;
+        if (RemoteWarpDownlink.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+          if (oldStatus != newStatus) {
+            final Envelope remoteEnvelope = ((Envelope) message).nodeUri(this.remoteNodeUri);
+            final PullContext<? super Envelope> pullContext = this.pullContext;
+            if (pullContext != null) {
+              pullContext.push(remoteEnvelope);
+              this.pullContext = null;
+              if (remoteEnvelope instanceof EventMessage) {
+                RemoteHost.DOWNLINK_EVENT_DELTA.incrementAndGet(this.host);
+                this.host.didUpdateMetrics();
+              }
+            }
           }
+          break;
         }
-      }
+      } while (true);
     } else {
       push.trap(new LinkException("unsupported message: " + message));
     }
@@ -315,83 +321,88 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
 
   @Override
   public void skipDown() {
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus & ~PULLING_DOWN;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if (oldStatus != newStatus) {
-      final PullContext<? super Envelope> pullContext = this.pullContext;
-      if (pullContext != null) {
-        pullContext.skip();
-        this.pullContext = null;
+      final int oldStatus = RemoteWarpDownlink.STATUS.get(this);
+      final int newStatus = oldStatus & ~RemoteWarpDownlink.PULLING_DOWN;
+      if (RemoteWarpDownlink.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if (oldStatus != newStatus) {
+          final PullContext<? super Envelope> pullContext = this.pullContext;
+          if (pullContext != null) {
+            pullContext.skip();
+            this.pullContext = null;
+          }
+        }
+        break;
       }
-    }
+    } while (true);
   }
 
   public void queueUp(Envelope envelope) {
     this.upQueue.add(envelope);
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus | FEEDING_UP;
+      final int oldStatus = RemoteWarpDownlink.STATUS.get(this);
+      int newStatus = oldStatus | RemoteWarpDownlink.FEEDING_UP;
       if (envelope instanceof SyncRequest) {
-        newStatus |= SYNC;
+        newStatus |= RemoteWarpDownlink.SYNC;
       }
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if ((oldStatus & FEEDING_UP) != (newStatus & FEEDING_UP)) {
-      this.linkContext.feedUp();
-    }
+      if (RemoteWarpDownlink.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if ((oldStatus & RemoteWarpDownlink.FEEDING_UP) != (newStatus & RemoteWarpDownlink.FEEDING_UP)) {
+          this.linkContext.feedUp();
+        }
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public void pullUp() {
     final Envelope envelope = this.upQueue.poll();
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus & ~FEEDING_UP;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    try {
-      if (envelope != null) {
-        this.linkContext.pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), this.nodeUri, this.laneUri,
-                                                   this.prio, this.host.remoteIdentity(), envelope, null));
+      final int oldStatus = RemoteWarpDownlink.STATUS.get(this);
+      final int newStatus = oldStatus & ~RemoteWarpDownlink.FEEDING_UP;
+      if (RemoteWarpDownlink.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        try {
+          if (envelope != null) {
+            this.linkContext.pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), this.nodeUri, this.laneUri,
+                                                       this.prio, this.host.remoteIdentity(), envelope, null));
+          }
+          this.feedUpQueue();
+        } catch (Throwable error) {
+          if (Cont.isNonFatal(error)) {
+            this.linkContext.didFailDown(error);
+          } else {
+            throw error;
+          }
+        }
+        break;
       }
-      feedUpQueue();
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        this.linkContext.didFailDown(error);
-      } else {
-        throw error;
-      }
-    }
+    } while (true);
   }
 
   void feedUpQueue() {
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
+      final int oldStatus = RemoteWarpDownlink.STATUS.get(this);
+      final int newStatus;
       if (!this.upQueue.isEmpty()) {
-        newStatus = oldStatus | FEEDING_UP;
+        newStatus = oldStatus | RemoteWarpDownlink.FEEDING_UP;
       } else {
         newStatus = oldStatus;
       }
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if (oldStatus != newStatus) {
-      try {
-        this.linkContext.feedUp();
-      } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
-          this.linkContext.didFailDown(error);
-        } else {
-          throw error;
+      if (RemoteWarpDownlink.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if (oldStatus != newStatus) {
+          try {
+            this.linkContext.feedUp();
+          } catch (Throwable error) {
+            if (Cont.isNonFatal(error)) {
+              this.linkContext.didFailDown(error);
+            } else {
+              throw error;
+            }
+          }
         }
+        break;
       }
-    }
+    } while (true);
   }
 
   @Override
@@ -402,22 +413,22 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
   @Override
   public void reopen() {
     this.linkContext.closeUp();
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus & ~FEEDING_UP;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-
-    this.host.hostContext.openDownlink(this);
-    this.linkContext.didOpenDown();
-    final Envelope request;
-    if ((oldStatus & SYNC) != 0) {
-      request = new SyncRequest(this.nodeUri, this.laneUri, this.prio, this.rate, this.body);
-    } else {
-      request = new LinkRequest(this.nodeUri, this.laneUri, this.prio, this.rate, this.body);
-    }
-    queueUp(request);
+      final int oldStatus = RemoteWarpDownlink.STATUS.get(this);
+      final int newStatus = oldStatus & ~RemoteWarpDownlink.FEEDING_UP;
+      if (RemoteWarpDownlink.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        this.host.hostContext.openDownlink(this);
+        this.linkContext.didOpenDown();
+        final Envelope request;
+        if ((oldStatus & RemoteWarpDownlink.SYNC) != 0) {
+          request = new SyncRequest(this.nodeUri, this.laneUri, this.prio, this.rate, this.body);
+        } else {
+          request = new LinkRequest(this.nodeUri, this.laneUri, this.prio, this.rate, this.body);
+        }
+        this.queueUp(request);
+        break;
+      }
+    } while (true);
   }
 
   @Override
@@ -432,25 +443,25 @@ class RemoteWarpDownlink implements WarpBinding, PullRequest<Envelope> {
 
   @Override
   public void didConnect() {
-    // nop
+    // hook
   }
 
   @Override
   public void didDisconnect() {
-    // nop
+    // hook
   }
 
   @Override
   public void didCloseUp() {
-    // nop
+    // hook
   }
 
   @Override
   public void didFailUp(Throwable error) {
     try {
-      didFail(error);
+      this.didFail(error);
     } finally {
-      closeDown();
+      this.closeDown();
     }
   }
 

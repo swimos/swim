@@ -28,63 +28,58 @@ import static org.testng.Assert.assertEquals;
 
 public class WsSettingsSpec {
 
-  static void assertDecodes(Value actualValue, WsSettings expected) {
-    final WsSettings actual = WsSettings.form().cast(actualValue);
-    assertEquals(actual, expected);
-  }
-
   @Test
   public void decodeStandardSettings() {
-    assertDecodes(Record.empty(), WsSettings.standard());
-    assertDecodes(Record.of(Record.of(Attr.of("websocket"))), WsSettings.standard());
+    assertCasts(Record.empty(), WsSettings.standard());
+    assertCasts(Record.of(Record.of(Attr.of("websocket"))), WsSettings.standard());
   }
 
   @Test
   public void decodeCustomSettings() {
-    assertDecodes(Record.of(Record.of(Attr.of("websocket"),
-        Slot.of("maxFrameSize", 2048),
-        Slot.of("maxMessageSize", 4096),
-        Slot.of("serverCompressionLevel", 7),
-        Slot.of("clientCompressionLevel", 9),
-        Slot.of("serverNoContextTakeover", true),
-        Slot.of("clientNoContextTakeover", true),
-        Slot.of("serverMaxWindowBits", 11),
-        Slot.of("clientMaxWindowBits", 13))),
-        WsSettings.standard().maxFrameSize(2048)
-            .maxMessageSize(4096)
-            .serverCompressionLevel(7)
-            .clientCompressionLevel(9)
-            .serverNoContextTakeover(true)
-            .clientNoContextTakeover(true)
-            .serverMaxWindowBits(11)
-            .clientMaxWindowBits(13));
+    assertCasts(Record.of(Record.of(Attr.of("websocket"),
+                                    Slot.of("maxFrameSize", 2048),
+                                    Slot.of("maxMessageSize", 4096),
+                                    Slot.of("serverCompressionLevel", 7),
+                                    Slot.of("clientCompressionLevel", 9),
+                                    Slot.of("serverNoContextTakeover", true),
+                                    Slot.of("clientNoContextTakeover", true),
+                                    Slot.of("serverMaxWindowBits", 11),
+                                    Slot.of("clientMaxWindowBits", 13))),
+                WsSettings.standard().maxFrameSize(2048)
+                                     .maxMessageSize(4096)
+                                     .serverCompressionLevel(7)
+                                     .clientCompressionLevel(9)
+                                     .serverNoContextTakeover(true)
+                                     .clientNoContextTakeover(true)
+                                     .serverMaxWindowBits(11)
+                                     .clientMaxWindowBits(13));
   }
 
   @Test
   public void decodesWsHttpTlsAndTcpSettings() {
     final WsSettings settings = WsSettings.form().cast(
         Record.of(Record.of(Attr.of("websocket"),
-            Slot.of("maxFrameSize", 2),
-            Slot.of("maxMessageSize", 3)),
-            Record.of(Attr.of("http"),
-                Slot.of("maxMessageSize", 5)),
-            Record.of(Attr.of("tls", Record.of(Slot.of("protocol", "TLS"))),
-                Slot.of("clientAuth", "need"),
-                Slot.of("cipherSuites", Record.of("ECDHE-ECDSA-AES128-GCM-SHA256", "ECDHE-RSA-AES128-GCM-SHA256")),
-                Slot.of("protocols", Record.of("TLSv1.1", "TLSv1.2")),
-                Record.of(Attr.of("keyStore", Record.of(Slot.of("type", "jks"))),
-                    Slot.of("resource", "keystore.jks"),
-                    Slot.of("password", "default")),
-                Record.of(Attr.of("trustStore", Record.of(Slot.of("type", "jks"))),
-                    Slot.of("resource", "cacerts.jks"),
-                    Slot.of("password", "default"))),
-            Record.of(Attr.of("tcp"),
-                Slot.of("keepAlive", true),
-                Slot.of("noDelay", true),
-                Slot.of("receiveBufferSize", 7),
-                Slot.of("sendBufferSize", 11),
-                Slot.of("readBufferSize", 13),
-                Slot.of("writeBufferSize", 17))));
+                            Slot.of("maxFrameSize", 2),
+                            Slot.of("maxMessageSize", 3)),
+                  Record.of(Attr.of("http"),
+                            Slot.of("maxMessageSize", 5)),
+                  Record.of(Attr.of("tls", Record.of(Slot.of("protocol", "TLS"))),
+                            Slot.of("clientAuth", "need"),
+                            Slot.of("cipherSuites", Record.of("ECDHE-ECDSA-AES128-GCM-SHA256", "ECDHE-RSA-AES128-GCM-SHA256")),
+                            Slot.of("protocols", Record.of("TLSv1.1", "TLSv1.2")),
+                            Record.of(Attr.of("keyStore", Record.of(Slot.of("type", "jks"))),
+                                      Slot.of("resource", "keystore.jks"),
+                                      Slot.of("password", "default")),
+                            Record.of(Attr.of("trustStore", Record.of(Slot.of("type", "jks"))),
+                                      Slot.of("resource", "cacerts.jks"),
+                                      Slot.of("password", "default"))),
+                  Record.of(Attr.of("tcp"),
+                            Slot.of("keepAlive", true),
+                            Slot.of("noDelay", true),
+                            Slot.of("receiveBufferSize", 7),
+                            Slot.of("sendBufferSize", 11),
+                            Slot.of("readBufferSize", 13),
+                            Slot.of("writeBufferSize", 17))));
     assertEquals(settings.maxFrameSize(), 2);
     assertEquals(settings.maxMessageSize(), 3);
 
@@ -99,6 +94,11 @@ public class WsSettingsSpec {
 
     final TcpSettings tcpSettings = settings.tcpSettings();
     assertEquals(tcpSettings, new TcpSettings(true, true, 7, 11, 13, 17));
+  }
+
+  static void assertCasts(Value actualValue, WsSettings expected) {
+    final WsSettings actual = WsSettings.form().cast(actualValue);
+    assertEquals(actual, expected);
   }
 
 }

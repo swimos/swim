@@ -33,7 +33,7 @@ import java.nio.channels.ReadableByteChannel;
 public final class Binary {
 
   private Binary() {
-    // nop
+    // static
   }
 
   public static InputBuffer input(byte... bytes) {
@@ -67,7 +67,7 @@ public final class Binary {
   /**
    * Returns a new {@code Output} that appends bytes to a growable array,
    * pre-allocated with space for {@code initialCapacity} bytes, using the
-   * given {@code settings}.  The returned {@code Output} accepts an unbounded
+   * given {@code settings}. The returned {@code Output} accepts an unbounded
    * number of bytes, remaining permanently in the <em>cont</em> state, and can
    * {@link Output#bind() bind} a {@code byte[]} array with the current output
    * state at any time.
@@ -81,7 +81,7 @@ public final class Binary {
 
   /**
    * Returns a new {@code Output} that appends bytes to a growable array,
-   * pre-allocated with space for {@code initialCapacity} bytes.  The returned
+   * pre-allocated with space for {@code initialCapacity} bytes. The returned
    * {@code Output} accepts an unbounded number of bytes, remaining permanently
    * in the <em>cont</em> state, and can {@link Output#bind() bind} a {@code
    * byte[]} array with the current output state at any time.
@@ -95,7 +95,7 @@ public final class Binary {
 
   /**
    * Returns a new {@code Output} that appends bytes to a growable array,
-   * using the given {@code settings}.  The returned {@code Output} accepts
+   * using the given {@code settings}. The returned {@code Output} accepts
    * an unbounded number of bytes, remaining permanently in the <em>cont</em>
    * state, and can {@link Output#bind() bind} a {@code byte[]} array with
    * the current output state at any time.
@@ -118,7 +118,7 @@ public final class Binary {
   /**
    * Returns a new {@code Output} that appends bytes to a growable array,
    * pre-allocated with space for {@code initialCapacity} bytes, using the
-   * given {@code settings}.  The returned {@code Output} accepts an unbounded
+   * given {@code settings}. The returned {@code Output} accepts an unbounded
    * number of bytes, remaining permanently in the <em>cont</em> state, and can
    * {@link Output#bind() bind} a {@code ByteBuffer} with the current output
    * state at any time.
@@ -132,7 +132,7 @@ public final class Binary {
 
   /**
    * Returns a new {@code Output} that appends bytes to a growable array,
-   * pre-allocated with space for {@code initialCapacity} bytes.  The returned
+   * pre-allocated with space for {@code initialCapacity} bytes. The returned
    * {@code Output} accepts an unbounded number of bytes, remaining permanently
    * in the <em>cont</em> state, and can {@link Output#bind() bind} a {@code
    * ByteBuffer} with the current output state at any time.
@@ -146,7 +146,7 @@ public final class Binary {
 
   /**
    * Returns a new {@code Output} that appends bytes to a growable array,
-   * using the given {@code settings}.  The returned {@code Output} accepts
+   * using the given {@code settings}. The returned {@code Output} accepts
    * an unbounded number of bytes, remaining permanently in the <em>cont</em>
    * state, and can {@link Output#bind() bind} a {@code ByteBuffer} with the
    * current output state at any time.
@@ -251,7 +251,7 @@ public final class Binary {
   }
 
   public static <O> O read(Decoder<O> decoder, InputStream input) throws IOException {
-    decoder = decode(decoder, input);
+    decoder = Binary.decode(decoder, input);
     if (decoder.isDone()) {
       return decoder.bind();
     } else {

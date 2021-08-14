@@ -42,6 +42,11 @@ final class AcceptLanguageParser extends Parser<AcceptLanguage> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<AcceptLanguage> feed(Input input) {
+    return AcceptLanguageParser.parse(input, this.http, this.language, this.languages, this.step);
+  }
+
   static Parser<AcceptLanguage> parse(Input input, HttpParser http, Parser<LanguageRange> language,
                                       Builder<LanguageRange, FingerTrieSeq<LanguageRange>> languages, int step) {
     int c = 0;
@@ -76,7 +81,7 @@ final class AcceptLanguageParser extends Parser<AcceptLanguage> {
           input = input.step();
           step = 3;
         } else if (!input.isEmpty()) {
-          return done(AcceptLanguage.from(languages.bind()));
+          return Parser.done(AcceptLanguage.create(languages.bind()));
         }
       }
       if (step == 3) {
@@ -91,7 +96,7 @@ final class AcceptLanguageParser extends Parser<AcceptLanguage> {
         if (input.isCont()) {
           step = 4;
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
@@ -112,18 +117,13 @@ final class AcceptLanguageParser extends Parser<AcceptLanguage> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new AcceptLanguageParser(http, language, languages, step);
   }
 
   static Parser<AcceptLanguage> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<AcceptLanguage> feed(Input input) {
-    return parse(input, this.http, this.language, this.languages, this.step);
+    return AcceptLanguageParser.parse(input, http, null, null, 1);
   }
 
 }

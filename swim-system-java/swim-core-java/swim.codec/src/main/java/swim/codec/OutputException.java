@@ -19,8 +19,6 @@ package swim.codec;
  */
 public class OutputException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public OutputException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -36,5 +34,7 @@ public class OutputException extends RuntimeException {
   public OutputException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

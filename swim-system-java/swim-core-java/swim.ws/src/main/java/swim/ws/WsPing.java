@@ -26,38 +26,12 @@ import swim.util.Murmur3;
 
 public final class WsPing<P, T> extends WsControl<P, T> implements Debug {
 
-  private static int hashSeed;
   final P payload;
   final Encoder<?, ?> content;
 
   WsPing(P payload, Encoder<?, ?> content) {
     this.payload = payload;
     this.content = content;
-  }
-
-  public static <P, T> WsPing<P, T> empty() {
-    return new WsPing<P, T>(null, Encoder.done());
-  }
-
-  public static <P, T> WsPing<P, T> from(P payload, Encoder<?, ?> content) {
-    return new WsPing<P, T>(payload, content);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <P, T> WsPing<P, T> from(P payload) {
-    if (payload instanceof Data) {
-      return (WsPing<P, T>) from((Data) payload);
-    } else {
-      return new WsPing<P, T>(payload, Encoder.done());
-    }
-  }
-
-  public static <T> WsPing<ByteBuffer, T> from(ByteBuffer payload) {
-    return new WsPing<ByteBuffer, T>(payload.duplicate(), Binary.byteBufferWriter(payload));
-  }
-
-  public static <T> WsPing<Data, T> from(Data payload) {
-    return new WsPing<Data, T>(payload, payload.writer());
   }
 
   @Override
@@ -91,23 +65,51 @@ public final class WsPing<P, T> extends WsControl<P, T> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(WsPing.class);
+    if (WsPing.hashSeed == 0) {
+      WsPing.hashSeed = Murmur3.seed(WsPing.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, Murmur3.hash(this.payload)));
+    return Murmur3.mash(Murmur3.mix(WsPing.hashSeed, Murmur3.hash(this.payload)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("WsPing").write('.').write("from").write('(')
-        .debug(this.payload).write(", ").debug(this.content).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("WsPing").write('.').write("create").write('(')
+                   .debug(this.payload).write(", ").debug(this.content).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static <P, T> WsPing<P, T> empty() {
+    return new WsPing<P, T>(null, Encoder.done());
+  }
+
+  public static <P, T> WsPing<P, T> create(P payload, Encoder<?, ?> content) {
+    return new WsPing<P, T>(payload, content);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <P, T> WsPing<P, T> create(P payload) {
+    if (payload instanceof Data) {
+      return (WsPing<P, T>) WsPing.create((Data) payload);
+    } else {
+      return new WsPing<P, T>(payload, Encoder.done());
+    }
+  }
+
+  public static <T> WsPing<ByteBuffer, T> create(ByteBuffer payload) {
+    return new WsPing<ByteBuffer, T>(payload.duplicate(), Binary.byteBufferWriter(payload));
+  }
+
+  public static <T> WsPing<Data, T> create(Data payload) {
+    return new WsPing<Data, T>(payload, payload.writer());
   }
 
 }

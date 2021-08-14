@@ -53,9 +53,9 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.items, this.inBlock, this.inMarkup,
-                 this.inBraces, this.inBrackets, this.first, this.markupSafe,
-                 this.item, this.next, this.part, this.step);
+    return BlockWriter.write(output, this.recon, this.items, this.inBlock, this.inMarkup,
+                             this.inBraces, this.inBrackets, this.first, this.markupSafe,
+                             this.item, this.next, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, Iterator<I> items,
@@ -246,7 +246,7 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
           } else {
             first = false;
           }
-          part = writeItem(output, recon, item);
+          part = BlockWriter.writeItem(output, recon, item);
           step = 7;
         } else if (inBrackets) {
           if (recon.isRecord(item) && recon.isMarkupSafe(recon.items(item))) {
@@ -271,14 +271,14 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
           } else {
             first = false;
           }
-          part = writeItem(output, recon, item);
+          part = BlockWriter.writeItem(output, recon, item);
           step = 7;
         } else if (inMarkup && recon.isText(item) && next == null) {
           output = output.write('[');
           part = recon.writeMarkupText(item, output);
           step = 8;
         } else if (!inMarkup && recon.isValue(item) && !recon.isRecord(item)
-            && (!first && next == null || next != null && recon.isAttr(next))) {
+               && (!first && next == null || next != null && recon.isAttr(next))) {
           if (!first && (recon.isText(item) && recon.isIdent(item)
               || recon.isNum(item) || recon.isBool(item))) {
             output = output.write(' ');
@@ -360,24 +360,24 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
       if (inBrackets) {
         if (output.isCont()) {
           output = output.write(']');
-          return done();
+          return Writer.done();
         }
       } else {
-        return done();
+        return Writer.done();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new BlockWriter<I, V>(recon, items, inBlock, inMarkup, inBraces, inBrackets,
-        first, markupSafe, item, next, part, step);
+                                 first, markupSafe, item, next, part, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon,
                                              Iterator<I> items, boolean inBlock, boolean inMarkup) {
-    return write(output, recon, items, inBlock, inMarkup, false, false, true, true, null, null, null, 1);
+    return BlockWriter.write(output, recon, items, inBlock, inMarkup, false, false, true, true, null, null, null, 1);
   }
 
   static <I, V> Writer<?, ?> writeItem(Output<?> output, ReconWriter<I, V> recon, I item) {

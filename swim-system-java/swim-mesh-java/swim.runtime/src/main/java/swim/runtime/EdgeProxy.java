@@ -35,6 +35,7 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
 
   public EdgeProxy(EdgeBinding edgeBinding) {
     this.edgeBinding = edgeBinding;
+    this.edgeContext = null;
   }
 
   @Override
@@ -65,7 +66,7 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapEdge(Class<T> edgeClass) {
-    if (edgeClass.isAssignableFrom(getClass())) {
+    if (edgeClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.edgeContext.unwrapEdge(edgeClass);
@@ -76,7 +77,7 @@ public class EdgeProxy implements EdgeBinding, EdgeContext {
   @Override
   public <T> T bottomEdge(Class<T> edgeClass) {
     T edge = this.edgeContext.bottomEdge(edgeClass);
-    if (edge == null && edgeClass.isAssignableFrom(getClass())) {
+    if (edge == null && edgeClass.isAssignableFrom(this.getClass())) {
       edge = (T) this;
     }
     return edge;

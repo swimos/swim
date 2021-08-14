@@ -33,9 +33,6 @@ import swim.warp.UnlinkedResponse;
 
 public class WarpErrorUplinkModem implements WarpContext {
 
-  static final int FEEDING_DOWN = 1 << 0;
-  static final AtomicIntegerFieldUpdater<WarpErrorUplinkModem> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(WarpErrorUplinkModem.class, "status");
   protected final WarpBinding linkBinding;
   protected final Value body;
   volatile int status;
@@ -43,6 +40,7 @@ public class WarpErrorUplinkModem implements WarpContext {
   public WarpErrorUplinkModem(WarpBinding linkBinding, Value body) {
     this.linkBinding = linkBinding;
     this.body = body;
+    this.status = 0;
   }
 
   @Override
@@ -57,7 +55,7 @@ public class WarpErrorUplinkModem implements WarpContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapLink(Class<T> linkClass) {
-    if (linkClass.isAssignableFrom(getClass())) {
+    if (linkClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -67,7 +65,7 @@ public class WarpErrorUplinkModem implements WarpContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T bottomLink(Class<T> linkClass) {
-    if (linkClass.isAssignableFrom(getClass())) {
+    if (linkClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -150,32 +148,34 @@ public class WarpErrorUplinkModem implements WarpContext {
   }
 
   public void cueDown() {
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus | FEEDING_DOWN;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if (oldStatus != newStatus) {
-      this.linkBinding.feedDown();
-    }
+      final int oldStatus = WarpErrorUplinkModem.STATUS.get(this);
+      final int newStatus = oldStatus | WarpErrorUplinkModem.FEEDING_DOWN;
+      if (WarpErrorUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if (oldStatus != newStatus) {
+          this.linkBinding.feedDown();
+        }
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public void pullDown() {
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus & ~FEEDING_DOWN;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if (oldStatus != newStatus) {
-      final UnlinkedResponse response = getUnlinkedResponse();
-      this.linkBinding.pushDown(new Push<UnlinkedResponse>(Uri.empty(), this.linkBinding.hostUri(), this.linkBinding.nodeUri(),
-                                                           this.linkBinding.laneUri(), this.linkBinding.prio(), null, response, null));
-    } else {
-      this.linkBinding.skipDown();
-    }
+      final int oldStatus = WarpErrorUplinkModem.STATUS.get(this);
+      final int newStatus = oldStatus & ~WarpErrorUplinkModem.FEEDING_DOWN;
+      if (WarpErrorUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if (oldStatus != newStatus) {
+          final UnlinkedResponse response = this.getUnlinkedResponse();
+          this.linkBinding.pushDown(new Push<UnlinkedResponse>(Uri.empty(), this.linkBinding.hostUri(), this.linkBinding.nodeUri(),
+                                                               this.linkBinding.laneUri(), this.linkBinding.prio(), null, response, null));
+        } else {
+          this.linkBinding.skipDown();
+        }
+        break;
+      }
+    } while (true);
   }
 
   @Override
@@ -251,5 +251,10 @@ public class WarpErrorUplinkModem implements WarpContext {
   public void failUp(Object message) {
     // nop
   }
+
+  static final int FEEDING_DOWN = 1 << 0;
+
+  static final AtomicIntegerFieldUpdater<WarpErrorUplinkModem> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(WarpErrorUplinkModem.class, "status");
 
 }

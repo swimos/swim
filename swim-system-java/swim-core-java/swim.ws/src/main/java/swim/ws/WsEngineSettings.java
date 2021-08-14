@@ -59,10 +59,10 @@ public class WsEngineSettings implements Debug {
   }
 
   public WsEngineSettings maxFrameSize(int maxFrameSize) {
-    return copy(maxFrameSize, this.maxMessageSize,
-                this.serverCompressionLevel, this.clientCompressionLevel,
-                this.serverNoContextTakeover, this.clientNoContextTakeover,
-                this.serverMaxWindowBits, this.clientMaxWindowBits);
+    return this.copy(maxFrameSize, this.maxMessageSize,
+                     this.serverCompressionLevel, this.clientCompressionLevel,
+                     this.serverNoContextTakeover, this.clientNoContextTakeover,
+                     this.serverMaxWindowBits, this.clientMaxWindowBits);
   }
 
   public final int maxMessageSize() {
@@ -70,10 +70,10 @@ public class WsEngineSettings implements Debug {
   }
 
   public WsEngineSettings maxMessageSize(int maxMessageSize) {
-    return copy(this.maxFrameSize, maxMessageSize,
-                this.serverCompressionLevel, this.clientCompressionLevel,
-                this.serverNoContextTakeover, this.clientNoContextTakeover,
-                this.serverMaxWindowBits, this.clientMaxWindowBits);
+    return this.copy(this.maxFrameSize, maxMessageSize,
+                     this.serverCompressionLevel, this.clientCompressionLevel,
+                     this.serverNoContextTakeover, this.clientNoContextTakeover,
+                     this.serverMaxWindowBits, this.clientMaxWindowBits);
   }
 
   public final int serverCompressionLevel() {
@@ -81,10 +81,10 @@ public class WsEngineSettings implements Debug {
   }
 
   public WsEngineSettings serverCompressionLevel(int serverCompressionLevel) {
-    return copy(this.maxFrameSize, this.maxMessageSize,
-                serverCompressionLevel, this.clientCompressionLevel,
-                this.serverNoContextTakeover, this.clientNoContextTakeover,
-                this.serverMaxWindowBits, this.clientMaxWindowBits);
+    return this.copy(this.maxFrameSize, this.maxMessageSize,
+                     serverCompressionLevel, this.clientCompressionLevel,
+                     this.serverNoContextTakeover, this.clientNoContextTakeover,
+                     this.serverMaxWindowBits, this.clientMaxWindowBits);
   }
 
   public final int clientCompressionLevel() {
@@ -92,17 +92,17 @@ public class WsEngineSettings implements Debug {
   }
 
   public WsEngineSettings clientCompressionLevel(int clientCompressionLevel) {
-    return copy(this.maxFrameSize, this.maxMessageSize,
-                this.serverCompressionLevel, clientCompressionLevel,
-                this.serverNoContextTakeover, this.clientNoContextTakeover,
-                this.serverMaxWindowBits, this.clientMaxWindowBits);
+    return this.copy(this.maxFrameSize, this.maxMessageSize,
+                     this.serverCompressionLevel, clientCompressionLevel,
+                     this.serverNoContextTakeover, this.clientNoContextTakeover,
+                     this.serverMaxWindowBits, this.clientMaxWindowBits);
   }
 
   public WsEngineSettings compressionLevel(int serverCompressionLevel, int clientCompressionLevel) {
-    return copy(this.maxFrameSize, this.maxMessageSize,
-                serverCompressionLevel, clientCompressionLevel,
-                this.serverNoContextTakeover, this.clientNoContextTakeover,
-                this.serverMaxWindowBits, this.clientMaxWindowBits);
+    return this.copy(this.maxFrameSize, this.maxMessageSize,
+                     serverCompressionLevel, clientCompressionLevel,
+                     this.serverNoContextTakeover, this.clientNoContextTakeover,
+                     this.serverMaxWindowBits, this.clientMaxWindowBits);
   }
 
   public final boolean serverNoContextTakeover() {
@@ -110,10 +110,10 @@ public class WsEngineSettings implements Debug {
   }
 
   public WsEngineSettings serverNoContextTakeover(boolean serverNoContextTakeover) {
-    return copy(this.maxFrameSize, this.maxMessageSize,
-                this.serverCompressionLevel, this.clientCompressionLevel,
-                serverNoContextTakeover, this.clientNoContextTakeover,
-                this.serverMaxWindowBits, this.clientMaxWindowBits);
+    return this.copy(this.maxFrameSize, this.maxMessageSize,
+                     this.serverCompressionLevel, this.clientCompressionLevel,
+                     serverNoContextTakeover, this.clientNoContextTakeover,
+                     this.serverMaxWindowBits, this.clientMaxWindowBits);
   }
 
   public final boolean clientNoContextTakeover() {
@@ -121,10 +121,10 @@ public class WsEngineSettings implements Debug {
   }
 
   public WsEngineSettings clientNoContextTakeover(boolean clientNoContextTakeover) {
-    return copy(this.maxFrameSize, this.maxMessageSize,
-                this.serverCompressionLevel, this.clientCompressionLevel,
-                this.serverNoContextTakeover, clientNoContextTakeover,
-                this.serverMaxWindowBits, this.clientMaxWindowBits);
+    return this.copy(this.maxFrameSize, this.maxMessageSize,
+                     this.serverCompressionLevel, this.clientCompressionLevel,
+                     this.serverNoContextTakeover, clientNoContextTakeover,
+                     this.serverMaxWindowBits, this.clientMaxWindowBits);
   }
 
   public final int serverMaxWindowBits() {
@@ -132,10 +132,10 @@ public class WsEngineSettings implements Debug {
   }
 
   public WsEngineSettings serverMaxWindowBits(int serverMaxWindowBits) {
-    return copy(this.maxFrameSize, this.maxMessageSize,
-                this.serverCompressionLevel, this.clientCompressionLevel,
-                this.serverNoContextTakeover, this.clientNoContextTakeover,
-                serverMaxWindowBits, this.clientMaxWindowBits);
+    return this.copy(this.maxFrameSize, this.maxMessageSize,
+                     this.serverCompressionLevel, this.clientCompressionLevel,
+                     this.serverNoContextTakeover, this.clientNoContextTakeover,
+                     serverMaxWindowBits, this.clientMaxWindowBits);
   }
 
   public final int clientMaxWindowBits() {
@@ -143,17 +143,17 @@ public class WsEngineSettings implements Debug {
   }
 
   public WsEngineSettings clientMaxWindowBits(int clientMaxWindowBits) {
-    return copy(this.maxFrameSize, this.maxMessageSize,
-                this.serverCompressionLevel, this.clientCompressionLevel,
-                this.serverNoContextTakeover, this.clientNoContextTakeover,
-                this.serverMaxWindowBits, clientMaxWindowBits);
+    return this.copy(this.maxFrameSize, this.maxMessageSize,
+                     this.serverCompressionLevel, this.clientCompressionLevel,
+                     this.serverNoContextTakeover, this.clientNoContextTakeover,
+                     this.serverMaxWindowBits, clientMaxWindowBits);
   }
 
   public FingerTrieSeq<WebSocketExtension> extensions() {
-    if (serverCompressionLevel != 0 && clientCompressionLevel != 0) {
-      final WebSocketExtension permessageDeflate = WebSocketExtension.permessageDeflate(
-          this.serverNoContextTakeover, this.clientNoContextTakeover,
-          this.serverMaxWindowBits, 0);
+    if (this.serverCompressionLevel != 0 && this.clientCompressionLevel != 0) {
+      final WebSocketExtension permessageDeflate = WebSocketExtension.permessageDeflate(this.serverNoContextTakeover,
+                                                                                        this.clientNoContextTakeover,
+                                                                                        this.serverMaxWindowBits, 0);
       return FingerTrieSeq.of(permessageDeflate);
     }
     return FingerTrieSeq.empty();
@@ -202,24 +202,22 @@ public class WsEngineSettings implements Debug {
             throw new WsException("invalid permessage-deflate; " + param.toHttp());
           }
         }
-        if (requestClientMaxWindowBits != 0 && clientMaxWindowBits != 15) {
+        if (requestClientMaxWindowBits != 0 && this.clientMaxWindowBits != 15) {
           continue;
         } else if (requestClientMaxWindowBits == 0) {
-          requestClientMaxWindowBits = clientMaxWindowBits;
+          requestClientMaxWindowBits = this.clientMaxWindowBits;
         }
 
         if ("permessage-deflate".equals(extensionName)) {
-          permessageDeflate = WebSocketExtension.permessageDeflate(
-              requestServerNoContextTakeover || this.serverNoContextTakeover,
-              requestClientNoContextTakeover || this.clientNoContextTakeover,
-              Math.min(requestServerMaxWindowBits, this.serverMaxWindowBits),
-              Math.min(requestClientMaxWindowBits, this.clientMaxWindowBits));
+          permessageDeflate = WebSocketExtension.permessageDeflate(requestServerNoContextTakeover || this.serverNoContextTakeover,
+                                                                   requestClientNoContextTakeover || this.clientNoContextTakeover,
+                                                                   Math.min(requestServerMaxWindowBits, this.serverMaxWindowBits),
+                                                                   Math.min(requestClientMaxWindowBits, this.clientMaxWindowBits));
         } else if ("x-webkit-deflate-frame".equals(extensionName)) {
-          permessageDeflate = WebSocketExtension.xWebkitDeflateFrame(
-              requestServerNoContextTakeover || this.serverNoContextTakeover,
-              requestClientNoContextTakeover || this.clientNoContextTakeover,
-              Math.min(requestServerMaxWindowBits, this.serverMaxWindowBits),
-              Math.min(requestClientMaxWindowBits, this.clientMaxWindowBits));
+          permessageDeflate = WebSocketExtension.xWebkitDeflateFrame(requestServerNoContextTakeover || this.serverNoContextTakeover,
+                                                                     requestClientNoContextTakeover || this.clientNoContextTakeover,
+                                                                     Math.min(requestServerMaxWindowBits, this.serverMaxWindowBits),
+                                                                     Math.min(requestClientMaxWindowBits, this.clientMaxWindowBits));
         }
       }
     }
@@ -231,27 +229,27 @@ public class WsEngineSettings implements Debug {
   }
 
   public WsRequest handshakeRequest(Uri uri, FingerTrieSeq<String> protocols, FingerTrieSeq<HttpHeader> headers) {
-    return WsRequest.from(uri, protocols, extensions(), headers);
+    return WsRequest.create(uri, protocols, this.extensions(), headers);
   }
 
   public WsRequest handshakeRequest(Uri uri, FingerTrieSeq<String> protocols, HttpHeader... headers) {
-    return handshakeRequest(uri, protocols, FingerTrieSeq.of(headers));
+    return this.handshakeRequest(uri, protocols, FingerTrieSeq.of(headers));
   }
 
   public WsRequest handshakeRequest(Uri uri, FingerTrieSeq<String> protocols) {
-    return handshakeRequest(uri, protocols, FingerTrieSeq.<HttpHeader>empty());
+    return this.handshakeRequest(uri, protocols, FingerTrieSeq.<HttpHeader>empty());
   }
 
   public WsRequest handshakeRequest(Uri uri, HttpHeader... headers) {
-    return handshakeRequest(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.of(headers));
+    return this.handshakeRequest(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.of(headers));
   }
 
   public WsRequest handshakeRequest(Uri uri) {
-    return handshakeRequest(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.<HttpHeader>empty());
+    return this.handshakeRequest(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.<HttpHeader>empty());
   }
 
   public Value toValue() {
-    return engineForm().mold(this).toValue();
+    return WsEngineSettings.engineForm().mold(this).toValue();
   }
 
   protected WsEngineSettings copy(int maxFrameSize, int maxMessageSize,
@@ -259,9 +257,9 @@ public class WsEngineSettings implements Debug {
                                   boolean serverNoContextTakeover, boolean clientNoContextTakeover,
                                   int serverMaxWindowBits, int clientMaxWindowBits) {
     return new WsEngineSettings(maxFrameSize, maxMessageSize,
-        serverCompressionLevel, clientCompressionLevel,
-        serverNoContextTakeover, clientNoContextTakeover,
-        serverMaxWindowBits, clientMaxWindowBits);
+                                serverCompressionLevel, clientCompressionLevel,
+                                serverNoContextTakeover, clientNoContextTakeover,
+                                serverMaxWindowBits, clientMaxWindowBits);
   }
 
   public boolean canEqual(Object other) {
@@ -287,29 +285,32 @@ public class WsEngineSettings implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(WsEngineSettings.class);
+    if (WsEngineSettings.hashSeed == 0) {
+      WsEngineSettings.hashSeed = Murmur3.seed(WsEngineSettings.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed, this.maxFrameSize), this.maxMessageSize),
-            this.serverCompressionLevel), this.clientCompressionLevel),
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        WsEngineSettings.hashSeed, this.maxFrameSize), this.maxMessageSize),
+        this.serverCompressionLevel), this.clientCompressionLevel),
         Murmur3.hash(this.serverNoContextTakeover)), Murmur3.hash(this.clientNoContextTakeover)),
         this.serverMaxWindowBits), this.clientMaxWindowBits));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("WsEngineSettings").write('.').write("standard").write('(').write(')')
-        .write('.').write("maxFrameSize").write('(').debug(this.maxFrameSize).write(')')
-        .write('.').write("maxMessageSize").write('(').debug(this.maxMessageSize).write(')')
-        .write('.').write("serverCompressionLevel").write('(').debug(this.serverCompressionLevel).write(')')
-        .write('.').write("clientCompressionLevel").write('(').debug(this.clientCompressionLevel).write(')')
-        .write('.').write("serverNoContextTakeover").write('(').debug(this.serverNoContextTakeover).write(')')
-        .write('.').write("clientNoContextTakeover").write('(').debug(this.clientNoContextTakeover).write(')')
-        .write('.').write("serverMaxWindowBits").write('(').debug(this.serverMaxWindowBits).write(')')
-        .write('.').write("clientMaxWindowBits").write('(').debug(this.clientMaxWindowBits).write(')');
+                   .write('.').write("maxFrameSize").write('(').debug(this.maxFrameSize).write(')')
+                   .write('.').write("maxMessageSize").write('(').debug(this.maxMessageSize).write(')')
+                   .write('.').write("serverCompressionLevel").write('(').debug(this.serverCompressionLevel).write(')')
+                   .write('.').write("clientCompressionLevel").write('(').debug(this.clientCompressionLevel).write(')')
+                   .write('.').write("serverNoContextTakeover").write('(').debug(this.serverNoContextTakeover).write(')')
+                   .write('.').write("clientNoContextTakeover").write('(').debug(this.clientNoContextTakeover).write(')')
+                   .write('.').write("serverMaxWindowBits").write('(').debug(this.serverMaxWindowBits).write(')')
+                   .write('.').write("clientMaxWindowBits").write('(').debug(this.clientMaxWindowBits).write(')');
+    return output;
   }
 
   @Override
@@ -317,12 +318,10 @@ public class WsEngineSettings implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
   private static WsEngineSettings standard;
-  private static Form<WsEngineSettings> engineForm;
 
   public static WsEngineSettings standard() {
-    if (standard == null) {
+    if (WsEngineSettings.standard == null) {
       int maxFrameSize;
       try {
         maxFrameSize = Integer.parseInt(System.getProperty("swim.ws.max.frame.size"));
@@ -369,36 +368,38 @@ public class WsEngineSettings implements Debug {
         clientMaxWindowBits = 15;
       }
 
-      standard = new WsEngineSettings(maxFrameSize, maxMessageSize,
-          serverCompressionLevel, clientCompressionLevel,
-          serverNoContextTakeover, clientNoContextTakeover,
-          serverMaxWindowBits, clientMaxWindowBits);
+      WsEngineSettings.standard = new WsEngineSettings(maxFrameSize, maxMessageSize,
+                                                       serverCompressionLevel, clientCompressionLevel,
+                                                       serverNoContextTakeover, clientNoContextTakeover,
+                                                       serverMaxWindowBits, clientMaxWindowBits);
     }
-    return standard;
+    return WsEngineSettings.standard;
   }
 
   public static WsEngineSettings noCompression() {
-    return standard().compressionLevel(0, 0);
+    return WsEngineSettings.standard().compressionLevel(0, 0);
   }
 
   public static WsEngineSettings defaultCompression() {
-    return standard().compressionLevel(-1, -1);
+    return WsEngineSettings.standard().compressionLevel(-1, -1);
   }
 
   public static WsEngineSettings fastestCompression() {
-    return standard().compressionLevel(1, 1);
+    return WsEngineSettings.standard().compressionLevel(1, 1);
   }
 
   public static WsEngineSettings bestCompression() {
-    return standard().compressionLevel(9, 9);
+    return WsEngineSettings.standard().compressionLevel(9, 9);
   }
+
+  private static Form<WsEngineSettings> engineForm;
 
   @Kind
   public static Form<WsEngineSettings> engineForm() {
-    if (engineForm == null) {
-      engineForm = new WsEngineSettingsForm();
+    if (WsEngineSettings.engineForm == null) {
+      WsEngineSettings.engineForm = new WsEngineSettingsForm();
     }
-    return engineForm;
+    return WsEngineSettings.engineForm;
   }
 
 }

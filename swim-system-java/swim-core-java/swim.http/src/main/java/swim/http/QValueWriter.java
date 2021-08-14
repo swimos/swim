@@ -36,6 +36,11 @@ final class QValueWriter extends Writer<Object, Object> {
     this.step = 1;
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return QValueWriter.write(output, this.weight, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, int weight, int step) {
     if (step == 1 && output.isCont()) {
       output = output.write(';');
@@ -57,7 +62,7 @@ final class QValueWriter extends Writer<Object, Object> {
       output = output.write('0' + (weight / 1000));
       weight %= 1000;
       if (weight == 0) {
-        return done();
+        return Writer.done();
       } else {
         step = 6;
       }
@@ -70,7 +75,7 @@ final class QValueWriter extends Writer<Object, Object> {
       output = output.write('0' + (weight / 100));
       weight %= 100;
       if (weight == 0) {
-        return done();
+        return Writer.done();
       } else {
         step = 8;
       }
@@ -79,34 +84,29 @@ final class QValueWriter extends Writer<Object, Object> {
       output = output.write('0' + (weight / 10));
       weight %= 10;
       if (weight == 0) {
-        return done();
+        return Writer.done();
       } else {
         step = 9;
       }
     }
     if (step == 9 && output.isCont()) {
       output = output.write('0' + weight);
-      return done();
+      return Writer.done();
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new QValueWriter(weight, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, float weight) {
     if (weight >= 0f && weight <= 1f) {
-      return write(output, (int) (weight * 1000f), 1);
+      return QValueWriter.write(output, (int) (weight * 1000f), 1);
     } else {
-      return error(new HttpException("invalid qvalue: " + weight));
+      return Writer.error(new HttpException("invalid qvalue: " + weight));
     }
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.weight, this.step);
   }
 
 }

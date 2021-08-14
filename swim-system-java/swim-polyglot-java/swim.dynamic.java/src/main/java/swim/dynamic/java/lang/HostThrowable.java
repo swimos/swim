@@ -21,6 +21,10 @@ import swim.dynamic.JavaHostObjectType;
 
 public final class HostThrowable {
 
+  private HostThrowable() {
+    // static
+  }
+
   public static final HostObjectType<Throwable> TYPE;
 
   static {
@@ -29,10 +33,6 @@ public final class HostThrowable {
     type.extendType(HostObject.TYPE);
     type.addMember(new HostThrowableGetMessage());
     type.addMember(new HostThrowableGetCause());
-  }
-
-  private HostThrowable() {
-    // static
   }
 
 }

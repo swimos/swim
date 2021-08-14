@@ -22,10 +22,6 @@ import swim.codec.Writer;
 
 public abstract class HttpHeader extends HttpPart implements Debug {
 
-  public static HttpHeader parseHttp(String string) {
-    return Http.standardParser().parseHeaderString(string);
-  }
-
   public boolean isBlank() {
     return false;
   }
@@ -36,7 +32,7 @@ public abstract class HttpHeader extends HttpPart implements Debug {
 
   public String value() {
     final Output<String> output = Utf8.decodedString();
-    writeHttpValue(output, Http.standardWriter());
+    this.writeHttpValue(output, Http.standardWriter()).bind();
     return output.bind();
   }
 
@@ -53,8 +49,15 @@ public abstract class HttpHeader extends HttpPart implements Debug {
   public abstract Writer<?, ?> writeHttpValue(Output<?> output, HttpWriter http);
 
   @Override
+  public abstract <T> Output<T> debug(Output<T> output);
+
+  @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static HttpHeader parseHttp(String string) {
+    return Http.standardParser().parseHeaderString(string);
   }
 
 }

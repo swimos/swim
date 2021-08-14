@@ -31,7 +31,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.math.Z2Form;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidMoveShape;
@@ -48,9 +48,6 @@ import swim.structure.Form;
 
 public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLane<K, S, V> {
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
   protected final AgentContext agentContext;
   protected Form<K> keyForm;
   protected Z2Form<S> shapeForm;
@@ -66,6 +63,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
     this.keyForm = keyForm;
     this.shapeForm = shapeForm;
     this.valueForm = valueForm;
+    this.laneBinding = null;
+    this.dataView = null;
     this.flags = flags;
   }
 
@@ -89,7 +88,7 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
 
   @Override
   public LaneBinding createLaneBinding() {
-    return new SpatialLaneModel<S>(shapeForm, flags);
+    return new SpatialLaneModel<S>(this.shapeForm, this.flags);
   }
 
   @Override
@@ -100,12 +99,12 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
   @Override
   public <K2> SpatialLane<K2, S, V> keyForm(Form<K2> keyForm) {
     return new SpatialLaneView<K2, S, V>(this.agentContext, keyForm, this.shapeForm, this.valueForm,
-        this.flags, typesafeObservers(this.observers));
+                                         this.flags, this.typesafeObservers(this.observers));
   }
 
   @Override
   public <K2> SpatialLane<K2, S, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   public void setKeyForm(Form<K> keyForm) {
@@ -119,13 +118,13 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
 
   @Override
   public <V2> SpatialLane<K, S, V2> valueForm(Form<V2> valueForm) {
-    return new SpatialLaneView<K, S, V2>(this.agentContext, keyForm, this.shapeForm, valueForm,
-        this.flags, typesafeObservers(this.observers));
+    return new SpatialLaneView<K, S, V2>(this.agentContext, this.keyForm, this.shapeForm, valueForm,
+                                         this.flags, this.typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> SpatialLane<K, S, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   public void setValueForm(Form<V> valueForm) {
@@ -139,15 +138,15 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
   }
 
   public final boolean isResident() {
-    return (this.flags & RESIDENT) != 0;
+    return (this.flags & SpatialLaneView.RESIDENT) != 0;
   }
 
   @Override
   public SpatialLane<K, S, V> isResident(boolean isResident) {
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= SpatialLaneView.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~SpatialLaneView.RESIDENT;
     }
     final SpatialLaneModel<S> laneBinding = this.laneBinding;
     if (laneBinding != null) {
@@ -158,22 +157,22 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
 
   void didSetResident(boolean isResident) {
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= SpatialLaneView.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~SpatialLaneView.RESIDENT;
     }
   }
 
   public final boolean isTransient() {
-    return (this.flags & TRANSIENT) != 0;
+    return (this.flags & SpatialLaneView.TRANSIENT) != 0;
   }
 
   @Override
   public SpatialLane<K, S, V> isTransient(boolean isTransient) {
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= SpatialLaneView.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~SpatialLaneView.TRANSIENT;
     }
     final SpatialLaneModel<S> laneBinding = this.laneBinding;
     if (laneBinding != null) {
@@ -184,9 +183,9 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
 
   void didSetTransient(boolean isTransient) {
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= SpatialLaneView.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~SpatialLaneView.TRANSIENT;
     }
   }
 
@@ -215,82 +214,82 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
 
   @Override
   public SpatialLane<K, S, V> willUpdate(WillUpdateShape<K, S, V> willUpdate) {
-    return observe(willUpdate);
+    return this.observe(willUpdate);
   }
 
   @Override
   public SpatialLane<K, S, V> didUpdate(DidUpdateShape<K, S, V> didUpdate) {
-    return observe(didUpdate);
+    return this.observe(didUpdate);
   }
 
   @Override
   public SpatialLane<K, S, V> willMove(WillMoveShape<K, S, V> willMove) {
-    return observe(willMove);
+    return this.observe(willMove);
   }
 
   @Override
   public SpatialLane<K, S, V> didMove(DidMoveShape<K, S, V> didMove) {
-    return observe(didMove);
+    return this.observe(didMove);
   }
 
   @Override
   public SpatialLane<K, S, V> willRemove(WillRemoveShape<K, S> willRemove) {
-    return observe(willRemove);
+    return this.observe(willRemove);
   }
 
   @Override
   public SpatialLane<K, S, V> didRemove(DidRemoveShape<K, S, V> didRemove) {
-    return observe(didRemove);
+    return this.observe(didRemove);
   }
 
   @Override
   public SpatialLane<K, S, V> willClear(WillClear willClear) {
-    return observe(willClear);
+    return this.observe(willClear);
   }
 
   @Override
   public SpatialLane<K, S, V> didClear(DidClear didClear) {
-    return observe(didClear);
+    return this.observe(didClear);
   }
 
   @Override
   public SpatialLaneView<K, S, V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public SpatialLaneView<K, S, V> didCommand(DidCommand didCommand) {
-    return observe(didCommand);
+    return this.observe(didCommand);
   }
 
   @Override
   public SpatialLaneView<K, S, V> willUplink(WillUplink willUplink) {
-    return observe(willUplink);
+    return this.observe(willUplink);
   }
 
   @Override
   public SpatialLaneView<K, S, V> didUplink(DidUplink didUplink) {
-    return observe(didUplink);
+    return this.observe(didUplink);
   }
 
   @Override
   public SpatialLaneView<K, S, V> willEnter(WillEnter willEnter) {
-    return observe(willEnter);
+    return this.observe(willEnter);
   }
 
   @Override
   public SpatialLaneView<K, S, V> didEnter(DidEnter didEnter) {
-    return observe(didEnter);
+    return this.observe(didEnter);
   }
 
   @Override
   public SpatialLaneView<K, S, V> willLeave(WillLeave willLeave) {
-    return observe(willLeave);
+    return this.observe(willLeave);
   }
 
   @Override
   public SpatialLaneView<K, S, V> didLeave(DidLeave didLeave) {
-    return observe(didLeave);
+    return this.observe(didLeave);
   }
 
   @SuppressWarnings("unchecked")
@@ -307,8 +306,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
           try {
             newValue = ((WillUpdateShape<K, S, V>) observers).willUpdate(key, shape, newValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -324,8 +323,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
               try {
                 newValue = ((WillUpdateShape<K, S, V>) observer).willUpdate(key, shape, newValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -356,8 +355,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
           try {
             ((DidUpdateShape<K, S, V>) observers).didUpdate(key, shape, newValue, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -373,8 +372,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
               try {
                 ((DidUpdateShape<K, S, V>) observer).didUpdate(key, shape, newValue, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -406,8 +405,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
           try {
             newValue = ((WillMoveShape<K, S, V>) observers).willMove(key, newShape, newValue, oldShape);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -423,8 +422,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
               try {
                 newValue = ((WillMoveShape<K, S, V>) observer).willMove(key, newShape, newValue, oldShape);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -456,8 +455,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
           try {
             ((DidMoveShape<K, S, V>) observers).didMove(key, newShape, newValue, oldShape, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -473,8 +472,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
               try {
                 ((DidMoveShape<K, S, V>) observer).didMove(key, newShape, newValue, oldShape, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -505,8 +504,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
           try {
             ((WillRemoveShape<K, S>) observers).willRemove(key, shape);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -522,8 +521,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
               try {
                 ((WillRemoveShape<K, S>) observers).willRemove(key, shape);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -554,8 +553,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
           try {
             ((DidRemoveShape<K, S, V>) observers).didRemove(key, shape, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -571,8 +570,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
               try {
                 ((DidRemoveShape<K, S, V>) observers).didRemove(key, shape, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -602,8 +601,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
           try {
             ((WillClear) observers).willClear();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -619,8 +618,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
               try {
                 ((WillClear) observer).willClear();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -650,8 +649,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
           try {
             ((DidClear) observers).didClear();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -667,8 +666,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
               try {
                 ((DidClear) observer).didClear();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -690,7 +689,7 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
   }
 
   public void laneDidUpdate(K key, S shape, V newValue, V oldValue) {
-
+    // hook
   }
 
   public V laneWillMove(K key, S newShape, V newValue, S oldShape) {
@@ -702,19 +701,19 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
   }
 
   public void laneWillRemove(K key, S shape) {
-
+    // hook
   }
 
   public void laneDidRemove(K key, S shape) {
-
+    // hook
   }
 
   public void laneWillClear() {
-
+    // hook
   }
 
   public void laneDidClear() {
-
+    // hook
   }
 
   @Override
@@ -796,5 +795,8 @@ public class SpatialLaneView<K, S, V> extends WarpLaneView implements SpatialLan
   public Iterator<V> valueIterator() {
     return this.dataView.valueIterator();
   }
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
 
 }

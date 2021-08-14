@@ -58,6 +58,14 @@ final class MqttConnectDecoder extends Decoder<MqttConnect> {
     this(mqtt, 0, null, 0, 0, 0, null, null, null, null, null, 0, 1);
   }
 
+  @Override
+  public Decoder<MqttConnect> feed(InputBuffer input) {
+    return MqttConnectDecoder.decode(input, this.mqtt, this.packetFlags, this.protocolName,
+                                     this.protocolLevel, this.connectFlags, this.keepAlive,
+                                     this.clientId, this.willTopic, this.willMessage,
+                                     this.username, this.password, this.remaining, this.step);
+  }
+
   static Decoder<MqttConnect> decode(InputBuffer input, MqttDecoder mqtt, int packetFlags,
                                      Decoder<String> protocolName, int protocolLevel,
                                      int connectFlags, int keepAlive, Decoder<String> clientId,
@@ -79,7 +87,7 @@ final class MqttConnectDecoder extends Decoder<MqttConnect> {
       } else if (step < 5) {
         step += 1;
       } else {
-        return error(new MqttException("packet length too long"));
+        return Decoder.error(new MqttException("packet length too long"));
       }
     }
     if (step == 6) {
@@ -257,35 +265,28 @@ final class MqttConnectDecoder extends Decoder<MqttConnect> {
       }
     }
     if (step == 16 && remaining == 0) {
-      return done(mqtt.connect(packetFlags, protocolName.bind(),
-          protocolLevel, connectFlags, keepAlive,
-          clientId != null ? clientId.bind() : null,
-          willTopic != null ? willTopic.bind() : null,
-          willMessage != null ? willMessage.bind() : null,
-          username != null ? username.bind() : null,
-          password != null ? password.bind() : null));
+      return Decoder.done(mqtt.connect(packetFlags, protocolName.bind(),
+                                       protocolLevel, connectFlags, keepAlive,
+                                       clientId != null ? clientId.bind() : null,
+                                       willTopic != null ? willTopic.bind() : null,
+                                       willMessage != null ? willMessage.bind() : null,
+                                       username != null ? username.bind() : null,
+                                       password != null ? password.bind() : null));
     }
     if (remaining < 0) {
-      return error(new MqttException("packet length too short"));
+      return Decoder.error(new MqttException("packet length too short"));
     } else if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new MqttConnectDecoder(mqtt, packetFlags, protocolName, protocolLevel,
-        connectFlags, keepAlive, clientId, willTopic,
-        willMessage, username, password, remaining, step);
+                                  connectFlags, keepAlive, clientId, willTopic,
+                                  willMessage, username, password, remaining, step);
   }
 
   static Decoder<MqttConnect> decode(InputBuffer input, MqttDecoder mqtt) {
-    return decode(input, mqtt, 0, null, 0, 0, 0, null, null, null, null, null, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttConnect> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.protocolName, this.protocolLevel,
-        this.connectFlags, this.keepAlive, this.clientId, this.willTopic,
-        this.willMessage, this.username, this.password, this.remaining, this.step);
+    return MqttConnectDecoder.decode(input, mqtt, 0, null, 0, 0, 0, null, null, null, null, null, 0, 1);
   }
 
 }

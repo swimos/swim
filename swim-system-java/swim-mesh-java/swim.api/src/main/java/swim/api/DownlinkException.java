@@ -16,8 +16,6 @@ package swim.api;
 
 public class DownlinkException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public DownlinkException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class DownlinkException extends RuntimeException {
   public DownlinkException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

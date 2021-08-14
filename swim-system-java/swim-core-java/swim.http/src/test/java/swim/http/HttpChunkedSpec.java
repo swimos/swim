@@ -21,16 +21,6 @@ import swim.codec.Utf8;
 
 public class HttpChunkedSpec {
 
-  static <T> void assertDecodes(Decoder<T> decodee, String input, T expected) {
-    final HttpResponse<T> headers = HttpResponse.from(HttpStatus.OK);
-    final HttpResponse<T> response = headers.entity(HttpValue.from(expected));
-    HttpAssertions.assertDecodes(Http.standardParser().chunkedDecoder(headers, decodee), input, response);
-  }
-
-  static void assertEncodes(HttpEntity<?> entity, String expected) {
-    HttpAssertions.assertEncodes(entity.httpEncoder(null), expected);
-  }
-
   @Test
   public void decodeEmptyChunk() {
     assertDecodes(Utf8.stringParser(), "0\r\n\r\n", "");
@@ -48,18 +38,28 @@ public class HttpChunkedSpec {
 
   @Test
   public void encodeEmptyChunk() {
-    assertEncodes(HttpChunked.from(Encoder.done()), "0\r\n\r\n");
+    assertEncodes(HttpChunked.create(Encoder.done()), "0\r\n\r\n");
   }
 
   @Test
   public void encodeSingleChunk() {
-    assertEncodes(HttpChunked.from(Utf8.stringWriter("test")), "4\r\ntest\r\n0\r\n\r\n");
+    assertEncodes(HttpChunked.create(Utf8.stringWriter("test")), "4\r\ntest\r\n0\r\n\r\n");
   }
 
   @Test
   public void encodeMultipleChunks() {
-    assertEncodes(HttpChunked.from(Utf8.stringWriter("Hello, ").andThen(Utf8.stringWriter("world!"))),
-        "7\r\nHello, \r\n6\r\nworld!\r\n0\r\n\r\n");
+    assertEncodes(HttpChunked.create(Utf8.stringWriter("Hello, ").andThen(Utf8.stringWriter("world!"))),
+                  "7\r\nHello, \r\n6\r\nworld!\r\n0\r\n\r\n");
+  }
+
+  public static <T> void assertDecodes(Decoder<T> decodee, String input, T expected) {
+    final HttpResponse<T> headers = HttpResponse.create(HttpStatus.OK);
+    final HttpResponse<T> response = headers.entity(HttpValue.create(expected));
+    HttpAssertions.assertDecodes(Http.standardParser().chunkedDecoder(headers, decodee), input, response);
+  }
+
+  public static void assertEncodes(HttpEntity<?> entity, String expected) {
+    HttpAssertions.assertEncodes(entity.httpEncoder(null), expected);
   }
 
 }

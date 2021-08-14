@@ -67,7 +67,7 @@ public class MeshTablePart implements PartContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapPart(Class<T> partClass) {
-    if (partClass.isAssignableFrom(getClass())) {
+    if (partClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -77,7 +77,7 @@ public class MeshTablePart implements PartContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T bottomPart(Class<T> partClass) {
-    if (partClass.isAssignableFrom(getClass())) {
+    if (partClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -216,12 +216,12 @@ public class MeshTablePart implements PartContext {
 
   @Override
   public void hostDidConnect(Uri hostUri) {
-    // nop
+    // hook
   }
 
   @Override
   public void hostDidDisconnect(Uri hostUri) {
-    // nop
+    // hook
   }
 
   @Override
@@ -286,57 +286,57 @@ public class MeshTablePart implements PartContext {
 
   @Override
   public void willOpen() {
-    // nop
+    // hook
   }
 
   @Override
   public void didOpen() {
-    // nop
+    // hook
   }
 
   @Override
   public void willLoad() {
-    // nop
+    // hook
   }
 
   @Override
   public void didLoad() {
-    // nop
+    // hook
   }
 
   @Override
   public void willStart() {
-    // nop
+    // hook
   }
 
   @Override
   public void didStart() {
-    // nop
+    // hook
   }
 
   @Override
   public void willStop() {
-    // nop
+    // hook
   }
 
   @Override
   public void didStop() {
-    // nop
+    // hook
   }
 
   @Override
   public void willUnload() {
-    // nop
+    // hook
   }
 
   @Override
   public void didUnload() {
-    // nop
+    // hook
   }
 
   @Override
   public void willClose() {
-    // nop
+    // hook
   }
 
 }

@@ -41,7 +41,7 @@ final class RepeatedDecoder<I, T> extends Decoder<T> {
 
   @Override
   public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.protobuf, this.type, this.builder, this.itemDecoder);
+    return RepeatedDecoder.decode(input, this.protobuf, this.type, this.builder, this.itemDecoder);
   }
 
   @SuppressWarnings("unchecked")
@@ -53,7 +53,7 @@ final class RepeatedDecoder<I, T> extends Decoder<T> {
         if (builder == null) {
           builder = type.valueBuilder();
         }
-        return done(builder.bind());
+        return Decoder.done(builder.bind());
       }
       if (itemDecoder == null) {
         itemDecoder = protobuf.decodeType(type.itemType(), input);
@@ -73,16 +73,16 @@ final class RepeatedDecoder<I, T> extends Decoder<T> {
       break;
     } while (true);
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new RepeatedDecoder<I, T>(protobuf, type, builder, itemDecoder);
   }
 
   static <I, T> Decoder<T> decode(InputBuffer input, ProtobufDecoder protobuf,
                                   ProtobufRepeatedType<I, T> type) {
-    return decode(input, protobuf, type, null, null);
+    return RepeatedDecoder.decode(input, protobuf, type, null, null);
   }
 
 }

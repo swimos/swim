@@ -14,7 +14,7 @@
 
 package swim.runtime;
 
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 
 public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends LaneView> implements Runnable {
@@ -34,7 +34,7 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
     if (this.views instanceof LaneView) {
       this.viewCount = 1;
     } else if (this.views instanceof LaneView[]) {
-      this.viewCount = ((LaneView[]) views).length;
+      this.viewCount = ((LaneView[]) this.views).length;
     } else {
       this.viewCount = 0;
     }
@@ -42,7 +42,7 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
     this.phaseCount = phaseCount;
     this.preemptive = true;
     this.stage = stage;
-    beginPhase(phase);
+    this.beginPhase(this.phase);
   }
 
   protected LaneRelay(Model model, int phaseCount) {
@@ -58,7 +58,7 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
   }
 
   protected void beginPhase(int phase) {
-    // stub
+    // hook
   }
 
   protected boolean runPhase(View view, int phase, boolean preemptive) {
@@ -66,25 +66,25 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
   }
 
   protected void endPhase(int phase) {
-    // stub
+    // hook
   }
 
   protected void done() {
-    // stub
+    // hook
   }
 
   void pass() {
     do {
       if (this.phase < this.phaseCount) {
-        endPhase(this.phase);
+        this.endPhase(this.phase);
         this.phase += 1;
         this.preemptive = true;
         if (this.phase < this.phaseCount) {
-          beginPhase(this.phase);
+          this.beginPhase(this.phase);
         } else {
-          endPhase(this.phase);
+          this.endPhase(this.phase);
           this.phase += 1;
-          done();
+          this.done();
           break;
         }
       } else {
@@ -97,7 +97,7 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
     do {
       if (this.viewIndex < this.viewCount) {
         try {
-          if (!runPhase(view, this.phase, this.preemptive) && this.preemptive) {
+          if (!this.runPhase(view, this.phase, this.preemptive) && this.preemptive) {
             this.preemptive = false;
             if (this.stage == null) {
               this.stage = this.model.stage();
@@ -108,23 +108,23 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
             }
           }
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
+          if (Cont.isNonFatal(error)) {
             view.laneDidFail(error);
           }
           throw error;
         }
         this.viewIndex += 1;
       } else if (this.phase < this.phaseCount) {
-        endPhase(this.phase);
+        this.endPhase(this.phase);
         this.viewIndex = 0;
         this.phase += 1;
         this.preemptive = true;
         if (this.phase < this.phaseCount) {
-          beginPhase(this.phase);
+          this.beginPhase(this.phase);
         } else {
-          endPhase(this.phase);
+          this.endPhase(this.phase);
           this.phase += 1;
-          done();
+          this.done();
           break;
         }
       } else {
@@ -139,7 +139,7 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
       if (this.viewIndex < this.viewCount) {
         final View view = (View) views[this.viewIndex];
         try {
-          if (!runPhase(view, this.phase, this.preemptive) && this.preemptive) {
+          if (!this.runPhase(view, this.phase, this.preemptive) && this.preemptive) {
             this.preemptive = false;
             if (this.stage == null) {
               this.stage = this.model.stage();
@@ -150,23 +150,23 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
             }
           }
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
+          if (Cont.isNonFatal(error)) {
             view.laneDidFail(error);
           }
           throw error;
         }
         this.viewIndex += 1;
       } else if (this.phase < this.phaseCount) {
-        endPhase(this.phase);
+        this.endPhase(this.phase);
         this.viewIndex = 0;
         this.phase += 1;
         this.preemptive = true;
         if (this.phase < this.phaseCount) {
-          beginPhase(this.phase);
+          this.beginPhase(this.phase);
         } else {
-          endPhase(this.phase);
+          this.endPhase(this.phase);
           this.phase += 1;
-          done();
+          this.done();
           break;
         }
       } else {
@@ -182,14 +182,14 @@ public abstract class LaneRelay<Model extends LaneModel<View, ?>, View extends L
     final long t0 = System.nanoTime();
     try {
       if (this.viewCount == 0) {
-        pass();
+        this.pass();
       } else if (this.viewCount == 1) {
-        pass((View) views);
+        this.pass((View) this.views);
       } else if (this.viewCount > 1) {
-        pass((LaneView[]) views);
+        this.pass((LaneView[]) this.views);
       }
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
+      if (Cont.isNonFatal(error)) {
         this.model.didFail(error);
       } else {
         throw error;

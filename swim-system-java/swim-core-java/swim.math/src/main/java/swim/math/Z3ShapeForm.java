@@ -78,9 +78,9 @@ final class Z3ShapeForm extends Z3Form<Z3Shape> {
     final Value value = item.toValue();
     final String tag = value.tag();
     if ("point".equals(tag)) {
-      return PointZ3.form().cast(value);
+      return Z3Point.form().cast(value);
     } else if ("box".equals(tag)) {
-      return BoxZ3.form().cast(value);
+      return Z3Box.form().cast(value);
     }
     return null;
   }

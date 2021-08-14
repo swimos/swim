@@ -26,7 +26,6 @@ import swim.util.Murmur3;
 
 public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
 
-  private static int hashSeed;
   final HttpVersion version;
   final HttpStatus status;
   final FingerTrieSeq<HttpHeader> headers;
@@ -45,48 +44,13 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
     this(version, status, headers, HttpEntity.<T>empty());
   }
 
-  public static <T> HttpResponse<T> from(HttpVersion version, HttpStatus status,
-                                         FingerTrieSeq<HttpHeader> headers, HttpEntity<T> entity) {
-    return new HttpResponse<T>(version, status, headers, entity);
-  }
-
-  public static <T> HttpResponse<T> from(HttpVersion version, HttpStatus status,
-                                         FingerTrieSeq<HttpHeader> headers) {
-    return new HttpResponse<T>(version, status, headers);
-  }
-
-  public static <T> HttpResponse<T> from(HttpVersion version, HttpStatus status,
-                                         HttpHeader... headers) {
-    return new HttpResponse<T>(version, status, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpResponse<T> from(HttpVersion version, HttpStatus status) {
-    return new HttpResponse<T>(version, status, FingerTrieSeq.<HttpHeader>empty());
-  }
-
-  public static <T> HttpResponse<T> from(HttpStatus status, FingerTrieSeq<HttpHeader> headers) {
-    return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, headers);
-  }
-
-  public static <T> HttpResponse<T> from(HttpStatus status, HttpHeader... headers) {
-    return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, FingerTrieSeq.of(headers));
-  }
-
-  public static <T> HttpResponse<T> from(HttpStatus status) {
-    return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, FingerTrieSeq.<HttpHeader>empty());
-  }
-
-  public static <T> HttpResponse<T> parseHttp(String string) {
-    return Http.standardParser().parseResponseString(string);
-  }
-
   @Override
   public HttpVersion version() {
     return this.version;
   }
 
   public HttpResponse<T> version(HttpVersion version) {
-    return from(version, this.status, this.headers, this.entity);
+    return HttpResponse.create(version, this.status, this.headers, this.entity);
   }
 
   public HttpStatus status() {
@@ -94,7 +58,7 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
   }
 
   public HttpResponse<T> status(HttpStatus status) {
-    return from(this.version, status, this.headers, this.entity);
+    return HttpResponse.create(this.version, status, this.headers, this.entity);
   }
 
   @Override
@@ -104,12 +68,12 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
 
   @Override
   public HttpResponse<T> headers(FingerTrieSeq<HttpHeader> headers) {
-    return from(this.version, this.status, headers, this.entity);
+    return HttpResponse.create(this.version, this.status, headers, this.entity);
   }
 
   @Override
   public HttpResponse<T> headers(HttpHeader... headers) {
-    return headers(FingerTrieSeq.of(headers));
+    return this.headers(FingerTrieSeq.of(headers));
   }
 
   @Override
@@ -117,7 +81,7 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
     final FingerTrieSeq<HttpHeader> oldHeaders = this.headers;
     final FingerTrieSeq<HttpHeader> headers = oldHeaders.appended(newHeaders);
     if (oldHeaders != headers) {
-      return from(this.version, this.status, headers, this.entity);
+      return HttpResponse.create(this.version, this.status, headers, this.entity);
     } else {
       return this;
     }
@@ -125,7 +89,7 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
 
   @Override
   public HttpResponse<T> appendedHeaders(HttpHeader... newHeaders) {
-    return appendedHeaders(FingerTrieSeq.of(newHeaders));
+    return this.appendedHeaders(FingerTrieSeq.of(newHeaders));
   }
 
   @Override
@@ -133,7 +97,7 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
     final FingerTrieSeq<HttpHeader> oldHeaders = this.headers;
     final FingerTrieSeq<HttpHeader> headers = oldHeaders.appended(newHeader);
     if (oldHeaders != headers) {
-      return from(this.version, this.status, headers, this.entity);
+      return HttpResponse.create(this.version, this.status, headers, this.entity);
     } else {
       return this;
     }
@@ -142,9 +106,9 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
   @Override
   public HttpResponse<T> updatedHeaders(FingerTrieSeq<HttpHeader> newHeaders) {
     final FingerTrieSeq<HttpHeader> oldHeaders = this.headers;
-    final FingerTrieSeq<HttpHeader> headers = updatedHeaders(oldHeaders, newHeaders);
+    final FingerTrieSeq<HttpHeader> headers = HttpMessage.updatedHeaders(oldHeaders, newHeaders);
     if (oldHeaders != headers) {
-      return from(this.version, this.status, headers, this.entity);
+      return HttpResponse.create(this.version, this.status, headers, this.entity);
     } else {
       return this;
     }
@@ -152,15 +116,15 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
 
   @Override
   public HttpResponse<T> updatedHeaders(HttpHeader... newHeaders) {
-    return updatedHeaders(FingerTrieSeq.of(newHeaders));
+    return this.updatedHeaders(FingerTrieSeq.of(newHeaders));
   }
 
   @Override
   public HttpResponse<T> updatedHeader(HttpHeader newHeader) {
     final FingerTrieSeq<HttpHeader> oldHeaders = this.headers;
-    final FingerTrieSeq<HttpHeader> headers = updatedHeaders(oldHeaders, newHeader);
+    final FingerTrieSeq<HttpHeader> headers = HttpMessage.updatedHeaders(oldHeaders, newHeader);
     if (oldHeaders != headers) {
-      return from(this.version, this.status, headers, this.entity);
+      return HttpResponse.create(this.version, this.status, headers, this.entity);
     } else {
       return this;
     }
@@ -173,23 +137,23 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
 
   @Override
   public <T2> HttpResponse<T2> entity(HttpEntity<T2> entity) {
-    return from(this.version, this.status, this.headers, entity);
+    return HttpResponse.create(this.version, this.status, this.headers, entity);
   }
 
   @Override
   public <T2> HttpResponse<T2> content(HttpEntity<T2> entity) {
-    final FingerTrieSeq<HttpHeader> headers = updatedHeaders(this.headers, entity.headers());
-    return from(this.version, this.status, headers, entity);
+    final FingerTrieSeq<HttpHeader> headers = HttpMessage.updatedHeaders(this.headers, entity.headers());
+    return HttpResponse.create(this.version, this.status, headers, entity);
   }
 
   @Override
   public HttpResponse<String> body(String content, MediaType mediaType) {
-    return content(HttpBody.from(content, mediaType));
+    return this.content(HttpBody.create(content, mediaType));
   }
 
   @Override
   public HttpResponse<String> body(String content) {
-    return content(HttpBody.from(content));
+    return this.content(HttpBody.create(content));
   }
 
   @SuppressWarnings("unchecked")
@@ -229,7 +193,7 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
 
   @Override
   public Writer<?, HttpResponse<T>> httpWriter() {
-    return httpWriter(Http.standardWriter());
+    return this.httpWriter(Http.standardWriter());
   }
 
   @Override
@@ -239,7 +203,7 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
 
   @Override
   public Writer<?, HttpResponse<T>> writeHttp(Output<?> output) {
-    return writeHttp(output, Http.standardWriter());
+    return this.writeHttp(output, Http.standardWriter());
   }
 
   @Override
@@ -254,20 +218,22 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(HttpResponse.class);
+    if (HttpResponse.hashSeed == 0) {
+      HttpResponse.hashSeed = Murmur3.seed(HttpResponse.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
-        this.version.hashCode()), this.status.hashCode()),
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        HttpResponse.hashSeed, this.version.hashCode()), this.status.hashCode()),
         this.headers.hashCode()), this.entity.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("HttpResponse").write('.').write("from").write('(')
-        .debug(this.version).write(", ").debug(this.status);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("HttpResponse").write('.').write("create").write('(')
+                   .debug(this.version).write(", ").debug(this.status);
     for (HttpHeader header : this.headers) {
       output = output.write(", ").debug(header);
     }
@@ -275,11 +241,47 @@ public final class HttpResponse<T> extends HttpMessage<T> implements Debug {
     if (this.entity.isDefined()) {
       output = output.write('.').write("entity").write('(').debug(this.entity).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static <T> HttpResponse<T> create(HttpVersion version, HttpStatus status,
+                                           FingerTrieSeq<HttpHeader> headers, HttpEntity<T> entity) {
+    return new HttpResponse<T>(version, status, headers, entity);
+  }
+
+  public static <T> HttpResponse<T> create(HttpVersion version, HttpStatus status,
+                                           FingerTrieSeq<HttpHeader> headers) {
+    return new HttpResponse<T>(version, status, headers);
+  }
+
+  public static <T> HttpResponse<T> create(HttpVersion version, HttpStatus status,
+                                           HttpHeader... headers) {
+    return new HttpResponse<T>(version, status, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpResponse<T> create(HttpVersion version, HttpStatus status) {
+    return new HttpResponse<T>(version, status, FingerTrieSeq.<HttpHeader>empty());
+  }
+
+  public static <T> HttpResponse<T> create(HttpStatus status, FingerTrieSeq<HttpHeader> headers) {
+    return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, headers);
+  }
+
+  public static <T> HttpResponse<T> create(HttpStatus status, HttpHeader... headers) {
+    return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, FingerTrieSeq.of(headers));
+  }
+
+  public static <T> HttpResponse<T> create(HttpStatus status) {
+    return new HttpResponse<T>(HttpVersion.HTTP_1_1, status, FingerTrieSeq.<HttpHeader>empty());
+  }
+
+  public static <T> HttpResponse<T> parseHttp(String string) {
+    return Http.standardParser().parseResponseString(string);
   }
 
 }

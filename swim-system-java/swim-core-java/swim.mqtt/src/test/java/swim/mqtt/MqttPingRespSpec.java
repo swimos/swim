@@ -20,10 +20,6 @@ import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttPingRespSpec {
 
-  public static void assertDecodes(Data data, MqttPingResp packet) {
-    MqttAssertions.assertDecodesPacket(data, packet);
-  }
-
   @Test
   public void decodePingRespPackets() {
     assertDecodes(Data.fromBase16("D000"), MqttPingResp.packet());
@@ -32,6 +28,10 @@ public class MqttPingRespSpec {
   @Test
   public void encodePingRespPackets() {
     assertEncodes(MqttPingResp.packet(), Data.fromBase16("D000"));
+  }
+
+  public static void assertDecodes(Data data, MqttPingResp packet) {
+    MqttAssertions.assertDecodesPacket(data, packet);
   }
 
 }

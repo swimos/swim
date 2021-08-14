@@ -103,7 +103,7 @@ final class QTreeLeafCursor<K, S, V> implements Cursor<QTreeEntry<K, S, V>> {
 
   @Override
   public long nextIndexLong() {
-    return (long) nextIndex();
+    return (long) this.nextIndex();
   }
 
   @Override
@@ -143,7 +143,7 @@ final class QTreeLeafCursor<K, S, V> implements Cursor<QTreeEntry<K, S, V>> {
 
   @Override
   public long previousIndexLong() {
-    return (long) previousIndex();
+    return (long) this.previousIndex();
   }
 
   @Override

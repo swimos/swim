@@ -21,6 +21,10 @@ import swim.dynamic.JavaHostPackage;
 
 public final class SwimObservable {
 
+  private SwimObservable() {
+    // static
+  }
+
   public static final HostPackage PACKAGE;
   public static final HostLibrary LIBRARY;
 
@@ -36,10 +40,6 @@ public final class SwimObservable {
     final JavaHostLibrary hostLib = new JavaHostLibrary("swim.observable");
     LIBRARY = hostLib;
     hostLib.addHostPackage(SwimObservable.PACKAGE);
-  }
-
-  private SwimObservable() {
-    // static
   }
 
 }

@@ -25,7 +25,6 @@ import swim.uri.Uri;
 
 public class MeshInfo {
 
-  private static Form<MeshInfo> form;
   protected final Uri meshUri;
   protected final Value gatewayPartKey;
   protected final Value ourselfPartKey;
@@ -36,22 +35,6 @@ public class MeshInfo {
     this.gatewayPartKey = gatewayPartKey;
     this.ourselfPartKey = ourselfPartKey;
     this.partCount = partCount;
-  }
-
-  public static MeshInfo from(MeshBinding meshBinding) {
-    final PartBinding gateway = meshBinding.gateway();
-    final PartBinding ourself = meshBinding.ourself();
-    return new MeshInfo(meshBinding.meshUri(), gateway != null ? gateway.partKey() : Value.absent(),
-        ourself != null ? ourself.partKey() : Value.absent(),
-        meshBinding.parts().size());
-  }
-
-  @Kind
-  public static Form<MeshInfo> form() {
-    if (form == null) {
-      form = new MeshInfoForm();
-    }
-    return form;
   }
 
   public final Uri meshUri() {
@@ -67,7 +50,25 @@ public class MeshInfo {
   }
 
   public Value toValue() {
-    return form().mold(this).toValue();
+    return MeshInfo.form().mold(this).toValue();
+  }
+
+  public static MeshInfo create(MeshBinding meshBinding) {
+    final PartBinding gateway = meshBinding.gateway();
+    final PartBinding ourself = meshBinding.ourself();
+    return new MeshInfo(meshBinding.meshUri(), gateway != null ? gateway.partKey() : Value.absent(),
+                        ourself != null ? ourself.partKey() : Value.absent(),
+                        meshBinding.parts().size());
+  }
+
+  private static Form<MeshInfo> form;
+
+  @Kind
+  public static Form<MeshInfo> form() {
+    if (MeshInfo.form == null) {
+      MeshInfo.form = new MeshInfoForm();
+    }
+    return MeshInfo.form;
   }
 
 }

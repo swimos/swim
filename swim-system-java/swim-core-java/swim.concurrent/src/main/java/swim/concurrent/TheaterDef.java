@@ -27,9 +27,6 @@ import swim.util.Murmur3;
 
 public class TheaterDef implements StageDef, Debug {
 
-  private static int hashSeed;
-  private static TheaterDef standard;
-  private static Form<TheaterDef> theaterForm;
   final String name;
   final int parallelism;
   final ScheduleDef scheduleDef;
@@ -40,31 +37,12 @@ public class TheaterDef implements StageDef, Debug {
     this.scheduleDef = scheduleDef;
   }
 
-  public static TheaterDef standard() {
-    if (standard == null) {
-      standard = new TheaterDef(null, 0, null);
-    }
-    return standard;
-  }
-
-  public static Form<TheaterDef> theaterForm(Form<ScheduleDef> scheduleForm) {
-    return new TheaterForm(scheduleForm, standard());
-  }
-
-  @Kind
-  public static Form<TheaterDef> theaterForm() {
-    if (theaterForm == null) {
-      theaterForm = new TheaterForm(ScheduleDef.form(), standard());
-    }
-    return theaterForm;
-  }
-
   public final String name() {
     return this.name;
   }
 
   public TheaterDef name(String name) {
-    return copy(name, this.parallelism, this.scheduleDef);
+    return this.copy(name, this.parallelism, this.scheduleDef);
   }
 
   public final int parallelism() {
@@ -72,7 +50,7 @@ public class TheaterDef implements StageDef, Debug {
   }
 
   public TheaterDef parallelism(int parallelism) {
-    return copy(this.name, parallelism, this.scheduleDef);
+    return this.copy(this.name, parallelism, this.scheduleDef);
   }
 
   public final ScheduleDef scheduleDef() {
@@ -80,7 +58,7 @@ public class TheaterDef implements StageDef, Debug {
   }
 
   public TheaterDef scheduleDef(ScheduleDef scheduleDef) {
-    return copy(this.name, this.parallelism, scheduleDef);
+    return this.copy(this.name, this.parallelism, scheduleDef);
   }
 
   protected TheaterDef copy(String name, int parallelism, ScheduleDef scheduleDef) {
@@ -100,30 +78,56 @@ public class TheaterDef implements StageDef, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(TheaterDef.class);
+    if (TheaterDef.hashSeed == 0) {
+      TheaterDef.hashSeed = Murmur3.seed(TheaterDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(TheaterDef.hashSeed,
         Murmur3.hash(this.name)), this.parallelism), Murmur3.hash(this.scheduleDef)));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("TheaterDef").write('.').write("standard").write('(').write(')');
     if (this.name != null) {
-      output = output.write('.').write("name").write('(').debug(name).write(')');
+      output = output.write('.').write("name").write('(').debug(this.name).write(')');
     }
-    output = output.write('.').write("parallelism").write('(').debug(parallelism).write(')');
+    output = output.write('.').write("parallelism").write('(').debug(this.parallelism).write(')');
     if (this.scheduleDef != null) {
-      output = output.write('.').write("scheduleDef").write('(').debug(scheduleDef).write(')');
+      output = output.write('.').write("scheduleDef").write('(').debug(this.scheduleDef).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static TheaterDef standard;
+
+  public static TheaterDef standard() {
+    if (TheaterDef.standard == null) {
+      TheaterDef.standard = new TheaterDef(null, 0, null);
+    }
+    return TheaterDef.standard;
+  }
+
+  private static Form<TheaterDef> theaterForm;
+
+  @Kind
+  public static Form<TheaterDef> theaterForm() {
+    if (TheaterDef.theaterForm == null) {
+      TheaterDef.theaterForm = new TheaterForm(ScheduleDef.form(), TheaterDef.standard());
+    }
+    return TheaterDef.theaterForm;
+  }
+
+  public static Form<TheaterDef> theaterForm(Form<ScheduleDef> scheduleForm) {
+    return new TheaterForm(scheduleForm, TheaterDef.standard());
   }
 
 }
@@ -161,7 +165,7 @@ final class TheaterForm extends Form<TheaterDef> {
   @Override
   public Item mold(TheaterDef theaterDef) {
     if (theaterDef != null) {
-      final Record record = Record.create(3).attr(tag());
+      final Record record = Record.create(3).attr(this.tag());
       record.slot("parallelism", theaterDef.parallelism);
       if (theaterDef.scheduleDef != null) {
         record.add(this.scheduleForm.mold(theaterDef.scheduleDef));
@@ -175,7 +179,7 @@ final class TheaterForm extends Form<TheaterDef> {
   @Override
   public TheaterDef cast(Item item) {
     final Value value = item.toValue();
-    final Value header = value.getAttr(tag());
+    final Value header = value.getAttr(this.tag());
     if (header.isDefined()) {
       final String name = item.key().stringValue(null);
       int parallelism = 2 * Runtime.getRuntime().availableProcessors();

@@ -22,7 +22,6 @@ import swim.structure.Value;
 
 public class PartPulse extends Pulse {
 
-  private static Form<PartPulse> form;
   protected final int hostCount;
   protected final long nodeCount;
   protected final AgentPulse agents;
@@ -36,14 +35,6 @@ public class PartPulse extends Pulse {
     this.agents = agents;
     this.downlinks = downlinks;
     this.uplinks = uplinks;
-  }
-
-  @Kind
-  public static Form<PartPulse> form() {
-    if (form == null) {
-      form = new PartPulseForm();
-    }
-    return form;
   }
 
   @Override
@@ -74,7 +65,17 @@ public class PartPulse extends Pulse {
 
   @Override
   public Value toValue() {
-    return form().mold(this).toValue();
+    return PartPulse.form().mold(this).toValue();
+  }
+
+  private static Form<PartPulse> form;
+
+  @Kind
+  public static Form<PartPulse> form() {
+    if (PartPulse.form == null) {
+      PartPulse.form = new PartPulseForm();
+    }
+    return PartPulse.form;
   }
 
 }

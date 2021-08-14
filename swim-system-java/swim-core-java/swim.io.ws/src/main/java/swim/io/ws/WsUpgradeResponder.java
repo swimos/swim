@@ -65,13 +65,13 @@ public class WsUpgradeResponder extends AbstractHttpResponder<Object> {
 
   @Override
   public void doRespond(HttpRequest<Object> httpRequest) {
-    writeResponse(this.wsResponse.httpResponse());
+    this.writeResponse(this.wsResponse.httpResponse());
   }
 
   @Override
   public void didRespond(HttpResponse<?> httpResponse) {
     final WsEngine engine = this.wsResponse.serverEngine(this.wsSettings);
-    final IpSocket socket = createSocket(engine);
+    final IpSocket socket = this.createSocket(engine);
     become(socket);
     this.webSocket.didConnect();
     this.webSocket.didUpgrade(this.wsResponse.httpRequest(), httpResponse);

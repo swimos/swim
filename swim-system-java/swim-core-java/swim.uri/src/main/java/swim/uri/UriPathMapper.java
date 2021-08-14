@@ -18,32 +18,18 @@ import swim.collections.HashTrieMap;
 
 abstract class UriPathMapper<T> extends UriAuthorityMapper<T> {
 
-  @SuppressWarnings("unchecked")
-  static <T> UriPathMapper<T> compile(Uri pattern, UriPath path, UriQuery query, UriFragment fragment, T value) {
-    if (!path.isEmpty()) {
-      final String segment = path.head();
-      if (!segment.isEmpty() && segment.charAt(0) == ':') {
-        return new UriPathMapping<T>(HashTrieMap.<String, UriPathMapper<T>>empty(), compile(pattern, path.tail(), query, fragment, value), (UriQueryMapper<T>) empty());
-      } else {
-        return new UriPathMapping<T>(HashTrieMap.<String, UriPathMapper<T>>empty().updated(segment, compile(pattern, path.tail(), query, fragment, value)), (UriPathMapper<T>) empty(), (UriQueryMapper<T>) empty());
-      }
-    } else {
-      return new UriPathMapping<T>(HashTrieMap.<String, UriPathMapper<T>>empty(), (UriPathMapper<T>) empty(), UriQueryMapper.compile(pattern, query, fragment, value));
-    }
-  }
-
   abstract UriMapper<T> getSuffix(UriPath path, UriQuery query, UriFragment fragment);
 
   @Override
   UriMapper<T> getSuffix(UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
-    return getSuffix(path, query, fragment);
+    return this.getSuffix(path, query, fragment);
   }
 
   abstract T get(UriPath path, UriQuery query, UriFragment fragment);
 
   @Override
   T get(UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
-    return get(path, query, fragment);
+    return this.get(path, query, fragment);
   }
 
   abstract UriPathMapper<T> merged(UriPathMapper<T> that);
@@ -51,7 +37,7 @@ abstract class UriPathMapper<T> extends UriAuthorityMapper<T> {
   @Override
   UriAuthorityMapper<T> merged(UriAuthorityMapper<T> that) {
     if (that instanceof UriPathMapper<?>) {
-      return merged((UriPathMapper<T>) that);
+      return this.merged((UriPathMapper<T>) that);
     } else {
       return that;
     }
@@ -61,7 +47,7 @@ abstract class UriPathMapper<T> extends UriAuthorityMapper<T> {
 
   @Override
   UriAuthorityMapper<T> removed(UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
-    return removed(path, query, fragment);
+    return this.removed(path, query, fragment);
   }
 
   abstract UriPathMapper<T> unmerged(UriPathMapper<T> that);
@@ -69,9 +55,23 @@ abstract class UriPathMapper<T> extends UriAuthorityMapper<T> {
   @Override
   UriAuthorityMapper<T> unmerged(UriAuthorityMapper<T> that) {
     if (that instanceof UriPathMapper<?>) {
-      return unmerged((UriPathMapper<T>) that);
+      return this.unmerged((UriPathMapper<T>) that);
     } else {
       return this;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  static <T> UriPathMapper<T> compile(Uri pattern, UriPath path, UriQuery query, UriFragment fragment, T value) {
+    if (!path.isEmpty()) {
+      final String segment = path.head();
+      if (!segment.isEmpty() && segment.charAt(0) == ':') {
+        return new UriPathMapping<T>(HashTrieMap.<String, UriPathMapper<T>>empty(), UriPathMapper.compile(pattern, path.tail(), query, fragment, value), (UriQueryMapper<T>) empty());
+      } else {
+        return new UriPathMapping<T>(HashTrieMap.<String, UriPathMapper<T>>empty().updated(segment, UriPathMapper.compile(pattern, path.tail(), query, fragment, value)), (UriPathMapper<T>) empty(), (UriQueryMapper<T>) empty());
+      }
+    } else {
+      return new UriPathMapping<T>(HashTrieMap.<String, UriPathMapper<T>>empty(), (UriPathMapper<T>) empty(), UriQueryMapper.compile(pattern, query, fragment, value));
     }
   }
 

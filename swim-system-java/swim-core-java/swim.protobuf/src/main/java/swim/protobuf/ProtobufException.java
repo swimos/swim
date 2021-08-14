@@ -16,8 +16,6 @@ package swim.protobuf;
 
 public class ProtobufException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public ProtobufException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class ProtobufException extends RuntimeException {
   public ProtobufException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

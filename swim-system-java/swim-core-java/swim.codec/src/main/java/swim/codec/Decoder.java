@@ -21,97 +21,63 @@ package swim.codec;
  *
  * <h3>Decoder states</h3>
  * <p>A {@code Decoder} is always in one of three states: <em>cont</em>inue,
- * <em>done</em>, or <em>error</em>.  The <em>cont</em> state indicates that
+ * <em>done</em>, or <em>error</em>. The <em>cont</em> state indicates that
  * {@link #feed(InputBuffer) feed} is ready to consume input buffer data; the
  * <em>done</em> state indicates that decoding terminated successfully, and that
  * {@link #bind() bind} will return the decoded result; the <em>error</em> state
  * indicates that decoding terminated in failure, and that {@link #trap() trap}
- * will return the decode error.  {@code Decoder} subclasses default to the
+ * will return the decode error. {@code Decoder} subclasses default to the
  * <em>cont</em> state.</p>
  *
  * <h3>Feeding input</h3>
  * <p>The {@link #feed(InputBuffer)} method incrementally decodes as much
  * {@code InputBuffer} data as it can, before returning another {@code Decoder}
  * that represents the continuation of how to decode additional {@code
- * InputBuffer} data.  The {@code InputBuffer} passed to {@code feed} is only
+ * InputBuffer} data. The {@code InputBuffer} passed to {@code feed} is only
  * guaranteed to be valid for the duration of the method call; references to
  * the provided {@code InputBuffer} instance must not be stored.</p>
  *
  * <h3>Decoder results</h3>
  * <p>A {@code Decoder} produces a decoded result of type {@code O}, obtained
- * via the {@link #bind()} method.  {@code bind} is only guaranteed to return
+ * via the {@link #bind()} method. {@code bind} is only guaranteed to return
  * a result when in the <em>done</em> state; though {@code bind} may optionally
- * make available partial results in other states.  A failed {@code Decoder}
- * provides a decode error via the {@link #trap()} method.  {@code trap} is
+ * make available partial results in other states. A failed {@code Decoder}
+ * provides a decode error via the {@link #trap()} method. {@code trap} is
  * only guaranteed to return an error when in the <em>error</em> state.</p>
  *
  * <h3>Continuations</h3>
  * <p>A {@code Decoder} instance represents a continuation of how to decode
- * remaining {@code InputBuffer} data.  Rather than parsing a completely
+ * remaining {@code InputBuffer} data. Rather than parsing a completely
  * buffered input in one go, a {@code Decoder} takes a buffered chunk and
  * returns another {@code Decoder} instance that knows how to decode subsequent
- * buffered chunks.  This enables non-blocking, incremental decoding that can
+ * buffered chunks. This enables non-blocking, incremental decoding that can
  * be interrupted whenever an {@code InputBuffer} runs out of immediately
- * available data.  A {@code Decoder} terminates by returning a continuation
+ * available data. A {@code Decoder} terminates by returning a continuation
  * in either the <em>done</em> state, or the <em>error</em> state. {@link
  * Decoder#done(Object)} returns a {@code Decoder} in the <em>done</em> state.
  * {@link Decoder#error(Throwable)} returns a {@code Decoder} in the
  * <em>error</em> state.</p>
  *
  * <h3>Immutability</h3>
- * <p>A {@code Decoder} should be immutable.  Specifically, an invocation of
+ * <p>A {@code Decoder} should be immutable. Specifically, an invocation of
  * {@code feed} should not alter the behavior of future calls to {@code feed}
- * on the same {@code Decoder} instance.  A {@code Decoder} should only mutate
+ * on the same {@code Decoder} instance. A {@code Decoder} should only mutate
  * its internal state if it's essential to do so, such as for critical path
  * performance reasons.</p>
  *
  * <h3>Forking</h3>
  * <p>The {@link #fork(Object)} method passes an out-of-band condition to a
  * {@code Decoder}, yielding a {@code Decoder} continuation whose behavior may
- * be altered by the given condition.  For example, a text {@code Decoder}
+ * be altered by the given condition. For example, a text {@code Decoder}
  * might support a {@code fork} condition to change the character encoding.
  * The types of conditions accepted by {@code fork}, and their intended
  * semantics, are implementation defined.</p>
  */
 public abstract class Decoder<O> {
 
-  private static Decoder<Object> done;
-
-  /**
-   * Returns a {@code Decoder} in the <em>done</em> state that {@code bind}s
-   * a {@code null} decoded result.
-   */
-  @SuppressWarnings("unchecked")
-  public static <O> Decoder<O> done() {
-    if (done == null) {
-      done = new DecoderDone<Object>(null);
-    }
-    return (Decoder<O>) done;
-  }
-
-  /**
-   * Returns a {@code Decoder} in the <em>done</em> state that {@code bind}s
-   * the given decoded {@code output}.
-   */
-  public static <O> Decoder<O> done(O output) {
-    if (output == null) {
-      return done();
-    } else {
-      return new DecoderDone<O>(output);
-    }
-  }
-
-  /**
-   * Returns a {@code Decoder} in the <em>error</em> state that {@code trap}s
-   * the given decode {@code error}.
-   */
-  public static <O> Decoder<O> error(Throwable error) {
-    return new DecoderError<O>(error);
-  }
-
   /**
    * Returns {@code true} when {@link #feed(InputBuffer) feed} is able to
-   * consume {@code InputBuffer} data.  i.e. this {@code Decoder} is in the
+   * consume {@code InputBuffer} data. i.e. this {@code Decoder} is in the
    * <em>cont</em> state.
    */
   public boolean isCont() {
@@ -120,7 +86,7 @@ public abstract class Decoder<O> {
 
   /**
    * Returns {@code true} when decoding has terminated successfully, and {@link
-   * #bind() bind} will return the decoded result.  i.e. this {@code Decoder}
+   * #bind() bind} will return the decoded result. i.e. this {@code Decoder}
    * is in the <em>done</em> state.
    */
   public boolean isDone() {
@@ -129,7 +95,7 @@ public abstract class Decoder<O> {
 
   /**
    * Returns {@code true} when decoding has terminated in failure, and {@link
-   * #trap() trap} will return the decode error.  i.e. this {@code Decoder} is
+   * #trap() trap} will return the decode error. i.e. this {@code Decoder} is
    * in the <em>error</em> state.
    */
   public boolean isError() {
@@ -139,7 +105,7 @@ public abstract class Decoder<O> {
   /**
    * Incrementally decodes as much {@code input} buffer data as possible, and
    * returns another {@code Decoder} that represents the continuation of how to
-   * decode additional buffer data.  If {@code isLast} is {@code true}, then
+   * decode additional buffer data. If {@code isLast} is {@code true}, then
    * {@code feed} <em>must</em> return a terminated {@code Decoder}, i.e. a
    * {@code Decoder} in the <em>done</em> state, or in the <em>error</em>
    * state. The given {@code input} buffer is only guaranteed to be valid for
@@ -157,7 +123,7 @@ public abstract class Decoder<O> {
   }
 
   /**
-   * Returns the decoded result.  Only guaranteed to return a result when in
+   * Returns the decoded result. Only guaranteed to return a result when in
    * the <em>done</em> state.
    *
    * @throws IllegalStateException if this {@code Decoder} is not in the
@@ -168,7 +134,7 @@ public abstract class Decoder<O> {
   }
 
   /**
-   * Returns the decode error.  Only guaranteed to return an error when in the
+   * Returns the decode error. Only guaranteed to return an error when in the
    * <em>error</em> state.
    *
    * @throws IllegalStateException if this {@code Decoder} is not in the
@@ -187,6 +153,40 @@ public abstract class Decoder<O> {
    */
   public <O> Decoder<O> asError() {
     throw new IllegalStateException();
+  }
+
+  private static Decoder<Object> done;
+
+  /**
+   * Returns a {@code Decoder} in the <em>done</em> state that {@code bind}s
+   * a {@code null} decoded result.
+   */
+  @SuppressWarnings("unchecked")
+  public static <O> Decoder<O> done() {
+    if (Decoder.done == null) {
+      Decoder.done = new DecoderDone<Object>(null);
+    }
+    return (Decoder<O>) Decoder.done;
+  }
+
+  /**
+   * Returns a {@code Decoder} in the <em>done</em> state that {@code bind}s
+   * the given decoded {@code output}.
+   */
+  public static <O> Decoder<O> done(O output) {
+    if (output == null) {
+      return Decoder.done();
+    } else {
+      return new DecoderDone<O>(output);
+    }
+  }
+
+  /**
+   * Returns a {@code Decoder} in the <em>error</em> state that {@code trap}s
+   * the given decode {@code error}.
+   */
+  public static <O> Decoder<O> error(Throwable error) {
+    return new DecoderError<O>(error);
   }
 
 }

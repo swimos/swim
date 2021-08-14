@@ -36,7 +36,7 @@ final class LambdaFuncWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.bindings, this.template, this.part, this.step);
+    return LambdaFuncWriter.write(output, this.recon, this.bindings, this.template, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, V bindings, V template) {
@@ -85,22 +85,22 @@ final class LambdaFuncWriter<I, V> extends Writer<Object, Object> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new LambdaFuncWriter<I, V>(recon, bindings, template, part, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon,
                                              V bindings, V template) {
-    return write(output, recon, bindings, template, null, 1);
+    return LambdaFuncWriter.write(output, recon, bindings, template, null, 1);
   }
 
 }

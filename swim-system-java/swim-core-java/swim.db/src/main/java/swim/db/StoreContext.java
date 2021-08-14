@@ -26,6 +26,85 @@ public class StoreContext {
     this(StoreSettings.standard());
   }
 
+  public final StoreSettings settings() {
+    return this.settings;
+  }
+
+  public boolean pageShouldSplit(Store store, Database database, Page page) {
+    return PageContext.pageShouldSplit(page, this.settings.pageSplitSize);
+  }
+
+  public boolean pageShouldMerge(Store store, Database database, Page page) {
+    return PageContext.pageShouldMerge(page, this.settings.pageSplitSize);
+  }
+
+  public void hitPage(Store store, Database database, Page page) {
+    // nop
+  }
+
+  public void treeDidOpen(Store store, Database database, Tree tree) {
+    // nop
+  }
+
+  public void treeDidClose(Store store, Database database, Tree tree) {
+    // nop
+  }
+
+  public void treeDidChange(Store store, Database database, Tree newTree, Tree oldTree) {
+    StoreContext.autoCommit(database, this.settings.autoCommitSize, this.settings.autoCommitInterval, Commit.forced());
+  }
+
+  public void databaseWillOpen(Store store, Database database) {
+    // nop
+  }
+
+  public void databaseDidOpen(Store store, Database database) {
+    // nop
+  }
+
+  public void databaseWillClose(Store store, Database database) {
+    // nop
+  }
+
+  public void databaseDidClose(Store store, Database database) {
+    // nop
+  }
+
+  public Commit databaseWillCommit(Store store, Database database, Commit commit) {
+    return StoreContext.autoCommitShifted(store, this.settings.maxZoneSize, commit);
+  }
+
+  public void databaseDidCommit(Store store, Database database, Chunk chunk) {
+    if (chunk != null && !chunk.commit().isClosed()) {
+      StoreContext.autoCompact(store, database, this.settings.minTreeFill, this.settings.minCompactSize,
+                               Compact.forced(this.settings.deleteDelay));
+    }
+  }
+
+  public void databaseCommitDidFail(Store store, Database database, Throwable error) {
+    error.printStackTrace();
+  }
+
+  public Compact databaseWillCompact(Store store, Database database, Compact compact) {
+    return StoreContext.autoCompactShifted(store, this.settings.minZoneFill, compact);
+  }
+
+  public void databaseDidCompact(Store store, Database database, Compact compact) {
+    // nop
+  }
+
+  public void databaseCompactDidFail(Store store, Database database, Throwable error) {
+    error.printStackTrace();
+  }
+
+  public void databaseDidShiftZone(Store store, Database database, Zone newZone) {
+    // nop
+  }
+
+  public void databaseDidDeleteZone(Store store, Database database, int zoneId) {
+    // nop
+  }
+
   public static boolean autoCommit(Database database, long autoCommitSize,
                                    int autoCommitInterval, Commit commit) {
     if (autoCommitInterval > 0 && (database.diffSize() > autoCommitSize
@@ -68,85 +147,6 @@ public class StoreContext {
     } else {
       return compact;
     }
-  }
-
-  public final StoreSettings settings() {
-    return this.settings;
-  }
-
-  public boolean pageShouldSplit(Store store, Database database, Page page) {
-    return PageContext.pageShouldSplit(page, this.settings.pageSplitSize);
-  }
-
-  public boolean pageShouldMerge(Store store, Database database, Page page) {
-    return PageContext.pageShouldMerge(page, this.settings.pageSplitSize);
-  }
-
-  public void hitPage(Store store, Database database, Page page) {
-    // nop
-  }
-
-  public void treeDidOpen(Store store, Database database, Tree tree) {
-    // nop
-  }
-
-  public void treeDidClose(Store store, Database database, Tree tree) {
-    // nop
-  }
-
-  public void treeDidChange(Store store, Database database, Tree newTree, Tree oldTree) {
-    autoCommit(database, this.settings.autoCommitSize, this.settings.autoCommitInterval, Commit.forced());
-  }
-
-  public void databaseWillOpen(Store store, Database database) {
-    // nop
-  }
-
-  public void databaseDidOpen(Store store, Database database) {
-    // nop
-  }
-
-  public void databaseWillClose(Store store, Database database) {
-    // nop
-  }
-
-  public void databaseDidClose(Store store, Database database) {
-    // nop
-  }
-
-  public Commit databaseWillCommit(Store store, Database database, Commit commit) {
-    return autoCommitShifted(store, this.settings.maxZoneSize, commit);
-  }
-
-  public void databaseDidCommit(Store store, Database database, Chunk chunk) {
-    if (chunk != null && !chunk.commit().isClosed()) {
-      autoCompact(store, database, this.settings.minTreeFill, this.settings.minCompactSize,
-          Compact.forced(this.settings.deleteDelay));
-    }
-  }
-
-  public void databaseCommitDidFail(Store store, Database database, Throwable error) {
-    error.printStackTrace();
-  }
-
-  public Compact databaseWillCompact(Store store, Database database, Compact compact) {
-    return autoCompactShifted(store, this.settings.minZoneFill, compact);
-  }
-
-  public void databaseDidCompact(Store store, Database database, Compact compact) {
-    // nop
-  }
-
-  public void databaseCompactDidFail(Store store, Database database, Throwable error) {
-    error.printStackTrace();
-  }
-
-  public void databaseDidShiftZone(Store store, Database database, Zone newZone) {
-    // nop
-  }
-
-  public void databaseDidDeleteZone(Store store, Database database, int zoneId) {
-    // nop
   }
 
 }

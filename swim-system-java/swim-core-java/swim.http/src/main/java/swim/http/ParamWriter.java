@@ -38,6 +38,11 @@ final class ParamWriter extends Writer<Object, Object> {
     this(http, key, value, null, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return ParamWriter.write(output, this.http, this.key, this.value, this.part, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String key,
                                       String value, Writer<?, ?> part, int step) {
     if (step == 1) {
@@ -49,7 +54,7 @@ final class ParamWriter extends Writer<Object, Object> {
       if (part.isDone()) {
         part = null;
         if (value.isEmpty()) {
-          return done();
+          return Writer.done();
         } else {
           step = 2;
         }
@@ -68,26 +73,21 @@ final class ParamWriter extends Writer<Object, Object> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new ParamWriter(http, key, value, part, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String key, String value) {
-    return write(output, http, key, value, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.key, this.value, this.part, this.step);
+    return ParamWriter.write(output, http, key, value, null, 1);
   }
 
 }

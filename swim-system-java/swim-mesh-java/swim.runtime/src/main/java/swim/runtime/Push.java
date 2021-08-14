@@ -16,7 +16,6 @@ package swim.runtime;
 
 import swim.api.auth.Identity;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.uri.Uri;
 
 public class Push<M> {
@@ -47,8 +46,8 @@ public class Push<M> {
   }
 
   public Push<M> meshUri(Uri meshUri) {
-    return copy(meshUri, this.hostUri, this.nodeUri, this.laneUri,
-                this.prio, this.identity, this.message, this.cont);
+    return this.copy(meshUri, this.hostUri, this.nodeUri, this.laneUri,
+                     this.prio, this.identity, this.message, this.cont);
   }
 
   public final Uri hostUri() {
@@ -56,8 +55,8 @@ public class Push<M> {
   }
 
   public Push<M> hostUri(Uri hostUri) {
-    return copy(this.meshUri, hostUri, this.nodeUri, this.laneUri,
-                this.prio, this.identity, this.message, this.cont);
+    return this.copy(this.meshUri, hostUri, this.nodeUri, this.laneUri,
+                     this.prio, this.identity, this.message, this.cont);
   }
 
   public final Uri nodeUri() {
@@ -65,8 +64,8 @@ public class Push<M> {
   }
 
   public Push<M> nodeUri(Uri nodeUri) {
-    return copy(this.meshUri, this.hostUri, nodeUri, this.laneUri,
-                this.prio, this.identity, this.message, this.cont);
+    return this.copy(this.meshUri, this.hostUri, nodeUri, this.laneUri,
+                     this.prio, this.identity, this.message, this.cont);
   }
 
   public final Uri laneUri() {
@@ -74,8 +73,8 @@ public class Push<M> {
   }
 
   public Push<M> laneUri(Uri laneUri) {
-    return copy(this.meshUri, this.hostUri, this.nodeUri, laneUri,
-                this.prio, this.identity, this.message, this.cont);
+    return this.copy(this.meshUri, this.hostUri, this.nodeUri, laneUri,
+                     this.prio, this.identity, this.message, this.cont);
   }
 
   public final float prio() {
@@ -83,8 +82,8 @@ public class Push<M> {
   }
 
   public Push<M> prio(float prio) {
-    return copy(this.meshUri, this.hostUri, this.nodeUri, this.laneUri,
-                prio, this.identity, this.message, this.cont);
+    return this.copy(this.meshUri, this.hostUri, this.nodeUri, this.laneUri,
+                     prio, this.identity, this.message, this.cont);
   }
 
   public final Identity identity() {
@@ -109,7 +108,7 @@ public class Push<M> {
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;

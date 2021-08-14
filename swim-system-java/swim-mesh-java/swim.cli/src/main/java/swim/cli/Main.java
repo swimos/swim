@@ -20,7 +20,7 @@ import swim.client.ClientRuntime;
 public final class Main {
 
   private Main() {
-    // stub
+    // static
   }
 
   public static void main(String[] args) {

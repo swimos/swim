@@ -18,23 +18,13 @@ import swim.collections.HashTrieMap;
 
 abstract class UriSchemePattern extends UriPattern {
 
-  static UriSchemePattern compile(Uri pattern, UriScheme scheme, UriAuthority authority,
-                                  UriPath path, UriQuery query, UriFragment fragment) {
-    if (scheme.isDefined()) {
-      return new UriSchemeLiteral(scheme, UriAuthorityPattern.compile(pattern, authority,
-          path, query, fragment));
-    } else {
-      return UriAuthorityPattern.compile(pattern, authority, path, query, fragment);
-    }
-  }
-
   abstract HashTrieMap<String, String> unapply(UriScheme scheme, UriAuthority authority,
                                                UriPath path, UriQuery query, UriFragment fragment,
                                                HashTrieMap<String, String> args);
 
   @Override
   public HashTrieMap<String, String> unapply(Uri uri, HashTrieMap<String, String> args) {
-    return unapply(uri.scheme(), uri.authority(), uri.path(), uri.query(), uri.fragment(), args);
+    return this.unapply(uri.scheme(), uri.authority(), uri.path(), uri.query(), uri.fragment(), args);
   }
 
   abstract boolean matches(UriScheme scheme, UriAuthority authority, UriPath path,
@@ -42,7 +32,16 @@ abstract class UriSchemePattern extends UriPattern {
 
   @Override
   public boolean matches(Uri uri) {
-    return matches(uri.scheme(), uri.authority(), uri.path(), uri.query(), uri.fragment());
+    return this.matches(uri.scheme(), uri.authority(), uri.path(), uri.query(), uri.fragment());
+  }
+
+  static UriSchemePattern compile(Uri pattern, UriScheme scheme, UriAuthority authority,
+                                  UriPath path, UriQuery query, UriFragment fragment) {
+    if (scheme.isDefined()) {
+      return new UriSchemeLiteral(scheme, UriAuthorityPattern.compile(pattern, authority, path, query, fragment));
+    } else {
+      return UriAuthorityPattern.compile(pattern, authority, path, query, fragment);
+    }
   }
 
 }

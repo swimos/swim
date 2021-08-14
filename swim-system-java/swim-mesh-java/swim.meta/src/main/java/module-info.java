@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /**
- * Swim meta runtime.
+ * Swim reflection runtime.
  */
 module swim.meta {
   requires swim.recon;

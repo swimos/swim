@@ -19,8 +19,7 @@ import swim.io.IpSocketRef;
 
 public class SecureMqttSocketSpec extends MqttSocketBehaviors {
 
-  final MqttSettings mqttSettings = MqttSettings.standard()
-      .tlsSettings(TestTlsSettings.tlsSettings());
+  final MqttSettings mqttSettings = MqttSettings.standard().tlsSettings(TestTlsSettings.tlsSettings());
 
   @Override
   protected IpServiceRef bind(MqttEndpoint endpoint, MqttService service) {

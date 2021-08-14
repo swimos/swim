@@ -21,7 +21,7 @@ package swim.streamlet;
 public interface Streamlet<I, O> extends StreamletScope<O> {
 
   /**
-   * Returns the lexically scoped parent of this {@code Streamlet}.  Returns
+   * Returns the lexically scoped parent of this {@code Streamlet}. Returns
    * {@code null} if this {@code Streamlet} has no lexical parent.
    */
   @Override
@@ -53,7 +53,7 @@ public interface Streamlet<I, O> extends StreamletScope<O> {
   /**
    * Connects the {@code Inlet} of this {@code Streamlet}, identified by the
    * given {@code key}, to the {@code input} from which the {@code Inlet}
-   * should acquire its state.  Delegates to {@link Inlet#bindInput(Outlet)} on
+   * should acquire its state. Delegates to {@link Inlet#bindInput(Outlet)} on
    * the identified {@code Inlet}.
    *
    * @throws IllegalArgumentException if this {@code Streamlet} has no {@code
@@ -64,7 +64,7 @@ public interface Streamlet<I, O> extends StreamletScope<O> {
   /**
    * Disconnects the {@code Inlet} of this {@code Streamlet}, identified by the
    * given {@code key}, from its {@link Inlet#input() input} {@code Outlet},
-   * if connected.  Delegates to {@link Inlet#unbindInput()} on the
+   * if connected. Delegates to {@link Inlet#unbindInput()} on the
    * identified {@code Inlet}.
    *
    * @throws IllegalArgumentException if this {@code Streamlet} has no {@code
@@ -82,21 +82,21 @@ public interface Streamlet<I, O> extends StreamletScope<O> {
 
   /**
    * Disconnects all {@code Inlet}s dominated by this {@code Streamlet} in the
-   * dataflow dependency graph.  Used to recursively clean up chains of
+   * dataflow dependency graph. Used to recursively clean up chains of
    * combinators terminating at this {@code Streamlet}.
    */
   void disconnectInputs();
 
   /**
    * Disconnects all {@code Inlets}s dominated by this {@code Streamlet} in the
-   * dataflow graph.  Used to recursively clean up chains of combinators
+   * dataflow graph. Used to recursively clean up chains of combinators
    * originating from this {@code Streamlet}.
    */
   void disconnectOutputs();
 
   /**
    * Marks this {@code Streamlet}—and all of its outlets—as having inconsistent
-   * state.  Decohering a {@code Streamlet} will recursively decohere all
+   * state. Decohering a {@code Streamlet} will recursively decohere all
    * streamlets that transitively depend on the state of this {@code Streamlet}.
    * Decohering a {@code Streamlet} does not cause its state to be recomputed.
    * A subsequent {@link #recohere(int)} call will eventually make the state of
@@ -106,12 +106,12 @@ public interface Streamlet<I, O> extends StreamletScope<O> {
 
   /**
    * Updates the state of this {@code Streamlet} to make it consistent with the
-   * target {@code version}.  The {@code Streamlet} only needs to update if its
+   * target {@code version}. The {@code Streamlet} only needs to update if its
    * current {@code version} differs from the target {@code version}.
    * To update its state, the {@code Streamlet} first invokes {@link
    * Inlet#recohereOutput(int)} on each of its inlets, to ensure that its
-   * input states are coherent.  It then recomputes its own state in an
-   * implementation defined manner.  Finally, it invokes {@link
+   * input states are coherent. It then recomputes its own state in an
+   * implementation defined manner. Finally, it invokes {@link
    * Outlet#recohereInput(int)} on its outlets, causing all transitively
    * dependent streamlets to make their own states coherent again.
    */

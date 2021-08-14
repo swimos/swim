@@ -18,26 +18,13 @@ import swim.collections.HashTrieMap;
 
 abstract class UriPathPattern extends UriAuthorityPattern {
 
-  static UriPathPattern compile(Uri pattern, UriPath path, UriQuery query, UriFragment fragment) {
-    if (!path.isEmpty()) {
-      final String component = path.head();
-      if (!component.isEmpty() && component.charAt(0) == ':') {
-        return new UriPathVariable(component.substring(1), compile(pattern, path.tail(), query, fragment));
-      } else {
-        return new UriPathLiteral(component, compile(pattern, path.tail(), query, fragment));
-      }
-    } else {
-      return UriQueryPattern.compile(pattern, query, fragment);
-    }
-  }
-
   Uri apply(UriScheme scheme, UriAuthority authority, UriPathBuilder path, String[] args, int index) {
-    return apply(scheme, authority, path.bind(), args, index);
+    return this.apply(scheme, authority, path.bind(), args, index);
   }
 
   @Override
   Uri apply(UriScheme scheme, UriAuthority authority, String[] args, int index) {
-    return apply(scheme, authority, new UriPathBuilder(), args, index);
+    return this.apply(scheme, authority, new UriPathBuilder(), args, index);
   }
 
   abstract HashTrieMap<String, String> unapply(UriPath path, UriQuery query, UriFragment fragment,
@@ -46,7 +33,7 @@ abstract class UriPathPattern extends UriAuthorityPattern {
   @Override
   HashTrieMap<String, String> unapply(UriAuthority authority, UriPath path, UriQuery query,
                                       UriFragment fragment, HashTrieMap<String, String> args) {
-    return unapply(path, query, fragment, args);
+    return this.unapply(path, query, fragment, args);
   }
 
   abstract boolean matches(UriPath path, UriQuery query, UriFragment fragment);
@@ -54,9 +41,22 @@ abstract class UriPathPattern extends UriAuthorityPattern {
   @Override
   boolean matches(UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
     if (!authority.isDefined()) {
-      return matches(path, query, fragment);
+      return this.matches(path, query, fragment);
     } else {
       return false;
+    }
+  }
+
+  static UriPathPattern compile(Uri pattern, UriPath path, UriQuery query, UriFragment fragment) {
+    if (!path.isEmpty()) {
+      final String component = path.head();
+      if (!component.isEmpty() && component.charAt(0) == ':') {
+        return new UriPathVariable(component.substring(1), UriPathPattern.compile(pattern, path.tail(), query, fragment));
+      } else {
+        return new UriPathLiteral(component, UriPathPattern.compile(pattern, path.tail(), query, fragment));
+      }
+    } else {
+      return UriQueryPattern.compile(pattern, query, fragment);
     }
   }
 

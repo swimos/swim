@@ -15,17 +15,18 @@
 package swim.util;
 
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
+import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
 /**
  * A hashed generational set evicts the least recently used value with the
- * worst hit rate per hash bucket.  HashGenSet is a concurrent and lock-free
+ * worst hit rate per hash bucket. HashGenSet is a concurrent and lock-free
  * LRFU cache, with O(1) access time, that strongly references its values.
  * <p>
  * Maintaining four "generations" of cached values per hash bucket, the cache
  * discards from the younger generations based on least recent usage, and
  * promotes younger generations to older generations based on most frequent
- * usage.  Cache misses count as negative usage of the older generations,
+ * usage. Cache misses count as negative usage of the older generations,
  * biasing the cache against least recently used values with poor hit rates.
  * <p>
  * The evict(V) method is guaranteed to be called when a value is displaced
@@ -33,190 +34,183 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
  */
 public class HashGenSet<V> {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> BUCKET_GEN4_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen4Weight");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> BUCKET_GEN3_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen3Weight");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> BUCKET_GEN2_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen2Weight");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> BUCKET_GEN1_WEIGHT =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen1Weight");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSet<?>> GEN4_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen4Hits");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSet<?>> GEN3_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen3Hits");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSet<?>> GEN2_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen2Hits");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSet<?>> GEN1_HITS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen1Hits");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSet<?>> MISSES =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "misses");
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HashGenSet<?>> EVICTS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "evicts");
   final AtomicReferenceArray<HashGenSetBucket<V>> buckets;
-  volatile int gen4Hits;
-  volatile int gen3Hits;
-  volatile int gen2Hits;
-  volatile int gen1Hits;
-  volatile int misses;
-  volatile int evicts;
+  volatile long gen4Hits;
+  volatile long gen3Hits;
+  volatile long gen2Hits;
+  volatile long gen1Hits;
+  volatile long misses;
+  volatile long evicts;
 
   public HashGenSet(int size) {
-    buckets = new AtomicReferenceArray<HashGenSetBucket<V>>(size);
+    this.buckets = new AtomicReferenceArray<HashGenSetBucket<V>>(size);
+    this.gen4Hits = 0L;
+    this.gen3Hits = 0L;
+    this.gen2Hits = 0L;
+    this.gen1Hits = 0L;
+    this.misses = 0L;
+    this.evicts = 0L;
   }
 
   protected void evict(V value) {
   }
 
   public V put(V value) {
+    final AtomicReferenceArray<HashGenSetBucket<V>> buckets = this.buckets;
     if (buckets.length() == 0) {
       return value;
     }
-    HashGenSetBucket<V> bucket;
+    HashGenSetBucket<V> oldBucket;
     HashGenSetBucket<V> newBucket;
     V evictVal = null;
     V cacheVal;
     final int index = Math.abs(value.hashCode()) % buckets.length();
     do {
-      bucket = buckets.get(index);
-      if (bucket == null) {
+      oldBucket = buckets.get(index);
+      if (oldBucket == null) {
         newBucket = new HashGenSetBucket<V>(value);
         cacheVal = value;
       } else {
-        if (bucket.gen4Val != null && value.equals(bucket.gen4Val)) {
-          GEN4_HITS.incrementAndGet(this);
-          BUCKET_GEN4_WEIGHT.incrementAndGet(bucket);
-          newBucket = bucket;
-          cacheVal = bucket.gen4Val;
-        } else if (bucket.gen3Val != null && value.equals(bucket.gen3Val)) {
-          GEN3_HITS.incrementAndGet(this);
-          if (BUCKET_GEN3_WEIGHT.incrementAndGet(bucket) > bucket.gen4Weight) {
-            newBucket = new HashGenSetBucket<V>(
-                bucket.gen3Val, bucket.gen3Weight,
-                bucket.gen4Val, bucket.gen4Weight,
-                bucket.gen2Val, bucket.gen2Weight,
-                bucket.gen1Val, bucket.gen1Weight);
+        if (oldBucket.gen4Val != null && value.equals(oldBucket.gen4Val)) {
+          HashGenSet.GEN4_HITS.incrementAndGet(this);
+          HashGenSetBucket.GEN4_WEIGHT.incrementAndGet(oldBucket);
+          newBucket = oldBucket;
+          cacheVal = oldBucket.gen4Val;
+        } else if (oldBucket.gen3Val != null && value.equals(oldBucket.gen3Val)) {
+          HashGenSet.GEN3_HITS.incrementAndGet(this);
+          if (HashGenSetBucket.GEN3_WEIGHT.incrementAndGet(oldBucket) > oldBucket.gen4Weight) {
+            newBucket = new HashGenSetBucket<V>(oldBucket.gen3Val, oldBucket.gen3Weight,
+                                                oldBucket.gen4Val, oldBucket.gen4Weight,
+                                                oldBucket.gen2Val, oldBucket.gen2Weight,
+                                                oldBucket.gen1Val, oldBucket.gen1Weight);
           } else {
-            newBucket = bucket;
+            newBucket = oldBucket;
           }
-          cacheVal = bucket.gen3Val;
-        } else if (bucket.gen2Val != null && value.equals(bucket.gen2Val)) {
-          GEN2_HITS.incrementAndGet(this);
-          if (BUCKET_GEN2_WEIGHT.incrementAndGet(bucket) > bucket.gen3Weight) {
-            newBucket = new HashGenSetBucket<V>(
-                bucket.gen4Val, bucket.gen4Weight,
-                bucket.gen2Val, bucket.gen2Weight,
-                bucket.gen3Val, bucket.gen3Weight,
-                bucket.gen1Val, bucket.gen1Weight);
+          cacheVal = oldBucket.gen3Val;
+        } else if (oldBucket.gen2Val != null && value.equals(oldBucket.gen2Val)) {
+          HashGenSet.GEN2_HITS.incrementAndGet(this);
+          if (HashGenSetBucket.GEN2_WEIGHT.incrementAndGet(oldBucket) > oldBucket.gen3Weight) {
+            newBucket = new HashGenSetBucket<V>(oldBucket.gen4Val, oldBucket.gen4Weight,
+                                                oldBucket.gen2Val, oldBucket.gen2Weight,
+                                                oldBucket.gen3Val, oldBucket.gen3Weight,
+                                                oldBucket.gen1Val, oldBucket.gen1Weight);
           } else {
-            newBucket = bucket;
+            newBucket = oldBucket;
           }
-          cacheVal = bucket.gen2Val;
-        } else if (bucket.gen1Val != null && value.equals(bucket.gen1Val)) {
-          GEN1_HITS.incrementAndGet(this);
-          if (BUCKET_GEN1_WEIGHT.incrementAndGet(bucket) > bucket.gen2Weight) {
-            newBucket = new HashGenSetBucket<V>(
-                bucket.gen4Val, bucket.gen4Weight,
-                bucket.gen3Val, bucket.gen3Weight,
-                bucket.gen1Val, bucket.gen1Weight,
-                bucket.gen2Val, bucket.gen2Weight);
+          cacheVal = oldBucket.gen2Val;
+        } else if (oldBucket.gen1Val != null && value.equals(oldBucket.gen1Val)) {
+          HashGenSet.GEN1_HITS.incrementAndGet(this);
+          if (HashGenSetBucket.GEN1_WEIGHT.incrementAndGet(oldBucket) > oldBucket.gen2Weight) {
+            newBucket = new HashGenSetBucket<V>(oldBucket.gen4Val, oldBucket.gen4Weight,
+                                                oldBucket.gen3Val, oldBucket.gen3Weight,
+                                                oldBucket.gen1Val, oldBucket.gen1Weight,
+                                                oldBucket.gen2Val, oldBucket.gen2Weight);
           } else {
-            newBucket = bucket;
+            newBucket = oldBucket;
           }
-          cacheVal = bucket.gen1Val;
+          cacheVal = oldBucket.gen1Val;
         } else {
-          MISSES.incrementAndGet(this);
-          evictVal = bucket.gen2Val;
+          HashGenSet.MISSES.incrementAndGet(this);
+          evictVal = oldBucket.gen2Val;
           // Penalize older gens for thrash. Promote gen1 to prevent nacent gens
           // from flip-flopping. If sacrificed gen2 was worth keeping, it likely
           // would have already been promoted.
-          newBucket = new HashGenSetBucket<V>(
-              bucket.gen4Val, bucket.gen4Weight - 1,
-              bucket.gen3Val, bucket.gen3Weight - 1,
-              bucket.gen1Val, bucket.gen1Weight,
-              value, 1);
+          newBucket = new HashGenSetBucket<V>(oldBucket.gen4Val, oldBucket.gen4Weight - 1,
+                                              oldBucket.gen3Val, oldBucket.gen3Weight - 1,
+                                              oldBucket.gen1Val, oldBucket.gen1Weight,
+                                              value, 1);
           cacheVal = value;
         }
       }
-    } while (bucket != newBucket && !buckets.compareAndSet(index, bucket, newBucket));
+    } while (oldBucket != newBucket && !buckets.compareAndSet(index, oldBucket, newBucket));
     if (evictVal != null) {
-      EVICTS.incrementAndGet(this);
-      evict(evictVal);
+      HashGenSet.EVICTS.incrementAndGet(this);
+      this.evict(evictVal);
     }
     return cacheVal;
   }
 
   public boolean remove(V value) {
+    final AtomicReferenceArray<HashGenSetBucket<V>> buckets = this.buckets;
     if (buckets.length() == 0) {
       return false;
     }
-    HashGenSetBucket<V> bucket;
+    HashGenSetBucket<V> oldBucket;
     HashGenSetBucket<V> newBucket;
     boolean removed;
     final int index = Math.abs(value.hashCode()) % buckets.length();
     do {
-      bucket = buckets.get(index);
-      if (bucket == null) {
+      oldBucket = buckets.get(index);
+      if (oldBucket == null) {
         newBucket = null;
         removed = false;
       } else {
-        if (bucket.gen4Val != null && value.equals(bucket.gen4Val)) {
-          newBucket = new HashGenSetBucket<V>(
-              bucket.gen3Val, bucket.gen3Weight,
-              bucket.gen2Val, bucket.gen2Weight,
-              bucket.gen1Val, bucket.gen1Weight,
-              null, 0);
+        if (oldBucket.gen4Val != null && value.equals(oldBucket.gen4Val)) {
+          newBucket = new HashGenSetBucket<V>(oldBucket.gen3Val, oldBucket.gen3Weight,
+                                              oldBucket.gen2Val, oldBucket.gen2Weight,
+                                              oldBucket.gen1Val, oldBucket.gen1Weight,
+                                              null, 0);
           removed = true;
-        } else if (bucket.gen3Val != null && value.equals(bucket.gen3Val)) {
-          newBucket = new HashGenSetBucket<V>(
-              bucket.gen4Val, bucket.gen4Weight,
-              bucket.gen2Val, bucket.gen2Weight,
-              bucket.gen1Val, bucket.gen1Weight,
-              null, 0);
+        } else if (oldBucket.gen3Val != null && value.equals(oldBucket.gen3Val)) {
+          newBucket = new HashGenSetBucket<V>(oldBucket.gen4Val, oldBucket.gen4Weight,
+                                              oldBucket.gen2Val, oldBucket.gen2Weight,
+                                              oldBucket.gen1Val, oldBucket.gen1Weight,
+                                              null, 0);
           removed = true;
-        } else if (bucket.gen2Val != null && value.equals(bucket.gen2Val)) {
-          newBucket = new HashGenSetBucket<V>(
-              bucket.gen4Val, bucket.gen4Weight,
-              bucket.gen3Val, bucket.gen3Weight,
-              bucket.gen1Val, bucket.gen1Weight,
-              null, 0);
+        } else if (oldBucket.gen2Val != null && value.equals(oldBucket.gen2Val)) {
+          newBucket = new HashGenSetBucket<V>(oldBucket.gen4Val, oldBucket.gen4Weight,
+                                              oldBucket.gen3Val, oldBucket.gen3Weight,
+                                              oldBucket.gen1Val, oldBucket.gen1Weight,
+                                              null, 0);
           removed = true;
-        } else if (bucket.gen1Val != null && value.equals(bucket.gen1Val)) {
-          newBucket = new HashGenSetBucket<V>(
-              bucket.gen4Val, bucket.gen4Weight,
-              bucket.gen3Val, bucket.gen3Weight,
-              bucket.gen2Val, bucket.gen2Weight,
-              null, 0);
+        } else if (oldBucket.gen1Val != null && value.equals(oldBucket.gen1Val)) {
+          newBucket = new HashGenSetBucket<V>(oldBucket.gen4Val, oldBucket.gen4Weight,
+                                              oldBucket.gen3Val, oldBucket.gen3Weight,
+                                              oldBucket.gen2Val, oldBucket.gen2Weight,
+                                              null, 0);
           removed = true;
         } else {
-          newBucket = bucket;
+          newBucket = oldBucket;
           removed = false;
         }
       }
-    } while (bucket != newBucket && !buckets.compareAndSet(index, bucket, newBucket));
+    } while (oldBucket != newBucket && !buckets.compareAndSet(index, oldBucket, newBucket));
     return removed;
   }
 
   public void clear() {
+    final AtomicReferenceArray<HashGenSetBucket<V>> buckets = this.buckets;
     for (int i = 0; i < buckets.length(); i += 1) {
       buckets.set(i, null);
     }
   }
 
   public double hitRatio() {
-    final double hits = (double) gen4Hits + (double) gen3Hits + (double) gen2Hits + (double) gen1Hits;
-    return hits / (hits + (double) misses);
+    final double hits = (double) HashGenSet.GEN4_HITS.get(this)
+                      + (double) HashGenSet.GEN3_HITS.get(this)
+                      + (double) HashGenSet.GEN2_HITS.get(this)
+                      + (double) HashGenSet.GEN1_HITS.get(this);
+    return hits / (hits + (double) HashGenSet.MISSES.get(this));
   }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<HashGenSet<?>> GEN4_HITS =
+      AtomicLongFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen4Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<HashGenSet<?>> GEN3_HITS =
+      AtomicLongFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen3Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<HashGenSet<?>> GEN2_HITS =
+      AtomicLongFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen2Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<HashGenSet<?>> GEN1_HITS =
+      AtomicLongFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "gen1Hits");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<HashGenSet<?>> MISSES =
+      AtomicLongFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "misses");
+  @SuppressWarnings("unchecked")
+  static final AtomicLongFieldUpdater<HashGenSet<?>> EVICTS =
+      AtomicLongFieldUpdater.newUpdater((Class<HashGenSet<?>>) (Class<?>) HashGenSet.class, "evicts");
 
 }
 
@@ -253,5 +247,18 @@ final class HashGenSetBucket<V> {
   HashGenSetBucket() {
     this(null, 0, null, 0, null, 0, null, 0);
   }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> GEN4_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen4Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> GEN3_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen3Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> GEN2_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen2Weight");
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HashGenSetBucket<?>> GEN1_WEIGHT =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HashGenSetBucket<?>>) (Class<?>) HashGenSetBucket.class, "gen1Weight");
 
 }

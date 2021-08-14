@@ -79,6 +79,7 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
     this.node = node;
     this.id = id.commit();
     this.props = props.commit();
+    this.agent = null;
   }
 
   public final Agent agent() {
@@ -96,7 +97,7 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
 
   @SuppressWarnings("unchecked")
   public <T> T unwrapNode(Class<T> nodeClass) {
-    if (nodeClass.isAssignableFrom(getClass())) {
+    if (nodeClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else if (nodeClass.isAssignableFrom(this.agent.getClass())) {
       return (T) this.agent;
@@ -107,7 +108,7 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
 
   @SuppressWarnings("unchecked")
   public <T> T bottomNode(Class<T> nodeClass) {
-    if (nodeClass.isAssignableFrom(getClass())) {
+    if (nodeClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -222,7 +223,7 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
 
   @Override
   public Agent getAgent(String name) {
-    return getAgent(Text.from(name));
+    return this.getAgent(Text.from(name));
   }
 
   @Override
@@ -242,27 +243,27 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
 
   @Override
   public <A extends Agent> A openAgent(Value id, AgentFactory<A> agentFactory) {
-    return openAgent(id, Value.absent(), agentFactory);
+    return this.openAgent(id, Value.absent(), agentFactory);
   }
 
   @Override
   public <A extends Agent> A openAgent(String name, AgentFactory<A> agentFactory) {
-    return openAgent(Text.from(name), agentFactory);
+    return this.openAgent(Text.from(name), agentFactory);
   }
 
   @Override
   public <A extends Agent> A openAgent(Value id, Value props, Class<? extends A> agentClass) {
-    return openAgent(id, props, createAgentFactory(agentClass));
+    return this.openAgent(id, props, this.createAgentFactory(agentClass));
   }
 
   @Override
   public <A extends Agent> A openAgent(Value id, Class<? extends A> agentClass) {
-    return openAgent(id, Value.absent(), createAgentFactory(agentClass));
+    return this.openAgent(id, Value.absent(), this.createAgentFactory(agentClass));
   }
 
   @Override
   public <A extends Agent> A openAgent(String name, Class<? extends A> agentClass) {
-    return openAgent(Text.from(name), agentClass);
+    return this.openAgent(Text.from(name), agentClass);
   }
 
   @Override
@@ -275,7 +276,7 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
 
   @Override
   public void closeAgent(String name) {
-    closeAgent(Text.from(name));
+    this.closeAgent(Text.from(name));
   }
 
   @Override
@@ -345,52 +346,52 @@ public class AgentView extends AbstractTierBinding implements TierContext, Agent
 
   @Override
   public ListData<Value> listData(Value name) {
-    return store().listData(name);
+    return this.store().listData(name);
   }
 
   @Override
   public ListData<Value> listData(String name) {
-    return store().listData(name);
+    return this.store().listData(name);
   }
 
   @Override
   public MapData<Value, Value> mapData(Value name) {
-    return store().mapData(name);
+    return this.store().mapData(name);
   }
 
   @Override
   public MapData<Value, Value> mapData(String name) {
-    return store().mapData(name);
+    return this.store().mapData(name);
   }
 
   @Override
   public <S> SpatialData<Value, S, Value> spatialData(Value name, Z2Form<S> shapeForm) {
-    return store().spatialData(name, shapeForm);
+    return this.store().spatialData(name, shapeForm);
   }
 
   @Override
   public <S> SpatialData<Value, S, Value> spatialData(String name, Z2Form<S> shapeForm) {
-    return store().spatialData(name, shapeForm);
+    return this.store().spatialData(name, shapeForm);
   }
 
   @Override
   public SpatialData<Value, R2Shape, Value> geospatialData(Value name) {
-    return store().geospatialData(name);
+    return this.store().geospatialData(name);
   }
 
   @Override
   public SpatialData<Value, R2Shape, Value> geospatialData(String name) {
-    return store().geospatialData(name);
+    return this.store().geospatialData(name);
   }
 
   @Override
   public ValueData<Value> valueData(Value name) {
-    return store().valueData(name);
+    return this.store().valueData(name);
   }
 
   @Override
   public ValueData<Value> valueData(String name) {
-    return store().valueData(name);
+    return this.store().valueData(name);
   }
 
   @Override

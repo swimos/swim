@@ -32,6 +32,11 @@ final class TokenListParser extends Parser<FingerTrieSeq<String>> {
     this.step = step;
   }
 
+  @Override
+  public Parser<FingerTrieSeq<String>> feed(Input input) {
+    return TokenListParser.parse(input, this.token, this.tokens, this.step);
+  }
+
   static Parser<FingerTrieSeq<String>> parse(Input input, StringBuilder token,
                                              Builder<String, FingerTrieSeq<String>> tokens, int step) {
     int c = 0;
@@ -44,10 +49,10 @@ final class TokenListParser extends Parser<FingerTrieSeq<String>> {
           token.appendCodePoint(c);
           step = 2;
         } else {
-          return done(FingerTrieSeq.<String>empty());
+          return Parser.done(FingerTrieSeq.<String>empty());
         }
       } else if (input.isDone()) {
-        return done(FingerTrieSeq.<String>empty());
+        return Parser.done(FingerTrieSeq.<String>empty());
       }
     }
     if (step == 2) {
@@ -83,7 +88,7 @@ final class TokenListParser extends Parser<FingerTrieSeq<String>> {
           input = input.step();
           step = 4;
         } else if (!input.isEmpty()) {
-          return done(tokens.bind());
+          return Parser.done(tokens.bind());
         }
       }
       if (step == 4) {
@@ -102,10 +107,10 @@ final class TokenListParser extends Parser<FingerTrieSeq<String>> {
             token.appendCodePoint(c);
             step = 5;
           } else {
-            return error(Diagnostic.expected("token", input));
+            return Parser.error(Diagnostic.expected("token", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("token", input));
+          return Parser.error(Diagnostic.expected("token", input));
         }
       }
       if (step == 5) {
@@ -128,18 +133,13 @@ final class TokenListParser extends Parser<FingerTrieSeq<String>> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new TokenListParser(token, tokens, step);
   }
 
   static Parser<FingerTrieSeq<String>> parse(Input input) {
-    return parse(input, null, null, 1);
-  }
-
-  @Override
-  public Parser<FingerTrieSeq<String>> feed(Input input) {
-    return parse(input, this.token, this.tokens, this.step);
+    return TokenListParser.parse(input, null, null, 1);
   }
 
 }

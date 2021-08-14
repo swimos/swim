@@ -23,26 +23,26 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class UserAgentSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseUserAgentHeaders() {
-    assertParses("User-Agent: swim", UserAgent.from(Product.from("swim")));
-    assertParses("User-Agent: swim/1.0", UserAgent.from(Product.from("swim", "1.0")));
+    assertParses("User-Agent: swim", UserAgent.create(Product.create("swim")));
+    assertParses("User-Agent: swim/1.0", UserAgent.create(Product.create("swim", "1.0")));
     assertParses("User-Agent: swim/1.0 (beta) (debug) recon (xml/json)",
-        UserAgent.from(Product.from("swim", "1.0").comment("beta").comment("debug"),
-            Product.from("recon").comment("xml/json")));
+                 UserAgent.create(Product.create("swim", "1.0").comment("beta").comment("debug"),
+                                  Product.create("recon").comment("xml/json")));
   }
 
   @Test
   public void writeUserAgentHeaders() {
-    assertWrites(UserAgent.from(Product.from("swim")), "User-Agent: swim");
-    assertWrites(UserAgent.from(Product.from("swim", "1.0")), "User-Agent: swim/1.0");
-    assertWrites(UserAgent.from(Product.from("swim", "1.0").comment("beta").comment("debug"),
-        Product.from("recon").comment("xml/json")),
-        "User-Agent: swim/1.0 (beta) (debug) recon (xml/json)");
+    assertWrites(UserAgent.create(Product.create("swim")), "User-Agent: swim");
+    assertWrites(UserAgent.create(Product.create("swim", "1.0")), "User-Agent: swim/1.0");
+    assertWrites(UserAgent.create(Product.create("swim", "1.0").comment("beta").comment("debug"),
+                                  Product.create("recon").comment("xml/json")),
+                 "User-Agent: swim/1.0 (beta) (debug) recon (xml/json)");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

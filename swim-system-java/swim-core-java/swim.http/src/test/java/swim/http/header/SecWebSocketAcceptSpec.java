@@ -22,20 +22,20 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class SecWebSocketAcceptSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseSecWebSocketAcceptHeaders() {
     assertParses("Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=",
-        SecWebSocketAccept.from("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="));
+                 SecWebSocketAccept.create("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="));
   }
 
   @Test
   public void writeSecWebSocketAcceptHeaders() {
-    assertWrites(SecWebSocketAccept.from("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
-        "Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=");
+    assertWrites(SecWebSocketAccept.create("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
+                 "Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

@@ -16,8 +16,6 @@ package swim.dynamic;
 
 public class BridgeException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public BridgeException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class BridgeException extends RuntimeException {
   public BridgeException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

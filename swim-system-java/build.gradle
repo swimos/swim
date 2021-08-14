@@ -25,7 +25,6 @@ javadoc {
                 'swim.csv',
                 'swim.dataflow',
                 'swim.db',
-                'swim.decipher',
                 'swim.deflate',
                 'swim.http',
                 'swim.io',
@@ -78,12 +77,12 @@ javadoc {
 
   // Google Analytics Tracking Code
   options.addBooleanOption("-allow-script-in-comments", true)
-  options.header = "<script async src=\"https://www.googletagmanager.com/gtag/js?id=UA-79441805-2\"></script>\n" +
-                   "<script>\n" +
-                   "  window.dataLayer = window.dataLayer || [];\n" +
-                   "  function gtag(){dataLayer.push(arguments);}\n" +
-                   "  gtag('js', new Date());\n" +
-                   "  gtag('config', 'UA-79441805-2');\n" +
+  options.header = "<script async src=\"https://www.googletagmanager.com/gtag/js?id=UA-79441805-2\"></script>\n";
+                   "<script>\n";
+                   "  window.dataLayer = window.dataLayer || [];\n";
+                   "  function gtag(){dataLayer.push(arguments);}\n";
+                   "  gtag('js', new Date());\n";
+                   "  gtag('config', 'UA-79441805-2');\n";
                    "</script>\n";
 
   options.addStringOption('-module-source-path', [

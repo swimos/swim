@@ -68,11 +68,11 @@ final class R2ShapeForm extends R2Form<R2Shape> {
     final Value value = item.toValue();
     final String tag = value.tag();
     if ("point".equals(tag)) {
-      return PointR2.form().cast(value);
+      return R2Point.form().cast(value);
     } else if ("box".equals(tag)) {
-      return BoxR2.form().cast(value);
+      return R2Box.form().cast(value);
     } else if ("circle".equals(tag)) {
-      return CircleR2.form().cast(value);
+      return R2Circle.form().cast(value);
     }
     return null;
   }

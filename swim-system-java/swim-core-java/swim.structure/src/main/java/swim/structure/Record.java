@@ -22,18 +22,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import swim.codec.Output;
 import swim.util.Builder;
 import swim.util.PairBuilder;
 
 public abstract class Record extends Value implements List<Item>, Builder<Item, Record>, PairBuilder<Value, Value, Record> {
-
-  volatile int flags;
-
-  protected Record() {
-    // stub
-  }
 
   @Override
   public boolean isDefinite() {
@@ -51,7 +44,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * members–no {@code Field} members.
    */
   public boolean isArray() {
-    return fieldCount() == 0;
+    return this.fieldCount() == 0;
   }
 
   /**
@@ -59,7 +52,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * members–no {@code Value} members.
    */
   public boolean isObject() {
-    return valueCount() == 0;
+    return this.valueCount() == 0;
   }
 
   /**
@@ -74,7 +67,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    */
   @Override
   public final int length() {
-    return size();
+    return this.size();
   }
 
   /**
@@ -121,12 +114,12 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * the first member is not an {@code Attr}.
    * <p>
    * Used to concisely get the name of the discriminating attribute of a
-   * structure.  The {@code tag} can be used to discern the nominal type of a
+   * structure. The {@code tag} can be used to discern the nominal type of a
    * polymorphic structure, similar to an XML element tag.
    */
   @Override
   public String tag() {
-    final Item item = head();
+    final Item item = this.head();
     if (item instanceof Attr) {
       return ((Attr) item).key.value;
     }
@@ -184,15 +177,15 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    */
   @Override
   public Value flattened() {
-    if (isEmpty()) {
+    if (this.isEmpty()) {
       return Value.extant();
     } else {
-      final Iterator<Item> items = iterator();
+      final Iterator<Item> items = this.iterator();
       final Item head = items.next();
       if (!items.hasNext() && head instanceof Value) {
         return (Value) head;
       } else {
-        return branch();
+        return this.branch();
       }
     }
   }
@@ -214,13 +207,13 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * <p>
    * Used to conditionally get the value of the head {@code Attr} of a
    * structure, if and only if the key string of the head {@code Attr} is equal
-   * to the {@code tag}.  Can be used to check if a structure might conform to
+   * to the {@code tag}. Can be used to check if a structure might conform to
    * a nominal type named {@code tag}, while simultaneously getting the value
    * of the {@code tag} attribute.
    */
   @Override
   public Value header(String tag) {
-    final Item head = head();
+    final Item head = this.head();
     if (head instanceof Attr && head.keyEquals(tag)) {
       return ((Attr) head).value;
     } else {
@@ -230,14 +223,14 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   /**
    * Returns the {@link #unflattened() unflattened} {@link #header(String)
-   * header} of this {@code Record}.  The {@code headers} of the {@code tag}
+   * header} of this {@code Record}. The {@code headers} of the {@code tag}
    * attribute of a structure are like the attributes of an XML element tag;
    * through unlike an XML element, {@code tag} attribute headers are not
    * limited to string keys and values.
    */
   @Override
   public Record headers(String tag) {
-    final Item head = head();
+    final Item head = this.head();
     if (head instanceof Attr && head.keyEquals(tag)) {
       final Value header = ((Attr) head).value;
       if (header instanceof Record) {
@@ -255,7 +248,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    */
   @Override
   public Item head() {
-    return getItem(0);
+    return this.getItem(0);
   }
 
   /**
@@ -266,7 +259,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   @Override
   public Record tail() {
     final Record tail = Record.create();
-    final Iterator<Item> items = iterator();
+    final Iterator<Item> items = this.iterator();
     if (items.hasNext()) {
       items.next(); // skip head
     }
@@ -278,13 +271,13 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   /**
    * Returns the {@link #flattened() flattened} {@link #tail() tail} of this
-   * {@code Record}.  Used to recursively deconstruct a structure, terminating
+   * {@code Record}. Used to recursively deconstruct a structure, terminating
    * with its last {@code Value}, rather than a unary {@code Record} containing
    * its last value, if the structure ends with a {@code Value} member.
    */
   @Override
   public Value body() {
-    final Record tail = tail();
+    final Record tail = this.tail();
     if (!tail.isEmpty()) {
       return tail.flattened();
     } else {
@@ -299,7 +292,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    */
   @Override
   public boolean contains(Object item) {
-    return contains(Item.fromObject(item));
+    return this.contains(Item.fromObject(item));
   }
 
   /**
@@ -325,7 +318,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   @Override
   public boolean containsAll(Collection<?> items) {
     final HashSet<Object> q = new HashSet<Object>(items);
-    final Iterator<Item> elems = iterator();
+    final Iterator<Item> elems = this.iterator();
     while (elems.hasNext() && !q.isEmpty()) {
       q.remove(elems.next());
     }
@@ -352,7 +345,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * Returns {@code true} if this {@code Record} has a {@link Field} member
    * with a key that is equal to the given {@code key}; otherwise returns
    * {@code false} if this {@code Record} has no {@code Field} member with a
-   * key equal to the given {@code key}.  Equivalent to {@link
+   * key equal to the given {@code key}. Equivalent to {@link
    * #containsKey(Value)}, but avoids boxing the {@code key} string into a
    * {@code Text} value.
    */
@@ -384,11 +377,11 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public int indexOf(Object item) {
-    return indexOf(Item.fromObject(item));
+    return this.indexOf(Item.fromObject(item));
   }
 
   private int indexOf(Item item) {
-    final Iterator<Item> items = iterator();
+    final Iterator<Item> items = this.iterator();
     int index = 0;
     while (items.hasNext()) {
       if (item.equals(items.next())) {
@@ -401,13 +394,13 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public int lastIndexOf(Object item) {
-    return lastIndexOf(Item.fromObject(item));
+    return this.lastIndexOf(Item.fromObject(item));
   }
 
   private int lastIndexOf(Item item) {
     int index = this.size() - 1;
     while (index >= 0) {
-      if (item.equals(getItem(index))) {
+      if (item.equals(this.getItem(index))) {
         return index;
       }
       index -= 1;
@@ -435,7 +428,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * Returns the value of the last {@link Field} member of this {@code Record}
    * whose key is equal to the given {@code key}; returns {@link Absent} if
    * this {@code Record} has no {@code Field} member with a key equal to the
-   * given {@code key}.  Equivalent to {@link #get(Value)}, but avoids boxing
+   * given {@code key}. Equivalent to {@link #get(Value)}, but avoids boxing
    * the {@code key} string into a {@code Text} value.
    */
   @Override
@@ -468,7 +461,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * Returns the value of the last {@link Attr} member of this {@code Record}
    * whose key is equal to the given {@code key}; returns {@link Absent} if
    * this {@code Record} has no {@code Attr} member with a key equal to the
-   * given {@code key}.  Equivalent to {@link #getAttr(Text)}, but avoids
+   * given {@code key}. Equivalent to {@link #getAttr(Text)}, but avoids
    * boxing the {@code key} string into a {@code Text} value.
    */
   @Override
@@ -501,7 +494,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * Returns the value of the last {@link Slot} member of this {@code Record}
    * whose key is equal to the given {@code key}; returns {@link Absent} if
    * this {@code Record} has no {@code Slot} member with a key equal to the
-   * given {@code key}.  Equivalent to {@link #getSlot(Value)}, but avoids
+   * given {@code key}. Equivalent to {@link #getSlot(Value)}, but avoids
    * boxing the {@code key} string into a {@code Text} value.
    */
   @Override
@@ -534,7 +527,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * Returns the last {@link Field} member of this {@code Record} whose key
    * is equal to the given {@code key}; returns {@code null} if this {@code
    * Record} has no {@code Field} member with a {@code key} equal to the
-   * given {@code key}.  Equivalent to {@link #getField(Value)}, but avoids
+   * given {@code key}. Equivalent to {@link #getField(Value)}, but avoids
    * boxing the {@code key} string into a {@code Text} value.
    */
   @Override
@@ -567,7 +560,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   public abstract Item getItem(int index);
 
   public Value put(Value key, Value newValue) {
-    final ListIterator<Item> items = listIterator();
+    final ListIterator<Item> items = this.listIterator();
     while (items.hasNext()) {
       final Item item = items.next();
       if (item instanceof Field && item.keyEquals(key)) {
@@ -581,36 +574,36 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
         }
       }
     }
-    add(new Slot(key, newValue));
+    this.add(new Slot(key, newValue));
     return Value.absent();
   }
 
   public Value put(Value key, String newValue) {
-    return put(key, Text.from(newValue));
+    return this.put(key, Text.from(newValue));
   }
 
   public Value put(Value key, int newValue) {
-    return put(key, Num.from(newValue));
+    return this.put(key, Num.from(newValue));
   }
 
   public Value put(Value key, long newValue) {
-    return put(key, Num.from(newValue));
+    return this.put(key, Num.from(newValue));
   }
 
   public Value put(Value key, float newValue) {
-    return put(key, Num.from(newValue));
+    return this.put(key, Num.from(newValue));
   }
 
   public Value put(Value key, double newValue) {
-    return put(key, Num.from(newValue));
+    return this.put(key, Num.from(newValue));
   }
 
   public Value put(Value key, boolean newValue) {
-    return put(key, Bool.from(newValue));
+    return this.put(key, Bool.from(newValue));
   }
 
   public Value put(String key, Value newValue) {
-    final ListIterator<Item> items = listIterator();
+    final ListIterator<Item> items = this.listIterator();
     while (items.hasNext()) {
       final Item item = items.next();
       if (item instanceof Field && item.keyEquals(key)) {
@@ -624,36 +617,36 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
         }
       }
     }
-    add(new Slot(Text.from(key), newValue));
+    this.add(new Slot(Text.from(key), newValue));
     return Value.absent();
   }
 
   public Value put(String key, String newValue) {
-    return put(key, Text.from(newValue));
+    return this.put(key, Text.from(newValue));
   }
 
   public Value put(String key, int newValue) {
-    return put(key, Num.from(newValue));
+    return this.put(key, Num.from(newValue));
   }
 
   public Value put(String key, long newValue) {
-    return put(key, Num.from(newValue));
+    return this.put(key, Num.from(newValue));
   }
 
   public Value put(String key, float newValue) {
-    return put(key, Num.from(newValue));
+    return this.put(key, Num.from(newValue));
   }
 
   public Value put(String key, double newValue) {
-    return put(key, Num.from(newValue));
+    return this.put(key, Num.from(newValue));
   }
 
   public Value put(String key, boolean newValue) {
-    return put(key, Bool.from(newValue));
+    return this.put(key, Bool.from(newValue));
   }
 
   public Value putAttr(Text key, Value newValue) {
-    final ListIterator<Item> items = listIterator();
+    final ListIterator<Item> items = this.listIterator();
     while (items.hasNext()) {
       final Item item = items.next();
       if (item instanceof Field && item.keyEquals(key)) {
@@ -666,36 +659,36 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
         }
       }
     }
-    add(new Attr(key, newValue));
+    this.add(new Attr(key, newValue));
     return Value.absent();
   }
 
   public Value putAttr(Text key, String newValue) {
-    return putAttr(key, Text.from(newValue));
+    return this.putAttr(key, Text.from(newValue));
   }
 
   public Value putAttr(Text key, int newValue) {
-    return putAttr(key, Num.from(newValue));
+    return this.putAttr(key, Num.from(newValue));
   }
 
   public Value putAttr(Text key, long newValue) {
-    return putAttr(key, Num.from(newValue));
+    return this.putAttr(key, Num.from(newValue));
   }
 
   public Value putAttr(Text key, float newValue) {
-    return putAttr(key, Num.from(newValue));
+    return this.putAttr(key, Num.from(newValue));
   }
 
   public Value putAttr(Text key, double newValue) {
-    return putAttr(key, Num.from(newValue));
+    return this.putAttr(key, Num.from(newValue));
   }
 
   public Value putAttr(Text key, boolean newValue) {
-    return putAttr(key, Bool.from(newValue));
+    return this.putAttr(key, Bool.from(newValue));
   }
 
   public Value putAttr(String key, Value newValue) {
-    final ListIterator<Item> items = listIterator();
+    final ListIterator<Item> items = this.listIterator();
     while (items.hasNext()) {
       final Item item = items.next();
       if (item instanceof Field && item.keyEquals(key)) {
@@ -708,36 +701,36 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
         }
       }
     }
-    add(new Attr(Text.from(key), newValue));
+    this.add(new Attr(Text.from(key), newValue));
     return Value.absent();
   }
 
   public Value putAttr(String key, String newValue) {
-    return putAttr(key, Text.from(newValue));
+    return this.putAttr(key, Text.from(newValue));
   }
 
   public Value putAttr(String key, int newValue) {
-    return putAttr(key, Num.from(newValue));
+    return this.putAttr(key, Num.from(newValue));
   }
 
   public Value putAttr(String key, long newValue) {
-    return putAttr(key, Num.from(newValue));
+    return this.putAttr(key, Num.from(newValue));
   }
 
   public Value putAttr(String key, float newValue) {
-    return putAttr(key, Num.from(newValue));
+    return this.putAttr(key, Num.from(newValue));
   }
 
   public Value putAttr(String key, double newValue) {
-    return putAttr(key, Num.from(newValue));
+    return this.putAttr(key, Num.from(newValue));
   }
 
   public Value putAttr(String key, boolean newValue) {
-    return putAttr(key, Bool.from(newValue));
+    return this.putAttr(key, Bool.from(newValue));
   }
 
   public Value putSlot(Value key, Value newValue) {
-    final ListIterator<Item> items = listIterator();
+    final ListIterator<Item> items = this.listIterator();
     while (items.hasNext()) {
       final Item item = items.next();
       if (item instanceof Field && item.keyEquals(key)) {
@@ -750,36 +743,36 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
         }
       }
     }
-    add(new Slot(key, newValue));
+    this.add(new Slot(key, newValue));
     return Value.absent();
   }
 
   public Value putSlot(Value key, String newValue) {
-    return putSlot(key, Text.from(newValue));
+    return this.putSlot(key, Text.from(newValue));
   }
 
   public Value putSlot(Value key, int newValue) {
-    return putSlot(key, Num.from(newValue));
+    return this.putSlot(key, Num.from(newValue));
   }
 
   public Value putSlot(Value key, long newValue) {
-    return putSlot(key, Num.from(newValue));
+    return this.putSlot(key, Num.from(newValue));
   }
 
   public Value putSlot(Value key, float newValue) {
-    return putSlot(key, Num.from(newValue));
+    return this.putSlot(key, Num.from(newValue));
   }
 
   public Value putSlot(Value key, double newValue) {
-    return putSlot(key, Num.from(newValue));
+    return this.putSlot(key, Num.from(newValue));
   }
 
   public Value putSlot(Value key, boolean newValue) {
-    return putSlot(key, Bool.from(newValue));
+    return this.putSlot(key, Bool.from(newValue));
   }
 
   public Value putSlot(String key, Value newValue) {
-    final ListIterator<Item> items = listIterator();
+    final ListIterator<Item> items = this.listIterator();
     while (items.hasNext()) {
       final Item item = items.next();
       if (item instanceof Field && item.keyEquals(key)) {
@@ -792,37 +785,37 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
         }
       }
     }
-    add(new Slot(Text.from(key), newValue));
+    this.add(new Slot(Text.from(key), newValue));
     return Value.absent();
   }
 
   public Value putSlot(String key, String newValue) {
-    return putSlot(key, Text.from(newValue));
+    return this.putSlot(key, Text.from(newValue));
   }
 
   public Value putSlot(String key, int newValue) {
-    return putSlot(key, Num.from(newValue));
+    return this.putSlot(key, Num.from(newValue));
   }
 
   public Value putSlot(String key, long newValue) {
-    return putSlot(key, Num.from(newValue));
+    return this.putSlot(key, Num.from(newValue));
   }
 
   public Value putSlot(String key, float newValue) {
-    return putSlot(key, Num.from(newValue));
+    return this.putSlot(key, Num.from(newValue));
   }
 
   public Value putSlot(String key, double newValue) {
-    return putSlot(key, Num.from(newValue));
+    return this.putSlot(key, Num.from(newValue));
   }
 
   public Value putSlot(String key, boolean newValue) {
-    return putSlot(key, Bool.from(newValue));
+    return this.putSlot(key, Bool.from(newValue));
   }
 
   public void putAll(Map<? extends Value, ? extends Value> fields) {
     for (Map.Entry<? extends Value, ? extends Value> field : fields.entrySet()) {
-      put(field.getKey(), field.getValue());
+      this.put(field.getKey(), field.getValue());
     }
   }
 
@@ -830,7 +823,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * Replaces the member of this {@code Record} at the given {@code index} with
    * a new {@code item}, returning the previous {@code Item} at the given {@code
    * index}, if the {@code index} is greater than or equal to zero, and less
-   * than the {@link #length() length} of this {@code Record}.  Equivalent to
+   * than the {@link #length() length} of this {@code Record}. Equivalent to
    * {@link #setItem(int, Item)}.
    *
    * @throws UnsupportedOperationException if this is an immutable {@code Record}.
@@ -838,7 +831,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    */
   @Override
   public Item set(int index, Item item) {
-    return setItem(index, item);
+    return this.setItem(index, item);
   }
 
   /**
@@ -863,7 +856,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * @throws IndexOutOfBoundsException     if the {@code index} is out of bounds.
    */
   public Item setItem(int index, String value) {
-    return setItem(index, Text.from(value));
+    return this.setItem(index, Text.from(value));
   }
 
   /**
@@ -877,7 +870,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * @throws IndexOutOfBoundsException     if the {@code index} is out of bounds.
    */
   public Item setItem(int index, int value) {
-    return setItem(index, Num.from(value));
+    return this.setItem(index, Num.from(value));
   }
 
   /**
@@ -891,7 +884,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * @throws IndexOutOfBoundsException     if the {@code index} is out of bounds.
    */
   public Item setItem(int index, long value) {
-    return setItem(index, Num.from(value));
+    return this.setItem(index, Num.from(value));
   }
 
   /**
@@ -905,7 +898,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * @throws IndexOutOfBoundsException     if the {@code index} is out of bounds.
    */
   public Item setItem(int index, float value) {
-    return setItem(index, Num.from(value));
+    return this.setItem(index, Num.from(value));
   }
 
   /**
@@ -919,7 +912,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * @throws IndexOutOfBoundsException     if the {@code index} is out of bounds.
    */
   public Item setItem(int index, double value) {
-    return setItem(index, Num.from(value));
+    return this.setItem(index, Num.from(value));
   }
 
   /**
@@ -933,73 +926,73 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
    * @throws IndexOutOfBoundsException     if the {@code index} is out of bounds.
    */
   public Item setItem(int index, boolean value) {
-    return setItem(index, Bool.from(value));
+    return this.setItem(index, Bool.from(value));
   }
 
   @Override
   public abstract boolean add(Item item);
 
   public boolean add(String item) {
-    return add(Text.from(item));
+    return this.add(Text.from(item));
   }
 
   public boolean add(int item) {
-    return add(Num.from(item));
+    return this.add(Num.from(item));
   }
 
   public boolean add(long item) {
-    return add(Num.from(item));
+    return this.add(Num.from(item));
   }
 
   public boolean add(float item) {
-    return add(Num.from(item));
+    return this.add(Num.from(item));
   }
 
   public boolean add(double item) {
-    return add(Num.from(item));
+    return this.add(Num.from(item));
   }
 
   public boolean add(boolean item) {
-    return add(Bool.from(item));
+    return this.add(Bool.from(item));
   }
 
   @Override
   public abstract void add(int index, Item item);
 
   public void add(int index, String item) {
-    add(index, Text.from(item));
+    this.add(index, Text.from(item));
   }
 
   public void add(int index, int item) {
-    add(index, Num.from(item));
+    this.add(index, Num.from(item));
   }
 
   public void add(int index, long item) {
-    add(index, Num.from(item));
+    this.add(index, Num.from(item));
   }
 
   public void add(int index, float item) {
-    add(index, Num.from(item));
+    this.add(index, Num.from(item));
   }
 
   public void add(int index, double item) {
-    add(index, Num.from(item));
+    this.add(index, Num.from(item));
   }
 
   public void add(int index, boolean item) {
-    add(index, Bool.from(item));
+    this.add(index, Bool.from(item));
   }
 
   @Override
   public boolean add(Value key, Value value) {
-    return add(new Slot(key, value));
+    return this.add(new Slot(key, value));
   }
 
   @Override
   public boolean addAll(Collection<? extends Item> items) {
     boolean changed = false;
     for (Item item : items) {
-      add(item);
+      this.add(item);
       changed = true;
     }
     return changed;
@@ -1009,7 +1002,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   public boolean addAll(int index, Collection<? extends Item> items) {
     boolean changed = false;
     for (Item item : items) {
-      add(index, item);
+      this.add(index, item);
       changed = true;
       index += 1;
     }
@@ -1017,162 +1010,162 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   }
 
   public Record attr(Text key, Value value) {
-    add(new Attr(key, value));
+    this.add(new Attr(key, value));
     return this;
   }
 
   public Record attr(Text key, String value) {
-    return attr(key, Text.from(value));
+    return this.attr(key, Text.from(value));
   }
 
   public Record attr(Text key, int value) {
-    return attr(key, Num.from(value));
+    return this.attr(key, Num.from(value));
   }
 
   public Record attr(Text key, long value) {
-    return attr(key, Num.from(value));
+    return this.attr(key, Num.from(value));
   }
 
   public Record attr(Text key, float value) {
-    return attr(key, Num.from(value));
+    return this.attr(key, Num.from(value));
   }
 
   public Record attr(Text key, double value) {
-    return attr(key, Num.from(value));
+    return this.attr(key, Num.from(value));
   }
 
   public Record attr(Text key, boolean value) {
-    return attr(key, Bool.from(value));
+    return this.attr(key, Bool.from(value));
   }
 
   public Record attr(Text key) {
-    return attr(key, Value.extant());
+    return this.attr(key, Value.extant());
   }
 
   public Record attr(String key, Value value) {
-    return attr(Text.from(key), value);
+    return this.attr(Text.from(key), value);
   }
 
   public Record attr(String key, String value) {
-    return attr(key, Text.from(value));
+    return this.attr(key, Text.from(value));
   }
 
   public Record attr(String key, int value) {
-    return attr(key, Num.from(value));
+    return this.attr(key, Num.from(value));
   }
 
   public Record attr(String key, long value) {
-    return attr(key, Num.from(value));
+    return this.attr(key, Num.from(value));
   }
 
   public Record attr(String key, float value) {
-    return attr(key, Num.from(value));
+    return this.attr(key, Num.from(value));
   }
 
   public Record attr(String key, double value) {
-    return attr(key, Num.from(value));
+    return this.attr(key, Num.from(value));
   }
 
   public Record attr(String key, boolean value) {
-    return attr(key, Bool.from(value));
+    return this.attr(key, Bool.from(value));
   }
 
   public Record attr(String key) {
-    return attr(key, Value.extant());
+    return this.attr(key, Value.extant());
   }
 
   public Record slot(Value key, Value value) {
-    add(new Slot(key, value));
+    this.add(new Slot(key, value));
     return this;
   }
 
   public Record slot(Value key, String value) {
-    return slot(key, Text.from(value));
+    return this.slot(key, Text.from(value));
   }
 
   public Record slot(Value key, int value) {
-    return slot(key, Num.from(value));
+    return this.slot(key, Num.from(value));
   }
 
   public Record slot(Value key, long value) {
-    return slot(key, Num.from(value));
+    return this.slot(key, Num.from(value));
   }
 
   public Record slot(Value key, float value) {
-    return slot(key, Num.from(value));
+    return this.slot(key, Num.from(value));
   }
 
   public Record slot(Value key, double value) {
-    return slot(key, Num.from(value));
+    return this.slot(key, Num.from(value));
   }
 
   public Record slot(Value key, boolean value) {
-    return slot(key, Bool.from(value));
+    return this.slot(key, Bool.from(value));
   }
 
   public Record slot(Value key) {
-    return slot(key, Value.extant());
+    return this.slot(key, Value.extant());
   }
 
   public Record slot(String key, Value value) {
-    return slot(Text.from(key), value);
+    return this.slot(Text.from(key), value);
   }
 
   public Record slot(String key, String value) {
-    return slot(key, Text.from(value));
+    return this.slot(key, Text.from(value));
   }
 
   public Record slot(String key, int value) {
-    return slot(key, Num.from(value));
+    return this.slot(key, Num.from(value));
   }
 
   public Record slot(String key, long value) {
-    return slot(key, Num.from(value));
+    return this.slot(key, Num.from(value));
   }
 
   public Record slot(String key, float value) {
-    return slot(key, Num.from(value));
+    return this.slot(key, Num.from(value));
   }
 
   public Record slot(String key, double value) {
-    return slot(key, Num.from(value));
+    return this.slot(key, Num.from(value));
   }
 
   public Record slot(String key, boolean value) {
-    return slot(key, Bool.from(value));
+    return this.slot(key, Bool.from(value));
   }
 
   public Record slot(String key) {
-    return slot(key, Value.extant());
+    return this.slot(key, Value.extant());
   }
 
   public Record item(Item item) {
-    add(item);
+    this.add(item);
     return this;
   }
 
   public Record item(String item) {
-    return item(Text.from(item));
+    return this.item(Text.from(item));
   }
 
   public Record item(int item) {
-    return item(Num.from(item));
+    return this.item(Num.from(item));
   }
 
   public Record item(long item) {
-    return item(Num.from(item));
+    return this.item(Num.from(item));
   }
 
   public Record item(float item) {
-    return item(Num.from(item));
+    return this.item(Num.from(item));
   }
 
   public Record item(double item) {
-    return item(Num.from(item));
+    return this.item(Num.from(item));
   }
 
   public Record item(boolean item) {
-    return item(Bool.from(item));
+    return this.item(Bool.from(item));
   }
 
   @Override
@@ -1181,9 +1174,9 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   @Override
   public boolean remove(Object object) {
     final Item item = Item.fromObject(object);
-    final int index = indexOf(item);
+    final int index = this.indexOf(item);
     if (index >= 0) {
-      remove(index);
+      this.remove(index);
       return true;
     } else {
       return false;
@@ -1191,7 +1184,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   }
 
   public boolean removeKey(Value key) {
-    final Iterator<Item> items = iterator();
+    final Iterator<Item> items = this.iterator();
     while (items.hasNext()) {
       final Item item = items.next();
       if (item.keyEquals(key)) {
@@ -1203,7 +1196,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   }
 
   public boolean removeKey(String key) {
-    final Iterator<Item> items = iterator();
+    final Iterator<Item> items = this.iterator();
     while (items.hasNext()) {
       final Item item = items.next();
       if (item.keyEquals(key)) {
@@ -1217,7 +1210,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   @Override
   public boolean removeAll(Collection<?> items) {
     boolean modified = false;
-    final Iterator<Item> iter = iterator();
+    final Iterator<Item> iter = this.iterator();
     while (iter.hasNext()) {
       final Item item = iter.next();
       if (items.contains(item)) {
@@ -1231,7 +1224,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   @Override
   public boolean retainAll(Collection<?> items) {
     boolean modified = false;
-    final Iterator<Item> iter = iterator();
+    final Iterator<Item> iter = this.iterator();
     while (iter.hasNext()) {
       final Item item = iter.next();
       if (!items.contains(item)) {
@@ -1247,7 +1240,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public Record updated(Value key, Value value) {
-    final Record record = isMutable() ? this : branch();
+    final Record record = this.asMutable();
     final ListIterator<Item> items = record.listIterator();
     while (items.hasNext()) {
       final Item item = items.next();
@@ -1266,7 +1259,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public Record updated(String key, Value value) {
-    final Record record = isMutable() ? this : branch();
+    final Record record = this.asMutable();
     final ListIterator<Item> items = record.listIterator();
     while (items.hasNext()) {
       final Item item = items.next();
@@ -1285,7 +1278,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public Record updatedAttr(Text key, Value value) {
-    final Record record = isMutable() ? this : branch();
+    final Record record = this.asMutable();
     final ListIterator<Item> items = record.listIterator();
     while (items.hasNext()) {
       final Item item = items.next();
@@ -1304,7 +1297,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public Record updatedAttr(String key, Value value) {
-    final Record record = isMutable() ? this : branch();
+    final Record record = this.asMutable();
     final ListIterator<Item> items = record.listIterator();
     while (items.hasNext()) {
       final Item item = items.next();
@@ -1323,7 +1316,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public Record updatedSlot(Value key, Value value) {
-    final Record record = isMutable() ? this : branch();
+    final Record record = this.asMutable();
     final ListIterator<Item> items = record.listIterator();
     while (items.hasNext()) {
       final Item item = items.next();
@@ -1342,7 +1335,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public Record updatedSlot(String key, Value value) {
-    final Record record = isMutable() ? this : branch();
+    final Record record = this.asMutable();
     final ListIterator<Item> items = record.listIterator();
     while (items.hasNext()) {
       final Item item = items.next();
@@ -1361,42 +1354,42 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public Record appended(Item item) {
-    final Record record = isMutable() ? this : branch();
+    final Record record = this.asMutable();
     record.add(item);
     return record;
   }
 
   @Override
   public Record appended(Object... items) {
-    final Record record = isMutable() ? this : branch();
+    final Record record = this.asMutable();
     record.addAll(Record.of(items));
     return record;
   }
 
   @Override
   public Record prepended(Item item) {
-    final Record record = isMutable() ? this : branch();
+    final Record record = this.asMutable();
     record.add(0, item);
     return record;
   }
 
   @Override
   public Record prepended(Object... items) {
-    final Record record = isMutable() ? this : branch();
+    final Record record = this.asMutable();
     record.addAll(0, Record.of(items));
     return record;
   }
 
   @Override
   public Record removed(Value key) {
-    final Record record = isMutable() ? this : branch();
+    final Record record = this.asMutable();
     record.removeKey(key);
     return record;
   }
 
   @Override
   public Record removed(String key) {
-    final Record record = isMutable() ? this : branch();
+    final Record record = this.asMutable();
     record.removeKey(key);
     return record;
   }
@@ -1404,7 +1397,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   @Override
   public Record concat(Item that) {
     if (!that.isDefined()) {
-      return branch();
+      return this.branch();
     } else {
       final Record record = Record.create(this.length() + that.length());
       record.addAll(this);
@@ -1455,7 +1448,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public String stringValue() {
-    return stringValue(null);
+    return this.stringValue(null);
   }
 
   @Override
@@ -1482,6 +1475,10 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
     return true;
   }
 
+  public Record asMutable() {
+    return this.isMutable() ? this : this.branch();
+  }
+
   public void alias() {
     // nop
   }
@@ -1505,9 +1502,9 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public Item[] toArray() {
-    final int n = size();
+    final int n = this.size();
     final Item[] array = new Item[n];
-    final Iterator<Item> items = iterator();
+    final Iterator<Item> items = this.iterator();
     int i = 0;
     while (items.hasNext()) {
       array[i] = items.next();
@@ -1519,11 +1516,11 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   @SuppressWarnings("unchecked")
   @Override
   public <T> T[] toArray(T[] array) {
-    final int n = size();
+    final int n = this.size();
     if (array.length < n) {
       array = (T[]) Array.newInstance(array.getClass().getComponentType(), n);
     }
-    final Iterator<Item> items = iterator();
+    final Iterator<Item> items = this.iterator();
     int i = 0;
     while (items.hasNext()) {
       array[i] = (T) items.next();
@@ -1537,7 +1534,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public Record subList(int fromIndex, int toIndex) {
-    final Iterator<Item> items = iterator();
+    final Iterator<Item> items = this.iterator();
     final Record record = Record.create();
     int index = 0;
     while (items.hasNext()) {
@@ -1553,7 +1550,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @SuppressWarnings("unchecked")
   public Set<Map.Entry<Value, Value>> entrySet() {
-    return (Set<Map.Entry<Value, Value>>) (Set<?>) fieldSet();
+    return (Set<Map.Entry<Value, Value>>) (Set<?>) this.fieldSet();
   }
 
   public Set<Field> fieldSet() {
@@ -1580,22 +1577,22 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
 
   @Override
   public ListIterator<Item> listIterator(int index) {
-    if (index < 0 || index > size()) {
+    if (index < 0 || index > this.size()) {
       throw new IndexOutOfBoundsException(Integer.toString(index));
     }
     return new RecordIterator(this, index);
   }
 
   public Iterator<Value> keyIterator() {
-    return new RecordKeyIterator(iterator());
+    return new RecordKeyIterator(this.iterator());
   }
 
   public Iterator<Value> valueIterator() {
-    return new RecordValueIterator(iterator());
+    return new RecordValueIterator(this.iterator());
   }
 
   public Iterator<Field> fieldIterator() {
-    return new RecordFieldIterator(iterator());
+    return new RecordFieldIterator(this.iterator());
   }
 
   @Override
@@ -1606,13 +1603,13 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   @Override
   public int compareTo(Item other) {
     if (other instanceof Record) {
-      return compareTo((Record) other);
+      return this.compareTo((Record) other);
     }
-    return Integer.compare(typeOrder(), other.typeOrder());
+    return Integer.compare(this.typeOrder(), other.typeOrder());
   }
 
   public int compareTo(Record that) {
-    final Iterator<Item> xs = iterator();
+    final Iterator<Item> xs = this.iterator();
     final Iterator<Item> ys = that.iterator();
     int order = 0;
     do {
@@ -1639,7 +1636,7 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
       return true;
     } else if (other instanceof List<?>) {
       final List<?> that = (List<?>) other;
-      final Iterator<Item> xs = iterator();
+      final Iterator<Item> xs = this.iterator();
       final Iterator<?> ys = that.iterator();
       while (xs.hasNext() && ys.hasNext()) {
         if (!xs.next().equals(ys.next())) {
@@ -1661,18 +1658,19 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Record").write('.');
-    if (isEmpty()) {
-      output = output.write("empty").write('(').write(')');
+    if (this.isEmpty()) {
+      output = output.write("empty").write('(');
     } else {
-      final Iterator<Item> items = iterator();
+      final Iterator<Item> items = this.iterator();
       output = output.write("of").write('(').display(items.next());
       while (items.hasNext()) {
         output = output.write(", ").display(items.next());
       }
-      output = output.write(')');
     }
+    output = output.write(')');
+    return output;
   }
 
   public static Record empty() {
@@ -1698,21 +1696,5 @@ public abstract class Record extends Value implements List<Item>, Builder<Item, 
   public static Record of(Object... objects) {
     return RecordMap.of(objects);
   }
-
-  static int expand(int n) {
-    n = Math.max(8, n) - 1;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
-    return n + 1;
-  }
-
-  protected static final AtomicIntegerFieldUpdater<Record> FLAGS =
-      AtomicIntegerFieldUpdater.newUpdater(Record.class, "flags");
-
-  static final int ALIASED = 1 << 0;
-  static final int IMMUTABLE = 1 << 1;
 
 }

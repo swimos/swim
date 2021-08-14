@@ -40,8 +40,8 @@ final class AdditiveOperatorParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.lhsParser, this.operator,
-                 this.rhsParser, this.step);
+    return AdditiveOperatorParser.parse(input, this.recon, this.builder, this.lhsParser,
+                                        this.operator, this.rhsParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -97,11 +97,11 @@ final class AdditiveOperatorParser<I, V> extends Parser<V> {
           final V lhs = lhsParser.bind();
           final V rhs = rhsParser.bind();
           if ("+".equals(operator)) {
-            lhsParser = done(recon.plus(lhs, rhs));
+            lhsParser = Parser.done(recon.plus(lhs, rhs));
           } else if ("-".equals(operator)) {
-            lhsParser = done(recon.minus(lhs, rhs));
+            lhsParser = Parser.done(recon.minus(lhs, rhs));
           } else {
-            return error(Diagnostic.message(operator, input));
+            return Parser.error(Diagnostic.message(operator, input));
           }
           rhsParser = null;
           operator = null;
@@ -114,13 +114,13 @@ final class AdditiveOperatorParser<I, V> extends Parser<V> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new AdditiveOperatorParser<I, V>(recon, builder, lhsParser, operator, rhsParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, null, null, 1);
+    return AdditiveOperatorParser.parse(input, recon, builder, null, null, null, 1);
   }
 
 }

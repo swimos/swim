@@ -52,7 +52,7 @@ public class TraitSpec {
   public void testExtensionLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestGraphPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestGraphPlane.class);
+                                       .openPlane("test", TestGraphPlane.class);
 
     final String testValue = "Hello, world!";
     final CountDownLatch valueDidReceive = new CountDownLatch(1);
@@ -167,7 +167,7 @@ public class TraitSpec {
   public void testOverloadedLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestGraphPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestGraphPlane.class);
+                                       .openPlane("test", TestGraphPlane.class);
 
     final String testValue = "Hello, world";
     final String testInfo = testValue + "!";

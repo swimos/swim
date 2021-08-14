@@ -35,7 +35,7 @@ public final class DownlinkAddress implements LinkAddress, Debug {
   }
 
   public DownlinkAddress cellAddress(CellAddress cellAddress) {
-    return copy(cellAddress, this.linkKey);
+    return this.copy(cellAddress, this.linkKey);
   }
 
   public Value linkKey() {
@@ -43,7 +43,7 @@ public final class DownlinkAddress implements LinkAddress, Debug {
   }
 
   public DownlinkAddress linkKey(Value linkKey) {
-    return copy(this.cellAddress, linkKey);
+    return this.copy(this.cellAddress, linkKey);
   }
 
   DownlinkAddress copy(CellAddress cellAddress, Value linkKey) {
@@ -61,19 +61,22 @@ public final class DownlinkAddress implements LinkAddress, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.hash(DownlinkAddress.class);
+    if (DownlinkAddress.hashSeed == 0) {
+      DownlinkAddress.hashSeed = Murmur3.hash(DownlinkAddress.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(DownlinkAddress.hashSeed,
         this.cellAddress.hashCode()), this.linkKey.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("DownlinkAddress").write('.').write("from").write('(')
-        .debug(this.cellAddress.toString()).write(", ").debug(this.linkKey).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("DownlinkAddress").write('.').write("create").write('(')
+                   .debug(this.cellAddress.toString()).write(", ").debug(this.linkKey).write(')');
+    return output;
   }
 
   @Override
@@ -81,9 +84,7 @@ public final class DownlinkAddress implements LinkAddress, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static DownlinkAddress from(CellAddress cellAddress, Value linkKey) {
+  public static DownlinkAddress create(CellAddress cellAddress, Value linkKey) {
     return new DownlinkAddress(cellAddress, linkKey);
   }
 

@@ -52,7 +52,7 @@ public class FingerTrieSeqSpec {
   public void testComposeSeqs() {
     for (int k = 4; k <= 20; k += 4) {
       final int n = 1 << k;
-      testCompose(n);
+      this.testCompose(n);
     }
   }
 
@@ -75,8 +75,8 @@ public class FingerTrieSeqSpec {
 
   @Test
   public void testDropSeqs() {
-    testDrop((1 << 10) + 1);
-    testDrop((1 << 15) + 1);
+    this.testDrop((1 << 10) + 1);
+    this.testDrop((1 << 15) + 1);
   }
 
   private void testDrop(int n) {
@@ -97,8 +97,8 @@ public class FingerTrieSeqSpec {
 
   @Test
   public void testTakeSeqs() {
-    testTake((1 << 10) + 1);
-    testTake((1 << 15) + 1);
+    this.testTake((1 << 10) + 1);
+    this.testTake((1 << 15) + 1);
   }
 
   private void testTake(int n) {
@@ -121,7 +121,7 @@ public class FingerTrieSeqSpec {
   public void testAppendAndDropSeqs() {
     for (int appendCount = 0; appendCount < 128; appendCount += 1) {
       for (int dropCount = 0; dropCount < appendCount; dropCount += 1) {
-        testAppendAndDrop(appendCount, dropCount);
+        this.testAppendAndDrop(appendCount, dropCount);
       }
     }
   }
@@ -146,7 +146,7 @@ public class FingerTrieSeqSpec {
   public void testPrependAndDropSeqs() {
     for (int prependCount = 0; prependCount < 128; prependCount += 1) {
       for (int dropCount = 0; dropCount < prependCount; dropCount += 1) {
-        testPrependAndDrop(prependCount, dropCount);
+        this.testPrependAndDrop(prependCount, dropCount);
       }
     }
   }
@@ -169,8 +169,8 @@ public class FingerTrieSeqSpec {
 
   @Test
   public void testListIterator() {
-    testListIteratorSize((1 << 10) + 1);
-    testListIteratorSize((1 << 15) + 1);
+    this.testListIteratorSize((1 << 10) + 1);
+    this.testListIteratorSize((1 << 15) + 1);
   }
 
   private void testListIteratorSize(int n) {
@@ -191,8 +191,8 @@ public class FingerTrieSeqSpec {
 
   @Test
   public void testReverseListIterator() {
-    testReverseListIteratorSize((1 << 10) + 1);
-    testReverseListIteratorSize((1 << 15) + 1);
+    this.testReverseListIteratorSize((1 << 10) + 1);
+    this.testReverseListIteratorSize((1 << 15) + 1);
   }
 
   private void testReverseListIteratorSize(int n) {

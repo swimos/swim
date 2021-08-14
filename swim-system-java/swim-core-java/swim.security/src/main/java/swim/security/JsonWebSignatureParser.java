@@ -46,9 +46,16 @@ final class JsonWebSignatureParser extends Parser<JsonWebSignature> {
     this(null, null, null, null, 0, 0, 0, 1);
   }
 
-  static Parser<JsonWebSignature> parse(Data signingInput, Data protectedHeaderData,
+  @Override
+  public Parser<JsonWebSignature> feed(Input input) {
+    return JsonWebSignatureParser.parse(input, this.signingInput, this.protectedHeaderData,
+                                        this.payloadData, this.signatureData,
+                                        this.p, this.q, this.r, this.step);
+  }
+
+  static Parser<JsonWebSignature> parse(Input input, Data signingInput, Data protectedHeaderData,
                                         Data payloadData, Data signatureData,
-                                        int p, int q, int r, int step, Input input) {
+                                        int p, int q, int r, int step) {
     int c;
     if (signingInput == null) {
       signingInput = Data.create();
@@ -66,7 +73,7 @@ final class JsonWebSignatureParser extends Parser<JsonWebSignature> {
       if (step == 1) {
         if (input.isCont()) {
           c = input.head();
-          if (isBase64Char(c)) {
+          if (JsonWebSignatureParser.isBase64Char(c)) {
             input = input.step();
             signingInput.addByte((byte) c);
             p = c;
@@ -76,57 +83,57 @@ final class JsonWebSignatureParser extends Parser<JsonWebSignature> {
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 2) {
         if (input.isCont()) {
           c = input.head();
-          if (isBase64Char(c)) {
+          if (JsonWebSignatureParser.isBase64Char(c)) {
             input = input.step();
             signingInput.addByte((byte) c);
             q = c;
             step = 3;
           } else {
-            return error(Diagnostic.expected("base64 digit", input));
+            return Parser.error(Diagnostic.expected("base64 digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 3) {
         if (input.isCont()) {
           c = input.head();
-          if (isBase64Char(c)) {
+          if (JsonWebSignatureParser.isBase64Char(c)) {
             input = input.step();
             signingInput.addByte((byte) c);
             r = c;
             step = 4;
           } else {
-            decodeBase64Quantum(p, q, '=', '=', protectedHeaderData);
+            JsonWebSignatureParser.decodeBase64Quantum(p, q, '=', '=', protectedHeaderData);
             step = 5;
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
         if (input.isCont()) {
           c = input.head();
-          if (isBase64Char(c)) {
+          if (JsonWebSignatureParser.isBase64Char(c)) {
             input = input.step();
             signingInput.addByte((byte) c);
-            decodeBase64Quantum(p, q, r, c, protectedHeaderData);
+            JsonWebSignatureParser.decodeBase64Quantum(p, q, r, c, protectedHeaderData);
             step = 1;
             continue;
           } else {
-            decodeBase64Quantum(p, q, r, '=', protectedHeaderData);
+            JsonWebSignatureParser.decodeBase64Quantum(p, q, r, '=', protectedHeaderData);
             step = 5;
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       break;
@@ -139,17 +146,17 @@ final class JsonWebSignatureParser extends Parser<JsonWebSignature> {
           signingInput.addByte((byte) c);
           step = 6;
         } else {
-          return error(Diagnostic.expected('.', input));
+          return Parser.error(Diagnostic.expected('.', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     do {
       if (step == 6) {
         if (input.isCont()) {
           c = input.head();
-          if (isBase64Char(c)) {
+          if (JsonWebSignatureParser.isBase64Char(c)) {
             input = input.step();
             signingInput.addByte((byte) c);
             p = c;
@@ -159,57 +166,57 @@ final class JsonWebSignatureParser extends Parser<JsonWebSignature> {
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 7) {
         if (input.isCont()) {
           c = input.head();
-          if (isBase64Char(c)) {
+          if (JsonWebSignatureParser.isBase64Char(c)) {
             input = input.step();
             signingInput.addByte((byte) c);
             q = c;
             step = 8;
           } else {
-            return error(Diagnostic.expected("base64 digit", input));
+            return Parser.error(Diagnostic.expected("base64 digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 8) {
         if (input.isCont()) {
           c = input.head();
-          if (isBase64Char(c)) {
+          if (JsonWebSignatureParser.isBase64Char(c)) {
             input = input.step();
             signingInput.addByte((byte) c);
             r = c;
             step = 9;
           } else {
-            decodeBase64Quantum(p, q, '=', '=', payloadData);
+            JsonWebSignatureParser.decodeBase64Quantum(p, q, '=', '=', payloadData);
             step = 10;
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 9) {
         if (input.isCont()) {
           c = input.head();
-          if (isBase64Char(c)) {
+          if (JsonWebSignatureParser.isBase64Char(c)) {
             input = input.step();
             signingInput.addByte((byte) c);
-            decodeBase64Quantum(p, q, r, c, payloadData);
+            JsonWebSignatureParser.decodeBase64Quantum(p, q, r, c, payloadData);
             step = 6;
             continue;
           } else {
-            decodeBase64Quantum(p, q, r, '=', payloadData);
+            JsonWebSignatureParser.decodeBase64Quantum(p, q, r, '=', payloadData);
             step = 10;
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       break;
@@ -221,82 +228,81 @@ final class JsonWebSignatureParser extends Parser<JsonWebSignature> {
           input = input.step();
           step = 11;
         } else {
-          return error(Diagnostic.expected('.', input));
+          return Parser.error(Diagnostic.expected('.', input));
         }
       } else {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     do {
       if (step == 11) {
         if (input.isCont()) {
           c = input.head();
-          if (isBase64Char(c)) {
+          if (JsonWebSignatureParser.isBase64Char(c)) {
             input = input.step();
             p = c;
             step = 12;
           } else {
-            return done(JsonWebSignature.from(signingInput, protectedHeaderData, payloadData, signatureData));
+            return Parser.done(JsonWebSignature.create(signingInput, protectedHeaderData, payloadData, signatureData));
           }
         } else if (input.isDone()) {
-          return done(JsonWebSignature.from(signingInput, protectedHeaderData, payloadData, signatureData));
+          return Parser.done(JsonWebSignature.create(signingInput, protectedHeaderData, payloadData, signatureData));
         }
       }
       if (step == 12) {
         if (input.isCont()) {
           c = input.head();
-          if (isBase64Char(c)) {
+          if (JsonWebSignatureParser.isBase64Char(c)) {
             input = input.step();
             q = c;
             step = 13;
           } else {
-            return error(Diagnostic.expected("base64 digit", input));
+            return Parser.error(Diagnostic.expected("base64 digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 13) {
         if (input.isCont()) {
           c = input.head();
-          if (isBase64Char(c)) {
+          if (JsonWebSignatureParser.isBase64Char(c)) {
             input = input.step();
             r = c;
             step = 14;
           } else {
-            decodeBase64Quantum(p, q, '=', '=', signatureData);
-            return done(JsonWebSignature.from(signingInput, protectedHeaderData, payloadData, signatureData));
+            JsonWebSignatureParser.decodeBase64Quantum(p, q, '=', '=', signatureData);
+            return Parser.done(JsonWebSignature.create(signingInput, protectedHeaderData, payloadData, signatureData));
           }
         } else if (input.isDone()) {
-          decodeBase64Quantum(p, q, '=', '=', signatureData);
-          return done(JsonWebSignature.from(signingInput, protectedHeaderData, payloadData, signatureData));
+          JsonWebSignatureParser.decodeBase64Quantum(p, q, '=', '=', signatureData);
+          return Parser.done(JsonWebSignature.create(signingInput, protectedHeaderData, payloadData, signatureData));
         }
       }
       if (step == 14) {
         if (input.isCont()) {
           c = input.head();
-          if (isBase64Char(c)) {
+          if (JsonWebSignatureParser.isBase64Char(c)) {
             input = input.step();
-            decodeBase64Quantum(p, q, r, c, signatureData);
+            JsonWebSignatureParser.decodeBase64Quantum(p, q, r, c, signatureData);
             step = 11;
             continue;
           } else {
-            decodeBase64Quantum(p, q, r, '=', signatureData);
-            return done(JsonWebSignature.from(signingInput, protectedHeaderData, payloadData, signatureData));
+            JsonWebSignatureParser.decodeBase64Quantum(p, q, r, '=', signatureData);
+            return Parser.done(JsonWebSignature.create(signingInput, protectedHeaderData, payloadData, signatureData));
           }
         } else if (input.isDone()) {
-          decodeBase64Quantum(p, q, r, '=', signatureData);
-          return done(JsonWebSignature.from(signingInput, protectedHeaderData, payloadData, signatureData));
+          JsonWebSignatureParser.decodeBase64Quantum(p, q, r, '=', signatureData);
+          return Parser.done(JsonWebSignature.create(signingInput, protectedHeaderData, payloadData, signatureData));
         }
       }
       break;
     } while (true);
-    return new JsonWebSignatureParser(signingInput, protectedHeaderData, payloadData,
-        signatureData, p, q, r, step);
+    return new JsonWebSignatureParser(signingInput, protectedHeaderData, payloadData, signatureData, p, q, r, step);
   }
 
   static Parser<JsonWebSignature> parse(Input input) {
-    return parse(null, null, null, null, 0, 0, 0, 1, input);
+    return JsonWebSignatureParser.parse(input, null, null, null, null, 0, 0, 0, 1);
   }
 
   static boolean isBase64Char(int c) {
@@ -324,12 +330,12 @@ final class JsonWebSignatureParser extends Parser<JsonWebSignature> {
   }
 
   static void decodeBase64Quantum(int p, int q, int r, int s, Data data) {
-    final int x = decodeBase64Digit(p);
-    final int y = decodeBase64Digit(q);
+    final int x = JsonWebSignatureParser.decodeBase64Digit(p);
+    final int y = JsonWebSignatureParser.decodeBase64Digit(q);
     if (r != '=') {
-      final int z = decodeBase64Digit(r);
+      final int z = JsonWebSignatureParser.decodeBase64Digit(r);
       if (s != '=') {
-        final int w = decodeBase64Digit(s);
+        final int w = JsonWebSignatureParser.decodeBase64Digit(s);
         data.addByte((byte) ((x << 2) | (y >>> 4)));
         data.addByte((byte) ((y << 4) | (z >>> 2)));
         data.addByte((byte) ((z << 6) | w));
@@ -343,12 +349,6 @@ final class JsonWebSignatureParser extends Parser<JsonWebSignature> {
       }
       data.addByte((byte) ((x << 2) | (y >>> 4)));
     }
-  }
-
-  @Override
-  public Parser<JsonWebSignature> feed(Input input) {
-    return parse(signingInput, protectedHeaderData, payloadData,
-        signatureData, p, q, r, step, input);
   }
 
 }

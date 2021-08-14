@@ -41,6 +41,11 @@ final class UserAgentParser extends Parser<UserAgent> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<UserAgent> feed(Input input) {
+    return UserAgentParser.parse(input, this.http, this.product, this.products, this.step);
+  }
+
   static Parser<UserAgent> parse(Input input, HttpParser http, Parser<Product> product,
                                  Builder<Product, FingerTrieSeq<Product>> products, int step) {
     int c = 0;
@@ -74,7 +79,7 @@ final class UserAgentParser extends Parser<UserAgent> {
         if (input.isCont() && Http.isTokenChar(c)) {
           step = 3;
         } else if (!input.isEmpty()) {
-          return done(UserAgent.from(products.bind()));
+          return Parser.done(UserAgent.create(products.bind()));
         }
       }
       if (step == 3) {
@@ -95,18 +100,13 @@ final class UserAgentParser extends Parser<UserAgent> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new UserAgentParser(http, product, products, step);
   }
 
   static Parser<UserAgent> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<UserAgent> feed(Input input) {
-    return parse(input, this.http, this.product, this.products, this.step);
+    return UserAgentParser.parse(input, http, null, null, 1);
   }
 
 }

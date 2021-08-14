@@ -39,6 +39,11 @@ final class DataDecoder<T> extends Decoder<T> {
     this(type, 0L, 0, null, 1);
   }
 
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return DataDecoder.decode(input, this.type, this.size, this.shift, this.decoder, this.step);
+  }
+
   static <T> Decoder<T> decode(InputBuffer input, AvroDataType<T> type, long size,
                                int shift, Decoder<T> decoder, int step) {
     if (step == 1) {
@@ -48,7 +53,7 @@ final class DataDecoder<T> extends Decoder<T> {
           input = input.step();
           size |= (long) (b & 0x7f) << shift;
         } else {
-          return error(new DecoderException("data size overflow"));
+          return Decoder.error(new DecoderException("data size overflow"));
         }
         if ((b & 0x80) == 0) {
           size = (size >>> 1) ^ (size << 63 >> 63);
@@ -82,27 +87,22 @@ final class DataDecoder<T> extends Decoder<T> {
         if (size == 0L) {
           return decoder;
         } else {
-          return error(new DecoderException("unconsumed input"));
+          return Decoder.error(new DecoderException("unconsumed input"));
         }
       } else if (decoder.isError()) {
         return decoder.asError();
       }
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new DataDecoder<T>(type, size, shift, decoder, step);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, AvroDataType<T> type) {
-    return decode(input, type, 0L, 0, null, 1);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.size, this.shift, this.decoder, this.step);
+    return DataDecoder.decode(input, type, 0L, 0, null, 1);
   }
 
 }

@@ -39,11 +39,16 @@ final class HttpStatusWriter extends Writer<Object, Object> {
     this(http, code, phrase, null, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return HttpStatusWriter.write(output, this.http, this.code, this.phrase, this.part, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, int code, String phrase,
                                       Writer<?, ?> part, int step) {
     if (step == 1 && output.isCont()) {
       if (code / 1000 != 0) {
-        return error(new HttpException("invalid HTTP status code: " + code));
+        return Writer.error(new HttpException("invalid HTTP status code: " + code));
       }
       output = output.write(Base10.encodeDigit(code / 100 % 10));
       step = 2;
@@ -67,26 +72,21 @@ final class HttpStatusWriter extends Writer<Object, Object> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new HttpStatusWriter(http, code, phrase, part, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, int code, String phrase) {
-    return write(output, http, code, phrase, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.code, this.phrase, this.part, this.step);
+    return HttpStatusWriter.write(output, http, code, phrase, null, 1);
   }
 
 }

@@ -135,75 +135,75 @@ public abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
 
   @Override
   public void decohereOutput() {
-    decohere();
+    this.decohere();
   }
 
   @Override
   public void decohereInput() {
-    decohere();
+    this.decohere();
   }
 
   public void decohere() {
     if (this.version >= 0) {
-      willDecohere();
+      this.willDecohere();
       this.version = -1;
-      onDecohere();
+      this.onDecohere();
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         this.outputs[i].decohereOutput();
       }
-      didDecohere();
+      this.didDecohere();
     }
   }
 
   @Override
   public void recohereOutput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   @Override
   public void recohereInput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   public void recohere(int version) {
     if (this.version < 0) {
-      willRecohere(version);
+      this.willRecohere(version);
       this.version = version;
       if (this.input != null) {
         this.input.recohereInput(version);
       }
-      onRecohere(version);
+      this.onRecohere(version);
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         this.outputs[i].recohereOutput(version);
       }
-      didRecohere(version);
+      this.didRecohere(version);
     }
   }
 
   protected void willDecohere() {
-    // stub
+    // hook
   }
 
   protected void onDecohere() {
-    // stub
+    // hook
   }
 
   protected void didDecohere() {
-    // stub
+    // hook
   }
 
   protected void willRecohere(int version) {
-    // stub
+    // hook
   }
 
   protected void onRecohere(int version) {
-    // stub
+    // hook
   }
 
   protected void didRecohere(int version) {
-    // stub
+    // hook
   }
 
 }

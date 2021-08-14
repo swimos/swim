@@ -39,6 +39,12 @@ final class TagContentParser<I, V> extends Parser<V> {
     this.step = step;
   }
 
+  @Override
+  public Parser<V> feed(Input input) {
+    return TagContentParser.parse(input, this.xml, this.tag, this.builder,
+                                  this.text, this.nodeParser, this.step);
+  }
+
   @SuppressWarnings("unchecked")
   static <I, V> Parser<V> parse(Input input, XmlParser<I, V> xml, String tag, Builder<I, V> builder,
                                 Output<V> text, Parser<?> nodeParser, int step) {
@@ -71,10 +77,10 @@ final class TagContentParser<I, V> extends Parser<V> {
             nodeParser = xml.parseReference(input, text);
             step = 8;
           } else {
-            return error(Diagnostic.unexpected(input));
+            return Parser.error(Diagnostic.unexpected(input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 2) {
@@ -92,14 +98,14 @@ final class TagContentParser<I, V> extends Parser<V> {
             continue;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 3) {
         if (input.isCont()) {
           c = input.head();
           if (c == '>') {
-            return error(Diagnostic.message("unexpected ]]>", input));
+            return Parser.error(Diagnostic.message("unexpected ]]>", input));
           } else {
             if (text == null) {
               text = xml.textOutput();
@@ -110,7 +116,7 @@ final class TagContentParser<I, V> extends Parser<V> {
             continue;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
@@ -142,10 +148,10 @@ final class TagContentParser<I, V> extends Parser<V> {
             input = input.step();
             step = 5;
           } else {
-            return error(Diagnostic.expected("end tag, processing instruction, comment, or CDATA section", input));
+            return Parser.error(Diagnostic.expected("end tag, processing instruction, comment, or CDATA section", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("end tag, processing instruction, comment, or CDATA section", input));
+          return Parser.error(Diagnostic.expected("end tag, processing instruction, comment, or CDATA section", input));
         }
       }
       if (step == 5) {
@@ -165,10 +171,10 @@ final class TagContentParser<I, V> extends Parser<V> {
             nodeParser = xml.parseCDataSectionRest(input, text);
             step = 8;
           } else {
-            return error(Diagnostic.expected("comment or CDATA section", input));
+            return Parser.error(Diagnostic.expected("comment or CDATA section", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("comment or CDATA section", input));
+          return Parser.error(Diagnostic.expected("comment or CDATA section", input));
         }
       }
       if (step == 6) {
@@ -218,18 +224,13 @@ final class TagContentParser<I, V> extends Parser<V> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new TagContentParser<I, V>(xml, tag, builder, text, nodeParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, XmlParser<I, V> xml, String tag, Builder<I, V> builder) {
-    return parse(input, xml, tag, builder, null, null, 1);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.xml, this.tag, this.builder, this.text, this.nodeParser, this.step);
+    return TagContentParser.parse(input, xml, tag, builder, null, null, 1);
   }
 
 }

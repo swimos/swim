@@ -48,9 +48,8 @@ public class MetaLeaf {
   }
 
   public Value toValue() {
-    final Record record = Record.create(4)
-        .slot("tree", this.name)
-        .slot("type", this.type.tag());
+    final Record record = Record.create(4).slot("tree", this.name)
+                                          .slot("type", this.type.tag());
     if (this.key.isDefined()) {
       record.slot("key", this.key);
     }

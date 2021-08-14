@@ -23,26 +23,26 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class ServerSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseServerHeaders() {
-    assertParses("Server: swim", Server.from(Product.from("swim")));
-    assertParses("Server: swim/1.0", Server.from(Product.from("swim", "1.0")));
+    assertParses("Server: swim", Server.create(Product.create("swim")));
+    assertParses("Server: swim/1.0", Server.create(Product.create("swim", "1.0")));
     assertParses("Server: swim/1.0 (beta) (debug) recon (xml/json)",
-        Server.from(Product.from("swim", "1.0").comment("beta").comment("debug"),
-            Product.from("recon").comment("xml/json")));
+                 Server.create(Product.create("swim", "1.0").comment("beta").comment("debug"),
+                               Product.create("recon").comment("xml/json")));
   }
 
   @Test
   public void writeServerHeaders() {
-    assertWrites(Server.from(Product.from("swim")), "Server: swim");
-    assertWrites(Server.from(Product.from("swim", "1.0")), "Server: swim/1.0");
-    assertWrites(Server.from(Product.from("swim", "1.0").comment("beta").comment("debug"),
-        Product.from("recon").comment("xml/json")),
-        "Server: swim/1.0 (beta) (debug) recon (xml/json)");
+    assertWrites(Server.create(Product.create("swim")), "Server: swim");
+    assertWrites(Server.create(Product.create("swim", "1.0")), "Server: swim/1.0");
+    assertWrites(Server.create(Product.create("swim", "1.0").comment("beta").comment("debug"),
+                               Product.create("recon").comment("xml/json")),
+                 "Server: swim/1.0 (beta) (debug) recon (xml/json)");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

@@ -29,33 +29,10 @@ import swim.util.OrderedMapCursor;
  */
 public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>, Debug {
 
-  private static BTree<Object, Object> empty;
   final BTreePage<K, V, ?> root;
 
   protected BTree(BTreePage<K, V, ?> root) {
     this.root = root;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <K, V> BTree<K, V> empty() {
-    if (empty == null) {
-      empty = new BTree<Object, Object>(BTreePage.empty());
-    }
-    return (BTree<K, V>) (BTree<?, ?>) empty;
-  }
-
-  public static <K, V> BTree<K, V> of(K key, V value) {
-    BTree<K, V> tree = empty();
-    tree = tree.updated(key, value);
-    return tree;
-  }
-
-  public static <K, V> BTree<K, V> from(Map<? extends K, ? extends V> map) {
-    BTree<K, V> tree = empty();
-    for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
-      tree = tree.updated(entry.getKey(), entry.getValue());
-    }
-    return tree;
   }
 
   @Override
@@ -89,23 +66,23 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
   }
 
   @Override
-  public Entry<K, V> getEntry(Object key) {
+  public Map.Entry<K, V> getEntry(Object key) {
     return this.root.getEntry(key, this);
   }
 
   @Override
-  public Entry<K, V> getIndex(int index) {
+  public Map.Entry<K, V> getIndex(int index) {
     return this.root.getIndex(index);
   }
 
   @Override
-  public Entry<K, V> firstEntry() {
+  public Map.Entry<K, V> firstEntry() {
     return this.root.firstEntry();
   }
 
   @Override
   public K firstKey() {
-    final Entry<K, V> entry = this.root.firstEntry();
+    final Map.Entry<K, V> entry = this.root.firstEntry();
     if (entry != null) {
       return entry.getKey();
     } else {
@@ -115,7 +92,7 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
 
   @Override
   public V firstValue() {
-    final Entry<K, V> entry = this.root.firstEntry();
+    final Map.Entry<K, V> entry = this.root.firstEntry();
     if (entry != null) {
       return entry.getValue();
     } else {
@@ -124,13 +101,13 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
   }
 
   @Override
-  public Entry<K, V> lastEntry() {
+  public Map.Entry<K, V> lastEntry() {
     return this.root.lastEntry();
   }
 
   @Override
   public K lastKey() {
-    final Entry<K, V> entry = this.root.lastEntry();
+    final Map.Entry<K, V> entry = this.root.lastEntry();
     if (entry != null) {
       return entry.getKey();
     } else {
@@ -140,7 +117,7 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
 
   @Override
   public V lastValue() {
-    final Entry<K, V> entry = this.root.lastEntry();
+    final Map.Entry<K, V> entry = this.root.lastEntry();
     if (entry != null) {
       return entry.getValue();
     } else {
@@ -149,13 +126,13 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
   }
 
   @Override
-  public Entry<K, V> nextEntry(K key) {
+  public Map.Entry<K, V> nextEntry(K key) {
     return this.root.nextEntry(key, this);
   }
 
   @Override
   public K nextKey(K key) {
-    final Entry<K, V> entry = this.root.nextEntry(key, this);
+    final Map.Entry<K, V> entry = this.root.nextEntry(key, this);
     if (entry != null) {
       return entry.getKey();
     } else {
@@ -165,7 +142,7 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
 
   @Override
   public V nextValue(K key) {
-    final Entry<K, V> entry = this.root.nextEntry(key, this);
+    final Map.Entry<K, V> entry = this.root.nextEntry(key, this);
     if (entry != null) {
       return entry.getValue();
     } else {
@@ -174,13 +151,13 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
   }
 
   @Override
-  public Entry<K, V> previousEntry(K key) {
+  public Map.Entry<K, V> previousEntry(K key) {
     return this.root.previousEntry(key, this);
   }
 
   @Override
   public K previousKey(K key) {
-    final Entry<K, V> entry = this.root.previousEntry(key, this);
+    final Map.Entry<K, V> entry = this.root.previousEntry(key, this);
     if (entry != null) {
       return entry.getKey();
     } else {
@@ -190,7 +167,7 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
 
   @Override
   public V previousValue(K key) {
-    final Entry<K, V> entry = this.root.previousEntry(key, this);
+    final Map.Entry<K, V> entry = this.root.previousEntry(key, this);
     if (entry != null) {
       return entry.getValue();
     } else {
@@ -216,9 +193,9 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
   public BTree<K, V> drop(int lower) {
     if (lower > 0 && this.root.size() > 0) {
       if (lower < this.root.size()) {
-        return copy(this.root.drop(lower, this).balanced(this));
+        return this.copy(this.root.drop(lower, this).balanced(this));
       } else {
-        return empty();
+        return BTree.empty();
       }
     }
     return this;
@@ -227,9 +204,9 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
   public BTree<K, V> take(int upper) {
     if (upper < this.root.size() && this.root.size() > 0) {
       if (upper > 0) {
-        return copy(this.root.take(upper, this).balanced(this));
+        return this.copy(this.root.take(upper, this).balanced(this));
       } else {
-        return empty();
+        return BTree.empty();
       }
     }
     return this;
@@ -247,7 +224,7 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
       if (newRoot.size() > oldRoot.size()) {
         newRoot = newRoot.balanced(this);
       }
-      return copy(newRoot);
+      return this.copy(newRoot);
     } else {
       return this;
     }
@@ -257,14 +234,14 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
     final BTreePage<K, V, ?> oldRoot = this.root;
     final BTreePage<K, V, ?> newRoot = oldRoot.removed(key, this).balanced(this);
     if (oldRoot != newRoot) {
-      return copy(newRoot);
+      return this.copy(newRoot);
     } else {
       return this;
     }
   }
 
   public BTree<K, V> cleared() {
-    return empty();
+    return BTree.empty();
   }
 
   @Override
@@ -280,16 +257,16 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
     return this.root.valueIterator();
   }
 
-  public OrderedMapCursor<K, V> lastIterator() {
-    return this.root.lastIterator();
+  public OrderedMapCursor<K, V> reverseIterator() {
+    return this.root.reverseIterator();
   }
 
-  public Cursor<K> lastKeyIterator() {
-    return this.root.lastKeyIterator();
+  public Cursor<K> reverseKeyIterator() {
+    return this.root.reverseKeyIterator();
   }
 
-  public Cursor<V> lastValueIterator() {
-    return this.root.lastValueIterator();
+  public Cursor<V> reverseValueIterator() {
+    return this.root.reverseValueIterator();
   }
 
   protected BTree<K, V> copy(BTreePage<K, V, ?> root) {
@@ -308,11 +285,11 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
       return true;
     } else if (other instanceof Map<?, ?>) {
       final Map<K, V> that = (Map<K, V>) other;
-      if (size() == that.size()) {
-        final Iterator<Entry<K, V>> those = that.entrySet().iterator();
+      if (this.size() == that.size()) {
+        final Iterator<Map.Entry<K, V>> those = that.entrySet().iterator();
         while (those.hasNext()) {
-          final Entry<K, V> entry = those.next();
-          final V value = get(entry.getKey());
+          final Map.Entry<K, V> entry = those.next();
+          final V value = this.get(entry.getKey());
           final V v = entry.getValue();
           if (value == null ? v != null : !value.equals(v)) {
             return false;
@@ -327,7 +304,7 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
   @Override
   public int hashCode() {
     int code = 0;
-    final Cursor<Entry<K, V>> these = iterator();
+    final Cursor<Map.Entry<K, V>> these = this.iterator();
     while (these.hasNext()) {
       code += these.next().hashCode();
     }
@@ -335,27 +312,38 @@ public class BTree<K, V> extends BTreeContext<K, V> implements OrderedMap<K, V>,
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("BTree").write('.');
-    final Cursor<Entry<K, V>> these = iterator();
-    if (these.hasNext()) {
-      Entry<K, V> entry = these.next();
-      output = output.write("of").write('(')
-          .debug(entry.getKey()).write(", ").debug(entry.getValue());
-      while (these.hasNext()) {
-        entry = these.next();
-        output = output.write(')').write('.').write("updated").write('(')
-            .debug(entry.getKey()).write(", ").debug(entry.getValue());
-      }
-    } else {
-      output = output.write("empty").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("BTree").write('.').write("empty").write('(').write(')');
+    final Cursor<Map.Entry<K, V>> these = this.iterator();
+    while (these.hasNext()) {
+      final Map.Entry<K, V> entry = these.next();
+      output = output.write('.').write("updated").write('(').debug(entry.getKey())
+                     .write(", ").debug(entry.getValue()).write(')');
     }
-    output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static BTree<Object, Object> empty;
+
+  @SuppressWarnings("unchecked")
+  public static <K, V> BTree<K, V> empty() {
+    if (BTree.empty == null) {
+      BTree.empty = new BTree<Object, Object>(BTreePage.empty());
+    }
+    return (BTree<K, V>) (BTree<?, ?>) BTree.empty;
+  }
+
+  public static <K, V> BTree<K, V> from(Map<? extends K, ? extends V> map) {
+    BTree<K, V> tree = BTree.empty();
+    for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+      tree = tree.updated(entry.getKey(), entry.getValue());
+    }
+    return tree;
   }
 
 }

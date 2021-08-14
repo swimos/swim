@@ -21,8 +21,8 @@ import swim.api.Link;
 import swim.api.data.MapData;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Stage;
+import swim.runtime.LaneModel;
 import swim.runtime.LaneRelay;
 import swim.runtime.LaneView;
 import swim.runtime.Push;
@@ -35,14 +35,12 @@ import swim.warp.CommandMessage;
 
 public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink> {
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
   protected int flags;
   protected MapData<Value, Value> data;
 
   MapLaneModel(int flags) {
     this.flags = flags;
+    this.data = null;
   }
 
   public MapLaneModel() {
@@ -56,7 +54,7 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
 
   @Override
   protected MapLaneUplink createWarpUplink(WarpBinding link) {
-    return new MapLaneUplink(this, link, createUplinkAddress(link));
+    return new MapLaneUplink(this, link, this.createUplinkAddress(link));
   }
 
   @Override
@@ -93,18 +91,19 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
     }
   }
 
+  @SuppressWarnings("unchecked")
   protected void cueDownKey(Value key) {
     FingerTrieSeq<MapLaneUplink> uplinks;
     do {
-      uplinks = this.uplinks;
+      uplinks = (FingerTrieSeq<MapLaneUplink>) LaneModel.UPLINKS.get(this);
       for (int i = 0, n = uplinks.size(); i < n; i += 1) {
         uplinks.get(i).cueDownKey(key);
       }
-    } while (uplinks != this.uplinks);
+    } while (uplinks != LaneModel.UPLINKS.get(this));
   }
 
   public final boolean isResident() {
-    return (this.flags & RESIDENT) != 0;
+    return (this.flags & MapLaneModel.RESIDENT) != 0;
   }
 
   public MapLaneModel isResident(boolean isResident) {
@@ -112,11 +111,11 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
       this.data.isResident(isResident);
     }
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= MapLaneModel.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~MapLaneModel.RESIDENT;
     }
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof MapLaneView<?, ?>) {
       ((MapLaneView<?, ?>) views).didSetResident(isResident);
     } else if (views instanceof LaneView[]) {
@@ -129,7 +128,7 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
   }
 
   public final boolean isTransient() {
-    return (this.flags & TRANSIENT) != 0;
+    return (this.flags & MapLaneModel.TRANSIENT) != 0;
   }
 
   public MapLaneModel isTransient(boolean isTransient) {
@@ -137,11 +136,11 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
       this.data.isTransient(isTransient);
     }
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= MapLaneModel.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~MapLaneModel.TRANSIENT;
     }
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof MapLaneView<?, ?>) {
       ((MapLaneView<?, ?>) views).didSetTransient(isTransient);
     } else if (views instanceof LaneView[]) {
@@ -167,7 +166,7 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
     final Form<V> valueForm = view.valueForm;
     final Value key = keyForm.mold(keyObject).toValue();
     final Value newValue = valueForm.mold(newObject).toValue();
-    final MapLaneRelayUpdate relay = new MapLaneRelayUpdate(this, stage(), key, newValue);
+    final MapLaneRelayUpdate relay = new MapLaneRelayUpdate(this, this.stage(), key, newValue);
     relay.keyForm = (Form<Object>) keyForm;
     relay.valueForm = (Form<Object>) valueForm;
     relay.keyObject = keyObject;
@@ -188,7 +187,7 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
     final Form<K> keyForm = view.keyForm;
     final Form<V> valueForm = view.valueForm;
     final Value key = keyForm.mold(keyObject).toValue();
-    final MapLaneRelayRemove relay = new MapLaneRelayRemove(this, stage(), key);
+    final MapLaneRelayRemove relay = new MapLaneRelayRemove(this, this.stage(), key);
     relay.keyForm = (Form<Object>) keyForm;
     relay.valueForm = (Form<Object>) valueForm;
     relay.keyObject = keyObject;
@@ -202,20 +201,20 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
 
   public void drop(MapLaneView<?, ?> view, int lower) {
     if (lower > 0) {
-      final MapLaneRelayDrop relay = new MapLaneRelayDrop(this, stage(), lower);
+      final MapLaneRelayDrop relay = new MapLaneRelayDrop(this, this.stage(), lower);
       relay.run();
     }
   }
 
   public void take(MapLaneView<?, ?> view, int upper) {
     if (upper > 0) {
-      final MapLaneRelayTake relay = new MapLaneRelayTake(this, stage(), upper);
+      final MapLaneRelayTake relay = new MapLaneRelayTake(this, this.stage(), upper);
       relay.run();
     }
   }
 
   public void clear(MapLaneView<?, ?> view) {
-    final MapLaneRelayClear relay = new MapLaneRelayClear(this, stage());
+    final MapLaneRelayClear relay = new MapLaneRelayClear(this, this.stage());
     relay.run();
   }
 
@@ -232,16 +231,19 @@ public class MapLaneModel extends WarpLaneModel<MapLaneView<?, ?>, MapLaneUplink
   }
 
   protected void openStore() {
-    this.data = this.laneContext.store().mapData(laneUri().toString())
-        .isTransient(isTransient())
-        .isResident(isResident());
+    this.data = this.laneContext.store().mapData(this.laneUri().toString())
+                                        .isTransient(this.isTransient())
+                                        .isResident(this.isResident());
   }
 
   @Override
   protected void willLoad() {
-    openStore();
+    this.openStore();
     super.willLoad();
   }
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
 
 }
 
@@ -376,7 +378,7 @@ final class MapLaneRelayUpdate extends LaneRelay<MapLaneModel, MapLaneView<?, ?>
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -507,7 +509,7 @@ final class MapLaneRelayRemove extends LaneRelay<MapLaneModel, MapLaneView<?, ?>
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -590,7 +592,7 @@ final class MapLaneRelayDrop extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> 
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -673,7 +675,7 @@ final class MapLaneRelayTake extends LaneRelay<MapLaneModel, MapLaneView<?, ?>> 
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -752,7 +754,7 @@ final class MapLaneRelayClear extends LaneRelay<MapLaneModel, MapLaneView<?, ?>>
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;

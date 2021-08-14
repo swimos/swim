@@ -19,7 +19,7 @@ import swim.structure.Item;
 
 /**
  * Fall-through "transformation" between a structural {@link Item} and a nominal
- * {@code Item}.  Both {@link #mold} and {@link #cast} simply return the {@code
+ * {@code Item}. Both {@link #mold} and {@link #cast} simply return the {@code
  * Item} argument itself.
  */
 public final class ItemForm extends Form<Item> {

@@ -37,7 +37,7 @@ public class ValueSet<T> extends ValueCollection<T> implements Set<T> {
 
   @Override
   public <T2> ValueSet<T2> valueClass(Class<T2> valueClass) {
-    return valueForm(Form.<T2>forClass(valueClass));
+    return this.valueForm(Form.<T2>forClass(valueClass));
   }
 
   @Override
@@ -46,9 +46,9 @@ public class ValueSet<T> extends ValueCollection<T> implements Set<T> {
       return true;
     } else if (other instanceof Set<?>) {
       final Set<?> that = (Set<?>) other;
-      if (size() == that.size()) {
+      if (this.size() == that.size()) {
         try {
-          return containsAll(that);
+          return this.containsAll(that);
         } catch (ClassCastException | NullPointerException e) {
           // swallow
         }
@@ -59,7 +59,7 @@ public class ValueSet<T> extends ValueCollection<T> implements Set<T> {
 
   @Override
   public int hashCode() {
-    final Iterator<T> these = iterator();
+    final Iterator<T> these = this.iterator();
     int code = 0;
     while (these.hasNext()) {
       final T object = these.next();

@@ -40,8 +40,8 @@ final class ComparisonOperatorParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.lhsParser, this.operator,
-                 this.rhsParser, this.step);
+    return ComparisonOperatorParser.parse(input, this.recon, this.builder, this.lhsParser,
+                                          this.operator, this.rhsParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -101,7 +101,7 @@ final class ComparisonOperatorParser<I, V> extends Parser<V> {
           step = 7;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     if (step == 4) {
@@ -116,7 +116,7 @@ final class ComparisonOperatorParser<I, V> extends Parser<V> {
           step = 7;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     if (step == 5) {
@@ -131,7 +131,7 @@ final class ComparisonOperatorParser<I, V> extends Parser<V> {
           step = 7;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     if (step == 6) {
@@ -148,7 +148,7 @@ final class ComparisonOperatorParser<I, V> extends Parser<V> {
           step = 7;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     if (step == 7) {
@@ -162,32 +162,32 @@ final class ComparisonOperatorParser<I, V> extends Parser<V> {
         final V lhs = lhsParser.bind();
         final V rhs = rhsParser.bind();
         if ("<".equals(operator)) {
-          return done(recon.lt(lhs, rhs));
+          return Parser.done(recon.lt(lhs, rhs));
         } else if ("<=".equals(operator)) {
-          return done(recon.le(lhs, rhs));
+          return Parser.done(recon.le(lhs, rhs));
         } else if ("==".equals(operator)) {
-          return done(recon.eq(lhs, rhs));
+          return Parser.done(recon.eq(lhs, rhs));
         } else if ("!=".equals(operator)) {
-          return done(recon.ne(lhs, rhs));
+          return Parser.done(recon.ne(lhs, rhs));
         } else if (">=".equals(operator)) {
-          return done(recon.ge(lhs, rhs));
+          return Parser.done(recon.ge(lhs, rhs));
         } else if (">".equals(operator)) {
-          return done(recon.gt(lhs, rhs));
+          return Parser.done(recon.gt(lhs, rhs));
         } else {
-          return error(Diagnostic.message(operator, input));
+          return Parser.error(Diagnostic.message(operator, input));
         }
       } else if (rhsParser.isError()) {
         return rhsParser.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ComparisonOperatorParser<I, V>(recon, builder, lhsParser, operator, rhsParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, null, null, 1);
+    return ComparisonOperatorParser.parse(input, recon, builder, null, null, null, 1);
   }
 
 }

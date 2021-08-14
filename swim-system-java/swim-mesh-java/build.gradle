@@ -3,7 +3,7 @@ plugins {
   id 'SwimSystemPublish'
 }
 
-description = 'Swim Mesh'
+description = 'Swim Host Framework'
 ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java'
 ext.moduleName = null
 
@@ -27,10 +27,9 @@ dependencies {
 }
 
 javadoc {
-  title 'Swim Mesh'
+  title 'Swim Host Framework'
   options.overview = "${projectDir}/overview.html"
   options.addStringOption('-module-source-path', [
                           "${projectDir}/*/src/main/java",
                           "${projectDir}/../swim-core-java/*/src/main/java"].join(':'))
-
 }

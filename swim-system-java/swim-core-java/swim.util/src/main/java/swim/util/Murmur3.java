@@ -29,14 +29,14 @@ public final class Murmur3 {
    * Returns the hash code of the name of the class.
    */
   public static int seed(Class<?> clazz) {
-    return seed(clazz.getName());
+    return Murmur3.seed(clazz.getName());
   }
 
   /**
    * Returns the hash code of the {@code string}.
    */
   public static int seed(String string) {
-    return mash(mix(0, string));
+    return Murmur3.mash(Murmur3.mix(0, string));
   }
 
   /**
@@ -74,7 +74,7 @@ public final class Murmur3 {
     if (value == (float) (int) value) {
       return (int) value;
     } else if (value == (float) (long) value) {
-      return hash((long) value);
+      return Murmur3.hash((long) value);
     } else {
       return Float.floatToIntBits(value);
     }
@@ -87,7 +87,7 @@ public final class Murmur3 {
     if (value == (double) (int) value) {
       return (int) value;
     } else if (value == (double) (long) value) {
-      return hash((long) value);
+      return Murmur3.hash((long) value);
     } else if (value == (double) (float) value) {
       return Float.floatToIntBits((float) value);
     } else {
@@ -119,11 +119,11 @@ public final class Murmur3 {
    */
   public static int hash(Number number) {
     if (number instanceof Double) {
-      return hash(number.doubleValue());
+      return Murmur3.hash(number.doubleValue());
     } else if (number instanceof Float) {
-      return hash(number.floatValue());
+      return Murmur3.hash(number.floatValue());
     } else if (number instanceof Long) {
-      return hash(number.longValue());
+      return Murmur3.hash(number.longValue());
     } else {
       return number.intValue();
     }
@@ -136,7 +136,7 @@ public final class Murmur3 {
     if (object == null) {
       return 0;
     } else if (object instanceof Number) {
-      return hash((Number) object);
+      return Murmur3.hash((Number) object);
     } else {
       return object.hashCode();
     }
@@ -149,9 +149,9 @@ public final class Murmur3 {
    */
   public static int mix(int code, byte[] array, int offset, int size) {
     if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) {
-      return mixByteArrayBE(code, array, offset, size);
+      return Murmur3.mixByteArrayBE(code, array, offset, size);
     } else if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
-      return mixByteArrayLE(code, array, offset, size);
+      return Murmur3.mixByteArrayLE(code, array, offset, size);
     } else {
       throw new AssertionError();
     }
@@ -161,8 +161,8 @@ public final class Murmur3 {
     final int limit = offset + size;
     while (offset + 3 < limit) {
       final int word = (array[offset] & 0xff) << 24 | (array[offset + 1] & 0xff) << 16
-          | (array[offset + 2] & 0xff) << 8 | array[offset + 3] & 0xff;
-      code = mix(code, word);
+                     | (array[offset + 2] & 0xff) << 8 | array[offset + 3] & 0xff;
+      code = Murmur3.mix(code, word);
       offset += 4;
     }
     if (offset < limit) {
@@ -186,8 +186,8 @@ public final class Murmur3 {
     final int limit = offset + size;
     while (offset + 3 < limit) {
       final int word = array[offset] & 0xff | (array[offset + 1] & 0xff) << 8
-          | (array[offset + 2] & 0xff) << 16 | (array[offset + 3] & 0xff) << 24;
-      code = mix(code, word);
+                     | (array[offset + 2] & 0xff) << 16 | (array[offset + 3] & 0xff) << 24;
+      code = Murmur3.mix(code, word);
       offset += 4;
     }
     if (offset < limit) {
@@ -212,7 +212,7 @@ public final class Murmur3 {
    * accumulated hash {@code code}.
    */
   public static int mix(int code, byte[] array) {
-    return mix(code, array, 0, array != null ? array.length : 0);
+    return Murmur3.mix(code, array, 0, array != null ? array.length : 0);
   }
 
   /**
@@ -221,9 +221,9 @@ public final class Murmur3 {
    */
   public static int mix(int code, String string) {
     if (ByteOrder.nativeOrder() == ByteOrder.BIG_ENDIAN) {
-      return mixStringBE(code, string);
+      return Murmur3.mixStringBE(code, string);
     } else if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
-      return mixStringLE(code, string);
+      return Murmur3.mixStringLE(code, string);
     } else {
       throw new AssertionError();
     }
@@ -242,7 +242,7 @@ public final class Murmur3 {
         k -= 8;
         word |= c << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
@@ -251,14 +251,14 @@ public final class Murmur3 {
         k -= 8;
         word |= (0xc0 | (c >>> 6)) << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
         k -= 8;
         word |= (0x80 | (c & 0x3f)) << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
@@ -267,21 +267,21 @@ public final class Murmur3 {
         k -= 8;
         word |= (0xe0 | (c >>> 12)) << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
         k -= 8;
         word |= (0x80 | ((c >>> 6) & 0x3f)) << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
         k -= 8;
         word |= (0x80 | (c & 0x3f)) << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
@@ -290,28 +290,28 @@ public final class Murmur3 {
         k -= 8;
         word |= (0xf0 | (c >>> 18)) << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
         k -= 8;
         word |= (0x80 | ((c >>> 12) & 0x3f)) << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
         k -= 8;
         word |= (0x80 | ((c >>> 6) & 0x3f)) << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
         k -= 8;
         word |= (0x80 | (c & 0x3f)) << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
@@ -320,21 +320,21 @@ public final class Murmur3 {
         k -= 8;
         word |= 0xef << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
         k -= 8;
         word |= 0xbf << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
         k -= 8;
         word |= 0xbd << k;
         if (k == 0) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 32;
         }
@@ -364,7 +364,7 @@ public final class Murmur3 {
         word |= c << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }
@@ -373,14 +373,14 @@ public final class Murmur3 {
         word |= (0xc0 | (c >>> 6)) << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }
         word |= (0x80 | (c & 0x3f)) << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }
@@ -389,21 +389,21 @@ public final class Murmur3 {
         word |= (0xe0 | (c >>> 12)) << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }
         word |= (0x80 | ((c >>> 6) & 0x3f)) << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }
         word |= (0x80 | (c & 0x3f)) << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }
@@ -412,28 +412,28 @@ public final class Murmur3 {
         word |= (0xf0 | (c >>> 18)) << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }
         word |= (0x80 | ((c >>> 12) & 0x3f)) << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }
         word |= (0x80 | ((c >>> 6) & 0x3f)) << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }
         word |= (0x80 | (c & 0x3f)) << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }
@@ -442,21 +442,21 @@ public final class Murmur3 {
         word |= 0xef << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }
         word |= 0xbf << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }
         word |= 0xbd << k;
         k += 8;
         if (k == 32) {
-          code = mix(code, word);
+          code = Murmur3.mix(code, word);
           word = 0;
           k = 0;
         }

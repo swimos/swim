@@ -27,31 +27,10 @@ import swim.util.Murmur3;
 
 public final class ContentType extends HttpHeader {
 
-  private static int hashSeed;
   final MediaType mediaType;
 
   ContentType(MediaType mediaType) {
     this.mediaType = mediaType;
-  }
-
-  public static ContentType from(MediaType mediaType) {
-    return new ContentType(mediaType);
-  }
-
-  public static ContentType from(String type, String subtype, HashTrieMap<String, String> params) {
-    return from(MediaType.from(type, subtype, params));
-  }
-
-  public static ContentType from(String type, String subtype) {
-    return from(MediaType.from(type, subtype));
-  }
-
-  public static ContentType from(String mediaType) {
-    return from(MediaType.parse(mediaType));
-  }
-
-  public static Parser<ContentType> parseHttpValue(Input input, HttpParser http) {
-    return ContentTypeParser.parse(input, http);
   }
 
   @Override
@@ -85,7 +64,7 @@ public final class ContentType extends HttpHeader {
   }
 
   public ContentType param(String key, String value) {
-    return from(this.mediaType.param(key, value));
+    return ContentType.create(this.mediaType.param(key, value));
   }
 
   @Override
@@ -104,22 +83,47 @@ public final class ContentType extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ContentType.class);
+    if (ContentType.hashSeed == 0) {
+      ContentType.hashSeed = Murmur3.seed(ContentType.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.mediaType.hashCode()));
+    return Murmur3.mash(Murmur3.mix(ContentType.hashSeed, this.mediaType.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("ContentType").write('.').write("from").write('(')
-        .debug(this.mediaType.type()).write(", ").write(this.mediaType.subtype()).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("ContentType").write('.').write("create").write('(')
+                   .debug(this.mediaType.type()).write(", ")
+                   .write(this.mediaType.subtype()).write(')');
     for (HashTrieMap.Entry<String, String> param : this.mediaType.params()) {
       output = output.write('.').write("param").write('(')
-          .debug(param.getKey()).write(", ").debug(param.getValue()).write(')');
+                     .debug(param.getKey()).write(", ")
+                     .debug(param.getValue()).write(')');
     }
+    return output;
+  }
+
+  public static ContentType create(MediaType mediaType) {
+    return new ContentType(mediaType);
+  }
+
+  public static ContentType create(String type, String subtype, HashTrieMap<String, String> params) {
+    return ContentType.create(MediaType.create(type, subtype, params));
+  }
+
+  public static ContentType create(String type, String subtype) {
+    return ContentType.create(MediaType.create(type, subtype));
+  }
+
+  public static ContentType create(String mediaType) {
+    return ContentType.create(MediaType.parse(mediaType));
+  }
+
+  public static Parser<ContentType> parseHttpValue(Input input, HttpParser http) {
+    return ContentTypeParser.parse(input, http);
   }
 
 }

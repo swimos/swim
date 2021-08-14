@@ -30,41 +30,12 @@ import swim.util.Murmur3;
 
 public final class Host extends HttpHeader {
 
-  private static int hashSeed;
   final UriHost host;
   final UriPort port;
 
   Host(UriHost host, UriPort port) {
     this.host = host;
     this.port = port;
-  }
-
-  public static Host from(UriHost host, UriPort port) {
-    return new Host(host, port);
-  }
-
-  public static Host from(UriHost host) {
-    return new Host(host, UriPort.undefined());
-  }
-
-  public static Host from(UriAuthority authority) {
-    return new Host(authority.host(), authority.port());
-  }
-
-  public static Host from(String host, int port) {
-    return new Host(UriHost.parse(host), UriPort.from(port));
-  }
-
-  public static Host from(String host) {
-    return new Host(UriHost.parse(host), UriPort.undefined());
-  }
-
-  public static Host from(InetSocketAddress address) {
-    return new Host(UriHost.inetAddress(address.getAddress()), UriPort.from(address.getPort()));
-  }
-
-  public static Parser<Host> parseHttpValue(Input input, HttpParser http) {
-    return HostParser.parse(input);
   }
 
   @Override
@@ -86,7 +57,7 @@ public final class Host extends HttpHeader {
   }
 
   public InetSocketAddress inetSocketAddress() throws UnknownHostException {
-    return new InetSocketAddress(host.inetAddress(), port.number());
+    return new InetSocketAddress(this.host.inetAddress(), this.port.number());
   }
 
   @Override
@@ -105,22 +76,53 @@ public final class Host extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Host.class);
+    if (Host.hashSeed == 0) {
+      Host.hashSeed = Murmur3.seed(Host.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Host.hashSeed,
         this.host.hashCode()), this.port.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("Host").write('.').write("from").write('(').debug(this.host.toString());
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Host").write('.').write("create").write('(').debug(this.host.toString());
     if (this.port.isDefined()) {
       output = output.write(", ").debug(this.port.number());
     }
     output = output.write(')');
+    return output;
+  }
+
+  public static Host create(UriHost host, UriPort port) {
+    return new Host(host, port);
+  }
+
+  public static Host create(UriHost host) {
+    return new Host(host, UriPort.undefined());
+  }
+
+  public static Host create(UriAuthority authority) {
+    return new Host(authority.host(), authority.port());
+  }
+
+  public static Host create(String host, int port) {
+    return new Host(UriHost.parse(host), UriPort.create(port));
+  }
+
+  public static Host create(String host) {
+    return new Host(UriHost.parse(host), UriPort.undefined());
+  }
+
+  public static Host create(InetSocketAddress address) {
+    return new Host(UriHost.inetAddress(address.getAddress()), UriPort.create(address.getPort()));
+  }
+
+  public static Parser<Host> parseHttpValue(Input input, HttpParser http) {
+    return HostParser.parse(input);
   }
 
 }

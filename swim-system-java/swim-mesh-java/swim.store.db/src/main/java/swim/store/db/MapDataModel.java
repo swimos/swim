@@ -46,7 +46,9 @@ public class MapDataModel implements MapDataBinding, BTreeDelegate {
   public MapDataModel(Value name, BTreeMap tree) {
     this.name = name;
     this.tree = tree;
-    tree.setTreeDelegate(this);
+    this.dataContext = null;
+    this.storeBinding = null;
+    this.tree.setTreeDelegate(this);
   }
 
   @Override
@@ -72,7 +74,7 @@ public class MapDataModel implements MapDataBinding, BTreeDelegate {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapData(Class<T> dataClass) {
-    if (dataClass.isAssignableFrom(getClass())) {
+    if (dataClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -88,7 +90,7 @@ public class MapDataModel implements MapDataBinding, BTreeDelegate {
   }
 
   public final Store store() {
-    return database().store();
+    return this.database().store();
   }
 
   public final Value treeName() {
@@ -112,7 +114,7 @@ public class MapDataModel implements MapDataBinding, BTreeDelegate {
 
   @Override
   public <K2> MapData<K2, Value> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   @Override
@@ -127,7 +129,7 @@ public class MapDataModel implements MapDataBinding, BTreeDelegate {
 
   @Override
   public <V2> MapData<Value, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override
@@ -353,22 +355,22 @@ public class MapDataModel implements MapDataBinding, BTreeDelegate {
 
   @Override
   public void treeDidLoadPage(Page page) {
-    // nop
+    // hook
   }
 
   @Override
   public void treeDidChange(Tree newTree, Tree oldTree) {
-    // nop
+    // hook
   }
 
   @Override
   public void treeDidCommit(Tree newTree, Tree oldTree) {
-    // nop
+    // hook
   }
 
   @Override
   public void treeDidClear(Tree newTree, Tree oldTree) {
-    // nop
+    // hook
   }
 
   @Override

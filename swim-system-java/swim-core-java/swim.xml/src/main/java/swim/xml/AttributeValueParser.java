@@ -27,13 +27,19 @@ final class AttributeValueParser<V> extends Parser<V> {
   final int quote;
   final int step;
 
-  AttributeValueParser(XmlParser<?, V> xml, Output<V> output, Parser<?> referenceParser,
-                       int quote, int step) {
+  AttributeValueParser(XmlParser<?, V> xml, Output<V> output,
+                       Parser<?> referenceParser, int quote, int step) {
     this.xml = xml;
     this.output = output;
     this.referenceParser = referenceParser;
     this.quote = quote;
     this.step = step;
+  }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return AttributeValueParser.parse(input, this.xml, this.output,
+                                      this.referenceParser, this.quote, this.step);
   }
 
   static <V> Parser<V> parse(Input input, XmlParser<?, V> xml, Output<V> output,
@@ -50,10 +56,10 @@ final class AttributeValueParser<V> extends Parser<V> {
           quote = c;
           step = 2;
         } else {
-          return error(Diagnostic.expected("attribute value", input));
+          return Parser.error(Diagnostic.expected("attribute value", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("attribute value", input));
+        return Parser.error(Diagnostic.expected("attribute value", input));
       }
     }
     do {
@@ -74,10 +80,10 @@ final class AttributeValueParser<V> extends Parser<V> {
           } else if (c == '&') {
             step = 3;
           } else {
-            return error(Diagnostic.unexpected(input));
+            return Parser.error(Diagnostic.unexpected(input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 3) {
@@ -97,22 +103,17 @@ final class AttributeValueParser<V> extends Parser<V> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new AttributeValueParser<V>(xml, output, referenceParser, quote, step);
   }
 
   static <V> Parser<V> parse(Input input, XmlParser<?, V> xml, Output<V> output) {
-    return parse(input, xml, output, null, 0, 1);
+    return AttributeValueParser.parse(input, xml, output, null, 0, 1);
   }
 
   static <V> Parser<V> parse(Input input, XmlParser<?, V> xml) {
-    return parse(input, xml, null, null, 0, 1);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.xml, this.output, this.referenceParser, this.quote, this.step);
+    return AttributeValueParser.parse(input, xml, null, null, 0, 1);
   }
 
 }

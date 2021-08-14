@@ -28,26 +28,33 @@ import swim.util.Murmur3;
 
 public abstract class PartPredicate {
 
-  private static Form<PartPredicate> form;
+  protected PartPredicate() {
+    // sealed
+  }
+
+  public abstract boolean test(Uri nodeUri, int nodeHash);
+
+  public boolean test(Uri nodeUri) {
+    return this.test(nodeUri, nodeUri.hashCode());
+  }
+
+  public PartPredicate or(PartPredicate that) {
+    return new OrPartPredicate(this, that);
+  }
+
+  public PartPredicate and(PartPredicate that) {
+    return new AndPartPredicate(this, that);
+  }
+
+  public abstract Value toValue();
+
   private static PartPredicate any;
 
-  protected PartPredicate() {
-    // stub
-  }
-
-  @Kind
-  public static Form<PartPredicate> form() {
-    if (form == null) {
-      form = new PartPredicateForm();
-    }
-    return form;
-  }
-
   public static PartPredicate any() {
-    if (any == null) {
-      any = new AnyPartPredicate();
+    if (PartPredicate.any == null) {
+      PartPredicate.any = new AnyPartPredicate();
     }
-    return any;
+    return PartPredicate.any;
   }
 
   public static PartPredicate or(PartPredicate... predicates) {
@@ -77,14 +84,14 @@ public abstract class PartPredicate {
     } else if ("hash".equals(tag)) {
       return HashPartPredicate.fromValue(value);
     } else if (value instanceof OrOperator) {
-      final PartPredicate lhs = fromValue(((OrOperator) value).operand1().toValue());
-      final PartPredicate rhs = fromValue(((OrOperator) value).operand2().toValue());
+      final PartPredicate lhs = fromValue(((OrOperator) value).lhs().toValue());
+      final PartPredicate rhs = fromValue(((OrOperator) value).rhs().toValue());
       if (lhs != null && rhs != null) {
         return new OrPartPredicate(lhs, rhs);
       }
     } else if (value instanceof AndOperator) {
-      final PartPredicate lhs = fromValue(((AndOperator) value).operand1().toValue());
-      final PartPredicate rhs = fromValue(((AndOperator) value).operand2().toValue());
+      final PartPredicate lhs = fromValue(((AndOperator) value).lhs().toValue());
+      final PartPredicate rhs = fromValue(((AndOperator) value).rhs().toValue());
       if (lhs != null && rhs != null) {
         return new AndPartPredicate(lhs, rhs);
       }
@@ -94,21 +101,15 @@ public abstract class PartPredicate {
     return null;
   }
 
-  public abstract boolean test(Uri nodeUri, int nodeHash);
+  private static Form<PartPredicate> form;
 
-  public boolean test(Uri nodeUri) {
-    return test(nodeUri, nodeUri.hashCode());
+  @Kind
+  public static Form<PartPredicate> form() {
+    if (PartPredicate.form == null) {
+      PartPredicate.form = new PartPredicateForm();
+    }
+    return PartPredicate.form;
   }
-
-  public PartPredicate or(PartPredicate that) {
-    return new OrPartPredicate(this, that);
-  }
-
-  public PartPredicate and(PartPredicate that) {
-    return new AndPartPredicate(this, that);
-  }
-
-  public abstract Value toValue();
 
 }
 
@@ -162,7 +163,6 @@ final class AnyPartPredicate extends PartPredicate {
 
 final class OrPartPredicate extends PartPredicate {
 
-  private static int hashSeed;
   final PartPredicate[] predicates;
 
   OrPartPredicate(PartPredicate[] predicates) {
@@ -228,12 +228,14 @@ final class OrPartPredicate extends PartPredicate {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(OrPartPredicate.class);
+    if (OrPartPredicate.hashSeed == 0) {
+      OrPartPredicate.hashSeed = Murmur3.seed(OrPartPredicate.class);
     }
-    int code = hashSeed;
+    int code = OrPartPredicate.hashSeed;
     for (int i = 0, n = this.predicates.length; i < n; i += 1) {
       code = Murmur3.mix(code, this.predicates[i].hashCode());
     }
@@ -256,7 +258,6 @@ final class OrPartPredicate extends PartPredicate {
 
 final class AndPartPredicate extends PartPredicate {
 
-  private static int hashSeed;
   final PartPredicate[] predicates;
 
   AndPartPredicate(PartPredicate[] predicates) {
@@ -322,12 +323,14 @@ final class AndPartPredicate extends PartPredicate {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(AndPartPredicate.class);
+    if (AndPartPredicate.hashSeed == 0) {
+      AndPartPredicate.hashSeed = Murmur3.seed(AndPartPredicate.class);
     }
-    int code = hashSeed;
+    int code = AndPartPredicate.hashSeed;
     for (int i = 0, n = this.predicates.length; i < n; i += 1) {
       code = Murmur3.mix(code, this.predicates[i].hashCode());
     }
@@ -350,7 +353,6 @@ final class AndPartPredicate extends PartPredicate {
 
 final class NodePartPredicate extends PartPredicate {
 
-  private static int hashSeed;
   final UriPattern nodePattern;
 
   NodePartPredicate(UriPattern nodePattern) {
@@ -384,12 +386,14 @@ final class NodePartPredicate extends PartPredicate {
     }
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(NodePartPredicate.class);
+    if (NodePartPredicate.hashSeed == 0) {
+      NodePartPredicate.hashSeed = Murmur3.seed(NodePartPredicate.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.nodePattern.hashCode()));
+    return Murmur3.mash(Murmur3.mix(NodePartPredicate.hashSeed, this.nodePattern.hashCode()));
   }
 
   @Override
@@ -401,7 +405,6 @@ final class NodePartPredicate extends PartPredicate {
 
 final class HashPartPredicate extends PartPredicate {
 
-  private static int hashSeed;
   final int lowerBound;
   final int upperBound;
 
@@ -425,7 +428,8 @@ final class HashPartPredicate extends PartPredicate {
 
   @Override
   public Value toValue() {
-    return Record.create(1).attr("hash", Record.create(2).item(this.lowerBound).item(this.upperBound));
+    return Record.create(1).attr("hash", Record.create(2).item(this.lowerBound)
+                                                         .item(this.upperBound));
   }
 
   @Override
@@ -440,12 +444,15 @@ final class HashPartPredicate extends PartPredicate {
     }
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(HashPartPredicate.class);
+    if (HashPartPredicate.hashSeed == 0) {
+      HashPartPredicate.hashSeed = Murmur3.seed(HashPartPredicate.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed, this.lowerBound), this.upperBound));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HashPartPredicate.hashSeed,
+        this.lowerBound), this.upperBound));
   }
 
   @Override

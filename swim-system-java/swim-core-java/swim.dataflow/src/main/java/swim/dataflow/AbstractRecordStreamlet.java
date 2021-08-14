@@ -50,37 +50,6 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
     this(null);
   }
 
-  public static <I extends Value, O extends Value> void compileInlets(Class<?> streamletClass, RecordStreamlet<I, O> streamlet) {
-    while (streamletClass != null) {
-      final java.lang.reflect.Field[] fields = streamletClass.getDeclaredFields();
-      for (java.lang.reflect.Field field : fields) {
-        if (Inlet.class.isAssignableFrom(field.getType())) {
-          final In in = field.getAnnotation(In.class);
-          if (in != null) {
-            String name = in.value();
-            if (name.isEmpty()) {
-              name = field.getName();
-            }
-            final Inlet<I> inlet = AbstractStreamlet.reflectInletField(streamlet, field);
-            streamlet.compileInlet(inlet, name);
-            continue;
-          }
-          final Inout inout = field.getAnnotation(Inout.class);
-          if (inout != null) {
-            String name = inout.value();
-            if (name.isEmpty()) {
-              name = field.getName();
-            }
-            final Inoutlet<I, O> inoutlet = AbstractStreamlet.reflectInoutletField(streamlet, field);
-            streamlet.compileInlet(inoutlet, name);
-            continue;
-          }
-        }
-      }
-      streamletClass = streamletClass.getSuperclass();
-    }
-  }
-
   @Override
   public StreamletScope<? extends O> streamletScope() {
     return this.scope;
@@ -96,7 +65,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
     if (this.context != null) {
       return this.context;
     }
-    final StreamletScope<? extends O> scope = streamletScope();
+    final StreamletScope<? extends O> scope = this.streamletScope();
     if (scope != null) {
       return scope.streamletContext();
     }
@@ -110,12 +79,12 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @Override
   public boolean isEmpty() {
-    return size() != 0;
+    return this.size() != 0;
   }
 
   @Override
   public int size() {
-    return AbstractStreamlet.reflectOutletCount(getClass());
+    return AbstractStreamlet.reflectOutletCount(this.getClass());
   }
 
   @Override
@@ -123,13 +92,13 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
     if (!(key instanceof Text)) {
       return false;
     }
-    final Outlet<O> outlet = outlet(((Text) key).stringValue());
+    final Outlet<O> outlet = this.outlet(((Text) key).stringValue());
     return outlet != null;
   }
 
   @Override
   public boolean containsKey(String key) {
-    final Outlet<O> outlet = outlet(key);
+    final Outlet<O> outlet = this.outlet(key);
     return outlet != null;
   }
 
@@ -138,7 +107,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
     if (!(key instanceof Text)) {
       return Value.absent();
     }
-    final Outlet<O> outlet = outlet(((Text) key).stringValue());
+    final Outlet<O> outlet = this.outlet(((Text) key).stringValue());
     if (outlet != null) {
       final Value output = outlet.get();
       if (output != null) {
@@ -150,7 +119,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @Override
   public Value get(String key) {
-    final Outlet<O> outlet = outlet(key);
+    final Outlet<O> outlet = this.outlet(key);
     if (outlet != null) {
       final Value output = outlet.get();
       if (output != null) {
@@ -172,17 +141,17 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @Override
   public Value getSlot(Value key) {
-    return get(key);
+    return this.get(key);
   }
 
   @Override
   public Value getSlot(String key) {
-    return get(key);
+    return this.get(key);
   }
 
   @Override
   public Field getField(Value key) {
-    final Value value = get(key);
+    final Value value = this.get(key);
     if (value.isDefined()) {
       return Slot.of(key, value);
     }
@@ -191,7 +160,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @Override
   public Field getField(String key) {
-    final Value value = get(key);
+    final Value value = this.get(key);
     if (value.isDefined()) {
       return Slot.of(key, value);
     }
@@ -200,7 +169,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @Override
   public Item get(int index) {
-    final Map.Entry<String, Outlet<O>> entry = AbstractStreamlet.reflectOutletIndex(index, this, getClass());
+    final Map.Entry<String, Outlet<O>> entry = AbstractStreamlet.reflectOutletIndex(index, this, this.getClass());
     if (entry != null) {
       final String name = entry.getKey();
       final Value output = entry.getValue().get();
@@ -213,7 +182,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @Override
   public Item getItem(int index) {
-    final Map.Entry<String, Outlet<O>> entry = AbstractStreamlet.reflectOutletIndex(index, this, getClass());
+    final Map.Entry<String, Outlet<O>> entry = AbstractStreamlet.reflectOutletIndex(index, this, this.getClass());
     if (entry != null) {
       final String name = entry.getKey();
       Value output = entry.getValue().get();
@@ -292,7 +261,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @Override
   public Inlet<I> inlet(String key) {
-    return AbstractStreamlet.reflectInletKey(key, this, getClass());
+    return AbstractStreamlet.reflectInletKey(key, this, this.getClass());
   }
 
   protected <I2 extends I> Inlet<I2> inlet() {
@@ -301,7 +270,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @Override
   public void bindInput(String key, Outlet<? extends I> input) {
-    final Inlet<I> inlet = inlet(key);
+    final Inlet<I> inlet = this.inlet(key);
     if (inlet == null) {
       throw new IllegalArgumentException(key.toString());
     }
@@ -310,7 +279,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @Override
   public void unbindInput(String key) {
-    final Inlet<I> inlet = inlet(key);
+    final Inlet<I> inlet = this.inlet(key);
     if (inlet == null) {
       throw new IllegalArgumentException(key.toString());
     }
@@ -319,7 +288,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @Override
   public Outlet<O> outlet(String key) {
-    return AbstractStreamlet.reflectOutletKey(key, this, getClass());
+    return AbstractStreamlet.reflectOutletKey(key, this, this.getClass());
   }
 
   @SuppressWarnings("unchecked")
@@ -335,23 +304,23 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   @Override
   public void decohere() {
     if (this.version >= 0) {
-      willDecohere();
+      this.willDecohere();
       this.version = -1;
-      onDecohere();
-      onDecohereOutlets();
-      didDecohere();
+      this.onDecohere();
+      this.onDecohereOutlets();
+      this.didDecohere();
     }
   }
 
   @Override
   public void recohere(int version) {
     if (this.version < 0) {
-      willRecohere(version);
+      this.willRecohere(version);
       this.version = version;
-      onRecohereInlets(version);
-      onRecohere(version);
-      onRecohereOutlets(version);
-      didRecohere(version);
+      this.onRecohereInlets(version);
+      this.onRecohere(version);
+      this.onRecohereOutlets(version);
+      this.didRecohere(version);
     }
   }
 
@@ -365,15 +334,15 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @SuppressWarnings("unchecked")
   public <I2 extends I> I2 getInput(String key) {
-    final Inlet<I2> inlet = (Inlet<I2>) inlet(key);
+    final Inlet<I2> inlet = (Inlet<I2>) this.inlet(key);
     if (inlet != null) {
-      return getInput(inlet);
+      return this.getInput(inlet);
     }
     return null;
   }
 
   public <I2 extends I> I2 getInput(Inlet<I2> inlet, I2 orElse) {
-    I2 input = getInput(inlet);
+    I2 input = this.getInput(inlet);
     if (input == null) {
       input = orElse;
     }
@@ -381,7 +350,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   public <I2 extends I> I2 getInput(String key, I2 orElse) {
-    I2 input = getInput(key);
+    I2 input = this.getInput(key);
     if (input == null) {
       input = orElse;
     }
@@ -389,7 +358,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   public <T> T castInput(Inlet<? extends I> inlet, Form<T> form) {
-    final I input = getInput(inlet);
+    final I input = this.getInput(inlet);
     T object = null;
     if (input != null) {
       object = form.cast(input);
@@ -398,7 +367,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   public <T> T castInput(String key, Form<T> form) {
-    final I input = getInput(key);
+    final I input = this.getInput(key);
     T object = null;
     if (input != null) {
       object = form.cast(input);
@@ -407,7 +376,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   public <T> T castInput(Inlet<? extends I> inlet, Form<T> form, T orElse) {
-    final I input = getInput(inlet);
+    final I input = this.getInput(inlet);
     T object = null;
     if (input != null) {
       object = form.cast(input);
@@ -419,7 +388,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   public <T> T castInput(String key, Form<T> form, T orElse) {
-    final I input = getInput(key);
+    final I input = this.getInput(key);
     T object = null;
     if (input != null) {
       object = form.cast(input);
@@ -431,7 +400,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   public <T> T coerceInput(Inlet<? extends I> inlet, Form<T> form) {
-    final I input = getInput(inlet);
+    final I input = this.getInput(inlet);
     T object = null;
     if (input != null) {
       object = form.cast(input);
@@ -443,7 +412,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   public <T> T coerceInput(String key, Form<T> form) {
-    final I input = getInput(key);
+    final I input = this.getInput(key);
     T object = null;
     if (input != null) {
       object = form.cast(input);
@@ -455,7 +424,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   public <T> T coerceInput(Inlet<? extends I> inlet, Form<T> form, T orElse) {
-    final I input = getInput(inlet);
+    final I input = this.getInput(inlet);
     T object = null;
     if (input != null) {
       object = form.cast(input);
@@ -470,7 +439,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   public <T> T coerceInput(String key, Form<T> form, T orElse) {
-    final I input = getInput(key);
+    final I input = this.getInput(key);
     T object = null;
     if (input != null) {
       object = form.cast(input);
@@ -490,21 +459,21 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   public O getOutput(String key) {
-    final Outlet<O> outlet = outlet(key);
+    final Outlet<O> outlet = this.outlet(key);
     if (outlet != null) {
-      return getOutput(outlet);
+      return this.getOutput(outlet);
     }
     return null;
   }
 
   @Override
   public void disconnectInputs() {
-    AbstractStreamlet.disconnectInputs(this, getClass());
+    AbstractStreamlet.disconnectInputs(this, this.getClass());
   }
 
   @Override
   public void disconnectOutputs() {
-    AbstractStreamlet.disconnectOutputs(this, getClass());
+    AbstractStreamlet.disconnectOutputs(this, this.getClass());
   }
 
   @Override
@@ -514,7 +483,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @Override
   public void didDecohereInlet(Inlet<? extends I> inlet) {
-    decohere();
+    this.decohere();
   }
 
   @Override
@@ -524,7 +493,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
 
   @Override
   public void didRecohereInlet(Inlet<? extends I> inlet, int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   @Override
@@ -556,7 +525,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   protected void onDecohereOutlets() {
-    AbstractStreamlet.decohereOutlets(this, getClass());
+    AbstractStreamlet.decohereOutlets(this, this.getClass());
   }
 
   protected void didDecohere() {
@@ -568,7 +537,7 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   protected void onRecohereInlets(int version) {
-    AbstractStreamlet.recohereInlets(version, this, getClass());
+    AbstractStreamlet.recohereInlets(version, this, this.getClass());
   }
 
   protected void onRecohere(int version) {
@@ -576,11 +545,42 @@ public abstract class AbstractRecordStreamlet<I extends Value, O extends Value> 
   }
 
   protected void onRecohereOutlets(int version) {
-    AbstractStreamlet.recohereOutlets(version, this, getClass());
+    AbstractStreamlet.recohereOutlets(version, this, this.getClass());
   }
 
   protected void didRecohere(int version) {
     // hook
+  }
+
+  public static <I extends Value, O extends Value> void compileInlets(Class<?> streamletClass, RecordStreamlet<I, O> streamlet) {
+    while (streamletClass != null) {
+      final java.lang.reflect.Field[] fields = streamletClass.getDeclaredFields();
+      for (java.lang.reflect.Field field : fields) {
+        if (Inlet.class.isAssignableFrom(field.getType())) {
+          final In in = field.getAnnotation(In.class);
+          if (in != null) {
+            String name = in.value();
+            if (name.isEmpty()) {
+              name = field.getName();
+            }
+            final Inlet<I> inlet = AbstractStreamlet.reflectInletField(streamlet, field);
+            streamlet.compileInlet(inlet, name);
+            continue;
+          }
+          final Inout inout = field.getAnnotation(Inout.class);
+          if (inout != null) {
+            String name = inout.value();
+            if (name.isEmpty()) {
+              name = field.getName();
+            }
+            final Inoutlet<I, O> inoutlet = AbstractStreamlet.reflectInoutletField(streamlet, field);
+            streamlet.compileInlet(inoutlet, name);
+            continue;
+          }
+        }
+      }
+      streamletClass = streamletClass.getSuperclass();
+    }
   }
 
 }

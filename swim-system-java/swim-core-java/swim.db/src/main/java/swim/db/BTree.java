@@ -16,7 +16,6 @@ package swim.db;
 
 import swim.codec.Output;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Sync;
 import swim.structure.Slot;
 import swim.structure.Value;
@@ -234,10 +233,11 @@ public final class BTree extends Tree {
   public BTree updated(Value key, Value newValue, long newVersion, int newPost) {
     final BTreePage oldRoot = this.rootRef.page();
     final BTreePage newRoot = oldRoot.updated(key, newValue, newVersion)
-        .balanced(newVersion).evacuated(newPost, newVersion);
+                                     .balanced(newVersion)
+                                     .evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new BTree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -246,10 +246,11 @@ public final class BTree extends Tree {
   public BTree removed(Value key, long newVersion, int newPost) {
     final BTreePage oldRoot = this.rootRef.page();
     final BTreePage newRoot = oldRoot.removed(key, newVersion)
-        .balanced(newVersion).evacuated(newPost, newVersion);
+                                     .balanced(newVersion)
+                                     .evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new BTree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -261,12 +262,13 @@ public final class BTree extends Tree {
       final BTreePage newRoot;
       if (lower < oldRootRef.span) {
         newRoot = oldRootRef.page().drop(lower, newVersion)
-            .balanced(newVersion).evacuated(newPost, newVersion);
+                                   .balanced(newVersion)
+                                   .evacuated(newPost, newVersion);
       } else {
         newRoot = BTreePage.empty(this.treeContext, this.seed.stem, newVersion);
       }
       return new BTree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -278,12 +280,13 @@ public final class BTree extends Tree {
       final BTreePage newRoot;
       if (upper > 0L) {
         newRoot = oldRootRef.page().take(upper, newVersion)
-            .balanced(newVersion).evacuated(newPost, newVersion);
+                                   .balanced(newVersion)
+                                   .evacuated(newPost, newVersion);
       } else {
         newRoot = BTreePage.empty(this.treeContext, this.seed.stem, newVersion);
       }
       return new BTree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -293,7 +296,7 @@ public final class BTree extends Tree {
     if (!this.rootRef.isEmpty()) {
       final BTreePage newRoot = BTreePage.empty(this.treeContext, this.seed.stem, newVersion);
       return new BTree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -317,7 +320,7 @@ public final class BTree extends Tree {
                        CombinerFunction<Value, Value> combiner, long newVersion, int newPost) {
     final BTreePageRef oldRootRef = this.rootRef;
     final BTreePageRef newRootRef = oldRootRef.reduced(identity, accumulator, combiner, newVersion)
-        .evacuated(newPost, newVersion);
+                                              .evacuated(newPost, newVersion);
     if (oldRootRef != newRootRef) {
       return new BTree(this.treeContext, newRootRef, this.seed, this.isResident, this.isTransient);
     } else {
@@ -369,10 +372,10 @@ public final class BTree extends Tree {
   @Override
   public void loadAsync(Cont<Tree> cont) {
     try {
-      final Cont<Page> andThen = Conts.constant(cont, this);
+      final Cont<Page> andThen = Cont.constant(cont, this);
       this.rootRef.loadTreeAsync(this.isResident, andThen);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
+      if (Cont.isNonFatal(error)) {
         cont.trap(new StoreException(this.rootRef.toDebugString(), error));
       } else {
         throw error;
@@ -383,7 +386,7 @@ public final class BTree extends Tree {
   @Override
   public BTree load() throws InterruptedException {
     final Sync<Tree> syncTree = new Sync<Tree>();
-    loadAsync(syncTree);
+    this.loadAsync(syncTree);
     return (BTree) syncTree.await(settings().treeLoadTimeout);
   }
 

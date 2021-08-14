@@ -38,6 +38,22 @@ public class MutableTensor extends Tensor {
     super(dims, array);
   }
 
+  @Override
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MutableTensor").write('.').write("of").write('(')
+                   .debug(this.dims).write(", ").debug(this.offset);
+    final Object us = this.array;
+    if (us instanceof double[]) {
+      Tensor.debug(output, (double[]) us);
+    } else if (us instanceof float[]) {
+      Tensor.debug(output, (float[]) us);
+    } else {
+      throw new AssertionError();
+    }
+    output = output.write(')');
+    return output;
+  }
+
   public static MutableTensor zero(TensorDims dims, Precision prec) {
     if (prec.isDouble()) {
       return new MutableTensor(dims, new double[dims.size * dims.stride]);
@@ -49,7 +65,7 @@ public class MutableTensor extends Tensor {
   }
 
   public static MutableTensor zero(TensorDims dims) {
-    return zero(dims, Precision.f32());
+    return MutableTensor.zero(dims, Precision.f32());
   }
 
   public static MutableTensor of(TensorDims dims, int offset, double... array) {
@@ -58,21 +74,6 @@ public class MutableTensor extends Tensor {
 
   public static MutableTensor of(TensorDims dims, int offset, float... array) {
     return new MutableTensor(dims, array, offset);
-  }
-
-  @Override
-  public void debug(Output<?> output) {
-    output = output.write("MutableTensor").write('.').write("of").write('(')
-        .debug(this.dims).write(", ").debug(this.offset);
-    final Object us = this.array;
-    if (us instanceof double[]) {
-      Tensor.debug(output, (double[]) us);
-    } else if (us instanceof float[]) {
-      Tensor.debug(output, (float[]) us);
-    } else {
-      throw new AssertionError();
-    }
-    output = output.write(')');
   }
 
 }

@@ -22,8 +22,6 @@ import swim.util.Murmur3;
 
 public final class BitwiseNotOperator extends UnaryOperator {
 
-  private static int hashSeed;
-
   public BitwiseNotOperator(Item operand) {
     super(operand);
   }
@@ -61,9 +59,9 @@ public final class BitwiseNotOperator extends UnaryOperator {
   @Override
   protected int compareTo(Operator that) {
     if (that instanceof BitwiseNotOperator) {
-      return compareTo((BitwiseNotOperator) that);
+      return this.compareTo((BitwiseNotOperator) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(BitwiseNotOperator that) {
@@ -81,17 +79,20 @@ public final class BitwiseNotOperator extends UnaryOperator {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(BitwiseNotOperator.class);
+    if (BitwiseNotOperator.hashSeed == 0) {
+      BitwiseNotOperator.hashSeed = Murmur3.seed(BitwiseNotOperator.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.operand.hashCode()));
+    return Murmur3.mash(Murmur3.mix(BitwiseNotOperator.hashSeed, this.operand.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output.debug(this.operand).write('.').write("bitwiseNot").write('(').write(')');
+    return output;
   }
 
 }

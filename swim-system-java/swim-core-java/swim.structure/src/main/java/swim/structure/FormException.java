@@ -16,8 +16,6 @@ package swim.structure;
 
 public class FormException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public FormException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class FormException extends RuntimeException {
   public FormException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

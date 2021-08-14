@@ -30,7 +30,7 @@ public interface NodeDef extends CellDef {
 
   default Value props(Uri nodeUri) {
     final Record props = Record.create();
-    final UriPattern pattern = nodePattern();
+    final UriPattern pattern = this.nodePattern();
     if (pattern != null) {
       final HashTrieMap<String, String> params = pattern.unapply(nodeUri);
       for (HashTrieMap.Entry<String, String> param : params) {

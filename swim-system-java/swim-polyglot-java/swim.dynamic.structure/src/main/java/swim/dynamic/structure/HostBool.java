@@ -20,16 +20,16 @@ import swim.structure.Bool;
 
 public final class HostBool {
 
+  private HostBool() {
+    // static
+  }
+
   public static final HostObjectType<Bool> TYPE;
 
   static {
     final JavaHostClassType<Bool> type = new JavaHostClassType<>(Bool.class);
     TYPE = type;
     type.extendType(HostValue.TYPE);
-  }
-
-  private HostBool() {
-    // static
   }
 
 }

@@ -23,62 +23,66 @@ import swim.api.service.ServiceContext;
  */
 public final class SwimContext {
 
-  private static final ThreadLocal<ServiceContext> SERVICE_CONTEXT = new ThreadLocal<>();
-  private static final ThreadLocal<PlaneContext> PLANE_CONTEXT = new ThreadLocal<>();
-  private static final ThreadLocal<AgentContext> AGENT_CONTEXT = new ThreadLocal<>();
-  private static final ThreadLocal<Lane> LANE = new ThreadLocal<>();
-  private static final ThreadLocal<Link> LINK = new ThreadLocal<>();
-
   private SwimContext() {
-    // nop
+    // static
   }
 
+  private static final ThreadLocal<ServiceContext> SERVICE_CONTEXT = new ThreadLocal<>();
+
   public static ServiceContext getServiceContext() {
-    return SERVICE_CONTEXT.get();
+    return SwimContext.SERVICE_CONTEXT.get();
   }
 
   public static void setServiceContext(ServiceContext serviceContext) {
-    SERVICE_CONTEXT.set(serviceContext);
+    SwimContext.SERVICE_CONTEXT.set(serviceContext);
   }
 
+  private static final ThreadLocal<PlaneContext> PLANE_CONTEXT = new ThreadLocal<>();
+
   public static PlaneContext getPlaneContext() {
-    return PLANE_CONTEXT.get();
+    return SwimContext.PLANE_CONTEXT.get();
   }
 
   public static void setPlaneContext(PlaneContext planeContext) {
-    PLANE_CONTEXT.set(planeContext);
+    SwimContext.PLANE_CONTEXT.set(planeContext);
   }
 
+  private static final ThreadLocal<AgentContext> AGENT_CONTEXT = new ThreadLocal<>();
+
   public static AgentContext getAgentContext() {
-    return AGENT_CONTEXT.get();
+    return SwimContext.AGENT_CONTEXT.get();
   }
 
   public static void setAgentContext(AgentContext agentContext) {
-    AGENT_CONTEXT.set(agentContext);
+    SwimContext.AGENT_CONTEXT.set(agentContext);
   }
 
+  private static final ThreadLocal<Lane> LANE = new ThreadLocal<>();
+
   public static Lane getLane() {
-    return LANE.get();
+    return SwimContext.LANE.get();
   }
 
   public static void setLane(Lane lane) {
-    LANE.set(lane);
+    SwimContext.LANE.set(lane);
   }
 
+  private static final ThreadLocal<Link> LINK = new ThreadLocal<>();
+
   public static Link getLink() {
-    return LINK.get();
+    return SwimContext.LINK.get();
   }
 
   public static void setLink(Link link) {
-    LINK.set(link);
+    SwimContext.LINK.set(link);
   }
 
   public static void clear() {
-    SERVICE_CONTEXT.remove();
-    PLANE_CONTEXT.remove();
-    AGENT_CONTEXT.remove();
-    LANE.remove();
-    LINK.remove();
+    SwimContext.SERVICE_CONTEXT.remove();
+    SwimContext.PLANE_CONTEXT.remove();
+    SwimContext.AGENT_CONTEXT.remove();
+    SwimContext.LANE.remove();
+    SwimContext.LINK.remove();
   }
 
 }

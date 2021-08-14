@@ -22,24 +22,24 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class ContentLengthSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseContentLengthHeaders() {
-    assertParses("Content-Length: 0", ContentLength.from(0L));
-    assertParses("Content-Length: 1", ContentLength.from(1L));
-    assertParses("Content-Length: 10", ContentLength.from(10L));
-    assertParses("Content-Length: 9223372036854775807", ContentLength.from(9223372036854775807L));
+    assertParses("Content-Length: 0", ContentLength.create(0L));
+    assertParses("Content-Length: 1", ContentLength.create(1L));
+    assertParses("Content-Length: 10", ContentLength.create(10L));
+    assertParses("Content-Length: 9223372036854775807", ContentLength.create(9223372036854775807L));
   }
 
   @Test
   public void writeContentLengthHeaders() {
-    assertWrites(ContentLength.from(0L), "Content-Length: 0");
-    assertWrites(ContentLength.from(1L), "Content-Length: 1");
-    assertWrites(ContentLength.from(10L), "Content-Length: 10");
-    assertWrites(ContentLength.from(9223372036854775807L), "Content-Length: 9223372036854775807");
+    assertWrites(ContentLength.create(0L), "Content-Length: 0");
+    assertWrites(ContentLength.create(1L), "Content-Length: 1");
+    assertWrites(ContentLength.create(10L), "Content-Length: 10");
+    assertWrites(ContentLength.create(9223372036854775807L), "Content-Length: 9223372036854775807");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

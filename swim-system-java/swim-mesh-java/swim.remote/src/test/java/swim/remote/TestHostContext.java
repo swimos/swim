@@ -69,7 +69,7 @@ public class TestHostContext extends TestCellContext implements HostContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapHost(Class<T> hostClass) {
-    if (hostClass.isAssignableFrom(getClass())) {
+    if (hostClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -79,7 +79,7 @@ public class TestHostContext extends TestCellContext implements HostContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T bottomHost(Class<T> hostClass) {
-    if (hostClass.isAssignableFrom(getClass())) {
+    if (hostClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -88,7 +88,7 @@ public class TestHostContext extends TestCellContext implements HostContext {
 
   @Override
   public HostAddress cellAddress() {
-    return new HostAddress(edgeName(), meshUri(), partKey(), hostUri());
+    return new HostAddress(this.edgeName(), this.meshUri(), this.partKey(), this.hostUri());
   }
 
   @Override
@@ -103,11 +103,12 @@ public class TestHostContext extends TestCellContext implements HostContext {
 
   @Override
   public Uri hostUri() {
-    return hostUri;
+    return this.hostUri;
   }
 
   @Override
   public void openMetaHost(HostBinding host, NodeBinding metaHost) {
+    // hook
   }
 
   @Override
@@ -122,6 +123,7 @@ public class TestHostContext extends TestCellContext implements HostContext {
 
   @Override
   public void openMetaNode(NodeBinding node, NodeBinding metaNode) {
+    // hook
   }
 
   @Override
@@ -136,10 +138,12 @@ public class TestHostContext extends TestCellContext implements HostContext {
 
   @Override
   public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
+    // hook
   }
 
   @Override
   public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
+    // hook
   }
 
   @Override
@@ -149,6 +153,7 @@ public class TestHostContext extends TestCellContext implements HostContext {
 
   @Override
   public void openLanes(NodeBinding node) {
+    // hook
   }
 
   @Override
@@ -163,6 +168,7 @@ public class TestHostContext extends TestCellContext implements HostContext {
 
   @Override
   public void openAgents(NodeBinding node) {
+    // hook
   }
 
   @Override
@@ -177,70 +183,87 @@ public class TestHostContext extends TestCellContext implements HostContext {
 
   @Override
   public void openDownlink(LinkBinding link) {
+    // hook
   }
 
   @Override
   public void closeDownlink(LinkBinding link) {
+    // hook
   }
 
   @Override
   public void pushDown(Push<?> push) {
+    // hook
   }
 
   @Override
   public void didConnect() {
+    // hook
   }
 
   @Override
   public void didDisconnect() {
+    // hook
   }
 
   @Override
   public void close() {
+    // hook
   }
 
   @Override
   public void willOpen() {
+    // hook
   }
 
   @Override
   public void didOpen() {
+    // hook
   }
 
   @Override
   public void willLoad() {
+    // hook
   }
 
   @Override
   public void didLoad() {
+    // hook
   }
 
   @Override
   public void willStart() {
+    // hook
   }
 
   @Override
   public void didStart() {
+    // hook
   }
 
   @Override
   public void willStop() {
+    // hook
   }
 
   @Override
   public void didStop() {
+    // hook
   }
 
   @Override
   public void willUnload() {
+    // hook
   }
 
   @Override
   public void didUnload() {
+    // hook
   }
 
   @Override
   public void willClose() {
+    // hook
   }
 
 }

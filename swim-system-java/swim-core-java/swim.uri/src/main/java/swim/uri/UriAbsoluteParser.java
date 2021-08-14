@@ -44,6 +44,12 @@ final class UriAbsoluteParser extends Parser<Uri> {
     this(uri, null, null, null, null, null, 1);
   }
 
+  @Override
+  public Parser<Uri> feed(Input input) {
+    return UriAbsoluteParser.parse(input, this.uri, this.schemeParser, this.authorityParser,
+                                   this.pathParser, this.queryParser, this.fragmentParser, this.step);
+  }
+
   static Parser<Uri> parse(Input input, UriParser uri, Parser<UriScheme> schemeParser,
                            Parser<UriAuthority> authorityParser, Parser<UriPath> pathParser,
                            Parser<UriQuery> queryParser, Parser<UriFragment> fragmentParser, int step) {
@@ -79,7 +85,7 @@ final class UriAbsoluteParser extends Parser<Uri> {
           input = input.step();
           step = 3;
         } else if (!input.isEmpty()) {
-          return error(Diagnostic.expected(':', input));
+          return Parser.error(Diagnostic.expected(':', input));
         }
       } else if (schemeParser.isError()) {
         return schemeParser.asError();
@@ -101,8 +107,8 @@ final class UriAbsoluteParser extends Parser<Uri> {
           step = 6;
         }
       } else if (input.isDone()) {
-        return done(uri.absolute(schemeParser != null ? schemeParser.bind() : null,
-            null, null, null, null));
+        return Parser.done(uri.absolute(schemeParser != null ? schemeParser.bind() : null,
+                                        null, null, null, null));
       }
     }
     if (step == 4) {
@@ -115,8 +121,8 @@ final class UriAbsoluteParser extends Parser<Uri> {
         pathParser = uri.parsePath(input, pathBuilder);
         step = 6;
       } else if (input.isDone()) {
-        return done(uri.absolute(schemeParser != null ? schemeParser.bind() : null,
-            null, UriPath.slash(), null, null));
+        return Parser.done(uri.absolute(schemeParser != null ? schemeParser.bind() : null,
+                                        null, UriPath.slash(), null, null));
       }
     }
     if (step == 5) {
@@ -138,8 +144,8 @@ final class UriAbsoluteParser extends Parser<Uri> {
             step = 6;
           }
         } else if (input.isDone()) {
-          return done(uri.absolute(schemeParser != null ? schemeParser.bind() : null,
-              authorityParser.bind(), null, null, null));
+          return Parser.done(uri.absolute(schemeParser != null ? schemeParser.bind() : null,
+                                          authorityParser.bind(), null, null, null));
         }
       } else if (authorityParser.isError()) {
         return authorityParser.asError();
@@ -159,9 +165,9 @@ final class UriAbsoluteParser extends Parser<Uri> {
           input = input.step();
           step = 8;
         } else if (!input.isEmpty()) {
-          return done(uri.absolute(schemeParser != null ? schemeParser.bind() : null,
-              authorityParser != null ? authorityParser.bind() : null,
-              pathParser.bind(), null, null));
+          return Parser.done(uri.absolute(schemeParser != null ? schemeParser.bind() : null,
+                                          authorityParser != null ? authorityParser.bind() : null,
+                                          pathParser.bind(), null, null));
         }
       } else if (pathParser.isError()) {
         return pathParser.asError();
@@ -178,10 +184,10 @@ final class UriAbsoluteParser extends Parser<Uri> {
           input = input.step();
           step = 8;
         } else if (!input.isEmpty()) {
-          return done(uri.absolute(schemeParser != null ? schemeParser.bind() : null,
-              authorityParser != null ? authorityParser.bind() : null,
-              pathParser != null ? pathParser.bind() : null,
-              queryParser.bind(), null));
+          return Parser.done(uri.absolute(schemeParser != null ? schemeParser.bind() : null,
+                                          authorityParser != null ? authorityParser.bind() : null,
+                                          pathParser != null ? pathParser.bind() : null,
+                                          queryParser.bind(), null));
         }
       } else if (queryParser.isError()) {
         return queryParser.asError();
@@ -194,30 +200,24 @@ final class UriAbsoluteParser extends Parser<Uri> {
         fragmentParser = fragmentParser.feed(input);
       }
       if (fragmentParser.isDone()) {
-        return done(uri.absolute(schemeParser != null ? schemeParser.bind() : null,
-            authorityParser != null ? authorityParser.bind() : null,
-            pathParser != null ? pathParser.bind() : null,
-            queryParser != null ? queryParser.bind() : null,
-            fragmentParser.bind()));
+        return Parser.done(uri.absolute(schemeParser != null ? schemeParser.bind() : null,
+                                        authorityParser != null ? authorityParser.bind() : null,
+                                        pathParser != null ? pathParser.bind() : null,
+                                        queryParser != null ? queryParser.bind() : null,
+                                        fragmentParser.bind()));
       } else if (fragmentParser.isError()) {
         return fragmentParser.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new UriAbsoluteParser(uri, schemeParser, authorityParser, pathParser,
-        queryParser, fragmentParser, step);
+                                 queryParser, fragmentParser, step);
   }
 
   static Parser<Uri> parse(Input input, UriParser uri) {
-    return parse(input, uri, null, null, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<Uri> feed(Input input) {
-    return parse(input, this.uri, this.schemeParser, this.authorityParser,
-        this.pathParser, this.queryParser, this.fragmentParser, this.step);
+    return UriAbsoluteParser.parse(input, uri, null, null, null, null, null, 1);
   }
 
 }

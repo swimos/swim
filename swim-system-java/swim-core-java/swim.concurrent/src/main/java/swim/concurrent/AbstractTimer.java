@@ -40,16 +40,16 @@ public abstract class AbstractTimer implements Timer {
 
   @Override
   public void timerWillSchedule(long millis) {
-    // stub
+    // hook
   }
 
   @Override
   public void timerDidCancel() {
-    // stub
+    // hook
   }
 
   /**
-   * Returns the {@code Schedule} to which this timer is bound.  Delegates to
+   * Returns the {@code Schedule} to which this timer is bound. Delegates to
    * the assigned {@link #timerContext}.
    *
    * @throws TimerException if {@link #timerContext} is {@code null}.
@@ -74,9 +74,9 @@ public abstract class AbstractTimer implements Timer {
 
   /**
    * Schedules this timer to execute after {@code millis} milliseconds has
-   * elapsed.  If this timer is currently scheduled, it will not execute at its
+   * elapsed. If this timer is currently scheduled, it will not execute at its
    * previously scheduled time; it will only execute at the newly scheduled
-   * time.  Delegates to the assigned {@link #timerContext}.
+   * time. Delegates to the assigned {@link #timerContext}.
    *
    * @throws TimerException if {@link #timerContext} is {@code null}, or if
    *                        {@code millis} is negative.
@@ -90,7 +90,7 @@ public abstract class AbstractTimer implements Timer {
   }
 
   /**
-   * Cancels this timer to prevent it from executing.  Returns {@code true} if
+   * Cancels this timer to prevent it from executing. Returns {@code true} if
    * this operation caused the cancellation of this timer; returns {@code false}
    * if this {@code Timer} was not scheduled to execute.
    */

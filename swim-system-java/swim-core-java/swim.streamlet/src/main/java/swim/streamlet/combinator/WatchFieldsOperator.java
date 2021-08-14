@@ -23,12 +23,12 @@ public abstract class WatchFieldsOperator<K, V, O> extends AbstractMapInlet<K, V
   protected void onRecohereOutputKey(K key, KeyEffect effect, int version) {
     if (effect == KeyEffect.UPDATE) {
       if (this.input != null) {
-        evaluate(key, this.input.get(key));
+        this.evaluate(key, this.input.get(key));
       } else {
-        evaluate(key, null);
+        this.evaluate(key, null);
       }
     } else if (effect == KeyEffect.REMOVE) {
-      evaluate(key, null);
+      this.evaluate(key, null);
     }
   }
 

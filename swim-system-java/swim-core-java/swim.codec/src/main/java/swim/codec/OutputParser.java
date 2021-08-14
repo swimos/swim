@@ -24,27 +24,27 @@ final class OutputParser<O> extends Parser<O> {
     this.output = output;
   }
 
+  @Override
+  public Parser<O> feed(Input input) {
+    if (this.input != null) {
+      input = this.input.fork(input);
+    }
+    return OutputParser.parse(input, this.output);
+  }
+
   static <O> Parser<O> parse(Input input, Output<O> output) {
     while (input.isCont()) {
       output = output.write(input.head());
       input = input.step();
     }
     if (input.isDone()) {
-      return done(output.bind());
+      return Parser.done(output.bind());
     } else if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     } else if (output.isError()) {
-      return error(output.trap());
+      return Parser.error(output.trap());
     }
     return new OutputParser<O>(input, output);
-  }
-
-  @Override
-  public Parser<O> feed(Input input) {
-    if (this.input != null) {
-      input = this.input.fork(input);
-    }
-    return parse(input, this.output);
   }
 
 }

@@ -54,65 +54,10 @@ import swim.util.Murmur3;
 
 public class JsonWebKey implements Debug {
 
-  static ECParameterSpec p256;
-  static ECParameterSpec p384;
-  static ECParameterSpec p521;
-  private static int hashSeed;
   protected final Value value;
 
   public JsonWebKey(Value value) {
     this.value = value.commit();
-  }
-
-  public static JsonWebKey from(Value value) {
-    // TODO: validate
-    return new JsonWebKey(value);
-  }
-
-  public static JsonWebKey parse(String jwk) {
-    return from(Json.parse(jwk));
-  }
-
-  private static byte[] parseBase64Url(String value) {
-    return Base64.urlUnpadded().parseByteArray(Unicode.stringInput(value)).bind();
-  }
-
-  private static BigInteger parseBase64UrlUInt(String value) {
-    return new BigInteger(1, parseBase64Url(value));
-  }
-
-  private static ECParameterSpec ecParameterSpec(String crv) {
-    if ("P-256".equals(crv)) {
-      if (p256 == null) {
-        p256 = createECParameterSpec("secp256r1");
-      }
-      return p256;
-    } else if ("P-384".equals(crv)) {
-      if (p384 == null) {
-        p384 = createECParameterSpec("secp384r1");
-      }
-      return p384;
-    } else if ("P-521".equals(crv)) {
-      if (p521 == null) {
-        p521 = createECParameterSpec("secp521r1");
-      }
-      return p521;
-    } else {
-      return null;
-    }
-  }
-
-  private static ECParameterSpec createECParameterSpec(String stdName) {
-    try {
-      final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
-      final ECGenParameterSpec parameterSpec = new ECGenParameterSpec(stdName);
-      keyPairGenerator.initialize(parameterSpec);
-      final KeyPair keyPair = keyPairGenerator.generateKeyPair();
-      final ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
-      return publicKey.getParams();
-    } catch (GeneralSecurityException cause) {
-      throw new RuntimeException(cause);
-    }
   }
 
   public Value get(String name) {
@@ -170,19 +115,19 @@ public class JsonWebKey implements Debug {
   }
 
   public Key key() {
-    final String keyType = keyType();
+    final String keyType = this.keyType();
     if ("EC".equals(keyType)) {
-      return (Key) ecKey();
+      return (Key) this.ecKey();
     } else if ("RSA".equals(keyType)) {
-      return (Key) rsaKey();
+      return (Key) this.rsaKey();
     } else if ("oct".equals(keyType)) {
-      return symmetricKey();
+      return this.symmetricKey();
     }
     return null;
   }
 
   public KeyDef keyDef() {
-    final Key key = key();
+    final Key key = this.key();
     if (key != null) {
       return KeyDef.from(key);
     }
@@ -190,18 +135,18 @@ public class JsonWebKey implements Debug {
   }
 
   public PublicKey publicKey() {
-    final String keyType = keyType();
+    final String keyType = this.keyType();
     if ("EC".equals(keyType)) {
-      return (PublicKey) ecPublicKey();
+      return (PublicKey) this.ecPublicKey();
     } else if ("RSA".equals(keyType)) {
-      return (PublicKey) rsaPublicKey();
+      return (PublicKey) this.rsaPublicKey();
     } else {
       return null;
     }
   }
 
   public PublicKeyDef publicKeyDef() {
-    final PublicKey publicKey = publicKey();
+    final PublicKey publicKey = this.publicKey();
     if (publicKey != null) {
       return PublicKeyDef.from(publicKey);
     }
@@ -209,18 +154,18 @@ public class JsonWebKey implements Debug {
   }
 
   public PrivateKey privateKey() {
-    final String keyType = keyType();
+    final String keyType = this.keyType();
     if ("EC".equals(keyType)) {
-      return (PrivateKey) ecPrivateKey();
+      return (PrivateKey) this.ecPrivateKey();
     } else if ("RSA".equals(keyType)) {
-      return (PrivateKey) rsaPrivateKey();
+      return (PrivateKey) this.rsaPrivateKey();
     } else {
       return null;
     }
   }
 
   public PrivateKeyDef privateKeyDef() {
-    final PrivateKey privateKey = privateKey();
+    final PrivateKey privateKey = this.privateKey();
     if (privateKey != null) {
       return PrivateKeyDef.from(privateKey);
     }
@@ -229,16 +174,16 @@ public class JsonWebKey implements Debug {
 
   public ECKey ecKey() {
     if (this.value.containsKey("d")) {
-      return ecPrivateKey();
+      return this.ecPrivateKey();
     } else {
-      return ecPublicKey();
+      return this.ecPublicKey();
     }
   }
 
   public ECPublicKey ecPublicKey() {
-    final ECParameterSpec params = ecParameterSpec(this.value.get("crv").stringValue());
-    final BigInteger x = parseBase64UrlUInt(this.value.get("x").stringValue());
-    final BigInteger y = parseBase64UrlUInt(this.value.get("y").stringValue());
+    final ECParameterSpec params = JsonWebKey.ecParameterSpec(this.value.get("crv").stringValue());
+    final BigInteger x = JsonWebKey.parseBase64UrlUInt(this.value.get("x").stringValue());
+    final BigInteger y = JsonWebKey.parseBase64UrlUInt(this.value.get("y").stringValue());
     try {
       final ECPublicKeySpec keySpec = new ECPublicKeySpec(new ECPoint(x, y), params);
       final KeyFactory keyFactory = KeyFactory.getInstance("EC");
@@ -249,8 +194,8 @@ public class JsonWebKey implements Debug {
   }
 
   public ECPrivateKey ecPrivateKey() {
-    final ECParameterSpec params = ecParameterSpec(this.value.get("crv").stringValue());
-    final BigInteger d = parseBase64UrlUInt(this.value.get("d").stringValue());
+    final ECParameterSpec params = JsonWebKey.ecParameterSpec(this.value.get("crv").stringValue());
+    final BigInteger d = JsonWebKey.parseBase64UrlUInt(this.value.get("d").stringValue());
     try {
       final ECPrivateKeySpec keySpec = new ECPrivateKeySpec(d, params);
       final KeyFactory keyFactory = KeyFactory.getInstance("EC");
@@ -262,15 +207,15 @@ public class JsonWebKey implements Debug {
 
   public RSAKey rsaKey() {
     if (this.value.containsKey("d")) {
-      return rsaPrivateKey();
+      return this.rsaPrivateKey();
     } else {
-      return rsaPublicKey();
+      return this.rsaPublicKey();
     }
   }
 
   public RSAPublicKey rsaPublicKey() {
-    final BigInteger modulus = parseBase64UrlUInt(this.value.get("n").stringValue());
-    final BigInteger publicExponent = parseBase64UrlUInt(this.value.get("e").stringValue());
+    final BigInteger modulus = JsonWebKey.parseBase64UrlUInt(this.value.get("n").stringValue());
+    final BigInteger publicExponent = JsonWebKey.parseBase64UrlUInt(this.value.get("e").stringValue());
     try {
       final RSAPublicKeySpec keySpec = new RSAPublicKeySpec(modulus, publicExponent);
       final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -281,8 +226,8 @@ public class JsonWebKey implements Debug {
   }
 
   public RSAPrivateKey rsaPrivateKey() {
-    final BigInteger modulus = parseBase64UrlUInt(this.value.get("n").stringValue());
-    final BigInteger privateExponent = parseBase64UrlUInt(this.value.get("d").stringValue());
+    final BigInteger modulus = JsonWebKey.parseBase64UrlUInt(this.value.get("n").stringValue());
+    final BigInteger privateExponent = JsonWebKey.parseBase64UrlUInt(this.value.get("d").stringValue());
     try {
       final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
       final KeySpec keySpec;
@@ -290,28 +235,28 @@ public class JsonWebKey implements Debug {
       if (!p.isDefined()) {
         keySpec = new RSAPrivateKeySpec(modulus, privateExponent);
       } else {
-        final BigInteger publicExponent = parseBase64UrlUInt(this.value.get("e").stringValue());
-        final BigInteger primeP = parseBase64UrlUInt(p.stringValue());
-        final BigInteger primeQ = parseBase64UrlUInt(this.value.get("q").stringValue());
-        final BigInteger primeExponentP = parseBase64UrlUInt(this.value.get("dp").stringValue());
-        final BigInteger primeExponentQ = parseBase64UrlUInt(this.value.get("dq").stringValue());
-        final BigInteger crtCoefficient = parseBase64UrlUInt(this.value.get("qi").stringValue());
+        final BigInteger publicExponent = JsonWebKey.parseBase64UrlUInt(this.value.get("e").stringValue());
+        final BigInteger primeP = JsonWebKey.parseBase64UrlUInt(p.stringValue());
+        final BigInteger primeQ = JsonWebKey.parseBase64UrlUInt(this.value.get("q").stringValue());
+        final BigInteger primeExponentP = JsonWebKey.parseBase64UrlUInt(this.value.get("dp").stringValue());
+        final BigInteger primeExponentQ = JsonWebKey.parseBase64UrlUInt(this.value.get("dq").stringValue());
+        final BigInteger crtCoefficient = JsonWebKey.parseBase64UrlUInt(this.value.get("qi").stringValue());
         final Value oth = this.value.get("oth");
         if (!oth.isDefined()) {
           keySpec = new RSAPrivateCrtKeySpec(modulus, publicExponent, privateExponent, primeP, primeQ,
-              primeExponentP, primeExponentQ, crtCoefficient);
+                                             primeExponentP, primeExponentQ, crtCoefficient);
         } else {
           final RSAOtherPrimeInfo[] otherPrimeInfo = new RSAOtherPrimeInfo[oth.length()];
           for (int i = 0; i < otherPrimeInfo.length; i += 1) {
             final Item item = oth.getItem(i);
-            final BigInteger prime = parseBase64UrlUInt(oth.get("r").stringValue());
-            final BigInteger primeExponent = parseBase64UrlUInt(oth.get("d").stringValue());
-            final BigInteger coefficient = parseBase64UrlUInt(oth.get("t").stringValue());
+            final BigInteger prime = JsonWebKey.parseBase64UrlUInt(oth.get("r").stringValue());
+            final BigInteger primeExponent = JsonWebKey.parseBase64UrlUInt(oth.get("d").stringValue());
+            final BigInteger coefficient = JsonWebKey.parseBase64UrlUInt(oth.get("t").stringValue());
             otherPrimeInfo[i] = new RSAOtherPrimeInfo(prime, primeExponent, coefficient);
           }
           keySpec = new RSAMultiPrimePrivateCrtKeySpec(modulus, publicExponent, privateExponent,
-              primeP, primeQ, primeExponentP, primeExponentQ,
-              crtCoefficient, otherPrimeInfo);
+                                                       primeP, primeQ, primeExponentP, primeExponentQ,
+                                                       crtCoefficient, otherPrimeInfo);
         }
       }
       return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
@@ -321,19 +266,19 @@ public class JsonWebKey implements Debug {
   }
 
   public Key symmetricKey(String algorithm) {
-    return new SecretKeySpec(parseBase64Url(this.value.get("k").stringValue()), algorithm);
+    return new SecretKeySpec(JsonWebKey.parseBase64Url(this.value.get("k").stringValue()), algorithm);
   }
 
   public Key symmetricKey() {
-    final String algorithm = algorithm();
+    final String algorithm = this.algorithm();
     if ("HS256".equals(algorithm)) {
-      return symmetricKey("HmacSHA256");
+      return this.symmetricKey("HmacSHA256");
     } else if ("HS384".equals(algorithm)) {
-      return symmetricKey("HmacSHA384");
+      return this.symmetricKey("HmacSHA384");
     } else if ("HS512".equals(algorithm)) {
-      return symmetricKey("HmacSHA512");
+      return this.symmetricKey("HmacSHA512");
     } else {
-      return symmetricKey("");
+      return this.symmetricKey("");
     }
   }
 
@@ -352,23 +297,81 @@ public class JsonWebKey implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(JsonWebKey.class);
+    if (JsonWebKey.hashSeed == 0) {
+      JsonWebKey.hashSeed = Murmur3.seed(JsonWebKey.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.value.hashCode()));
+    return Murmur3.mash(Murmur3.mix(JsonWebKey.hashSeed, this.value.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.write("JsonWebKey").write('.').write("from").write('(')
-        .debug(this.value).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("JsonWebKey").write('.').write("from").write('(')
+                   .debug(this.value).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static JsonWebKey from(Value value) {
+    // TODO: validate
+    return new JsonWebKey(value);
+  }
+
+  public static JsonWebKey parse(String jwk) {
+    return JsonWebKey.from(Json.parse(jwk));
+  }
+
+  private static byte[] parseBase64Url(String value) {
+    return Base64.urlUnpadded().parseByteArray(Unicode.stringInput(value)).bind();
+  }
+
+  private static BigInteger parseBase64UrlUInt(String value) {
+    return new BigInteger(1, JsonWebKey.parseBase64Url(value));
+  }
+
+  static ECParameterSpec p256;
+  static ECParameterSpec p384;
+  static ECParameterSpec p521;
+
+  private static ECParameterSpec ecParameterSpec(String crv) {
+    if ("P-256".equals(crv)) {
+      if (JsonWebKey.p256 == null) {
+        JsonWebKey.p256 = createECParameterSpec("secp256r1");
+      }
+      return JsonWebKey.p256;
+    } else if ("P-384".equals(crv)) {
+      if (JsonWebKey.p384 == null) {
+        JsonWebKey.p384 = createECParameterSpec("secp384r1");
+      }
+      return JsonWebKey.p384;
+    } else if ("P-521".equals(crv)) {
+      if (JsonWebKey.p521 == null) {
+        JsonWebKey.p521 = createECParameterSpec("secp521r1");
+      }
+      return JsonWebKey.p521;
+    } else {
+      return null;
+    }
+  }
+
+  private static ECParameterSpec createECParameterSpec(String stdName) {
+    try {
+      final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
+      final ECGenParameterSpec parameterSpec = new ECGenParameterSpec(stdName);
+      keyPairGenerator.initialize(parameterSpec);
+      final KeyPair keyPair = keyPairGenerator.generateKeyPair();
+      final ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
+      return publicKey.getParams();
+    } catch (GeneralSecurityException cause) {
+      throw new RuntimeException(cause);
+    }
   }
 
 }

@@ -23,7 +23,6 @@ import swim.util.Murmur3;
 
 public final class MediaRange extends HttpPart implements Debug {
 
-  private static int hashSeed;
   final String type;
   final String subtype;
   final float weight;
@@ -46,26 +45,6 @@ public final class MediaRange extends HttpPart implements Debug {
 
   MediaRange(String type, String subtype) {
     this(type, subtype, 1f, HashTrieMap.<String, String>empty());
-  }
-
-  public static MediaRange from(String type, String subtype, float weight, HashTrieMap<String, String> params) {
-    return new MediaRange(type, subtype, weight, params);
-  }
-
-  public static MediaRange from(String type, String subtype, float weight) {
-    return new MediaRange(type, subtype, weight);
-  }
-
-  public static MediaRange from(String type, String subtype, HashTrieMap<String, String> params) {
-    return new MediaRange(type, subtype, params);
-  }
-
-  public static MediaRange from(String type, String subtype) {
-    return new MediaRange(type, subtype);
-  }
-
-  public static MediaRange parse(String string) {
-    return Http.standardParser().parseMediaRangeString(string);
   }
 
   public boolean isApplication() {
@@ -142,33 +121,57 @@ public final class MediaRange extends HttpPart implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MediaRange.class);
+    if (MediaRange.hashSeed == 0) {
+      MediaRange.hashSeed = Murmur3.seed(MediaRange.class);
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        hashSeed, this.type.hashCode()), this.subtype.hashCode()),
+        MediaRange.hashSeed, this.type.hashCode()), this.subtype.hashCode()),
         Murmur3.hash(this.weight)), this.params.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("MediaRange").write('.').write("from").write('(')
-        .debug(this.type).write(", ").debug(this.subtype);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MediaRange").write('.').write("create").write('(')
+                   .debug(this.type).write(", ").debug(this.subtype);
     if (this.weight != 1f) {
       output = output.write(", ").debug(this.weight);
     }
     output = output.write(')');
     for (HashTrieMap.Entry<String, String> param : this.params) {
       output = output.write('.').write("param").write('(')
-          .debug(param.getKey()).write(", ").debug(param.getValue()).write(')');
+                     .debug(param.getKey()).write(", ")
+                     .debug(param.getValue()).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static MediaRange create(String type, String subtype, float weight, HashTrieMap<String, String> params) {
+    return new MediaRange(type, subtype, weight, params);
+  }
+
+  public static MediaRange create(String type, String subtype, float weight) {
+    return new MediaRange(type, subtype, weight);
+  }
+
+  public static MediaRange create(String type, String subtype, HashTrieMap<String, String> params) {
+    return new MediaRange(type, subtype, params);
+  }
+
+  public static MediaRange create(String type, String subtype) {
+    return new MediaRange(type, subtype);
+  }
+
+  public static MediaRange parse(String string) {
+    return Http.standardParser().parseMediaRangeString(string);
   }
 
 }

@@ -16,8 +16,6 @@ package swim.runtime;
 
 public class PartException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public PartException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class PartException extends RuntimeException {
   public PartException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

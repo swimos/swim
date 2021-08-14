@@ -14,6 +14,7 @@
 
 package swim.structure;
 
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import swim.codec.Output;
 import swim.structure.operator.BitwiseAndOperator;
 import swim.structure.operator.BitwiseOrOperator;
@@ -28,6 +29,7 @@ public final class Slot extends Field {
 
   final Value key;
   Value value;
+  volatile int flags;
 
   Slot(Value key, Value value, int flags) {
     this.key = key.commit();
@@ -56,7 +58,7 @@ public final class Slot extends Field {
 
   @Override
   public Value setValue(Value newValue) {
-    if ((this.flags & IMMUTABLE) != 0) {
+    if ((Slot.FLAGS.get(this) & Slot.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
     }
     final Value oldValue = this.value;
@@ -69,7 +71,7 @@ public final class Slot extends Field {
     if (value == null) {
       throw new NullPointerException();
     }
-    return new Slot(key, value);
+    return new Slot(this.key, value);
   }
 
   @Override
@@ -78,15 +80,15 @@ public final class Slot extends Field {
       return new BitwiseOrOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Slot && key.equals(((Slot) that).key)) {
-      newValue = value.bitwiseOr(((Slot) that).value);
+    if (that instanceof Slot && this.key.equals(((Slot) that).key)) {
+      newValue = this.value.bitwiseOr(((Slot) that).value);
     } else if (that instanceof Value) {
-      newValue = value.bitwiseOr((Value) that);
+      newValue = this.value.bitwiseOr((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
@@ -97,15 +99,15 @@ public final class Slot extends Field {
       return new BitwiseXorOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Slot && key.equals(((Slot) that).key)) {
-      newValue = value.bitwiseXor(((Slot) that).value);
+    if (that instanceof Slot && this.key.equals(((Slot) that).key)) {
+      newValue = this.value.bitwiseXor(((Slot) that).value);
     } else if (that instanceof Value) {
-      newValue = value.bitwiseXor((Value) that);
+      newValue = this.value.bitwiseXor((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
@@ -116,15 +118,15 @@ public final class Slot extends Field {
       return new BitwiseAndOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Slot && key.equals(((Slot) that).key)) {
-      newValue = value.bitwiseAnd(((Slot) that).value);
+    if (that instanceof Slot && this.key.equals(((Slot) that).key)) {
+      newValue = this.value.bitwiseAnd(((Slot) that).value);
     } else if (that instanceof Value) {
-      newValue = value.bitwiseAnd((Value) that);
+      newValue = this.value.bitwiseAnd((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
@@ -135,15 +137,15 @@ public final class Slot extends Field {
       return new PlusOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Slot && key.equals(((Slot) that).key)) {
-      newValue = value.plus(((Slot) that).value);
+    if (that instanceof Slot && this.key.equals(((Slot) that).key)) {
+      newValue = this.value.plus(((Slot) that).value);
     } else if (that instanceof Value) {
-      newValue = value.plus((Value) that);
+      newValue = this.value.plus((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
@@ -154,15 +156,15 @@ public final class Slot extends Field {
       return new MinusOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Slot && key.equals(((Slot) that).key)) {
-      newValue = value.minus(((Slot) that).value);
+    if (that instanceof Slot && this.key.equals(((Slot) that).key)) {
+      newValue = this.value.minus(((Slot) that).value);
     } else if (that instanceof Value) {
-      newValue = value.minus((Value) that);
+      newValue = this.value.minus((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
@@ -173,15 +175,15 @@ public final class Slot extends Field {
       return new TimesOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Slot && key.equals(((Slot) that).key)) {
-      newValue = value.times(((Slot) that).value);
+    if (that instanceof Slot && this.key.equals(((Slot) that).key)) {
+      newValue = this.value.times(((Slot) that).value);
     } else if (that instanceof Value) {
-      newValue = value.times((Value) that);
+      newValue = this.value.times((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
@@ -192,15 +194,15 @@ public final class Slot extends Field {
       return new DivideOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Slot && key.equals(((Slot) that).key)) {
-      newValue = value.divide(((Slot) that).value);
+    if (that instanceof Slot && this.key.equals(((Slot) that).key)) {
+      newValue = this.value.divide(((Slot) that).value);
     } else if (that instanceof Value) {
-      newValue = value.divide((Value) that);
+      newValue = this.value.divide((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
@@ -211,60 +213,60 @@ public final class Slot extends Field {
       return new ModuloOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Slot && key.equals(((Slot) that).key)) {
-      newValue = value.modulo(((Slot) that).value);
+    if (that instanceof Slot && this.key.equals(((Slot) that).key)) {
+      newValue = this.value.modulo(((Slot) that).value);
     } else if (that instanceof Value) {
-      newValue = value.modulo((Value) that);
+      newValue = this.value.modulo((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   @Override
   public Item not() {
-    final Value newValue = value.not();
+    final Value newValue = this.value.not();
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   @Override
   public Item bitwiseNot() {
-    final Value newValue = value.bitwiseNot();
+    final Value newValue = this.value.bitwiseNot();
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   @Override
   public Item negative() {
-    final Value newValue = value.negative();
+    final Value newValue = this.value.negative();
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   @Override
   public Item positive() {
-    final Value newValue = value.positive();
+    final Value newValue = this.value.positive();
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
 
   @Override
   public Item inverse() {
-    final Value newValue = value.inverse();
+    final Value newValue = this.value.inverse();
     if (newValue.isDefined()) {
-      return new Slot(key, newValue);
+      return new Slot(this.key, newValue);
     }
     return Item.absent();
   }
@@ -300,16 +302,16 @@ public final class Slot extends Field {
 
   @Override
   public boolean isMutable() {
-    return (this.flags & IMMUTABLE) == 0;
+    return (Slot.FLAGS.get(this) & Slot.IMMUTABLE) == 0;
   }
 
   @Override
   public void alias() {
     do {
-      final int oldFlags = this.flags;
-      if ((oldFlags & IMMUTABLE) == 0) {
-        final int newFlags = oldFlags | IMMUTABLE;
-        if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
+      final int oldFlags = Slot.FLAGS.get(this);
+      if ((oldFlags & Slot.IMMUTABLE) == 0) {
+        final int newFlags = oldFlags | Slot.IMMUTABLE;
+        if (Slot.FLAGS.compareAndSet(this, oldFlags, newFlags)) {
           break;
         }
       } else {
@@ -320,8 +322,9 @@ public final class Slot extends Field {
 
   @Override
   public Slot branch() {
-    if ((this.flags & IMMUTABLE) != 0) {
-      return new Slot(key, value, flags & ~IMMUTABLE);
+    final int flags = Slot.FLAGS.get(this);
+    if ((flags & Slot.IMMUTABLE) != 0) {
+      return new Slot(this.key, this.value, flags & ~Slot.IMMUTABLE);
     } else {
       return this;
     }
@@ -330,10 +333,10 @@ public final class Slot extends Field {
   @Override
   public Slot commit() {
     do {
-      final int oldFlags = this.flags;
-      if ((oldFlags & IMMUTABLE) == 0) {
-        final int newFlags = oldFlags | IMMUTABLE;
-        if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
+      final int oldFlags = Slot.FLAGS.get(this);
+      if ((oldFlags & Slot.IMMUTABLE) == 0) {
+        final int newFlags = oldFlags | Slot.IMMUTABLE;
+        if (Slot.FLAGS.compareAndSet(this, oldFlags, newFlags)) {
           this.value.commit();
           break;
         }
@@ -352,9 +355,9 @@ public final class Slot extends Field {
   @Override
   public int compareTo(Item other) {
     if (other instanceof Slot) {
-      return compareTo((Slot) other);
+      return this.compareTo((Slot) other);
     }
-    return Integer.compare(typeOrder(), other.typeOrder());
+    return Integer.compare(this.typeOrder(), other.typeOrder());
   }
 
   int compareTo(Slot that) {
@@ -393,13 +396,19 @@ public final class Slot extends Field {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Slot").write('.').write("of").write('(').display(this.key);
     if (!(this.value instanceof Extant)) {
       output = output.write(", ").display(this.value);
     }
     output = output.write(')');
+    return output;
   }
+
+  static final int IMMUTABLE = 1 << 0;
+
+  static final AtomicIntegerFieldUpdater<Slot> FLAGS =
+      AtomicIntegerFieldUpdater.newUpdater(Slot.class, "flags");
 
   public static Slot of(Value key, Value value) {
     if (key == null) {

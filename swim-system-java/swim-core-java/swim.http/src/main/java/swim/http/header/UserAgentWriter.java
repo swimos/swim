@@ -28,20 +28,27 @@ final class UserAgentWriter extends Writer<Object, Object> {
   final Writer<?, ?> part;
   final int step;
 
-  UserAgentWriter(HttpWriter http, Iterator<Product> products, Writer<?, ?> part, int step) {
+  UserAgentWriter(HttpWriter http, Iterator<Product> products,
+                  Writer<?, ?> part, int step) {
     this.http = http;
     this.products = products;
     this.part = part;
     this.step = step;
   }
 
-  static Writer<Object, Object> write(Output<?> output, HttpWriter http, Iterator<Product> products,
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return UserAgentWriter.write(output, this.http, this.products, this.part, this.step);
+  }
+
+  static Writer<Object, Object> write(Output<?> output, HttpWriter http,
+                                      Iterator<Product> products,
                                       Writer<?, ?> part, int step) {
     do {
       if (step == 1) {
         if (part == null) {
           if (!products.hasNext()) {
-            return done();
+            return Writer.done();
           } else {
             part = products.next().writeHttp(output, http);
           }
@@ -51,7 +58,7 @@ final class UserAgentWriter extends Writer<Object, Object> {
         if (part.isDone()) {
           part = null;
           if (!products.hasNext()) {
-            return done();
+            return Writer.done();
           } else {
             step = 2;
           }
@@ -67,20 +74,16 @@ final class UserAgentWriter extends Writer<Object, Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new UserAgentWriter(http, products, part, step);
   }
 
-  static Writer<Object, Object> write(Output<?> output, HttpWriter http, Iterator<Product> products) {
-    return write(output, http, products, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.products, this.part, this.step);
+  static Writer<Object, Object> write(Output<?> output, HttpWriter http,
+                                      Iterator<Product> products) {
+    return UserAgentWriter.write(output, http, products, null, 1);
   }
 
 }

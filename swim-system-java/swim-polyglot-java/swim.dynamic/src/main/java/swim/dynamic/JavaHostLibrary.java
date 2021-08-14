@@ -66,7 +66,7 @@ public class JavaHostLibrary implements HostLibrary {
     if (!this.hostPackages.containsKey(packageName)) {
       this.hostPackages = this.hostPackages.updated(packageName, hostPackage);
       for (HostType<?> hostType : hostPackage.hostTypes()) {
-        addHostType(hostType);
+        this.addHostType(hostType);
       }
     }
   }

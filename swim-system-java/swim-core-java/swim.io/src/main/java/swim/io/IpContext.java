@@ -49,7 +49,7 @@ public interface IpContext {
 
   /**
    * Returns the name of the transport-layer security protocol used by the
-   * underlying network connection.  Returns {@code null} if the underlying
+   * underlying network connection. Returns {@code null} if the underlying
    * network channel is not currently connected, or if the underlying network
    * connection is not secure.
    */
@@ -57,21 +57,21 @@ public interface IpContext {
 
   /**
    * Returns the cryptographic cipher suite used by the underlying network
-   * connection.  Returns {@code null} if the underlying network channel is not
+   * connection. Returns {@code null} if the underlying network channel is not
    * currently connected, or if the underlying network connection is not secure.
    */
   String cipherSuite();
 
   /**
    * Returns the IP address and port of the local endpoint of the underlying
-   * network connection.  Returns {@code null} if the underlying network
+   * network connection. Returns {@code null} if the underlying network
    * channel is not  currently connected.
    */
   InetSocketAddress localAddress();
 
   /**
    * Returns the authenticated identity of the local endpoint of the
-   * underlying network connection.  Returns {@code null} if the underlying
+   * underlying network connection. Returns {@code null} if the underlying
    * network channel is not currently connected, or if the underlying network
    * connection is not authenticated.
    */
@@ -79,7 +79,7 @@ public interface IpContext {
 
   /**
    * Returns the certificate chain used to authenticate the local endpoint of
-   * the underlying network connection.  Returns {@code null} if the underlying
+   * the underlying network connection. Returns {@code null} if the underlying
    * network channel is not currently connected, or if the underlying network
    * connection is not authenticated.
    */
@@ -87,14 +87,14 @@ public interface IpContext {
 
   /**
    * Returns the IP address and port of the remote endpoint of the underlying
-   * network connection.  Returns {@code null} if the underlying network
+   * network connection. Returns {@code null} if the underlying network
    * channel is not currently connected.
    */
   InetSocketAddress remoteAddress();
 
   /**
    * Returns the authenticated identity of the remote endpoint of the
-   * underlying network connection.  Returns {@code null} if the underlying
+   * underlying network connection. Returns {@code null} if the underlying
    * network channel is not currently connected, or if the underlying network
    * connection is not authenticated.
    */
@@ -102,7 +102,7 @@ public interface IpContext {
 
   /**
    * Returns the certificate chain used to authenticate the remote endpoint of
-   * the underlying network connection.  Returns {@code null} if the underlying
+   * the underlying network connection. Returns {@code null} if the underlying
    * network channel is not currently connected, or if the underlying network
    * connection is not authenticated.
    */

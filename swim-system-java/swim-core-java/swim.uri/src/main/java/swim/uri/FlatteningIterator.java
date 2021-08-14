@@ -33,7 +33,7 @@ abstract class FlatteningIterator<P, T> implements Iterator<T> {
       if (this.inner != null && this.inner.hasNext()) {
         return true;
       } else if (this.outer != null && this.outer.hasNext()) {
-        this.inner = childIterator(this.outer.next());
+        this.inner = this.childIterator(this.outer.next());
       } else {
         this.inner = null;
         this.outer = null;
@@ -48,7 +48,7 @@ abstract class FlatteningIterator<P, T> implements Iterator<T> {
       if (this.inner != null && this.inner.hasNext()) {
         return this.inner.next();
       } else if (this.outer != null && this.outer.hasNext()) {
-        this.inner = childIterator(this.outer.next());
+        this.inner = this.childIterator(this.outer.next());
       } else {
         this.inner = null;
         this.outer = null;

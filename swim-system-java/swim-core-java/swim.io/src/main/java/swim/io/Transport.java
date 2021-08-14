@@ -20,13 +20,13 @@ import java.nio.channels.SelectableChannel;
 
 /**
  * I/O transport binding that handles asynchronous I/O operations for a
- * non-blocking NIO channel.  A {@code Transport} provides a selectable {@link
+ * non-blocking NIO channel. A {@code Transport} provides a selectable {@link
  * #channel()} on which to perform asynchronous I/O operations, along with an
  * {@link #readBuffer()} into which input data will be read, and an {@link
  * #writeBuffer()} from which data will be written.
  * <p>
  * A {@code Transport} interfaces with the underlying asynchronous I/O system
- * via a {@link TransportContext}.  The transport context invokes I/O callbacks
+ * via a {@link TransportContext}. The transport context invokes I/O callbacks
  * on the {@code Transport} when the underlying NIO channel is ready to perform
  * I/O operations permitted by the transport context's {@link FlowControl}.
  */
@@ -62,8 +62,8 @@ public interface Transport {
 
   /**
    * Returns the number of idle milliseconds after which this {@code Transport}
-   * should be closed due to inactivity.  Returns {@code -1} if a default idle
-   * timeout should be used.  Returns {@code 0} if the underlying I/O transport
+   * should be closed due to inactivity. Returns {@code -1} if a default idle
+   * timeout should be used. Returns {@code 0} if the underlying I/O transport
    * should not time out.
    */
   long idleTimeout();
@@ -83,7 +83,7 @@ public interface Transport {
   /**
    * I/O callback invoked by the transport context asking this {@code Transport}
    * to read input data out of the {@code readBuffer}, thereby completing a
-   * <em>read</em> operation from the underlying I/O transport.  May be invoked
+   * <em>read</em> operation from the underlying I/O transport. May be invoked
    * concurrently to other I/O callbacks, but never concurrently with other
    * {@code doRead} calls.
    */
@@ -92,7 +92,7 @@ public interface Transport {
   /**
    * I/O callback invoked by the transport context asking this {@code Transport}
    * to write output data into the {@code writeBuffer}, thereby initiating a
-   * <em>write</em> operation to the underlying I/O transport.  May be invoked
+   * <em>write</em> operation to the underlying I/O transport. May be invoked
    * concurrently to other I/O callbacks, but never concurrently with other
    * {@code doWrite} or {@code didWrite} calls.
    */
@@ -101,7 +101,7 @@ public interface Transport {
   /**
    * I/O callback invoked by the transport context after the underlying
    * transport has completed writing all data in its {@code writeBuffer},
-   * thereby completing the current <em>write</em> operation.  May be invoked
+   * thereby completing the current <em>write</em> operation. May be invoked
    * concurrently to other I/O callbacks, but never concurrently with other
    * {@code doWrite} or {@code didWrite} calls.
    */
@@ -109,7 +109,7 @@ public interface Transport {
 
   /**
    * Lifecycle callback invoked by the transport context after the underlying
-   * transport has timed out.  The transport will automatically be closed.
+   * transport has timed out. The transport will automatically be closed.
    */
   void didTimeout();
 
@@ -121,7 +121,7 @@ public interface Transport {
 
   /**
    * Lifecycle callback invoked by the transport context when the underlying
-   * transport fails by throwing an {@code error}.  The transport will
+   * transport fails by throwing an {@code error}. The transport will
    * automatically be closed.
    */
   void didFail(Throwable error);

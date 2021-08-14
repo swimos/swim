@@ -62,7 +62,7 @@ final class STreeNodeCursor<T> implements Cursor<Map.Entry<Object, T>> {
           this.pageCursor = null;
         }
       } else if (this.pageIndex < this.pages.length) {
-        this.pageCursor = pageCursor(this.pages[this.pageIndex]);
+        this.pageCursor = this.pageCursor(this.pages[this.pageIndex]);
         this.pageIndex += 1;
       } else {
         this.pageIndex = this.pages.length;
@@ -82,7 +82,7 @@ final class STreeNodeCursor<T> implements Cursor<Map.Entry<Object, T>> {
         }
       } else {
         if (this.pageIndex < this.pages.length) {
-          this.pageCursor = pageCursor(this.pages[this.pageIndex]);
+          this.pageCursor = this.pageCursor(this.pages[this.pageIndex]);
           this.pageIndex += 1;
         } else {
           this.pageIndex = this.pages.length;
@@ -104,7 +104,7 @@ final class STreeNodeCursor<T> implements Cursor<Map.Entry<Object, T>> {
         }
       } else {
         if (this.pageIndex < this.pages.length) {
-          this.pageCursor = pageCursor(this.pages[this.pageIndex]);
+          this.pageCursor = this.pageCursor(this.pages[this.pageIndex]);
           this.pageIndex += 1;
         } else {
           this.pageIndex = this.pages.length;
@@ -127,10 +127,10 @@ final class STreeNodeCursor<T> implements Cursor<Map.Entry<Object, T>> {
         }
       } else if (this.pageIndex < this.pages.length) {
         final STreePage<T> page = this.pages[this.pageIndex];
-        final long pageSize = pageSize(page);
+        final long pageSize = this.pageSize(page);
         this.pageIndex += 1;
         if (pageSize < count) {
-          this.pageCursor = pageCursor(page);
+          this.pageCursor = this.pageCursor(page);
           if (count > 0L) {
             this.index += count;
             this.pageCursor.skip(count);
@@ -157,7 +157,7 @@ final class STreeNodeCursor<T> implements Cursor<Map.Entry<Object, T>> {
           this.pageCursor = null;
         }
       } else if (this.pageIndex < this.pages.length) {
-        this.pageCursor = pageCursor(this.pages[this.pageIndex]);
+        this.pageCursor = this.pageCursor(this.pages[this.pageIndex]);
         this.pageIndex += 1;
       } else {
         this.pageIndex = this.pages.length;
@@ -183,7 +183,7 @@ final class STreeNodeCursor<T> implements Cursor<Map.Entry<Object, T>> {
         }
       } else {
         if (this.pageIndex < this.pages.length) {
-          this.pageCursor = pageCursor(this.pages[this.pageIndex]);
+          this.pageCursor = this.pageCursor(this.pages[this.pageIndex]);
           this.pageIndex += 1;
         } else {
           this.pageIndex = this.pages.length;
@@ -203,7 +203,7 @@ final class STreeNodeCursor<T> implements Cursor<Map.Entry<Object, T>> {
           this.pageCursor = null;
         }
       } else if (this.pageIndex > 0) {
-        this.pageCursor = reversePageCursor(this.pages[this.pageIndex - 1]);
+        this.pageCursor = this.reversePageCursor(this.pages[this.pageIndex - 1]);
         this.pageIndex -= 1;
       } else {
         this.pageIndex = 0;
@@ -228,7 +228,7 @@ final class STreeNodeCursor<T> implements Cursor<Map.Entry<Object, T>> {
           this.pageCursor = null;
         }
       } else if (this.pageIndex > 0) {
-        this.pageCursor = reversePageCursor(this.pages[this.pageIndex - 1]);
+        this.pageCursor = this.reversePageCursor(this.pages[this.pageIndex - 1]);
         this.pageIndex -= 1;
       } else {
         this.pageIndex = 0;

@@ -18,19 +18,10 @@ import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
 
-public class Z3 implements F3<VectorZ3, Long>, Debug {
-
-  private static Z3 module;
+public class Z3 implements F3<Z3Vector, Long>, Debug {
 
   protected Z3() {
-    // stub
-  }
-
-  public static Z3 module() {
-    if (module == null) {
-      module = new Z3();
-    }
-    return module;
+    // singleton
   }
 
   @Override
@@ -39,63 +30,73 @@ public class Z3 implements F3<VectorZ3, Long>, Debug {
   }
 
   @Override
-  public final VectorZ3 zero() {
-    return VectorZ3.zero();
+  public final Z3Vector zero() {
+    return Z3Vector.zero();
   }
 
   @Override
-  public final VectorZ3 of(Long x, Long y, Long z) {
-    return VectorZ3.of(x, y, z);
+  public final Z3Vector of(Long x, Long y, Long z) {
+    return new Z3Vector(x, y, z);
   }
 
   @Override
-  public final Long getX(VectorZ3 v) {
+  public final Long getX(Z3Vector v) {
     return v.x;
   }
 
   @Override
-  public final Long getY(VectorZ3 v) {
+  public final Long getY(Z3Vector v) {
     return v.y;
   }
 
   @Override
-  public final Long getZ(VectorZ3 v) {
+  public final Long getZ(Z3Vector v) {
     return v.z;
   }
 
   @Override
-  public final VectorZ3 add(VectorZ3 u, VectorZ3 v) {
+  public final Z3Vector add(Z3Vector u, Z3Vector v) {
     return u.plus(v);
   }
 
   @Override
-  public final VectorZ3 opposite(VectorZ3 v) {
+  public final Z3Vector opposite(Z3Vector v) {
     return v.opposite();
   }
 
   @Override
-  public final VectorZ3 subtract(VectorZ3 u, VectorZ3 v) {
+  public final Z3Vector subtract(Z3Vector u, Z3Vector v) {
     return u.minus(v);
   }
 
   @Override
-  public final VectorZ3 multiply(VectorZ3 u, Long a) {
+  public final Z3Vector multiply(Z3Vector u, Long a) {
     return u.times(a);
   }
 
   @Override
-  public final VectorZ3 combine(Long a, VectorZ3 u, Long b, VectorZ3 v) {
-    return new VectorZ3(a * u.x + b * v.x, a * u.y + b * v.y, a * u.z + b * v.z);
+  public final Z3Vector combine(Long a, Z3Vector u, Long b, Z3Vector v) {
+    return new Z3Vector(a * u.x + b * v.x, a * u.y + b * v.y, a * u.z + b * v.z);
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.write("Z3").write('.').write("module").write('(').write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Z3").write('.').write("module").write('(').write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static Z3 module;
+
+  public static Z3 module() {
+    if (Z3.module == null) {
+      Z3.module = new Z3();
+    }
+    return Z3.module;
   }
 
 }

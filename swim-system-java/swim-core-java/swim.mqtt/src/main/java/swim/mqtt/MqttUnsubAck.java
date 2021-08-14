@@ -23,21 +23,12 @@ import swim.util.Murmur3;
 
 public final class MqttUnsubAck extends MqttPacket<Object> implements Debug {
 
-  private static int hashSeed;
   final int packetFlags;
   final int packetId;
 
   MqttUnsubAck(int packetFlags, int packetId) {
     this.packetFlags = packetFlags;
     this.packetId = packetId;
-  }
-
-  public static MqttUnsubAck from(int packetFlags, int packetId) {
-    return new MqttUnsubAck(packetFlags, packetId);
-  }
-
-  public static MqttUnsubAck from(int packetId) {
-    return new MqttUnsubAck(0, packetId);
   }
 
   @Override
@@ -88,26 +79,36 @@ public final class MqttUnsubAck extends MqttPacket<Object> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttUnsubAck.class);
+    if (MqttUnsubAck.hashSeed == 0) {
+      MqttUnsubAck.hashSeed = Murmur3.seed(MqttUnsubAck.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed, this.packetFlags), this.packetId));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(MqttUnsubAck.hashSeed, this.packetFlags), this.packetId));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("MqttUnsubAck").write('.').write("from").write('(')
-        .debug(this.packetId).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MqttUnsubAck").write('.').write("create").write('(').debug(this.packetId).write(')');
     if (this.packetFlags != 0) {
       output = output.write('.').write("packetFlags").write('(').debug(this.packetFlags).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static MqttUnsubAck create(int packetFlags, int packetId) {
+    return new MqttUnsubAck(packetFlags, packetId);
+  }
+
+  public static MqttUnsubAck create(int packetId) {
+    return new MqttUnsubAck(0, packetId);
   }
 
 }

@@ -24,6 +24,10 @@ import swim.dynamic.observable.HostObservableSpatialMap;
 
 public final class HostSpatialLane {
 
+  private HostSpatialLane() {
+    // static
+  }
+
   public static final HostObjectType<SpatialLane<Object, Object, Object>> TYPE;
 
   static {
@@ -35,10 +39,6 @@ public final class HostSpatialLane {
     type.addMember(new HostSpatialLaneIsTransient());
     type.addMember(new HostSpatialLaneObserve());
     type.addMember(new HostSpatialLaneUnobserve());
-  }
-
-  private HostSpatialLane() {
-    // static
   }
 
 }

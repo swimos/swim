@@ -36,7 +36,7 @@ final class GetAttrSelectorWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.key, this.then, this.part, this.step);
+    return GetAttrSelectorWriter.write(output, this.recon, this.key, this.then, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, V key, V then) {
@@ -73,19 +73,19 @@ final class GetAttrSelectorWriter<I, V> extends Writer<Object, Object> {
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new GetAttrSelectorWriter<I, V>(recon, key, then, part, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon, V key, V then) {
-    return write(output, recon, key, then, null, 1);
+    return GetAttrSelectorWriter.write(output, recon, key, then, null, 1);
   }
 
   static <I, V> Writer<Object, Object> writeThen(Output<?> output, ReconWriter<I, V> recon, V key, V then) {
-    return write(output, recon, key, then, null, 2);
+    return GetAttrSelectorWriter.write(output, recon, key, then, null, 2);
   }
 
 }

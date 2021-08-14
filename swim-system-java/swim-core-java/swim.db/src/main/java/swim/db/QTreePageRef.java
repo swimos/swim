@@ -18,7 +18,6 @@ import java.lang.ref.WeakReference;
 import swim.codec.Output;
 import swim.codec.Unicode;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Sync;
 import swim.recon.Recon;
 import swim.structure.Num;
@@ -76,51 +75,6 @@ public final class QTreePageRef extends PageRef {
     this(context, pageType, stem, post, zone, base, span, x, y, fold, null, -1, -1, -1, -1L);
   }
 
-  public static QTreePageRef empty(PageContext context, int stem, long version) {
-    return QTreeLeaf.empty(context, stem, version).pageRef();
-  }
-
-  public static QTreePageRef fromValue(PageContext context, int stem, Value value) {
-    Throwable cause = null;
-    try {
-      final String tag = value.tag();
-      final PageType pageType = PageType.fromTag(tag);
-      if (pageType == null) {
-        return null;
-      }
-      final Value header = value.header(tag);
-      final int zone = header.get("zone").intValue();
-      final int post = header.get("post").intValue(zone);
-      final long base = header.get("base").longValue();
-      final int size = header.get("size").intValue();
-      final long area = header.get("area").longValue();
-      final long span = header.get("span").longValue();
-      final long x = header.get("x").longValue();
-      final long y = header.get("y").longValue();
-      final Value fold = header.get("fold");
-      if (base < 0L) {
-        throw new StoreException("negative page base: " + base);
-      } else if (size < 0) {
-        throw new StoreException("negative page size: " + size);
-      } else if (area < 0) {
-        throw new StoreException("negative page area: " + area);
-      } else if (span < 0) {
-        throw new StoreException("negative page span: " + span);
-      }
-      return new QTreePageRef(context, pageType, stem, post, zone, base, span,
-          x, y, fold, null, -1, size, 0, area);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        cause = error;
-      } else {
-        throw error;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed qtree page ref: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), cause);
-  }
-
   @Override
   public PageContext pageContext() {
     return this.context;
@@ -165,11 +119,11 @@ public final class QTreePageRef extends PageRef {
   }
 
   public long xBase() {
-    return this.x << xRank();
+    return this.x << this.xRank();
   }
 
   public long xMask() {
-    return ~((1L << xRank()) - 1L);
+    return ~((1L << this.xRank()) - 1L);
   }
 
   public long xSplit() {
@@ -185,11 +139,11 @@ public final class QTreePageRef extends PageRef {
   }
 
   public long yBase() {
-    return this.y << yRank();
+    return this.y << this.yRank();
   }
 
   public long yMask() {
-    return ~((1L << yRank()) - 1L);
+    return ~((1L << this.yRank()) - 1L);
   }
 
   public long ySplit() {
@@ -218,7 +172,7 @@ public final class QTreePageRef extends PageRef {
       } catch (InterruptedException error) {
         throw new StoreException(toDebugString(), error);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           throw new StoreException(toDebugString(), error);
         } else {
           throw error;
@@ -252,7 +206,7 @@ public final class QTreePageRef extends PageRef {
 
   @Override
   public long softVersion() {
-    final QTreePage page = softPage();
+    final QTreePage page = this.softPage();
     if (page != null) {
       return page.version();
     } else {
@@ -284,16 +238,16 @@ public final class QTreePageRef extends PageRef {
       pageRefSize += 6; // ",base:"
       pageRefSize += Recon.sizeOf(Num.from(this.base));
       pageRefSize += 6; // ",size:"
-      pageRefSize += Recon.sizeOf(Num.from(pageSize()));
+      pageRefSize += Recon.sizeOf(Num.from(this.pageSize()));
       pageRefSize += 6; // ",area:"
-      pageRefSize += Recon.sizeOf(Num.from(treeSize()));
+      pageRefSize += Recon.sizeOf(Num.from(this.treeSize()));
       pageRefSize += 6; // ",span:"
       pageRefSize += Recon.sizeOf(Num.from(this.span));
       pageRefSize += 3; // ",x:"
       pageRefSize += 18; // "0xXXXXXXXXXXXXXXXX";
       pageRefSize += 3; // ",y:"
       pageRefSize += 18; // "0xXXXXXXXXXXXXXXXX";
-      final Value fold = fold();
+      final Value fold = this.fold();
       if (fold.isDefined()) {
         pageRefSize += 6; // ",fold:"
         pageRefSize += Recon.sizeOf(fold);
@@ -307,7 +261,7 @@ public final class QTreePageRef extends PageRef {
   @Override
   public int pageSize() {
     if (this.pageSize < 0) {
-      page().memoizeSize(this);
+      this.page().memoizeSize(this);
     }
     return this.pageSize;
   }
@@ -315,7 +269,7 @@ public final class QTreePageRef extends PageRef {
   @Override
   public int diffSize() {
     if (this.diffSize < 0) {
-      page().memoizeSize(this);
+      this.page().memoizeSize(this);
     }
     return this.diffSize;
   }
@@ -323,7 +277,7 @@ public final class QTreePageRef extends PageRef {
   @Override
   public long treeSize() {
     if (this.treeSize < 0L) {
-      page().memoizeSize(this);
+      this.page().memoizeSize(this);
     }
     return this.treeSize;
   }
@@ -335,13 +289,13 @@ public final class QTreePageRef extends PageRef {
       header.slot("post", this.post);
     }
     header.slot("zone", this.zone)
-        .slot("base", this.base)
-        .slot("size", pageSize())
-        .slot("area", treeSize())
-        .slot("span", this.span)
-        .slot("x", Num.uint64(this.x))
-        .slot("y", Num.uint64(this.y));
-    final Value fold = fold();
+          .slot("base", this.base)
+          .slot("size", this.pageSize())
+          .slot("area", this.treeSize())
+          .slot("span", this.span)
+          .slot("x", Num.uint64(this.x))
+          .slot("y", Num.uint64(this.y));
+    final Value fold = this.fold();
     if (fold.isDefined()) {
       header.slot("fold", fold);
     }
@@ -351,7 +305,7 @@ public final class QTreePageRef extends PageRef {
   public QTreePageRef reduced(Value identity, CombinerFunction<? super Value, Value> accumulator,
                               CombinerFunction<Value, Value> combiner, long newVersion) {
     if (!this.fold.isDefined()) {
-      return page().reduced(identity, accumulator, combiner, newVersion).pageRef();
+      return this.page().reduced(identity, accumulator, combiner, newVersion).pageRef();
     } else {
       return this;
     }
@@ -360,7 +314,7 @@ public final class QTreePageRef extends PageRef {
   @Override
   public QTreePageRef evacuated(int post, long version) {
     if (this.post != 0 && this.post < post) {
-      return page().evacuated(post, version).pageRef();
+      return this.page().evacuated(post, version).pageRef();
     } else {
       return this;
     }
@@ -368,7 +322,7 @@ public final class QTreePageRef extends PageRef {
 
   @Override
   public QTreePageRef committed(int zone, long base, long version) {
-    final QTreePage page = hardPage();
+    final QTreePage page = this.hardPage();
     if (page != null) {
       return page.committed(zone, base, version).pageRef();
     } else {
@@ -378,7 +332,7 @@ public final class QTreePageRef extends PageRef {
 
   @Override
   public QTreePageRef uncommitted(long version) {
-    final QTreePage page = hardPage();
+    final QTreePage page = this.hardPage();
     if (page != null && page.version() >= version) {
       return page.uncommitted(version).pageRef();
     } else {
@@ -388,17 +342,17 @@ public final class QTreePageRef extends PageRef {
 
   @Override
   public void writePageRef(Output<?> output) {
-    Recon.write(toValue(), output);
+    Recon.write(this.toValue(), output);
   }
 
   @Override
   public void writePage(Output<?> output) {
-    page().writePage(output);
+    this.page().writePage(output);
   }
 
   @Override
   public void writeDiff(Output<?> output) {
-    page().writeDiff(output);
+    this.page().writeDiff(output);
   }
 
   @Override
@@ -422,14 +376,14 @@ public final class QTreePageRef extends PageRef {
       }
       if (page instanceof QTreePage) {
         // Call continuation on fresh stack
-        this.context.stage().execute(Conts.async(cont, (QTreePage) page));
+        this.context.stage().execute(Cont.async(cont, (QTreePage) page));
       } else {
         final PageLoader pageLoader = this.context.openPageLoader(isResident);
         pageLoader.loadPageAsync(this, new LoadPage(pageLoader, cont));
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        cont.trap(new StoreException(toDebugString(), cause));
+      if (Cont.isNonFatal(cause)) {
+        cont.trap(new StoreException(this.toDebugString(), cause));
       } else {
         throw cause;
       }
@@ -440,10 +394,10 @@ public final class QTreePageRef extends PageRef {
   public void loadTreeAsync(boolean isResident, Cont<Page> cont) {
     try {
       final PageLoader pageLoader = this.context.openPageLoader(isResident);
-      loadTreeAsync(pageLoader, new LoadPage(pageLoader, cont));
+      this.loadTreeAsync(pageLoader, new LoadPage(pageLoader, cont));
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        cont.trap(new StoreException(toDebugString(), cause));
+      if (Cont.isNonFatal(cause)) {
+        cont.trap(new StoreException(this.toDebugString(), cause));
       } else {
         throw cause;
       }
@@ -458,14 +412,14 @@ public final class QTreePageRef extends PageRef {
         page = ((WeakReference<?>) page).get();
       }
       if (page instanceof QTreePage) {
-        final Cont<Page> andThen = Conts.constant(cont, (QTreePage) page);
+        final Cont<Page> andThen = Cont.constant(cont, (QTreePage) page);
         ((QTreePage) page).loadTreeAsync(pageLoader, andThen);
       } else {
         pageLoader.loadPageAsync(this, new LoadTree(pageLoader, cont));
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        cont.trap(new StoreException(toDebugString(), cause));
+      if (Cont.isNonFatal(cause)) {
+        cont.trap(new StoreException(this.toDebugString(), cause));
       } else {
         throw cause;
       }
@@ -476,7 +430,7 @@ public final class QTreePageRef extends PageRef {
   public void soften(long version) {
     final Object page = this.page;
     if (page instanceof QTreePage) {
-      if (((QTreePage) page).version() <= version && isCommitted()) {
+      if (((QTreePage) page).version() <= version && this.isCommitted()) {
         this.context.hitPage((QTreePage) page);
         this.page = new WeakReference<Object>(page);
       }
@@ -486,18 +440,18 @@ public final class QTreePageRef extends PageRef {
 
   @Override
   public Cursor<Slot> cursor() {
-    return page().cursor();
+    return this.page().cursor();
   }
 
   public Cursor<Slot> cursor(long x, long y) {
-    return page().cursor(x, y);
+    return this.page().cursor(x, y);
   }
 
   public Cursor<Slot> depthCursor(long x, long y, int maxDepth) {
     if (maxDepth > 0) {
-      return page().depthCursor(x, y, maxDepth);
+      return this.page().depthCursor(x, y, maxDepth);
     } else {
-      final Value fold = fold();
+      final Value fold = this.fold();
       if (fold instanceof Record) {
         return new QTreePageRefCursor(this, (Record) fold);
       } else if (fold.isDefined()) {
@@ -510,9 +464,9 @@ public final class QTreePageRef extends PageRef {
 
   public Cursor<Slot> depthCursor(int maxDepth) {
     if (maxDepth > 0) {
-      return page().depthCursor(maxDepth);
+      return this.page().depthCursor(maxDepth);
     } else {
-      final Value fold = fold();
+      final Value fold = this.fold();
       if (fold instanceof Record) {
         return new QTreePageRefCursor(this, (Record) fold);
       } else if (fold.isDefined()) {
@@ -524,26 +478,71 @@ public final class QTreePageRef extends PageRef {
   }
 
   public Cursor<Slot> deltaCursor(long x, long y, long sinceVersion) {
-    return page().deltaCursor(x, y, sinceVersion);
+    return this.page().deltaCursor(x, y, sinceVersion);
   }
 
   public Cursor<Slot> deltaCursor(long sinceVersion) {
-    return page().deltaCursor(sinceVersion);
+    return this.page().deltaCursor(sinceVersion);
   }
 
   public Cursor<Slot> tileCursor(long x, long y) {
-    return page().tileCursor(x, y);
+    return this.page().tileCursor(x, y);
   }
 
   public Cursor<Slot> tileCursor() {
-    return page().tileCursor();
+    return this.page().tileCursor();
   }
 
   @Override
   public String toString() {
-    final Output<String> output = Unicode.stringOutput(pageRefSize());
-    writePageRef(output);
+    final Output<String> output = Unicode.stringOutput(this.pageRefSize());
+    this.writePageRef(output);
     return output.bind();
+  }
+
+  public static QTreePageRef empty(PageContext context, int stem, long version) {
+    return QTreeLeaf.empty(context, stem, version).pageRef();
+  }
+
+  public static QTreePageRef fromValue(PageContext context, int stem, Value value) {
+    Throwable cause = null;
+    try {
+      final String tag = value.tag();
+      final PageType pageType = PageType.fromTag(tag);
+      if (pageType == null) {
+        return null;
+      }
+      final Value header = value.header(tag);
+      final int zone = header.get("zone").intValue();
+      final int post = header.get("post").intValue(zone);
+      final long base = header.get("base").longValue();
+      final int size = header.get("size").intValue();
+      final long area = header.get("area").longValue();
+      final long span = header.get("span").longValue();
+      final long x = header.get("x").longValue();
+      final long y = header.get("y").longValue();
+      final Value fold = header.get("fold");
+      if (base < 0L) {
+        throw new StoreException("negative page base: " + base);
+      } else if (size < 0) {
+        throw new StoreException("negative page size: " + size);
+      } else if (area < 0) {
+        throw new StoreException("negative page area: " + area);
+      } else if (span < 0) {
+        throw new StoreException("negative page span: " + span);
+      }
+      return new QTreePageRef(context, pageType, stem, post, zone, base, span,
+                              x, y, fold, null, -1, size, 0, area);
+    } catch (Throwable error) {
+      if (Cont.isNonFatal(error)) {
+        cause = error;
+      } else {
+        throw error;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed qtree page ref: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), cause);
   }
 
 }

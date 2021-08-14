@@ -16,24 +16,9 @@ package swim.security;
 
 import java.util.Iterator;
 import swim.codec.Encoder;
-import swim.codec.EncoderException;
 import swim.codec.OutputBuffer;
 
 abstract class DerEncoder<V> {
-
-  static int sizeOfLength(int length) {
-    if (length < 128) {
-      return 1;
-    } else if (length < (1 << 8)) {
-      return 2;
-    } else if (length < (1 << 16)) {
-      return 3;
-    } else if (length < (1 << 24)) {
-      return 4;
-    } else {
-      return 5;
-    }
-  }
 
   public abstract boolean isSequence(V value);
 
@@ -47,40 +32,40 @@ abstract class DerEncoder<V> {
 
   public int sizeOf(V value) {
     final int length;
-    if (isSequence(value)) {
-      length = sizeOfSequence(iterator(value));
+    if (this.isSequence(value)) {
+      length = this.sizeOfSequence(this.iterator(value));
     } else {
-      length = sizeOfPrimitive(value);
+      length = this.sizeOfPrimitive(value);
     }
-    return sizeOfValue(length);
+    return this.sizeOfValue(length);
   }
 
   public Encoder<?, ?> encoder(V value) {
-    final int tag = tagOf(value);
-    if (isSequence(value)) {
-      final int length = sizeOfSequence(iterator(value));
-      return sequenceEncoder(tag, length, iterator(value));
+    final int tag = this.tagOf(value);
+    if (this.isSequence(value)) {
+      final int length = this.sizeOfSequence(this.iterator(value));
+      return this.sequenceEncoder(tag, length, this.iterator(value));
     } else {
-      final int length = sizeOfPrimitive(value);
-      final Encoder<?, ?> data = primitiveEncoder(length, value);
-      return valueEncoder(tag, length, data);
+      final int length = this.sizeOfPrimitive(value);
+      final Encoder<?, ?> data = this.primitiveEncoder(length, value);
+      return this.valueEncoder(tag, length, data);
     }
   }
 
   public Encoder<?, ?> encode(V value, OutputBuffer<?> output) {
-    final int tag = tagOf(value);
-    if (isSequence(value)) {
-      final int length = sizeOfSequence(iterator(value));
-      return encodeSequence(tag, length, iterator(value), output);
+    final int tag = this.tagOf(value);
+    if (this.isSequence(value)) {
+      final int length = this.sizeOfSequence(this.iterator(value));
+      return this.encodeSequence(tag, length, this.iterator(value), output);
     } else {
-      final int length = sizeOfPrimitive(value);
-      final Encoder<?, ?> data = primitiveEncoder(length, value);
-      return encodeValue(tag, length, data, output);
+      final int length = this.sizeOfPrimitive(value);
+      final Encoder<?, ?> data = this.primitiveEncoder(length, value);
+      return this.encodeValue(tag, length, data, output);
     }
   }
 
   public int sizeOfValue(int length) {
-    return 1 + sizeOfLength(length) + length;
+    return 1 + DerEncoder.sizeOfLength(length) + length;
   }
 
   public Encoder<?, ?> valueEncoder(int tag, int length, Encoder<?, ?> data) {
@@ -94,7 +79,7 @@ abstract class DerEncoder<V> {
   public int sizeOfSequence(Iterator<V> elements) {
     int size = 0;
     while (elements.hasNext()) {
-      size += sizeOf(elements.next());
+      size += this.sizeOf(elements.next());
     }
     return size;
   }
@@ -107,233 +92,18 @@ abstract class DerEncoder<V> {
     return DerSequenceEncoder.encode(output, this, tag, length, elements);
   }
 
-}
-
-final class DerValueEncoder<V> extends Encoder<Object, Object> {
-
-  final int tag;
-  final int length;
-  final Encoder<?, ?> data;
-  final int offset;
-  final int step;
-  DerEncoder<V> der;
-
-  DerValueEncoder(DerEncoder<V> der, int tag, int length, Encoder<?, ?> data, int offset, int step) {
-    this.der = der;
-    this.tag = tag;
-    this.length = length;
-    this.data = data;
-    this.offset = offset;
-    this.step = step;
-  }
-
-  DerValueEncoder(DerEncoder<V> der, int tag, int length, Encoder<?, ?> data) {
-    this(der, tag, length, data, 0, 1);
-  }
-
-  static <V> Encoder<Object, Object> encode(OutputBuffer<?> output, DerEncoder<V> der,
-                                            int tag, int length, Encoder<?, ?> data,
-                                            int offset, int step) {
-    if (step == 1 && output.isCont()) {
-      output = output.write(tag);
-      step = 2;
+  static int sizeOfLength(int length) {
+    if (length < 128) {
+      return 1;
+    } else if (length < (1 << 8)) {
+      return 2;
+    } else if (length < (1 << 16)) {
+      return 3;
+    } else if (length < (1 << 24)) {
+      return 4;
+    } else {
+      return 5;
     }
-    if (step == 2 && output.isCont()) {
-      if (length < 128) {
-        output = output.write(length);
-        step = 7;
-      } else if (length < (1 << 8)) {
-        output = output.write(0x81);
-        step = 6;
-      } else if (length < (1 << 16)) {
-        output = output.write(0x82);
-        step = 5;
-      } else if (length < (1 << 24)) {
-        output = output.write(0x83);
-        step = 4;
-      } else {
-        output = output.write(0x84);
-        step = 3;
-      }
-    }
-    if (step == 3 && output.isCont()) {
-      output = output.write(length >> 24);
-      step = 4;
-    }
-    if (step == 4 && output.isCont()) {
-      output = output.write(length >> 16);
-      step = 5;
-    }
-    if (step == 5 && output.isCont()) {
-      output = output.write(length >> 8);
-      step = 6;
-    }
-    if (step == 6 && output.isCont()) {
-      output = output.write(length);
-      step = 7;
-    }
-    if (step == 7) {
-      final int outputStart = output.index();
-      final int outputLimit = output.limit();
-      final int outputRemaining = outputLimit - outputStart;
-      final int inputRemaining = length - offset;
-      final boolean outputPart = output.isPart();
-      if (inputRemaining <= outputRemaining) {
-        output = output.limit(outputStart + inputRemaining).isPart(false);
-        data = data.pull(output);
-        output = output.limit(outputLimit);
-      } else {
-        output = output.isPart(true);
-        data = data.pull(output);
-      }
-      output = output.isPart(outputPart);
-      offset += output.index() - outputStart;
-      if (data.isDone()) {
-        if (offset < length) {
-          return error(new EncoderException("buffer underflow"));
-        } else if (offset > length) {
-          return error(new EncoderException("buffer overflow"));
-        } else {
-          return done();
-        }
-      } else if (data.isError()) {
-        return data.asError();
-      }
-    }
-    if (output.isDone()) {
-      return error(new EncoderException("truncated"));
-    } else if (output.isError()) {
-      return error(output.trap());
-    }
-    return new DerValueEncoder<V>(der, tag, length, data, offset, step);
-  }
-
-  static <V> Encoder<Object, Object> encode(OutputBuffer<?> output, DerEncoder<V> der,
-                                            int tag, int length, Encoder<?, ?> data) {
-    return encode(output, der, tag, length, data, 0, 1);
-  }
-
-  @Override
-  public Encoder<Object, Object> pull(OutputBuffer<?> output) {
-    return encode(output, this.der, this.tag, this.length, this.data, this.offset, this.step);
-  }
-
-}
-
-final class DerSequenceEncoder<V> extends Encoder<Object, Object> {
-
-  final int tag;
-  final int length;
-  final Iterator<V> elements;
-  final Encoder<?, ?> element;
-  final int offset;
-  final int step;
-  DerEncoder<V> der;
-
-  DerSequenceEncoder(DerEncoder<V> der, int tag, int length, Iterator<V> elements,
-                     Encoder<?, ?> element, int offset, int step) {
-    this.der = der;
-    this.tag = tag;
-    this.length = length;
-    this.elements = elements;
-    this.element = element;
-    this.offset = offset;
-    this.step = step;
-  }
-
-  DerSequenceEncoder(DerEncoder<V> der, int tag, int length, Iterator<V> elements) {
-    this(der, tag, length, elements, null, 0, 1);
-  }
-
-  static <V> Encoder<Object, Object> encode(OutputBuffer<?> output, DerEncoder<V> der, int tag, int length,
-                                            Iterator<V> elements, Encoder<?, ?> element, int offset, int step) {
-    if (step == 1 && output.isCont()) {
-      output = output.write(tag);
-      step = 2;
-    }
-    if (step == 2 && output.isCont()) {
-      if (length < 128) {
-        output = output.write(length);
-        step = 7;
-      } else if (length < (1 << 8)) {
-        output = output.write(0x81);
-        step = 6;
-      } else if (length < (1 << 16)) {
-        output = output.write(0x82);
-        step = 5;
-      } else if (length < (1 << 24)) {
-        output = output.write(0x83);
-        step = 4;
-      } else {
-        output = output.write(0x84);
-        step = 3;
-      }
-    }
-    if (step == 3 && output.isCont()) {
-      output = output.write(length >> 24);
-      step = 4;
-    }
-    if (step == 4 && output.isCont()) {
-      output = output.write(length >> 16);
-      step = 5;
-    }
-    if (step == 5 && output.isCont()) {
-      output = output.write(length >> 8);
-      step = 6;
-    }
-    if (step == 6 && output.isCont()) {
-      output = output.write(length);
-      step = 7;
-    }
-    while (step == 7) {
-      final int outputStart = output.index();
-      final int outputLimit = output.limit();
-      final int outputRemaining = outputLimit - outputStart;
-      final int inputRemaining = length - offset;
-      final boolean outputPart = output.isPart();
-      output = output.limit(outputStart + inputRemaining).isPart(inputRemaining > outputRemaining);
-      if (element != null) {
-        element = element.pull(output);
-      } else if (elements.hasNext()) {
-        element = der.encode(elements.next(), output);
-      }
-      output = output.limit(outputLimit).isPart(outputPart);
-      offset += output.index() - outputStart;
-      if (element.isDone()) {
-        if (offset < length) {
-          if (elements.hasNext()) {
-            element = null;
-            continue;
-          } else {
-            return error(new EncoderException("buffer underflow"));
-          }
-        } else if (offset > length) {
-          return error(new EncoderException("buffer overflow"));
-        } else {
-          return done();
-        }
-      } else if (element.isError()) {
-        return element.asError();
-      }
-      break;
-    }
-    if (output.isDone()) {
-      return error(new EncoderException("truncated"));
-    } else if (output.isError()) {
-      return error(output.trap());
-    }
-    return new DerSequenceEncoder<V>(der, tag, length, elements, element, offset, step);
-  }
-
-  static <V> Encoder<Object, Object> encode(OutputBuffer<?> output, DerEncoder<V> der,
-                                            int tag, int length, Iterator<V> elements) {
-    return encode(output, der, tag, length, elements, null, 0, 1);
-  }
-
-  @Override
-  public Encoder<Object, Object> pull(OutputBuffer<?> output) {
-    return encode(output, this.der, this.tag, this.length, this.elements,
-        this.element, this.offset, this.step);
   }
 
 }

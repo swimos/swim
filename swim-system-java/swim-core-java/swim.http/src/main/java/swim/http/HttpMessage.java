@@ -14,22 +14,71 @@
 
 package swim.http;
 
+import swim.codec.Binary;
 import swim.codec.Decoder;
+import swim.codec.Detect;
 import swim.codec.Encoder;
+import swim.codec.Output;
 import swim.codec.OutputBuffer;
 import swim.codec.Utf8;
+import swim.codec.UtfErrorMode;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieSet;
-import swim.decipher.Decipher;
 import swim.http.header.ContentLength;
 import swim.http.header.ContentType;
 import swim.http.header.TransferEncoding;
 import swim.json.Json;
 import swim.recon.Recon;
+import swim.structure.Data;
+import swim.structure.Text;
+import swim.structure.Value;
 import swim.util.Builder;
 import swim.xml.Xml;
 
 public abstract class HttpMessage<T> extends HttpPart {
+
+  public abstract HttpVersion version();
+
+  public abstract FingerTrieSeq<HttpHeader> headers();
+
+  public HttpHeader getHeader(String name) {
+    final FingerTrieSeq<HttpHeader> headers = this.headers();
+    for (int i = 0, n = headers.size(); i < n; i += 1) {
+      final HttpHeader header = headers.get(i);
+      if (name.equalsIgnoreCase(header.name())) {
+        return header;
+      }
+    }
+    return null;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <H extends HttpHeader> H getHeader(Class<H> headerClass) {
+    final FingerTrieSeq<HttpHeader> headers = this.headers();
+    for (int i = 0, n = headers.size(); i < n; i += 1) {
+      final HttpHeader header = headers.get(i);
+      if (headerClass.isInstance(header)) {
+        return (H) header;
+      }
+    }
+    return null;
+  }
+
+  public abstract HttpMessage<T> headers(FingerTrieSeq<HttpHeader> headers);
+
+  public abstract HttpMessage<T> headers(HttpHeader... headers);
+
+  public abstract HttpMessage<T> appendedHeaders(FingerTrieSeq<HttpHeader> newHeaders);
+
+  public abstract HttpMessage<T> appendedHeaders(HttpHeader... newHeaders);
+
+  public abstract HttpMessage<T> appendedHeader(HttpHeader newHeader);
+
+  public abstract HttpMessage<T> updatedHeaders(FingerTrieSeq<HttpHeader> newHeaders);
+
+  public abstract HttpMessage<T> updatedHeaders(HttpHeader... newHeaders);
+
+  public abstract HttpMessage<T> updatedHeader(HttpHeader newHeader);
 
   static FingerTrieSeq<HttpHeader> updatedHeaders(FingerTrieSeq<HttpHeader> oldHeaders, HttpHeader newHeader) {
     final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers = FingerTrieSeq.builder();
@@ -64,7 +113,7 @@ public abstract class HttpMessage<T> extends HttpPart {
     if (newHeaderCount == 0) {
       return oldHeaders;
     } else if (newHeaderCount == 1) {
-      return updatedHeaders(oldHeaders, newHeaders.head());
+      return HttpMessage.updatedHeaders(oldHeaders, newHeaders.head());
     } else {
       final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers = FingerTrieSeq.builder();
       final HashTrieSet<HttpHeader> absent = HashTrieSet.from(newHeaders);
@@ -102,49 +151,6 @@ public abstract class HttpMessage<T> extends HttpPart {
     }
   }
 
-  public abstract HttpVersion version();
-
-  public abstract FingerTrieSeq<HttpHeader> headers();
-
-  public HttpHeader getHeader(String name) {
-    final FingerTrieSeq<HttpHeader> headers = headers();
-    for (int i = 0, n = headers.size(); i < n; i += 1) {
-      final HttpHeader header = headers.get(i);
-      if (name.equalsIgnoreCase(header.name())) {
-        return header;
-      }
-    }
-    return null;
-  }
-
-  @SuppressWarnings("unchecked")
-  public <H extends HttpHeader> H getHeader(Class<H> headerClass) {
-    final FingerTrieSeq<HttpHeader> headers = headers();
-    for (int i = 0, n = headers.size(); i < n; i += 1) {
-      final HttpHeader header = headers.get(i);
-      if (headerClass.isInstance(header)) {
-        return (H) header;
-      }
-    }
-    return null;
-  }
-
-  public abstract HttpMessage<T> headers(FingerTrieSeq<HttpHeader> headers);
-
-  public abstract HttpMessage<T> headers(HttpHeader... headers);
-
-  public abstract HttpMessage<T> appendedHeaders(FingerTrieSeq<HttpHeader> newHeaders);
-
-  public abstract HttpMessage<T> appendedHeaders(HttpHeader... newHeaders);
-
-  public abstract HttpMessage<T> appendedHeader(HttpHeader newHeader);
-
-  public abstract HttpMessage<T> updatedHeaders(FingerTrieSeq<HttpHeader> newHeaders);
-
-  public abstract HttpMessage<T> updatedHeaders(HttpHeader... newHeaders);
-
-  public abstract HttpMessage<T> updatedHeader(HttpHeader newHeader);
-
   public abstract HttpEntity<T> entity();
 
   public abstract <T2> HttpMessage<T2> entity(HttpEntity<T2> entity);
@@ -158,7 +164,7 @@ public abstract class HttpMessage<T> extends HttpPart {
   public <T2> Decoder<? extends HttpMessage<T2>> entityDecoder(Decoder<T2> contentDecoder) {
     int bodyType = 0;
     long length = 0L;
-    final FingerTrieSeq<HttpHeader> headers = headers();
+    final FingerTrieSeq<HttpHeader> headers = this.headers();
     for (int i = 0, n = headers.size(); i < n; i += 1) {
       final HttpHeader header = headers.get(i);
       if (header instanceof ContentLength) {
@@ -193,7 +199,7 @@ public abstract class HttpMessage<T> extends HttpPart {
     } else if (bodyType == 2) {
       return HttpChunked.httpDecoder(this, contentDecoder);
     } else {
-      return Decoder.done(entity(HttpEntity.<T2>empty()));
+      return Decoder.done(this.entity(HttpEntity.<T2>empty()));
     }
   }
 
@@ -205,24 +211,24 @@ public abstract class HttpMessage<T> extends HttpPart {
       if ("json".equalsIgnoreCase(mediaType.subtype)) {
         return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Json.structureParser().documentParser());
       } else if ("recon".equalsIgnoreCase(mediaType.subtype)
-          || "x-recon".equalsIgnoreCase(mediaType.subtype)) {
+              || "x-recon".equalsIgnoreCase(mediaType.subtype)) {
         return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Recon.structureParser().blockParser());
       } else if ("xml".equalsIgnoreCase(mediaType.subtype)) {
         return (Decoder<Object>) (Decoder<?>) Utf8.decodedParser(Xml.structureParser().documentParser());
       }
     }
-    return (Decoder<Object>) (Decoder<?>) Decipher.structureDecoder().anyDecoder();
+    return (Decoder<Object>) (Decoder<?>) HttpMessage.detectContentDecoder();
   }
 
   public Decoder<Object> contentDecoder() {
-    final FingerTrieSeq<HttpHeader> headers = headers();
+    final FingerTrieSeq<HttpHeader> headers = this.headers();
     for (int i = 0, n = headers.size(); i < n; i += 1) {
       final HttpHeader header = headers.get(i);
       if (header instanceof ContentType) {
-        return contentDecoder(((ContentType) header).mediaType());
+        return this.contentDecoder(((ContentType) header).mediaType());
       }
     }
-    return contentDecoder(MediaType.applicationOctetStream());
+    return this.contentDecoder(MediaType.applicationOctetStream());
   }
 
   public Encoder<?, ? extends HttpMessage<T>> httpEncoder(HttpWriter http) {
@@ -230,7 +236,7 @@ public abstract class HttpMessage<T> extends HttpPart {
   }
 
   public Encoder<?, ? extends HttpMessage<T>> httpEncoder() {
-    return httpEncoder(Http.standardWriter());
+    return this.httpEncoder(Http.standardWriter());
   }
 
   public Encoder<?, ? extends HttpMessage<T>> encodeHttp(OutputBuffer<?> output, HttpWriter http) {
@@ -238,7 +244,22 @@ public abstract class HttpMessage<T> extends HttpPart {
   }
 
   public Encoder<?, ? extends HttpMessage<T>> encodeHttp(OutputBuffer<?> output) {
-    return encodeHttp(output, Http.standardWriter());
+    return this.encodeHttp(output, Http.standardWriter());
+  }
+
+  private static Decoder<Value> detectContentDecoder;
+
+  @SuppressWarnings("unchecked")
+  public static Decoder<Value> detectContentDecoder() {
+    if (HttpMessage.detectContentDecoder == null) {
+      final Decoder<Value> xmlDecoder = Utf8.decodedParser(Xml.structureParser().documentParser(), UtfErrorMode.fatalNonZero());
+      final Decoder<Value> jsonDecoder = Utf8.decodedParser(Json.structureParser().documentParser(), UtfErrorMode.fatalNonZero());
+      final Decoder<Value> reconDecoder = Utf8.decodedParser(Recon.structureParser().blockParser(), UtfErrorMode.fatalNonZero());
+      final Decoder<Value> textDecoder = Utf8.outputDecoder((Output<Value>) (Output<?>) Text.output(), UtfErrorMode.fatalNonZero());
+      final Decoder<Value> dataDecoder = Binary.outputParser((Output<Value>) (Output<?>) Data.output());
+      HttpMessage.detectContentDecoder = Detect.decoder(xmlDecoder, jsonDecoder, reconDecoder, textDecoder, dataDecoder);
+    }
+    return HttpMessage.detectContentDecoder;
   }
 
 }

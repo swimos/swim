@@ -31,6 +31,11 @@ final class SecWebSocketAcceptParser extends Parser<SecWebSocketAccept> {
     this(null);
   }
 
+  @Override
+  public Parser<SecWebSocketAccept> feed(Input input) {
+    return SecWebSocketAcceptParser.parse(input, this.digest);
+  }
+
   static Parser<SecWebSocketAccept> parse(Input input, Parser<byte[]> digest) {
     if (digest == null) {
       digest = Base64.standard().parseByteArray(input);
@@ -40,25 +45,20 @@ final class SecWebSocketAcceptParser extends Parser<SecWebSocketAccept> {
     if (digest.isDone()) {
       final byte[] data = digest.bind();
       if (data.length != 0) {
-        return done(SecWebSocketAccept.from(data));
+        return Parser.done(SecWebSocketAccept.create(data));
       } else {
-        return error(Diagnostic.expected("base64 digest", input));
+        return Parser.error(Diagnostic.expected("base64 digest", input));
       }
     } else if (digest.isError()) {
       return digest.asError();
     } else if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new SecWebSocketAcceptParser(digest);
   }
 
   static Parser<SecWebSocketAccept> parse(Input input) {
-    return parse(input, null);
-  }
-
-  @Override
-  public Parser<SecWebSocketAccept> feed(Input input) {
-    return parse(input, this.digest);
+    return SecWebSocketAcceptParser.parse(input, null);
   }
 
 }

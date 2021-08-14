@@ -34,7 +34,6 @@ import swim.uri.UriPath;
 
 public class MetaKernel extends KernelProxy {
 
-  private static final double KERNEL_PRIORITY = 2.0;
   final double kernelPriority;
 
   public MetaKernel(double kernelPriority) {
@@ -42,17 +41,7 @@ public class MetaKernel extends KernelProxy {
   }
 
   public MetaKernel() {
-    this(KERNEL_PRIORITY);
-  }
-
-  public static MetaKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || MetaKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new MetaKernel(kernelPriority);
-    }
-    return null;
+    this(MetaKernel.KERNEL_PRIORITY);
   }
 
   @Override
@@ -64,12 +53,12 @@ public class MetaKernel extends KernelProxy {
   public NodeBinding createNode(NodeAddress nodeAddress) {
     final Uri nodeUri = nodeAddress.nodeUri();
     if ("swim".equals(nodeUri.schemeName())) {
-      final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+      final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
       final Space space = kernel.getSpace(nodeAddress.edgeName());
       if (space instanceof EdgeContext) {
         final EdgeBinding edge = ((EdgeContext) space).edgeWrapper();
         final UriPath nodePath = nodeUri.path();
-        final NodeBinding nodeBinding = createMeta(edge, nodePath);
+        final NodeBinding nodeBinding = this.createMeta(edge, nodePath);
         if (nodeBinding != null) {
           return nodeBinding;
         }
@@ -86,31 +75,31 @@ public class MetaKernel extends KernelProxy {
           if (!nodePath.isEmpty()) {
             nodePath = nodePath.tail(); // drop /
           }
-          return createMetaEdge(edge, nodePath);
+          return this.createMetaEdge(edge, nodePath);
         } else if ("meta:mesh".equals(nodePath.head())) {
           nodePath = nodePath.tail(); // drop meta:mesh
           if (!nodePath.isEmpty()) {
             nodePath = nodePath.tail(); // drop /
           }
-          return createMetaMesh(edge, nodePath);
+          return this.createMetaMesh(edge, nodePath);
         } else if ("meta:part".equals(nodePath.head())) {
           nodePath = nodePath.tail(); // drop meta:part
           if (!nodePath.isEmpty()) {
             nodePath = nodePath.tail(); // drop /
           }
-          return createMetaPart(edge, nodePath);
+          return this.createMetaPart(edge, nodePath);
         } else if ("meta:host".equals(nodePath.head())) {
           nodePath = nodePath.tail(); // drop meta:host
           if (!nodePath.isEmpty()) {
             nodePath = nodePath.tail(); // drop /
           }
-          return createMetaHost(edge, nodePath);
+          return this.createMetaHost(edge, nodePath);
         } else if ("meta:node".equals(nodePath.head())) {
           nodePath = nodePath.tail(); // drop meta:node
           if (!nodePath.isEmpty()) {
             nodePath = nodePath.tail(); // drop /
           }
-          return createMetaNode(edge, nodePath);
+          return this.createMetaNode(edge, nodePath);
         }
       } catch (ParserException cause) {
         // swallow
@@ -127,25 +116,25 @@ public class MetaKernel extends KernelProxy {
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaMesh(edge, nodePath);
+      return this.createMetaMesh(edge, nodePath);
     } else if ("part".equals(nodePath.head())) {
       nodePath = nodePath.tail(); // drop part
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaPart(edge, nodePath);
+      return this.createMetaPart(edge, nodePath);
     } else if ("host".equals(nodePath.head())) {
       nodePath = nodePath.tail(); // drop host
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaHost(edge, nodePath);
+      return this.createMetaHost(edge, nodePath);
     } else if ("node".equals(nodePath.head())) {
       nodePath = nodePath.tail(); // drop node
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaNode(edge, nodePath);
+      return this.createMetaNode(edge, nodePath);
     }
     return null;
   }
@@ -162,7 +151,7 @@ public class MetaKernel extends KernelProxy {
           nodePath = nodePath.tail(); // drop /
         }
       }
-      return createMetaMesh(mesh, nodePath);
+      return this.createMetaMesh(mesh, nodePath);
     }
     return null;
   }
@@ -175,19 +164,19 @@ public class MetaKernel extends KernelProxy {
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaPart(mesh, nodePath);
+      return this.createMetaPart(mesh, nodePath);
     } else if ("host".equals(nodePath.head())) {
       nodePath = nodePath.tail(); // drop host
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaHost(mesh, nodePath);
+      return this.createMetaHost(mesh, nodePath);
     } else if ("node".equals(nodePath.head())) {
       nodePath = nodePath.tail(); // drop node
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaNode(mesh, nodePath);
+      return this.createMetaNode(mesh, nodePath);
     }
     return null;
   }
@@ -195,7 +184,7 @@ public class MetaKernel extends KernelProxy {
   protected NodeBinding createMetaPart(EdgeBinding edge, UriPath nodePath) {
     final MeshBinding mesh = edge.network();
     if (mesh != null) {
-      return createMetaPart(mesh, nodePath);
+      return this.createMetaPart(mesh, nodePath);
     }
     return null;
   }
@@ -212,7 +201,7 @@ public class MetaKernel extends KernelProxy {
           nodePath = nodePath.tail(); // drop /
         }
       }
-      return createMetaPart(part, nodePath);
+      return this.createMetaPart(part, nodePath);
     }
     return null;
   }
@@ -225,13 +214,13 @@ public class MetaKernel extends KernelProxy {
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaHost(part, nodePath);
+      return this.createMetaHost(part, nodePath);
     } else if ("node".equals(nodePath.head())) {
       nodePath = nodePath.tail(); // drop node
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaNode(part, nodePath);
+      return this.createMetaNode(part, nodePath);
     }
     return null;
   }
@@ -239,7 +228,7 @@ public class MetaKernel extends KernelProxy {
   protected NodeBinding createMetaHost(EdgeBinding edge, UriPath nodePath) {
     final MeshBinding mesh = edge.network();
     if (mesh != null) {
-      return createMetaHost(mesh, nodePath);
+      return this.createMetaHost(mesh, nodePath);
     }
     return null;
   }
@@ -247,7 +236,7 @@ public class MetaKernel extends KernelProxy {
   public NodeBinding createMetaHost(MeshBinding mesh, UriPath nodePath) {
     final PartBinding part = mesh.gateway();
     if (part != null) {
-      return createMetaHost(part, nodePath);
+      return this.createMetaHost(part, nodePath);
     }
     return null;
   }
@@ -264,7 +253,7 @@ public class MetaKernel extends KernelProxy {
           nodePath = nodePath.tail(); // drop /
         }
       }
-      return createMetaHost(host, nodePath);
+      return this.createMetaHost(host, nodePath);
     }
     return null;
   }
@@ -277,7 +266,7 @@ public class MetaKernel extends KernelProxy {
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaNode(host, nodePath);
+      return this.createMetaNode(host, nodePath);
     }
     return null;
   }
@@ -285,7 +274,7 @@ public class MetaKernel extends KernelProxy {
   protected NodeBinding createMetaNode(EdgeBinding edge, UriPath nodePath) {
     final MeshBinding mesh = edge.network();
     if (mesh != null) {
-      return createMetaNode(mesh, nodePath);
+      return this.createMetaNode(mesh, nodePath);
     }
     return null;
   }
@@ -293,7 +282,7 @@ public class MetaKernel extends KernelProxy {
   public NodeBinding createMetaNode(MeshBinding mesh, UriPath nodePath) {
     final PartBinding part = mesh.gateway();
     if (part != null) {
-      return createMetaNode(part, nodePath);
+      return this.createMetaNode(part, nodePath);
     }
     return null;
   }
@@ -301,7 +290,7 @@ public class MetaKernel extends KernelProxy {
   public NodeBinding createMetaNode(PartBinding part, UriPath nodePath) {
     final HostBinding host = part.master();
     if (host != null) {
-      return createMetaNode(host, nodePath);
+      return this.createMetaNode(host, nodePath);
     }
     return null;
   }
@@ -317,7 +306,7 @@ public class MetaKernel extends KernelProxy {
             nodePath = nodePath.tail(); // drop /
           }
         }
-        return createMetaNode(node, nodePath);
+        return this.createMetaNode(node, nodePath);
       }
     }
     return null;
@@ -331,7 +320,7 @@ public class MetaKernel extends KernelProxy {
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaLane(node, nodePath);
+      return this.createMetaLane(node, nodePath);
     }
     return null;
   }
@@ -347,7 +336,7 @@ public class MetaKernel extends KernelProxy {
             nodePath = nodePath.tail(); // drop /
           }
         }
-        return createMetaLane(lane, nodePath);
+        return this.createMetaLane(lane, nodePath);
       }
     }
     return null;
@@ -361,7 +350,7 @@ public class MetaKernel extends KernelProxy {
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaUplink(lane, nodePath);
+      return this.createMetaUplink(lane, nodePath);
     }
     return null;
   }
@@ -374,7 +363,7 @@ public class MetaKernel extends KernelProxy {
       if (!nodePath.isEmpty()) {
         nodePath = nodePath.tail(); // drop /
       }
-      return createMetaUplink(uplink, nodePath);
+      return this.createMetaUplink(uplink, nodePath);
     }
     return null;
   }
@@ -382,6 +371,18 @@ public class MetaKernel extends KernelProxy {
   public NodeBinding createMetaUplink(LinkContext uplink, UriPath nodePath) {
     if (nodePath.isEmpty()) {
       return new MetaUplinkAgent(uplink);
+    }
+    return null;
+  }
+
+  private static final double KERNEL_PRIORITY = 2.0;
+
+  public static MetaKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || MetaKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(MetaKernel.KERNEL_PRIORITY);
+      return new MetaKernel(kernelPriority);
     }
     return null;
   }

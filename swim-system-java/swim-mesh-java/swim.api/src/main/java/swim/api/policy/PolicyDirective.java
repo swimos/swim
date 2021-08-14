@@ -21,16 +21,46 @@ import swim.util.Murmur3;
 
 public abstract class PolicyDirective<T> implements Debug {
 
-  private static Allow<Object> allow;
-
   PolicyDirective() {
+    // sealed
   }
 
-  private static Allow<Object> staticAllow() {
-    if (allow == null) {
-      allow = new Allow<>(null);
+  public boolean isAllowed() {
+    return false;
+  }
+
+  public boolean isDenied() {
+    return false;
+  }
+
+  public boolean isForbidden() {
+    return false;
+  }
+
+  public boolean isDefined() {
+    return false;
+  }
+
+  public T get() {
+    throw null;
+  }
+
+  public Policy policy() {
+    return null;
+  }
+
+  public Object reason() {
+    return null;
+  }
+
+  private static Allow<Object> allow;
+
+  @SuppressWarnings("unchecked")
+  public static <T> PolicyDirective<T> allow() {
+    if (PolicyDirective.allow == null) {
+      PolicyDirective.allow = new Allow<Object>(null);
     }
-    return allow;
+    return (PolicyDirective<T>) (PolicyDirective<?>) PolicyDirective.allow;
   }
 
   @SuppressWarnings("unchecked")
@@ -38,13 +68,8 @@ public abstract class PolicyDirective<T> implements Debug {
     if (value != null) {
       return new Allow<T>(value);
     } else {
-      return (Allow<T>) staticAllow();
+      return PolicyDirective.allow();
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> PolicyDirective<T> allow() {
-    return (PolicyDirective<T>) staticAllow();
   }
 
   public static <T> PolicyDirective<T> deny(Policy policy, Object reason) {
@@ -79,37 +104,8 @@ public abstract class PolicyDirective<T> implements Debug {
     return new Forbid<T>(null, null);
   }
 
-  public boolean isAllowed() {
-    return false;
-  }
-
-  public boolean isDenied() {
-    return false;
-  }
-
-  public boolean isForbidden() {
-    return false;
-  }
-
-  public boolean isDefined() {
-    return false;
-  }
-
-  public T get() {
-    throw null;
-  }
-
-  public Policy policy() {
-    return null;
-  }
-
-  public Object reason() {
-    return null;
-  }
-
   static final class Allow<T> extends PolicyDirective<T> {
 
-    private static int hashSeed;
     final T value;
 
     Allow(T value) {
@@ -123,12 +119,12 @@ public abstract class PolicyDirective<T> implements Debug {
 
     @Override
     public boolean isDefined() {
-      return value != null;
+      return this.value != null;
     }
 
     @Override
     public T get() {
-      return value;
+      return this.value;
     }
 
     @Override
@@ -137,28 +133,30 @@ public abstract class PolicyDirective<T> implements Debug {
         return true;
       } else if (other instanceof Allow<?>) {
         final Allow<?> that = (Allow<?>) other;
-        return value == null ? that.value == null : value.equals(that.value);
+        return this.value == null ? that.value == null : this.value.equals(that.value);
       } else {
         return false;
       }
     }
 
+    private static int hashSeed;
+
     @Override
     public int hashCode() {
-      if (hashSeed == 0) {
-        hashSeed = Murmur3.seed(Allow.class);
+      if (Allow.hashSeed == 0) {
+        Allow.hashSeed = Murmur3.seed(Allow.class);
       }
-      return Murmur3.mash(Murmur3.mix(hashSeed, Murmur3.hash(value)));
+      return Murmur3.mash(Murmur3.mix(Allow.hashSeed, Murmur3.hash(this.value)));
     }
 
     @Override
-    public void debug(Output<?> output) {
-      output = output.write("PolicyDirective").write('.').write("allow")
-          .write('(');
-      if (value != null) {
-        output = output.debug(value);
+    public <T> Output<T> debug(Output<T> output) {
+      output = output.write("PolicyDirective").write('.').write("allow").write('(');
+      if (this.value != null) {
+        output = output.debug(this.value);
       }
       output = output.write(')');
+      return output;
     }
 
     @Override
@@ -170,7 +168,6 @@ public abstract class PolicyDirective<T> implements Debug {
 
   static final class Deny<T> extends PolicyDirective<T> {
 
-    private static int hashSeed;
     final Policy policy;
     final Object reason;
 
@@ -186,12 +183,12 @@ public abstract class PolicyDirective<T> implements Debug {
 
     @Override
     public Policy policy() {
-      return policy;
+      return this.policy;
     }
 
     @Override
     public Object reason() {
-      return reason;
+      return this.reason;
     }
 
     @Override
@@ -200,30 +197,33 @@ public abstract class PolicyDirective<T> implements Debug {
         return true;
       } else if (other instanceof Deny<?>) {
         final Deny<?> that = (Deny<?>) other;
-        return (policy == null ? that.policy == null : policy.equals(that.policy))
-            && (reason == null ? that.reason == null : reason.equals(that.reason));
+        return (this.policy == null ? that.policy == null : this.policy.equals(that.policy))
+            && (this.reason == null ? that.reason == null : this.reason.equals(that.reason));
       } else {
         return false;
       }
     }
 
+    private static int hashSeed;
+
     @Override
     public int hashCode() {
-      if (hashSeed == 0) {
-        hashSeed = Murmur3.seed(Deny.class);
+      if (Deny.hashSeed == 0) {
+        Deny.hashSeed = Murmur3.seed(Deny.class);
       }
-      return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
-          Murmur3.hash(policy)), Murmur3.hash(reason)));
+      return Murmur3.mash(Murmur3.mix(Murmur3.mix(Deny.hashSeed,
+          Murmur3.hash(this.policy)), Murmur3.hash(this.reason)));
     }
 
     @Override
-    public void debug(Output<?> output) {
+    public <T> Output<T> debug(Output<T> output) {
       output = output.write("PolicyDirective").write('.')
-          .write("deny").write('(').debug(policy);
-      if (reason != null) {
-        output = output.write(", ").debug(reason);
+                     .write("deny").write('(').debug(this.policy);
+      if (this.reason != null) {
+        output = output.write(", ").debug(this.reason);
       }
       output = output.write(')');
+      return output;
     }
 
     @Override
@@ -235,7 +235,6 @@ public abstract class PolicyDirective<T> implements Debug {
 
   static final class Forbid<T> extends PolicyDirective<T> {
 
-    private static int hashSeed;
     final Policy policy;
     final Object reason;
 
@@ -251,12 +250,12 @@ public abstract class PolicyDirective<T> implements Debug {
 
     @Override
     public Policy policy() {
-      return policy;
+      return this.policy;
     }
 
     @Override
     public Object reason() {
-      return reason;
+      return this.reason;
     }
 
     @Override
@@ -265,30 +264,33 @@ public abstract class PolicyDirective<T> implements Debug {
         return true;
       } else if (other instanceof Forbid<?>) {
         final Forbid<?> that = (Forbid<?>) other;
-        return (policy == null ? that.policy == null : policy.equals(that.policy))
-            && (reason == null ? that.reason == null : reason.equals(that.reason));
+        return (this.policy == null ? that.policy == null : this.policy.equals(that.policy))
+            && (this.reason == null ? that.reason == null : this.reason.equals(that.reason));
       } else {
         return false;
       }
     }
 
+    private static int hashSeed;
+
     @Override
     public int hashCode() {
-      if (hashSeed == 0) {
-        hashSeed = Murmur3.seed(Forbid.class);
+      if (Forbid.hashSeed == 0) {
+        Forbid.hashSeed = Murmur3.seed(Forbid.class);
       }
-      return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
-          Murmur3.hash(policy)), Murmur3.hash(reason)));
+      return Murmur3.mash(Murmur3.mix(Murmur3.mix(Forbid.hashSeed,
+          Murmur3.hash(this.policy)), Murmur3.hash(this.reason)));
     }
 
     @Override
-    public void debug(Output<?> output) {
-      output = output.write("PolicyDirective").write('.').write("forbid")
-          .write('(').debug(policy);
-      if (reason != null) {
-        output = output.write(", ").debug(reason);
+    public <T> Output<T> debug(Output<T> output) {
+      output = output.write("PolicyDirective").write('.')
+                     .write("forbid").write('(').debug(this.policy);
+      if (this.reason != null) {
+        output = output.write(", ").debug(this.reason);
       }
       output = output.write(')');
+      return output;
     }
 
     @Override

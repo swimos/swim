@@ -21,6 +21,10 @@ import swim.dynamic.JavaHostObjectType;
 
 public final class HostIterable {
 
+  private HostIterable() {
+    // static
+  }
+
   public static final HostObjectType<Iterable<Object>> TYPE;
 
   static {
@@ -28,10 +32,6 @@ public final class HostIterable {
     TYPE = type;
     type.inheritType(HostObject.TYPE);
     type.addMember(new HostIterableIterator());
-  }
-
-  private HostIterable() {
-    // static
   }
 
 }

@@ -26,8 +26,8 @@ public class WebServerSpec {
   @Test
   public void testExtensions() {
     final WsSettings wsSettings = WsSettings.bestCompression();
-    final WebServiceDef serviceDef = new WebServiceDef("web", "0.0.0.0", 80, false, null, null, null, WarpSettings.from(wsSettings));
-    final WebServer server = new WebServer(new WebServiceKernel(), serviceDef, request -> request.respond(HttpResponse.from(HttpStatus.OK))) {
+    final WebServiceDef serviceDef = new WebServiceDef("web", "0.0.0.0", 80, false, null, null, null, WarpSettings.create(wsSettings));
+    final WebServer server = new WebServer(new WebServiceKernel(), serviceDef, request -> request.respond(HttpResponse.create(HttpStatus.OK))) {
       @Override
       protected RemoteHost openHost(Uri requestUri) {
         return new RemoteHost(requestUri);
@@ -36,23 +36,20 @@ public class WebServerSpec {
 
 
     final HttpRequest<?> request = HttpRequest.get(Uri.empty(),
-        Upgrade.from("websocket"),
-        Connection.from("Upgrade"),
-        SecWebSocketKey.from("dGhlIHNhbXBsZSBub25jZQ=="),
-        Origin.from("http://example.com"),
-        SecWebSocketExtensions.from("Sec-WebSocket-Extensions", "permessage-deflate"),
-        SecWebSocketVersion.from(13));
+                                                   Upgrade.create("websocket"),
+                                                   Connection.create("Upgrade"),
+                                                   SecWebSocketKey.create("dGhlIHNhbXBsZSBub25jZQ=="),
+                                                   Origin.create("http://example.com"),
+                                                   SecWebSocketExtensions.create("Sec-WebSocket-Extensions", "permessage-deflate"),
+                                                   SecWebSocketVersion.create(13));
 
     final WsUpgradeResponder responder = (WsUpgradeResponder) server.doRequest(request);
     final HttpResponse<?> response = responder.wsResponse().httpResponse();
-    final HttpResponse<?> expected = HttpResponse.from(HttpVersion.HTTP_1_1, HttpStatus.SWITCHING_PROTOCOLS,
-        FingerTrieSeq.of(
-            Connection.from("Upgrade"),
-            Upgrade.from(UpgradeProtocol.from("websocket")),
-            SecWebSocketAccept.from("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
-            SecWebSocketExtensions.from("permessage-deflate")
-        )
-    );
+    final HttpResponse<?> expected = HttpResponse.create(HttpVersion.HTTP_1_1, HttpStatus.SWITCHING_PROTOCOLS,
+                                                         FingerTrieSeq.of(Connection.create("Upgrade"),
+                                                                          Upgrade.create(UpgradeProtocol.create("websocket")),
+                                                                          SecWebSocketAccept.create("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
+                                                                          SecWebSocketExtensions.create("permessage-deflate")));
 
     assertEquals(response, expected);
   }

@@ -36,7 +36,7 @@ final class LiteralSelectorWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.item, this.then, this.part, this.step);
+    return LiteralSelectorWriter.write(output, this.recon, this.item, this.then, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, I item, V then) {
@@ -92,15 +92,15 @@ final class LiteralSelectorWriter<I, V> extends Writer<Object, Object> {
       return (Writer<Object, Object>) recon.writeThen(then, output);
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new LiteralSelectorWriter<I, V>(recon, item, then, part, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon, I item, V then) {
-    return write(output, recon, item, then, null, 1);
+    return LiteralSelectorWriter.write(output, recon, item, then, null, 1);
   }
 
 }

@@ -80,7 +80,7 @@ final class StringStructure implements CsvStructureCol {
   public void addCell(Item cell, Builder<Item, ?> rowBuilder) {
     if (!this.optional || cell instanceof Text && ((Text) cell).size() != 0) {
       if (cell == null) {
-        cell = defaultCell();
+        cell = this.defaultCell();
       }
       if (this.key.isDefined() && cell instanceof Value) {
         rowBuilder.add(Slot.of(this.key, (Value) cell));

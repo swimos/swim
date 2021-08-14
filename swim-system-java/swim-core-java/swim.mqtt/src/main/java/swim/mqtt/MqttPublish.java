@@ -24,11 +24,6 @@ import swim.util.Murmur3;
 
 public final class MqttPublish<T> extends MqttPacket<T> implements Debug {
 
-  static final int RETAIN_FLAG = 0x01;
-  static final int QOS_MASK = 0x06;
-  static final int QOS_SHIFT = 1;
-  static final int DUP_FLAG = 0x08;
-  private static int hashSeed;
   final int packetFlags;
   final String topicName;
   final int packetId;
@@ -39,23 +34,6 @@ public final class MqttPublish<T> extends MqttPacket<T> implements Debug {
     this.topicName = topicName;
     this.packetId = packetId;
     this.payload = payload;
-  }
-
-  public static <T> MqttPublish<T> from(int packetFlags, String topicName,
-                                        int packetId, MqttEntity<T> payload) {
-    return new MqttPublish<T>(packetFlags, topicName, packetId, payload);
-  }
-
-  public static <T> MqttPublish<T> from(String topicName, int packetId, MqttEntity<T> payload) {
-    return new MqttPublish<T>(0, topicName, packetId, payload);
-  }
-
-  public static <T> MqttPublish<T> from(String topicName, MqttEntity<T> payload) {
-    return new MqttPublish<T>(0, topicName, 0, payload);
-  }
-
-  public static MqttPublish<Object> from(String topicName) {
-    return new MqttPublish<Object>(0, topicName, 0, MqttEntity.empty());
   }
 
   @Override
@@ -69,29 +47,34 @@ public final class MqttPublish<T> extends MqttPacket<T> implements Debug {
   }
 
   public boolean retain() {
-    return (this.packetFlags & RETAIN_FLAG) != 0;
+    return (this.packetFlags & MqttPublish.RETAIN_FLAG) != 0;
   }
 
   public MqttPublish<T> retain(boolean retain) {
-    final int packetFlags = retain ? this.packetFlags | RETAIN_FLAG : this.packetFlags & ~RETAIN_FLAG;
+    final int packetFlags = retain
+                          ? this.packetFlags | MqttPublish.RETAIN_FLAG
+                          : this.packetFlags & ~MqttPublish.RETAIN_FLAG;
     return new MqttPublish<T>(packetFlags, this.topicName, this.packetId, this.payload);
   }
 
   public MqttQoS qos() {
-    return MqttQoS.from((this.packetFlags & QOS_MASK) >>> QOS_SHIFT);
+    return MqttQoS.from((this.packetFlags & MqttPublish.QOS_MASK) >>> MqttPublish.QOS_SHIFT);
   }
 
   public MqttPublish<T> qos(MqttQoS qos) {
-    final int packetFlags = this.packetFlags & ~QOS_MASK | (qos.code << QOS_SHIFT) & QOS_MASK;
+    final int packetFlags = this.packetFlags & ~MqttPublish.QOS_MASK
+                          | (qos.code << MqttPublish.QOS_SHIFT) & MqttPublish.QOS_MASK;
     return new MqttPublish<T>(packetFlags, this.topicName, this.packetId, this.payload);
   }
 
   public boolean dup() {
-    return (this.packetFlags & DUP_FLAG) != 0;
+    return (this.packetFlags & MqttPublish.DUP_FLAG) != 0;
   }
 
   public MqttPublish<T> dup(boolean dup) {
-    final int packetFlags = dup ? this.packetFlags | DUP_FLAG : this.packetFlags & ~DUP_FLAG;
+    final int packetFlags = dup
+                          ? this.packetFlags | MqttPublish.DUP_FLAG
+                          : this.packetFlags & ~MqttPublish.DUP_FLAG;
     return new MqttPublish<T>(packetFlags, this.topicName, this.packetId, this.payload);
   }
 
@@ -104,7 +87,7 @@ public final class MqttPublish<T> extends MqttPacket<T> implements Debug {
   }
 
   public boolean hasPacketId() {
-    return ((this.packetFlags & QOS_MASK) >>> QOS_SHIFT) != 0;
+    return ((this.packetFlags & MqttPublish.QOS_MASK) >>> MqttPublish.QOS_SHIFT) != 0;
   }
 
   public int packetId() {
@@ -124,24 +107,24 @@ public final class MqttPublish<T> extends MqttPacket<T> implements Debug {
   }
 
   public <U> MqttPublish<U> payload(Encoder<?, ?> content, int length) {
-    return new MqttPublish<U>(packetFlags, topicName, packetId, MqttPayload.<U>from(content, length));
+    return new MqttPublish<U>(this.packetFlags, this.topicName, this.packetId, MqttPayload.<U>create(content, length));
   }
 
   public <U> MqttPublish<U> payload(ByteBuffer data) {
-    return new MqttPublish<U>(packetFlags, topicName, packetId, MqttPayload.<U>from(data));
+    return new MqttPublish<U>(this.packetFlags, this.topicName, this.packetId, MqttPayload.<U>create(data));
   }
 
   public MqttPublish<String> payload(String content) {
-    return new MqttPublish<String>(packetFlags, topicName, packetId, MqttPayload.from(content));
+    return new MqttPublish<String>(this.packetFlags, this.topicName, this.packetId, MqttPayload.create(content));
   }
 
   @Override
   int bodySize(MqttEncoder mqtt) {
     int size = mqtt.sizeOfString(this.topicName);
-    if (hasPacketId()) {
+    if (this.hasPacketId()) {
       size += 2;
     }
-    size += payload.mqttSize();
+    size += this.payload.mqttSize();
     return size;
   }
 
@@ -167,42 +150,67 @@ public final class MqttPublish<T> extends MqttPacket<T> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttPublish.class);
+    if (MqttPublish.hashSeed == 0) {
+      MqttPublish.hashSeed = Murmur3.seed(MqttPublish.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(MqttPublish.hashSeed,
         this.packetFlags), this.topicName.hashCode()), this.packetId), this.payload.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("MqttPublish").write('.').write("from").write('(')
-        .debug(this.topicName).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MqttPublish").write('.').write("create").write('(')
+                   .debug(this.topicName).write(')');
     if (this.packetFlags != 0) {
       output = output.write('.').write("packetFlags").write('(').debug(this.packetFlags).write(')');
     }
-    if (retain()) {
+    if (this.retain()) {
       output = output.write('.').write("retain").write('(').write("true").write(')');
     }
-    if (qos().code != 0) {
-      output = output.write('.').write("qos").write('(').debug(qos()).write(')');
+    if (this.qos().code != 0) {
+      output = output.write('.').write("qos").write('(').debug(this.qos()).write(')');
     }
-    if (dup()) {
+    if (this.dup()) {
       output = output.write('.').write("dup").write('(').write("true").write(')');
     }
-    if (hasPacketId()) {
+    if (this.hasPacketId()) {
       output = output.write('.').write("packetId").write('(').debug(this.packetId).write(')');
     }
-    if (payload.isDefined()) {
+    if (this.payload.isDefined()) {
       output = output.write('.').write("payload").write('(').debug(this.payload).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  static final int RETAIN_FLAG = 0x01;
+  static final int QOS_MASK = 0x06;
+  static final int QOS_SHIFT = 1;
+  static final int DUP_FLAG = 0x08;
+
+  public static <T> MqttPublish<T> create(int packetFlags, String topicName,
+                                          int packetId, MqttEntity<T> payload) {
+    return new MqttPublish<T>(packetFlags, topicName, packetId, payload);
+  }
+
+  public static <T> MqttPublish<T> create(String topicName, int packetId, MqttEntity<T> payload) {
+    return new MqttPublish<T>(0, topicName, packetId, payload);
+  }
+
+  public static <T> MqttPublish<T> create(String topicName, MqttEntity<T> payload) {
+    return new MqttPublish<T>(0, topicName, 0, payload);
+  }
+
+  public static MqttPublish<Object> create(String topicName) {
+    return new MqttPublish<Object>(0, topicName, 0, MqttEntity.empty());
   }
 
 }

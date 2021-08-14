@@ -71,13 +71,14 @@ final class AvroNamespaceEmpty extends AvroNamespace {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("AvroNamespace").write('.').write("empty").write('(').write(')');
+    return output;
   }
 
   @Override
-  public void display(Output<?> output) {
-    // nop
+  public <T> Output<T> display(Output<T> output) {
+    return output; // blank
   }
 
   @Override

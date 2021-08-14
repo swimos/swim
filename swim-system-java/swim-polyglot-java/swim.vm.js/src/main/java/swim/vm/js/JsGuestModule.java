@@ -33,9 +33,9 @@ public class JsGuestModule implements JsModule {
     this.moduleId = moduleId;
     this.moduleSource = moduleSource;
 
-    this.moduleExports = createModuleExports();
-    this.moduleObject = createModuleObject();
-    this.requireFunction = createRequireFunction();
+    this.moduleExports = this.createModuleExports();
+    this.moduleObject = this.createModuleObject();
+    this.requireFunction = this.createRequireFunction();
   }
 
   @Override

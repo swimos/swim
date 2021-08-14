@@ -31,18 +31,14 @@ import swim.io.ws.WsSettings;
 
 public final class TestTlsSettings {
 
-  private static TlsSettings tlsSettings;
-  private static IpSettings ipSettings;
-  private static HttpSettings httpSettings;
-  private static WsSettings wsSettings;
-  private static WarpSettings warpSettings;
-
   private TestTlsSettings() {
-    // stub
+    // static
   }
 
+  private static TlsSettings tlsSettings;
+
   public static TlsSettings tlsSettings() {
-    if (tlsSettings == null) {
+    if (TestTlsSettings.tlsSettings == null) {
       try {
         final KeyStore keystore = KeyStore.getInstance("jks");
         final InputStream keystoreStream = TestTlsSettings.class.getResourceAsStream("/keystore.jks");
@@ -71,40 +67,48 @@ public final class TestTlsSettings {
         final SSLContext sslContext = SSLContext.getInstance("TLS");
         sslContext.init(keyManagerFactory.getKeyManagers(), trustManagerFactory.getTrustManagers(), new SecureRandom());
 
-        tlsSettings = new TlsSettings(sslContext, ClientAuth.NONE, null, null);
+        TestTlsSettings.tlsSettings = new TlsSettings(sslContext, ClientAuth.NONE, null, null);
       } catch (IOException | GeneralSecurityException error) {
         throw new StationException(error);
       }
     }
-    return tlsSettings;
+    return TestTlsSettings.tlsSettings;
   }
+
+  private static IpSettings ipSettings;
 
   public static IpSettings ipSettings() {
-    if (ipSettings == null) {
-      ipSettings = IpSettings.from(tlsSettings());
+    if (TestTlsSettings.ipSettings == null) {
+      TestTlsSettings.ipSettings = IpSettings.create(TestTlsSettings.tlsSettings());
     }
-    return ipSettings;
+    return TestTlsSettings.ipSettings;
   }
+
+  private static HttpSettings httpSettings;
 
   public static HttpSettings httpSettings() {
-    if (httpSettings == null) {
-      httpSettings = HttpSettings.from(ipSettings());
+    if (TestTlsSettings.httpSettings == null) {
+      TestTlsSettings.httpSettings = HttpSettings.create(TestTlsSettings.ipSettings());
     }
-    return httpSettings;
+    return TestTlsSettings.httpSettings;
   }
+
+  private static WsSettings wsSettings;
 
   public static WsSettings wsSettings() {
-    if (wsSettings == null) {
-      wsSettings = WsSettings.from(httpSettings());
+    if (TestTlsSettings.wsSettings == null) {
+      TestTlsSettings.wsSettings = WsSettings.create(TestTlsSettings.httpSettings());
     }
-    return wsSettings;
+    return TestTlsSettings.wsSettings;
   }
 
+  private static WarpSettings warpSettings;
+
   public static WarpSettings warpSettings() {
-    if (warpSettings == null) {
-      warpSettings = WarpSettings.from(wsSettings());
+    if (TestTlsSettings.warpSettings == null) {
+      TestTlsSettings.warpSettings = WarpSettings.create(TestTlsSettings.wsSettings());
     }
-    return warpSettings;
+    return TestTlsSettings.warpSettings;
   }
 
 }

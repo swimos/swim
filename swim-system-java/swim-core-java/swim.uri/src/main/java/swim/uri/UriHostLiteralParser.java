@@ -36,6 +36,11 @@ final class UriHostLiteralParser extends Parser<UriHost> {
     this(uri, null, 1);
   }
 
+  @Override
+  public Parser<UriHost> feed(Input input) {
+    return UriHostLiteralParser.parse(input, this.uri, this.output, this.step);
+  }
+
   static Parser<UriHost> parse(Input input, UriParser uri, Output<String> output, int step) {
     int c = 0;
     if (step == 1) {
@@ -43,7 +48,7 @@ final class UriHostLiteralParser extends Parser<UriHost> {
         input = input.step();
         step = 2;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected('[', input));
+        return Parser.error(Diagnostic.expected('[', input));
       }
     }
     if (step == 2) {
@@ -61,24 +66,19 @@ final class UriHostLiteralParser extends Parser<UriHost> {
       }
       if (input.isCont() && c == ']') {
         input = input.step();
-        return done(uri.hostIPv6(output.bind()));
+        return Parser.done(uri.hostIPv6(output.bind()));
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected(']', input));
+        return Parser.error(Diagnostic.expected(']', input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new UriHostLiteralParser(uri, output, step);
   }
 
   static Parser<UriHost> parse(Input input, UriParser uri) {
-    return parse(input, uri, null, 1);
-  }
-
-  @Override
-  public Parser<UriHost> feed(Input input) {
-    return parse(input, this.uri, this.output, this.step);
+    return UriHostLiteralParser.parse(input, uri, null, 1);
   }
 
 }

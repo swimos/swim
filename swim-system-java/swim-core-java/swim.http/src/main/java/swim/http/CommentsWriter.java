@@ -39,12 +39,17 @@ final class CommentsWriter extends Writer<Object, Object> {
     this(comments, null, 0, 0, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return CommentsWriter.write(output, this.comments, this.comment, this.index, this.escape, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, Iterator<String> comments,
                                       String comment, int index, int escape, int step) {
     do {
       if (step == 1) {
         if (!comments.hasNext()) {
-          return done();
+          return Writer.done();
         } else if (output.isCont()) {
           output = output.write(' ');
           comment = comments.next();
@@ -68,7 +73,7 @@ final class CommentsWriter extends Writer<Object, Object> {
             step = 4;
             break;
           } else {
-            return error(new HttpException("invalid comment: " + comment));
+            return Writer.error(new HttpException("invalid comment: " + comment));
           }
           index = comment.offsetByCodePoints(index, 1);
         }
@@ -91,20 +96,15 @@ final class CommentsWriter extends Writer<Object, Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new CommentsWriter(comments, comment, index, escape, step);
   }
 
   public static Writer<Object, Object> write(Output<?> output, Iterator<String> comments) {
-    return write(output, comments, null, 0, 0, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.comments, this.comment, this.index, this.escape, this.step);
+    return CommentsWriter.write(output, comments, null, 0, 0, 1);
   }
 
 }

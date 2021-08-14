@@ -19,8 +19,6 @@ package swim.codec;
  */
 public class DecoderException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public DecoderException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -36,5 +34,7 @@ public class DecoderException extends RuntimeException {
   public DecoderException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

@@ -67,7 +67,7 @@ public class MapLaneSpec {
   public void testPut() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestMapPlane.class);
+                                     .openPlane("test", TestMapPlane.class);
 
     laneWillUpdate = new CountDownLatch(3);
     laneDidUpdate = new CountDownLatch(3);
@@ -114,7 +114,7 @@ public class MapLaneSpec {
   void testRemove() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestMapPlane.class);
+                                     .openPlane("test", TestMapPlane.class);
 
     laneDidUpdate = new CountDownLatch(2);
     laneWillRemove = new CountDownLatch(1);
@@ -154,7 +154,7 @@ public class MapLaneSpec {
   void testClear() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestMapPlane.class);
+                                     .openPlane("test", TestMapPlane.class);
 
     laneDidUpdate = new CountDownLatch(2);
     laneWillClear = new CountDownLatch(1);
@@ -193,7 +193,7 @@ public class MapLaneSpec {
   void testDrop() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestMapPlane.class);
+                                     .openPlane("test", TestMapPlane.class);
 
     laneDidUpdate = new CountDownLatch(5);
     laneWillDrop = new CountDownLatch(1);
@@ -242,7 +242,7 @@ public class MapLaneSpec {
   void testTake() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestMapPlane.class);
+                                     .openPlane("test", TestMapPlane.class);
 
     laneDidUpdate = new CountDownLatch(5);
     laneWillTake = new CountDownLatch(1);
@@ -321,8 +321,8 @@ public class MapLaneSpec {
       @Override
       public void didUpdate(String key, String newValue, String oldValue) {
         System.out.println("lane didUpdate key: " + Format.debug(key) + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-        mapLaneCopy = testMap.snapshot();
-        testMap1.put(key, newValue);
+        mapLaneCopy = TestMapLaneAgent.this.testMap.snapshot();
+        TestMapLaneAgent.this.testMap1.put(key, newValue);
         laneDidUpdate.countDown();
       }
 
@@ -335,8 +335,8 @@ public class MapLaneSpec {
       @Override
       public void didRemove(String key, String oldValue) {
         System.out.println("lane didRemove key: " + Format.debug(key) + "; oldValue: " + Format.debug(oldValue));
-        mapLaneCopy = testMap.snapshot();
-        testMap1.remove(key);
+        mapLaneCopy = TestMapLaneAgent.this.testMap.snapshot();
+        TestMapLaneAgent.this.testMap1.remove(key);
         laneDidRemove.countDown();
       }
 
@@ -349,8 +349,8 @@ public class MapLaneSpec {
       @Override
       public void didClear() {
         System.out.println("lane didClear");
-        mapLaneCopy = testMap.snapshot();
-        testMap1.clear();
+        mapLaneCopy = TestMapLaneAgent.this.testMap.snapshot();
+        TestMapLaneAgent.this.testMap1.clear();
         laneDidClear.countDown();
       }
 
@@ -363,8 +363,8 @@ public class MapLaneSpec {
       @Override
       public void didDrop(int lower) {
         System.out.println("lane didDrop " + lower);
-        mapLaneCopy = testMap.snapshot();
-        testMap1.drop(lower);
+        mapLaneCopy = TestMapLaneAgent.this.testMap.snapshot();
+        TestMapLaneAgent.this.testMap1.drop(lower);
         laneDidDrop.countDown();
       }
 
@@ -377,8 +377,8 @@ public class MapLaneSpec {
       @Override
       public void didTake(int upper) {
         System.out.println("lane didTake " + upper);
-        mapLaneCopy = testMap.snapshot();
-        testMap1.take(upper);
+        mapLaneCopy = TestMapLaneAgent.this.testMap.snapshot();
+        TestMapLaneAgent.this.testMap1.take(upper);
         laneDidTake.countDown();
       }
 

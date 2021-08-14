@@ -51,7 +51,7 @@ public class HttpErrorUplinkModem implements HttpContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapLink(Class<T> linkClass) {
-    if (linkClass.isAssignableFrom(getClass())) {
+    if (linkClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -61,7 +61,7 @@ public class HttpErrorUplinkModem implements HttpContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T bottomLink(Class<T> linkClass) {
-    if (linkClass.isAssignableFrom(getClass())) {
+    if (linkClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -160,7 +160,7 @@ public class HttpErrorUplinkModem implements HttpContext {
 
   @Override
   public void doRespond(HttpRequest<Object> request) {
-    this.linkBinding.writeResponse(HttpResponse.from(HttpStatus.NOT_FOUND));
+    this.linkBinding.writeResponse(HttpResponse.create(HttpStatus.NOT_FOUND));
   }
 
   @Override

@@ -40,6 +40,11 @@ final class LanguageRangeParser extends Parser<LanguageRange> {
     this(http, null, null, null, 1);
   }
 
+  @Override
+  public Parser<LanguageRange> feed(Input input) {
+    return LanguageRangeParser.parse(input, this.http, this.tag, this.subtag, this.weight, this.step);
+  }
+
   static Parser<LanguageRange> parse(Input input, HttpParser http, StringBuilder tag,
                                      StringBuilder subtag, Parser<Float> weight, int step) {
     int c = 0;
@@ -58,10 +63,10 @@ final class LanguageRangeParser extends Parser<LanguageRange> {
           tag = new StringBuilder("*");
           step = 18;
         } else {
-          return error(Diagnostic.expected("language tag", input));
+          return Parser.error(Diagnostic.expected("language tag", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("language tag", input));
+        return Parser.error(Diagnostic.expected("language tag", input));
       }
     }
     while (step >= 2 && step <= 8) {
@@ -97,10 +102,10 @@ final class LanguageRangeParser extends Parser<LanguageRange> {
           subtag.appendCodePoint(c);
           step = 10;
         } else {
-          return error(Diagnostic.expected("language subtag", input));
+          return Parser.error(Diagnostic.expected("language subtag", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("language subtag", input));
+        return Parser.error(Diagnostic.expected("language subtag", input));
       }
     }
     while (step >= 10 && step <= 17) {
@@ -130,24 +135,19 @@ final class LanguageRangeParser extends Parser<LanguageRange> {
       if (weight.isDone()) {
         final Float qvalue = weight.bind();
         final float q = qvalue != null ? (float) qvalue : 1f;
-        return done(http.languageRange(tag.toString(), subtag != null ? subtag.toString() : null, q));
+        return Parser.done(http.languageRange(tag.toString(), subtag != null ? subtag.toString() : null, q));
       } else if (weight.isError()) {
         return weight.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new LanguageRangeParser(http, tag, subtag, weight, step);
   }
 
   static Parser<LanguageRange> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<LanguageRange> feed(Input input) {
-    return parse(input, this.http, this.tag, this.subtag, this.weight, this.step);
+    return LanguageRangeParser.parse(input, http, null, null, null, 1);
   }
 
 }

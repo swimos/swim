@@ -14,6 +14,7 @@
 
 package swim.structure;
 
+import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import swim.codec.Output;
 import swim.structure.operator.BitwiseAndOperator;
 import swim.structure.operator.BitwiseOrOperator;
@@ -28,6 +29,7 @@ public final class Attr extends Field {
 
   final Text key;
   Value value;
+  volatile int flags;
 
   Attr(Text key, Value value, int flags) {
     this.key = key;
@@ -60,7 +62,7 @@ public final class Attr extends Field {
 
   @Override
   public Value setValue(Value newValue) {
-    if ((this.flags & IMMUTABLE) != 0) {
+    if ((Attr.FLAGS.get(this) & Attr.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
     }
     final Value oldValue = this.value;
@@ -73,7 +75,7 @@ public final class Attr extends Field {
     if (value == null) {
       throw new NullPointerException();
     }
-    return new Attr(key, value);
+    return new Attr(this.key, value);
   }
 
   @Override
@@ -82,15 +84,15 @@ public final class Attr extends Field {
       return new BitwiseOrOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Attr && key.equals(((Attr) that).key)) {
-      newValue = value.bitwiseOr(((Attr) that).value);
+    if (that instanceof Attr && this.key.equals(((Attr) that).key)) {
+      newValue = this.value.bitwiseOr(((Attr) that).value);
     } else if (that instanceof Value) {
-      newValue = value.bitwiseOr((Value) that);
+      newValue = this.value.bitwiseOr((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
@@ -101,15 +103,15 @@ public final class Attr extends Field {
       return new BitwiseXorOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Attr && key.equals(((Attr) that).key)) {
-      newValue = value.bitwiseXor(((Attr) that).value);
+    if (that instanceof Attr && this.key.equals(((Attr) that).key)) {
+      newValue = this.value.bitwiseXor(((Attr) that).value);
     } else if (that instanceof Value) {
-      newValue = value.bitwiseXor((Value) that);
+      newValue = this.value.bitwiseXor((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
@@ -120,15 +122,15 @@ public final class Attr extends Field {
       return new BitwiseAndOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Attr && key.equals(((Attr) that).key)) {
-      newValue = value.bitwiseAnd(((Attr) that).value);
+    if (that instanceof Attr && this.key.equals(((Attr) that).key)) {
+      newValue = this.value.bitwiseAnd(((Attr) that).value);
     } else if (that instanceof Value) {
-      newValue = value.bitwiseAnd((Value) that);
+      newValue = this.value.bitwiseAnd((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
@@ -139,15 +141,15 @@ public final class Attr extends Field {
       return new PlusOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Attr && key.equals(((Attr) that).key)) {
-      newValue = value.plus(((Attr) that).value);
+    if (that instanceof Attr && this.key.equals(((Attr) that).key)) {
+      newValue = this.value.plus(((Attr) that).value);
     } else if (that instanceof Value) {
-      newValue = value.plus((Value) that);
+      newValue = this.value.plus((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
@@ -158,15 +160,15 @@ public final class Attr extends Field {
       return new MinusOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Attr && key.equals(((Attr) that).key)) {
-      newValue = value.minus(((Attr) that).value);
+    if (that instanceof Attr && this.key.equals(((Attr) that).key)) {
+      newValue = this.value.minus(((Attr) that).value);
     } else if (that instanceof Value) {
-      newValue = value.minus((Value) that);
+      newValue = this.value.minus((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
@@ -177,15 +179,15 @@ public final class Attr extends Field {
       return new TimesOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Attr && key.equals(((Attr) that).key)) {
-      newValue = value.times(((Attr) that).value);
+    if (that instanceof Attr && this.key.equals(((Attr) that).key)) {
+      newValue = this.value.times(((Attr) that).value);
     } else if (that instanceof Value) {
-      newValue = value.times((Value) that);
+      newValue = this.value.times((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
@@ -196,15 +198,15 @@ public final class Attr extends Field {
       return new DivideOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Attr && key.equals(((Attr) that).key)) {
-      newValue = value.divide(((Attr) that).value);
+    if (that instanceof Attr && this.key.equals(((Attr) that).key)) {
+      newValue = this.value.divide(((Attr) that).value);
     } else if (that instanceof Value) {
-      newValue = value.divide((Value) that);
+      newValue = this.value.divide((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
@@ -215,60 +217,60 @@ public final class Attr extends Field {
       return new ModuloOperator(this, that);
     }
     final Value newValue;
-    if (that instanceof Attr && key.equals(((Attr) that).key)) {
-      newValue = value.modulo(((Attr) that).value);
+    if (that instanceof Attr && this.key.equals(((Attr) that).key)) {
+      newValue = this.value.modulo(((Attr) that).value);
     } else if (that instanceof Value) {
-      newValue = value.modulo((Value) that);
+      newValue = this.value.modulo((Value) that);
     } else {
       newValue = Value.absent();
     }
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
 
   @Override
   public Item not() {
-    final Value newValue = value.not();
+    final Value newValue = this.value.not();
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
 
   @Override
   public Item bitwiseNot() {
-    final Value newValue = value.bitwiseNot();
+    final Value newValue = this.value.bitwiseNot();
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
 
   @Override
   public Item negative() {
-    final Value newValue = value.negative();
+    final Value newValue = this.value.negative();
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
 
   @Override
   public Item positive() {
-    final Value newValue = value.positive();
+    final Value newValue = this.value.positive();
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
 
   @Override
   public Item inverse() {
-    final Value newValue = value.inverse();
+    final Value newValue = this.value.inverse();
     if (newValue.isDefined()) {
-      return new Attr(key, newValue);
+      return new Attr(this.key, newValue);
     }
     return Item.absent();
   }
@@ -312,16 +314,16 @@ public final class Attr extends Field {
 
   @Override
   public boolean isMutable() {
-    return (this.flags & IMMUTABLE) == 0;
+    return (Attr.FLAGS.get(this) & Attr.IMMUTABLE) == 0;
   }
 
   @Override
   public void alias() {
     do {
-      final int oldFlags = this.flags;
-      if ((oldFlags & IMMUTABLE) == 0) {
-        final int newFlags = oldFlags | IMMUTABLE;
-        if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
+      final int oldFlags = Attr.FLAGS.get(this);
+      if ((oldFlags & Attr.IMMUTABLE) == 0) {
+        final int newFlags = oldFlags | Attr.IMMUTABLE;
+        if (Attr.FLAGS.compareAndSet(this, oldFlags, newFlags)) {
           break;
         }
       } else {
@@ -332,8 +334,9 @@ public final class Attr extends Field {
 
   @Override
   public Attr branch() {
-    if ((this.flags & IMMUTABLE) != 0) {
-      return new Attr(key, value, flags & ~IMMUTABLE);
+    final int flags = Attr.FLAGS.get(this);
+    if ((flags & Attr.IMMUTABLE) != 0) {
+      return new Attr(this.key, this.value, flags & ~Attr.IMMUTABLE);
     } else {
       return this;
     }
@@ -342,10 +345,10 @@ public final class Attr extends Field {
   @Override
   public Attr commit() {
     do {
-      final int oldFlags = this.flags;
-      if ((oldFlags & IMMUTABLE) == 0) {
-        final int newFlags = oldFlags | IMMUTABLE;
-        if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
+      final int oldFlags = Attr.FLAGS.get(this);
+      if ((oldFlags & Attr.IMMUTABLE) == 0) {
+        final int newFlags = oldFlags | Attr.IMMUTABLE;
+        if (Attr.FLAGS.compareAndSet(this, oldFlags, newFlags)) {
           this.value.commit();
           break;
         }
@@ -364,9 +367,9 @@ public final class Attr extends Field {
   @Override
   public int compareTo(Item other) {
     if (other instanceof Attr) {
-      return compareTo((Attr) other);
+      return this.compareTo((Attr) other);
     }
-    return Integer.compare(typeOrder(), other.typeOrder());
+    return Integer.compare(this.typeOrder(), other.typeOrder());
   }
 
   int compareTo(Attr that) {
@@ -405,13 +408,19 @@ public final class Attr extends Field {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Attr").write('.').write("of").write('(').display(this.key);
     if (!(this.value instanceof Extant)) {
       output = output.write(", ").display(this.value);
     }
     output = output.write(')');
+    return output;
   }
+
+  static final int IMMUTABLE = 1 << 0;
+
+  static final AtomicIntegerFieldUpdater<Attr> FLAGS =
+      AtomicIntegerFieldUpdater.newUpdater(Attr.class, "flags");
 
   public static Attr of(Text key, Value value) {
     if (key == null) {

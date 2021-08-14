@@ -52,42 +52,42 @@ public abstract class AbstractHttpRequester<T> implements HttpRequester<T>, IpCo
 
   @Override
   public void willRequest(HttpRequest<?> request) {
-    // stub
+    // hook
   }
 
   @Override
   public void didRequest(HttpRequest<?> request) {
-    // stub
+    // hook
   }
 
   @Override
   public void willRespond(HttpResponse<?> response) {
-    // stub
+    // hook
   }
 
   @Override
   public void didRespond(HttpResponse<T> response) {
-    // stub
+    // hook
   }
 
   @Override
   public void willBecome(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didBecome(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didTimeout() {
-    // stub
+    // hook
   }
 
   @Override
   public void didDisconnect() {
-    // stub
+    // hook
   }
 
   @Override

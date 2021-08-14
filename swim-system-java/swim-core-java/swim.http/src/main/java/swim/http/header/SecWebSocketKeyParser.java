@@ -31,6 +31,11 @@ final class SecWebSocketKeyParser extends Parser<SecWebSocketKey> {
     this(null);
   }
 
+  @Override
+  public Parser<SecWebSocketKey> feed(Input input) {
+    return SecWebSocketKeyParser.parse(input, this.key);
+  }
+
   static Parser<SecWebSocketKey> parse(Input input, Parser<byte[]> key) {
     if (key == null) {
       key = Base64.standard().parseByteArray(input);
@@ -40,25 +45,20 @@ final class SecWebSocketKeyParser extends Parser<SecWebSocketKey> {
     if (key.isDone()) {
       final byte[] data = key.bind();
       if (data.length != 0) {
-        return done(SecWebSocketKey.from(data));
+        return Parser.done(SecWebSocketKey.create(data));
       } else {
-        return error(Diagnostic.expected("base64 digest", input));
+        return Parser.error(Diagnostic.expected("base64 digest", input));
       }
     } else if (key.isError()) {
       return key.asError();
     } else if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new SecWebSocketKeyParser(key);
   }
 
   static Parser<SecWebSocketKey> parse(Input input) {
-    return parse(input, null);
-  }
-
-  @Override
-  public Parser<SecWebSocketKey> feed(Input input) {
-    return parse(input, key);
+    return SecWebSocketKeyParser.parse(input, null);
   }
 
 }

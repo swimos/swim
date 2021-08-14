@@ -24,8 +24,8 @@ import swim.api.downlink.MapDownlink;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Stage;
+import swim.runtime.LaneModel;
 import swim.runtime.LaneRelay;
 import swim.runtime.LaneView;
 import swim.runtime.Push;
@@ -40,12 +40,6 @@ import swim.warp.CommandMessage;
 
 public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, JoinMapLaneUplink> {
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<JoinMapLaneModel, HashTrieMap<Value, JoinMapLaneDownlink<?, ?>>> DOWNLINKS =
-      AtomicReferenceFieldUpdater.newUpdater(JoinMapLaneModel.class, (Class<HashTrieMap<Value, JoinMapLaneDownlink<?, ?>>>) (Class<?>) HashTrieMap.class, "downlinks");
   protected int flags;
   protected MapData<Value, Value> data;
   protected MapData<Value, Value> linkData;
@@ -53,6 +47,8 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
 
   JoinMapLaneModel(int flags) {
     this.flags = flags;
+    this.data = null;
+    this.linkData = null;
     this.downlinks = HashTrieMap.empty();
   }
 
@@ -67,7 +63,7 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
 
   @Override
   protected JoinMapLaneUplink createWarpUplink(WarpBinding link) {
-    return new JoinMapLaneUplink(this, link, createUplinkAddress(link));
+    return new JoinMapLaneUplink(this, link, this.createUplinkAddress(link));
   }
 
   protected void openDownlinks() {
@@ -80,9 +76,10 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
       final float prio = header.get("prio").floatValue(0.0f);
       final float rate = header.get("rate").floatValue(0.0f);
       final Value body = header.get("body");
-      new JoinMapLaneDownlink<Value, Value>(this.laneContext, stage(), this, key,
-          this.laneContext.meshUri(), this.laneContext.hostUri(), nodeUri, laneUri,
-          prio, rate, body, Form.forValue(), Form.forValue()).openDownlink();
+      new JoinMapLaneDownlink<Value, Value>(this.laneContext, this.stage(), this, key,
+                                            this.laneContext.meshUri(), this.laneContext.hostUri(),
+                                            nodeUri, laneUri, prio, rate, body, Form.forValue(),
+                                            Form.forValue()).openDownlink();
     }
   }
 
@@ -95,9 +92,8 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
         || header.get("prio").floatValue(0.0f) != downlink.prio()
         || header.get("rate").floatValue(0.0f) != downlink.rate()
         || !header.get("body").equals(downlink.body())) {
-      header = Record.create(2)
-          .slot("node", downlink.nodeUri().toString())
-          .slot("lane", downlink.laneUri().toString());
+      header = Record.create(2).slot("node", downlink.nodeUri().toString())
+                               .slot("lane", downlink.laneUri().toString());
       if (downlink.prio() != 0.0f) {
         header.slot("prio", downlink.prio());
       }
@@ -119,53 +115,63 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
 
   protected void openDownlink(Value key, JoinMapLaneDownlink<?, ?> downlink) {
     downlink.openDownlink(); // Open before CAS
-    HashTrieMap<Value, JoinMapLaneDownlink<?, ?>> oldDownlinks;
-    HashTrieMap<Value, JoinMapLaneDownlink<?, ?>> newDownlinks;
     do {
-      oldDownlinks = this.downlinks;
-      newDownlinks = oldDownlinks.updated(key, downlink);
-    } while (oldDownlinks != newDownlinks && !DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks));
-    if (oldDownlinks != newDownlinks) {
-      final JoinMapLaneDownlink<?, ?> oldDownlink = oldDownlinks.get(key);
-      if (oldDownlink != null) {
-        try {
-          oldDownlink.close();
-        } catch (Exception swallow) {
+      final HashTrieMap<Value, JoinMapLaneDownlink<?, ?>> oldDownlinks = JoinMapLaneModel.DOWNLINKS.get(this);
+      final HashTrieMap<Value, JoinMapLaneDownlink<?, ?>> newDownlinks = oldDownlinks.updated(key, downlink);
+      if (oldDownlinks != newDownlinks) {
+        if (JoinMapLaneModel.DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks)) {
+          final JoinMapLaneDownlink<?, ?> oldDownlink = oldDownlinks.get(key);
+          if (oldDownlink != null) {
+            try {
+              oldDownlink.close();
+            } catch (Exception swallow) {
+            }
+          }
+          break;
         }
+      } else {
+        break;
       }
-    }
+    } while (true);
   }
 
   protected void closeDownlinks() {
-    HashTrieMap<Value, JoinMapLaneDownlink<?, ?>> oldDownlinks;
-    final HashTrieMap<Value, JoinMapLaneDownlink<?, ?>> newDownlinks = HashTrieMap.empty();
     do {
-      oldDownlinks = this.downlinks;
-    } while (oldDownlinks != newDownlinks && !DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks));
-    if (!oldDownlinks.isEmpty()) {
-      for (JoinMapLaneDownlink<?, ?> downlink : oldDownlinks.values()) {
-        try {
-          downlink.close();
-        } catch (Exception swallow) {
+      final HashTrieMap<Value, JoinMapLaneDownlink<?, ?>> oldDownlinks = JoinMapLaneModel.DOWNLINKS.get(this);
+      if (!oldDownlinks.isEmpty()) {
+        final HashTrieMap<Value, JoinMapLaneDownlink<?, ?>> newDownlinks = HashTrieMap.empty();
+        if (JoinMapLaneModel.DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks)) {
+          for (JoinMapLaneDownlink<?, ?> downlink : oldDownlinks.values()) {
+            try {
+              downlink.close();
+            } catch (Exception swallow) {
+            }
+          }
+          break;
         }
+      } else {
+        break;
       }
-    }
+    } while (true);
   }
 
   protected void closeDownlinkKey(Value key) {
-    HashTrieMap<Value, JoinMapLaneDownlink<?, ?>> oldDownlinks;
-    HashTrieMap<Value, JoinMapLaneDownlink<?, ?>> newDownlinks;
     do {
-      oldDownlinks = this.downlinks;
-      newDownlinks = oldDownlinks.removed(key);
-    } while (oldDownlinks != newDownlinks && !DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks));
-    if (oldDownlinks != newDownlinks) {
-      final JoinMapLaneDownlink<?, ?> downlink = oldDownlinks.get(key);
-      try {
-        downlink.close();
-      } catch (Exception swallow) {
+      final HashTrieMap<Value, JoinMapLaneDownlink<?, ?>> oldDownlinks = JoinMapLaneModel.DOWNLINKS.get(this);
+      final HashTrieMap<Value, JoinMapLaneDownlink<?, ?>> newDownlinks = oldDownlinks.removed(key);
+      if (oldDownlinks != newDownlinks) {
+        if (JoinMapLaneModel.DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks)) {
+          final JoinMapLaneDownlink<?, ?> downlink = oldDownlinks.get(key);
+          try {
+            downlink.close();
+          } catch (Exception swallow) {
+          }
+          break;
+        }
+      } else {
+        break;
       }
-    }
+    } while (true);
   }
 
   @Override
@@ -194,18 +200,19 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
     }
   }
 
+  @SuppressWarnings("unchecked")
   protected void cueDownKey(Value key) {
     FingerTrieSeq<JoinMapLaneUplink> uplinks;
     do {
-      uplinks = this.uplinks;
+      uplinks = (FingerTrieSeq<JoinMapLaneUplink>) LaneModel.UPLINKS.get(this);
       for (int i = 0, n = uplinks.size(); i < n; i += 1) {
         uplinks.get(i).cueDownKey(key);
       }
-    } while (uplinks != this.uplinks);
+    } while (uplinks != LaneModel.UPLINKS.get(this));
   }
 
   public final boolean isResident() {
-    return (this.flags & RESIDENT) != 0;
+    return (this.flags & JoinMapLaneModel.RESIDENT) != 0;
   }
 
   public JoinMapLaneModel isResident(boolean isResident) {
@@ -216,11 +223,11 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
       this.linkData.isResident(isResident);
     }
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= JoinMapLaneModel.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~JoinMapLaneModel.RESIDENT;
     }
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof ValueLaneView<?>) {
       ((ValueLaneView<?>) views).didSetResident(isResident);
     } else if (views instanceof LaneView[]) {
@@ -233,7 +240,7 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
   }
 
   public final boolean isTransient() {
-    return (this.flags & TRANSIENT) != 0;
+    return (this.flags & JoinMapLaneModel.TRANSIENT) != 0;
   }
 
   public JoinMapLaneModel isTransient(boolean isTransient) {
@@ -244,11 +251,11 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
       this.linkData.isTransient(isTransient);
     }
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= JoinMapLaneModel.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~JoinMapLaneModel.TRANSIENT;
     }
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof ValueLaneView<?>) {
       ((ValueLaneView<?>) views).didSetTransient(isTransient);
     } else if (views instanceof LaneView[]) {
@@ -269,7 +276,7 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
   }
 
   public JoinMapLaneDownlink<?, ?> getDownlink(Object key) {
-    return this.downlinks.get(key);
+    return JoinMapLaneModel.DOWNLINKS.get(this).get(key);
   }
 
   public void put(JoinMapLaneDownlink<?, ?> downlink, Value key, Value newValue) {
@@ -345,24 +352,31 @@ public class JoinMapLaneModel extends WarpLaneModel<JoinMapLaneView<?, ?, ?>, Jo
 
   protected void openStore() {
     this.data = this.laneContext.store().mapData(laneUri().toString())
-        .isTransient(isTransient())
-        .isResident(isResident());
+                                        .isTransient(this.isTransient())
+                                        .isResident(this.isResident());
     this.linkData = this.laneContext.store().mapData(Record.create(1).attr("join", laneUri().toString()))
-        .isTransient(isTransient())
-        .isResident(isResident());
+                                            .isTransient(this.isTransient())
+                                            .isResident(this.isResident());
   }
 
   @Override
   protected void willLoad() {
-    openStore();
+    this.openStore();
     super.willLoad();
   }
 
   @Override
   protected void willStart() {
     super.willStart();
-    openDownlinks();
+    this.openDownlinks();
   }
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<JoinMapLaneModel, HashTrieMap<Value, JoinMapLaneDownlink<?, ?>>> DOWNLINKS =
+      AtomicReferenceFieldUpdater.newUpdater(JoinMapLaneModel.class, (Class<HashTrieMap<Value, JoinMapLaneDownlink<?, ?>>>) (Class<?>) HashTrieMap.class, "downlinks");
 
 }
 
@@ -494,7 +508,7 @@ final class JoinMapLaneRelayUpdate extends LaneRelay<JoinMapLaneModel, JoinMapLa
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -628,7 +642,7 @@ final class JoinMapLaneRelayRemove extends LaneRelay<JoinMapLaneModel, JoinMapLa
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -708,7 +722,7 @@ final class JoinMapLaneRelayClear extends LaneRelay<JoinMapLaneModel, JoinMapLan
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -747,7 +761,7 @@ final class JoinMapLaneRelayDownlink extends LaneRelay<JoinMapLaneModel, JoinMap
       final Form<Object> keyForm = (Form<Object>) view.keyForm;
       if (this.keyForm != keyForm && keyForm != null) {
         this.keyForm = keyForm;
-        this.keyObject = keyForm.cast(key);
+        this.keyObject = keyForm.cast(this.key);
         if (this.keyObject == null) {
           this.keyObject = keyForm.unit();
         }
@@ -762,7 +776,7 @@ final class JoinMapLaneRelayDownlink extends LaneRelay<JoinMapLaneModel, JoinMap
       final Form<Object> keyForm = (Form<Object>) view.keyForm;
       if (this.keyForm != keyForm && keyForm != null) {
         this.keyForm = keyForm;
-        this.keyObject = keyForm.cast(key);
+        this.keyObject = keyForm.cast(this.key);
         if (this.keyObject == null) {
           this.keyObject = keyForm.unit();
         }

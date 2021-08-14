@@ -42,6 +42,11 @@ final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
     this(http, 0L, null, null, 1);
   }
 
+  @Override
+  public Parser<HttpChunkHeader> feed(Input input) {
+    return HttpChunkHeaderParser.parse(input, this.http, this.size, this.extension, this.extensions, this.step);
+  }
+
   static Parser<HttpChunkHeader> parse(Input input, HttpParser http, long size, Parser<ChunkExtension> extension,
                                        Builder<ChunkExtension, FingerTrieSeq<ChunkExtension>> extensions, int step) {
     int c = 0;
@@ -53,10 +58,10 @@ final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
           size = Base16.decodeDigit(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("chunk size", input));
+          return Parser.error(Diagnostic.expected("chunk size", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("chunk size", input));
+        return Parser.error(Diagnostic.expected("chunk size", input));
       }
     }
     if (step == 2) {
@@ -66,7 +71,7 @@ final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
           input = input.step();
           size = (size << 4) | Base16.decodeDigit(c);
           if (size < 0L) {
-            return error(Diagnostic.message("chunk size overflow", input));
+            return Parser.error(Diagnostic.message("chunk size overflow", input));
           }
         } else {
           break;
@@ -87,7 +92,7 @@ final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
@@ -117,10 +122,10 @@ final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
           input = input.step();
           step = 6;
         } else {
-          return error(Diagnostic.expected("carriage return", input));
+          return Parser.error(Diagnostic.expected("carriage return", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("carriage return", input));
+        return Parser.error(Diagnostic.expected("carriage return", input));
       }
     }
     if (step == 6) {
@@ -129,30 +134,25 @@ final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
         if (c == '\n') {
           input = input.step();
           if (extensions == null) {
-            return done(http.chunkHeader(size, FingerTrieSeq.<ChunkExtension>empty()));
+            return Parser.done(http.chunkHeader(size, FingerTrieSeq.<ChunkExtension>empty()));
           } else {
-            return done(http.chunkHeader(size, extensions.bind()));
+            return Parser.done(http.chunkHeader(size, extensions.bind()));
           }
         } else {
-          return error(Diagnostic.expected("line feed", input));
+          return Parser.error(Diagnostic.expected("line feed", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("line feed", input));
+        return Parser.error(Diagnostic.expected("line feed", input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new HttpChunkHeaderParser(http, size, extension, extensions, step);
   }
 
   static Parser<HttpChunkHeader> parse(Input input, HttpParser http) {
-    return parse(input, http, 0L, null, null, 1);
-  }
-
-  @Override
-  public Parser<HttpChunkHeader> feed(Input input) {
-    return parse(input, this.http, this.size, this.extension, this.extensions, this.step);
+    return HttpChunkHeaderParser.parse(input, http, 0L, null, null, 1);
   }
 
 }

@@ -60,6 +60,7 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
 
   public ActorPart(PartBinding partBinding, PartDef partDef) {
     this.partBinding = partBinding;
+    this.partContext = null;
     this.partDef = partDef;
   }
 
@@ -68,7 +69,7 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
   }
 
   public final ActorMesh actorMesh() {
-    return mesh().unwrapMesh(ActorMesh.class);
+    return this.mesh().unwrapMesh(ActorMesh.class);
   }
 
   @Override
@@ -99,7 +100,7 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapPart(Class<T> partClass) {
-    if (partClass.isAssignableFrom(getClass())) {
+    if (partClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.partContext.unwrapPart(partClass);
@@ -110,7 +111,7 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
   @Override
   public <T> T bottomPart(Class<T> partClass) {
     T part = this.partContext.bottomPart(partClass);
-    if (part == null && partClass.isAssignableFrom(getClass())) {
+    if (part == null && partClass.isAssignableFrom(this.getClass())) {
       part = (T) this;
     }
     return part;
@@ -187,17 +188,17 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
   }
 
   public Log createLog(LogDef logDef) {
-    final ActorMesh mesh = actorMesh();
+    final ActorMesh mesh = this.actorMesh();
     return mesh != null ? mesh.createLog(logDef) : null;
   }
 
   public Log createLog(CellAddress cellAddress) {
-    final ActorMesh mesh = actorMesh();
+    final ActorMesh mesh = this.actorMesh();
     return mesh != null ? mesh.createLog(cellAddress) : null;
   }
 
   public Log injectLog(Log log) {
-    final ActorMesh mesh = actorMesh();
+    final ActorMesh mesh = this.actorMesh();
     return mesh != null ? mesh.injectLog(log) : log;
   }
 
@@ -205,28 +206,28 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
   protected Log openLog() {
     Log log;
     if (this.partDef != null && this.partDef.logDef() != null) {
-      log = createLog(this.partDef.logDef());
+      log = this.createLog(this.partDef.logDef());
     } else {
-      log = createLog(cellAddress());
+      log = this.createLog(this.cellAddress());
     }
     if (log != null) {
-      log = injectLog(log);
+      log = this.injectLog(log);
     }
     return log;
   }
 
   public Policy createPolicy(PolicyDef policyDef) {
-    final ActorMesh mesh = actorMesh();
+    final ActorMesh mesh = this.actorMesh();
     return mesh != null ? mesh.createPolicy(policyDef) : null;
   }
 
   public Policy createPolicy(CellAddress cellAddress) {
-    final ActorMesh mesh = actorMesh();
+    final ActorMesh mesh = this.actorMesh();
     return mesh != null ? mesh.createPolicy(cellAddress) : null;
   }
 
   public Policy injectPolicy(Policy policy) {
-    final ActorMesh mesh = actorMesh();
+    final ActorMesh mesh = this.actorMesh();
     return mesh != null ? mesh.injectPolicy(policy) : policy;
   }
 
@@ -234,28 +235,28 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
   protected Policy openPolicy() {
     Policy policy;
     if (this.partDef != null && this.partDef.policyDef() != null) {
-      policy = createPolicy(this.partDef.policyDef());
+      policy = this.createPolicy(this.partDef.policyDef());
     } else {
-      policy = createPolicy(cellAddress());
+      policy = this.createPolicy(this.cellAddress());
     }
     if (policy != null) {
-      policy = injectPolicy(policy);
+      policy = this.injectPolicy(policy);
     }
     return policy;
   }
 
   public Stage createStage(StageDef stageDef) {
-    final ActorMesh mesh = actorMesh();
+    final ActorMesh mesh = this.actorMesh();
     return mesh != null ? mesh.createStage(stageDef) : null;
   }
 
   public Stage createStage(CellAddress cellAddress) {
-    final ActorMesh mesh = actorMesh();
+    final ActorMesh mesh = this.actorMesh();
     return mesh != null ? mesh.createStage(cellAddress) : null;
   }
 
   public Stage injectStage(Stage stage) {
-    final ActorMesh mesh = actorMesh();
+    final ActorMesh mesh = this.actorMesh();
     return mesh != null ? mesh.injectStage(stage) : stage;
   }
 
@@ -263,28 +264,28 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
   protected Stage openStage() {
     Stage stage;
     if (this.partDef != null && this.partDef.stageDef() != null) {
-      stage = createStage(this.partDef.stageDef());
+      stage = this.createStage(this.partDef.stageDef());
     } else {
-      stage = createStage(cellAddress());
+      stage = this.createStage(this.cellAddress());
     }
     if (stage != null) {
-      stage = injectStage(stage);
+      stage = this.injectStage(stage);
     }
     return stage;
   }
 
   public StoreBinding createStore(StoreDef storeDef) {
-    final ActorMesh mesh = actorMesh();
+    final ActorMesh mesh = this.actorMesh();
     return mesh != null ? mesh.createStore(storeDef) : null;
   }
 
   public StoreBinding createStore(CellAddress cellAddress) {
-    final ActorMesh mesh = actorMesh();
+    final ActorMesh mesh = this.actorMesh();
     return mesh != null ? mesh.createStore(cellAddress) : null;
   }
 
   public StoreBinding injectStore(StoreBinding store) {
-    final ActorMesh mesh = actorMesh();
+    final ActorMesh mesh = this.actorMesh();
     return mesh != null ? mesh.injectStore(store) : store;
   }
 
@@ -292,12 +293,12 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
   protected StoreBinding openStore() {
     StoreBinding store = null;
     if (this.partDef != null && this.partDef.storeDef() != null) {
-      store = createStore(this.partDef.storeDef());
+      store = this.createStore(this.partDef.storeDef());
     } else {
-      store = createStore(cellAddress());
+      store = this.createStore(this.cellAddress());
     }
     if (store != null) {
-      store = injectStore(store);
+      store = this.injectStore(store);
     }
     return store;
   }
@@ -311,7 +312,7 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
     final PartDef partDef = this.partDef;
     HostDef hostDef = partDef != null ? partDef.getHostDef(hostAddress.hostUri()) : null;
     if (hostDef == null) {
-      final ActorMesh mesh = actorMesh();
+      final ActorMesh mesh = this.actorMesh();
       hostDef = mesh != null ? mesh.getHostDef(hostAddress) : null;
     }
     return hostDef;
@@ -324,7 +325,7 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
 
   @Override
   public HostBinding injectHost(HostAddress hostAddress, HostBinding host) {
-    final HostDef hostDef = getHostDef(hostAddress);
+    final HostDef hostDef = this.getHostDef(hostAddress);
     return new ActorHost(this.partContext.injectHost(hostAddress, host), hostDef);
   }
 
@@ -337,7 +338,7 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
     final PartDef partDef = this.partDef;
     NodeDef nodeDef = partDef != null ? partDef.getNodeDef(nodeAddress.nodeUri()) : null;
     if (nodeDef == null) {
-      final ActorMesh mesh = actorMesh();
+      final ActorMesh mesh = this.actorMesh();
       nodeDef = mesh != null ? mesh.getNodeDef(nodeAddress) : null;
     }
     return nodeDef;
@@ -346,7 +347,7 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
   @Override
   public NodeBinding createNode(NodeAddress nodeAddress) {
     NodeBinding node = this.partContext.createNode(nodeAddress);
-    if (node == null && !meshUri().isDefined()) {
+    if (node == null && !this.meshUri().isDefined()) {
       final PartDef partDef = this.partDef;
       final NodeDef nodeDef = partDef != null ? partDef.getNodeDef(nodeAddress.nodeUri()) : null;
       if (nodeDef != null) {
@@ -371,7 +372,7 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
     final PartDef partDef = this.partDef;
     LaneDef laneDef = partDef != null ? partDef.getLaneDef(laneAddress.laneUri()) : null;
     if (laneDef == null) {
-      final ActorMesh mesh = actorMesh();
+      final ActorMesh mesh = this.actorMesh();
       laneDef = mesh != null ? mesh.getLaneDef(laneAddress) : null;
     }
     return laneDef;
@@ -425,13 +426,13 @@ public class ActorPart extends ActorTier implements PartBinding, PartContext {
   @Override
   public void openAgents(NodeBinding node) {
     this.partContext.openAgents(node);
-    if (!meshUri().isDefined()) {
+    if (!this.meshUri().isDefined()) {
       final PartDef partDef = this.partDef;
       final NodeDef nodeDef = partDef != null ? partDef.getNodeDef(node.nodeUri()) : null;
       if (nodeDef != null && node instanceof AgentModel) {
         final AgentModel agentModel = (AgentModel) node;
         for (AgentDef agentDef : nodeDef.agentDefs()) {
-          final AgentFactory<?> agentFactory = createAgentFactory(node, agentDef);
+          final AgentFactory<?> agentFactory = this.createAgentFactory(node, agentDef);
           if (agentDef != null) {
             final Value id = agentDef.id();
             final Value props = agentModel.props().concat(agentDef.props());

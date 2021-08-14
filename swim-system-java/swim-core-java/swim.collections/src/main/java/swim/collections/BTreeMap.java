@@ -31,9 +31,6 @@ import swim.util.ReducedMap;
  */
 public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<K, V, U>, Cloneable, Debug {
 
-  @SuppressWarnings("rawtypes")
-  static final AtomicReferenceFieldUpdater<BTreeMap, BTreePage> ROOT =
-      AtomicReferenceFieldUpdater.newUpdater(BTreeMap.class, BTreePage.class, "root");
   volatile BTreePage<K, V, U> root;
 
   protected BTreeMap(BTreePage<K, V, U> root) {
@@ -44,72 +41,69 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
     this(BTreePage.<K, V, U>empty());
   }
 
-  public static <K, V, U> BTreeMap<K, V, U> empty() {
-    return new BTreeMap<K, V, U>();
-  }
-
-  public static <K, V, U> BTreeMap<K, V, U> of(K key, V value) {
-    final BTreeMap<K, V, U> tree = new BTreeMap<K, V, U>();
-    tree.put(key, value);
-    return tree;
-  }
-
-  public static <K, V, U> BTreeMap<K, V, U> from(Map<? extends K, ? extends V> map) {
-    final BTreeMap<K, V, U> tree = new BTreeMap<K, V, U>();
-    for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
-      tree.put(entry.getKey(), entry.getValue());
-    }
-    return tree;
+  @SuppressWarnings("unchecked")
+  final BTreePage<K, V, U> root() {
+    return BTreeMap.ROOT.get(this);
   }
 
   @Override
   public boolean isEmpty() {
-    return this.root.isEmpty();
+    final BTreePage<K, V, U> root = this.root();
+    return root.isEmpty();
   }
 
   @Override
   public int size() {
-    return this.root.size();
+    final BTreePage<K, V, U> root = this.root();
+    return root.size();
   }
 
   @Override
   public boolean containsKey(Object key) {
-    return this.root.containsKey(key, this);
+    final BTreePage<K, V, U> root = this.root();
+    return root.containsKey(key, this);
   }
 
   @Override
   public boolean containsValue(Object value) {
-    return this.root.containsValue(value);
+    final BTreePage<K, V, U> root = this.root();
+    return root.containsValue(value);
   }
 
   @Override
   public int indexOf(Object key) {
-    return this.root.indexOf(key, this);
+    final BTreePage<K, V, U> root = this.root();
+    return root.indexOf(key, this);
   }
 
   @Override
   public V get(Object key) {
-    return this.root.get(key, this);
+    final BTreePage<K, V, U> root = this.root();
+    return root.get(key, this);
   }
 
   @Override
-  public Entry<K, V> getEntry(Object key) {
-    return this.root.getEntry(key, this);
+  public Map.Entry<K, V> getEntry(Object key) {
+    final BTreePage<K, V, U> root = this.root();
+    return root.getEntry(key, this);
   }
 
   @Override
-  public Entry<K, V> getIndex(int index) {
-    return this.root.getIndex(index);
+  public Map.Entry<K, V> getIndex(int index) {
+    final BTreePage<K, V, U> root = this.root();
+    return root.getIndex(index);
   }
 
   @Override
-  public Entry<K, V> firstEntry() {
-    return this.root.firstEntry();
+  public Map.Entry<K, V> firstEntry() {
+    final BTreePage<K, V, U> root = this.root();
+    return root.firstEntry();
   }
 
   @Override
   public K firstKey() {
-    final Entry<K, V> entry = this.root.firstEntry();
+    final BTreePage<K, V, U> root = this.root();
+    final Map.Entry<K, V> entry = root.firstEntry();
     if (entry != null) {
       return entry.getKey();
     } else {
@@ -119,7 +113,8 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
 
   @Override
   public V firstValue() {
-    final Entry<K, V> entry = this.root.firstEntry();
+    final BTreePage<K, V, U> root = this.root();
+    final Map.Entry<K, V> entry = root.firstEntry();
     if (entry != null) {
       return entry.getValue();
     } else {
@@ -128,13 +123,15 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
   }
 
   @Override
-  public Entry<K, V> lastEntry() {
-    return this.root.lastEntry();
+  public Map.Entry<K, V> lastEntry() {
+    final BTreePage<K, V, U> root = this.root();
+    return root.lastEntry();
   }
 
   @Override
   public K lastKey() {
-    final Entry<K, V> entry = this.root.lastEntry();
+    final BTreePage<K, V, U> root = this.root();
+    final Map.Entry<K, V> entry = root.lastEntry();
     if (entry != null) {
       return entry.getKey();
     } else {
@@ -144,7 +141,8 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
 
   @Override
   public V lastValue() {
-    final Entry<K, V> entry = this.root.lastEntry();
+    final BTreePage<K, V, U> root = this.root();
+    final Map.Entry<K, V> entry = root.lastEntry();
     if (entry != null) {
       return entry.getValue();
     } else {
@@ -153,13 +151,15 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
   }
 
   @Override
-  public Entry<K, V> nextEntry(K key) {
-    return this.root.nextEntry(key, this);
+  public Map.Entry<K, V> nextEntry(K key) {
+    final BTreePage<K, V, U> root = this.root();
+    return root.nextEntry(key, this);
   }
 
   @Override
   public K nextKey(K key) {
-    final Entry<K, V> entry = this.root.nextEntry(key, this);
+    final BTreePage<K, V, U> root = this.root();
+    final Map.Entry<K, V> entry = root.nextEntry(key, this);
     if (entry != null) {
       return entry.getKey();
     } else {
@@ -169,7 +169,8 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
 
   @Override
   public V nextValue(K key) {
-    final Entry<K, V> entry = this.root.nextEntry(key, this);
+    final BTreePage<K, V, U> root = this.root();
+    final Map.Entry<K, V> entry = root.nextEntry(key, this);
     if (entry != null) {
       return entry.getValue();
     } else {
@@ -178,13 +179,15 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
   }
 
   @Override
-  public Entry<K, V> previousEntry(K key) {
-    return this.root.previousEntry(key, this);
+  public Map.Entry<K, V> previousEntry(K key) {
+    final BTreePage<K, V, U> root = this.root();
+    return root.previousEntry(key, this);
   }
 
   @Override
   public K previousKey(K key) {
-    final Entry<K, V> entry = this.root.previousEntry(key, this);
+    final BTreePage<K, V, U> root = this.root();
+    final Map.Entry<K, V> entry = root.previousEntry(key, this);
     if (entry != null) {
       return entry.getKey();
     } else {
@@ -194,7 +197,8 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
 
   @Override
   public V previousValue(K key) {
-    final Entry<K, V> entry = this.root.previousEntry(key, this);
+    final BTreePage<K, V, U> root = this.root();
+    final Map.Entry<K, V> entry = root.previousEntry(key, this);
     if (entry != null) {
       return entry.getValue();
     } else {
@@ -206,13 +210,13 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
   public V put(K key, V newValue) {
     BTreePage<K, V, U> oldRoot;
     do {
-      oldRoot = this.root;
+      oldRoot = this.root();
       BTreePage<K, V, U> newRoot = oldRoot.updated(key, newValue, this);
       if (oldRoot != newRoot) {
         if (newRoot.size() > oldRoot.size()) {
           newRoot = newRoot.balanced(this);
         }
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (BTreeMap.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           break;
         }
       } else {
@@ -224,18 +228,18 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
 
   @Override
   public void putAll(Map<? extends K, ? extends V> map) {
-    for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
-      put(entry.getKey(), entry.getValue());
+    for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+      this.put(entry.getKey(), entry.getValue());
     }
   }
 
   @Override
   public V remove(Object key) {
     do {
-      final BTreePage<K, V, U> oldRoot = this.root;
+      final BTreePage<K, V, U> oldRoot = this.root();
       final BTreePage<K, V, U> newRoot = oldRoot.removed(key, this).balanced(this);
       if (oldRoot != newRoot) {
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (BTreeMap.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           return oldRoot.get(key, this);
         }
       } else {
@@ -246,7 +250,7 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
 
   public BTreeMap<K, V, U> drop(int lower) {
     do {
-      final BTreePage<K, V, U> oldRoot = this.root;
+      final BTreePage<K, V, U> oldRoot = this.root();
       if (lower > 0 && oldRoot.size() > 0) {
         final BTreePage<K, V, U> newRoot;
         if (lower < oldRoot.size()) {
@@ -254,7 +258,7 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
         } else {
           newRoot = BTreePage.empty();
         }
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (BTreeMap.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           break;
         }
       } else {
@@ -266,7 +270,7 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
 
   public BTreeMap<K, V, U> take(int upper) {
     do {
-      final BTreePage<K, V, U> oldRoot = this.root;
+      final BTreePage<K, V, U> oldRoot = this.root();
       if (upper < oldRoot.size() && oldRoot.size() > 0) {
         final BTreePage<K, V, U> newRoot;
         if (upper > 0) {
@@ -274,7 +278,7 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
         } else {
           newRoot = BTreePage.<K, V, U>empty();
         }
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (BTreeMap.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           break;
         }
       } else {
@@ -287,10 +291,10 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
   @Override
   public void clear() {
     do {
-      final BTreePage<K, V, U> oldRoot = this.root;
+      final BTreePage<K, V, U> oldRoot = this.root();
       final BTreePage<K, V, U> newRoot = BTreePage.empty();
       if (oldRoot != newRoot) {
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (BTreeMap.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           break;
         }
       } else {
@@ -300,30 +304,35 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
   }
 
   public BTreeMap<K, V, U> updated(K key, V newValue) {
-    final BTreePage<K, V, U> oldRoot = this.root;
+    final BTreePage<K, V, U> oldRoot = this.root();
     BTreePage<K, V, U> newRoot = oldRoot.updated(key, newValue, this);
     if (newRoot.size() > oldRoot.size()) {
       newRoot = newRoot.balanced(this);
     }
-    return copy(newRoot);
+    return this.copy(newRoot);
   }
 
   public BTreeMap<K, V, U> removed(K key) {
-    return copy(this.root.removed(key, this).balanced(this));
+    final BTreePage<K, V, U> oldRoot = this.root();
+    BTreePage<K, V, U> newRoot = oldRoot.removed(key, this);
+    if (oldRoot != newRoot) {
+      newRoot = newRoot.balanced(this);
+    }
+    return this.copy(newRoot);
   }
 
   public BTreeMap<K, V, U> cleared() {
-    return copy(BTreePage.empty());
+    return this.copy(BTreePage.empty());
   }
 
   @Override
   public U reduced(U identity, CombinerFunction<? super V, U> accumulator, CombinerFunction<U, U> combiner) {
     BTreePage<K, V, U> newRoot;
     do {
-      final BTreePage<K, V, U> oldRoot = this.root;
+      final BTreePage<K, V, U> oldRoot = this.root();
       newRoot = oldRoot.reduced(identity, accumulator, combiner);
       if (oldRoot != newRoot) {
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (BTreeMap.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           break;
         }
       } else {
@@ -337,37 +346,45 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
    * An immutable copy of this {@code BTreeMap}'s data.
    */
   public BTree<K, V> snapshot() {
-    return new BTree<K, V>(this.root);
+    final BTreePage<K, V, U> root = this.root();
+    return new BTree<K, V>(root);
   }
 
   @Override
   public OrderedMapCursor<K, V> iterator() {
-    return this.root.iterator();
+    final BTreePage<K, V, U> root = this.root();
+    return root.iterator();
   }
 
   public Cursor<K> keyIterator() {
-    return this.root.keyIterator();
+    final BTreePage<K, V, U> root = this.root();
+    return root.keyIterator();
   }
 
   public Cursor<V> valueIterator() {
-    return this.root.valueIterator();
+    final BTreePage<K, V, U> root = this.root();
+    return root.valueIterator();
   }
 
-  public OrderedMapCursor<K, V> lastIterator() {
-    return this.root.lastIterator();
+  public OrderedMapCursor<K, V> reverseIterator() {
+    final BTreePage<K, V, U> root = this.root();
+    return root.reverseIterator();
   }
 
-  public Cursor<K> lastKeyIterator() {
-    return this.root.lastKeyIterator();
+  public Cursor<K> reverseKeyIterator() {
+    final BTreePage<K, V, U> root = this.root();
+    return root.reverseKeyIterator();
   }
 
-  public Cursor<V> lastValueIterator() {
-    return this.root.lastValueIterator();
+  public Cursor<V> reverseValueIterator() {
+    final BTreePage<K, V, U> root = this.root();
+    return root.reverseValueIterator();
   }
 
   @Override
   public BTreeMap<K, V, U> clone() {
-    return copy(this.root);
+    final BTreePage<K, V, U> root = this.root();
+    return this.copy(root);
   }
 
   protected BTreeMap<K, V, U> copy(BTreePage<K, V, U> root) {
@@ -386,11 +403,12 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
       return true;
     } else if (other instanceof Map<?, ?>) {
       final Map<K, V> that = (Map<K, V>) other;
-      if (size() == that.size()) {
-        final Iterator<Entry<K, V>> those = that.entrySet().iterator();
+      final BTreePage<K, V, U> root = this.root();
+      if (root.size() == that.size()) {
+        final Iterator<Map.Entry<K, V>> those = that.entrySet().iterator();
         while (those.hasNext()) {
-          final Entry<K, V> entry = those.next();
-          final V value = get(entry.getKey());
+          final Map.Entry<K, V> entry = those.next();
+          final V value = root.get(entry.getKey(), this);
           final V v = entry.getValue();
           if (value == null ? v != null : !value.equals(v)) {
             return false;
@@ -405,7 +423,7 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
   @Override
   public int hashCode() {
     int code = 0;
-    final Cursor<Entry<K, V>> these = iterator();
+    final Cursor<Map.Entry<K, V>> these = this.iterator();
     while (these.hasNext()) {
       code += these.next().hashCode();
     }
@@ -413,27 +431,36 @@ public class BTreeMap<K, V, U> extends BTreeContext<K, V> implements ReducedMap<
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("BTreeMap").write('.');
-    final Cursor<Entry<K, V>> these = iterator();
-    if (these.hasNext()) {
-      Entry<K, V> entry = these.next();
-      output = output.write("of").write('(')
-          .debug(entry.getKey()).write(", ").debug(entry.getValue());
-      while (these.hasNext()) {
-        entry = these.next();
-        output = output.write(')').write('.').write("updated").write('(')
-            .debug(entry.getKey()).write(", ").debug(entry.getValue());
-      }
-    } else {
-      output = output.write("empty").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("BTreeMap").write('.').write("empty").write('(').write(')');
+    final Cursor<Map.Entry<K, V>> these = this.iterator();
+    while (these.hasNext()) {
+      final Map.Entry<K, V> entry = these.next();
+      output = output.write('.').write("updated").write('(').debug(entry.getKey())
+                     .write(", ").debug(entry.getValue()).write(')');
     }
-    output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  @SuppressWarnings("rawtypes")
+  static final AtomicReferenceFieldUpdater<BTreeMap, BTreePage> ROOT =
+      AtomicReferenceFieldUpdater.newUpdater(BTreeMap.class, BTreePage.class, "root");
+
+  public static <K, V, U> BTreeMap<K, V, U> empty() {
+    return new BTreeMap<K, V, U>();
+  }
+
+  public static <K, V, U> BTreeMap<K, V, U> from(Map<? extends K, ? extends V> map) {
+    final BTreeMap<K, V, U> tree = new BTreeMap<K, V, U>();
+    for (Map.Entry<? extends K, ? extends V> entry : map.entrySet()) {
+      tree.put(entry.getKey(), entry.getValue());
+    }
+    return tree;
   }
 
 }

@@ -20,16 +20,16 @@ import swim.structure.Num;
 
 public final class HostNum {
 
+  private HostNum() {
+    // static
+  }
+
   public static final HostObjectType<Num> TYPE;
 
   static {
     final JavaHostClassType<Num> type = new JavaHostClassType<>(Num.class);
     TYPE = type;
     type.extendType(HostValue.TYPE);
-  }
-
-  private HostNum() {
-    // static
   }
 
 }

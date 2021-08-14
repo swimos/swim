@@ -37,7 +37,7 @@ public abstract class HttpLaneModel<View extends HttpLaneView<?>, U extends Http
   @Override
   protected U createUplink(LinkBinding link) {
     if (link instanceof HttpBinding) {
-      return createHttpUplink((HttpBinding) link);
+      return this.createHttpUplink((HttpBinding) link);
     }
     return null;
   }
@@ -64,11 +64,11 @@ public abstract class HttpLaneModel<View extends HttpLaneView<?>, U extends Http
   }
 
   protected HttpResponse<?> doRespondDefault(U uplink, HttpRequest<?> request) {
-    return HttpResponse.from(HttpStatus.NOT_FOUND).entity(HttpBody.empty());
+    return HttpResponse.create(HttpStatus.NOT_FOUND).entity(HttpBody.empty());
   }
 
   protected Decoder<Object> decodeRequest(U uplink, HttpRequest<?> request) {
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     HttpLaneView<?> view;
     Decoder<Object> decoder = null;
     if (views instanceof HttpLaneView) {
@@ -91,7 +91,7 @@ public abstract class HttpLaneModel<View extends HttpLaneView<?>, U extends Http
       }
     }
     if (decoder == null) {
-      decoder = decodeRequestDefault(uplink, request);
+      decoder = this.decodeRequestDefault(uplink, request);
     }
     return decoder;
   }

@@ -54,6 +54,23 @@ final class Base64Writer extends Writer<Object, Object> {
     this(null, null, base64, 0, 0, 0);
   }
 
+  @Override
+  public Writer<Object, Object> feed(Object value) {
+    if (value instanceof ByteBuffer) {
+      return new Base64Writer((ByteBuffer) value, this.base64);
+    } else if (value instanceof byte[]) {
+      return new Base64Writer((byte[]) value, this.base64);
+    } else {
+      throw new IllegalArgumentException(value.toString());
+    }
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return Base64Writer.write(output, this.value, this.input, this.base64,
+                              this.index, this.limit, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, Object value, ByteBuffer input,
                                       Base64 base64, int index, int limit, int step) {
     while (index + 2 < limit && output.isCont()) {
@@ -125,45 +142,29 @@ final class Base64Writer extends Writer<Object, Object> {
       }
     }
     if (index == limit) {
-      return done(value);
+      return Writer.done(value);
     } else if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new Base64Writer(value, input, base64, index, limit, step);
   }
 
   static Writer<?, ?> write(Output<?> output, Object value, ByteBuffer input, Base64 base64) {
-    return write(output, value, input, base64, input.position(), input.limit(), 1);
+    return Base64Writer.write(output, value, input, base64, input.position(), input.limit(), 1);
   }
 
   static Writer<?, ?> write(Output<?> output, ByteBuffer input, Base64 base64) {
-    return write(output, null, input, base64);
+    return Base64Writer.write(output, null, input, base64);
   }
 
   static Writer<?, ?> write(Output<?> output, Object value, byte[] input, Base64 base64) {
-    return write(output, value, ByteBuffer.wrap(input), base64);
+    return Base64Writer.write(output, value, ByteBuffer.wrap(input), base64);
   }
 
   static Writer<?, ?> write(Output<?> output, byte[] input, Base64 base64) {
-    return write(output, null, input, base64);
-  }
-
-  @Override
-  public Writer<Object, Object> feed(Object value) {
-    if (value instanceof ByteBuffer) {
-      return new Base64Writer((ByteBuffer) value, this.base64);
-    } else if (value instanceof byte[]) {
-      return new Base64Writer((byte[]) value, this.base64);
-    } else {
-      throw new IllegalArgumentException(value.toString());
-    }
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.value, this.input, this.base64, this.index, this.limit, this.step);
+    return Base64Writer.write(output, null, input, base64);
   }
 
 }

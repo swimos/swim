@@ -27,7 +27,6 @@ import swim.util.Murmur3;
 
 public final class AvroName implements Comparable<AvroName>, Debug, Display {
 
-  private static ThreadLocal<HashGenCacheSet<String>> nameCache = new ThreadLocal<>();
   final AvroNamespace namespace;
   final String name;
   String string;
@@ -37,16 +36,74 @@ public final class AvroName implements Comparable<AvroName>, Debug, Display {
     this.name = name;
   }
 
-  public static AvroName from(AvroNamespace namespace, String name) {
+  public AvroNamespace namespace() {
+    return this.namespace;
+  }
+
+  public String name() {
+    return this.name;
+  }
+
+  @Override
+  public int compareTo(AvroName that) {
+    return this.toString().compareTo(that.toString());
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof AvroName) {
+      final AvroName that = (AvroName) other;
+      return this.toString().equals(that.toString());
+    }
+    return false;
+  }
+
+  @Override
+  public int hashCode() {
+    return Murmur3.seed(this.toString());
+  }
+
+  @Override
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("AvroName").write('.').write("parse").write('(').write('"')
+                   .display(this).write('"').write(')');
+    return output;
+  }
+
+  @Override
+  public <T> Output<T> display(Output<T> output) {
+    if (this.string != null) {
+      output = output.write(this.string);
+    } else {
+      if (this.namespace.isDefined()) {
+        output = this.namespace.display(output);
+        output = output.write('.');
+      }
+      output = output.write(this.name);
+    }
+    return output;
+  }
+
+  @Override
+  public String toString() {
+    if (this.string == null) {
+      this.string = Format.display(this);
+    }
+    return this.string;
+  }
+
+  public static AvroName create(AvroNamespace namespace, String name) {
     if (namespace == null) {
       throw new NullPointerException("namespace");
     }
-    name = cacheName(name);
+    name = AvroName.cacheName(name);
     return new AvroName(namespace, name);
   }
 
-  public static AvroName from(String name) {
-    name = cacheName(name);
+  public static AvroName create(String name) {
+    name = AvroName.cacheName(name);
     return new AvroName(AvroNamespace.empty(), name);
   }
 
@@ -60,6 +117,8 @@ public final class AvroName implements Comparable<AvroName>, Debug, Display {
     }
     return parser.bind();
   }
+
+  private static ThreadLocal<HashGenCacheSet<String>> nameCache = new ThreadLocal<>();
 
   static HashGenCacheSet<String> nameCache() {
     HashGenCacheSet<String> nameCache = AvroName.nameCache.get();
@@ -78,65 +137,10 @@ public final class AvroName implements Comparable<AvroName>, Debug, Display {
 
   static String cacheName(String name) {
     if (name.length() <= 32) {
-      return nameCache().put(name);
+      return AvroName.nameCache().put(name);
     } else {
       return name;
     }
-  }
-
-  public AvroNamespace namespace() {
-    return this.namespace;
-  }
-
-  public String name() {
-    return this.name;
-  }
-
-  @Override
-  public int compareTo(AvroName that) {
-    return toString().compareTo(that.toString());
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    } else if (other instanceof AvroName) {
-      return toString().equals(((AvroName) other).toString());
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    return Murmur3.seed(toString());
-  }
-
-  @Override
-  public void debug(Output<?> output) {
-    output = output.write("AvroName").write('.').write("parse").write('(').write('"')
-        .display(this).write('"').write(')');
-  }
-
-  @Override
-  public void display(Output<?> output) {
-    if (this.string != null) {
-      output = output.write(this.string);
-    } else {
-      if (this.namespace.isDefined()) {
-        this.namespace.display(output);
-        output = output.write('.');
-      }
-      output = output.write(this.name);
-    }
-  }
-
-  @Override
-  public String toString() {
-    if (this.string == null) {
-      this.string = Format.display(this);
-    }
-    return this.string;
   }
 
 }

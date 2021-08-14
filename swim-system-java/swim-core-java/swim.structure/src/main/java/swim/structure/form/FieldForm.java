@@ -29,7 +29,7 @@ public abstract class FieldForm<T> extends Form<T> {
 
   @Override
   public T cast(Item item) {
-    return cast(item, null);
+    return this.cast(item, null);
   }
 
 }

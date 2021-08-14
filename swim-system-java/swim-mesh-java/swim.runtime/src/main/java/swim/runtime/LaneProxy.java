@@ -34,6 +34,7 @@ public class LaneProxy implements LaneBinding, LaneContext {
 
   public LaneProxy(LaneBinding laneBinding) {
     this.laneBinding = laneBinding;
+    this.laneContext = null;
   }
 
   @Override
@@ -69,7 +70,7 @@ public class LaneProxy implements LaneBinding, LaneContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapLane(Class<T> laneClass) {
-    if (laneClass.isAssignableFrom(getClass())) {
+    if (laneClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.laneContext.unwrapLane(laneClass);
@@ -80,7 +81,7 @@ public class LaneProxy implements LaneBinding, LaneContext {
   @Override
   public <T> T bottomLane(Class<T> laneClass) {
     T lane = this.laneContext.bottomLane(laneClass);
-    if (lane == null && laneClass.isAssignableFrom(getClass())) {
+    if (lane == null && laneClass.isAssignableFrom(this.getClass())) {
       lane = (T) this;
     }
     return lane;

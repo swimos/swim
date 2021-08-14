@@ -24,7 +24,6 @@ import swim.util.Murmur3;
 
 public final class InvokeOperator extends Operator {
 
-  private static int hashSeed;
   final Value func;
   final Value args;
   Object state;
@@ -95,9 +94,9 @@ public final class InvokeOperator extends Operator {
   @Override
   protected int compareTo(Operator that) {
     if (that instanceof InvokeOperator) {
-      return compareTo((InvokeOperator) that);
+      return this.compareTo((InvokeOperator) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(InvokeOperator that) {
@@ -119,18 +118,21 @@ public final class InvokeOperator extends Operator {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(InvokeOperator.class);
+    if (InvokeOperator.hashSeed == 0) {
+      InvokeOperator.hashSeed = Murmur3.seed(InvokeOperator.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(InvokeOperator.hashSeed,
         this.func.hashCode()), this.args.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.debug(this.func).write('.').write("invoke").write('(').debug(this.args).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.debug(this.func).write('.').write("invoke").write('(').debug(this.args).write(')');
+    return output;
   }
 
 }

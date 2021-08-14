@@ -17,39 +17,39 @@ package swim.warp;
 import org.testng.annotations.Test;
 import swim.structure.Attr;
 import swim.structure.Record;
-import static swim.warp.Assertions.assertParses;
-import static swim.warp.Assertions.assertWrites;
+import static swim.warp.WarpAssertions.assertParses;
+import static swim.warp.WarpAssertions.assertWrites;
 
 public class CommandMessageSpec {
 
   @Test
   public void parseCommandWithNamedHeaders() {
     assertParses("@command(node: node_uri, lane: lane_uri)",
-        new CommandMessage("node_uri", "lane_uri"));
+                 new CommandMessage("node_uri", "lane_uri"));
   }
 
   @Test
   public void parseCommandWithPositionalHeaders() {
     assertParses("@command(node_uri, lane_uri)",
-        new CommandMessage("node_uri", "lane_uri"));
+                 new CommandMessage("node_uri", "lane_uri"));
   }
 
   @Test
   public void parseCommandWithBody() {
     assertParses("@command(node_uri, lane_uri)@test",
-        new CommandMessage("node_uri", "lane_uri", Record.of(Attr.of("test"))));
+                 new CommandMessage("node_uri", "lane_uri", Record.of(Attr.of("test"))));
   }
 
   @Test
   public void writeCommand() {
     assertWrites(new CommandMessage("node_uri", "lane_uri"),
-        "@command(node:node_uri,lane:lane_uri)");
+                 "@command(node:node_uri,lane:lane_uri)");
   }
 
   @Test
   public void writeCommandWithBody() {
     assertWrites(new CommandMessage("node_uri", "lane_uri", Record.of(Attr.of("test"))),
-        "@command(node:node_uri,lane:lane_uri)@test");
+                 "@command(node:node_uri,lane:lane_uri)@test");
   }
 
 }

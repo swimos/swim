@@ -34,6 +34,11 @@ final class FieldWriter<I, V> extends Writer<Object, Object> {
     this.step = step;
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return FieldWriter.write(output, this.json, this.key, this.value, this.part, this.step);
+  }
+
   static <I, V> Writer<Object, Object> write(Output<?> output, JsonWriter<I, V> json,
                                              V key, V value, Writer<?, ?> part, int step) {
     if (step == 1) {
@@ -60,27 +65,21 @@ final class FieldWriter<I, V> extends Writer<Object, Object> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new FieldWriter<I, V>(json, key, value, part, step);
   }
 
-  static <I, V> Writer<Object, Object> write(Output<?> output, JsonWriter<I, V> json,
-                                             V key, V value) {
-    return write(output, json, key, value, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.json, this.key, this.value, this.part, this.step);
+  static <I, V> Writer<Object, Object> write(Output<?> output, JsonWriter<I, V> json, V key, V value) {
+    return FieldWriter.write(output, json, key, value, null, 1);
   }
 
 }

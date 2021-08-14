@@ -61,73 +61,73 @@ public final class ProtobufReflection {
   private static StringReflection stringType;
 
   public static ProtobufVarintType<Boolean> booleanType() {
-    if (booleanType == null) {
-      booleanType = new BooleanReflection();
+    if (ProtobufReflection.booleanType == null) {
+      ProtobufReflection.booleanType = new BooleanReflection();
     }
-    return booleanType;
+    return ProtobufReflection.booleanType;
   }
 
   public static ProtobufZigZagType<Byte> byteType() {
-    if (byteType == null) {
-      byteType = new ByteReflection();
+    if (ProtobufReflection.byteType == null) {
+      ProtobufReflection.byteType = new ByteReflection();
     }
-    return byteType;
+    return ProtobufReflection.byteType;
   }
 
   public static ProtobufZigZagType<Short> shortType() {
-    if (shortType == null) {
-      shortType = new ShortReflection();
+    if (ProtobufReflection.shortType == null) {
+      ProtobufReflection.shortType = new ShortReflection();
     }
-    return shortType;
+    return ProtobufReflection.shortType;
   }
 
   public static ProtobufZigZagType<Integer> intType() {
-    if (intType == null) {
-      intType = new IntReflection();
+    if (ProtobufReflection.intType == null) {
+      ProtobufReflection.intType = new IntReflection();
     }
-    return intType;
+    return ProtobufReflection.intType;
   }
 
   public static ProtobufZigZagType<Long> longType() {
-    if (longType == null) {
-      longType = new LongReflection();
+    if (ProtobufReflection.longType == null) {
+      ProtobufReflection.longType = new LongReflection();
     }
-    return longType;
+    return ProtobufReflection.longType;
   }
 
   public static ProtobufFixed32Type<Float> floatType() {
-    if (floatType == null) {
-      floatType = new FloatReflection();
+    if (ProtobufReflection.floatType == null) {
+      ProtobufReflection.floatType = new FloatReflection();
     }
-    return floatType;
+    return ProtobufReflection.floatType;
   }
 
   public static ProtobufFixed64Type<Double> doubleType() {
-    if (doubleType == null) {
-      doubleType = new DoubleReflection();
+    if (ProtobufReflection.doubleType == null) {
+      ProtobufReflection.doubleType = new DoubleReflection();
     }
-    return doubleType;
+    return ProtobufReflection.doubleType;
   }
 
   public static ProtobufVarintType<Character> charType() {
-    if (charType == null) {
-      charType = new CharReflection();
+    if (ProtobufReflection.charType == null) {
+      ProtobufReflection.charType = new CharReflection();
     }
-    return charType;
+    return ProtobufReflection.charType;
   }
 
   public static ProtobufDataType<ByteBuffer> dataType() {
-    if (dataType == null) {
-      dataType = new DataReflection();
+    if (ProtobufReflection.dataType == null) {
+      ProtobufReflection.dataType = new DataReflection();
     }
-    return dataType;
+    return ProtobufReflection.dataType;
   }
 
   public static ProtobufStringType<String> stringType() {
-    if (stringType == null) {
-      stringType = new StringReflection();
+    if (ProtobufReflection.stringType == null) {
+      ProtobufReflection.stringType = new StringReflection();
     }
-    return stringType;
+    return ProtobufReflection.stringType;
   }
 
   @SuppressWarnings("unchecked")
@@ -151,7 +151,7 @@ public final class ProtobufReflection {
   }
 
   public static <I, T> ProtobufRepeatedType<I, T> arrayType(Class<?> itemClass) {
-    return arrayType(itemClass, classType(itemClass));
+    return ProtobufReflection.arrayType(itemClass, ProtobufReflection.classType(itemClass));
   }
 
   public static <K, V> ProtobufMapEntryType<K, V, Map.Entry<K, V>> mapEntryType(ProtobufType<? extends K> keyType, ProtobufType<? extends V> valueType) {
@@ -175,12 +175,12 @@ public final class ProtobufReflection {
   }
 
   public static <K, V> ProtobufMapType<K, V, Map.Entry<K, V>, Map<K, V>> mapType(ProtobufMapEntryType<? extends K, ? extends V, ? extends Map.Entry<K, V>> entryType) {
-    return mapType(Map.class, entryType);
+    return ProtobufReflection.mapType(Map.class, entryType);
   }
 
   public static <K, V> ProtobufMapType<K, V, Map.Entry<K, V>, Map<K, V>> mapType(ProtobufType<? extends K> keyType, ProtobufType<? extends V> valueType) {
     final ProtobufMapEntryType<K, V, Map.Entry<K, V>> entryType = MapEntryReflection.create(keyType, valueType);
-    return mapType(Map.class, entryType);
+    return ProtobufReflection.mapType(Map.class, entryType);
   }
 
   @SuppressWarnings("unchecked")
@@ -207,25 +207,25 @@ public final class ProtobufReflection {
   @SuppressWarnings("unchecked")
   static <T> ProtobufType<T> builtinType(Class<?> type) {
     if (type == String.class) {
-      return (ProtobufType<T>) stringType();
+      return (ProtobufType<T>) ProtobufReflection.stringType();
     } else if (type == Byte.class || type == Byte.TYPE) {
-      return (ProtobufType<T>) byteType();
+      return (ProtobufType<T>) ProtobufReflection.byteType();
     } else if (type == Short.class || type == Short.TYPE) {
-      return (ProtobufType<T>) shortType();
+      return (ProtobufType<T>) ProtobufReflection.shortType();
     } else if (type == Integer.class || type == Integer.TYPE) {
-      return (ProtobufType<T>) intType();
+      return (ProtobufType<T>) ProtobufReflection.intType();
     } else if (type == Long.class || type == Long.TYPE) {
-      return (ProtobufType<T>) longType();
+      return (ProtobufType<T>) ProtobufReflection.longType();
     } else if (type == Float.class || type == Float.TYPE) {
-      return (ProtobufType<T>) floatType();
+      return (ProtobufType<T>) ProtobufReflection.floatType();
     } else if (type == Double.class || type == Double.TYPE) {
-      return (ProtobufType<T>) doubleType();
+      return (ProtobufType<T>) ProtobufReflection.doubleType();
     } else if (type == Character.class || type == Character.TYPE) {
-      return (ProtobufType<T>) charType();
+      return (ProtobufType<T>) ProtobufReflection.charType();
     } else if (type == Boolean.class || type == Boolean.TYPE) {
-      return (ProtobufType<T>) booleanType();
+      return (ProtobufType<T>) ProtobufReflection.booleanType();
     } else if (type == ByteBuffer.class) {
-      return (ProtobufType<T>) dataType();
+      return (ProtobufType<T>) ProtobufReflection.dataType();
     } else {
       return null;
     }
@@ -254,8 +254,8 @@ public final class ProtobufReflection {
       final Field[] fields = type.getDeclaredFields();
       for (int i = 0, n = fields.length; i < n; i += 1) {
         final Field field = fields[i];
-        final ProtobufKind kind = field.getAnnotation(ProtobufKind.class);
-        if (kind != null) {
+        final ProtobufKind kindAnnotation = field.getAnnotation(ProtobufKind.class);
+        if (kindAnnotation != null) {
           if (!ProtobufType.class.isAssignableFrom(field.getType())) {
             throw new ProtobufException(field.toString());
           }
@@ -280,8 +280,8 @@ public final class ProtobufReflection {
       final Method[] methods = type.getDeclaredMethods();
       for (int i = 0, n = methods.length; i < n; i += 1) {
         final Method method = methods[i];
-        final ProtobufKind kind = method.getAnnotation(ProtobufKind.class);
-        if (kind != null) {
+        final ProtobufKind kindAnnotation = method.getAnnotation(ProtobufKind.class);
+        if (kindAnnotation != null) {
           if (!ProtobufType.class.isAssignableFrom(method.getReturnType())) {
             throw new ProtobufException(method.toString());
           }
@@ -363,12 +363,12 @@ public final class ProtobufReflection {
   static <T> ProtobufMessageType<T, T> reflectField(ProtobufMessageType<T, T> messageType, Field field) {
     final int modifiers = field.getModifiers();
     if ((modifiers & (Modifier.STATIC | Modifier.TRANSIENT)) == 0) {
-      final ProtobufMember member = field.getAnnotation(ProtobufMember.class);
-      if (member != null) {
+      final ProtobufMember memberAnnotation = field.getAnnotation(ProtobufMember.class);
+      if (memberAnnotation != null) {
         if ((modifiers & (Modifier.FINAL | Modifier.PRIVATE | Modifier.PROTECTED)) != 0 || modifiers == 0) {
           field.setAccessible(true);
         }
-        final long fieldNumber = member.value();
+        final long fieldNumber = memberAnnotation.value();
         final ProtobufType<?> valueType = reflectGenericType(field.getGenericType());
         if (valueType != null) {
           messageType = messageType.field(field(field, fieldNumber, valueType));

@@ -31,6 +31,11 @@ final class QValueParser extends Parser<Float> {
     this.step = step;
   }
 
+  @Override
+  public Parser<Float> feed(Input input) {
+    return QValueParser.parse(input, this.significand, this.exponent, this.step);
+  }
+
   static Parser<Float> parse(Input input, int significand, int exponent, int step) {
     int c = 0;
     if (step == 1) {
@@ -46,7 +51,7 @@ final class QValueParser extends Parser<Float> {
         input = input.step();
         step = 2;
       } else if (!input.isEmpty()) {
-        return done();
+        return Parser.done();
       }
     }
     if (step == 2) {
@@ -63,10 +68,10 @@ final class QValueParser extends Parser<Float> {
           input = input.step();
           step = 3;
         } else {
-          return error(Diagnostic.expected("qvalue", input));
+          return Parser.error(Diagnostic.expected("qvalue", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("qvalue", input));
+        return Parser.error(Diagnostic.expected("qvalue", input));
       }
     }
     if (step == 3) {
@@ -76,10 +81,10 @@ final class QValueParser extends Parser<Float> {
           input = input.step();
           step = 4;
         } else {
-          return error(Diagnostic.expected('=', input));
+          return Parser.error(Diagnostic.expected('=', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('=', input));
+        return Parser.error(Diagnostic.expected('=', input));
       }
     }
     if (step == 4) {
@@ -96,10 +101,10 @@ final class QValueParser extends Parser<Float> {
           exponent = 0;
           step = 5;
         } else {
-          return error(Diagnostic.expected("0 or 1", input));
+          return Parser.error(Diagnostic.expected("0 or 1", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("0 or 1", input));
+        return Parser.error(Diagnostic.expected("0 or 1", input));
       }
     }
     if (step == 5) {
@@ -139,28 +144,23 @@ final class QValueParser extends Parser<Float> {
         exponent -= 1;
       }
       if (weight <= 1f) {
-        return done(weight);
+        return Parser.done(weight);
       } else {
-        return error(Diagnostic.message("invalid qvalue: " + weight, input));
+        return Parser.error(Diagnostic.message("invalid qvalue: " + weight, input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new QValueParser(significand, exponent, step);
   }
 
   public static Parser<Float> parse(Input input) {
-    return parse(input, 0, 0, 1);
+    return QValueParser.parse(input, 0, 0, 1);
   }
 
   public static Parser<Float> parseRest(Input input) {
-    return parse(input, 0, 0, 3);
-  }
-
-  @Override
-  public Parser<Float> feed(Input input) {
-    return parse(input, this.significand, this.exponent, this.step);
+    return QValueParser.parse(input, 0, 0, 3);
   }
 
 }

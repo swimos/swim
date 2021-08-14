@@ -29,6 +29,8 @@ final class QTreeShapeCursor<K, S, V> implements Cursor<SpatialMap.Entry<K, S, V
     this.inner = inner;
     this.shapeForm = shapeForm;
     this.shape = shape;
+    this.nextSlot = null;
+    this.previousSlot = null;
   }
 
   @Override

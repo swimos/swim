@@ -73,12 +73,15 @@ import swim.web.WebResponse;
 
 public abstract class KernelProxy implements KernelBinding, KernelContext {
 
-  protected static final int STARTED = 0x01;
-  protected static final AtomicIntegerFieldUpdater<KernelProxy> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(KernelProxy.class, "status");
   protected KernelBinding kernelBinding;
   protected KernelContext kernelContext;
   protected volatile int status;
+
+  public KernelProxy() {
+    this.kernelBinding = null;
+    this.kernelContext = null;
+    this.status = 0;
+  }
 
   @Override
   public final KernelBinding kernelWrapper() {
@@ -122,19 +125,19 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
 
   @Override
   public Kernel injectKernel(Kernel kernel) {
-    if (kernelPriority() < kernel.kernelPriority()) {
-      setKernelBinding((KernelBinding) kernel);
+    if (this.kernelPriority() < kernel.kernelPriority()) {
+      this.setKernelBinding((KernelBinding) kernel);
       ((KernelBinding) kernel).setKernelContext(this);
       return kernel;
     } else {
       final KernelContext kernelContext = this.kernelContext;
       if (kernelContext == null) {
         ((KernelContext) kernel).setKernelBinding(this);
-        setKernelContext((KernelContext) kernel);
+        this.setKernelContext((KernelContext) kernel);
       } else {
         kernel = kernelContext.injectKernel(kernel);
         ((KernelContext) kernel).setKernelBinding(this);
-        setKernelContext((KernelContext) kernel);
+        this.setKernelContext((KernelContext) kernel);
       }
       return this;
     }
@@ -150,7 +153,7 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
 
   @Override
   public final boolean isStarted() {
-    return (this.status & STARTED) != 0;
+    return (KernelProxy.STATUS.get(this) & KernelProxy.STARTED) != 0;
   }
 
   @Override
@@ -741,47 +744,49 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
 
   @Override
   public void start() {
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus | STARTED;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if ((oldStatus & STARTED) == 0) {
-      willStart();
-    }
-    final KernelContext kernelContext = this.kernelContext;
-    if (kernelContext != null) {
-      kernelContext.start();
-    }
-    if ((oldStatus & STARTED) == 0) {
-      didStart();
-    }
+      final int oldStatus = KernelProxy.STATUS.get(this);
+      final int newStatus = oldStatus | KernelProxy.STARTED;
+      if (KernelProxy.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if ((oldStatus & KernelProxy.STARTED) == 0) {
+          this.willStart();
+        }
+        final KernelContext kernelContext = this.kernelContext;
+        if (kernelContext != null) {
+          kernelContext.start();
+        }
+        if ((oldStatus & KernelProxy.STARTED) == 0) {
+          this.didStart();
+        }
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public void stop() {
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus & ~STARTED;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if ((oldStatus & STARTED) != 0) {
-      willStop();
-    }
-    final KernelContext kernelContext = this.kernelContext;
-    if (kernelContext != null) {
-      kernelContext.stop();
-    }
-    if ((oldStatus & STARTED) != 0) {
-      didStop();
-    }
+      final int oldStatus = KernelProxy.STATUS.get(this);
+      final int newStatus = oldStatus & ~KernelProxy.STARTED;
+      if (KernelProxy.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if ((oldStatus & KernelProxy.STARTED) != 0) {
+          this.willStop();
+        }
+        final KernelContext kernelContext = this.kernelContext;
+        if (kernelContext != null) {
+          kernelContext.stop();
+        }
+        if ((oldStatus & KernelProxy.STARTED) != 0) {
+          this.didStop();
+        }
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public void run() {
-    start();
+    this.start();
     final KernelContext kernelContext = this.kernelContext;
     if (kernelContext != null) {
       kernelContext.run();
@@ -803,5 +808,10 @@ public abstract class KernelProxy implements KernelBinding, KernelContext {
   protected void didStop() {
     // hook
   }
+
+  protected static final int STARTED = 0x01;
+
+  protected static final AtomicIntegerFieldUpdater<KernelProxy> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(KernelProxy.class, "status");
 
 }

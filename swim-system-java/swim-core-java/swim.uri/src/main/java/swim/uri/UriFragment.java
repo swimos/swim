@@ -23,53 +23,11 @@ import swim.util.Murmur3;
 
 public class UriFragment extends UriPart implements Comparable<UriFragment>, Debug, Display {
 
-  private static UriFragment undefined;
-  private static ThreadLocal<HashGenCacheMap<String, UriFragment>> cache = new ThreadLocal<>();
   protected final String identifier;
   String string;
 
   protected UriFragment(String identifier) {
     this.identifier = identifier;
-  }
-
-  public static UriFragment undefined() {
-    if (undefined == null) {
-      undefined = new UriFragment(null);
-    }
-    return undefined;
-  }
-
-  public static UriFragment from(String identifier) {
-    if (identifier != null) {
-      final HashGenCacheMap<String, UriFragment> cache = cache();
-      final UriFragment fragment = cache.get(identifier);
-      if (fragment != null) {
-        return fragment;
-      } else {
-        return cache.put(identifier, new UriFragment(identifier));
-      }
-    } else {
-      return undefined();
-    }
-  }
-
-  public static UriFragment parse(String string) {
-    return Uri.standardParser().parseFragmentString(string);
-  }
-
-  static HashGenCacheMap<String, UriFragment> cache() {
-    HashGenCacheMap<String, UriFragment> cache = UriFragment.cache.get();
-    if (cache == null) {
-      int cacheSize;
-      try {
-        cacheSize = Integer.parseInt(System.getProperty("swim.uri.fragment.cache.size"));
-      } catch (NumberFormatException e) {
-        cacheSize = 32;
-      }
-      cache = new HashGenCacheMap<String, UriFragment>(cacheSize);
-      UriFragment.cache.set(cache);
-    }
-    return cache;
   }
 
   public final boolean isDefined() {
@@ -82,7 +40,7 @@ public class UriFragment extends UriPart implements Comparable<UriFragment>, Deb
 
   @Override
   public final int compareTo(UriFragment that) {
-    return toString().compareTo(that.toString());
+    return this.toString().compareTo(that.toString());
   }
 
   @Override
@@ -102,22 +60,25 @@ public class UriFragment extends UriPart implements Comparable<UriFragment>, Deb
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("UriFragment").write('.');
-    if (isDefined()) {
-      output = output.write("parse").write('(').write('"').display(this).write('"').write(')');
+    if (this.isDefined()) {
+      output = output.write("parse").write('(').write('"').display(this).write('"');
     } else {
-      output = output.write("undefined").write('(').write(')');
+      output = output.write("undefined").write('(');
     }
+    output = output.write(')');
+    return output;
   }
 
   @Override
-  public void display(Output<?> output) {
+  public <T> Output<T> display(Output<T> output) {
     if (this.string != null) {
       output = output.write(this.string);
     } else if (this.identifier != null) {
-      Uri.writeFragment(this.identifier, output);
+      output = Uri.writeFragment(this.identifier, output);
     }
+    return output;
   }
 
   @Override
@@ -126,6 +87,50 @@ public class UriFragment extends UriPart implements Comparable<UriFragment>, Deb
       this.string = Format.display(this);
     }
     return this.string;
+  }
+
+  private static UriFragment undefined;
+
+  public static UriFragment undefined() {
+    if (UriFragment.undefined == null) {
+      UriFragment.undefined = new UriFragment(null);
+    }
+    return UriFragment.undefined;
+  }
+
+  public static UriFragment create(String identifier) {
+    if (identifier != null) {
+      final HashGenCacheMap<String, UriFragment> cache = UriFragment.cache();
+      final UriFragment fragment = cache.get(identifier);
+      if (fragment != null) {
+        return fragment;
+      } else {
+        return cache.put(identifier, new UriFragment(identifier));
+      }
+    } else {
+      return UriFragment.undefined();
+    }
+  }
+
+  public static UriFragment parse(String string) {
+    return Uri.standardParser().parseFragmentString(string);
+  }
+
+  private static ThreadLocal<HashGenCacheMap<String, UriFragment>> cache = new ThreadLocal<>();
+
+  static HashGenCacheMap<String, UriFragment> cache() {
+    HashGenCacheMap<String, UriFragment> cache = UriFragment.cache.get();
+    if (cache == null) {
+      int cacheSize;
+      try {
+        cacheSize = Integer.parseInt(System.getProperty("swim.uri.fragment.cache.size"));
+      } catch (NumberFormatException e) {
+        cacheSize = 32;
+      }
+      cache = new HashGenCacheMap<String, UriFragment>(cacheSize);
+      UriFragment.cache.set(cache);
+    }
+    return cache;
   }
 
 }

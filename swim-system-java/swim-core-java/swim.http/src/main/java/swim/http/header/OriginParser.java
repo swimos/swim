@@ -46,8 +46,15 @@ final class OriginParser extends Parser<Origin> {
     this(null, null, null, null, 1);
   }
 
-  static Parser<Origin> parse(Input input, Parser<UriScheme> scheme, Parser<UriHost> host,
-                              Parser<UriPort> port, Builder<Uri, FingerTrieSeq<Uri>> origins, int step) {
+  @Override
+  public Parser<Origin> feed(Input input) {
+    return OriginParser.parse(input, this.scheme, this.host,
+                              this.port, this.origins, this.step);
+  }
+
+  static Parser<Origin> parse(Input input, Parser<UriScheme> scheme,
+                              Parser<UriHost> host, Parser<UriPort> port,
+                              Builder<Uri, FingerTrieSeq<Uri>> origins, int step) {
     do {
       if (step == 1) {
         if (scheme == null) {
@@ -61,9 +68,9 @@ final class OriginParser extends Parser<Origin> {
             step = 2;
           } else if (!input.isEmpty()) {
             if (origins == null && "null".equals(scheme.bind().name())) {
-              return done(Origin.empty());
+              return Parser.done(Origin.empty());
             } else {
-              return error(Diagnostic.expected(':', input));
+              return Parser.error(Diagnostic.expected(':', input));
             }
           }
         } else if (scheme.isError()) {
@@ -75,7 +82,7 @@ final class OriginParser extends Parser<Origin> {
           input = input.step();
           step = 3;
         } else if (!input.isEmpty()) {
-          return error(Diagnostic.expected('/', input));
+          return Parser.error(Diagnostic.expected('/', input));
         }
       }
       if (step == 3) {
@@ -83,7 +90,7 @@ final class OriginParser extends Parser<Origin> {
           input = input.step();
           step = 4;
         } else if (!input.isEmpty()) {
-          return error(Diagnostic.expected('/', input));
+          return Parser.error(Diagnostic.expected('/', input));
         }
       }
       if (step == 4) {
@@ -100,7 +107,7 @@ final class OriginParser extends Parser<Origin> {
             if (origins == null) {
               origins = FingerTrieSeq.builder();
             }
-            origins.add(Uri.from(scheme.bind(), UriAuthority.from(host.bind())));
+            origins.add(Uri.create(scheme.bind(), UriAuthority.create(host.bind())));
             scheme = null;
             host = null;
             step = 6;
@@ -119,7 +126,7 @@ final class OriginParser extends Parser<Origin> {
           if (origins == null) {
             origins = FingerTrieSeq.builder();
           }
-          origins.add(Uri.from(scheme.bind(), UriAuthority.from(host.bind(), port.bind())));
+          origins.add(Uri.create(scheme.bind(), UriAuthority.create(host.bind(), port.bind())));
           scheme = null;
           host = null;
           port = null;
@@ -134,24 +141,19 @@ final class OriginParser extends Parser<Origin> {
           step = 1;
           continue;
         } else if (!input.isEmpty()) {
-          return done(Origin.from(origins.bind()));
+          return Parser.done(Origin.create(origins.bind()));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new OriginParser(scheme, host, port, origins, step);
   }
 
   static Parser<Origin> parse(Input input) {
-    return parse(input, null, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<Origin> feed(Input input) {
-    return parse(input, this.scheme, this.host, this.port, this.origins, this.step);
+    return OriginParser.parse(input, null, null, null, null, 1);
   }
 
 }

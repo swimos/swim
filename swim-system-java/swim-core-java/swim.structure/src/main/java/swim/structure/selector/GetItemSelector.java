@@ -26,7 +26,6 @@ import swim.util.Murmur3;
 
 public final class GetItemSelector extends Selector {
 
-  private static int hashSeed;
   final Num index;
   final Selector then;
 
@@ -129,7 +128,7 @@ public final class GetItemSelector extends Selector {
 
   @Override
   public Selector andThen(Selector then) {
-    return new GetItemSelector(index, this.then.andThen(then));
+    return new GetItemSelector(this.index, this.then.andThen(then));
   }
 
   @Override
@@ -140,9 +139,9 @@ public final class GetItemSelector extends Selector {
   @Override
   protected int compareTo(Selector that) {
     if (that instanceof GetItemSelector) {
-      return compareTo((GetItemSelector) that);
+      return this.compareTo((GetItemSelector) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(GetItemSelector that) {
@@ -159,24 +158,27 @@ public final class GetItemSelector extends Selector {
       return true;
     } else if (other instanceof GetItemSelector) {
       final GetItemSelector that = (GetItemSelector) other;
-      return index.equals(that.index) && then.equals(that.then);
+      return this.index.equals(that.index) && this.then.equals(that.then);
     }
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(GetItemSelector.class);
+    if (GetItemSelector.hashSeed == 0) {
+      GetItemSelector.hashSeed = Murmur3.seed(GetItemSelector.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(GetItemSelector.hashSeed,
         this.index.hashCode()), this.then.hashCode()));
   }
 
   @Override
-  public void debugThen(Output<?> output) {
+  public <T> Output<T> debugThen(Output<T> output) {
     output = output.write('.').write("getItem").write('(').debug(this.index).write(')');
-    this.then.debugThen(output);
+    output = this.then.debugThen(output);
+    return output;
   }
 
 }

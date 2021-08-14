@@ -28,8 +28,8 @@ final class ConditionalOperatorWriter<I, V> extends Writer<Object, Object> {
   final Writer<?, ?> part;
   final int step;
 
-  ConditionalOperatorWriter(ReconWriter<I, V> recon, I ifTerm, I thenTerm, I elseTerm,
-                            int precedence, Writer<?, ?> part, int step) {
+  ConditionalOperatorWriter(ReconWriter<I, V> recon, I ifTerm, I thenTerm,
+                            I elseTerm, int precedence, Writer<?, ?> part, int step) {
     this.recon = recon;
     this.ifTerm = ifTerm;
     this.thenTerm = thenTerm;
@@ -41,8 +41,8 @@ final class ConditionalOperatorWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.ifTerm, this.thenTerm, this.elseTerm,
-                 this.precedence, this.part, this.step);
+    return ConditionalOperatorWriter.write(output, this.recon, this.ifTerm, this.thenTerm,
+                                           this.elseTerm, this.precedence, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, I ifTerm, I thenTerm, I elseTerm, int precedence) {
@@ -141,23 +141,23 @@ final class ConditionalOperatorWriter<I, V> extends Writer<Object, Object> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new ConditionalOperatorWriter<I, V>(recon, ifTerm, thenTerm, elseTerm,
-        precedence, part, step);
+                                               precedence, part, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon,
                                              I ifTerm, I thenTerm, I elseTerm, int precedence) {
-    return write(output, recon, ifTerm, thenTerm, elseTerm, precedence, null, 1);
+    return ConditionalOperatorWriter.write(output, recon, ifTerm, thenTerm, elseTerm, precedence, null, 1);
   }
 
 }

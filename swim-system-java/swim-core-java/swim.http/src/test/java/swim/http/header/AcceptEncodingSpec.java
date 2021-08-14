@@ -23,50 +23,50 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class AcceptEncodingSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseAcceptEncodingHeaders() {
-    assertParses("Accept-Encoding: *", AcceptEncoding.from(ContentCoding.star()));
-    assertParses("Accept-Encoding: identity", AcceptEncoding.from(ContentCoding.identity()));
-    assertParses("Accept-Encoding: identity;q=0", AcceptEncoding.from(ContentCoding.from("identity", 0f)));
-    assertParses("Accept-Encoding: identity; q=0", AcceptEncoding.from(ContentCoding.from("identity", 0f)));
-    assertParses("Accept-Encoding: identity ; q=0", AcceptEncoding.from(ContentCoding.from("identity", 0f)));
-    assertParses("Accept-Encoding: gzip; q=1", AcceptEncoding.from(ContentCoding.from("gzip", 1f)));
-    assertParses("Accept-Encoding: gzip; q=1.0", AcceptEncoding.from(ContentCoding.from("gzip", 1f)));
-    assertParses("Accept-Encoding: gzip; q=1.00", AcceptEncoding.from(ContentCoding.from("gzip", 1f)));
-    assertParses("Accept-Encoding: gzip; q=1.000", AcceptEncoding.from(ContentCoding.from("gzip", 1f)));
-    assertParses("Accept-Encoding: gzip; q=0.005", AcceptEncoding.from(ContentCoding.from("gzip", 0.005f)));
+    assertParses("Accept-Encoding: *", AcceptEncoding.create(ContentCoding.star()));
+    assertParses("Accept-Encoding: identity", AcceptEncoding.create(ContentCoding.identity()));
+    assertParses("Accept-Encoding: identity;q=0", AcceptEncoding.create(ContentCoding.create("identity", 0f)));
+    assertParses("Accept-Encoding: identity; q=0", AcceptEncoding.create(ContentCoding.create("identity", 0f)));
+    assertParses("Accept-Encoding: identity ; q=0", AcceptEncoding.create(ContentCoding.create("identity", 0f)));
+    assertParses("Accept-Encoding: gzip; q=1", AcceptEncoding.create(ContentCoding.create("gzip", 1f)));
+    assertParses("Accept-Encoding: gzip; q=1.0", AcceptEncoding.create(ContentCoding.create("gzip", 1f)));
+    assertParses("Accept-Encoding: gzip; q=1.00", AcceptEncoding.create(ContentCoding.create("gzip", 1f)));
+    assertParses("Accept-Encoding: gzip; q=1.000", AcceptEncoding.create(ContentCoding.create("gzip", 1f)));
+    assertParses("Accept-Encoding: gzip; q=0.005", AcceptEncoding.create(ContentCoding.create("gzip", 0.005f)));
     assertParses("Accept-Encoding: gzip,deflate,identity",
-        AcceptEncoding.from(ContentCoding.from("gzip"),
-            ContentCoding.from("deflate"),
-            ContentCoding.identity()));
+                 AcceptEncoding.create(ContentCoding.create("gzip"),
+                                       ContentCoding.create("deflate"),
+                                       ContentCoding.identity()));
     assertParses("Accept-Encoding: gzip, deflate ,identity",
-        AcceptEncoding.from(ContentCoding.from("gzip"),
-            ContentCoding.from("deflate"),
-            ContentCoding.identity()));
+                 AcceptEncoding.create(ContentCoding.create("gzip"),
+                                       ContentCoding.create("deflate"),
+                                       ContentCoding.identity()));
     assertParses("Accept-Encoding: gzip; q=1, deflate; q=0.5, identity; q=0",
-        AcceptEncoding.from(ContentCoding.from("gzip", 1f),
-            ContentCoding.from("deflate", 0.5f),
-            ContentCoding.from("identity", 0f)));
+                 AcceptEncoding.create(ContentCoding.create("gzip", 1f),
+                                       ContentCoding.create("deflate", 0.5f),
+                                       ContentCoding.create("identity", 0f)));
   }
 
   @Test
   public void writeAcceptEncodingHeaders() {
-    assertWrites(AcceptEncoding.from(ContentCoding.star()), "Accept-Encoding: *");
-    assertWrites(AcceptEncoding.from(ContentCoding.identity()), "Accept-Encoding: identity");
-    assertWrites(AcceptEncoding.from(ContentCoding.from("identity", 0f)), "Accept-Encoding: identity; q=0");
-    assertWrites(AcceptEncoding.from(ContentCoding.from("gzip", 0.005f)), "Accept-Encoding: gzip; q=0.005");
-    assertWrites(AcceptEncoding.from(ContentCoding.from("gzip"),
-        ContentCoding.from("deflate"),
-        ContentCoding.identity()),
-        "Accept-Encoding: gzip, deflate, identity");
-    assertWrites(AcceptEncoding.from(ContentCoding.from("gzip", 1f),
-        ContentCoding.from("deflate", 0.5f),
-        ContentCoding.from("identity", 0f)),
-        "Accept-Encoding: gzip, deflate; q=0.5, identity; q=0");
+    assertWrites(AcceptEncoding.create(ContentCoding.star()), "Accept-Encoding: *");
+    assertWrites(AcceptEncoding.create(ContentCoding.identity()), "Accept-Encoding: identity");
+    assertWrites(AcceptEncoding.create(ContentCoding.create("identity", 0f)), "Accept-Encoding: identity; q=0");
+    assertWrites(AcceptEncoding.create(ContentCoding.create("gzip", 0.005f)), "Accept-Encoding: gzip; q=0.005");
+    assertWrites(AcceptEncoding.create(ContentCoding.create("gzip"),
+                                       ContentCoding.create("deflate"),
+                                       ContentCoding.identity()),
+                 "Accept-Encoding: gzip, deflate, identity");
+    assertWrites(AcceptEncoding.create(ContentCoding.create("gzip", 1f),
+                                       ContentCoding.create("deflate", 0.5f),
+                                       ContentCoding.create("identity", 0f)),
+                 "Accept-Encoding: gzip, deflate; q=0.5, identity; q=0");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

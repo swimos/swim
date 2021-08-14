@@ -37,6 +37,11 @@ final class HttpBodyDecoder<T> extends Decoder<HttpMessage<T>> {
     this(message, content, length, 0L);
   }
 
+  @Override
+  public Decoder<HttpMessage<T>> feed(InputBuffer input) {
+    return HttpBodyDecoder.decode(input, this.message, this.content, this.length, this.offset);
+  }
+
   static <T> Decoder<HttpMessage<T>> decode(InputBuffer input, HttpMessage<?> message,
                                             Decoder<T> content, long length, long offset) {
     final int inputStart = input.index();
@@ -65,9 +70,9 @@ final class HttpBodyDecoder<T> extends Decoder<HttpMessage<T>> {
     }
     if (content.isDone()) {
       if (offset < length) {
-        return error(new DecoderException("buffer underflow"));
+        return Decoder.error(new DecoderException("buffer underflow"));
       } else if (offset > length) {
-        return error(new DecoderException("buffer overflow"));
+        return Decoder.error(new DecoderException("buffer overflow"));
       } else {
         final MediaType mediaType;
         final ContentType contentType = message.getHeader(ContentType.class);
@@ -76,8 +81,8 @@ final class HttpBodyDecoder<T> extends Decoder<HttpMessage<T>> {
         } else {
           mediaType = null;
         }
-        final HttpValue<T> entity = HttpValue.from(content.bind(), mediaType);
-        return done(message.entity(entity));
+        final HttpValue<T> entity = HttpValue.create(content.bind(), mediaType);
+        return Decoder.done(message.entity(entity));
       }
     } else if (content.isError()) {
       return content.asError();
@@ -87,12 +92,7 @@ final class HttpBodyDecoder<T> extends Decoder<HttpMessage<T>> {
 
   static <T> Decoder<HttpMessage<T>> decode(InputBuffer input, HttpMessage<?> message,
                                             Decoder<T> content, long length) {
-    return decode(input, message, content, length, 0L);
-  }
-
-  @Override
-  public Decoder<HttpMessage<T>> feed(InputBuffer input) {
-    return decode(input, this.message, this.content, this.length, this.offset);
+    return HttpBodyDecoder.decode(input, message, content, length, 0L);
   }
 
 }

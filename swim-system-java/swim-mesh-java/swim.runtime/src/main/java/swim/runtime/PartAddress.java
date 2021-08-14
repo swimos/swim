@@ -45,12 +45,12 @@ public final class PartAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public PartAddress meshUri(Uri meshUri) {
-    return copy(this.edgeName, meshUri, this.partKey);
+    return this.copy(this.edgeName, meshUri, this.partKey);
   }
 
   @Override
   public PartAddress meshUri(String meshUri) {
-    return meshUri(Uri.parse(meshUri));
+    return this.meshUri(Uri.parse(meshUri));
   }
 
   @Override
@@ -60,7 +60,7 @@ public final class PartAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public PartAddress partKey(Value partKey) {
-    return copy(this.edgeName, this.meshUri, partKey);
+    return this.copy(this.edgeName, this.meshUri, partKey);
   }
 
   PartAddress copy(String edgeName, Uri meshUri, Value partKey) {
@@ -74,7 +74,7 @@ public final class PartAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public HostAddress hostUri(String hostUri) {
-    return hostUri(Uri.parse(hostUri));
+    return this.hostUri(Uri.parse(hostUri));
   }
 
   @Override
@@ -89,20 +89,23 @@ public final class PartAddress implements EdgeAddressed, MeshAddressed, PartAddr
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.hash(PartAddress.class);
+    if (PartAddress.hashSeed == 0) {
+      PartAddress.hashSeed = Murmur3.hash(PartAddress.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(PartAddress.hashSeed,
         this.edgeName.hashCode()), this.meshUri.hashCode()), this.partKey.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("PartAddress").write('.').write("from").write('(')
-        .debug(this.edgeName).write(", ").debug(this.meshUri.toString()).write(", ")
-        .debug(this.partKey).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("PartAddress").write('.').write("create").write('(')
+                   .debug(this.edgeName).write(", ").debug(this.meshUri.toString()).write(", ")
+                   .debug(this.partKey).write(')');
+    return output;
   }
 
   @Override
@@ -110,13 +113,11 @@ public final class PartAddress implements EdgeAddressed, MeshAddressed, PartAddr
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static PartAddress from(String edgeName, Uri meshUri, Value partKey) {
+  public static PartAddress create(String edgeName, Uri meshUri, Value partKey) {
     return new PartAddress(edgeName, meshUri, partKey);
   }
 
-  public static PartAddress from(String edgeName, String meshUri, Value partKey) {
+  public static PartAddress create(String edgeName, String meshUri, Value partKey) {
     return new PartAddress(edgeName, Uri.parse(meshUri), partKey);
   }
 

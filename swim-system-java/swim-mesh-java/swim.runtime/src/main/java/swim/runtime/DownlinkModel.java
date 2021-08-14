@@ -15,7 +15,7 @@
 package swim.runtime;
 
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.uri.Uri;
 
 public abstract class DownlinkModel<View extends DownlinkView> extends AbstractDownlinkBinding implements LinkBinding {
@@ -24,13 +24,13 @@ public abstract class DownlinkModel<View extends DownlinkView> extends AbstractD
 
   public DownlinkModel(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri) {
     super(meshUri, hostUri, nodeUri, laneUri);
+    this.views = null;
   }
 
   public void addDownlink(View view) {
-    Object oldViews;
-    Object newViews;
     do {
-      oldViews = this.views;
+      final Object oldViews = DownlinkModel.VIEWS.get(this);
+      final Object newViews;
       if (oldViews instanceof DownlinkView) {
         newViews = new DownlinkView[] {(DownlinkView) oldViews, view};
       } else if (oldViews instanceof DownlinkView[]) {
@@ -43,22 +43,25 @@ public abstract class DownlinkModel<View extends DownlinkView> extends AbstractD
       } else {
         newViews = view;
       }
-    } while (!VIEWS.compareAndSet(this, oldViews, newViews));
-    didAddDownlink(view);
-    if (oldViews == null) {
-      openDown();
-    }
+      if (DownlinkModel.VIEWS.compareAndSet(this, oldViews, newViews)) {
+        this.didAddDownlink(view);
+        if (oldViews == null) {
+          this.openDown();
+        }
+        break;
+      }
+    } while (true);
   }
 
   public void removeDownlink(View view) {
-    Object oldViews;
-    Object newViews;
     do {
-      oldViews = this.views;
+      final Object oldViews = DownlinkModel.VIEWS.get(this);
+      final Object newViews;
       if (oldViews instanceof DownlinkView) {
         if (oldViews == view) {
           newViews = null;
-          continue;
+        } else {
+          break;
         }
       } else if (oldViews instanceof DownlinkView[]) {
         final DownlinkView[] oldViewArray = (DownlinkView[]) oldViews;
@@ -66,10 +69,10 @@ public abstract class DownlinkModel<View extends DownlinkView> extends AbstractD
         if (n == 2) {
           if (oldViewArray[0] == view) {
             newViews = oldViewArray[1];
-            continue;
           } else if (oldViewArray[1] == view) {
             newViews = oldViewArray[0];
-            continue;
+          } else {
+            break;
           }
         } else { // n > 2
           final DownlinkView[] newViewArray = new DownlinkView[n - 1];
@@ -87,50 +90,52 @@ public abstract class DownlinkModel<View extends DownlinkView> extends AbstractD
           if (i < n) {
             System.arraycopy(oldViewArray, i + 1, newViewArray, i, n - (i + 1));
             newViews = newViewArray;
-            continue;
+          } else {
+            break;
           }
         }
+      } else {
+        break;
       }
-      newViews = oldViews;
-      break;
-    } while (!VIEWS.compareAndSet(this, oldViews, newViews));
-    if (oldViews != newViews) {
-      didRemoveDownlink(view);
-    }
-    if (newViews == null) {
-      closeDown();
-    }
+      if (DownlinkModel.VIEWS.compareAndSet(this, oldViews, newViews)) {
+        this.didRemoveDownlink(view);
+        if (newViews == null) {
+          this.closeDown();
+        }
+        break;
+      }
+    } while (true);
   }
 
   @SuppressWarnings("unchecked")
   protected void removeDownlinks() {
-    final Object views = VIEWS.getAndSet(this, null);
+    final Object views = DownlinkModel.VIEWS.getAndSet(this, null);
     View view;
     if (views instanceof DownlinkView) {
       view = (View) views;
-      didRemoveDownlink(view);
+      this.didRemoveDownlink(view);
     } else if (views instanceof DownlinkView[]) {
       final DownlinkView[] viewArray = (DownlinkView[]) views;
       final int n = viewArray.length;
       for (int i = 0; i < n; i += 1) {
         view = (View) viewArray[i];
-        didRemoveDownlink(view);
+        this.didRemoveDownlink(view);
       }
     }
   }
 
   protected void didAddDownlink(View view) {
-    // stub
+    // hook
   }
 
   protected void didRemoveDownlink(View view) {
-    // stub
+    // hook
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public void reopen() {
-    final Object views = this.views;
+    final Object views = DownlinkModel.VIEWS.get(this);
     View view;
     if (views instanceof DownlinkView) {
       view = (View) views;
@@ -167,7 +172,7 @@ public abstract class DownlinkModel<View extends DownlinkView> extends AbstractD
 
   @Override
   public void didFail(Throwable error) {
-    if (Conts.isNonFatal(error)) {
+    if (Cont.isNonFatal(error)) {
       new DownlinkRelayDidFail<View>(this, error).run();
     } else {
       error.printStackTrace();
@@ -179,7 +184,7 @@ public abstract class DownlinkModel<View extends DownlinkView> extends AbstractD
   }
 
   @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<DownlinkModel<?>, Object> VIEWS =
+  protected static final AtomicReferenceFieldUpdater<DownlinkModel<?>, Object> VIEWS =
       AtomicReferenceFieldUpdater.newUpdater((Class<DownlinkModel<?>>) (Class<?>) DownlinkModel.class, Object.class, "views");
 
 }

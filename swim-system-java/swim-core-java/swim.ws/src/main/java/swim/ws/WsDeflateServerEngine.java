@@ -42,13 +42,13 @@ final class WsDeflateServerEngine extends WsEngine {
   @Override
   public WsEncoder encoder() {
     final int flush;
-    if (serverNoContextTakeover) {
+    if (this.serverNoContextTakeover) {
       flush = Deflate.Z_FULL_FLUSH;
     } else {
       flush = Deflate.Z_SYNC_FLUSH;
     }
     return Ws.deflateEncoderUnmasked(new Deflate<Object>(Deflate.Z_NO_WRAP, this.serverCompressionLevel,
-                                     this.serverMaxWindowBits), flush);
+                                                         this.serverMaxWindowBits), flush);
   }
 
   @Override
@@ -56,7 +56,7 @@ final class WsDeflateServerEngine extends WsEngine {
     return this;
   }
 
-  static WsDeflateServerEngine from(WebSocketExtension extension, WsEngineSettings settings) {
+  static WsDeflateServerEngine create(WebSocketExtension extension, WsEngineSettings settings) {
     boolean serverNoContextTakeover = false;
     int serverMaxWindowBits = 15;
     int clientMaxWindowBits = 15;

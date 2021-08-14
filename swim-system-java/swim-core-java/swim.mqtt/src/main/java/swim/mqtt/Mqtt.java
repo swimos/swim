@@ -16,25 +16,26 @@ package swim.mqtt;
 
 public final class Mqtt {
 
-  private static MqttDecoder standardDecoder;
-  private static MqttEncoder standardEncoder;
-
   private Mqtt() {
-    // stub
+    // static
   }
+
+  private static MqttDecoder standardDecoder;
 
   public static MqttDecoder standardDecoder() {
-    if (standardDecoder == null) {
-      standardDecoder = new MqttDecoder();
+    if (Mqtt.standardDecoder == null) {
+      Mqtt.standardDecoder = new MqttDecoder();
     }
-    return standardDecoder;
+    return Mqtt.standardDecoder;
   }
 
+  private static MqttEncoder standardEncoder;
+
   public static MqttEncoder standardEncoder() {
-    if (standardEncoder == null) {
-      standardEncoder = new MqttEncoder();
+    if (Mqtt.standardEncoder == null) {
+      Mqtt.standardEncoder = new MqttEncoder();
     }
-    return standardEncoder;
+    return Mqtt.standardEncoder;
   }
 
 }

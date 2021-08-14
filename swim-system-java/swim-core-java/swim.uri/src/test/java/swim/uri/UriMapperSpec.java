@@ -25,63 +25,63 @@ public class UriMapperSpec {
 
   @Test
   public void mapUriPathMatches() {
-    assertEquals(UriMapper.from("path", "test").get("path"), "test");
-    assertEquals(UriMapper.from("a/", "test").get("a/"), "test");
-    assertEquals(UriMapper.from("a/b", "test").get("a/b"), "test");
-    assertEquals(UriMapper.from("a/b/", "test").get("a/b/"), "test");
-    assertEquals(UriMapper.from("a/b/c", "test").get("a/b/c"), "test");
+    assertEquals(UriMapper.mapping("path", "test").get("path"), "test");
+    assertEquals(UriMapper.mapping("a/", "test").get("a/"), "test");
+    assertEquals(UriMapper.mapping("a/b", "test").get("a/b"), "test");
+    assertEquals(UriMapper.mapping("a/b/", "test").get("a/b/"), "test");
+    assertEquals(UriMapper.mapping("a/b/c", "test").get("a/b/c"), "test");
   }
 
   @Test
   public void notMapUriPathMismatches() {
-    assertNull(UriMapper.from("foo", "test").get("path"));
-    assertNull(UriMapper.from("x/", "test").get("a/"));
-    assertNull(UriMapper.from("x/b", "test").get("a/b"));
-    assertNull(UriMapper.from("a/x", "test").get("a/b"));
-    assertNull(UriMapper.from("x/b/", "test").get("a/b/"));
-    assertNull(UriMapper.from("a/x/", "test").get("a/b/"));
-    assertNull(UriMapper.from("x/b/c", "test").get("a/b/c"));
-    assertNull(UriMapper.from("a/x/c", "test").get("a/b/c"));
-    assertNull(UriMapper.from("a/b/x", "test").get("a/b/c"));
+    assertNull(UriMapper.mapping("foo", "test").get("path"));
+    assertNull(UriMapper.mapping("x/", "test").get("a/"));
+    assertNull(UriMapper.mapping("x/b", "test").get("a/b"));
+    assertNull(UriMapper.mapping("a/x", "test").get("a/b"));
+    assertNull(UriMapper.mapping("x/b/", "test").get("a/b/"));
+    assertNull(UriMapper.mapping("a/x/", "test").get("a/b/"));
+    assertNull(UriMapper.mapping("x/b/c", "test").get("a/b/c"));
+    assertNull(UriMapper.mapping("a/x/c", "test").get("a/b/c"));
+    assertNull(UriMapper.mapping("a/b/x", "test").get("a/b/c"));
   }
 
   @Test
   public void notMapUriPathPrefixes() {
-    assertNull(UriMapper.from("a/b/c/", "test").get("a"));
-    assertNull(UriMapper.from("a/b/c/", "test").get("a/"));
-    assertNull(UriMapper.from("a/b/c/", "test").get("a/b"));
-    assertNull(UriMapper.from("a/b/c/", "test").get("a/b/"));
-    assertNull(UriMapper.from("a/b/c/", "test").get("a/b/c"));
+    assertNull(UriMapper.mapping("a/b/c/", "test").get("a"));
+    assertNull(UriMapper.mapping("a/b/c/", "test").get("a/"));
+    assertNull(UriMapper.mapping("a/b/c/", "test").get("a/b"));
+    assertNull(UriMapper.mapping("a/b/c/", "test").get("a/b/"));
+    assertNull(UriMapper.mapping("a/b/c/", "test").get("a/b/c"));
   }
 
   @Test
   public void mapUriPathVariableMatches() {
-    assertEquals(UriMapper.from("/:path", "test").get("/foo"), "test");
-    assertEquals(UriMapper.from("/:path", "test").get("/bar"), "test");
-    assertEquals(UriMapper.from("/:path/", "test").get("/a/"), "test");
-    assertEquals(UriMapper.from("/:path/", "test").get("/b/"), "test");
-    assertEquals(UriMapper.from("/:name/b", "test").get("/a/b"), "test");
-    assertEquals(UriMapper.from("/:name/b", "test").get("/x/b"), "test");
-    assertEquals(UriMapper.from("/a/:name", "test").get("/a/b"), "test");
-    assertEquals(UriMapper.from("/a/:name", "test").get("/a/y"), "test");
-    assertEquals(UriMapper.from("/:name/b/", "test").get("/a/b/"), "test");
-    assertEquals(UriMapper.from("/:name/b/", "test").get("/x/b/"), "test");
-    assertEquals(UriMapper.from("/a/:name/", "test").get("/a/b/"), "test");
-    assertEquals(UriMapper.from("/a/:name/", "test").get("/a/y/"), "test");
-    assertEquals(UriMapper.from("/:name/b/c", "test").get("/a/b/c"), "test");
-    assertEquals(UriMapper.from("/:name/b/c", "test").get("/x/b/c"), "test");
-    assertEquals(UriMapper.from("/a/:name/c", "test").get("/a/b/c"), "test");
-    assertEquals(UriMapper.from("/a/:name/c", "test").get("/a/y/c"), "test");
-    assertEquals(UriMapper.from("/a/b/:name", "test").get("/a/b/c"), "test");
-    assertEquals(UriMapper.from("/a/b/:name", "test").get("/a/b/x"), "test");
+    assertEquals(UriMapper.mapping("/:path", "test").get("/foo"), "test");
+    assertEquals(UriMapper.mapping("/:path", "test").get("/bar"), "test");
+    assertEquals(UriMapper.mapping("/:path/", "test").get("/a/"), "test");
+    assertEquals(UriMapper.mapping("/:path/", "test").get("/b/"), "test");
+    assertEquals(UriMapper.mapping("/:name/b", "test").get("/a/b"), "test");
+    assertEquals(UriMapper.mapping("/:name/b", "test").get("/x/b"), "test");
+    assertEquals(UriMapper.mapping("/a/:name", "test").get("/a/b"), "test");
+    assertEquals(UriMapper.mapping("/a/:name", "test").get("/a/y"), "test");
+    assertEquals(UriMapper.mapping("/:name/b/", "test").get("/a/b/"), "test");
+    assertEquals(UriMapper.mapping("/:name/b/", "test").get("/x/b/"), "test");
+    assertEquals(UriMapper.mapping("/a/:name/", "test").get("/a/b/"), "test");
+    assertEquals(UriMapper.mapping("/a/:name/", "test").get("/a/y/"), "test");
+    assertEquals(UriMapper.mapping("/:name/b/c", "test").get("/a/b/c"), "test");
+    assertEquals(UriMapper.mapping("/:name/b/c", "test").get("/x/b/c"), "test");
+    assertEquals(UriMapper.mapping("/a/:name/c", "test").get("/a/b/c"), "test");
+    assertEquals(UriMapper.mapping("/a/:name/c", "test").get("/a/y/c"), "test");
+    assertEquals(UriMapper.mapping("/a/b/:name", "test").get("/a/b/c"), "test");
+    assertEquals(UriMapper.mapping("/a/b/:name", "test").get("/a/b/x"), "test");
   }
 
   @Test
   public void notMapUriPathVariableMismatches() {
-    assertNull(UriMapper.from("/:name/b", "test").get("/a/x"));
-    assertNull(UriMapper.from("/a/:name", "test").get("/x/b"));
-    assertNull(UriMapper.from("/:name/b/", "test").get("/a/x/"));
-    assertNull(UriMapper.from("/a/:name/", "test").get("/x/b/"));
+    assertNull(UriMapper.mapping("/:name/b", "test").get("/a/x"));
+    assertNull(UriMapper.mapping("/a/:name", "test").get("/x/b"));
+    assertNull(UriMapper.mapping("/:name/b/", "test").get("/a/x/"));
+    assertNull(UriMapper.mapping("/a/:name/", "test").get("/x/b/"));
   }
 
   @Test
@@ -143,9 +143,9 @@ public class UriMapperSpec {
   @Test
   public void removeUriMappings() {
     UriMapper<String> mapper = UriMapper.<String>empty()
-        .updated("/a/b", "B")
-        .updated("/x/y", "Y")
-        .updated("/a/c", "C");
+                                        .updated("/a/b", "B")
+                                        .updated("/x/y", "Y")
+                                        .updated("/a/c", "C");
     assertEquals(mapper.get("/a/b"), "B");
     assertEquals(mapper.get("/a/c"), "C");
     assertEquals(mapper.get("/x/y"), "Y");
@@ -171,10 +171,10 @@ public class UriMapperSpec {
   @Test
   public void removeUriVariableMappings() {
     UriMapper<String> mapper = UriMapper.<String>empty()
-        .updated("/:a/b", "B")
-        .updated("/:a", "A")
-        .updated("/:a/c", "C")
-        .updated("/:a/:b", "Y");
+                                        .updated("/:a/b", "B")
+                                        .updated("/:a", "A")
+                                        .updated("/:a/c", "C")
+                                        .updated("/:a/:b", "Y");
     assertEquals(mapper.get("/x"), "A");
     assertNull(mapper.get("/x/"));
     assertEquals(mapper.get("/x/b"), "B");
@@ -215,16 +215,16 @@ public class UriMapperSpec {
   @Test
   public void unmergeUriMappings() {
     UriMapper<String> mapper = UriMapper.<String>empty()
-        .updated("/a/b", "B")
-        .updated("/x/y", "Y")
-        .updated("/a/c", "C");
+                                        .updated("/a/b", "B")
+                                        .updated("/x/y", "Y")
+                                        .updated("/a/c", "C");
     assertEquals(mapper.get("/a/b"), "B");
     assertEquals(mapper.get("/a/c"), "C");
     assertEquals(mapper.get("/x/y"), "Y");
 
     final UriMapper<String> submapper = UriMapper.<String>empty()
-        .updated("/a/b", "B")
-        .updated("/x/y", "Y");
+                                                 .updated("/a/b", "B")
+                                                 .updated("/x/y", "Y");
 
     mapper = mapper.unmerged(submapper);
     assertNull(mapper.get("/a/b"));
@@ -235,10 +235,10 @@ public class UriMapperSpec {
   @Test
   public void suffixMappings() {
     final UriMapper<String> mapper = UriMapper.<String>empty()
-        .updated("/a/1", "1")
-        .updated("/b/2", "2")
-        .updated("/b/3", "3")
-        .updated("/c/4", "4");
+                                              .updated("/a/1", "1")
+                                              .updated("/b/2", "2")
+                                              .updated("/b/3", "3")
+                                              .updated("/c/4", "4");
 
     final UriMapper<String> slash = mapper.getSuffix("/");
     assertEquals(slash.size(), 4);
@@ -271,10 +271,10 @@ public class UriMapperSpec {
   @Test
   public void childIterators() {
     final UriMapper<String> mapper = UriMapper.<String>empty()
-        .updated("/a/1", "1")
-        .updated("/b/2", "2")
-        .updated("/b/3", "3")
-        .updated("/c/4", "4");
+                                              .updated("/a/1", "1")
+                                              .updated("/b/2", "2")
+                                              .updated("/b/3", "3")
+                                              .updated("/c/4", "4");
 
     final Iterator<UriPart> childIterator = mapper.getSuffix("/b/").childIterator();
     assertTrue(childIterator.hasNext());

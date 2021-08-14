@@ -34,7 +34,6 @@ import swim.util.Murmur3;
 
 public class ActorNodeDef implements NodeDef, Debug {
 
-  private static int hashSeed;
   final UriPattern nodePattern;
   final FingerTrieSeq<AgentDef> agentDefs;
   final UriMapper<LaneDef> laneDefs;
@@ -55,24 +54,6 @@ public class ActorNodeDef implements NodeDef, Debug {
     this.storeDef = storeDef;
   }
 
-  public static ActorNodeDef fromNodeUri(Uri nodeUri) {
-    return new ActorNodeDef(UriPattern.from(nodeUri), FingerTrieSeq.empty(),
-        UriMapper.empty(), null, null, null, null);
-  }
-
-  public static ActorNodeDef fromNodeUri(String nodeUri) {
-    return fromNodeUri(Uri.parse(nodeUri));
-  }
-
-  public static ActorNodeDef fromNodePattern(UriPattern nodePattern) {
-    return new ActorNodeDef(nodePattern, FingerTrieSeq.empty(),
-        UriMapper.empty(), null, null, null, null);
-  }
-
-  public static ActorNodeDef fromNodePattern(String nodePattern) {
-    return fromNodePattern(UriPattern.parse(nodePattern));
-  }
-
   @Override
   public final Uri nodeUri() {
     return this.nodePattern.isUri() ? this.nodePattern.toUri() : null;
@@ -84,8 +65,8 @@ public class ActorNodeDef implements NodeDef, Debug {
   }
 
   public ActorNodeDef nodePattern(UriPattern nodePattern) {
-    return copy(nodePattern, this.agentDefs, this.laneDefs,
-        this.logDef, this.policyDef, this.stageDef, this.storeDef);
+    return this.copy(nodePattern, this.agentDefs, this.laneDefs,
+                     this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -104,8 +85,8 @@ public class ActorNodeDef implements NodeDef, Debug {
   }
 
   public ActorNodeDef agentDef(AgentDef agentDef) {
-    return copy(this.nodePattern, this.agentDefs.appended(agentDef), this.laneDefs,
-        this.logDef, this.policyDef, this.stageDef, this.storeDef);
+    return this.copy(this.nodePattern, this.agentDefs.appended(agentDef), this.laneDefs,
+                     this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -119,8 +100,8 @@ public class ActorNodeDef implements NodeDef, Debug {
   }
 
   public ActorNodeDef laneDef(LaneDef laneDef) {
-    return copy(this.nodePattern, this.agentDefs, this.laneDefs.updated(laneDef.lanePattern(), laneDef),
-        this.logDef, this.policyDef, this.stageDef, this.storeDef);
+    return this.copy(this.nodePattern, this.agentDefs, this.laneDefs.updated(laneDef.lanePattern(), laneDef),
+                     this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -129,8 +110,8 @@ public class ActorNodeDef implements NodeDef, Debug {
   }
 
   public ActorNodeDef logDef(LogDef logDef) {
-    return copy(this.nodePattern, this.agentDefs, this.laneDefs,
-        logDef, this.policyDef, this.stageDef, this.storeDef);
+    return this.copy(this.nodePattern, this.agentDefs, this.laneDefs,
+                     logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -139,8 +120,8 @@ public class ActorNodeDef implements NodeDef, Debug {
   }
 
   public ActorNodeDef policyDef(PolicyDef policyDef) {
-    return copy(this.nodePattern, this.agentDefs, this.laneDefs,
-        this.logDef, policyDef, this.stageDef, this.storeDef);
+    return this.copy(this.nodePattern, this.agentDefs, this.laneDefs,
+                     this.logDef, policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -149,8 +130,8 @@ public class ActorNodeDef implements NodeDef, Debug {
   }
 
   public ActorNodeDef stageDef(StageDef stageDef) {
-    return copy(this.nodePattern, this.agentDefs, this.laneDefs,
-        this.logDef, this.policyDef, stageDef, this.storeDef);
+    return this.copy(this.nodePattern, this.agentDefs, this.laneDefs,
+                     this.logDef, this.policyDef, stageDef, this.storeDef);
   }
 
   @Override
@@ -159,15 +140,15 @@ public class ActorNodeDef implements NodeDef, Debug {
   }
 
   public ActorNodeDef storeDef(StoreDef storeDef) {
-    return copy(this.nodePattern, this.agentDefs, this.laneDefs,
-        this.logDef, this.policyDef, this.stageDef, storeDef);
+    return this.copy(this.nodePattern, this.agentDefs, this.laneDefs,
+                     this.logDef, this.policyDef, this.stageDef, storeDef);
   }
 
   protected ActorNodeDef copy(UriPattern nodePattern, FingerTrieSeq<AgentDef> agentDefs,
                               UriMapper<LaneDef> laneDefs, LogDef logDef, PolicyDef policyDef,
                               StageDef stageDef, StoreDef storeDef) {
     return new ActorNodeDef(nodePattern, agentDefs, laneDefs,
-        logDef, policyDef, stageDef, storeDef);
+                            logDef, policyDef, stageDef, storeDef);
   }
 
   @Override
@@ -187,19 +168,21 @@ public class ActorNodeDef implements NodeDef, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ActorNodeDef.class);
+    if (ActorNodeDef.hashSeed == 0) {
+      ActorNodeDef.hashSeed = Murmur3.seed(ActorNodeDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Murmur3.mix(hashSeed, this.nodePattern.hashCode()), this.agentDefs.hashCode()),
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        ActorNodeDef.hashSeed, this.nodePattern.hashCode()), this.agentDefs.hashCode()),
         this.laneDefs.hashCode()), Murmur3.hash(this.logDef)), Murmur3.hash(this.policyDef)),
         Murmur3.hash(this.stageDef)), Murmur3.hash(this.storeDef)));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("ActorNodeDef").write('.');
     if (this.nodePattern.isUri()) {
       output = output.write("fromNodeUri").write('(').debug(this.nodePattern.toUri()).write(')');
@@ -224,11 +207,30 @@ public class ActorNodeDef implements NodeDef, Debug {
     if (this.storeDef != null) {
       output = output.write('.').write("storeDef").write('(').debug(this.storeDef).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static ActorNodeDef fromNodeUri(Uri nodeUri) {
+    return new ActorNodeDef(UriPattern.from(nodeUri), FingerTrieSeq.empty(),
+                            UriMapper.empty(), null, null, null, null);
+  }
+
+  public static ActorNodeDef fromNodeUri(String nodeUri) {
+    return ActorNodeDef.fromNodeUri(Uri.parse(nodeUri));
+  }
+
+  public static ActorNodeDef fromNodePattern(UriPattern nodePattern) {
+    return new ActorNodeDef(nodePattern, FingerTrieSeq.empty(),
+                            UriMapper.empty(), null, null, null, null);
+  }
+
+  public static ActorNodeDef fromNodePattern(String nodePattern) {
+    return ActorNodeDef.fromNodePattern(UriPattern.parse(nodePattern));
   }
 
 }

@@ -55,7 +55,7 @@ public class DemandMapLaneUplink extends MapUplinkModem {
 
   @Override
   protected void willSync(SyncRequest request) {
-    syncDown(this.laneBinding.syncKeys(this));
+    this.syncDown(this.laneBinding.syncKeys(this));
     super.willSync(request);
   }
 

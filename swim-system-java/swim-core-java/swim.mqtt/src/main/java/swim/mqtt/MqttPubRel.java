@@ -23,21 +23,12 @@ import swim.util.Murmur3;
 
 public final class MqttPubRel extends MqttPacket<Object> implements Debug {
 
-  private static int hashSeed;
   final int packetFlags;
   final int packetId;
 
   MqttPubRel(int packetFlags, int packetId) {
     this.packetFlags = packetFlags;
     this.packetId = packetId;
-  }
-
-  public static MqttPubRel from(int packetFlags, int packetId) {
-    return new MqttPubRel(packetFlags, packetId);
-  }
-
-  public static MqttPubRel from(int packetId) {
-    return new MqttPubRel(2, packetId);
   }
 
   @Override
@@ -55,7 +46,7 @@ public final class MqttPubRel extends MqttPacket<Object> implements Debug {
   }
 
   public int packetId() {
-    return packetId;
+    return this.packetId;
   }
 
   public MqttPubRel packetId(int packetId) {
@@ -88,26 +79,36 @@ public final class MqttPubRel extends MqttPacket<Object> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttPubRel.class);
+    if (MqttPubRel.hashSeed == 0) {
+      MqttPubRel.hashSeed = Murmur3.seed(MqttPubRel.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed, this.packetFlags), this.packetId));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(MqttPubRel.hashSeed, this.packetFlags), this.packetId));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("MqttPubRel").write('.').write("from").write('(')
-        .debug(this.packetId).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MqttPubRel").write('.').write("create").write('(').debug(this.packetId).write(')');
     if (this.packetFlags != 2) {
       output = output.write('.').write("packetFlags").write('(').debug(this.packetFlags).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static MqttPubRel create(int packetFlags, int packetId) {
+    return new MqttPubRel(packetFlags, packetId);
+  }
+
+  public static MqttPubRel create(int packetId) {
+    return new MqttPubRel(2, packetId);
   }
 
 }

@@ -29,25 +29,25 @@ public abstract class DynamicDecoder<O> extends Decoder<O> {
     Decoder<? extends O> decoder = this.decoding;
     if (decoder == null) {
       if (input.isDone()) {
-        return done();
+        return Decoder.done();
       }
-      decoder = doDecode();
+      decoder = this.doDecode();
       this.decoding = decoder;
       if (decoder == null) {
-        return done();
+        return Decoder.done();
       }
     }
     if (decoder != null) {
       decoder = decoder.feed(input);
       if (decoder.isDone()) {
         this.decoding = null;
-        didDecode(decoder.bind());
+        this.didDecode(decoder.bind());
       } else if (decoder.isError()) {
         return decoder.asError();
       }
     }
     if (input.isDone()) {
-      return done();
+      return Decoder.done();
     }
     return this;
   }

@@ -37,27 +37,32 @@ final class TokenListWriter extends Writer<Object, Object> {
     this(tokens, null, 0, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return TokenListWriter.write(output, this.tokens, this.token, this.index, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, Iterator<?> tokens,
                                       String token, int index, int step) {
     do {
       if (step == 1) {
         if (token == null) {
           if (!tokens.hasNext()) {
-            return done();
+            return Writer.done();
           } else {
             token = tokens.next().toString();
           }
         }
         final int length = token.length();
         if (length == 0) {
-          return error(new HttpException("empty token"));
+          return Writer.error(new HttpException("empty token"));
         }
         while (index < length && output.isCont()) {
           final int c = token.codePointAt(index);
           if (Http.isTokenChar(c)) {
             output = output.write(c);
           } else {
-            return error(new HttpException("invalid token: " + token));
+            return Writer.error(new HttpException("invalid token: " + token));
           }
           index = token.offsetByCodePoints(index, 1);
         }
@@ -65,7 +70,7 @@ final class TokenListWriter extends Writer<Object, Object> {
           token = null;
           index = 0;
           if (!tokens.hasNext()) {
-            return done();
+            return Writer.done();
           } else {
             step = 2;
           }
@@ -83,20 +88,15 @@ final class TokenListWriter extends Writer<Object, Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new TokenListWriter(tokens, token, index, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, Iterator<?> tokens) {
-    return write(output, tokens, null, 0, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.tokens, this.token, this.index, this.step);
+    return TokenListWriter.write(output, tokens, null, 0, 1);
   }
 
 }

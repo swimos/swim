@@ -25,76 +25,76 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpResponseSpec {
 
-  public static <T> void assertParses(String string, HttpResponse<T> response) {
-    HttpAssertions.assertParses(Http.standardParser().<T>responseParser(), string, response);
-  }
-
   @Test
   public void parseResponsesWithNoHeaders() {
     assertParses("HTTP/1.0 200 OK\r\n"
-            + "\r\n",
-        HttpResponse.from(HttpVersion.HTTP_1_0, HttpStatus.OK));
+               + "\r\n",
+                 HttpResponse.create(HttpVersion.HTTP_1_0, HttpStatus.OK));
   }
 
   @Test
   public void parseResponsesWithASingleHeader() {
     assertParses("HTTP/1.1 200 OK\r\n"
-            + "Key: Value\r\n"
-            + "\r\n",
-        HttpResponse.from(HttpStatus.OK, RawHeader.from("Key", "Value")));
+               + "Key: Value\r\n"
+               + "\r\n",
+                 HttpResponse.create(HttpStatus.OK, RawHeader.create("Key", "Value")));
     assertParses("HTTP/1.1 200 OK\r\n"
-            + "Content-Length: 0\r\n"
-            + "\r\n",
-        HttpResponse.from(HttpStatus.OK, ContentLength.from(0)));
+               + "Content-Length: 0\r\n"
+               + "\r\n",
+                 HttpResponse.create(HttpStatus.OK, ContentLength.create(0)));
   }
 
   @Test
   public void parseResponsesWithMultipleHeaders() {
     assertParses("HTTP/1.1 101 Switching Protocols\r\n"
-            + "Upgrade: websocket\r\n"
-            + "Connection: Upgrade\r\n"
-            + "Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\r\n"
-            + "Sec-WebSocket-Protocol: chat\r\n"
-            + "\r\n",
-        HttpResponse.from(HttpStatus.SWITCHING_PROTOCOLS,
-            Upgrade.from("websocket"),
-            Connection.from("Upgrade"),
-            SecWebSocketAccept.from("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
-            SecWebSocketProtocol.from("chat")));
+               + "Upgrade: websocket\r\n"
+               + "Connection: Upgrade\r\n"
+               + "Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\r\n"
+               + "Sec-WebSocket-Protocol: chat\r\n"
+               + "\r\n",
+                 HttpResponse.create(HttpStatus.SWITCHING_PROTOCOLS,
+                                     Upgrade.create("websocket"),
+                                     Connection.create("Upgrade"),
+                                     SecWebSocketAccept.create("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
+                                     SecWebSocketProtocol.create("chat")));
   }
 
   @Test
   public void writeResponsesWithNoHeaders() {
-    assertWrites(HttpResponse.from(HttpVersion.HTTP_1_0, HttpStatus.OK),
-        "HTTP/1.0 200 OK\r\n"
-            + "\r\n");
+    assertWrites(HttpResponse.create(HttpVersion.HTTP_1_0, HttpStatus.OK),
+                 "HTTP/1.0 200 OK\r\n"
+               + "\r\n");
   }
 
   @Test
   public void writeResponsesWithASingleHeader() {
-    assertWrites(HttpResponse.from(HttpStatus.OK, RawHeader.from("Foo", "Bar")),
-        "HTTP/1.1 200 OK\r\n"
-            + "Foo: Bar\r\n"
-            + "\r\n");
-    assertWrites(HttpResponse.from(HttpStatus.OK, ContentLength.from(0)),
-        "HTTP/1.1 200 OK\r\n"
-            + "Content-Length: 0\r\n"
-            + "\r\n");
+    assertWrites(HttpResponse.create(HttpStatus.OK, RawHeader.create("Foo", "Bar")),
+                 "HTTP/1.1 200 OK\r\n"
+               + "Foo: Bar\r\n"
+               + "\r\n");
+    assertWrites(HttpResponse.create(HttpStatus.OK, ContentLength.create(0)),
+                 "HTTP/1.1 200 OK\r\n"
+               + "Content-Length: 0\r\n"
+               + "\r\n");
   }
 
   @Test
   public void writeResponsesWithMultipleHeaders() {
-    assertWrites(HttpResponse.from(HttpStatus.SWITCHING_PROTOCOLS,
-        Upgrade.from("websocket"),
-        Connection.from("Upgrade"),
-        SecWebSocketAccept.from("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
-        SecWebSocketProtocol.from("chat")),
-        "HTTP/1.1 101 Switching Protocols\r\n"
-            + "Upgrade: websocket\r\n"
-            + "Connection: Upgrade\r\n"
-            + "Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\r\n"
-            + "Sec-WebSocket-Protocol: chat\r\n"
-            + "\r\n");
+    assertWrites(HttpResponse.create(HttpStatus.SWITCHING_PROTOCOLS,
+                                     Upgrade.create("websocket"),
+                                     Connection.create("Upgrade"),
+                                     SecWebSocketAccept.create("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
+                                     SecWebSocketProtocol.create("chat")),
+                 "HTTP/1.1 101 Switching Protocols\r\n"
+               + "Upgrade: websocket\r\n"
+               + "Connection: Upgrade\r\n"
+               + "Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=\r\n"
+               + "Sec-WebSocket-Protocol: chat\r\n"
+               + "\r\n");
+  }
+
+  public static <T> void assertParses(String string, HttpResponse<T> response) {
+    HttpAssertions.assertParses(Http.standardParser().<T>responseParser(), string, response);
   }
 
 }

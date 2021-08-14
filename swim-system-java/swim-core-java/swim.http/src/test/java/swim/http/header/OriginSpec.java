@@ -25,49 +25,36 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class OriginSpec {
 
-  public static void assertParseFails(final String string) {
-    assertThrows(ParserException.class, new ThrowingRunnable() {
-      @Override
-      public void run() throws Throwable {
-        HttpHeader.parseHttp(string);
-      }
-    });
-  }
-
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseOriginHeaders() {
     assertParses("Origin: http://www.example.com",
-        Origin.from("http://www.example.com"));
+                 Origin.create("http://www.example.com"));
     assertParses("Origin: https://www.example.com:443",
-        Origin.from("https://www.example.com:443"));
+                 Origin.create("https://www.example.com:443"));
     assertParses("Origin: http://example1.com http://example2.com",
-        Origin.from("http://example1.com", "http://example2.com"));
+                 Origin.create("http://example1.com", "http://example2.com"));
     assertParses("Origin: http://example1.com:8080 http://example2.com:8081",
-        Origin.from("http://example1.com:8080", "http://example2.com:8081"));
+                 Origin.create("http://example1.com:8080", "http://example2.com:8081"));
     assertParses("Origin: null", Origin.empty());
   }
 
   @Test
   public void writeOriginHeaders() {
-    assertWrites(Origin.from("http://www.example.com"),
-        "Origin: http://www.example.com");
-    assertWrites(Origin.from("https://www.example.com:443"),
-        "Origin: https://www.example.com:443");
-    assertWrites(Origin.from("http://example1.com", "http://example2.com"),
-        "Origin: http://example1.com http://example2.com");
-    assertWrites(Origin.from("http://example1.com:8080", "http://example2.com:8081"),
-        "Origin: http://example1.com:8080 http://example2.com:8081");
+    assertWrites(Origin.create("http://www.example.com"),
+                 "Origin: http://www.example.com");
+    assertWrites(Origin.create("https://www.example.com:443"),
+                 "Origin: https://www.example.com:443");
+    assertWrites(Origin.create("http://example1.com", "http://example2.com"),
+                 "Origin: http://example1.com http://example2.com");
+    assertWrites(Origin.create("http://example1.com:8080", "http://example2.com:8081"),
+                 "Origin: http://example1.com:8080 http://example2.com:8081");
     assertWrites(Origin.empty(), "Origin: null");
   }
 
   @Test
   public void writeOriginHeadersOmittingPath() {
-    assertWrites(Origin.from("http://www.example.com/"),
-        "Origin: http://www.example.com");
+    assertWrites(Origin.create("http://www.example.com/"),
+                 "Origin: http://www.example.com");
   }
 
   @Test
@@ -84,6 +71,19 @@ public class OriginSpec {
   @Test
   public void parseOriginHeadersWithPathsFails() {
     assertParseFails("Origin: http://www.example.com/");
+  }
+
+  public static void assertParseFails(final String string) {
+    assertThrows(ParserException.class, new ThrowingRunnable() {
+      @Override
+      public void run() throws Throwable {
+        HttpHeader.parseHttp(string);
+      }
+    });
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

@@ -23,7 +23,7 @@ import swim.structure.Kind;
 
 public abstract class PublicKeyDef extends KeyDef {
 
-  private static Form<PublicKeyDef> publicKeyForm;
+  public abstract PublicKey publicKey();
 
   public static PublicKeyDef from(PublicKey key) {
     if (key instanceof ECPublicKey) {
@@ -34,15 +34,15 @@ public abstract class PublicKeyDef extends KeyDef {
     throw new IllegalArgumentException(key.toString());
   }
 
+  private static Form<PublicKeyDef> publicKeyForm;
+
   @Kind
   public static Form<PublicKeyDef> publicKeyForm() {
-    if (publicKeyForm == null) {
-      publicKeyForm = new PublicKeyForm();
+    if (PublicKeyDef.publicKeyForm == null) {
+      PublicKeyDef.publicKeyForm = new PublicKeyForm();
     }
-    return publicKeyForm;
+    return PublicKeyDef.publicKeyForm;
   }
-
-  public abstract PublicKey publicKey();
 
 }
 

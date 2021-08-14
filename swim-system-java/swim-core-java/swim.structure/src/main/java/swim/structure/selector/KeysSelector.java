@@ -31,7 +31,7 @@ import swim.util.Murmur3;
 /**
  * A {@link Selector} that, when {@link #evaluate evaluated} against some {@link
  * Interpreter}, yields all of the "keys" of the top {@code Item} in the
- * interpreter's frame stack.  The "keys" of an {@code Item} {@code item} are
+ * interpreter's frame stack. The "keys" of an {@code Item} {@code item} are
  * defined to be either the sole {@link Field ((Field) item).key} if {@code
  * item} is a {@code Field}, or every such key of every {@code Field} in {@code
  * item} if {@code item} is a {@code Record}; "keys" are not defined for any
@@ -39,7 +39,6 @@ import swim.util.Murmur3;
  */
 public final class KeysSelector extends Selector {
 
-  private static int hashSeed;
   final Selector then;
 
   public KeysSelector(Selector then) {
@@ -172,9 +171,9 @@ public final class KeysSelector extends Selector {
   @Override
   protected int compareTo(Selector that) {
     if (that instanceof KeysSelector) {
-      return compareTo((KeysSelector) that);
+      return this.compareTo((KeysSelector) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(KeysSelector that) {
@@ -187,23 +186,26 @@ public final class KeysSelector extends Selector {
       return true;
     } else if (other instanceof KeysSelector) {
       final KeysSelector that = (KeysSelector) other;
-      return then.equals(that.then);
+      return this.then.equals(that.then);
     }
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(KeysSelector.class);
+    if (KeysSelector.hashSeed == 0) {
+      KeysSelector.hashSeed = Murmur3.seed(KeysSelector.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.then.hashCode()));
+    return Murmur3.mash(Murmur3.mix(KeysSelector.hashSeed, this.then.hashCode()));
   }
 
   @Override
-  public void debugThen(Output<?> output) {
+  public <T> Output<T> debugThen(Output<T> output) {
     output = output.write('.').write("keys").write('(').write(')');
-    this.then.debugThen(output);
+    output = this.then.debugThen(output);
+    return output;
   }
 
 }

@@ -35,17 +35,17 @@ ext.includeSwimCore = { frameworkDir ->
   include 'swim-protobuf'
   project(':swim-protobuf').projectDir = file("${frameworkDir}/swim.protobuf")
 
-  include 'swim-decipher'
-  project(':swim-decipher').projectDir = file("${frameworkDir}/swim.decipher")
-
   include 'swim-math'
   project(':swim-math').projectDir = file("${frameworkDir}/swim.math")
+
+  include 'swim-spatial'
+  project(':swim-spatial').projectDir = file("${frameworkDir}/swim.spatial")
 
   include 'swim-security'
   project(':swim-security').projectDir = file("${frameworkDir}/swim.security")
 
-  include 'swim-spatial'
-  project(':swim-spatial').projectDir = file("${frameworkDir}/swim.spatial")
+  include 'swim-concurrent'
+  project(':swim-concurrent').projectDir = file("${frameworkDir}/swim.concurrent")
 
   include 'swim-streamlet'
   project(':swim-streamlet').projectDir = file("${frameworkDir}/swim.streamlet")
@@ -62,6 +62,9 @@ ext.includeSwimCore = { frameworkDir ->
   include 'swim-deflate'
   project(':swim-deflate').projectDir = file("${frameworkDir}/swim.deflate")
 
+  include 'swim-db'
+  project(':swim-db').projectDir = file("${frameworkDir}/swim.db")
+
   include 'swim-mqtt'
   project(':swim-mqtt').projectDir = file("${frameworkDir}/swim.mqtt")
 
@@ -73,12 +76,6 @@ ext.includeSwimCore = { frameworkDir ->
 
   include 'swim-warp'
   project(':swim-warp').projectDir = file("${frameworkDir}/swim.warp")
-
-  include 'swim-concurrent'
-  project(':swim-concurrent').projectDir = file("${frameworkDir}/swim.concurrent")
-
-  include 'swim-db'
-  project(':swim-db').projectDir = file("${frameworkDir}/swim.db")
 
   include 'swim-io'
   project(':swim-io').projectDir = file("${frameworkDir}/swim.io")

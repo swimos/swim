@@ -21,9 +21,6 @@ import swim.uri.Uri;
 
 public final class EventMessage extends LaneAddressed {
 
-  @Kind
-  public static final Form<EventMessage> FORM = new EventMessageForm();
-
   public EventMessage(Uri nodeUri, Uri laneUri, Value body) {
     super(nodeUri, laneUri, body);
   }
@@ -47,7 +44,7 @@ public final class EventMessage extends LaneAddressed {
 
   @Override
   public Form<EventMessage> form() {
-    return FORM;
+    return EventMessage.FORM;
   }
 
   @Override
@@ -65,6 +62,9 @@ public final class EventMessage extends LaneAddressed {
     return new EventMessage(this.nodeUri, this.laneUri, body);
   }
 
+  @Kind
+  public static final Form<EventMessage> FORM = new EventMessageForm();
+
 }
 
 final class EventMessageForm extends LaneAddressedForm<EventMessage> {
@@ -80,7 +80,7 @@ final class EventMessageForm extends LaneAddressedForm<EventMessage> {
   }
 
   @Override
-  public EventMessage from(Uri nodeUri, Uri laneUri, Value body) {
+  public EventMessage create(Uri nodeUri, Uri laneUri, Value body) {
     return new EventMessage(nodeUri, laneUri, body);
   }
 

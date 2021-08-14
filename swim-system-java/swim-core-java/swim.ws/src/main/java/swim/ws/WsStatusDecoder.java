@@ -35,6 +35,11 @@ final class WsStatusDecoder extends Decoder<WsStatus> {
     this(0, null, 1);
   }
 
+  @Override
+  public Decoder<WsStatus> feed(InputBuffer input) {
+    return WsStatusDecoder.decode(input, this.code, this.reason, this.step);
+  }
+
   static Decoder<WsStatus> decode(InputBuffer input, int code, Decoder<String> reason, int step) {
     if (step == 1) {
       if (input.isCont()) {
@@ -42,7 +47,7 @@ final class WsStatusDecoder extends Decoder<WsStatus> {
         input = input.step();
         step = 2;
       } else if (input.isDone()) {
-        return done(null);
+        return Decoder.done(null);
       }
     }
     if (step == 2 && input.isCont()) {
@@ -57,26 +62,21 @@ final class WsStatusDecoder extends Decoder<WsStatus> {
         reason = reason.feed(input);
       }
       if (reason.isDone()) {
-        return done(new WsStatus(code, reason.bind()));
+        return Decoder.done(new WsStatus(code, reason.bind()));
       } else if (reason.isError()) {
         return reason.asError();
       }
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new WsStatusDecoder(code, reason, step);
   }
 
   static Decoder<WsStatus> decode(InputBuffer input) {
-    return decode(input, 0, null, 1);
-  }
-
-  @Override
-  public Decoder<WsStatus> feed(InputBuffer input) {
-    return decode(input, this.code, this.reason, this.step);
+    return WsStatusDecoder.decode(input, 0, null, 1);
   }
 
 }

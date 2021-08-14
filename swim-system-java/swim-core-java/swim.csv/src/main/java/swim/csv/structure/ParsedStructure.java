@@ -82,7 +82,7 @@ final class ParsedStructure implements CsvStructureCol {
     if (!this.optional || (cell instanceof Record && !((Record) cell).isEmpty())
         || (cell != null && !(cell instanceof Record) && cell.isDefined())) {
       if (cell == null) {
-        cell = defaultCell();
+        cell = this.defaultCell();
       }
       if (this.key.isDefined() && cell instanceof Value) {
         rowBuilder.add(Slot.of(this.key, (Value) cell));

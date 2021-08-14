@@ -33,7 +33,6 @@ import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 import swim.collections.HashTrieSet;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
 import swim.concurrent.Schedule;
@@ -130,16 +129,47 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   volatile int uplinkCommandDelta;
   volatile long uplinkCommandCount;
   volatile long lastReportTime;
+
   HostPulse pulse;
   AgentNode metaNode;
   DemandLane<HostPulse> metaPulse;
 
   public RemoteHost(Uri requestUri, Uri baseUri) {
+    this.hostContext = null;
+    this.warpSocketContext = null;
     this.requestUri = requestUri;
     this.baseUri = baseUri;
+    this.remoteUri = null;
+
+    this.flags = 0;
+    this.remoteIdentity = null;
     this.downlinks = HashTrieMap.empty();
     this.uplinks = HashTrieMap.empty();
-    this.resolveCache = new HashGenCacheMap<Uri, Uri>(URI_RESOLUTION_CACHE_SIZE);
+    this.receiveBacklog = 0;
+    this.messageCont = null;
+    this.resolveCache = new HashGenCacheMap<Uri, Uri>(RemoteHost.URI_RESOLUTION_CACHE_SIZE);
+
+    this.downlinkOpenDelta = 0;
+    this.downlinkOpenCount = 0L;
+    this.downlinkCloseDelta = 0;
+    this.downlinkCloseCount = 0L;
+    this.downlinkEventDelta = 0;
+    this.downlinkEventCount = 0L;
+    this.downlinkCommandDelta = 0;
+    this.downlinkCommandCount = 0L;
+    this.uplinkOpenDelta = 0;
+    this.uplinkOpenCount = 0L;
+    this.uplinkCloseDelta = 0;
+    this.uplinkCloseCount = 0L;
+    this.uplinkEventDelta = 0;
+    this.uplinkEventCount = 0L;
+    this.uplinkCommandDelta = 0;
+    this.uplinkCommandCount = 0L;
+    this.lastReportTime = 0L;
+
+    this.pulse = null;
+    this.metaNode = null;
+    this.metaPulse = null;
   }
 
   public RemoteHost(Uri baseUri) {
@@ -164,7 +194,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapHost(Class<T> hostClass) {
-    if (hostClass.isAssignableFrom(getClass())) {
+    if (hostClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.hostContext.unwrapHost(hostClass);
@@ -175,7 +205,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   @Override
   public <T> T bottomHost(Class<T> hostClass) {
     T host = this.hostContext.bottomHost(hostClass);
-    if (host == null && hostClass.isAssignableFrom(getClass())) {
+    if (host == null && hostClass.isAssignableFrom(this.getClass())) {
       host = (T) this;
     }
     return host;
@@ -349,62 +379,66 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public boolean isPrimary() {
-    return (this.flags & PRIMARY) != 0;
+    return (RemoteHost.FLAGS.get(this) & RemoteHost.PRIMARY) != 0;
   }
 
   @Override
   public void setPrimary(boolean isPrimary) {
-    int oldFlags;
-    int newFlags;
     do {
-      oldFlags = this.flags;
-      newFlags = oldFlags | PRIMARY;
-    } while (oldFlags != newFlags && !FLAGS.compareAndSet(this, oldFlags, newFlags));
+      final int oldFlags = RemoteHost.FLAGS.get(this);
+      final int newFlags = oldFlags | RemoteHost.PRIMARY;
+      if (RemoteHost.FLAGS.compareAndSet(this, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public boolean isReplica() {
-    return (this.flags & REPLICA) != 0;
+    return (RemoteHost.FLAGS.get(this) & RemoteHost.REPLICA) != 0;
   }
 
   @Override
   public void setReplica(boolean isReplica) {
-    int oldFlags;
-    int newFlags;
     do {
-      oldFlags = this.flags;
-      newFlags = oldFlags | REPLICA;
-    } while (oldFlags != newFlags && !FLAGS.compareAndSet(this, oldFlags, newFlags));
+      final int oldFlags = RemoteHost.FLAGS.get(this);
+      final int newFlags = oldFlags | RemoteHost.REPLICA;
+      if (RemoteHost.FLAGS.compareAndSet(this, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public boolean isMaster() {
-    return (this.flags & MASTER) != 0;
+    return (RemoteHost.FLAGS.get(this) & RemoteHost.MASTER) != 0;
   }
 
   @Override
   public boolean isSlave() {
-    return (this.flags & SLAVE) != 0;
+    return (RemoteHost.FLAGS.get(this) & RemoteHost.SLAVE) != 0;
   }
 
   @Override
   public void didBecomeMaster() {
-    int oldFlags;
-    int newFlags;
     do {
-      oldFlags = this.flags;
-      newFlags = oldFlags & ~SLAVE | MASTER;
-    } while (oldFlags != newFlags && !FLAGS.compareAndSet(this, oldFlags, newFlags));
+      final int oldFlags = RemoteHost.FLAGS.get(this);
+      final int newFlags = oldFlags & ~RemoteHost.SLAVE | RemoteHost.MASTER;
+      if (RemoteHost.FLAGS.compareAndSet(this, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public void didBecomeSlave() {
-    int oldFlags;
-    int newFlags;
     do {
-      oldFlags = this.flags;
-      newFlags = oldFlags & ~MASTER | SLAVE;
-    } while (oldFlags != newFlags && !FLAGS.compareAndSet(this, oldFlags, newFlags));
+      final int oldFlags = RemoteHost.FLAGS.get(this);
+      final int newFlags = oldFlags & ~RemoteHost.MASTER | RemoteHost.SLAVE;
+      if (RemoteHost.FLAGS.compareAndSet(this, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
   }
 
   RemoteWarpDownlink createWarpDownlink(Uri remoteNodeUri, Uri nodeUri, Uri laneUri, float prio, float rate, Value body) {
@@ -424,8 +458,8 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     if (absoluteUri == null) {
       absoluteUri = this.baseUri.resolve(relativeUri);
       if (!relativeUri.authority().isDefined()) {
-        absoluteUri = Uri.from(relativeUri.scheme(), UriAuthority.undefined(),
-            absoluteUri.path(), absoluteUri.query(), absoluteUri.fragment());
+        absoluteUri = Uri.create(relativeUri.scheme(), UriAuthority.undefined(),
+                                 absoluteUri.path(), absoluteUri.query(), absoluteUri.fragment());
       }
       absoluteUri = this.resolveCache.put(relativeUri, absoluteUri);
     }
@@ -455,7 +489,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   @Override
   public void openUplink(LinkBinding link) {
     if (link instanceof WarpBinding) {
-      openWarpUplink((WarpBinding) link);
+      this.openWarpUplink((WarpBinding) link);
     } else {
       UplinkError.rejectUnsupported(link);
     }
@@ -463,14 +497,11 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   protected void openWarpUplink(WarpBinding link) {
     final Uri laneUri = link.laneUri();
-    final Uri remoteNodeUri = resolve(link.nodeUri());
-    final RemoteWarpUplink uplink = createWarpUplink(link, remoteNodeUri);
+    final Uri remoteNodeUri = this.resolve(link.nodeUri());
+    final RemoteWarpUplink uplink = this.createWarpUplink(link, remoteNodeUri);
     link.setLinkContext(uplink);
-
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> oldUplinks;
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> newUplinks;
     do {
-      oldUplinks = this.uplinks;
+      final HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> oldUplinks = RemoteHost.UPLINKS.get(this);
       HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = oldUplinks.get(remoteNodeUri);
       if (nodeUplinks == null) {
         nodeUplinks = HashTrieMap.empty();
@@ -481,28 +512,29 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
       }
       laneUplinks = laneUplinks.added(uplink);
       nodeUplinks = nodeUplinks.updated(laneUri, laneUplinks);
-      newUplinks = oldUplinks.updated(remoteNodeUri, nodeUplinks);
-    } while (!UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
-
-    if (oldUplinks != newUplinks) {
-      didOpenUplink(uplink);
-    }
-    if (isConnected()) {
-      uplink.didConnect();
-    }
+      final HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> newUplinks = oldUplinks.updated(remoteNodeUri, nodeUplinks);
+      if (RemoteHost.UPLINKS.compareAndSet(this, oldUplinks, newUplinks)) {
+        if (oldUplinks != newUplinks) {
+          this.didOpenUplink(uplink);
+        }
+        if (this.isConnected()) {
+          uplink.didConnect();
+        }
+        break;
+      }
+    } while (true);
   }
 
   void closeUplink(RemoteWarpUplink uplink) {
     final Uri laneUri = uplink.laneUri();
     final Uri remoteNodeUri = uplink.remoteNodeUri;
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> oldUplinks;
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> newUplinks;
     do {
-      oldUplinks = this.uplinks;
+      final HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> oldUplinks = RemoteHost.UPLINKS.get(this);
       HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = oldUplinks.get(remoteNodeUri);
       if (nodeUplinks != null) {
         HashTrieSet<RemoteWarpUplink> laneUplinks = nodeUplinks.get(laneUri);
         if (laneUplinks != null) {
+          final HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> newUplinks;
           laneUplinks = laneUplinks.removed(uplink);
           if (laneUplinks.isEmpty()) {
             nodeUplinks = nodeUplinks.removed(laneUri);
@@ -515,20 +547,20 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
             nodeUplinks = nodeUplinks.updated(laneUri, laneUplinks);
             newUplinks = oldUplinks.updated(remoteNodeUri, nodeUplinks);
           }
+          if (RemoteHost.UPLINKS.compareAndSet(this, oldUplinks, newUplinks)) {
+            if (oldUplinks != newUplinks) {
+              uplink.didCloseUp();
+              this.didCloseUplink(uplink);
+            }
+            break;
+          }
         } else {
-          newUplinks = oldUplinks;
           break;
         }
       } else {
-        newUplinks = oldUplinks;
         break;
       }
-    } while (oldUplinks != newUplinks && !UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
-
-    if (oldUplinks != newUplinks) {
-      uplink.didCloseUp();
-      didCloseUplink(uplink);
-    }
+    } while (true);
   }
 
   @SuppressWarnings("unchecked")
@@ -537,9 +569,9 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     final Object message = push.message();
     if (message instanceof Envelope) {
       final Envelope envelope = (Envelope) message;
-      final Uri remoteNodeUri = resolve(envelope.nodeUri());
+      final Uri remoteNodeUri = this.resolve(envelope.nodeUri());
       final Envelope remoteEnvelope = envelope.nodeUri(remoteNodeUri);
-      final PullRequest<Envelope> pull = createPull(push.prio(), remoteEnvelope, (Cont<Envelope>) push.cont());
+      final PullRequest<Envelope> pull = this.createPull(push.prio(), remoteEnvelope, (Cont<Envelope>) push.cont());
       this.warpSocketContext.feed(pull);
     } else {
       push.trap(new HostException("unsupported message: " + message));
@@ -548,18 +580,18 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public void willConnect() {
-    // nop
+    // hook
   }
 
   @Override
   public void didConnect() {
     this.messageCont = new RemoteHostMessageCont(this);
     final InetSocketAddress remoteAddress = this.warpSocketContext.remoteAddress();
-    final UriAuthority remoteAuthority = UriAuthority.from(UriHost.inetAddress(remoteAddress.getAddress()),
-        UriPort.from(remoteAddress.getPort()));
-    this.remoteUri = Uri.from(UriScheme.from("warp"), remoteAuthority, UriPath.slash());
-    REMOTE_IDENTITY.set(this, new Unauthenticated(this.requestUri, this.remoteUri, Value.absent()));
-    connectUplinks();
+    final UriAuthority remoteAuthority = UriAuthority.create(UriHost.inetAddress(remoteAddress.getAddress()),
+                                                             UriPort.create(remoteAddress.getPort()));
+    this.remoteUri = Uri.create(UriScheme.create("warp"), remoteAuthority, UriPath.slash());
+    RemoteHost.REMOTE_IDENTITY.set(this, new Unauthenticated(this.requestUri, this.remoteUri, Value.absent()));
+    this.connectUplinks();
     this.hostContext.didConnect();
   }
 
@@ -585,7 +617,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   @Override
   public void didUpgrade(HttpRequest<?> request, HttpResponse<?> response) {
-    start();
+    this.start();
   }
 
   @Override
@@ -596,31 +628,31 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   @Override
   public void didRead(Envelope envelope) {
     if (envelope instanceof EventMessage) {
-      onEventMessage((EventMessage) envelope);
+      this.onEventMessage((EventMessage) envelope);
     } else if (envelope instanceof CommandMessage) {
-      onCommandMessage((CommandMessage) envelope);
+      this.onCommandMessage((CommandMessage) envelope);
     } else if (envelope instanceof LinkRequest) {
-      onLinkRequest((LinkRequest) envelope);
+      this.onLinkRequest((LinkRequest) envelope);
     } else if (envelope instanceof LinkedResponse) {
-      onLinkedResponse((LinkedResponse) envelope);
+      this.onLinkedResponse((LinkedResponse) envelope);
     } else if (envelope instanceof SyncRequest) {
-      onSyncRequest((SyncRequest) envelope);
+      this.onSyncRequest((SyncRequest) envelope);
     } else if (envelope instanceof SyncedResponse) {
-      onSyncedResponse((SyncedResponse) envelope);
+      this.onSyncedResponse((SyncedResponse) envelope);
     } else if (envelope instanceof UnlinkRequest) {
-      onUnlinkRequest((UnlinkRequest) envelope);
+      this.onUnlinkRequest((UnlinkRequest) envelope);
     } else if (envelope instanceof UnlinkedResponse) {
-      onUnlinkedResponse((UnlinkedResponse) envelope);
+      this.onUnlinkedResponse((UnlinkedResponse) envelope);
     } else if (envelope instanceof AuthRequest) {
-      onAuthRequest((AuthRequest) envelope);
+      this.onAuthRequest((AuthRequest) envelope);
     } else if (envelope instanceof AuthedResponse) {
-      onAuthedResponse((AuthedResponse) envelope);
+      this.onAuthedResponse((AuthedResponse) envelope);
     } else if (envelope instanceof DeauthRequest) {
-      onDeauthRequest((DeauthRequest) envelope);
+      this.onDeauthRequest((DeauthRequest) envelope);
     } else if (envelope instanceof DeauthedResponse) {
-      onDeauthedResponse((DeauthedResponse) envelope);
+      this.onDeauthedResponse((DeauthedResponse) envelope);
     } else {
-      onUnknownEnvelope(envelope);
+      this.onUnknownEnvelope(envelope);
     }
   }
 
@@ -629,46 +661,46 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     final WarpSocketContext warpSocketContext = this.warpSocketContext;
     if (frame instanceof WsClose<?, ?>) {
       if (warpSocketContext != null) {
-        warpSocketContext.write(WsClose.from(1000));
+        warpSocketContext.write(WsClose.create(1000));
       } else {
-        didReadClose((WsClose<?, ?>) frame);
+        this.didReadClose((WsClose<?, ?>) frame);
       }
     } else if (frame instanceof WsPing<?, ?>) {
       if (warpSocketContext != null) {
-        warpSocketContext.write(WsPong.from(frame.payload()));
+        warpSocketContext.write(WsPong.create(frame.payload()));
       }
     }
   }
 
   protected void didReadClose(WsClose<?, ?> frame) {
-    close();
+    this.close();
   }
 
   protected void onEventMessage(EventMessage message) {
-    final Uri nodeUri = resolve(message.nodeUri());
+    final Uri nodeUri = this.resolve(message.nodeUri());
     final Uri laneUri = message.laneUri();
 
-    final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = this.uplinks.get(nodeUri);
+    final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = RemoteHost.UPLINKS.get(this).get(nodeUri);
     if (nodeUplinks != null) {
       final HashTrieSet<RemoteWarpUplink> laneUplinks = nodeUplinks.get(laneUri);
       if (laneUplinks != null) {
         final EventMessage resolvedMessage = message.nodeUri(nodeUri);
         final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
         while (uplinksIterator.hasNext()) {
-          willPushMessage(resolvedMessage);
+          this.willPushMessage(resolvedMessage);
           final RemoteWarpUplink uplink = uplinksIterator.next();
           uplink.queueDown(new Push<Envelope>(Uri.empty(), Uri.empty(), uplink.nodeUri(), uplink.laneUri(),
-                                              uplink.prio(), remoteIdentity(), resolvedMessage, this.messageCont));
+                                              uplink.prio(), this.remoteIdentity(), resolvedMessage, this.messageCont));
         }
       }
     }
 
-    UPLINK_EVENT_DELTA.incrementAndGet(this);
-    didUpdateMetrics();
+    RemoteHost.UPLINK_EVENT_DELTA.incrementAndGet(this);
+    this.didUpdateMetrics();
   }
 
   protected void onCommandMessage(CommandMessage message) {
-    final Policy policy = policy();
+    final Policy policy = this.policy();
     final PolicyDirective<CommandMessage> directive;
     if (policy != null) {
       directive = policy.canDownlink(message, this.remoteIdentity);
@@ -682,35 +714,35 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         message = newMessage;
       }
 
-      final Uri nodeUri = resolve(message.nodeUri());
+      final Uri nodeUri = this.resolve(message.nodeUri());
       final Uri laneUri = message.laneUri();
       final CommandMessage resolvedMessage = message.nodeUri(nodeUri);
-      final HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = this.downlinks.get(nodeUri);
+      final HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = RemoteHost.DOWNLINKS.get(this).get(nodeUri);
       final RemoteWarpDownlink laneDownlink = nodeDownlinks != null ? nodeDownlinks.get(laneUri) : null;
       if (laneDownlink != null) {
         laneDownlink.queueUp(resolvedMessage);
       } else {
-        willPushMessage(resolvedMessage);
+        this.willPushMessage(resolvedMessage);
         this.hostContext.pushDown(new Push<Envelope>(Uri.empty(), Uri.empty(), nodeUri, laneUri,
-                0.0f, null, resolvedMessage, this.messageCont));
+                                                     0.0f, null, resolvedMessage, this.messageCont));
       }
     } else if (directive.isForbidden()) {
-      forbid();
+      this.forbid();
     }
 
-    DOWNLINK_COMMAND_DELTA.incrementAndGet(this);
-    didUpdateMetrics();
+    RemoteHost.DOWNLINK_COMMAND_DELTA.incrementAndGet(this);
+    this.didUpdateMetrics();
   }
 
   protected void willPushMessage(Envelope envelope) {
     //do {
     //  final int oldReceiveBacklog = this.receiveBacklog;
     //  final int newReceiveBacklog = oldReceiveBacklog + 1;
-    //  if (RECEIVE_BACKLOG.compareAndSet(this, oldReceiveBacklog, newReceiveBacklog)) {
-    //    if (newReceiveBacklog == MAX_RECEIVE_BACKLOG) {
+    //  if (RemoteHost.RECEIVE_BACKLOG.compareAndSet(this, oldReceiveBacklog, newReceiveBacklog)) {
+    //    if (newReceiveBacklog == RemoteHost.MAX_RECEIVE_BACKLOG) {
     //      this.warpSocketContext.flowControl(FlowModifier.DISABLE_READ);
     //      if (newReceiveBacklog != this.receiveBacklog) {
-    //        reconcileReceiveBacklog();
+    //        this.reconcileReceiveBacklog();
     //      }
     //    }
     //    break;
@@ -722,11 +754,11 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     //do {
     //  final int oldReceiveBacklog = this.receiveBacklog;
     //  final int newReceiveBacklog = oldReceiveBacklog - 1;
-    //  if (RECEIVE_BACKLOG.compareAndSet(this, oldReceiveBacklog, newReceiveBacklog)) {
-    //    if (oldReceiveBacklog == MAX_RECEIVE_BACKLOG) {
+    //  if (RemoteHost.RECEIVE_BACKLOG.compareAndSet(this, oldReceiveBacklog, newReceiveBacklog)) {
+    //    if (oldReceiveBacklog == RemoteHost.MAX_RECEIVE_BACKLOG) {
     //      this.warpSocketContext.flowControl(FlowModifier.ENABLE_READ);
     //      if (newReceiveBacklog != this.receiveBacklog) {
-    //        reconcileReceiveBacklog();
+    //        this.reconcileReceiveBacklog();
     //      }
     //    }
     //    break;
@@ -737,7 +769,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   protected void reconcileReceiveBacklog() {
     do {
       final int receiveBacklog = this.receiveBacklog;
-      if (receiveBacklog < MAX_RECEIVE_BACKLOG) {
+      if (receiveBacklog < RemoteHost.MAX_RECEIVE_BACKLOG) {
         this.warpSocketContext.flowControl(FlowModifier.ENABLE_READ);
       } else {
         this.warpSocketContext.flowControl(FlowModifier.DISABLE_READ);
@@ -750,17 +782,15 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   protected void routeDownlink(LinkAddressed envelope) {
     final Uri remoteNodeUri = envelope.nodeUri();
-    final Uri nodeUri = resolve(remoteNodeUri);
+    final Uri nodeUri = this.resolve(remoteNodeUri);
     final Uri laneUri = envelope.laneUri();
     final float prio = envelope.prio();
     final float rate = envelope.rate();
     final Value body = envelope.body();
-    HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> oldDownlinks;
-    HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> newDownlinks;
     RemoteWarpDownlink downlink = null;
 
     do {
-      oldDownlinks = this.downlinks;
+      final HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> oldDownlinks = RemoteHost.DOWNLINKS.get(this);
       HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = oldDownlinks.get(nodeUri);
       if (nodeDownlinks == null) {
         nodeDownlinks = HashTrieMap.empty();
@@ -772,41 +802,41 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
           downlink.closeDown();
         }
         downlink = laneDownlink;
-        newDownlinks = oldDownlinks;
         break;
       } else {
         if (downlink == null) {
-          downlink = createWarpDownlink(remoteNodeUri, nodeUri, laneUri, prio, rate, body);
+          downlink = this.createWarpDownlink(remoteNodeUri, nodeUri, laneUri, prio, rate, body);
           this.hostContext.openDownlink(downlink);
         }
         // TODO: don't register error links
         nodeDownlinks = nodeDownlinks.updated(laneUri, downlink);
-        newDownlinks = oldDownlinks.updated(nodeUri, nodeDownlinks);
+        final HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> newDownlinks = oldDownlinks.updated(nodeUri, nodeDownlinks);
+        if (RemoteHost.DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks)) {
+          downlink.openDown();
+          this.didOpenDownlink(downlink);
+          break;
+        }
       }
-    } while (oldDownlinks != newDownlinks && !DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks));
+    } while (true);
 
-    if (oldDownlinks != newDownlinks) {
-      downlink.openDown();
-      didOpenDownlink(downlink);
-    }
     final LinkAddressed resolvedEnvelope = envelope.nodeUri(nodeUri);
     downlink.queueUp(resolvedEnvelope);
   }
 
   protected void didOpenDownlink(WarpBinding downlink) {
-    DOWNLINK_OPEN_DELTA.incrementAndGet(this);
-    flushMetrics();
+    RemoteHost.DOWNLINK_OPEN_DELTA.incrementAndGet(this);
+    this.flushMetrics();
   }
 
   protected void didCloseDownlink(WarpBinding downlink) {
-    DOWNLINK_CLOSE_DELTA.incrementAndGet(this);
-    flushMetrics();
+    RemoteHost.DOWNLINK_CLOSE_DELTA.incrementAndGet(this);
+    this.flushMetrics();
   }
 
   protected void routeUplink(LaneAddressed envelope) {
-    final Uri nodeUri = resolve(envelope.nodeUri());
+    final Uri nodeUri = this.resolve(envelope.nodeUri());
     final Uri laneUri = envelope.laneUri();
-    final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = this.uplinks.get(nodeUri);
+    final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = RemoteHost.UPLINKS.get(this).get(nodeUri);
     if (nodeUplinks != null) {
       final HashTrieSet<RemoteWarpUplink> laneUplinks = nodeUplinks.get(laneUri);
       if (laneUplinks != null) {
@@ -815,24 +845,24 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         while (uplinksIterator.hasNext()) {
           final RemoteWarpUplink uplink = uplinksIterator.next();
           uplink.queueDown(new Push<Envelope>(Uri.empty(), Uri.empty(), uplink.nodeUri(), uplink.laneUri(),
-                                              uplink.prio(), remoteIdentity(), resolvedEnvelope, null));
+                                              uplink.prio(), this.remoteIdentity(), resolvedEnvelope, null));
         }
       }
     }
   }
 
   protected void didOpenUplink(WarpContext uplink) {
-    UPLINK_OPEN_DELTA.incrementAndGet(this);
-    flushMetrics();
+    RemoteHost.UPLINK_OPEN_DELTA.incrementAndGet(this);
+    this.flushMetrics();
   }
 
   protected void didCloseUplink(WarpContext uplink) {
-    UPLINK_CLOSE_DELTA.incrementAndGet(this);
-    flushMetrics();
+    RemoteHost.UPLINK_CLOSE_DELTA.incrementAndGet(this);
+    this.flushMetrics();
   }
 
   protected void onLinkRequest(LinkRequest request) {
-    final Policy policy = policy();
+    final Policy policy = this.policy();
     if (policy != null) {
       final PolicyDirective<LinkRequest> directive = policy.canLink(request, this.remoteIdentity);
       if (directive.isAllowed()) {
@@ -845,19 +875,19 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         this.warpSocketContext.feed(response, 1.0f);
         return;
       } else {
-        forbid();
+        this.forbid();
         return;
       }
     }
-    routeDownlink(request);
+    this.routeDownlink(request);
   }
 
   protected void onLinkedResponse(LinkedResponse response) {
-    routeUplink(response);
+    this.routeUplink(response);
   }
 
   protected void onSyncRequest(SyncRequest request) {
-    final Policy policy = policy();
+    final Policy policy = this.policy();
     if (policy != null) {
       final PolicyDirective<SyncRequest> directive = policy.canSync(request, this.remoteIdentity);
       if (directive.isAllowed()) {
@@ -870,101 +900,89 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         this.warpSocketContext.feed(response, 1.0f);
         return;
       } else {
-        forbid();
+        this.forbid();
         return;
       }
     }
-    routeDownlink(request);
+    this.routeDownlink(request);
   }
 
   protected void onSyncedResponse(SyncedResponse response) {
-    routeUplink(response);
+    this.routeUplink(response);
   }
 
   protected void onUnlinkRequest(UnlinkRequest request) {
-    final Uri nodeUri = resolve(request.nodeUri());
+    final Uri nodeUri = this.resolve(request.nodeUri());
     final Uri laneUri = request.laneUri();
-    HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> oldDownlinks;
-    HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> newDownlinks;
-    RemoteWarpDownlink downlink;
-
     do {
-      oldDownlinks = this.downlinks;
+      final HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> oldDownlinks = RemoteHost.DOWNLINKS.get(this);
       HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = oldDownlinks.get(nodeUri);
       if (nodeDownlinks != null) {
-        downlink = nodeDownlinks.get(laneUri);
+        final RemoteWarpDownlink downlink = nodeDownlinks.get(laneUri);
         if (downlink != null) {
           nodeDownlinks = nodeDownlinks.removed(laneUri);
+          final HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> newDownlinks;
           if (nodeDownlinks.isEmpty()) {
             newDownlinks = oldDownlinks.removed(nodeUri);
           } else {
             newDownlinks = oldDownlinks.updated(nodeUri, nodeDownlinks);
           }
+          if (RemoteHost.DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks)) {
+            final UnlinkRequest resolvedRequest = request.nodeUri(nodeUri);
+            downlink.queueUp(resolvedRequest);
+            this.didCloseDownlink(downlink);
+            break;
+          }
         } else {
-          newDownlinks = oldDownlinks;
           break;
         }
       } else {
-        newDownlinks = oldDownlinks;
-        downlink = null;
         break;
       }
-    } while (oldDownlinks != newDownlinks && !DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks));
-
-    if (downlink != null) {
-      final UnlinkRequest resolvedRequest = request.nodeUri(nodeUri);
-      downlink.queueUp(resolvedRequest);
-      didCloseDownlink(downlink);
-    }
+    } while (true);
   }
 
   protected void onUnlinkedResponse(UnlinkedResponse response) {
-    final Uri nodeUri = resolve(response.nodeUri());
+    final Uri nodeUri = this.resolve(response.nodeUri());
     final Uri laneUri = response.laneUri();
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> oldUplinks;
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> newUplinks;
-    HashTrieSet<RemoteWarpUplink> laneUplinks;
-
     do {
-      oldUplinks = this.uplinks;
+      final HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> oldUplinks = RemoteHost.UPLINKS.get(this);
       HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = oldUplinks.get(nodeUri);
       if (nodeUplinks != null) {
-        laneUplinks = nodeUplinks.get(laneUri);
+        final HashTrieSet<RemoteWarpUplink> laneUplinks = nodeUplinks.get(laneUri);
         if (laneUplinks != null) {
           nodeUplinks = nodeUplinks.removed(laneUri);
+          final HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> newUplinks;
           if (nodeUplinks.isEmpty()) {
             newUplinks = oldUplinks.removed(nodeUri);
           } else {
             newUplinks = oldUplinks.updated(nodeUri, nodeUplinks);
           }
+          if (RemoteHost.UPLINKS.compareAndSet(this, oldUplinks, newUplinks)) {
+            final UnlinkedResponse resolvedResponse = response.nodeUri(nodeUri);
+            final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
+            while (uplinksIterator.hasNext()) {
+              final RemoteWarpUplink uplink = uplinksIterator.next();
+              uplink.queueDown(new Push<Envelope>(Uri.empty(), Uri.empty(), uplink.nodeUri(), uplink.laneUri(),
+                                                  uplink.prio(), this.remoteIdentity(), resolvedResponse, null));
+              this.didCloseUplink(uplink);
+            }
+            break;
+          }
         } else {
-          newUplinks = oldUplinks;
           break;
         }
       } else {
-        newUplinks = oldUplinks;
-        laneUplinks = null;
         break;
       }
-    } while (oldUplinks != newUplinks && !UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
-
-    if (laneUplinks != null) {
-      final UnlinkedResponse resolvedResponse = response.nodeUri(nodeUri);
-      final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
-      while (uplinksIterator.hasNext()) {
-        final RemoteWarpUplink uplink = uplinksIterator.next();
-        uplink.queueDown(new Push<Envelope>(Uri.empty(), Uri.empty(), uplink.nodeUri(), uplink.laneUri(),
-                                            uplink.prio(), remoteIdentity(), resolvedResponse, null));
-        didCloseUplink(uplink);
-      }
-    }
+    } while (true);
   }
 
   protected void onAuthRequest(AuthRequest request) {
     final RemoteCredentials credentials = new RemoteCredentials(this.requestUri, this.remoteUri, request.body());
     final PolicyDirective<Identity> directive = this.hostContext.authenticate(credentials);
     if (directive != null && directive.isAllowed()) {
-      REMOTE_IDENTITY.set(this, directive.get());
+      RemoteHost.REMOTE_IDENTITY.set(this, directive.get());
       final AuthedResponse response = new AuthedResponse();
       this.warpSocketContext.feed(response, 1.0f);
     } else {
@@ -974,9 +992,9 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     if (directive != null && directive.isForbidden()) {
       final WarpSocketContext warpSocketContext = this.warpSocketContext;
       if (warpSocketContext != null) {
-        warpSocketContext.write(WsClose.from(1008, "Unauthorized"));
+        warpSocketContext.write(WsClose.create(1008, "Unauthorized"));
       } else {
-        close();
+        this.close();
       }
     }
   }
@@ -986,7 +1004,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   protected void onDeauthRequest(DeauthRequest request) {
-    REMOTE_IDENTITY.set(this, null);
+    RemoteHost.REMOTE_IDENTITY.set(this, null);
     final DeauthedResponse response = new DeauthedResponse();
     this.warpSocketContext.feed(response, 1.0f);
   }
@@ -996,15 +1014,15 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   protected void onUnknownEnvelope(Envelope envelope) {
-    // nop
+    // hook
   }
 
   protected void forbid() {
     final WarpSocketContext warpSocketContext = this.warpSocketContext;
     if (warpSocketContext != null) {
-      warpSocketContext.write(WsClose.from(1008, "Forbidden"));
+      warpSocketContext.write(WsClose.create(1008, "Forbidden"));
     } else {
-      close();
+      this.close();
     }
   }
 
@@ -1035,13 +1053,13 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
       messageCont.host = null;
       this.messageCont = null;
     }
-    RECEIVE_BACKLOG.set(this, 0);
+    RemoteHost.RECEIVE_BACKLOG.set(this, 0);
 
     Throwable failure = null;
     try {
-      disconnectUplinks();
+      this.disconnectUplinks();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
@@ -1049,12 +1067,12 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     try {
       this.hostContext.didDisconnect();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
     }
-    reconnect();
+    this.reconnect();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -1067,17 +1085,17 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     super.willClose();
     Throwable failure = null;
     try {
-      closeDownlinks();
+      this.closeDownlinks();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
     }
     try {
-      closeUplinks();
+      this.closeUplinks();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
@@ -1088,7 +1106,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         hostContext.close();
       }
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
@@ -1099,7 +1117,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         warpSocketContext.close();
       }
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
@@ -1119,7 +1137,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
       metaNode.close();
       this.metaNode = null;
     }
-    flushMetrics();
+    this.flushMetrics();
   }
 
   @Override
@@ -1132,7 +1150,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
         warpSocketContext.close();
       }
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
@@ -1149,20 +1167,20 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   public void openMetaHost(HostBinding host, NodeBinding metaHost) {
     if (metaHost instanceof AgentNode) {
       this.metaNode = (AgentNode) metaHost;
-      openMetaLanes(host, (AgentNode) metaHost);
+      this.openMetaLanes(host, (AgentNode) metaHost);
     }
     this.hostContext.openMetaHost(host, metaHost);
   }
 
   protected void openMetaLanes(HostBinding host, AgentNode metaHost) {
-    openReflectLanes(host, metaHost);
+    this.openReflectLanes(host, metaHost);
   }
 
   protected void openReflectLanes(HostBinding host, AgentNode metaHost) {
-    this.metaPulse = metaNode.demandLane()
-        .valueForm(HostPulse.form())
-        .observe(new RemoteHostPulseController(this));
-    metaNode.openLane(HostPulse.PULSE_URI, this.metaPulse);
+    this.metaPulse = this.metaNode.demandLane()
+                                  .valueForm(HostPulse.form())
+                                  .observe(new RemoteHostPulseController(this));
+    this.metaNode.openLane(HostPulse.PULSE_URI, this.metaPulse);
   }
 
   @Override
@@ -1211,53 +1229,55 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   protected void reconnect() {
-    close();
+    this.close();
   }
 
   protected void closeDownlinks() {
-    HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> oldDownlinks;
-    final HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> newDownlinks = HashTrieMap.empty();
     do {
-      oldDownlinks = this.downlinks;
-    } while (oldDownlinks != newDownlinks && !DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks));
-
-    final Iterator<HashTrieMap<Uri, RemoteWarpDownlink>> nodeDownlinksIterator = oldDownlinks.valueIterator();
-    while (nodeDownlinksIterator.hasNext()) {
-      final HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = nodeDownlinksIterator.next();
-      final Iterator<RemoteWarpDownlink> laneDownlinks = nodeDownlinks.valueIterator();
-      while (laneDownlinks.hasNext()) {
-        final RemoteWarpDownlink downlink = laneDownlinks.next();
-        downlink.closeDown();
-        didCloseDownlink(downlink);
+      final HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> oldDownlinks = RemoteHost.DOWNLINKS.get(this);
+      final HashTrieMap<Uri, HashTrieMap<Uri, RemoteWarpDownlink>> newDownlinks = HashTrieMap.empty();
+      if (RemoteHost.DOWNLINKS.compareAndSet(this, oldDownlinks, newDownlinks)) {
+        final Iterator<HashTrieMap<Uri, RemoteWarpDownlink>> nodeDownlinksIterator = oldDownlinks.valueIterator();
+        while (nodeDownlinksIterator.hasNext()) {
+          final HashTrieMap<Uri, RemoteWarpDownlink> nodeDownlinks = nodeDownlinksIterator.next();
+          final Iterator<RemoteWarpDownlink> laneDownlinks = nodeDownlinks.valueIterator();
+          while (laneDownlinks.hasNext()) {
+            final RemoteWarpDownlink downlink = laneDownlinks.next();
+            downlink.closeDown();
+            this.didCloseDownlink(downlink);
+          }
+        }
+        break;
       }
-    }
+    } while (true);
   }
 
   protected void closeUplinks() {
-    HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> oldUplinks;
-    final HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> newUplinks = HashTrieMap.empty();
     do {
-      oldUplinks = this.uplinks;
-    } while (oldUplinks != newUplinks && !UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
-
-    final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> nodeUplinksIterator = oldUplinks.valueIterator();
-    while (nodeUplinksIterator.hasNext()) {
-      final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = nodeUplinksIterator.next();
-      final Iterator<HashTrieSet<RemoteWarpUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
-      while (laneUplinksIterator.hasNext()) {
-        final HashTrieSet<RemoteWarpUplink> laneUplinks = laneUplinksIterator.next();
-        final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
-        while (uplinksIterator.hasNext()) {
-          final RemoteWarpUplink uplink = uplinksIterator.next();
-          uplink.closeUp();
-          didCloseUplink(uplink);
+      final HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> oldUplinks = RemoteHost.UPLINKS.get(this);
+      final HashTrieMap<Uri, HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> newUplinks = HashTrieMap.empty();
+      if (RemoteHost.UPLINKS.compareAndSet(this, oldUplinks, newUplinks)) {
+        final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> nodeUplinksIterator = oldUplinks.valueIterator();
+        while (nodeUplinksIterator.hasNext()) {
+          final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = nodeUplinksIterator.next();
+          final Iterator<HashTrieSet<RemoteWarpUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
+          while (laneUplinksIterator.hasNext()) {
+            final HashTrieSet<RemoteWarpUplink> laneUplinks = laneUplinksIterator.next();
+            final Iterator<RemoteWarpUplink> uplinksIterator = laneUplinks.iterator();
+            while (uplinksIterator.hasNext()) {
+              final RemoteWarpUplink uplink = uplinksIterator.next();
+              uplink.closeUp();
+              this.didCloseUplink(uplink);
+            }
+          }
         }
+        break;
       }
-    }
+    } while (true);
   }
 
   protected void connectUplinks() {
-    final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> nodeUplinksIterator = this.uplinks.valueIterator();
+    final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> nodeUplinksIterator = RemoteHost.UPLINKS.get(this).valueIterator();
     while (nodeUplinksIterator.hasNext()) {
       final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = nodeUplinksIterator.next();
       final Iterator<HashTrieSet<RemoteWarpUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
@@ -1273,7 +1293,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   protected void disconnectUplinks() {
-    final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> nodeUplinksIterator = this.uplinks.valueIterator();
+    final Iterator<HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>>> nodeUplinksIterator = RemoteHost.UPLINKS.get(this).valueIterator();
     while (nodeUplinksIterator.hasNext()) {
       final HashTrieMap<Uri, HashTrieSet<RemoteWarpUplink>> nodeUplinks = nodeUplinksIterator.next();
       final Iterator<HashTrieSet<RemoteWarpUplink>> laneUplinksIterator = nodeUplinks.valueIterator();
@@ -1321,15 +1341,15 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   protected void didUpdateMetrics() {
     do {
       final long newReportTime = System.currentTimeMillis();
-      final long oldReportTime = this.lastReportTime;
+      final long oldReportTime = RemoteHost.LAST_REPORT_TIME.get(this);
       final long dt = newReportTime - oldReportTime;
       if (dt >= Metric.REPORT_INTERVAL) {
-        if (LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
+        if (RemoteHost.LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
           try {
-            reportMetrics(dt);
+            this.reportMetrics(dt);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              didFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.didFail(error);
             } else {
               throw error;
             }
@@ -1344,13 +1364,13 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
 
   protected void flushMetrics() {
     final long newReportTime = System.currentTimeMillis();
-    final long oldReportTime = LAST_REPORT_TIME.getAndSet(this, newReportTime);
+    final long oldReportTime = RemoteHost.LAST_REPORT_TIME.getAndSet(this, newReportTime);
     final long dt = newReportTime - oldReportTime;
     try {
-      reportMetrics(dt);
+      this.reportMetrics(dt);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
+      if (Cont.isNonFatal(error)) {
+        this.didFail(error);
       } else {
         throw error;
       }
@@ -1358,7 +1378,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   protected void reportMetrics(long dt) {
-    final HostProfile profile = collectProfile(dt);
+    final HostProfile profile = this.collectProfile(dt);
     this.hostContext.reportDown(profile);
   }
 
@@ -1380,54 +1400,54 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     final int timerEventRate = 0;
     final long timerEventCount = 0L;
 
-    final int downlinkOpenDelta = DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
-    final long downlinkOpenCount = DOWNLINK_OPEN_COUNT.addAndGet(this, (long) downlinkOpenDelta);
-    final int downlinkCloseDelta = DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
-    final long downlinkCloseCount = DOWNLINK_CLOSE_COUNT.addAndGet(this, (long) downlinkCloseDelta);
-    final int downlinkEventDelta = DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int downlinkOpenDelta = RemoteHost.DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long downlinkOpenCount = RemoteHost.DOWNLINK_OPEN_COUNT.addAndGet(this, (long) downlinkOpenDelta);
+    final int downlinkCloseDelta = RemoteHost.DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long downlinkCloseCount = RemoteHost.DOWNLINK_CLOSE_COUNT.addAndGet(this, (long) downlinkCloseDelta);
+    final int downlinkEventDelta = RemoteHost.DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
     final int downlinkEventRate = (int) Math.ceil((1000.0 * (double) downlinkEventDelta) / (double) dt);
-    final long downlinkEventCount = DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
-    final int downlinkCommandDelta = DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final long downlinkEventCount = RemoteHost.DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
+    final int downlinkCommandDelta = RemoteHost.DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
     final int downlinkCommandRate = (int) Math.ceil((1000.0 * (double) downlinkCommandDelta) / (double) dt);
-    final long downlinkCommandCount = DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
+    final long downlinkCommandCount = RemoteHost.DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
 
-    final int uplinkOpenDelta = UPLINK_OPEN_DELTA.getAndSet(this, 0);
-    final long uplinkOpenCount = UPLINK_OPEN_COUNT.addAndGet(this, (long) uplinkOpenDelta);
-    final int uplinkCloseDelta = UPLINK_CLOSE_DELTA.getAndSet(this, 0);
-    final long uplinkCloseCount = UPLINK_CLOSE_COUNT.addAndGet(this, (long) uplinkCloseDelta);
-    final int uplinkEventDelta = UPLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int uplinkOpenDelta = RemoteHost.UPLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long uplinkOpenCount = RemoteHost.UPLINK_OPEN_COUNT.addAndGet(this, (long) uplinkOpenDelta);
+    final int uplinkCloseDelta = RemoteHost.UPLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long uplinkCloseCount = RemoteHost.UPLINK_CLOSE_COUNT.addAndGet(this, (long) uplinkCloseDelta);
+    final int uplinkEventDelta = RemoteHost.UPLINK_EVENT_DELTA.getAndSet(this, 0);
     final int uplinkEventRate = (int) Math.ceil((1000.0 * (double) uplinkEventDelta) / (double) dt);
-    final long uplinkEventCount = UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
-    final int uplinkCommandDelta = UPLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final long uplinkEventCount = RemoteHost.UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
+    final int uplinkCommandDelta = RemoteHost.UPLINK_COMMAND_DELTA.getAndSet(this, 0);
     final int uplinkCommandRate = (int) Math.ceil((1000.0 * (double) uplinkCommandDelta) / (double) dt);
-    final long uplinkCommandCount = UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
+    final long uplinkCommandCount = RemoteHost.UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
 
     final long nodeCount = nodeOpenCount - nodeCloseCount;
     final long agentCount = agentOpenCount - agentCloseCount;
     final AgentPulse agentPulse = new AgentPulse(agentCount, agentExecRate, agentExecTime, timerEventRate, timerEventCount);
     final long downlinkCount = downlinkOpenCount - downlinkCloseCount;
     final WarpDownlinkPulse downlinkPulse = new WarpDownlinkPulse(downlinkCount, downlinkEventRate, downlinkEventCount,
-        downlinkCommandRate, downlinkCommandCount);
+                                                                  downlinkCommandRate, downlinkCommandCount);
     final long uplinkCount = uplinkOpenCount - uplinkCloseCount;
     final WarpUplinkPulse uplinkPulse = new WarpUplinkPulse(uplinkCount, uplinkEventRate, uplinkEventCount,
-        uplinkCommandRate, uplinkCommandCount);
+                                                            uplinkCommandRate, uplinkCommandCount);
     this.pulse = new HostPulse(nodeCount, agentPulse, downlinkPulse, uplinkPulse);
     final DemandLane<HostPulse> metaPulse = this.metaPulse;
     if (metaPulse != null) {
       metaPulse.cue();
     }
 
-    return new HostProfile(cellAddress(),
-        nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
-        agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
-        agentExecDelta, agentExecRate, agentExecTime,
-        timerEventDelta, timerEventRate, timerEventCount,
-        downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
-        downlinkEventDelta, downlinkEventRate, downlinkEventCount,
-        downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
-        uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
-        uplinkEventDelta, uplinkEventRate, uplinkEventCount,
-        uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
+    return new HostProfile(this.cellAddress(),
+                           nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
+                           agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
+                           agentExecDelta, agentExecRate, agentExecTime,
+                           timerEventDelta, timerEventRate, timerEventCount,
+                           downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
+                           downlinkEventDelta, downlinkEventRate, downlinkEventCount,
+                           downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
+                           uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
+                           uplinkEventDelta, uplinkEventRate, uplinkEventCount,
+                           uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
   }
 
   static final int PRIMARY = 1 << 0;
@@ -1578,7 +1598,7 @@ final class RemoteHostPull<E extends Envelope> implements PullRequest<E> {
         this.host.didUpdateMetrics();
       }
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
@@ -1607,7 +1627,7 @@ final class RemoteHostPull<E extends Envelope> implements PullRequest<E> {
   @Override
   public boolean stay(StayContext context, int backlog) {
     if (this.cont instanceof Stay) {
-      return ((Stay) this.cont).stay(host, backlog);
+      return ((Stay) this.cont).stay(this.host, backlog);
     } else {
       return backlog < RemoteHost.MAX_SEND_BACKLOG;
     }

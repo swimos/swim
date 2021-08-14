@@ -17,39 +17,39 @@ package swim.warp;
 import org.testng.annotations.Test;
 import swim.structure.Attr;
 import swim.structure.Record;
-import static swim.warp.Assertions.assertParses;
-import static swim.warp.Assertions.assertWrites;
+import static swim.warp.WarpAssertions.assertParses;
+import static swim.warp.WarpAssertions.assertWrites;
 
 public class UnlinkedResponseSpec {
 
   @Test
   public void parseUnlinkedWithNamedHeaders() {
     assertParses("@unlinked(node: node_uri, lane: lane_uri)",
-        new UnlinkedResponse("node_uri", "lane_uri"));
+                 new UnlinkedResponse("node_uri", "lane_uri"));
   }
 
   @Test
   public void parseUnlinkedWithPositionalHeaders() {
     assertParses("@unlinked(node_uri, lane_uri)",
-        new UnlinkedResponse("node_uri", "lane_uri"));
+                 new UnlinkedResponse("node_uri", "lane_uri"));
   }
 
   @Test
   public void parseUnlinkedWithBody() {
     assertParses("@unlinked(node_uri, lane_uri)@test",
-        new UnlinkedResponse("node_uri", "lane_uri", Record.of(Attr.of("test"))));
+                 new UnlinkedResponse("node_uri", "lane_uri", Record.of(Attr.of("test"))));
   }
 
   @Test
   public void writeUnlinked() {
     assertWrites(new UnlinkedResponse("node_uri", "lane_uri"),
-        "@unlinked(node:node_uri,lane:lane_uri)");
+                 "@unlinked(node:node_uri,lane:lane_uri)");
   }
 
   @Test
   public void writeUnlinkedWithBody() {
     assertWrites(new UnlinkedResponse("node_uri", "lane_uri", Record.of(Attr.of("test"))),
-        "@unlinked(node:node_uri,lane:lane_uri)@test");
+                 "@unlinked(node:node_uri,lane:lane_uri)@test");
   }
 
 }

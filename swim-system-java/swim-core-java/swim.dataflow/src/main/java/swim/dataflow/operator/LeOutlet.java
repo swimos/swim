@@ -20,8 +20,8 @@ import swim.structure.Value;
 public final class LeOutlet extends BinaryOutlet {
 
   @Override
-  protected Item evaluate(Value argument1, Value argument2) {
-    return argument1.le(argument2);
+  protected Item evaluate(Value lhs, Value rhs) {
+    return lhs.le(rhs);
   }
 
 }

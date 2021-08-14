@@ -63,7 +63,7 @@ public class OpenIdAuthenticator extends AbstractAuthenticator {
     if (compactJws != null) {
       final JsonWebSignature jws = JsonWebSignature.parse(compactJws);
       if (jws != null) {
-        return authenticate(credentials.requestUri(), credentials.fromUri(), jws);
+        return this.authenticate(credentials.requestUri(), credentials.fromUri(), jws);
       }
     }
     return null;

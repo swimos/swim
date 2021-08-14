@@ -33,6 +33,11 @@ final class ContentLengthParser extends Parser<ContentLength> {
     this(0L, 1);
   }
 
+  @Override
+  public Parser<ContentLength> feed(Input input) {
+    return ContentLengthParser.parse(input, this.length, this.step);
+  }
+
   static Parser<ContentLength> parse(Input input, long length, int step) {
     int c = 0;
     if (step == 1) {
@@ -43,10 +48,10 @@ final class ContentLengthParser extends Parser<ContentLength> {
           length = (long) Base10.decodeDigit(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("digit", input));
+          return Parser.error(Diagnostic.expected("digit", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("digit", input));
+        return Parser.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 2) {
@@ -56,29 +61,24 @@ final class ContentLengthParser extends Parser<ContentLength> {
           input = input.step();
           length = 10L * length + (long) Base10.decodeDigit(c);
           if (length < 0L) {
-            return error(Diagnostic.message("content length overflow", input));
+            return Parser.error(Diagnostic.message("content length overflow", input));
           }
         } else {
           break;
         }
       }
       if (!input.isEmpty()) {
-        return done(ContentLength.from(length));
+        return Parser.done(ContentLength.create(length));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ContentLengthParser(length, step);
   }
 
   static Parser<ContentLength> parse(Input input) {
-    return parse(input, 0L, 1);
-  }
-
-  @Override
-  public Parser<ContentLength> feed(Input input) {
-    return parse(input, this.length, this.step);
+    return ContentLengthParser.parse(input, 0L, 1);
   }
 
 }

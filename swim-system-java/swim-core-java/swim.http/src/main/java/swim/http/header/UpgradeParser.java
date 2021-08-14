@@ -42,6 +42,11 @@ final class UpgradeParser extends Parser<Upgrade> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<Upgrade> feed(Input input) {
+    return UpgradeParser.parse(input, this.http, this.protocol, this.protocols, this.step);
+  }
+
   static Parser<Upgrade> parse(Input input, HttpParser http, Parser<UpgradeProtocol> protocol,
                                Builder<UpgradeProtocol, FingerTrieSeq<UpgradeProtocol>> protocols, int step) {
     int c = 0;
@@ -76,7 +81,7 @@ final class UpgradeParser extends Parser<Upgrade> {
           input = input.step();
           step = 3;
         } else if (!input.isEmpty()) {
-          return done(Upgrade.from(protocols.bind()));
+          return Parser.done(Upgrade.create(protocols.bind()));
         }
       }
       if (step == 3) {
@@ -91,7 +96,7 @@ final class UpgradeParser extends Parser<Upgrade> {
         if (input.isCont()) {
           step = 4;
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
@@ -112,18 +117,13 @@ final class UpgradeParser extends Parser<Upgrade> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new UpgradeParser(http, protocol, protocols, step);
   }
 
   static Parser<Upgrade> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<Upgrade> feed(Input input) {
-    return parse(input, this.http, this.protocol, this.protocols, this.step);
+    return UpgradeParser.parse(input, http, null, null, 1);
   }
 
 }

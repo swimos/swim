@@ -67,17 +67,17 @@ public interface SpatialMap<K, S, V> extends Iterable<SpatialMap.Entry<K, S, V>>
 
     @Override
     public K getKey() {
-      return key;
+      return this.key;
     }
 
     @Override
     public S getShape() {
-      return shape;
+      return this.shape;
     }
 
     @Override
     public V getValue() {
-      return value;
+      return this.value;
     }
 
     @Override
@@ -91,11 +91,11 @@ public interface SpatialMap<K, S, V> extends Iterable<SpatialMap.Entry<K, S, V>>
         return true;
       } else if (other instanceof Map.Entry<?, ?>) {
         final Map.Entry<?, ?> that = (Map.Entry<?, ?>) other;
-        final K key = getKey();
+        final K key = this.getKey();
         if (key == null ? that.getKey() != null : !key.equals(that.getKey())) {
           return false;
         }
-        final V value = getValue();
+        final V value = this.getValue();
         if (value == null ? that.getValue() != null : !value.equals(that.getValue())) {
           return false;
         }
@@ -106,14 +106,14 @@ public interface SpatialMap<K, S, V> extends Iterable<SpatialMap.Entry<K, S, V>>
 
     @Override
     public int hashCode() {
-      final K key = getKey();
-      final V value = getValue();
+      final K key = this.getKey();
+      final V value = this.getValue();
       return (key == null ? 0 : key.hashCode()) ^ (value == null ? 0 : value.hashCode());
     }
 
     @Override
     public String toString() {
-      return new StringBuilder().append(getKey()).append('=').append(getValue()).toString();
+      return new StringBuilder().append(this.getKey()).append('=').append(this.getValue()).toString();
     }
 
   }

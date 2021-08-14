@@ -34,6 +34,11 @@ final class SecWebSocketProtocolParser extends Parser<SecWebSocketProtocol> {
     this(http, null);
   }
 
+  @Override
+  public Parser<SecWebSocketProtocol> feed(Input input) {
+    return SecWebSocketProtocolParser.parse(input, this.http, this.protocols);
+  }
+
   static Parser<SecWebSocketProtocol> parse(Input input, HttpParser http,
                                             Parser<FingerTrieSeq<String>> protocols) {
     if (protocols == null) {
@@ -44,25 +49,20 @@ final class SecWebSocketProtocolParser extends Parser<SecWebSocketProtocol> {
     if (protocols.isDone()) {
       final FingerTrieSeq<String> tokens = protocols.bind();
       if (!tokens.isEmpty()) {
-        return done(SecWebSocketProtocol.from(tokens));
+        return Parser.done(SecWebSocketProtocol.create(tokens));
       } else {
-        return error(Diagnostic.expected("websocket protocol", input));
+        return Parser.error(Diagnostic.expected("websocket protocol", input));
       }
     } else if (protocols.isError()) {
       return protocols.asError();
     } else if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new SecWebSocketProtocolParser(http, protocols);
   }
 
   static Parser<SecWebSocketProtocol> parse(Input input, HttpParser http) {
-    return parse(input, http, null);
-  }
-
-  @Override
-  public Parser<SecWebSocketProtocol> feed(Input input) {
-    return parse(input, this.http, this.protocols);
+    return SecWebSocketProtocolParser.parse(input, http, null);
   }
 
 }

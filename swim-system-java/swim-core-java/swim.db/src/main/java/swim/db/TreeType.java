@@ -29,34 +29,20 @@ public enum TreeType {
     this.tag = tag;
   }
 
-  public static TreeType fromTag(String tag) {
-    if ("btree".equals(tag)) {
-      return BTREE;
-    } else if ("qtree".equals(tag)) {
-      return QTREE;
-    } else if ("stree".equals(tag)) {
-      return STREE;
-    } else if ("utree".equals(tag)) {
-      return UTREE;
-    } else {
-      return null;
-    }
-  }
-
   public boolean isBTree() {
-    return this == BTREE;
+    return this == TreeType.BTREE;
   }
 
   public boolean isQTree() {
-    return this == QTREE;
+    return this == TreeType.QTREE;
   }
 
   public boolean isSTree() {
-    return this == STREE;
+    return this == TreeType.STREE;
   }
 
   public boolean isUTree() {
-    return this == UTREE;
+    return this == TreeType.UTREE;
   }
 
   public String tag() {
@@ -65,63 +51,57 @@ public enum TreeType {
 
   public PageRef emptyPageRef(PageContext pageContext, int stem, long version) {
     switch (this) {
-      case BTREE:
-        return BTreePageRef.empty(pageContext, stem, version);
-      case QTREE:
-        return QTreePageRef.empty(pageContext, stem, version);
-      case STREE:
-        return STreePageRef.empty(pageContext, stem, version);
-      case UTREE:
-        return UTreePageRef.empty(pageContext, stem, version);
-      default:
-        throw new UnsupportedOperationException();
+      case BTREE: return BTreePageRef.empty(pageContext, stem, version);
+      case QTREE: return QTreePageRef.empty(pageContext, stem, version);
+      case STREE: return STreePageRef.empty(pageContext, stem, version);
+      case UTREE: return UTreePageRef.empty(pageContext, stem, version);
+      default: throw new UnsupportedOperationException();
     }
   }
 
   public PageRef pageRefFromValue(PageContext pageContext, int stem, Value value) {
     switch (this) {
-      case BTREE:
-        return BTreePageRef.fromValue(pageContext, stem, value);
-      case QTREE:
-        return QTreePageRef.fromValue(pageContext, stem, value);
-      case STREE:
-        return STreePageRef.fromValue(pageContext, stem, value);
-      case UTREE:
-        return UTreePageRef.fromValue(pageContext, stem, value);
-      default:
-        throw new UnsupportedOperationException();
+      case BTREE: return BTreePageRef.fromValue(pageContext, stem, value);
+      case QTREE: return QTreePageRef.fromValue(pageContext, stem, value);
+      case STREE: return STreePageRef.fromValue(pageContext, stem, value);
+      case UTREE: return UTreePageRef.fromValue(pageContext, stem, value);
+      default: throw new UnsupportedOperationException();
     }
   }
 
   public Tree emptyTree(TreeContext treeContext, int stem, long version,
                         boolean isResident, boolean isTransient) {
     switch (this) {
-      case BTREE:
-        return new BTree(treeContext, stem, version, isResident, isTransient);
-      case QTREE:
-        return new QTree(treeContext, stem, version, isResident, isTransient);
-      case STREE:
-        return new STree(treeContext, stem, version, isResident, isTransient);
-      case UTREE:
-        return new UTree(treeContext, stem, version, isResident, isTransient);
-      default:
-        throw new UnsupportedOperationException();
+      case BTREE: return new BTree(treeContext, stem, version, isResident, isTransient);
+      case QTREE: return new QTree(treeContext, stem, version, isResident, isTransient);
+      case STREE: return new STree(treeContext, stem, version, isResident, isTransient);
+      case UTREE: return new UTree(treeContext, stem, version, isResident, isTransient);
+      default: throw new UnsupportedOperationException();
     }
   }
 
   public Tree treeFromSeed(TreeContext treeContext, Seed seed,
                            boolean isResident, boolean isTransient) {
     switch (this) {
-      case BTREE:
-        return new BTree(treeContext, seed, isResident, isTransient);
-      case QTREE:
-        return new QTree(treeContext, seed, isResident, isTransient);
-      case STREE:
-        return new STree(treeContext, seed, isResident, isTransient);
-      case UTREE:
-        return new UTree(treeContext, seed, isResident, isTransient);
-      default:
-        throw new UnsupportedOperationException();
+      case BTREE: return new BTree(treeContext, seed, isResident, isTransient);
+      case QTREE: return new QTree(treeContext, seed, isResident, isTransient);
+      case STREE: return new STree(treeContext, seed, isResident, isTransient);
+      case UTREE: return new UTree(treeContext, seed, isResident, isTransient);
+      default: throw new UnsupportedOperationException();
+    }
+  }
+
+  public static TreeType fromTag(String tag) {
+    if ("btree".equals(tag)) {
+      return TreeType.BTREE;
+    } else if ("qtree".equals(tag)) {
+      return TreeType.QTREE;
+    } else if ("stree".equals(tag)) {
+      return TreeType.STREE;
+    } else if ("utree".equals(tag)) {
+      return TreeType.UTREE;
+    } else {
+      return null;
     }
   }
 

@@ -33,6 +33,11 @@ final class EnvelopeDecoder extends Decoder<Envelope> {
     this(null);
   }
 
+  @Override
+  public Decoder<Envelope> feed(InputBuffer input) {
+    return EnvelopeDecoder.decode(input, this.output);
+  }
+
   static Decoder<Envelope> decode(InputBuffer input, Decoder<Value> output) {
     if (output == null) {
       output = Utf8.parseDecoded(Recon.structureParser().blockParser(), input);
@@ -44,24 +49,19 @@ final class EnvelopeDecoder extends Decoder<Envelope> {
         final Value value = output.bind();
         final Envelope envelope = Envelope.fromValue(value);
         if (envelope != null) {
-          return done(envelope);
+          return Decoder.done(envelope);
         } else {
-          return error(new DecoderException(Recon.toString(value)));
+          return Decoder.error(new DecoderException(Recon.toString(value)));
         }
       } catch (RuntimeException cause) {
-        return error(cause);
+        return Decoder.error(cause);
       }
     } else if (output.isError()) {
-      return error(output.trap());
+      return Decoder.error(output.trap());
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new EnvelopeDecoder(output);
-  }
-
-  @Override
-  public Decoder<Envelope> feed(InputBuffer input) {
-    return decode(input, this.output);
   }
 
 }

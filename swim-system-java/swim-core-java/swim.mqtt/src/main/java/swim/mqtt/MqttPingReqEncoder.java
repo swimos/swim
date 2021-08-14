@@ -26,7 +26,8 @@ final class MqttPingReqEncoder extends Encoder<Object, MqttPingReq> {
   final int remaining;
   final int step;
 
-  MqttPingReqEncoder(MqttEncoder mqtt, MqttPingReq packet, int length, int remaining, int step) {
+  MqttPingReqEncoder(MqttEncoder mqtt, MqttPingReq packet, int length,
+                     int remaining, int step) {
     this.mqtt = mqtt;
     this.packet = packet;
     this.length = length;
@@ -38,8 +39,15 @@ final class MqttPingReqEncoder extends Encoder<Object, MqttPingReq> {
     this(mqtt, packet, 0, 0, 1);
   }
 
+  @Override
+  public Encoder<Object, MqttPingReq> pull(OutputBuffer<?> output) {
+    return MqttPingReqEncoder.encode(output, this.mqtt, this.packet, this.length,
+                                     this.remaining, this.step);
+  }
+
   static Encoder<Object, MqttPingReq> encode(OutputBuffer<?> output, MqttEncoder mqtt,
-                                             MqttPingReq packet, int length, int remaining, int step) {
+                                             MqttPingReq packet, int length,
+                                             int remaining, int step) {
     if (step == 1 && output.isCont()) {
       length = packet.bodySize(mqtt);
       remaining = length;
@@ -59,30 +67,25 @@ final class MqttPingReqEncoder extends Encoder<Object, MqttPingReq> {
       } else if (step < 5) {
         step += 1;
       } else {
-        return error(new MqttException("packet length too long: " + remaining));
+        return Encoder.error(new MqttException("packet length too long: " + remaining));
       }
     }
     if (step == 6 && remaining == 0) {
-      return done(packet);
+      return Encoder.done(packet);
     }
     if (remaining < 0) {
-      return error(new MqttException("packet length too short"));
+      return Encoder.error(new MqttException("packet length too short"));
     } else if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new MqttPingReqEncoder(mqtt, packet, length, remaining, step);
   }
 
   static Encoder<Object, MqttPingReq> encode(OutputBuffer<?> output, MqttEncoder mqtt,
                                              MqttPingReq packet) {
-    return encode(output, mqtt, packet, 0, 0, 1);
-  }
-
-  @Override
-  public Encoder<Object, MqttPingReq> pull(OutputBuffer<?> output) {
-    return encode(output, this.mqtt, this.packet, this.length, this.remaining, this.step);
+    return MqttPingReqEncoder.encode(output, mqtt, packet, 0, 0, 1);
   }
 
 }

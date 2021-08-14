@@ -34,6 +34,11 @@ final class ConnectionParser extends Parser<Connection> {
     this(http, null);
   }
 
+  @Override
+  public Parser<Connection> feed(Input input) {
+    return ConnectionParser.parse(input, this.http, this.options);
+  }
+
   static Parser<Connection> parse(Input input, HttpParser http,
                                   Parser<FingerTrieSeq<String>> options) {
     if (options == null) {
@@ -44,25 +49,20 @@ final class ConnectionParser extends Parser<Connection> {
     if (options.isDone()) {
       final FingerTrieSeq<String> tokens = options.bind();
       if (!tokens.isEmpty()) {
-        return done(Connection.from(tokens));
+        return Parser.done(Connection.create(tokens));
       } else {
-        return error(Diagnostic.expected("connection option", input));
+        return Parser.error(Diagnostic.expected("connection option", input));
       }
     } else if (options.isError()) {
       return options.asError();
     } else if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ConnectionParser(http, options);
   }
 
   static Parser<Connection> parse(Input input, HttpParser http) {
-    return parse(input, http, null);
-  }
-
-  @Override
-  public Parser<Connection> feed(Input input) {
-    return parse(input, this.http, this.options);
+    return ConnectionParser.parse(input, http, null);
   }
 
 }

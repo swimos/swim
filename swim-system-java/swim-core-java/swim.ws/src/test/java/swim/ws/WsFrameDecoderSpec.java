@@ -25,92 +25,49 @@ import static org.testng.Assert.assertTrue;
 
 public class WsFrameDecoderSpec {
 
-  static <T> void assertDecodes(WsDecoder ws, Decoder<T> content, Data encoded, WsFrame<T> expeced) {
-    encoded = encoded.commit();
-    for (int i = 0, n = encoded.size(); i <= n; i += 1) {
-      InputBuffer input = encoded.toInputBuffer();
-      Decoder<WsFrame<T>> frameDecoder = ws.frameDecoder(content);
-      assertTrue(frameDecoder.isCont());
-      assertFalse(frameDecoder.isDone());
-      assertFalse(frameDecoder.isError());
-
-      input = input.index(0).limit(i).isPart(true);
-      frameDecoder = frameDecoder.feed(input);
-      if (frameDecoder.isDone()) {
-        final WsFrame<T> frame = frameDecoder.bind();
-        if (frame instanceof WsFragment<?>) {
-          frameDecoder = ws.frameDecoder(((WsFragment<T>) frame).contentDecoder());
-        }
-      }
-
-      input = input.limit(n).isPart(false);
-      frameDecoder = frameDecoder.feed(input);
-      if (frameDecoder.isDone()) {
-        final WsFrame<T> frame = frameDecoder.bind();
-        if (frame instanceof WsFragment<?>) {
-          frameDecoder = ws.frameDecoder(((WsFragment<T>) frame).contentDecoder());
-          frameDecoder = frameDecoder.feed(input);
-        }
-      }
-
-      if (frameDecoder.isError()) {
-        throw new TestException(frameDecoder.trap());
-      }
-      assertFalse(frameDecoder.isCont());
-      assertTrue(frameDecoder.isDone());
-      assertFalse(frameDecoder.isError());
-      assertEquals(frameDecoder.bind(), expeced);
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  static void assertDecodes(Data encoded, WsFrame<?> expeced) {
-    assertDecodes(Ws.standardDecoder(), new StringOrDataDecoder(), encoded, (WsFrame<Object>) expeced);
-  }
-
   @Test
   public void decodeUnmaskedEmptyTextFrame() {
-    assertDecodes(Data.fromBase16("8100"), WsValue.from(""));
+    assertDecodes(Data.fromBase16("8100"), WsValue.create(""));
   }
 
   @Test
   public void decodeUnmaskedEmptyBinaryFrame() {
-    assertDecodes(Data.fromBase16("8200"), WsValue.from(Data.empty()));
+    assertDecodes(Data.fromBase16("8200"), WsValue.create(Data.empty()));
   }
 
   @Test
   public void decodeUnmaskedTextFrame() {
-    assertDecodes(Data.fromBase16("810548656c6c6f"), WsValue.from("Hello"));
+    assertDecodes(Data.fromBase16("810548656c6c6f"), WsValue.create("Hello"));
   }
 
   @Test
   public void decodeUnmaskedTextFragments() {
-    assertDecodes(Data.fromBase16("010348656c80026c6f"), WsValue.from("Hello"));
+    assertDecodes(Data.fromBase16("010348656c80026c6f"), WsValue.create("Hello"));
   }
 
   @Test
   public void decodeMaskedTextFrame() {
-    assertDecodes(Data.fromBase16("818537fa213d7f9f4d5158"), WsValue.from("Hello"));
+    assertDecodes(Data.fromBase16("818537fa213d7f9f4d5158"), WsValue.create("Hello"));
   }
 
   @Test
   public void decodeEmptyPingFrame() {
-    assertDecodes(Data.fromBase16("8900"), WsPing.from(Data.empty()));
+    assertDecodes(Data.fromBase16("8900"), WsPing.create(Data.empty()));
   }
 
   @Test
   public void decodeEmptyPongFrame() {
-    assertDecodes(Data.fromBase16("8a00"), WsPong.from(Data.empty()));
+    assertDecodes(Data.fromBase16("8a00"), WsPong.create(Data.empty()));
   }
 
   @Test
   public void decodeCloseFrame() {
-    assertDecodes(Data.fromBase16("880203e8"), WsClose.from(1000));
+    assertDecodes(Data.fromBase16("880203e8"), WsClose.create(1000));
   }
 
   @Test
   public void decodeCloseFrameWithReason() {
-    assertDecodes(Data.fromBase16("880c03e9676f696e672061776179"), WsClose.from(1001, "going away"));
+    assertDecodes(Data.fromBase16("880c03e9676f696e672061776179"), WsClose.create(1001, "going away"));
   }
 
   @Test
@@ -180,6 +137,49 @@ public class WsFrameDecoderSpec {
     frameDecoder = frameDecoder.feed(frame.toInputBuffer());
     assertTrue(frameDecoder.isDone());
     assertEquals(frameDecoder.bind().get(), payload);
+  }
+
+  static <T> void assertDecodes(WsDecoder ws, Decoder<T> content, Data encoded, WsFrame<T> expeced) {
+    encoded = encoded.commit();
+    for (int i = 0, n = encoded.size(); i <= n; i += 1) {
+      InputBuffer input = encoded.toInputBuffer();
+      Decoder<WsFrame<T>> frameDecoder = ws.frameDecoder(content);
+      assertTrue(frameDecoder.isCont());
+      assertFalse(frameDecoder.isDone());
+      assertFalse(frameDecoder.isError());
+
+      input = input.index(0).limit(i).isPart(true);
+      frameDecoder = frameDecoder.feed(input);
+      if (frameDecoder.isDone()) {
+        final WsFrame<T> frame = frameDecoder.bind();
+        if (frame instanceof WsFragment<?>) {
+          frameDecoder = ws.frameDecoder(((WsFragment<T>) frame).contentDecoder());
+        }
+      }
+
+      input = input.limit(n).isPart(false);
+      frameDecoder = frameDecoder.feed(input);
+      if (frameDecoder.isDone()) {
+        final WsFrame<T> frame = frameDecoder.bind();
+        if (frame instanceof WsFragment<?>) {
+          frameDecoder = ws.frameDecoder(((WsFragment<T>) frame).contentDecoder());
+          frameDecoder = frameDecoder.feed(input);
+        }
+      }
+
+      if (frameDecoder.isError()) {
+        throw new TestException(frameDecoder.trap());
+      }
+      assertFalse(frameDecoder.isCont());
+      assertTrue(frameDecoder.isDone());
+      assertFalse(frameDecoder.isError());
+      assertEquals(frameDecoder.bind(), expeced);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  static void assertDecodes(Data encoded, WsFrame<?> expeced) {
+    assertDecodes(Ws.standardDecoder(), new StringOrDataDecoder(), encoded, (WsFrame<Object>) expeced);
   }
 
 }

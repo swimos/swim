@@ -46,11 +46,15 @@ final class MqttSubscribeDecoder extends Decoder<MqttSubscribe> {
     this(mqtt, 0, 0, FingerTrieSeq.<MqttSubscription>empty(), null, 0, 1);
   }
 
-  static Decoder<MqttSubscribe> decode(InputBuffer input, MqttDecoder mqtt,
-                                       int packetFlags, int packetId,
-                                       FingerTrieSeq<MqttSubscription> subscriptions,
-                                       Decoder<MqttSubscription> subscription,
-                                       int remaining, int step) {
+  @Override
+  public Decoder<MqttSubscribe> feed(InputBuffer input) {
+    return MqttSubscribeDecoder.decode(input, this.mqtt, this.packetFlags, this.packetId,
+                                       this.subscriptions, this.subscription, this.remaining, this.step);
+  }
+
+  static Decoder<MqttSubscribe> decode(InputBuffer input, MqttDecoder mqtt, int packetFlags,
+                                       int packetId, FingerTrieSeq<MqttSubscription> subscriptions,
+                                       Decoder<MqttSubscription> subscription, int remaining, int step) {
     if (step == 1 && input.isCont()) {
       packetFlags = input.head() & 0x0f;
       input = input.step();
@@ -66,7 +70,7 @@ final class MqttSubscribeDecoder extends Decoder<MqttSubscribe> {
       } else if (step < 5) {
         step += 1;
       } else {
-        return error(new MqttException("packet length too long"));
+        return Decoder.error(new MqttException("packet length too long"));
       }
     }
     if (step == 6 && remaining > 0 && input.isCont()) {
@@ -113,27 +117,21 @@ final class MqttSubscribeDecoder extends Decoder<MqttSubscribe> {
       }
     }
     if (step == 9 && remaining == 0) {
-      return done(mqtt.subscribe(packetFlags, packetId, subscriptions));
+      return Decoder.done(mqtt.subscribe(packetFlags, packetId, subscriptions));
     }
     if (remaining < 0) {
-      return error(new MqttException("packet length too short"));
+      return Decoder.error(new MqttException("packet length too short"));
     } else if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new MqttSubscribeDecoder(mqtt, packetFlags, packetId, subscriptions,
-        subscription, remaining, step);
+                                    subscription, remaining, step);
   }
 
   static Decoder<MqttSubscribe> decode(InputBuffer input, MqttDecoder mqtt) {
-    return decode(input, mqtt, 0, 0, FingerTrieSeq.<MqttSubscription>empty(), null, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttSubscribe> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.packetId,
-        this.subscriptions, this.subscription, this.remaining, this.step);
+    return MqttSubscribeDecoder.decode(input, mqtt, 0, 0, FingerTrieSeq.<MqttSubscription>empty(), null, 0, 1);
   }
 
 }

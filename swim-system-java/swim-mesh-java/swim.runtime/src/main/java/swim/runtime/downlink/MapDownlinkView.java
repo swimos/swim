@@ -38,7 +38,7 @@ import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.collections.HashTrieMap;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
@@ -75,7 +75,6 @@ import swim.util.OrderedMapCursor;
 
 public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownlink<K, V> {
 
-  protected static final int STATEFUL = 1 << 2;
   protected final Form<K> keyForm;
   protected final Form<V> valueForm;
   protected MapDownlinkModel model;
@@ -89,10 +88,10 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
                          Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
                          float rate, Value body, int flags, Form<K> keyForm,
                          Form<V> valueForm, Object observers) {
-    super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-        body, flags, observers);
+    super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate, body, flags, observers);
     this.keyForm = keyForm;
     this.valueForm = valueForm;
+    this.model = null;
 
     this.input = null;
     this.effects = HashTrieMap.empty();
@@ -104,8 +103,9 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   public MapDownlinkView(CellContext cellContext, Stage stage, Uri meshUri,
                          Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
                          float rate, Value body, Form<K> keyForm, Form<V> valueForm) {
-    this(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-        body, KEEP_LINKED | KEEP_SYNCED | STATEFUL, keyForm, valueForm, null);
+    this(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate, body,
+         WarpDownlinkView.KEEP_LINKED | WarpDownlinkView.KEEP_SYNCED | MapDownlinkView.STATEFUL,
+         keyForm, valueForm, null);
   }
 
   @Override
@@ -116,72 +116,72 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public MapDownlinkView<K, V> hostUri(Uri hostUri) {
     return new MapDownlinkView<K, V>(this.cellContext, this.stage, this.meshUri,
-        hostUri, this.nodeUri, this.laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        this.keyForm, this.valueForm, this.observers);
+                                     hostUri, this.nodeUri, this.laneUri,
+                                     this.prio, this.rate, this.body, this.flags,
+                                     this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> hostUri(String hostUri) {
-    return hostUri(Uri.parse(hostUri));
+    return this.hostUri(Uri.parse(hostUri));
   }
 
   @Override
   public MapDownlinkView<K, V> nodeUri(Uri nodeUri) {
     return new MapDownlinkView<K, V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, nodeUri, this.laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        this.keyForm, this.valueForm, this.observers);
+                                     this.hostUri, nodeUri, this.laneUri,
+                                     this.prio, this.rate, this.body, this.flags,
+                                     this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> nodeUri(String nodeUri) {
-    return nodeUri(Uri.parse(nodeUri));
+    return this.nodeUri(Uri.parse(nodeUri));
   }
 
   @Override
   public MapDownlinkView<K, V> laneUri(Uri laneUri) {
     return new MapDownlinkView<K, V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        this.keyForm, this.valueForm, this.observers);
+                                     this.hostUri, this.nodeUri, laneUri,
+                                     this.prio, this.rate, this.body, this.flags,
+                                     this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> laneUri(String laneUri) {
-    return laneUri(Uri.parse(laneUri));
+    return this.laneUri(Uri.parse(laneUri));
   }
 
   @Override
   public MapDownlinkView<K, V> prio(float prio) {
     return new MapDownlinkView<K, V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        prio, this.rate, this.body, this.flags,
-        this.keyForm, this.valueForm, this.observers);
+                                     this.hostUri, this.nodeUri, this.laneUri,
+                                     prio, this.rate, this.body, this.flags,
+                                     this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> rate(float rate) {
     return new MapDownlinkView<K, V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        this.prio, rate, this.body, this.flags,
-        this.keyForm, this.valueForm, this.observers);
+                                     this.hostUri, this.nodeUri, this.laneUri,
+                                     this.prio, rate, this.body, this.flags,
+                                     this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> body(Value body) {
     return new MapDownlinkView<K, V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        this.prio, this.rate, body, this.flags,
-        this.keyForm, this.valueForm, this.observers);
+                                     this.hostUri, this.nodeUri, this.laneUri,
+                                     this.prio, this.rate, body, this.flags,
+                                     this.keyForm, this.valueForm, this.observers);
   }
 
   @Override
   public MapDownlinkView<K, V> keepLinked(boolean keepLinked) {
     if (keepLinked) {
-      this.flags |= KEEP_LINKED;
+      this.flags |= WarpDownlinkView.KEEP_LINKED;
     } else {
-      this.flags &= ~KEEP_LINKED;
+      this.flags &= ~WarpDownlinkView.KEEP_LINKED;
     }
     return this;
   }
@@ -189,24 +189,24 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public MapDownlinkView<K, V> keepSynced(boolean keepSynced) {
     if (keepSynced) {
-      this.flags |= KEEP_SYNCED;
+      this.flags |= WarpDownlinkView.KEEP_SYNCED;
     } else {
-      this.flags &= ~KEEP_SYNCED;
+      this.flags &= ~WarpDownlinkView.KEEP_SYNCED;
     }
     return this;
   }
 
   @Override
   public final boolean isStateful() {
-    return (this.flags & STATEFUL) != 0;
+    return (this.flags & MapDownlinkView.STATEFUL) != 0;
   }
 
   @Override
   public MapDownlinkView<K, V> isStateful(boolean isStateful) {
     if (isStateful) {
-      this.flags |= STATEFUL;
+      this.flags |= MapDownlinkView.STATEFUL;
     } else {
-      this.flags &= ~STATEFUL;
+      this.flags &= ~MapDownlinkView.STATEFUL;
     }
     final MapDownlinkModel model = this.model;
     if (model != null) {
@@ -217,9 +217,9 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
 
   void didSetStateful(boolean isStateful) {
     if (isStateful) {
-      this.flags |= STATEFUL;
+      this.flags |= MapDownlinkView.STATEFUL;
     } else {
-      this.flags &= ~STATEFUL;
+      this.flags &= ~MapDownlinkView.STATEFUL;
     }
   }
 
@@ -231,14 +231,14 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public <K2> MapDownlinkView<K2, V> keyForm(Form<K2> keyForm) {
     return new MapDownlinkView<K2, V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        keyForm, this.valueForm, typesafeObservers(this.observers));
+                                      this.hostUri, this.nodeUri, this.laneUri,
+                                      this.prio, this.rate, this.body, this.flags,
+                                      keyForm, this.valueForm, this.typesafeObservers(this.observers));
   }
 
   @Override
   public <K2> MapDownlinkView<K2, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   @Override
@@ -249,14 +249,14 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public <V2> MapDownlinkView<K, V2> valueForm(Form<V2> valueForm) {
     return new MapDownlinkView<K, V2>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        this.keyForm, valueForm, typesafeObservers(this.observers));
+                                      this.hostUri, this.nodeUri, this.laneUri,
+                                      this.prio, this.rate, this.body, this.flags,
+                                      this.keyForm, valueForm, this.typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> MapDownlinkView<K, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   protected Object typesafeObservers(Object observers) {
@@ -279,117 +279,117 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
 
   @Override
   public MapDownlinkView<K, V> willUpdate(WillUpdateKey<K, V> willUpdate) {
-    return observe(willUpdate);
+    return this.observe(willUpdate);
   }
 
   @Override
   public MapDownlinkView<K, V> didUpdate(DidUpdateKey<K, V> didUpdate) {
-    return observe(didUpdate);
+    return this.observe(didUpdate);
   }
 
   @Override
   public MapDownlinkView<K, V> willRemove(WillRemoveKey<K> willRemove) {
-    return observe(willRemove);
+    return this.observe(willRemove);
   }
 
   @Override
   public MapDownlinkView<K, V> didRemove(DidRemoveKey<K, V> didRemove) {
-    return observe(didRemove);
+    return this.observe(didRemove);
   }
 
   @Override
   public MapDownlink<K, V> willDrop(WillDrop willDrop) {
-    return observe(willDrop);
+    return this.observe(willDrop);
   }
 
   @Override
   public MapDownlink<K, V> didDrop(DidDrop didDrop) {
-    return observe(didDrop);
+    return this.observe(didDrop);
   }
 
   @Override
   public MapDownlink<K, V> willTake(WillTake willTake) {
-    return observe(willTake);
+    return this.observe(willTake);
   }
 
   @Override
   public MapDownlink<K, V> didTake(DidTake didTake) {
-    return observe(didTake);
+    return this.observe(didTake);
   }
 
   @Override
   public MapDownlinkView<K, V> willClear(WillClear willClear) {
-    return observe(willClear);
+    return this.observe(willClear);
   }
 
   @Override
   public MapDownlinkView<K, V> didClear(DidClear didClear) {
-    return observe(didClear);
+    return this.observe(didClear);
   }
 
   @Override
   public MapDownlinkView<K, V> willReceive(WillReceive willReceive) {
-    return observe(willReceive);
+    return this.observe(willReceive);
   }
 
   @Override
   public MapDownlinkView<K, V> didReceive(DidReceive didReceive) {
-    return observe(didReceive);
+    return this.observe(didReceive);
   }
 
   @Override
   public MapDownlinkView<K, V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public MapDownlinkView<K, V> willLink(WillLink willLink) {
-    return observe(willLink);
+    return this.observe(willLink);
   }
 
   @Override
   public MapDownlinkView<K, V> didLink(DidLink didLink) {
-    return observe(didLink);
+    return this.observe(didLink);
   }
 
   @Override
   public MapDownlinkView<K, V> willSync(WillSync willSync) {
-    return observe(willSync);
+    return this.observe(willSync);
   }
 
   @Override
   public MapDownlinkView<K, V> didSync(DidSync didSync) {
-    return observe(didSync);
+    return this.observe(didSync);
   }
 
   @Override
   public MapDownlinkView<K, V> willUnlink(WillUnlink willUnlink) {
-    return observe(willUnlink);
+    return this.observe(willUnlink);
   }
 
   @Override
   public MapDownlinkView<K, V> didUnlink(DidUnlink didUnlink) {
-    return observe(didUnlink);
+    return this.observe(didUnlink);
   }
 
   @Override
   public MapDownlinkView<K, V> didConnect(DidConnect didConnect) {
-    return observe(didConnect);
+    return this.observe(didConnect);
   }
 
   @Override
   public MapDownlinkView<K, V> didDisconnect(DidDisconnect didDisconnect) {
-    return observe(didDisconnect);
+    return this.observe(didDisconnect);
   }
 
   @Override
   public MapDownlinkView<K, V> didClose(DidClose didClose) {
-    return observe(didClose);
+    return this.observe(didClose);
   }
 
   @Override
   public MapDownlinkView<K, V> didFail(DidFail didFail) {
-    return observe(didFail);
+    return this.observe(didFail);
   }
 
   public Value downlinkWillUpdateValue(Value key, Value newValue) {
@@ -397,6 +397,7 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   }
 
   public void downlinkDidUpdateValue(Value key, Value newValue, Value oldValue) {
+    // hook
   }
 
   public V downlinkWillUpdate(K key, V newValue) {
@@ -404,40 +405,49 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   }
 
   public void downlinkDidUpdate(K key, V newValue, V oldValue) {
-    decohereInputKey(key, KeyEffect.UPDATE);
-    recohereInput(0); // TODO: debounce and track version
+    this.decohereInputKey(key, KeyEffect.UPDATE);
+    this.recohereInput(0); // TODO: debounce and track version
   }
 
   public void downlinkWillRemoveValue(Value key) {
+    // hook
   }
 
   public void downlinkDidRemoveValue(Value key, Value oldValue) {
+    // hook
   }
 
   public void downlinkWillRemove(K key) {
+    // hook
   }
 
   public void downlinkDidRemove(K key, V oldValue) {
-    decohereInputKey(key, KeyEffect.REMOVE);
-    recohereInput(0); // TODO: debounce and track version
+    this.decohereInputKey(key, KeyEffect.REMOVE);
+    this.recohereInput(0); // TODO: debounce and track version
   }
 
   public void downlinkWillDrop(int lower) {
+    // hook
   }
 
   public void downlinkDidDrop(int lower) {
+    // hook
   }
 
   public void downlinkWillTake(int upper) {
+    // hook
   }
 
   public void downlinkDidTake(int upper) {
+    // hook
   }
 
   public void downlinkWillClear() {
+    // hook
   }
 
   public void downlinkDidClear() {
+    // hook
   }
 
   @SuppressWarnings("unchecked")
@@ -452,8 +462,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
           try {
             newValue = ((WillUpdateKey<K, V>) observers).willUpdate(key, newValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -469,8 +479,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
               try {
                 newValue = ((WillUpdateKey<K, V>) observer).willUpdate(key, newValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -498,8 +508,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
           try {
             ((DidUpdateKey<K, V>) observers).didUpdate(key, newValue, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -515,8 +525,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
               try {
                 ((DidUpdateKey<K, V>) observer).didUpdate(key, newValue, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -544,8 +554,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
           try {
             ((WillRemoveKey<K>) observers).willRemove(key);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -561,8 +571,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
               try {
                 ((WillRemoveKey<K>) observer).willRemove(key);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -590,8 +600,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
           try {
             ((DidRemoveKey<K, V>) observers).didRemove(key, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -607,8 +617,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
               try {
                 ((DidRemoveKey<K, V>) observer).didRemove(key, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -635,8 +645,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
           try {
             ((WillDrop) observers).willDrop(lower);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -652,8 +662,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
               try {
                 ((WillDrop) observer).willDrop(lower);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -680,8 +690,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
           try {
             ((DidDrop) observers).didDrop(lower);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -697,8 +707,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
               try {
                 ((DidDrop) observer).didDrop(lower);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -725,8 +735,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
           try {
             ((WillTake) observers).willTake(upper);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -742,8 +752,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
               try {
                 ((WillTake) observer).willTake(upper);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -770,8 +780,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
           try {
             ((DidTake) observers).didTake(upper);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -787,8 +797,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
               try {
                 ((DidTake) observer).didTake(upper);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -815,8 +825,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
           try {
             ((WillClear) observers).willClear();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -832,8 +842,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
               try {
                 ((WillClear) observer).willClear();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -860,8 +870,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
           try {
             ((DidClear) observers).didClear();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -877,8 +887,8 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
               try {
                 ((DidClear) observer).didClear();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -897,7 +907,7 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public MapDownlinkModel createDownlinkModel() {
     return new MapDownlinkModel(this.meshUri, this.hostUri, this.nodeUri,
-        this.laneUri, this.prio, this.rate, this.body);
+                                this.laneUri, this.prio, this.rate, this.body);
   }
 
   @Override
@@ -1295,7 +1305,7 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   @Override
   public void bindInput(Outlet<? extends Map<K, V>> input) {
     if (input instanceof MapOutlet<?, ?, ?>) {
-      bindInput((MapOutlet<K, V, ? extends Map<K, V>>) input);
+      this.bindInput((MapOutlet<K, V, ? extends Map<K, V>>) input);
     } else {
       throw new IllegalArgumentException(input.toString());
     }
@@ -1422,22 +1432,22 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
 
   @Override
   public void decohereOutputKey(K key, KeyEffect effect) {
-    decohereKey(key, effect);
+    this.decohereKey(key, effect);
   }
 
   @Override
   public void decohereInputKey(K key, KeyEffect effect) {
-    decohereKey(key, effect);
+    this.decohereKey(key, effect);
   }
 
   @SuppressWarnings("unchecked")
   public void decohereKey(K key, KeyEffect effect) {
     final HashTrieMap<K, KeyEffect> oldEffects = this.effects;
     if (oldEffects.get(key) != effect) {
-      willDecohereKey(key, effect);
+      this.willDecohereKey(key, effect);
       this.effects = oldEffects.updated(key, effect);
       this.version = -1;
-      onDecohereKey(key, effect);
+      this.onDecohereKey(key, effect);
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         final Inlet<?> output = this.outputs[i];
@@ -1451,25 +1461,25 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
       if (outlet != null) {
         outlet.decohereInput();
       }
-      didDecohereKey(key, effect);
+      this.didDecohereKey(key, effect);
     }
   }
 
   @Override
   public void decohereOutput() {
-    decohere();
+    this.decohere();
   }
 
   @Override
   public void decohereInput() {
-    decohere();
+    this.decohere();
   }
 
   public void decohere() {
     if (this.version >= 0) {
-      willDecohere();
+      this.willDecohere();
       this.version = -1;
-      onDecohere();
+      this.onDecohere();
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         this.outputs[i].decohereOutput();
@@ -1478,18 +1488,18 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
       while (outlets.hasNext()) {
         outlets.next().decohereInput();
       }
-      didDecohere();
+      this.didDecohere();
     }
   }
 
   @Override
   public void recohereOutputKey(K key, int version) {
-    recohereKey(key, version);
+    this.recohereKey(key, version);
   }
 
   @Override
   public void recohereInputKey(K key, int version) {
-    recohereKey(key, version);
+    this.recohereKey(key, version);
   }
 
   @SuppressWarnings("unchecked")
@@ -1498,12 +1508,12 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
       final HashTrieMap<K, KeyEffect> oldEffects = this.effects;
       final KeyEffect effect = oldEffects.get(key);
       if (effect != null) {
-        willRecohereKey(key, effect, version);
+        this.willRecohereKey(key, effect, version);
         this.effects = oldEffects.removed(key);
         if (this.input != null) {
           this.input.recohereInputKey(key, version);
         }
-        onRecohereKey(key, effect, version);
+        this.onRecohereKey(key, effect, version);
         for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
           final Inlet<?> output = this.outputs[i];
           if (output instanceof MapInlet<?, ?, ?>) {
@@ -1514,34 +1524,34 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
         if (outlet != null) {
           outlet.recohereInput(version);
         }
-        didRecohereKey(key, effect, version);
+        this.didRecohereKey(key, effect, version);
       }
     }
   }
 
   @Override
   public void recohereOutput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   @Override
   public void recohereInput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   public void recohere(int version) {
     if (this.version < 0) {
-      willRecohere(version);
+      this.willRecohere(version);
       final Iterator<K> keys = this.effects.keyIterator();
       while (keys.hasNext()) {
-        recohereKey(keys.next(), version);
+        this.recohereKey(keys.next(), version);
       }
       this.version = version;
-      onRecohere(version);
+      this.onRecohere(version);
       for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
         this.outputs[i].recohereOutput(version);
       }
-      didRecohere(version);
+      this.didRecohere(version);
     }
   }
 
@@ -1578,14 +1588,14 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
       if (this.input != null) {
         final V value = this.input.get(key);
         if (value != null) {
-          put(key, value);
+          this.put(key, value);
         } else {
-          remove(key);
+          this.remove(key);
         }
       }
     } else if (effect == KeyEffect.REMOVE) {
-      if (containsKey(key)) {
-        remove(key);
+      if (this.containsKey(key)) {
+        this.remove(key);
       }
     }
   }
@@ -1605,5 +1615,7 @@ public class MapDownlinkView<K, V> extends WarpDownlinkView implements MapDownli
   protected void didRecohere(int version) {
     // hook
   }
+
+  protected static final int STATEFUL = 1 << 2;
 
 }

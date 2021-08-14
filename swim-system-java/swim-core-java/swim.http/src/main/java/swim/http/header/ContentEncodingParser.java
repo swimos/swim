@@ -34,6 +34,11 @@ final class ContentEncodingParser extends Parser<ContentEncoding> {
     this(http, null);
   }
 
+  @Override
+  public Parser<ContentEncoding> feed(Input input) {
+    return ContentEncodingParser.parse(input, this.http, this.codings);
+  }
+
   static Parser<ContentEncoding> parse(Input input, HttpParser http,
                                        Parser<FingerTrieSeq<String>> codings) {
     if (codings == null) {
@@ -44,25 +49,20 @@ final class ContentEncodingParser extends Parser<ContentEncoding> {
     if (codings.isDone()) {
       final FingerTrieSeq<String> tokens = codings.bind();
       if (!tokens.isEmpty()) {
-        return done(ContentEncoding.from(tokens));
+        return Parser.done(ContentEncoding.create(tokens));
       } else {
-        return error(Diagnostic.expected("content coding", input));
+        return Parser.error(Diagnostic.expected("content coding", input));
       }
     } else if (codings.isError()) {
       return codings.asError();
     } else if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ContentEncodingParser(http, codings);
   }
 
   static Parser<ContentEncoding> parse(Input input, HttpParser http) {
-    return parse(input, http, null);
-  }
-
-  @Override
-  public Parser<ContentEncoding> feed(Input input) {
-    return parse(input, this.http, this.codings);
+    return ContentEncodingParser.parse(input, http, null);
   }
 
 }

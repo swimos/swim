@@ -19,8 +19,6 @@ package swim.concurrent;
  */
 public class SyncException extends ContException {
 
-  private static final long serialVersionUID = 1L;
-
   public SyncException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -36,5 +34,7 @@ public class SyncException extends ContException {
   public SyncException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

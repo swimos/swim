@@ -27,7 +27,7 @@ public abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
   public boolean containsKey(K key) {
     if (this.input != null) {
       final V value = this.input.get(key);
-      return value != null && evaluate(key, value);
+      return value != null && this.evaluate(key, value);
     }
     return false;
   }
@@ -36,7 +36,7 @@ public abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
   public V get(K key) {
     if (this.input != null) {
       final V value = this.input.get(key);
-      if (value != null && evaluate(key, value)) {
+      if (value != null && this.evaluate(key, value)) {
         return value;
       }
     }
@@ -46,11 +46,11 @@ public abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
   @Override
   public Map<K, V> get() {
     HashTrieMap<K, V> output = HashTrieMap.empty();
-    final Iterator<K> keys = keyIterator();
+    final Iterator<K> keys = this.keyIterator();
     while (keys.hasNext()) {
       final K key = keys.next();
       final V value = this.input.get(key);
-      if (value != null && evaluate(key, value)) {
+      if (value != null && this.evaluate(key, value)) {
         output = output.updated(key, value);
       }
     }
@@ -68,12 +68,12 @@ public abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
 
   @Override
   protected void onDecohereOutputKey(K key, KeyEffect effect) {
-    decohereInputKey(key, effect);
+    this.decohereInputKey(key, effect);
   }
 
   @Override
   protected void onRecohereOutputKey(K key, KeyEffect effect, int version) {
-    recohereInputKey(key, version);
+    this.recohereInputKey(key, version);
   }
 
   @Override
@@ -81,7 +81,7 @@ public abstract class FilterFieldsOperator<K, V, I> extends AbstractMapInletMapO
     if (effect == KeyEffect.UPDATE) {
       if (this.input != null) {
         final V value = this.input.get(key);
-        if (value == null || !evaluate(key, value)) {
+        if (value == null || !this.evaluate(key, value)) {
           return KeyEffect.REMOVE;
         }
       }

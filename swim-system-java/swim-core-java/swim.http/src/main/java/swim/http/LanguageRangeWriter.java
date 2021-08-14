@@ -41,6 +41,12 @@ final class LanguageRangeWriter extends Writer<Object, Object> {
     this(http, tag, subtag, weight, null, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return LanguageRangeWriter.write(output, this.http, this.tag, this.subtag,
+                                     this.weight, this.part, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String tag,
                                       String subtag, float weight, Writer<?, ?> part, int step) {
     if (step == 1) {
@@ -56,7 +62,7 @@ final class LanguageRangeWriter extends Writer<Object, Object> {
         } else if (weight != 1f) {
           step = 4;
         } else {
-          return done();
+          return Writer.done();
         }
       } else if (part.isError()) {
         return part.asError();
@@ -77,7 +83,7 @@ final class LanguageRangeWriter extends Writer<Object, Object> {
         if (weight != 1f) {
           step = 4;
         } else {
-          return done();
+          return Writer.done();
         }
       } else if (part.isError()) {
         return part.asError();
@@ -90,27 +96,22 @@ final class LanguageRangeWriter extends Writer<Object, Object> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new LanguageRangeWriter(http, tag, subtag, weight, part, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String tag,
                                       String subtag, float weight) {
-    return write(output, http, tag, subtag, weight, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.tag, this.subtag, this.weight, this.part, this.step);
+    return LanguageRangeWriter.write(output, http, tag, subtag, weight, null, 1);
   }
 
 }

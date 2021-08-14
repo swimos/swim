@@ -16,8 +16,6 @@ package swim.remote;
 
 public class RemoteHostException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public RemoteHostException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -29,5 +27,7 @@ public class RemoteHostException extends RuntimeException {
   public RemoteHostException(Throwable cause) {
     super(cause);
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

@@ -36,12 +36,13 @@ final class UriHostIPv6 extends UriHost {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("UriHost").write('.').write("ipv6").write('(').debug(this.address).write(')');
+    return output;
   }
 
   @Override
-  public void display(Output<?> output) {
+  public <T> Output<T> display(Output<T> output) {
     if (this.string != null) {
       output = output.write(this.string);
     } else {
@@ -49,6 +50,7 @@ final class UriHostIPv6 extends UriHost {
       Uri.writeHostLiteral(this.address, output);
       output = output.write(']');
     }
+    return output;
   }
 
   @Override

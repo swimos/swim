@@ -81,7 +81,7 @@ class TestTheater extends Theater {
   }
 
   void await(CountDownLatch latch) {
-    await(latch, 1000);
+    this.await(latch, 1000);
   }
 
   void await(CyclicBarrier barrier, int millis) {
@@ -93,7 +93,7 @@ class TestTheater extends Theater {
   }
 
   void await(CyclicBarrier barrier) {
-    await(barrier, 1000);
+    this.await(barrier, 1000);
   }
 
   <T> T await(Sync<T> sync, long millis) {
@@ -105,7 +105,7 @@ class TestTheater extends Theater {
   }
 
   <T> T await(Sync<T> sync) {
-    return await(sync, 1000L);
+    return this.await(sync, 1000L);
   }
 
 }

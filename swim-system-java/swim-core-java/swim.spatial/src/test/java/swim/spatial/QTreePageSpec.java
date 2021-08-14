@@ -752,27 +752,27 @@ public class QTreePageSpec {
 
   @Test(groups = {"slow"})
   public void testUniformRank00Nodes() {
-    testUniformRankNodes(0, 0, 32L);
+    this.testUniformRankNodes(0, 0, 32L);
   }
 
   @Test(groups = {"slow"})
   public void testUniformRank11Nodes() {
-    testUniformRankNodes(1, 1, 32L);
+    this.testUniformRankNodes(1, 1, 32L);
   }
 
   @Test(groups = {"slow"})
   public void testUniformRank21Nodes() {
-    testUniformRankNodes(2, 1, 32L);
+    this.testUniformRankNodes(2, 1, 32L);
   }
 
   @Test(groups = {"slow"})
   public void testNonUniformRankNodes() {
-    testNonUniformRankNodes(32L, false);
+    this.testNonUniformRankNodes(32L, false);
   }
 
   @Test(groups = {"slow"})
   public void testNonUniformZigZagRankNodes() {
-    testNonUniformRankNodes(32L, true);
+    this.testNonUniformRankNodes(32L, true);
   }
 
   void testUniformRankNodes(int xRank, int yRank, long size) {
@@ -783,12 +783,12 @@ public class QTreePageSpec {
             for (long yStep = 1L; yStep <= ySpan; yStep <<= 1) {
               for (int splitArity = 4; splitArity <= Math.max(4, width); splitArity <<= 1) {
                 System.out.println("testing width: " + width
-                    + "; xSpan: " + xSpan + "; ySpan: " + ySpan
-                    + "; xStep: " + xStep + "; yStep: " + yStep
-                    + "; xRank: " + xRank + "; yRank: " + yRank
-                    + "; splitArity: " + splitArity + " ...");
-                testUniformRankNodes(0L, 0L, width, width, xSpan, ySpan,
-                    xStep, yStep, xRank, yRank, splitArity);
+                                 + "; xSpan: " + xSpan + "; ySpan: " + ySpan
+                                 + "; xStep: " + xStep + "; yStep: " + yStep
+                                 + "; xRank: " + xRank + "; yRank: " + yRank
+                                 + "; splitArity: " + splitArity + " ...");
+                this.testUniformRankNodes(0L, 0L, width, width, xSpan, ySpan,
+                                          xStep, yStep, xRank, yRank, splitArity);
               }
             }
           }
@@ -867,11 +867,11 @@ public class QTreePageSpec {
             for (long yStep = 1L; yStep <= ySpan; yStep <<= 1) {
               for (int splitArity = 4; splitArity <= Math.max(4, width); splitArity <<= 1) {
                 System.out.println("testing width: " + width
-                    + "; xSpan: " + xSpan + "; ySpan: " + ySpan
-                    + "; xStep: " + xStep + "; yStep: " + yStep
-                    + "; splitArity: " + splitArity + "; zigzag: " + zigzag + " ...");
-                testNonUniformRankNodes(0L, 0L, width, width, xSpan, ySpan,
-                    xStep, yStep, splitArity, zigzag);
+                                 + "; xSpan: " + xSpan + "; ySpan: " + ySpan
+                                 + "; xStep: " + xStep + "; yStep: " + yStep
+                                 + "; splitArity: " + splitArity + "; zigzag: " + zigzag + " ...");
+                this.testNonUniformRankNodes(0L, 0L, width, width, xSpan, ySpan,
+                                             xStep, yStep, splitArity, zigzag);
               }
             }
           }

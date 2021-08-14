@@ -80,11 +80,11 @@ public final class SpatialValueEntry<K, S, V> implements SpatialMap.Entry<K, S, 
       return true;
     } else if (other instanceof Map.Entry<?, ?>) {
       final Map.Entry<?, ?> that = (Map.Entry<?, ?>) other;
-      final K keyObject = getKey();
+      final K keyObject = this.getKey();
       if (keyObject == null ? that.getKey() != null : !keyObject.equals(that.getKey())) {
         return false;
       }
-      final V valueObject = getValue();
+      final V valueObject = this.getValue();
       if (valueObject == null ? that.getValue() != null : !valueObject.equals(that.getValue())) {
         return false;
       }
@@ -95,15 +95,15 @@ public final class SpatialValueEntry<K, S, V> implements SpatialMap.Entry<K, S, 
 
   @Override
   public int hashCode() {
-    final K keyObject = getKey();
-    final V valueObject = getValue();
+    final K keyObject = this.getKey();
+    final V valueObject = this.getValue();
     return (keyObject == null ? 0 : keyObject.hashCode())
-        ^ (valueObject == null ? 0 : valueObject.hashCode());
+         ^ (valueObject == null ? 0 : valueObject.hashCode());
   }
 
   @Override
   public String toString() {
-    return new StringBuilder().append(getKey()).append('=').append(getValue()).toString();
+    return new StringBuilder().append(this.getKey()).append('=').append(this.getValue()).toString();
   }
 
 }

@@ -44,7 +44,7 @@ public class SpatialDataView<K, S, V> extends SpatialValueMap<K, S, V> implement
   }
 
   public <K2> SpatialDataView<K2, S, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   @SuppressWarnings("unchecked")
@@ -59,7 +59,7 @@ public class SpatialDataView<K, S, V> extends SpatialValueMap<K, S, V> implement
   }
 
   public <V2> SpatialDataView<K, S, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override
@@ -97,33 +97,33 @@ public class SpatialDataView<K, S, V> extends SpatialValueMap<K, S, V> implement
 
   @Override
   public void didChange() {
-    // stub
+    // hook
   }
 
   @Override
   public void didCommit() {
-    // stub
+    // hook
   }
 
   @Override
   public void didUpdate(Value key, long x, long y, Value newValue, Value oldValue) {
-    // stub
+    // hook
   }
 
   @Override
   public void didMove(Value key, long newX, long newY, Value newValue,
                       long oldX, long oldY, Value oldValue) {
-    // stub
+    // hook
   }
 
   @Override
   public void didRemove(Value key, long x, long y, Value oldValue) {
-    // stub
+    // hook
   }
 
   @Override
   public void didClear() {
-    // stub
+    // hook
   }
 
 }

@@ -22,16 +22,18 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.api.Uplink;
 import swim.api.auth.Identity;
 import swim.collections.FingerTrieSeq;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 import swim.structure.Value;
 import swim.uri.Uri;
 
 public abstract class AbstractUplinkContext implements LinkContext, Uplink {
 
-  static final AtomicReferenceFieldUpdater<AbstractUplinkContext, Object> OBSERVERS =
-      AtomicReferenceFieldUpdater.newUpdater(AbstractUplinkContext.class, Object.class, "observers");
   protected volatile Object observers; // Observer | Observer[]
+
+  public AbstractUplinkContext() {
+    this.observers = null;
+  }
 
   public abstract LaneBinding laneBinding();
 
@@ -43,7 +45,7 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapLink(Class<T> linkClass) {
-    if (linkClass.isAssignableFrom(getClass())) {
+    if (linkClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -53,7 +55,7 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T bottomLink(Class<T> linkClass) {
-    if (linkClass.isAssignableFrom(getClass())) {
+    if (linkClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -76,7 +78,7 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
 
   @Override
   public UplinkAddress cellAddressUp() {
-    return laneBinding().cellAddress().linkKey(linkKey());
+    return this.laneBinding().cellAddress().linkKey(this.linkKey());
   }
 
   @Override
@@ -146,73 +148,73 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
 
   @Override
   public boolean isConnected() {
-    return linkBinding().isConnectedDown();
+    return this.linkBinding().isConnectedDown();
   }
 
   @Override
   public boolean isRemote() {
-    return linkBinding().isRemoteDown();
+    return this.linkBinding().isRemoteDown();
   }
 
   @Override
   public boolean isSecure() {
-    return linkBinding().isSecureDown();
+    return this.linkBinding().isSecureDown();
   }
 
   @Override
   public String securityProtocol() {
-    return linkBinding().securityProtocolDown();
+    return this.linkBinding().securityProtocolDown();
   }
 
   @Override
   public String cipherSuite() {
-    return linkBinding().cipherSuiteDown();
+    return this.linkBinding().cipherSuiteDown();
   }
 
   @Override
   public InetSocketAddress localAddress() {
-    return linkBinding().localAddressDown();
+    return this.linkBinding().localAddressDown();
   }
 
   @Override
   public Identity localIdentity() {
-    return linkBinding().localIdentityDown();
+    return this.linkBinding().localIdentityDown();
   }
 
   @Override
   public Principal localPrincipal() {
-    return linkBinding().localPrincipalDown();
+    return this.linkBinding().localPrincipalDown();
   }
 
   @Override
   public Collection<Certificate> localCertificates() {
-    return linkBinding().localCertificatesDown();
+    return this.linkBinding().localCertificatesDown();
   }
 
   @Override
   public InetSocketAddress remoteAddress() {
-    return linkBinding().remoteAddressDown();
+    return this.linkBinding().remoteAddressDown();
   }
 
   @Override
   public Identity remoteIdentity() {
-    return linkBinding().remoteIdentityDown();
+    return this.linkBinding().remoteIdentityDown();
   }
 
   @Override
   public Principal remotePrincipal() {
-    return linkBinding().remotePrincipalDown();
+    return this.linkBinding().remotePrincipalDown();
   }
 
   @Override
   public Collection<Certificate> remoteCertificates() {
-    return linkBinding().remoteCertificatesDown();
+    return this.linkBinding().remoteCertificatesDown();
   }
 
   @Override
   public AbstractUplinkContext observe(Object newObserver) {
     do {
-      final Object oldObservers = this.observers;
+      final Object oldObservers = AbstractUplinkContext.OBSERVERS.get(this);
       final Object newObservers;
       if (oldObservers == null) {
         newObservers = newObserver;
@@ -229,7 +231,7 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
         newArray[oldCount] = newObserver;
         newObservers = newArray;
       }
-      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
+      if (AbstractUplinkContext.OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
         break;
       }
     } while (true);
@@ -239,7 +241,7 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
   @Override
   public AbstractUplinkContext unobserve(Object oldObserver) {
     do {
-      final Object oldObservers = this.observers;
+      final Object oldObservers = AbstractUplinkContext.OBSERVERS.get(this);
       final Object newObservers;
       if (oldObservers == null) {
         break;
@@ -278,7 +280,7 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
           }
         }
       }
-      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
+      if (AbstractUplinkContext.OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
         break;
       }
     } while (true);
@@ -287,101 +289,104 @@ public abstract class AbstractUplinkContext implements LinkContext, Uplink {
 
   @Override
   public void closeUp() {
-    didClose();
+    this.didClose();
   }
 
   @Override
   public void close() {
-    closeUp();
+    this.closeUp();
   }
 
   @Override
   public void didOpenDown() {
-    // stub
+    // hook
   }
 
   @Override
   public void didCloseDown() {
-    didClose();
+    this.didClose();
   }
 
   protected void didClose() {
-    laneBinding().closeUplink(linkKey());
+    this.laneBinding().closeUplink(this.linkKey());
   }
 
   @Override
   public void didFailDown(Throwable error) {
     try {
-      if (Conts.isNonFatal(error)) {
-        laneBinding().didFail(error);
+      if (Cont.isNonFatal(error)) {
+        this.laneBinding().didFail(error);
       }
     } finally {
-      didClose();
+      this.didClose();
     }
   }
 
   protected void didFail(Throwable error) {
-    laneBinding().didFail(error);
+    this.laneBinding().didFail(error);
   }
 
   @Override
   public void traceUp(Object message) {
-    laneBinding().trace(message);
+    this.laneBinding().trace(message);
   }
 
   @Override
   public void debugUp(Object message) {
-    laneBinding().debug(message);
+    this.laneBinding().debug(message);
   }
 
   @Override
   public void infoUp(Object message) {
-    laneBinding().info(message);
+    this.laneBinding().info(message);
   }
 
   @Override
   public void warnUp(Object message) {
-    laneBinding().warn(message);
+    this.laneBinding().warn(message);
   }
 
   @Override
   public void errorUp(Object message) {
-    laneBinding().error(message);
+    this.laneBinding().error(message);
   }
 
   @Override
   public void failUp(Object message) {
-    laneBinding().fail(message);
+    this.laneBinding().fail(message);
   }
 
   @Override
   public void trace(Object message) {
-    linkBinding().traceDown(message);
+    this.linkBinding().traceDown(message);
   }
 
   @Override
   public void debug(Object message) {
-    linkBinding().debugDown(message);
+    this.linkBinding().debugDown(message);
   }
 
   @Override
   public void info(Object message) {
-    linkBinding().infoDown(message);
+    this.linkBinding().infoDown(message);
   }
 
   @Override
   public void warn(Object message) {
-    linkBinding().warnDown(message);
+    this.linkBinding().warnDown(message);
   }
 
   @Override
   public void error(Object message) {
-    linkBinding().errorDown(message);
+    this.linkBinding().errorDown(message);
   }
 
   @Override
   public void fail(Object message) {
-    linkBinding().failDown(message);
+    this.linkBinding().failDown(message);
   }
+
+  static final AtomicReferenceFieldUpdater<AbstractUplinkContext, Object> OBSERVERS =
+      AtomicReferenceFieldUpdater.newUpdater(AbstractUplinkContext.class, Object.class, "observers");
 
 }

@@ -18,7 +18,7 @@ import java.util.Map;
 import swim.util.CombinerFunction;
 import swim.util.OrderedMapCursor;
 
-class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
+final class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
 
   final BTreePage<K, V, U>[] pages;
   final K[] knots;
@@ -33,38 +33,38 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   @Override
-  public final boolean isEmpty() {
+  public boolean isEmpty() {
     return this.size == 0;
   }
 
   @Override
-  public final int size() {
+  public int size() {
     return this.size;
   }
 
   @Override
-  public final int arity() {
+  public int arity() {
     return this.pages.length;
   }
 
   @Override
-  public final U fold() {
+  public U fold() {
     return this.fold;
   }
 
   @Override
-  public final K minKey() {
+  public K minKey() {
     return this.pages[0].minKey();
   }
 
   @Override
-  public final K maxKey() {
+  public K maxKey() {
     return this.pages[this.pages.length - 1].maxKey();
   }
 
   @Override
-  public final boolean containsKey(Object key, BTreeContext<K, V> tree) {
-    int x = lookup(key, tree);
+  public boolean containsKey(Object key, BTreeContext<K, V> tree) {
+    int x = this.lookup(key, tree);
     if (x > 0) {
       x += 1;
     } else if (x < 0) {
@@ -76,10 +76,9 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   @Override
-  public final boolean containsValue(Object value) {
-    final BTreePage<K, V, U>[] pages = this.pages;
-    for (int i = 0, n = pages.length; i < n; i += 1) {
-      if (pages[i].containsValue(value)) {
+  public boolean containsValue(Object value) {
+    for (int i = 0, n = this.pages.length; i < n; i += 1) {
+      if (this.pages[i].containsValue(value)) {
         return true;
       }
     }
@@ -87,8 +86,8 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   @Override
-  public final int indexOf(Object key, BTreeContext<K, V> tree) {
-    int x = lookup(key, tree);
+  public int indexOf(Object key, BTreeContext<K, V> tree) {
+    int x = this.lookup(key, tree);
     if (x >= 0) {
       x += 1;
     } else {
@@ -107,8 +106,8 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   @Override
-  public final V get(Object key, BTreeContext<K, V> tree) {
-    int x = lookup(key, tree);
+  public V get(Object key, BTreeContext<K, V> tree) {
+    int x = this.lookup(key, tree);
     if (x >= 0) {
       x += 1;
     } else {
@@ -118,8 +117,8 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   @Override
-  public final Map.Entry<K, V> getEntry(Object key, BTreeContext<K, V> tree) {
-    int x = lookup(key, tree);
+  public Map.Entry<K, V> getEntry(Object key, BTreeContext<K, V> tree) {
+    int x = this.lookup(key, tree);
     if (x >= 0) {
       x += 1;
     } else {
@@ -129,10 +128,9 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   @Override
-  public final Map.Entry<K, V> getIndex(int index) {
-    final BTreePage<K, V, U>[] pages = this.pages;
-    for (int i = 0, n = pages.length; i < n; i += 1) {
-      final BTreePage<K, V, U> page = pages[i];
+  public Map.Entry<K, V> getIndex(int index) {
+    for (int i = 0, n = this.pages.length; i < n; i += 1) {
+      final BTreePage<K, V, U> page = this.pages[i];
       if (index < page.size()) {
         return page.getIndex(index);
       } else {
@@ -143,60 +141,56 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   @Override
-  public final Map.Entry<K, V> firstEntry() {
-    final BTreePage<K, V, U>[] pages = this.pages;
-    if (pages.length != 0) {
-      return pages[0].firstEntry();
+  public Map.Entry<K, V> firstEntry() {
+    if (this.pages.length != 0) {
+      return this.pages[0].firstEntry();
     } else {
       return null;
     }
   }
 
   @Override
-  public final Map.Entry<K, V> lastEntry() {
-    final BTreePage<K, V, U>[] pages = this.pages;
-    if (pages.length != 0) {
-      return pages[pages.length - 1].lastEntry();
+  public Map.Entry<K, V> lastEntry() {
+    if (this.pages.length != 0) {
+      return this.pages[this.pages.length - 1].lastEntry();
     } else {
       return null;
     }
   }
 
   @Override
-  public final Map.Entry<K, V> nextEntry(K key, BTreeContext<K, V> tree) {
-    int x = lookup(key, tree);
+  public Map.Entry<K, V> nextEntry(K key, BTreeContext<K, V> tree) {
+    int x = this.lookup(key, tree);
     if (x >= 0) {
       x += 1;
     } else {
       x = -(x + 1);
     }
-    final BTreePage<K, V, U>[] pages = this.pages;
-    Map.Entry<K, V> entry = pages[x].nextEntry(key, tree);
-    if (entry == null && x + 1 < pages.length) {
-      entry = pages[x + 1].nextEntry(key, tree);
+    Map.Entry<K, V> entry = this.pages[x].nextEntry(key, tree);
+    if (entry == null && x + 1 < this.pages.length) {
+      entry = this.pages[x + 1].nextEntry(key, tree);
     }
     return entry;
   }
 
   @Override
-  public final Map.Entry<K, V> previousEntry(K key, BTreeContext<K, V> tree) {
-    int x = lookup(key, tree);
+  public Map.Entry<K, V> previousEntry(K key, BTreeContext<K, V> tree) {
+    int x = this.lookup(key, tree);
     if (x >= 0) {
       x += 1;
     } else {
       x = -(x + 1);
     }
-    final BTreePage<K, V, U>[] pages = this.pages;
-    Map.Entry<K, V> entry = pages[x].previousEntry(key, tree);
+    Map.Entry<K, V> entry = this.pages[x].previousEntry(key, tree);
     if (entry == null && x > 0) {
-      entry = pages[x - 1].previousEntry(key, tree);
+      entry = this.pages[x - 1].previousEntry(key, tree);
     }
     return entry;
   }
 
   @Override
-  public final BTreeNode<K, V, U> updated(K key, V newValue, BTreeContext<K, V> tree) {
-    int x = lookup(key, tree);
+  public BTreeNode<K, V, U> updated(K key, V newValue, BTreeContext<K, V> tree) {
+    int x = this.lookup(key, tree);
     if (x >= 0) {
       x += 1;
     } else {
@@ -206,9 +200,9 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     final BTreePage<K, V, U> newPage = oldPage.updated(key, newValue, tree);
     if (oldPage != newPage) {
       if (oldPage.size() != newPage.size() && tree.pageShouldSplit(newPage)) {
-        return updatedPageSplit(x, newPage, oldPage);
+        return this.updatedPageSplit(x, newPage, oldPage);
       } else {
-        return updatedPage(x, newPage, oldPage);
+        return this.updatedPage(x, newPage, oldPage);
       }
     } else {
       return this;
@@ -236,7 +230,7 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
 
     final int newSize = this.size - oldPage.size() + newPage.size();
-    return newNode(newPages, newKnots, null, newSize);
+    return new BTreeNode<K, V, U>(newPages, newKnots, null, newSize);
   }
 
   @SuppressWarnings("unchecked")
@@ -266,7 +260,7 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
 
     final int newSize = this.size - oldPage.size() + newPage.size();
-    return newNode(newPages, newKnots, null, newSize);
+    return new BTreeNode<K, V, U>(newPages, newKnots, null, newSize);
   }
 
   @SuppressWarnings("unchecked")
@@ -295,12 +289,12 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
 
     final int newSize = this.size - oldPage.size() + newPage.size();
-    return newNode(newPages, newKnots, null, newSize);
+    return new BTreeNode<K, V, U>(newPages, newKnots, null, newSize);
   }
 
   @Override
-  public final BTreePage<K, V, U> removed(Object key, BTreeContext<K, V> tree) {
-    int x = lookup(key, tree);
+  public BTreePage<K, V, U> removed(Object key, BTreeContext<K, V> tree) {
+    int x = this.lookup(key, tree);
     if (x >= 0) {
       x += 1;
     } else {
@@ -309,7 +303,7 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     final BTreePage<K, V, U> oldPage = this.pages[x];
     final BTreePage<K, V, U> newPage = oldPage.removed(key, tree);
     if (oldPage != newPage) {
-      return replacedPage(x, newPage, oldPage, tree);
+      return this.replacedPage(x, newPage, oldPage, tree);
     } else {
       return this;
     }
@@ -319,12 +313,12 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
                                           BTreePage<K, V, U> oldPage, BTreeContext<K, V> tree) {
     if (!newPage.isEmpty()) {
       if (newPage instanceof BTreeNode<?, ?, ?> && tree.pageShouldMerge(newPage)) {
-        return updatedPageMerge(x, (BTreeNode<K, V, U>) newPage, oldPage);
+        return this.updatedPageMerge(x, (BTreeNode<K, V, U>) newPage, oldPage);
       } else {
-        return updatedPage(x, newPage, oldPage);
+        return this.updatedPage(x, newPage, oldPage);
       }
     } else if (this.pages.length > 2) {
-      return removedPage(x, newPage, oldPage);
+      return this.removedPage(x, newPage, oldPage);
     } else if (this.pages.length > 1) {
       if (x == 0) {
         return this.pages[1];
@@ -354,12 +348,12 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
     }
 
     final int newSize = this.size - oldPage.size();
-    return newNode(newPages, newKnots, null, newSize);
+    return new BTreeNode<K, V, U>(newPages, newKnots, null, newSize);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public final BTreePage<K, V, U> drop(int lower, BTreeContext<K, V> tree) {
+  public BTreePage<K, V, U> drop(int lower, BTreeContext<K, V> tree) {
     if (lower > 0) {
       int newSize = this.size;
       if (lower < newSize) {
@@ -387,7 +381,7 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
             for (int i = 0; i < newKnots.length; i += 1) {
               newKnots[i] = this.knots[i + x];
             }
-            newNode = newNode(newPages, newKnots, null, newSize);
+            newNode = new BTreeNode<K, V, U>(newPages, newKnots, null, newSize);
           } else {
             newNode = this;
           }
@@ -411,7 +405,7 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
 
   @SuppressWarnings("unchecked")
   @Override
-  public final BTreePage<K, V, U> take(int upper, BTreeContext<K, V> tree) {
+  public BTreePage<K, V, U> take(int upper, BTreeContext<K, V> tree) {
     if (upper < this.size) {
       if (upper > 0) {
         final BTreePage<K, V, U>[] oldPages = this.pages;
@@ -436,7 +430,7 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
             System.arraycopy(oldPages, 0, newPages, 0, n);
             final K[] newKnots = (K[]) new Object[n - 1];
             System.arraycopy(this.knots, 0, newKnots, 0, n - 1);
-            newNode = newNode(newPages, newKnots, null, newSize);
+            newNode = new BTreeNode<K, V, U>(newPages, newKnots, null, newSize);
           } else {
             newNode = this;
           }
@@ -461,10 +455,10 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
   }
 
   @Override
-  public final BTreeNode<K, V, U> balanced(BTreeContext<K, V> tree) {
+  public BTreeNode<K, V, U> balanced(BTreeContext<K, V> tree) {
     if (this.pages.length > 1 && tree.pageShouldSplit(this)) {
       final int x = this.knots.length >>> 1;
-      return split(x);
+      return this.split(x);
     } else {
       return this;
     }
@@ -472,22 +466,22 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
 
   @SuppressWarnings("unchecked")
   @Override
-  public final BTreeNode<K, V, U> split(int x) {
+  public BTreeNode<K, V, U> split(int x) {
     final BTreePage<K, V, U>[] newPages = (BTreePage<K, V, U>[]) new BTreePage<?, ?, ?>[2];
-    final BTreeNode<K, V, U> newLeftPage = splitLeft(x);
-    final BTreeNode<K, V, U> newRightPage = splitRight(x);
+    final BTreeNode<K, V, U> newLeftPage = this.splitLeft(x);
+    final BTreeNode<K, V, U> newRightPage = this.splitRight(x);
     newPages[0] = newLeftPage;
     newPages[1] = newRightPage;
 
     final K[] newKnots = (K[]) new Object[1];
     newKnots[0] = newRightPage.minKey();
 
-    return newNode(newPages, newKnots, null, this.size);
+    return new BTreeNode<K, V, U>(newPages, newKnots, null, this.size);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public final BTreeNode<K, V, U> splitLeft(int x) {
+  public BTreeNode<K, V, U> splitLeft(int x) {
     final BTreePage<K, V, U>[] oldPages = this.pages;
     final BTreePage<K, V, U>[] newPages = (BTreePage<K, V, U>[]) new BTreePage<?, ?, ?>[x + 1];
     System.arraycopy(oldPages, 0, newPages, 0, x + 1);
@@ -501,12 +495,12 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
       newSize += newPages[i].size();
     }
 
-    return newNode(newPages, newKnots, null, newSize);
+    return new BTreeNode<K, V, U>(newPages, newKnots, null, newSize);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public final BTreeNode<K, V, U> splitRight(int x) {
+  public BTreeNode<K, V, U> splitRight(int x) {
     final BTreePage<K, V, U>[] oldPages = this.pages;
     final int y = oldPages.length - (x + 1);
     final BTreePage<K, V, U>[] newPages = (BTreePage<K, V, U>[]) new BTreePage<?, ?, ?>[y];
@@ -521,13 +515,13 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
       newSize += newPages[i].size();
     }
 
-    return newNode(newPages, newKnots, null, newSize);
+    return new BTreeNode<K, V, U>(newPages, newKnots, null, newSize);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public final BTreeNode<K, V, U> reduced(U identity, CombinerFunction<? super V, U> accumulator,
-                                          CombinerFunction<U, U> combiner) {
+  public BTreeNode<K, V, U> reduced(U identity, CombinerFunction<? super V, U> accumulator,
+                                    CombinerFunction<U, U> combiner) {
     if (this.fold == null) {
       final BTreePage<K, V, U>[] oldPages = this.pages;
       final int n = oldPages.length;
@@ -540,23 +534,23 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
       for (int i = 1; i < n; i += 1) {
         fold = combiner.combine(fold, newPages[i].fold());
       }
-      return newNode(newPages, this.knots, fold, this.size);
+      return new BTreeNode<K, V, U>(newPages, this.knots, fold, this.size);
     } else {
       return this;
     }
   }
 
   @Override
-  public final OrderedMapCursor<K, V> iterator() {
+  public OrderedMapCursor<K, V> iterator() {
     return new BTreeNodeCursor<K, V, U>(this.pages);
   }
 
   @Override
-  public final OrderedMapCursor<K, V> lastIterator() {
+  public OrderedMapCursor<K, V> reverseIterator() {
     return new BTreeNodeCursor<K, V, U>(this.pages, this.size, this.pages.length);
   }
 
-  protected final int lookup(Object key, BTreeContext<K, V> tree) {
+  protected int lookup(Object key, BTreeContext<K, V> tree) {
     int lo = 0;
     int hi = this.knots.length - 1;
     while (lo <= hi) {
@@ -571,10 +565,6 @@ class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
       }
     }
     return -(lo + 1);
-  }
-
-  protected BTreeNode<K, V, U> newNode(BTreePage<K, V, U>[] pages, K[] knots, U fold, int size) {
-    return new BTreeNode<K, V, U>(pages, knots, fold, size);
   }
 
 }

@@ -18,7 +18,7 @@ import java.util.concurrent.Executor;
 
 /**
  * An execution context in which to schedule tasks, create continuation calls,
- * and set timers.  {@code Stage} is thread safe.
+ * and set timers. {@code Stage} is thread safe.
  *
  * @see MainStage
  * @see Theater

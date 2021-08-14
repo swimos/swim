@@ -32,9 +32,6 @@ import swim.util.Log;
 
 public class ActorAuthenticator implements AuthenticatorContext {
 
-  protected static final int STARTED = 0x01;
-  protected static final AtomicIntegerFieldUpdater<ActorAuthenticator> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(ActorAuthenticator.class, "status");
   final String authenticatorName;
   final KernelContext kernel;
   Authenticator authenticator;
@@ -46,8 +43,11 @@ public class ActorAuthenticator implements AuthenticatorContext {
     this.authenticatorName = authenticatorName;
     this.kernel = kernel;
     this.authenticator = authenticator;
+    this.status = 0;
+    this.log = null;
+    this.stage = null;
     this.authenticator.setAuthenticatorContext(this);
-    start();
+    this.start();
   }
 
   public final String authenticatorName() {
@@ -98,29 +98,27 @@ public class ActorAuthenticator implements AuthenticatorContext {
   }
 
   public void start() {
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus | STARTED;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if ((oldStatus & STARTED) == 0) {
-      willStart();
-      didStart();
-    }
+      final int oldStatus = ActorAuthenticator.STATUS.get(this);
+      final int newStatus = oldStatus | ActorAuthenticator.STARTED;
+      if (ActorAuthenticator.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        this.willStart();
+        this.didStart();
+        break;
+      }
+    } while (true);
   }
 
   public void stop() {
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus & ~STARTED;
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
-    if ((oldStatus & STARTED) != 0) {
-      willStop();
-      didStop();
-    }
+      final int oldStatus = ActorAuthenticator.STATUS.get(this);
+      final int newStatus = oldStatus & ~ActorAuthenticator.STARTED;
+      if (ActorAuthenticator.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        this.willStop();
+        this.didStop();
+        break;
+      }
+    } while (true);
   }
 
   protected void willStart() {
@@ -207,5 +205,10 @@ public class ActorAuthenticator implements AuthenticatorContext {
       this.kernel.fail(message);
     }
   }
+
+  protected static final int STARTED = 0x01;
+
+  protected static final AtomicIntegerFieldUpdater<ActorAuthenticator> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(ActorAuthenticator.class, "status");
 
 }

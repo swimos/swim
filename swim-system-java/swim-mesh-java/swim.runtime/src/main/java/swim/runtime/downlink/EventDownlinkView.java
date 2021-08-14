@@ -32,7 +32,7 @@ import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 import swim.runtime.CellContext;
 import swim.runtime.LinkBinding;
@@ -50,16 +50,16 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
                            Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
                            float rate, Value body, int flags, Form<V> valueForm,
                            Object observers) {
-    super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-        body, flags, observers);
+    super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate, body, flags, observers);
     this.valueForm = valueForm;
+    this.model = null;
   }
 
   public EventDownlinkView(CellContext cellContext, Stage stage, Uri meshUri,
                            Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
                            float rate, Value body, Form<V> valueForm) {
-    this(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-        body, KEEP_LINKED, valueForm, null);
+    this(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate, body,
+         WarpDownlinkView.KEEP_LINKED, valueForm, null);
   }
 
   @Override
@@ -70,72 +70,72 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
   @Override
   public EventDownlinkView<V> hostUri(Uri hostUri) {
     return new EventDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        hostUri, this.nodeUri, this.laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        this.valueForm, this.observers);
+                                    hostUri, this.nodeUri, this.laneUri,
+                                    this.prio, this.rate, this.body, this.flags,
+                                    this.valueForm, this.observers);
   }
 
   @Override
   public EventDownlinkView<V> hostUri(String hostUri) {
-    return hostUri(Uri.parse(hostUri));
+    return this.hostUri(Uri.parse(hostUri));
   }
 
   @Override
   public EventDownlinkView<V> nodeUri(Uri nodeUri) {
     return new EventDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, nodeUri, this.laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        this.valueForm, this.observers);
+                                    this.hostUri, nodeUri, this.laneUri,
+                                    this.prio, this.rate, this.body, this.flags,
+                                    this.valueForm, this.observers);
   }
 
   @Override
   public EventDownlinkView<V> nodeUri(String nodeUri) {
-    return nodeUri(Uri.parse(nodeUri));
+    return this.nodeUri(Uri.parse(nodeUri));
   }
 
   @Override
   public EventDownlinkView<V> laneUri(Uri laneUri) {
     return new EventDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        this.valueForm, this.observers);
+                                    this.hostUri, this.nodeUri, laneUri,
+                                    this.prio, this.rate, this.body, this.flags,
+                                    this.valueForm, this.observers);
   }
 
   @Override
   public EventDownlinkView<V> laneUri(String laneUri) {
-    return laneUri(Uri.parse(laneUri));
+    return this.laneUri(Uri.parse(laneUri));
   }
 
   @Override
   public EventDownlinkView<V> prio(float prio) {
     return new EventDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        prio, this.rate, this.body, this.flags,
-        this.valueForm, this.observers);
+                                    this.hostUri, this.nodeUri, this.laneUri,
+                                    prio, this.rate, this.body, this.flags,
+                                    this.valueForm, this.observers);
   }
 
   @Override
   public EventDownlinkView<V> rate(float rate) {
     return new EventDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        this.prio, rate, this.body, this.flags,
-        valueForm, this.observers);
+                                    this.hostUri, this.nodeUri, this.laneUri,
+                                    this.prio, rate, this.body, this.flags,
+                                    this.valueForm, this.observers);
   }
 
   @Override
   public EventDownlinkView<V> body(Value body) {
     return new EventDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        this.prio, this.rate, body, this.flags,
-        this.valueForm, this.observers);
+                                    this.hostUri, this.nodeUri, this.laneUri,
+                                    this.prio, this.rate, body, this.flags,
+                                    this.valueForm, this.observers);
   }
 
   @Override
   public EventDownlinkView<V> keepLinked(boolean keepLinked) {
     if (keepLinked) {
-      this.flags |= KEEP_LINKED;
+      this.flags |= WarpDownlinkView.KEEP_LINKED;
     } else {
-      this.flags &= ~KEEP_LINKED;
+      this.flags &= ~WarpDownlinkView.KEEP_LINKED;
     }
     return this;
   }
@@ -143,29 +143,29 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
   @Override
   public EventDownlinkView<V> keepSynced(boolean keepSynced) {
     if (keepSynced) {
-      this.flags |= KEEP_SYNCED;
+      this.flags |= WarpDownlinkView.KEEP_SYNCED;
     } else {
-      this.flags &= ~KEEP_SYNCED;
+      this.flags &= ~WarpDownlinkView.KEEP_SYNCED;
     }
     return this;
   }
 
   @Override
   public final Form<V> valueForm() {
-    return valueForm;
+    return this.valueForm;
   }
 
   @Override
   public <V2> EventDownlinkView<V2> valueForm(Form<V2> valueForm) {
     return new EventDownlinkView<V2>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        valueForm, typesafeObservers(this.observers));
+                                     this.hostUri, this.nodeUri, this.laneUri,
+                                     this.prio, this.rate, this.body, this.flags,
+                                     valueForm, this.typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> EventDownlinkView<V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   protected Object typesafeObservers(Object observers) {
@@ -187,72 +187,72 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
 
   @Override
   public EventDownlinkView<V> onEvent(OnEvent<V> onEvent) {
-    return observe(onEvent);
+    return this.observe(onEvent);
   }
 
   @Override
   public EventDownlinkView<V> willReceive(WillReceive willReceive) {
-    return observe(willReceive);
+    return this.observe(willReceive);
   }
 
   @Override
   public EventDownlinkView<V> didReceive(DidReceive didReceive) {
-    return observe(didReceive);
+    return this.observe(didReceive);
   }
 
   @Override
   public EventDownlinkView<V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public EventDownlinkView<V> willLink(WillLink willLink) {
-    return observe(willLink);
+    return this.observe(willLink);
   }
 
   @Override
   public EventDownlinkView<V> didLink(DidLink didLink) {
-    return observe(didLink);
+    return this.observe(didLink);
   }
 
   @Override
   public EventDownlinkView<V> willSync(WillSync willSync) {
-    return observe(willSync);
+    return this.observe(willSync);
   }
 
   @Override
   public EventDownlinkView<V> didSync(DidSync didSync) {
-    return observe(didSync);
+    return this.observe(didSync);
   }
 
   @Override
   public EventDownlinkView<V> willUnlink(WillUnlink willUnlink) {
-    return observe(willUnlink);
+    return this.observe(willUnlink);
   }
 
   @Override
   public EventDownlinkView<V> didUnlink(DidUnlink didUnlink) {
-    return observe(didUnlink);
+    return this.observe(didUnlink);
   }
 
   @Override
   public EventDownlinkView<V> didConnect(DidConnect didConnect) {
-    return observe(didConnect);
+    return this.observe(didConnect);
   }
 
   @Override
   public EventDownlinkView<V> didDisconnect(DidDisconnect didDisconnect) {
-    return observe(didDisconnect);
+    return this.observe(didDisconnect);
   }
 
   @Override
   public EventDownlinkView<V> didClose(DidClose didClose) {
-    return observe(didClose);
+    return this.observe(didClose);
   }
 
   @Override
   public EventDownlinkView<V> didFail(DidFail didFail) {
-    return observe(didFail);
+    return this.observe(didFail);
   }
 
   @SuppressWarnings("unchecked")
@@ -267,8 +267,8 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
           try {
             ((OnEvent<V>) observers).onEvent(value);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -284,8 +284,8 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
               try {
                 ((OnEvent<V>) observer).onEvent(value);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -302,12 +302,13 @@ public class EventDownlinkView<V> extends WarpDownlinkView implements EventDownl
   }
 
   public void downlinkOnEvent(V value) {
+    // hook
   }
 
   @Override
   public EventDownlinkModel createDownlinkModel() {
     return new EventDownlinkModel(this.meshUri, this.hostUri, this.nodeUri,
-        this.laneUri, this.prio, this.rate, this.body);
+                                  this.laneUri, this.prio, this.rate, this.body);
   }
 
   @Override

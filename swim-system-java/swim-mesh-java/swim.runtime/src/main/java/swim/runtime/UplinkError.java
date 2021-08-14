@@ -38,9 +38,9 @@ public final class UplinkError {
 
   public static void rejectMeshNotFound(LinkBinding link) {
     if (link instanceof WarpBinding) {
-      rejectWarp((WarpBinding) link, Record.create(1).attr("meshNotFound"));
+      UplinkError.rejectWarp((WarpBinding) link, Record.create(1).attr("meshNotFound"));
     } else if (link instanceof HttpBinding) {
-      rejectHttp((HttpBinding) link);
+      UplinkError.rejectHttp((HttpBinding) link);
     } else {
       throw new AssertionError();
     }
@@ -48,9 +48,9 @@ public final class UplinkError {
 
   public static void rejectPartNotFound(LinkBinding link) {
     if (link instanceof WarpBinding) {
-      rejectWarp((WarpBinding) link, Record.create(1).attr("partNotFound"));
+      UplinkError.rejectWarp((WarpBinding) link, Record.create(1).attr("partNotFound"));
     } else if (link instanceof HttpBinding) {
-      rejectHttp((HttpBinding) link);
+      UplinkError.rejectHttp((HttpBinding) link);
     } else {
       throw new AssertionError();
     }
@@ -58,9 +58,9 @@ public final class UplinkError {
 
   public static void rejectHostNotFound(LinkBinding link) {
     if (link instanceof WarpBinding) {
-      rejectWarp((WarpBinding) link, Record.create(1).attr("hostNotFound"));
+      UplinkError.rejectWarp((WarpBinding) link, Record.create(1).attr("hostNotFound"));
     } else if (link instanceof HttpBinding) {
-      rejectHttp((HttpBinding) link);
+      UplinkError.rejectHttp((HttpBinding) link);
     } else {
       throw new AssertionError();
     }
@@ -68,9 +68,9 @@ public final class UplinkError {
 
   public static void rejectNodeNotFound(LinkBinding link) {
     if (link instanceof WarpBinding) {
-      rejectWarp((WarpBinding) link, Record.create(1).attr("nodeNotFound"));
+      UplinkError.rejectWarp((WarpBinding) link, Record.create(1).attr("nodeNotFound"));
     } else if (link instanceof HttpBinding) {
-      rejectHttp((HttpBinding) link);
+      UplinkError.rejectHttp((HttpBinding) link);
     } else {
       throw new AssertionError();
     }
@@ -78,9 +78,9 @@ public final class UplinkError {
 
   public static void rejectLaneNotFound(LinkBinding link) {
     if (link instanceof WarpBinding) {
-      rejectWarp((WarpBinding) link, Record.create(1).attr("laneNotFound"));
+      UplinkError.rejectWarp((WarpBinding) link, Record.create(1).attr("laneNotFound"));
     } else if (link instanceof HttpBinding) {
-      rejectHttp((HttpBinding) link);
+      UplinkError.rejectHttp((HttpBinding) link);
     } else {
       throw new AssertionError();
     }
@@ -88,9 +88,9 @@ public final class UplinkError {
 
   public static void rejectUnsupported(LinkBinding link) {
     if (link instanceof WarpBinding) {
-      rejectWarp((WarpBinding) link, Record.create(1).attr("unsupported"));
+      UplinkError.rejectWarp((WarpBinding) link, Record.create(1).attr("unsupported"));
     } else if (link instanceof HttpBinding) {
-      rejectHttp((HttpBinding) link);
+      UplinkError.rejectHttp((HttpBinding) link);
     } else {
       throw new AssertionError();
     }

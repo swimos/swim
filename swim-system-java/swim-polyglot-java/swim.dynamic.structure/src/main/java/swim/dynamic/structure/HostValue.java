@@ -20,16 +20,16 @@ import swim.structure.Value;
 
 public final class HostValue {
 
+  private HostValue() {
+    // static
+  }
+
   public static final HostObjectType<Value> TYPE;
 
   static {
     final JavaHostClassType<Value> type = new JavaHostClassType<>(Value.class);
     TYPE = type;
     type.extendType(HostItem.TYPE);
-  }
-
-  private HostValue() {
-    // static
   }
 
 }

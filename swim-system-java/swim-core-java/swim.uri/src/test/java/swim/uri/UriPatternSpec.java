@@ -32,16 +32,16 @@ public class UriPatternSpec {
 
   @Test
   public void unapplyPathSegments() {
-    assertEquals(UriPattern.parse("/:entity").unapply("/foo"), (Object) HashTrieMap.of("entity", "foo"));
-    assertEquals(UriPattern.parse("/test/:id").unapply("/test/bar"), (Object) HashTrieMap.of("id", "bar"));
-    assertEquals(UriPattern.parse("/:entity/:id").unapply("/foo/bar"), (Object) HashTrieMap.of("entity", "foo").updated("id", "bar"));
-    assertEquals(UriPattern.parse("http://example.com/:entity/info").unapply("http://example.com/foo/info"), (Object) HashTrieMap.of("entity", "foo"));
+    assertEquals(UriPattern.parse("/:entity").unapply("/foo"), (Object) HashTrieMap.<String, String>empty().updated("entity", "foo"));
+    assertEquals(UriPattern.parse("/test/:id").unapply("/test/bar"), (Object) HashTrieMap.<String, String>empty().updated("id", "bar"));
+    assertEquals(UriPattern.parse("/:entity/:id").unapply("/foo/bar"), (Object) HashTrieMap.<String, String>empty().updated("entity", "foo").updated("id", "bar"));
+    assertEquals(UriPattern.parse("http://example.com/:entity/info").unapply("http://example.com/foo/info"), (Object) HashTrieMap.<String, String>empty().updated("entity", "foo"));
   }
 
   @Test
   public void partiallyUnapplyPathSegments() {
-    assertEquals(UriPattern.parse("/:entity/:id").unapply("/foo"), (Object) HashTrieMap.of("entity", "foo"));
-    assertEquals(UriPattern.parse("/:entity/:id").unapply("/foo/"), (Object) HashTrieMap.of("entity", "foo"));
+    assertEquals(UriPattern.parse("/:entity/:id").unapply("/foo"), (Object) HashTrieMap.<String, String>empty().updated("entity", "foo"));
+    assertEquals(UriPattern.parse("/:entity/:id").unapply("/foo/"), (Object) HashTrieMap.<String, String>empty().updated("entity", "foo"));
   }
 
   @Test
@@ -51,12 +51,12 @@ public class UriPatternSpec {
 
   @Test
   public void partiallyUnapplyDifferingPathSuffixes() {
-    assertEquals(UriPattern.parse("/a/:id/b/:prop").unapply("/a/b/c/d"), (Object) HashTrieMap.of("id", "b"));
+    assertEquals(UriPattern.parse("/a/:id/b/:prop").unapply("/a/b/c/d"), (Object) HashTrieMap.<String, String>empty().updated("id", "b"));
   }
 
   @Test
   public void unapplyUndefinedParts() {
-    assertEquals(UriPattern.parse("/:entity").unapply("http://example.com/foo/bar?q#f"), (Object) HashTrieMap.of("entity", "foo"));
+    assertEquals(UriPattern.parse("/:entity").unapply("http://example.com/foo/bar?q#f"), (Object) HashTrieMap.<String, String>empty().updated("entity", "foo"));
   }
 
   @Test

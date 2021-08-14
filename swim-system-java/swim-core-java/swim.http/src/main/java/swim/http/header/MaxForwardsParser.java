@@ -33,6 +33,11 @@ final class MaxForwardsParser extends Parser<MaxForwards> {
     this(0, 1);
   }
 
+  @Override
+  public Parser<MaxForwards> feed(Input input) {
+    return MaxForwardsParser.parse(input, this.count, this.step);
+  }
+
   static Parser<MaxForwards> parse(Input input, int count, int step) {
     int c = 0;
     if (step == 1) {
@@ -43,10 +48,10 @@ final class MaxForwardsParser extends Parser<MaxForwards> {
           count = Base10.decodeDigit(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("digit", input));
+          return Parser.error(Diagnostic.expected("digit", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("digit", input));
+        return Parser.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 2) {
@@ -56,29 +61,24 @@ final class MaxForwardsParser extends Parser<MaxForwards> {
           input = input.step();
           count = 10 * count + Base10.decodeDigit(c);
           if (count < 0) {
-            return error(Diagnostic.message("max forwards overflow", input));
+            return Parser.error(Diagnostic.message("max forwards overflow", input));
           }
         } else {
           break;
         }
       }
       if (!input.isEmpty()) {
-        return done(MaxForwards.from(count));
+        return Parser.done(MaxForwards.create(count));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new MaxForwardsParser(count, step);
   }
 
   static Parser<MaxForwards> parse(Input input) {
-    return parse(input, 0, 1);
-  }
-
-  @Override
-  public Parser<MaxForwards> feed(Input input) {
-    return parse(input, this.count, this.step);
+    return MaxForwardsParser.parse(input, 0, 1);
   }
 
 }

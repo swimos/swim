@@ -36,7 +36,7 @@ final class AttrWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.key, this.value, this.part, this.step);
+    return AttrWriter.write(output, this.recon, this.key, this.value, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, V key, V value) {
@@ -66,7 +66,7 @@ final class AttrWriter<I, V> extends Writer<Object, Object> {
       if (part.isDone()) {
         part = null;
         if (recon.isExtant(recon.item(value))) {
-          return done();
+          return Writer.done();
         } else {
           step = 3;
         }
@@ -93,19 +93,19 @@ final class AttrWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 5 && output.isCont()) {
       output = output.write(')');
-      return done();
+      return Writer.done();
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new AttrWriter<I, V>(recon, key, value, part, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon,
                                              V key, V value) {
-    return write(output, recon, key, value, null, 1);
+    return AttrWriter.write(output, recon, key, value, null, 1);
   }
 
 }

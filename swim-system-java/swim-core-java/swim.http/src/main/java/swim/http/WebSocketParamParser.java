@@ -36,6 +36,11 @@ final class WebSocketParamParser extends Parser<WebSocketParam> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<WebSocketParam> feed(Input input) {
+    return WebSocketParamParser.parse(input, this.http, this.key, this.value, this.step);
+  }
+
   static Parser<WebSocketParam> parse(Input input, HttpParser http, StringBuilder key,
                                       StringBuilder value, int step) {
     int c = 0;
@@ -50,10 +55,10 @@ final class WebSocketParamParser extends Parser<WebSocketParam> {
           key.appendCodePoint(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("param name", input));
+          return Parser.error(Diagnostic.expected("param name", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("param name", input));
+        return Parser.error(Diagnostic.expected("param name", input));
       }
     }
     if (step == 2) {
@@ -83,7 +88,7 @@ final class WebSocketParamParser extends Parser<WebSocketParam> {
         input = input.step();
         step = 4;
       } else if (!input.isEmpty()) {
-        return done(http.webSocketParam(key.toString(), ""));
+        return Parser.done(http.webSocketParam(key.toString(), ""));
       }
     }
     if (step == 4) {
@@ -106,7 +111,7 @@ final class WebSocketParamParser extends Parser<WebSocketParam> {
           step = 5;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     if (step == 5) {
@@ -117,10 +122,10 @@ final class WebSocketParamParser extends Parser<WebSocketParam> {
           value.appendCodePoint(c);
           step = 6;
         } else {
-          return error(Diagnostic.expected("param value", input));
+          return Parser.error(Diagnostic.expected("param value", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("param value", input));
+        return Parser.error(Diagnostic.expected("param value", input));
       }
     }
     if (step == 6) {
@@ -134,7 +139,7 @@ final class WebSocketParamParser extends Parser<WebSocketParam> {
         }
       }
       if (!input.isEmpty()) {
-        return done(http.webSocketParam(key.toString(), value.toString()));
+        return Parser.done(http.webSocketParam(key.toString(), value.toString()));
       }
     }
     do {
@@ -156,10 +161,10 @@ final class WebSocketParamParser extends Parser<WebSocketParam> {
             input = input.step();
             step = 8;
           } else {
-            return error(Diagnostic.unexpected(input));
+            return Parser.error(Diagnostic.unexpected(input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 8) {
@@ -171,27 +176,22 @@ final class WebSocketParamParser extends Parser<WebSocketParam> {
             step = 7;
             continue;
           } else {
-            return error(Diagnostic.expected("escape character", input));
+            return Parser.error(Diagnostic.expected("escape character", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("escape character", input));
+          return Parser.error(Diagnostic.expected("escape character", input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new WebSocketParamParser(http, key, value, step);
   }
 
   static Parser<WebSocketParam> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<WebSocketParam> feed(Input input) {
-    return parse(input, this.http, this.key, this.value, this.step);
+    return WebSocketParamParser.parse(input, http, null, null, 1);
   }
 
 }

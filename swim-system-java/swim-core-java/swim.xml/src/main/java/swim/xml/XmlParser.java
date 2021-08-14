@@ -113,7 +113,7 @@ public abstract class XmlParser<I, V> {
   }
 
   public Parser<V> parseFragment(Input input) {
-    return DocumentParser.parse(input, this, fragmentBuilder());
+    return DocumentParser.parse(input, this, this.fragmentBuilder());
   }
 
   public Parser<I> parseXmlDecl(Input input) {
@@ -202,7 +202,7 @@ public abstract class XmlParser<I, V> {
     while (input.isCont() && Xml.isWhitespace(input.head())) {
       input = input.step();
     }
-    Parser<V> parser = parseDocument(input);
+    Parser<V> parser = this.parseDocument(input);
     if (parser.isDone()) {
       while (input.isCont() && Xml.isWhitespace(input.head())) {
         input = input.step();
@@ -221,7 +221,7 @@ public abstract class XmlParser<I, V> {
     while (input.isCont() && Xml.isWhitespace(input.head())) {
       input = input.step();
     }
-    Parser<V> parser = parseFragment(input);
+    Parser<V> parser = this.parseFragment(input);
     if (parser.isDone()) {
       while (input.isCont() && Xml.isWhitespace(input.head())) {
         input = input.step();

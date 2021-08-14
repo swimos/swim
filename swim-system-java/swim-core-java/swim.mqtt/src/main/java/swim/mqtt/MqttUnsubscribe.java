@@ -24,7 +24,6 @@ import swim.util.Murmur3;
 
 public final class MqttUnsubscribe extends MqttPacket<Object> implements Debug {
 
-  private static int hashSeed;
   final int packetFlags;
   final int packetId;
   final FingerTrieSeq<String> topicNames;
@@ -33,22 +32,6 @@ public final class MqttUnsubscribe extends MqttPacket<Object> implements Debug {
     this.packetFlags = packetFlags;
     this.packetId = packetId;
     this.topicNames = topicNames;
-  }
-
-  public static MqttUnsubscribe from(int packetFlags, int packetId, FingerTrieSeq<String> topicNames) {
-    return new MqttUnsubscribe(packetFlags, packetId, topicNames);
-  }
-
-  public static MqttUnsubscribe from(int packetId, FingerTrieSeq<String> topicNames) {
-    return new MqttUnsubscribe(2, packetId, topicNames);
-  }
-
-  public static MqttUnsubscribe from(int packetId, String... topicNames) {
-    return new MqttUnsubscribe(2, packetId, FingerTrieSeq.of(topicNames));
-  }
-
-  public static MqttUnsubscribe from(int packetId) {
-    return new MqttUnsubscribe(2, packetId, FingerTrieSeq.<String>empty());
   }
 
   @Override
@@ -120,30 +103,49 @@ public final class MqttUnsubscribe extends MqttPacket<Object> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttUnsubscribe.class);
+    if (MqttUnsubscribe.hashSeed == 0) {
+      MqttUnsubscribe.hashSeed = Murmur3.seed(MqttUnsubscribe.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(MqttUnsubscribe.hashSeed,
         this.packetFlags), this.packetId), this.topicNames.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("MqttUnsubscribe").write('.').write("from").write('(')
-        .debug(this.packetId).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MqttUnsubscribe").write('.').write("create").write('(')
+                   .debug(this.packetId).write(')');
     if (this.packetFlags != 2) {
       output = output.write('.').write("packetFlags").write('(').debug(this.packetFlags).write(')');
     }
     for (int i = 0, n = this.topicNames.size(); i < n; i += 1) {
       output = output.write('.').write("topicName").write('(').debug(this.topicNames.get(i)).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static MqttUnsubscribe create(int packetFlags, int packetId, FingerTrieSeq<String> topicNames) {
+    return new MqttUnsubscribe(packetFlags, packetId, topicNames);
+  }
+
+  public static MqttUnsubscribe create(int packetId, FingerTrieSeq<String> topicNames) {
+    return new MqttUnsubscribe(2, packetId, topicNames);
+  }
+
+  public static MqttUnsubscribe create(int packetId, String... topicNames) {
+    return new MqttUnsubscribe(2, packetId, FingerTrieSeq.of(topicNames));
+  }
+
+  public static MqttUnsubscribe create(int packetId) {
+    return new MqttUnsubscribe(2, packetId, FingerTrieSeq.<String>empty());
   }
 
 }

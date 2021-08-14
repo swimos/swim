@@ -25,6 +25,10 @@ import swim.structure.Form;
 
 public final class HostLaneFactory {
 
+  private HostLaneFactory() {
+    // static
+  }
+
   public static final HostObjectType<LaneFactory> TYPE;
 
   static {
@@ -42,10 +46,6 @@ public final class HostLaneFactory {
     type.addMember(new HostLaneFactoryGeospatialLane());
     type.addMember(new HostLaneFactorySupplyLane());
     type.addMember(new HostLaneFactoryValueLane());
-  }
-
-  private HostLaneFactory() {
-    // static
   }
 
 }

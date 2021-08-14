@@ -93,9 +93,9 @@ public abstract class WebSocketBehaviors {
     final AbstractWsServer server = new AbstractWsServer(WebSocketBehaviors.this.wsSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
-        final WsRequest wsRequest = WsRequest.from(httpRequest);
+        final WsRequest wsRequest = WsRequest.create(httpRequest);
         final WsResponse wsResponse = wsRequest.accept(WebSocketBehaviors.this.wsSettings);
-        return upgrade(serverSocket, wsResponse);
+        return this.upgrade(serverSocket, wsResponse);
       }
     };
     final AbstractHttpService service = new AbstractHttpService() {
@@ -113,9 +113,9 @@ public abstract class WebSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
+      this.bind(endpoint, service);
       serverBind.await();
-      connect(endpoint, clientSocket);
+      this.connect(endpoint, clientSocket);
       serverConnect.await();
       clientConnect.await();
       serverUpgrade.await();
@@ -142,47 +142,47 @@ public abstract class WebSocketBehaviors {
     final AbstractWebSocket<String, String> clientSocket = new AbstractWebSocket<String, String>() {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-        read(Utf8.stringParser());
-        write(WsText.from("@clientToServer"));
+        this.read(Utf8.stringParser());
+        this.write(WsText.create("@clientToServer"));
       }
 
       @Override
       public void didRead(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsValue.from("@serverToClient"));
+        assertEquals(frame, WsValue.create("@serverToClient"));
         clientRead.countDown();
       }
 
       @Override
       public void didWrite(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsText.from("@clientToServer"));
+        assertEquals(frame, WsText.create("@clientToServer"));
         clientWrite.countDown();
       }
     };
     final AbstractWebSocket<String, String> serverSocket = new AbstractWebSocket<String, String>() {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-        read(Utf8.stringParser());
-        write(WsText.from("@serverToClient"));
+        this.read(Utf8.stringParser());
+        this.write(WsText.create("@serverToClient"));
       }
 
       @Override
       public void didRead(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsValue.from("@clientToServer"));
+        assertEquals(frame, WsValue.create("@clientToServer"));
         serverRead.countDown();
       }
 
       @Override
       public void didWrite(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsText.from("@serverToClient"));
+        assertEquals(frame, WsText.create("@serverToClient"));
         serverWrite.countDown();
       }
     };
     final AbstractWsServer server = new AbstractWsServer(WebSocketBehaviors.this.wsSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
-        final WsRequest wsRequest = WsRequest.from(httpRequest);
+        final WsRequest wsRequest = WsRequest.create(httpRequest);
         final WsResponse wsResponse = wsRequest.accept(WebSocketBehaviors.this.wsSettings);
-        return upgrade(serverSocket, wsResponse);
+        return this.upgrade(serverSocket, wsResponse);
       }
     };
     final AbstractHttpService service = new AbstractHttpService() {
@@ -195,8 +195,8 @@ public abstract class WebSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, clientSocket);
+      this.bind(endpoint, service);
+      this.connect(endpoint, clientSocket);
       clientWrite.await();
       serverWrite.await();
       clientRead.await();
@@ -225,47 +225,47 @@ public abstract class WebSocketBehaviors {
     final AbstractWebSocket<String, String> clientSocket = new AbstractWebSocket<String, String>() {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-        read(Utf8.stringParser());
-        write(WsPing.from(pingData));
+        this.read(Utf8.stringParser());
+        this.write(WsPing.create(pingData));
       }
 
       @Override
       public void didRead(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsPong.from(pongData));
+        assertEquals(frame, WsPong.create(pongData));
         clientReadPong.countDown();
       }
 
       @Override
       public void didWrite(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsPing.from(pingData));
+        assertEquals(frame, WsPing.create(pingData));
         clientWritePing.countDown();
       }
     };
     final AbstractWebSocket<String, String> serverSocket = new AbstractWebSocket<String, String>() {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-        read(Utf8.stringParser());
+        this.read(Utf8.stringParser());
       }
 
       @Override
       public void didRead(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsPing.from(pingData));
+        assertEquals(frame, WsPing.create(pingData));
         serverReadPing.countDown();
-        write(WsPong.from(pongData));
+        this.write(WsPong.create(pongData));
       }
 
       @Override
       public void didWrite(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsPong.from(pongData));
+        assertEquals(frame, WsPong.create(pongData));
         serverWritePong.countDown();
       }
     };
     final AbstractWsServer server = new AbstractWsServer(WebSocketBehaviors.this.wsSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
-        final WsRequest wsRequest = WsRequest.from(httpRequest);
+        final WsRequest wsRequest = WsRequest.create(httpRequest);
         final WsResponse wsResponse = wsRequest.accept(WebSocketBehaviors.this.wsSettings);
-        return upgrade(serverSocket, wsResponse);
+        return this.upgrade(serverSocket, wsResponse);
       }
     };
     final AbstractHttpService service = new AbstractHttpService() {
@@ -278,8 +278,8 @@ public abstract class WebSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, clientSocket);
+      this.bind(endpoint, service);
+      this.connect(endpoint, clientSocket);
       clientWritePing.await();
       serverReadPing.await();
       serverWritePong.await();
@@ -306,47 +306,47 @@ public abstract class WebSocketBehaviors {
     final AbstractWebSocket<String, String> clientSocket = new AbstractWebSocket<String, String>() {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-        read(Utf8.stringParser());
-        write(WsClose.from(1000, "close"));
+        this.read(Utf8.stringParser());
+        this.write(WsClose.create(1000, "close"));
       }
 
       @Override
       public void didRead(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsClose.from(1001, "gone"));
+        assertEquals(frame, WsClose.create(1001, "gone"));
         clientReadClose.countDown();
       }
 
       @Override
       public void didWrite(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsClose.from(1000, "close"));
+        assertEquals(frame, WsClose.create(1000, "close"));
         clientWriteClose.countDown();
       }
     };
     final AbstractWebSocket<String, String> serverSocket = new AbstractWebSocket<String, String>() {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-        read(Utf8.stringParser());
+        this.read(Utf8.stringParser());
       }
 
       @Override
       public void didRead(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsClose.from(1000, "close"));
+        assertEquals(frame, WsClose.create(1000, "close"));
         serverReadClose.countDown();
-        write(WsClose.from(1001, "gone"));
+        this.write(WsClose.create(1001, "gone"));
       }
 
       @Override
       public void didWrite(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsClose.from(1001, "gone"));
+        assertEquals(frame, WsClose.create(1001, "gone"));
         serverWriteClose.countDown();
       }
     };
     final AbstractWsServer server = new AbstractWsServer(WebSocketBehaviors.this.wsSettings) {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
-        final WsRequest wsRequest = WsRequest.from(httpRequest);
+        final WsRequest wsRequest = WsRequest.create(httpRequest);
         final WsResponse wsResponse = wsRequest.accept(WebSocketBehaviors.this.wsSettings);
-        return upgrade(serverSocket, wsResponse);
+        return this.upgrade(serverSocket, wsResponse);
       }
     };
     final AbstractHttpService service = new AbstractHttpService() {
@@ -359,8 +359,8 @@ public abstract class WebSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, clientSocket);
+      this.bind(endpoint, service);
+      this.connect(endpoint, clientSocket);
       clientWriteClose.await();
       serverReadClose.await();
       serverWriteClose.await();
@@ -391,22 +391,22 @@ public abstract class WebSocketBehaviors {
       stage.start();
       endpoint.start();
       System.out.println("Warming up for " + duration + " milliseconds...");
-      bind(endpoint, new AbstractHttpService() {
+      this.bind(endpoint, new AbstractHttpService() {
         @Override
         public HttpServer createServer() {
           return new AbstractWsServer(WebSocketBehaviors.this.wsSettings) {
             @Override
             public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
-              final WsRequest wsRequest = WsRequest.from(httpRequest);
+              final WsRequest wsRequest = WsRequest.create(httpRequest);
               final WsResponse wsResponse = wsRequest.accept(WebSocketBehaviors.this.wsSettings);
-              return upgrade(new AbstractWebSocket<String, String>() {
+              return this.upgrade(new AbstractWebSocket<String, String>() {
                 boolean closed;
 
                 @Override
                 public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
                   t0.compareAndSet(0L, System.currentTimeMillis());
-                  read(Utf8.stringParser());
-                  write(WsText.from(payload));
+                  this.read(Utf8.stringParser());
+                  this.write(WsText.create(payload));
                 }
 
                 @Override
@@ -418,9 +418,9 @@ public abstract class WebSocketBehaviors {
                     newDt = System.currentTimeMillis() - t0.get();
                   } while ((oldDt < 2L * duration || newDt < 2L * duration) && !dt.compareAndSet(oldDt, newDt));
                   if (newDt >= 2L * duration) {
-                    if (!closed) {
-                      closed = true;
-                      write(WsClose.from(1000));
+                    if (!this.closed) {
+                      this.closed = true;
+                      this.write(WsClose.create(1000));
                     }
                     return;
                   } else if (newDt >= duration) {
@@ -429,7 +429,7 @@ public abstract class WebSocketBehaviors {
                     }
                     count.incrementAndGet();
                   }
-                  write(WsText.from(payload));
+                  this.write(WsText.create(payload));
                 }
 
                 @Override
@@ -451,18 +451,18 @@ public abstract class WebSocketBehaviors {
       });
       final IpSocketRef[] clients = new IpSocketRef[connections];
       for (int connection = 0; connection < connections; connection += 1) {
-        clients[connection] = connect(endpoint, new AbstractWebSocket<String, String>() {
+        clients[connection] = this.connect(endpoint, new AbstractWebSocket<String, String>() {
           @Override
           public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-            read(Utf8.stringParser());
+            this.read(Utf8.stringParser());
           }
 
           @Override
           public void didRead(WsFrame<? extends String> frame) {
             if (frame instanceof WsData<?>) {
-              read(Utf8.stringParser());
+              this.read(Utf8.stringParser());
             } else if (frame instanceof WsFragment<?>) {
-              read(((WsFragment<? extends String>) frame).contentDecoder());
+              this.read(((WsFragment<? extends String>) frame).contentDecoder());
             } else if (frame instanceof WsClose<?, ?>) {
               clientDone.countDown();
             }
@@ -494,7 +494,7 @@ public abstract class WebSocketBehaviors {
     for (int i = 0; i < 32; i += 1) {
       payload.append("test");
     }
-    benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, payload.toString());
+    this.benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, payload.toString());
   }
 
   @Test(groups = {"benchmark"})
@@ -503,7 +503,7 @@ public abstract class WebSocketBehaviors {
     for (int i = 0; i < 256; i += 1) {
       payload.append("test");
     }
-    benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, payload.toString());
+    this.benchmark(2 * Runtime.getRuntime().availableProcessors(), 2000L, payload.toString());
   }
 
 }

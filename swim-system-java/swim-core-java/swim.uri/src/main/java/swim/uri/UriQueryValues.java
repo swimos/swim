@@ -27,38 +27,6 @@ final class UriQueryValues implements Collection<String> {
     this.query = query;
   }
 
-  private static boolean containsAll(UriQuery query, HashSet<?> missing) {
-    while (!query.isEmpty() && !missing.isEmpty()) {
-      missing.remove(query.value());
-      query = query.tail();
-    }
-    return missing.isEmpty();
-  }
-
-  private static void toArray(UriQuery query, Object[] array) {
-    int i = 0;
-    while (!query.isEmpty()) {
-      array[i] = query.value();
-      query = query.tail();
-      i += 1;
-    }
-  }
-
-  private static String toString(UriQuery query) {
-    final StringBuilder s = new StringBuilder();
-    s.append('[');
-    if (!query.isEmpty()) {
-      s.append(String.valueOf(query.value()));
-      query = query.tail();
-      while (!query.isEmpty()) {
-        s.append(", ").append(String.valueOf(query.value()));
-        query = query.tail();
-      }
-    }
-    s.append(']');
-    return s.toString();
-  }
-
   @Override
   public boolean isEmpty() {
     return this.query.isEmpty();
@@ -80,6 +48,14 @@ final class UriQueryValues implements Collection<String> {
       throw new NullPointerException();
     }
     return UriQueryValues.containsAll(this.query, new HashSet<Object>(values));
+  }
+
+  private static boolean containsAll(UriQuery query, HashSet<?> missing) {
+    while (!query.isEmpty() && !missing.isEmpty()) {
+      missing.remove(query.value());
+      query = query.tail();
+    }
+    return missing.isEmpty();
   }
 
   @Override
@@ -119,7 +95,7 @@ final class UriQueryValues implements Collection<String> {
 
   @Override
   public Object[] toArray() {
-    final Object[] array = new Object[size()];
+    final Object[] array = new Object[this.size()];
     UriQueryValues.toArray(this.query, array);
     return array;
   }
@@ -127,7 +103,7 @@ final class UriQueryValues implements Collection<String> {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T[] toArray(T[] array) {
-    final int n = size();
+    final int n = this.size();
     if (array.length < n) {
       array = (T[]) Array.newInstance(array.getClass().getComponentType(), n);
     }
@@ -138,9 +114,33 @@ final class UriQueryValues implements Collection<String> {
     return array;
   }
 
+  private static void toArray(UriQuery query, Object[] array) {
+    int i = 0;
+    while (!query.isEmpty()) {
+      array[i] = query.value();
+      query = query.tail();
+      i += 1;
+    }
+  }
+
   @Override
   public String toString() {
     return UriQueryValues.toString(this.query);
+  }
+
+  private static String toString(UriQuery query) {
+    final StringBuilder s = new StringBuilder();
+    s.append('[');
+    if (!query.isEmpty()) {
+      s.append(String.valueOf(query.value()));
+      query = query.tail();
+      while (!query.isEmpty()) {
+        s.append(", ").append(String.valueOf(query.value()));
+        query = query.tail();
+      }
+    }
+    s.append(']');
+    return s.toString();
   }
 
 }

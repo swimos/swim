@@ -35,7 +35,7 @@ final class CsvInput extends Input {
 
   @Override
   public boolean isCont() {
-    return this.input.isCont() && !isDelimiter(this.input.head());
+    return this.input.isCont() && !this.isDelimiter(this.input.head());
   }
 
   @Override
@@ -45,7 +45,7 @@ final class CsvInput extends Input {
 
   @Override
   public boolean isDone() {
-    return this.input.isDone() || this.input.isCont() && isDelimiter(this.input.head());
+    return this.input.isDone() || this.input.isCont() && this.isDelimiter(this.input.head());
   }
 
   @Override
@@ -66,7 +66,7 @@ final class CsvInput extends Input {
   @Override
   public int head() {
     final int head = this.input.head();
-    if (!isDelimiter(head)) {
+    if (!this.isDelimiter(head)) {
       return head;
     } else {
       throw new InputException();
@@ -76,12 +76,12 @@ final class CsvInput extends Input {
   @Override
   public Input step() {
     final int head = this.input.head();
-    if (!isDelimiter(head)) {
+    if (!this.isDelimiter(head)) {
       this.input = this.input.step();
       return this;
     } else {
       final Throwable error = new InputException("invalid step");
-      return Input.error(error, id(), mark(), settings());
+      return Input.error(error, this.id(), this.mark(), this.settings());
     }
   }
 

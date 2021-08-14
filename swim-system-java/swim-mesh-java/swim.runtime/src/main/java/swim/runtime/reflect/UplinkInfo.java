@@ -22,22 +22,22 @@ import swim.structure.Kind;
 
 public abstract class UplinkInfo extends LinkInfo {
 
-  private static Form<UplinkInfo> uplinkForm;
-
-  public static UplinkInfo from(LinkContext linkContext) {
+  public static UplinkInfo create(LinkContext linkContext) {
     if (linkContext instanceof WarpContext) {
-      return WarpUplinkInfo.from((WarpContext) linkContext);
+      return WarpUplinkInfo.create((WarpContext) linkContext);
     } else {
       return null;
     }
   }
 
+  private static Form<UplinkInfo> uplinkForm;
+
   @Kind
   public static Form<UplinkInfo> uplinkForm() {
-    if (uplinkForm == null) {
-      uplinkForm = new UplinkInfoForm();
+    if (UplinkInfo.uplinkForm == null) {
+      UplinkInfo.uplinkForm = new UplinkInfoForm();
     }
-    return uplinkForm;
+    return UplinkInfo.uplinkForm;
   }
 
 }

@@ -28,12 +28,6 @@ final class WebServerRejected extends WebResponse {
     this.httpResponder = httpResponder;
   }
 
-  static WebServerRejected notFound() {
-    final HttpResponse<Object> response = HttpResponse.from(HttpStatus.NOT_FOUND).content(HttpBody.empty());
-    final HttpResponder<Object> responder = new StaticHttpResponder<Object>(response);
-    return new WebServerRejected(responder);
-  }
-
   @Override
   public boolean isAccepted() {
     return false;
@@ -47,6 +41,12 @@ final class WebServerRejected extends WebResponse {
   @Override
   public HttpResponder<?> httpResponder() {
     return this.httpResponder;
+  }
+
+  static WebServerRejected notFound() {
+    final HttpResponse<Object> response = HttpResponse.create(HttpStatus.NOT_FOUND).content(HttpBody.empty());
+    final HttpResponder<Object> responder = new StaticHttpResponder<Object>(response);
+    return new WebServerRejected(responder);
   }
 
 }

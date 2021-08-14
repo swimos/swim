@@ -29,6 +29,10 @@ import swim.observable.ObservableMap;
 
 public final class HostObservableMap {
 
+  private HostObservableMap() {
+    // static
+  }
+
   public static final HostObjectType<ObservableMap<Object, Object>> TYPE;
 
   static {
@@ -41,10 +45,6 @@ public final class HostObservableMap {
     type.addMember(new HostObservableMapDidRemove());
     type.addMember(new HostObservableMapWillClear());
     type.addMember(new HostObservableMapDidClear());
-  }
-
-  private HostObservableMap() {
-    // static
   }
 
 }

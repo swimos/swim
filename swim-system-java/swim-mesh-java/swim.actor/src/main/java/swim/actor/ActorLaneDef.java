@@ -28,7 +28,6 @@ import swim.util.Murmur3;
 
 public class ActorLaneDef implements LaneDef, Debug {
 
-  private static int hashSeed;
   final UriPattern lanePattern;
   final String laneType;
   final LogDef logDef;
@@ -46,22 +45,6 @@ public class ActorLaneDef implements LaneDef, Debug {
     this.storeDef = storeDef;
   }
 
-  public static ActorLaneDef fromLaneUri(Uri laneUri) {
-    return new ActorLaneDef(UriPattern.from(laneUri), null, null, null, null, null);
-  }
-
-  public static ActorLaneDef fromLaneUri(String laneUri) {
-    return fromLaneUri(Uri.parse(laneUri));
-  }
-
-  public static ActorLaneDef fromLanePattern(UriPattern lanePattern) {
-    return new ActorLaneDef(lanePattern, null, null, null, null, null);
-  }
-
-  public static ActorLaneDef fromLanePattern(String lanePattern) {
-    return fromLanePattern(UriPattern.parse(lanePattern));
-  }
-
   @Override
   public final Uri laneUri() {
     return this.lanePattern.isUri() ? this.lanePattern.toUri() : null;
@@ -73,7 +56,7 @@ public class ActorLaneDef implements LaneDef, Debug {
   }
 
   public ActorLaneDef lanePattern(UriPattern lanePattern) {
-    return copy(lanePattern, this.laneType, this.logDef, this.policyDef, this.stageDef, this.storeDef);
+    return this.copy(lanePattern, this.laneType, this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -82,7 +65,7 @@ public class ActorLaneDef implements LaneDef, Debug {
   }
 
   public ActorLaneDef laneType(String laneType) {
-    return copy(this.lanePattern, laneType, this.logDef, this.policyDef, this.stageDef, this.storeDef);
+    return this.copy(this.lanePattern, laneType, this.logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -91,7 +74,7 @@ public class ActorLaneDef implements LaneDef, Debug {
   }
 
   public ActorLaneDef logDef(LogDef logDef) {
-    return copy(this.lanePattern, this.laneType, logDef, this.policyDef, this.stageDef, this.storeDef);
+    return this.copy(this.lanePattern, this.laneType, logDef, this.policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -100,7 +83,7 @@ public class ActorLaneDef implements LaneDef, Debug {
   }
 
   public ActorLaneDef policyDef(PolicyDef policyDef) {
-    return copy(this.lanePattern, this.laneType, this.logDef, policyDef, this.stageDef, this.storeDef);
+    return this.copy(this.lanePattern, this.laneType, this.logDef, policyDef, this.stageDef, this.storeDef);
   }
 
   @Override
@@ -109,7 +92,7 @@ public class ActorLaneDef implements LaneDef, Debug {
   }
 
   public ActorLaneDef stageDef(StageDef stageDef) {
-    return copy(this.lanePattern, this.laneType, this.logDef, this.policyDef, stageDef, this.storeDef);
+    return this.copy(this.lanePattern, this.laneType, this.logDef, this.policyDef, stageDef, this.storeDef);
   }
 
   @Override
@@ -118,7 +101,7 @@ public class ActorLaneDef implements LaneDef, Debug {
   }
 
   public ActorLaneDef storeDef(StoreDef storeDef) {
-    return copy(this.lanePattern, this.laneType, this.logDef, this.policyDef, this.stageDef, storeDef);
+    return this.copy(this.lanePattern, this.laneType, this.logDef, this.policyDef, this.stageDef, storeDef);
   }
 
   protected ActorLaneDef copy(UriPattern lanePattern, String laneType, LogDef logDef,
@@ -142,19 +125,21 @@ public class ActorLaneDef implements LaneDef, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ActorLaneDef.class);
+    if (ActorLaneDef.hashSeed == 0) {
+      ActorLaneDef.hashSeed = Murmur3.seed(ActorLaneDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Murmur3.mix(hashSeed, this.lanePattern.hashCode()), Murmur3.hash(this.laneType)),
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        ActorLaneDef.hashSeed, this.lanePattern.hashCode()), Murmur3.hash(this.laneType)),
         Murmur3.hash(this.logDef)), Murmur3.hash(this.policyDef)),
         Murmur3.hash(this.stageDef)), Murmur3.hash(this.storeDef)));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("ActorLaneDef").write('.');
     if (this.lanePattern.isUri()) {
       output = output.write("fromLaneUri").write('(').debug(this.lanePattern.toUri()).write(')');
@@ -176,11 +161,28 @@ public class ActorLaneDef implements LaneDef, Debug {
     if (this.storeDef != null) {
       output = output.write('.').write("storeDef").write('(').debug(this.storeDef).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static ActorLaneDef fromLaneUri(Uri laneUri) {
+    return new ActorLaneDef(UriPattern.from(laneUri), null, null, null, null, null);
+  }
+
+  public static ActorLaneDef fromLaneUri(String laneUri) {
+    return ActorLaneDef.fromLaneUri(Uri.parse(laneUri));
+  }
+
+  public static ActorLaneDef fromLanePattern(UriPattern lanePattern) {
+    return new ActorLaneDef(lanePattern, null, null, null, null, null);
+  }
+
+  public static ActorLaneDef fromLanePattern(String lanePattern) {
+    return ActorLaneDef.fromLanePattern(UriPattern.parse(lanePattern));
   }
 
 }

@@ -28,22 +28,12 @@ public enum PageType implements Debug {
     this.tag = tag;
   }
 
-  public static PageType fromTag(String tag) {
-    if ("node".equals(tag)) {
-      return NODE;
-    } else if ("leaf".equals(tag)) {
-      return LEAF;
-    } else {
-      return null;
-    }
-  }
-
   public boolean isNode() {
-    return this == NODE;
+    return this == PageType.NODE;
   }
 
   public boolean isLeaf() {
-    return this == LEAF;
+    return this == PageType.LEAF;
   }
 
   public String tag() {
@@ -51,8 +41,19 @@ public enum PageType implements Debug {
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.write("PageType").write('.').write(name());
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("PageType").write('.').write(this.name());
+    return output;
+  }
+
+  public static PageType fromTag(String tag) {
+    if ("node".equals(tag)) {
+      return PageType.NODE;
+    } else if ("leaf".equals(tag)) {
+      return PageType.LEAF;
+    } else {
+      return null;
+    }
   }
 
 }

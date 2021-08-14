@@ -19,10 +19,6 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpVersionSpec {
 
-  public void assertParses(String string, HttpVersion version) {
-    HttpAssertions.assertParses(Http.standardParser().versionParser(), string, version);
-  }
-
   @Test
   public void parseVersions() {
     assertParses("HTTP/1.1", HttpVersion.HTTP_1_1);
@@ -33,6 +29,10 @@ public class HttpVersionSpec {
   public void writeVersions() {
     assertWrites(HttpVersion.HTTP_1_1, "HTTP/1.1");
     assertWrites(HttpVersion.HTTP_1_0, "HTTP/1.0");
+  }
+
+  public static void assertParses(String string, HttpVersion version) {
+    HttpAssertions.assertParses(Http.standardParser().versionParser(), string, version);
   }
 
 }

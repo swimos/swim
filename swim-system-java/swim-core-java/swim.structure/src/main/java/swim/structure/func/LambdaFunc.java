@@ -27,7 +27,6 @@ import swim.util.Murmur3;
 
 public class LambdaFunc extends Func {
 
-  private static int hashSeed;
   final Value bindings;
   final Value template;
 
@@ -86,9 +85,9 @@ public class LambdaFunc extends Func {
   @Override
   public int compareTo(Item other) {
     if (other instanceof LambdaFunc) {
-      return compareTo((LambdaFunc) other);
+      return this.compareTo((LambdaFunc) other);
     }
-    return Integer.compare(typeOrder(), other.typeOrder());
+    return Integer.compare(this.typeOrder(), other.typeOrder());
   }
 
   int compareTo(LambdaFunc that) {
@@ -110,18 +109,21 @@ public class LambdaFunc extends Func {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(LambdaFunc.class);
+    if (LambdaFunc.hashSeed == 0) {
+      LambdaFunc.hashSeed = Murmur3.seed(LambdaFunc.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(LambdaFunc.hashSeed,
         this.bindings.hashCode()), this.template.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output.debug(this.bindings).write('.').write("lambda").write('(').debug(this.template).write(')');
+    return output;
   }
 
 }

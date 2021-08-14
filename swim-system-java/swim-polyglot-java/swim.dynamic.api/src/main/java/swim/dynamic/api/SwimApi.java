@@ -25,6 +25,10 @@ import swim.dynamic.api.warp.SwimApiWarp;
 
 public final class SwimApi {
 
+  private SwimApi() {
+    // static
+  }
+
   public static final HostPackage PACKAGE;
   public static final HostLibrary LIBRARY;
 
@@ -41,10 +45,6 @@ public final class SwimApi {
     hostLib.addHostPackage(SwimApiLane.PACKAGE);
     hostLib.addHostPackage(SwimApiPlane.PACKAGE);
     hostLib.addHostPackage(SwimApiWarp.PACKAGE);
-  }
-
-  private SwimApi() {
-    // static
   }
 
 }

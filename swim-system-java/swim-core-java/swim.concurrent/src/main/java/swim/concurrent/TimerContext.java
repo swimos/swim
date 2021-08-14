@@ -17,7 +17,7 @@ package swim.concurrent;
 /**
  * Internal context that binds a {@link Timer} to a {@link Schedule}.
  * A {@code TimerContext} can be used by a {@code Timer} to check its status,
- * to reschedule itself, and to cancel itself.  {@code TimerContext} is thread
+ * to reschedule itself, and to cancel itself. {@code TimerContext} is thread
  * safe.
  *
  * @see Timer
@@ -37,7 +37,7 @@ public interface TimerContext extends TimerRef {
 
   /**
    * Schedules the timer to execute after {@code millis} milliseconds has
-   * elapsed.  If the timer is currently scheduled, it will not ececute at its
+   * elapsed. If the timer is currently scheduled, it will not ececute at its
    * previously scheduled time; it will only execute at the newly scheduled
    * time.
    *
@@ -47,7 +47,7 @@ public interface TimerContext extends TimerRef {
   void reschedule(long millis);
 
   /**
-   * Cancels the timer to prevent it from executing.  Returns {@code true} if
+   * Cancels the timer to prevent it from executing. Returns {@code true} if
    * this operation caused the cancellation of the timer; returns {@code false}
    * if the timer was not scheduled to execute.
    */

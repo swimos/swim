@@ -33,28 +33,29 @@ public abstract class WsEngine {
   }
 
   private static WsEngine standardClientEngine;
-  private static WsEngine standardServerEngine;
 
   public static WsEngine standardClientEngine() {
-    if (standardClientEngine == null) {
-      standardClientEngine = new WsStandardClientEngine();
+    if (WsEngine.standardClientEngine == null) {
+      WsEngine.standardClientEngine = new WsStandardClientEngine();
     }
-    return standardClientEngine;
+    return WsEngine.standardClientEngine;
   }
 
+  private static WsEngine standardServerEngine;
+
   public static WsEngine standardServerEngine() {
-    if (standardServerEngine == null) {
-      standardServerEngine = new WsStandardServerEngine();
+    if (WsEngine.standardServerEngine == null) {
+      WsEngine.standardServerEngine = new WsStandardServerEngine();
     }
-    return standardServerEngine;
+    return WsEngine.standardServerEngine;
   }
 
   public static WsEngine deflateClientEngine(WebSocketExtension extension, WsEngineSettings settings) {
-    return WsDeflateClientEngine.from(extension, settings);
+    return WsDeflateClientEngine.create(extension, settings);
   }
 
   public static WsEngine deflateServerEngine(WebSocketExtension extension, WsEngineSettings settings) {
-    return WsDeflateServerEngine.from(extension, settings);
+    return WsDeflateServerEngine.create(extension, settings);
   }
 
 }

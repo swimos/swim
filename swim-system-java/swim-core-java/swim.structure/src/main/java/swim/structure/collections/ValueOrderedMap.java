@@ -39,7 +39,7 @@ public class ValueOrderedMap<K, V> extends ValueIterableMap<K, V> implements Ord
 
   @Override
   public <K2> ValueOrderedMap<K2, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   @Override
@@ -49,7 +49,7 @@ public class ValueOrderedMap<K, V> extends ValueIterableMap<K, V> implements Ord
 
   @Override
   public <V2> ValueOrderedMap<K, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @SuppressWarnings("unchecked")

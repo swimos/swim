@@ -39,17 +39,12 @@ import swim.structure.Value;
 
 public class MemStore implements StoreBinding, StoreContext {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<MemStore, HashTrieMap<Value, StoreBinding>> STORES =
-      AtomicReferenceFieldUpdater.newUpdater(MemStore.class, (Class<HashTrieMap<Value, StoreBinding>>) (Class<?>) HashTrieMap.class, "stores");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<MemStore, HashTrieMap<Value, DataBinding>> TREES =
-      AtomicReferenceFieldUpdater.newUpdater(MemStore.class, (Class<HashTrieMap<Value, DataBinding>>) (Class<?>) HashTrieMap.class, "trees");
   protected StoreContext storeContext;
   volatile HashTrieMap<Value, StoreBinding> stores;
   volatile HashTrieMap<Value, DataBinding> trees;
 
   public MemStore() {
+    this.storeContext = null;
     this.stores = HashTrieMap.empty();
     this.trees = HashTrieMap.empty();
   }
@@ -66,16 +61,16 @@ public class MemStore implements StoreBinding, StoreContext {
 
   @Override
   public Iterator<DataBinding> dataBindings() {
-    return this.trees.valueIterator();
+    return MemStore.TREES.get(this).valueIterator();
   }
 
   @Override
   public void closeData(Value name) {
     do {
-      final HashTrieMap<Value, DataBinding> oldTrees = this.trees;
+      final HashTrieMap<Value, DataBinding> oldTrees = MemStore.TREES.get(this);
       final HashTrieMap<Value, DataBinding> newTrees = oldTrees.removed(name);
       if (oldTrees != newTrees) {
-        if (TREES.compareAndSet(this, oldTrees, newTrees)) {
+        if (MemStore.TREES.compareAndSet(this, oldTrees, newTrees)) {
           break;
         }
       } else {
@@ -93,7 +88,7 @@ public class MemStore implements StoreBinding, StoreContext {
   public StoreBinding openStore(Value name) {
     StoreBinding store = null;
     do {
-      final HashTrieMap<Value, StoreBinding> oldStores = this.stores;
+      final HashTrieMap<Value, StoreBinding> oldStores = MemStore.STORES.get(this);
       final StoreBinding oldStore = oldStores.get(name);
       if (oldStore != null) {
         store = oldStore;
@@ -103,7 +98,7 @@ public class MemStore implements StoreBinding, StoreContext {
           store = new MemStore();
         }
         final HashTrieMap<Value, StoreBinding> newStores = oldStores.updated(name, store);
-        if (STORES.compareAndSet(this, oldStores, newStores)) {
+        if (MemStore.STORES.compareAndSet(this, oldStores, newStores)) {
           break;
         }
       }
@@ -120,7 +115,7 @@ public class MemStore implements StoreBinding, StoreContext {
   public ListDataBinding openListData(Value name) {
     ListDataModel tree = null;
     do {
-      final HashTrieMap<Value, DataBinding> oldTrees = this.trees;
+      final HashTrieMap<Value, DataBinding> oldTrees = MemStore.TREES.get(this);
       final DataBinding oldTree = oldTrees.get(name);
       if (oldTree != null) {
         tree = (ListDataModel) oldTree;
@@ -130,7 +125,7 @@ public class MemStore implements StoreBinding, StoreContext {
           tree = new ListDataModel(name, new STreeList<Value>());
         }
         final HashTrieMap<Value, DataBinding> newTrees = oldTrees.updated(name, tree);
-        if (TREES.compareAndSet(this, oldTrees, newTrees)) {
+        if (MemStore.TREES.compareAndSet(this, oldTrees, newTrees)) {
           break;
         }
       }
@@ -147,7 +142,7 @@ public class MemStore implements StoreBinding, StoreContext {
   public MapDataBinding openMapData(Value name) {
     MapDataModel tree = null;
     do {
-      final HashTrieMap<Value, DataBinding> oldTrees = this.trees;
+      final HashTrieMap<Value, DataBinding> oldTrees = MemStore.TREES.get(this);
       final DataBinding oldTree = oldTrees.get(name);
       if (oldTree != null) {
         tree = (MapDataModel) oldTree;
@@ -157,7 +152,7 @@ public class MemStore implements StoreBinding, StoreContext {
           tree = new MapDataModel(name, new BTreeMap<Value, Value, Value>());
         }
         final HashTrieMap<Value, DataBinding> newTrees = oldTrees.updated(name, tree);
-        if (TREES.compareAndSet(this, oldTrees, newTrees)) {
+        if (MemStore.TREES.compareAndSet(this, oldTrees, newTrees)) {
           break;
         }
       }
@@ -175,7 +170,7 @@ public class MemStore implements StoreBinding, StoreContext {
   public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
     SpatialDataModel<S> tree = null;
     do {
-      final HashTrieMap<Value, DataBinding> oldTrees = this.trees;
+      final HashTrieMap<Value, DataBinding> oldTrees = MemStore.TREES.get(this);
       final DataBinding oldTree = oldTrees.get(name);
       if (oldTree != null) {
         tree = (SpatialDataModel<S>) oldTree;
@@ -185,7 +180,7 @@ public class MemStore implements StoreBinding, StoreContext {
           tree = new SpatialDataModel<S>(name, new QTreeMap<Value, S, Value>(shapeForm));
         }
         final HashTrieMap<Value, DataBinding> newTrees = oldTrees.updated(name, tree);
-        if (TREES.compareAndSet(this, oldTrees, newTrees)) {
+        if (MemStore.TREES.compareAndSet(this, oldTrees, newTrees)) {
           break;
         }
       }
@@ -202,7 +197,7 @@ public class MemStore implements StoreBinding, StoreContext {
   public ValueDataBinding openValueData(Value name) {
     ValueDataModel tree = null;
     do {
-      final HashTrieMap<Value, DataBinding> oldTrees = this.trees;
+      final HashTrieMap<Value, DataBinding> oldTrees = MemStore.TREES.get(this);
       final DataBinding oldTree = oldTrees.get(name);
       if (oldTree != null) {
         tree = (ValueDataModel) oldTree;
@@ -212,7 +207,7 @@ public class MemStore implements StoreBinding, StoreContext {
           tree = new ValueDataModel(name, Value.absent());
         }
         final HashTrieMap<Value, DataBinding> newTrees = oldTrees.updated(name, tree);
-        if (TREES.compareAndSet(this, oldTrees, newTrees)) {
+        if (MemStore.TREES.compareAndSet(this, oldTrees, newTrees)) {
           break;
         }
       }
@@ -227,60 +222,67 @@ public class MemStore implements StoreBinding, StoreContext {
 
   @Override
   public ListData<Value> listData(Value name) {
-    ListDataBinding dataBinding = openListData(name);
-    dataBinding = injectListData(dataBinding);
+    ListDataBinding dataBinding = this.openListData(name);
+    dataBinding = this.injectListData(dataBinding);
     return dataBinding;
   }
 
   @Override
   public ListData<Value> listData(String name) {
-    return listData(Text.from(name));
+    return this.listData(Text.from(name));
   }
 
   @Override
   public MapData<Value, Value> mapData(Value name) {
-    MapDataBinding dataBinding = openMapData(name);
-    dataBinding = injectMapData(dataBinding);
+    MapDataBinding dataBinding = this.openMapData(name);
+    dataBinding = this.injectMapData(dataBinding);
     return dataBinding;
   }
 
   @Override
   public MapData<Value, Value> mapData(String name) {
-    return mapData(Text.from(name));
+    return this.mapData(Text.from(name));
   }
 
   @Override
   public <S> SpatialData<Value, S, Value> spatialData(Value name, Z2Form<S> shapeForm) {
-    SpatialDataBinding<S> dataBinding = openSpatialData(name, shapeForm);
-    dataBinding = injectSpatialData(dataBinding);
+    SpatialDataBinding<S> dataBinding = this.openSpatialData(name, shapeForm);
+    dataBinding = this.injectSpatialData(dataBinding);
     return dataBinding;
   }
 
   @Override
   public <S> SpatialData<Value, S, Value> spatialData(String name, Z2Form<S> shapeForm) {
-    return spatialData(Text.from(name), shapeForm);
+    return this.spatialData(Text.from(name), shapeForm);
   }
 
   @Override
   public SpatialData<Value, R2Shape, Value> geospatialData(Value name) {
-    return spatialData(name, GeoProjection.wgs84Form());
+    return this.spatialData(name, GeoProjection.wgs84Form());
   }
 
   @Override
   public SpatialData<Value, R2Shape, Value> geospatialData(String name) {
-    return geospatialData(Text.from(name));
+    return this.geospatialData(Text.from(name));
   }
 
   @Override
   public ValueData<Value> valueData(Value name) {
-    ValueDataBinding dataBinding = openValueData(name);
-    dataBinding = injectValueData(dataBinding);
+    ValueDataBinding dataBinding = this.openValueData(name);
+    dataBinding = this.injectValueData(dataBinding);
     return dataBinding;
   }
 
   @Override
   public ValueData<Value> valueData(String name) {
-    return valueData(Text.from(name));
+    return this.valueData(Text.from(name));
   }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<MemStore, HashTrieMap<Value, StoreBinding>> STORES =
+      AtomicReferenceFieldUpdater.newUpdater(MemStore.class, (Class<HashTrieMap<Value, StoreBinding>>) (Class<?>) HashTrieMap.class, "stores");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<MemStore, HashTrieMap<Value, DataBinding>> TREES =
+      AtomicReferenceFieldUpdater.newUpdater(MemStore.class, (Class<HashTrieMap<Value, DataBinding>>) (Class<?>) HashTrieMap.class, "trees");
 
 }

@@ -39,6 +39,12 @@ final class UriAuthorityParser extends Parser<UriAuthority> {
     this(uri, null, null, null, 1);
   }
 
+  @Override
+  public Parser<UriAuthority> feed(Input input) {
+    return UriAuthorityParser.parse(input, this.uri, this.userParser, this.hostParser,
+                                    this.portParser, this.step);
+  }
+
   static Parser<UriAuthority> parse(Input input, UriParser uri, Parser<UriUser> userParser,
                                     Parser<UriHost> hostParser, Parser<UriPort> portParser, int step) {
     int c = 0;
@@ -73,7 +79,7 @@ final class UriAuthorityParser extends Parser<UriAuthority> {
           input = input.step();
           step = 3;
         } else if (!input.isEmpty()) {
-          return error(Diagnostic.expected('@', input));
+          return Parser.error(Diagnostic.expected('@', input));
         }
       } else if (userParser.isError()) {
         return userParser.asError();
@@ -90,8 +96,8 @@ final class UriAuthorityParser extends Parser<UriAuthority> {
           input = input.step();
           step = 4;
         } else if (!input.isEmpty()) {
-          return done(uri.authority(userParser != null ? userParser.bind() : null,
-              hostParser.bind(), null));
+          return Parser.done(uri.authority(userParser != null ? userParser.bind() : null,
+                                           hostParser.bind(), null));
         }
       } else if (hostParser.isError()) {
         return hostParser.asError();
@@ -104,26 +110,21 @@ final class UriAuthorityParser extends Parser<UriAuthority> {
         portParser = portParser.feed(input);
       }
       if (portParser.isDone()) {
-        return done(uri.authority(userParser != null ? userParser.bind() : null,
-            hostParser != null ? hostParser.bind() : null,
-            portParser.bind()));
+        return Parser.done(uri.authority(userParser != null ? userParser.bind() : null,
+                                         hostParser != null ? hostParser.bind() : null,
+                                         portParser.bind()));
       } else if (portParser.isError()) {
         return portParser.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new UriAuthorityParser(uri, userParser, hostParser, portParser, step);
   }
 
   static Parser<UriAuthority> parse(Input input, UriParser uri) {
-    return parse(input, uri, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<UriAuthority> feed(Input input) {
-    return parse(input, this.uri, this.userParser, this.hostParser, this.portParser, this.step);
+    return UriAuthorityParser.parse(input, uri, null, null, null, 1);
   }
 
 }

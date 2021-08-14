@@ -26,7 +26,8 @@ final class MqttPubCompEncoder extends Encoder<Object, MqttPubComp> {
   final int remaining;
   final int step;
 
-  MqttPubCompEncoder(MqttEncoder mqtt, MqttPubComp packet, int length, int remaining, int step) {
+  MqttPubCompEncoder(MqttEncoder mqtt, MqttPubComp packet, int length,
+                     int remaining, int step) {
     this.mqtt = mqtt;
     this.packet = packet;
     this.length = length;
@@ -38,8 +39,15 @@ final class MqttPubCompEncoder extends Encoder<Object, MqttPubComp> {
     this(mqtt, packet, 0, 0, 1);
   }
 
+  @Override
+  public Encoder<Object, MqttPubComp> pull(OutputBuffer<?> output) {
+    return MqttPubCompEncoder.encode(output, this.mqtt, this.packet, this.length,
+                                     this.remaining, this.step);
+  }
+
   static Encoder<Object, MqttPubComp> encode(OutputBuffer<?> output, MqttEncoder mqtt,
-                                             MqttPubComp packet, int length, int remaining, int step) {
+                                             MqttPubComp packet, int length,
+                                             int remaining, int step) {
     if (step == 1 && output.isCont()) {
       length = packet.bodySize(mqtt);
       remaining = length;
@@ -59,7 +67,7 @@ final class MqttPubCompEncoder extends Encoder<Object, MqttPubComp> {
       } else if (step < 5) {
         step += 1;
       } else {
-        return error(new MqttException("packet length too long: " + remaining));
+        return Encoder.error(new MqttException("packet length too long: " + remaining));
       }
     }
     if (step == 6 && remaining > 0 && output.isCont()) {
@@ -73,26 +81,21 @@ final class MqttPubCompEncoder extends Encoder<Object, MqttPubComp> {
       step = 8;
     }
     if (step == 8 && remaining == 0) {
-      return done(packet);
+      return Encoder.done(packet);
     }
     if (remaining < 0) {
-      return error(new MqttException("packet length too short"));
+      return Encoder.error(new MqttException("packet length too short"));
     } else if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new MqttPubCompEncoder(mqtt, packet, length, remaining, step);
   }
 
   static Encoder<Object, MqttPubComp> encode(OutputBuffer<?> output, MqttEncoder mqtt,
                                              MqttPubComp packet) {
-    return encode(output, mqtt, packet, 0, 0, 1);
-  }
-
-  @Override
-  public Encoder<Object, MqttPubComp> pull(OutputBuffer<?> output) {
-    return encode(output, this.mqtt, this.packet, this.length, this.remaining, this.step);
+    return MqttPubCompEncoder.encode(output, mqtt, packet, 0, 0, 1);
   }
 
 }

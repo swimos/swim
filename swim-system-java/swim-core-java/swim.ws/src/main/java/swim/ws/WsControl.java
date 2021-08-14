@@ -17,7 +17,7 @@ package swim.ws;
 public abstract class WsControl<P, T> extends WsFrame<T> {
 
   WsControl() {
-    // stub
+    // sealed
   }
 
   @Override

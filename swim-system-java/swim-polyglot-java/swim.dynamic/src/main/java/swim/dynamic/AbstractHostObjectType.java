@@ -28,9 +28,9 @@ public abstract class AbstractHostObjectType<T> extends AbstractHostType<T> impl
 
   @Override
   public HostMember<? super T> getMember(Bridge bridge, T self, String key) {
-    HostMember<? super T> member = getOwnMember(bridge, self, key);
+    HostMember<? super T> member = this.getOwnMember(bridge, self, key);
     if (member == null) {
-      final List<HostType<? super T>> baseTypes = baseTypes();
+      final List<HostType<? super T>> baseTypes = this.baseTypes();
       for (int i = baseTypes.size() - 1; i >= 0; i -= 1) {
         final HostType<? super T> baseType = baseTypes.get(i);
         if (baseType instanceof HostObjectType<?>) {
@@ -47,7 +47,7 @@ public abstract class AbstractHostObjectType<T> extends AbstractHostType<T> impl
   @Override
   public Collection<HostMember<? super T>> members(Bridge bridge, T self) {
     HashTrieMap<String, HostMember<? super T>> members = HashTrieMap.empty();
-    final List<HostType<? super T>> baseTypes = baseTypes();
+    final List<HostType<? super T>> baseTypes = this.baseTypes();
     for (int i = 0, n = baseTypes.size(); i < n; i += 1) {
       final HostType<? super T> baseType = baseTypes.get(i);
       if (baseType instanceof HostObjectType<?>) {
@@ -56,7 +56,7 @@ public abstract class AbstractHostObjectType<T> extends AbstractHostType<T> impl
         }
       }
     }
-    for (HostMember<? super T> member : ownMembers(bridge, self)) {
+    for (HostMember<? super T> member : this.ownMembers(bridge, self)) {
       members = members.updated(member.key(), member);
     }
     return members.values();

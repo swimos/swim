@@ -16,12 +16,10 @@ package swim.db;
 
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.concurrent.AbstractTask;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 
 final class FileStoreCommitter extends AbstractTask {
 
-  static final AtomicReferenceFieldUpdater<FileStoreCommitter, Commit> COMMIT =
-      AtomicReferenceFieldUpdater.newUpdater(FileStoreCommitter.class, Commit.class, "commit");
   final FileStore store;
   volatile Commit commit;
 
@@ -40,7 +38,7 @@ final class FileStoreCommitter extends AbstractTask {
     do {
       final Commit oldCommit = this.commit;
       final Commit newCommit = oldCommit != null ? oldCommit.merged(commit) : commit;
-      if (COMMIT.compareAndSet(this, oldCommit, newCommit)) {
+      if (FileStoreCommitter.COMMIT.compareAndSet(this, oldCommit, newCommit)) {
         if (oldCommit == null) {
           do {
             final int oldStatus = this.store.status;
@@ -49,7 +47,7 @@ final class FileStoreCommitter extends AbstractTask {
               break;
             }
           } while (true);
-          cue();
+          this.cue();
         }
         break;
       }
@@ -65,35 +63,35 @@ final class FileStoreCommitter extends AbstractTask {
   public void runTask() {
     final FileStore store = this.store;
     Database database = null;
+    Commit committing = FileStoreCommitter.COMMIT.getAndSet(this, null);
     try {
       database = store.openDatabase();
-      Commit commit = COMMIT.getAndSet(this, null);
-      if (commit == null) {
+      if (committing == null) {
         return;
       }
-      commit = database.databaseWillCommit(commit);
-      if (commit.isShifted()) {
+      committing = database.databaseWillCommit(committing);
+      if (committing.isShifted()) {
         store.shiftZone();
       }
       final FileZone zone = store.zone;
-      final Chunk chunk = zone.commitAndWriteChunk(commit);
+      final Chunk chunk = zone.commitAndWriteChunk(committing);
       database.databaseDidCommit(chunk);
       if (chunk != null) {
         chunk.soften();
       }
-      commit.bind(chunk);
+      committing.bind(chunk);
     } catch (InterruptedException cause) {
       try {
         database.databaseCommitDidFail(cause);
       } finally {
-        commit.trap(cause);
+        committing.trap(cause);
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         try {
           database.databaseCommitDidFail(cause);
         } finally {
-          commit.trap(cause);
+          committing.trap(cause);
         }
       } else {
         throw cause;
@@ -108,5 +106,8 @@ final class FileStoreCommitter extends AbstractTask {
       } while (true);
     }
   }
+
+  static final AtomicReferenceFieldUpdater<FileStoreCommitter, Commit> COMMIT =
+      AtomicReferenceFieldUpdater.newUpdater(FileStoreCommitter.class, Commit.class, "commit");
 
 }

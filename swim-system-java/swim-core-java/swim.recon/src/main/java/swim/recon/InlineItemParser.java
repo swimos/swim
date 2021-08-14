@@ -37,7 +37,8 @@ final class InlineItemParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.fieldParser, this.valueParser, this.step);
+    return InlineItemParser.parse(input, this.recon, this.builder, this.fieldParser,
+                                  this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -66,15 +67,15 @@ final class InlineItemParser<I, V> extends Parser<V> {
             step = 4;
           }
         } else if (builder == null) {
-          return done(recon.extant());
+          return Parser.done(recon.extant());
         } else {
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       } else if (input.isDone()) {
         if (builder == null) {
-          return done(recon.extant());
+          return Parser.done(recon.extant());
         } else {
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
     }
@@ -103,10 +104,10 @@ final class InlineItemParser<I, V> extends Parser<V> {
           valueParser = recon.parseMarkup(input, builder);
           step = 5;
         } else {
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       } else if (input.isDone()) {
-        return done(builder.bind());
+        return Parser.done(builder.bind());
       }
     }
     if (step == 4) {
@@ -118,7 +119,7 @@ final class InlineItemParser<I, V> extends Parser<V> {
           builder = recon.valueBuilder();
         }
         builder.add(recon.item(valueParser.bind()));
-        return done(builder.bind());
+        return Parser.done(builder.bind());
       } else if (valueParser.isError()) {
         return valueParser;
       }
@@ -128,19 +129,19 @@ final class InlineItemParser<I, V> extends Parser<V> {
         valueParser = valueParser.feed(input);
       }
       if (valueParser.isDone()) {
-        return done(builder.bind());
+        return Parser.done(builder.bind());
       } else if (valueParser.isError()) {
         return valueParser;
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new InlineItemParser<I, V>(recon, builder, fieldParser, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
-    return parse(input, recon, null, null, null, 1);
+    return InlineItemParser.parse(input, recon, null, null, null, 1);
   }
 
 }

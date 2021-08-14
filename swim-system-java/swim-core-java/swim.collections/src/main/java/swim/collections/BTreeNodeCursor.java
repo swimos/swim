@@ -48,8 +48,8 @@ final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
     return page.iterator();
   }
 
-  OrderedMapCursor<K, V> lastPageCursor(BTreePage<K, V, U> page) {
-    return page.lastIterator();
+  OrderedMapCursor<K, V> reversePageCursor(BTreePage<K, V, U> page) {
+    return page.reverseIterator();
   }
 
   @Override
@@ -62,7 +62,7 @@ final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
           this.pageCursor = null;
         }
       } else if (this.pageIndex < this.pages.length) {
-        this.pageCursor = pageCursor(this.pages[this.pageIndex]);
+        this.pageCursor = this.pageCursor(this.pages[this.pageIndex]);
         this.pageIndex += 1;
       } else {
         this.pageIndex = this.pages.length;
@@ -82,7 +82,7 @@ final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
         }
       } else {
         if (this.pageIndex < this.pages.length) {
-          this.pageCursor = pageCursor(this.pages[this.pageIndex]);
+          this.pageCursor = this.pageCursor(this.pages[this.pageIndex]);
           this.pageIndex += 1;
         } else {
           this.pageIndex = this.pages.length;
@@ -104,7 +104,7 @@ final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
         }
       } else {
         if (this.pageIndex < this.pages.length) {
-          this.pageCursor = pageCursor(this.pages[this.pageIndex]);
+          this.pageCursor = this.pageCursor(this.pages[this.pageIndex]);
           this.pageIndex += 1;
         } else {
           this.pageIndex = this.pages.length;
@@ -127,10 +127,10 @@ final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
         }
       } else if (this.pageIndex < this.pages.length) {
         final BTreePage<K, V, U> page = this.pages[this.pageIndex];
-        final long pageSize = pageSize(page);
+        final long pageSize = this.pageSize(page);
         this.pageIndex += 1;
         if (pageSize < count) {
-          this.pageCursor = pageCursor(page);
+          this.pageCursor = this.pageCursor(page);
           if (count > 0L) {
             this.index += count;
             this.pageCursor.skip(count);
@@ -157,7 +157,7 @@ final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
           this.pageCursor = null;
         }
       } else if (this.pageIndex < this.pages.length) {
-        this.pageCursor = pageCursor(this.pages[this.pageIndex]);
+        this.pageCursor = this.pageCursor(this.pages[this.pageIndex]);
         this.pageIndex += 1;
       } else {
         this.pageIndex = this.pages.length;
@@ -182,7 +182,7 @@ final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
         }
       } else {
         if (this.pageIndex < this.pages.length) {
-          this.pageCursor = pageCursor(this.pages[this.pageIndex]);
+          this.pageCursor = this.pageCursor(this.pages[this.pageIndex]);
           this.pageIndex += 1;
         } else {
           this.pageIndex = this.pages.length;
@@ -204,7 +204,7 @@ final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
         }
       } else {
         if (this.pageIndex < this.pages.length) {
-          this.pageCursor = pageCursor(this.pages[this.pageIndex]);
+          this.pageCursor = this.pageCursor(this.pages[this.pageIndex]);
           this.pageIndex += 1;
         } else {
           this.pageIndex = this.pages.length;
@@ -224,7 +224,7 @@ final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
           this.pageCursor = null;
         }
       } else if (this.pageIndex > 0) {
-        this.pageCursor = lastPageCursor(this.pages[this.pageIndex - 1]);
+        this.pageCursor = this.reversePageCursor(this.pages[this.pageIndex - 1]);
         this.pageIndex -= 1;
       } else {
         this.pageIndex = 0;
@@ -248,7 +248,7 @@ final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
           this.pageCursor = null;
         }
       } else if (this.pageIndex > 0) {
-        this.pageCursor = lastPageCursor(this.pages[this.pageIndex - 1]);
+        this.pageCursor = this.reversePageCursor(this.pages[this.pageIndex - 1]);
         this.pageIndex -= 1;
       } else {
         this.pageIndex = 0;
@@ -268,7 +268,7 @@ final class BTreeNodeCursor<K, V, U> implements OrderedMapCursor<K, V> {
           this.pageCursor = null;
         }
       } else if (this.pageIndex > 0) {
-        this.pageCursor = lastPageCursor(this.pages[this.pageIndex - 1]);
+        this.pageCursor = this.reversePageCursor(this.pages[this.pageIndex - 1]);
         this.pageIndex -= 1;
       } else {
         this.pageIndex = 0;

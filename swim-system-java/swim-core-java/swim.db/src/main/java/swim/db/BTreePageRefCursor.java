@@ -83,7 +83,7 @@ final class BTreePageRefCursor implements OrderedMapCursor<Value, Value> {
 
   @Override
   public long nextIndexLong() {
-    return (long) nextIndex();
+    return (long) this.nextIndex();
   }
 
   @Override
@@ -124,7 +124,7 @@ final class BTreePageRefCursor implements OrderedMapCursor<Value, Value> {
 
   @Override
   public long previousIndexLong() {
-    return (long) previousIndex();
+    return (long) this.previousIndex();
   }
 
   @Override

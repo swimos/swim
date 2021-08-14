@@ -79,14 +79,14 @@ public class JavaHostObjectType<T> extends AbstractHostObjectType<T> {
     }
     this.superType = (HostType<? super T>) superType;
     this.baseTypes = FingerTrieSeq.from((List<HostType<? super T>>) (List<?>) superType.baseTypes())
-        .appended((HostType<? super T>) superType);
+                                  .appended((HostType<? super T>) superType);
   }
 
   @SuppressWarnings("unchecked")
   public void inheritType(HostType<?> superType) {
-    if (!inheritsType(superType)) {
+    if (!this.inheritsType(superType)) {
       for (HostType<?> baseType : superType.baseTypes()) {
-        if (!inheritsType(baseType)) {
+        if (!this.inheritsType(baseType)) {
           this.baseTypes = this.baseTypes.appended((HostType<? super T>) baseType);
         }
       }

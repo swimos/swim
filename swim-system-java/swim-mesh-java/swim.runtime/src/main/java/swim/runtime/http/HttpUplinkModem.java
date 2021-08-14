@@ -117,7 +117,7 @@ public abstract class HttpUplinkModem extends AbstractUplinkContext implements H
 
   @Override
   public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
-    laneBinding().openMetaUplink(uplink, metaUplink);
+    this.laneBinding().openMetaUplink(uplink, metaUplink);
   }
 
 }

@@ -194,11 +194,11 @@ public abstract class ReconParser<I, V> {
   }
 
   public Parser<V> parseBlockExpression(Input input, Builder<I, V> builder) {
-    return parseLambdaFunc(input, builder);
+    return this.parseLambdaFunc(input, builder);
   }
 
   public Parser<V> parseBlockExpression(Input input) {
-    return parseLambdaFunc(input, null);
+    return this.parseLambdaFunc(input, null);
   }
 
   public Parser<V> parseLambdaFunc(Input input, Builder<I, V> builder) {
@@ -278,7 +278,7 @@ public abstract class ReconParser<I, V> {
     while (input.isCont() && Recon.isWhitespace(input.head())) {
       input = input.step();
     }
-    Parser<V> parser = parseBlock(input);
+    Parser<V> parser = this.parseBlock(input);
     if (parser.isDone()) {
       while (input.isCont() && Recon.isWhitespace(input.head())) {
         input = input.step();
@@ -297,7 +297,7 @@ public abstract class ReconParser<I, V> {
     while (input.isCont() && Recon.isWhitespace(input.head())) {
       input = input.step();
     }
-    Parser<V> parser = parseNumber(input);
+    Parser<V> parser = this.parseNumber(input);
     if (parser.isDone()) {
       while (input.isCont() && Recon.isWhitespace(input.head())) {
         input = input.step();

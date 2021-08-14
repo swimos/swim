@@ -19,8 +19,6 @@ package swim.concurrent;
  */
 public final class DropException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public DropException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -41,5 +39,7 @@ public final class DropException extends RuntimeException {
   public Throwable fillInStackTrace() {
     return this; // nop
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

@@ -20,20 +20,20 @@ import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttPubAckSpec {
 
-  public static void assertDecodes(Data data, MqttPubAck packet) {
-    MqttAssertions.assertDecodesPacket(data, packet);
-  }
-
   @Test
   public void decodePubAckPackets() {
-    assertDecodes(Data.fromBase16("40020000"), MqttPubAck.from(0x0000));
-    assertDecodes(Data.fromBase16("40027E96"), MqttPubAck.from(0x7E96));
+    assertDecodes(Data.fromBase16("40020000"), MqttPubAck.create(0x0000));
+    assertDecodes(Data.fromBase16("40027E96"), MqttPubAck.create(0x7E96));
   }
 
   @Test
   public void encodePubAckPackets() {
-    assertEncodes(MqttPubAck.from(0x0000), Data.fromBase16("40020000"));
-    assertEncodes(MqttPubAck.from(0x7E96), Data.fromBase16("40027E96"));
+    assertEncodes(MqttPubAck.create(0x0000), Data.fromBase16("40020000"));
+    assertEncodes(MqttPubAck.create(0x7E96), Data.fromBase16("40027E96"));
+  }
+
+  public static void assertDecodes(Data data, MqttPubAck packet) {
+    MqttAssertions.assertDecodesPacket(data, packet);
   }
 
 }

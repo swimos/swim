@@ -36,6 +36,7 @@ public class PartProxy implements PartBinding, PartContext {
 
   public PartProxy(PartBinding partBinding) {
     this.partBinding = partBinding;
+    this.partContext = null;
   }
 
   @Override
@@ -71,7 +72,7 @@ public class PartProxy implements PartBinding, PartContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapPart(Class<T> partClass) {
-    if (partClass.isAssignableFrom(getClass())) {
+    if (partClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.partContext.unwrapPart(partClass);
@@ -82,7 +83,7 @@ public class PartProxy implements PartBinding, PartContext {
   @Override
   public <T> T bottomPart(Class<T> partClass) {
     T part = this.partContext.bottomPart(partClass);
-    if (part == null && partClass.isAssignableFrom(getClass())) {
+    if (part == null && partClass.isAssignableFrom(this.getClass())) {
       part = (T) this;
     }
     return part;

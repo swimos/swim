@@ -38,6 +38,11 @@ final class RawHeaderParser extends Parser<RawHeader> {
     this(lowerCaseName, name, null, 1);
   }
 
+  @Override
+  public Parser<RawHeader> feed(Input input) {
+    return RawHeaderParser.parse(input, this.lowerCaseName, this.name, this.value, this.step);
+  }
+
   static Parser<RawHeader> parse(Input input, String lowerCaseName, String name,
                                  Output<String> value, int step) {
     int c = 0;
@@ -59,7 +64,7 @@ final class RawHeaderParser extends Parser<RawHeader> {
           input = input.step();
           step = 2;
         } else if (!input.isEmpty()) {
-          return done(RawHeader.from(lowerCaseName, name, value.bind()));
+          return Parser.done(RawHeader.create(lowerCaseName, name, value.bind()));
         }
       }
       if (step == 2) {
@@ -78,24 +83,19 @@ final class RawHeaderParser extends Parser<RawHeader> {
           step = 1;
           continue;
         } else if (!input.isEmpty()) {
-          return done(RawHeader.from(lowerCaseName, name, value.bind()));
+          return Parser.done(RawHeader.create(lowerCaseName, name, value.bind()));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new RawHeaderParser(lowerCaseName, name, value, step);
   }
 
   static Parser<RawHeader> parse(Input input, String lowerCaseName, String name) {
-    return parse(input, lowerCaseName, name, null, 1);
-  }
-
-  @Override
-  public Parser<RawHeader> feed(Input input) {
-    return parse(input, this.lowerCaseName, this.name, this.value, this.step);
+    return RawHeaderParser.parse(input, lowerCaseName, name, null, 1);
   }
 
 }

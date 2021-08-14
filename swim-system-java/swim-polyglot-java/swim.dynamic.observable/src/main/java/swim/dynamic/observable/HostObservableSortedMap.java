@@ -26,6 +26,10 @@ import swim.observable.ObservableSortedMap;
 
 public final class HostObservableSortedMap {
 
+  private HostObservableSortedMap() {
+    // static
+  }
+
   public static final HostObjectType<ObservableSortedMap<Object, Object>> TYPE;
 
   static {
@@ -39,10 +43,6 @@ public final class HostObservableSortedMap {
     type.addMember(new HostObservableSortedMapDidDrop());
     type.addMember(new HostObservableSortedMapWillTake());
     type.addMember(new HostObservableSortedMapDidTake());
-  }
-
-  private HostObservableSortedMap() {
-    // static
   }
 
 }

@@ -40,12 +40,12 @@ public abstract class ListDownlinkModem<View extends WarpDownlinkView> extends W
   }
 
   public void pushUp(ListLinkDelta delta) {
-    queueUp(delta);
+    this.queueUp(delta);
     do {
-      final int oldStatus = this.status;
-      final int newStatus = oldStatus | FEEDING_UP;
+      final int oldStatus = WarpDownlinkModem.STATUS.get(this);
+      final int newStatus = oldStatus | WarpDownlinkModem.FEEDING_UP;
       if (oldStatus != newStatus) {
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if (WarpDownlinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.linkContext.feedUp();
           break;
         }
@@ -59,10 +59,10 @@ public abstract class ListDownlinkModem<View extends WarpDownlinkView> extends W
   protected Push<CommandMessage> nextUpQueue() {
     final ListLinkDelta delta = this.upQueue.poll();
     if (delta != null) {
-      final Uri hostUri = hostUri();
-      final Uri nodeUri = nodeUri();
-      final Uri laneUri = laneUri();
-      final float prio = prio();
+      final Uri hostUri = this.hostUri();
+      final Uri nodeUri = this.nodeUri();
+      final Uri laneUri = this.laneUri();
+      final float prio = this.prio();
       final Value body = delta.toValue();
       final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
       return new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,

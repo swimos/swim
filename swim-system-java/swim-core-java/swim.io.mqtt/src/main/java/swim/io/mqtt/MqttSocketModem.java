@@ -19,7 +19,7 @@ import java.security.Principal;
 import java.security.cert.Certificate;
 import java.util.Collection;
 import swim.codec.Decoder;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.io.FlowControl;
 import swim.io.FlowModifier;
 import swim.io.IpModem;
@@ -123,12 +123,12 @@ public class MqttSocketModem<I, O> implements IpModem<Object, Object>, MqttSocke
     try {
       this.socket.didFail(error);
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
     }
-    close();
+    this.close();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {

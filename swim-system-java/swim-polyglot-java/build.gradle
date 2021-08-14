@@ -3,8 +3,8 @@ plugins {
   id 'SwimSystemPublish'
 }
 
-description = 'Swim Polyglot'
-ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-mesh-java'
+description = 'Swim Polyglot Framework'
+ext.homepage = 'https://github.com/swimos/swim/tree/master/swim-system-java/swim-polyglot-java'
 ext.moduleName = null
 
 dependencies {
@@ -19,7 +19,7 @@ dependencies {
 }
 
 javadoc {
-  title 'Swim Polyglot'
+  title 'Swim Polyglot Framework'
   options.overview = "${projectDir}/overview.html"
   options.addStringOption('-module-source-path', [
                           "${projectDir}/*/src/main/java",

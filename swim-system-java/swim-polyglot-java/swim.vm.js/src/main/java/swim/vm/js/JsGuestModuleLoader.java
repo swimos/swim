@@ -45,9 +45,9 @@ public class JsGuestModuleLoader implements JsModuleResolver, JsModuleLoader {
 
   @Override
   public JsModule loadModule(JsModuleSystem moduleSystem, UriPath moduleId) {
-    final Source moduleSource = loadModuleSource(moduleId);
+    final Source moduleSource = this.loadModuleSource(moduleId);
     if (moduleSource != null) {
-      return createModule(moduleSystem, moduleId, moduleSource);
+      return this.createModule(moduleSystem, moduleId, moduleSource);
     }
     return null;
   }

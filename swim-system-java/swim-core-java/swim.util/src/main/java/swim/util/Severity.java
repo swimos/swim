@@ -15,27 +15,10 @@
 package swim.util;
 
 /**
- * Level of importance.  Used for log levels and diagnostic classifications.
+ * Level of importance. Used for log levels and diagnostic classifications.
  */
 public final class Severity implements Comparable<Severity> {
 
-  public static final int TRACE_LEVEL = 0;
-  public static final int DEBUG_LEVEL = 1;
-  public static final int INFO_LEVEL = 2;
-  public static final int NOTE_LEVEL = 3;
-  public static final int WARNING_LEVEL = 4;
-  public static final int ERROR_LEVEL = 5;
-  public static final int ALERT_LEVEL = 6;
-  public static final int FATAL_LEVEL = 7;
-  private static int hashSeed;
-  private static Severity trace;
-  private static Severity debug;
-  private static Severity info;
-  private static Severity note;
-  private static Severity warning;
-  private static Severity error;
-  private static Severity alert;
-  private static Severity fatal;
   final int level;
   final String label;
 
@@ -45,226 +28,10 @@ public final class Severity implements Comparable<Severity> {
   }
 
   /**
-   * Returns a {@code Severity} with the given importance {@code level},
-   * and descriptive {@code label}.
-   *
-   * @throws IllegalArgumentException if {@code level} is not a valid
-   *                                  level of importance.
-   */
-  public static Severity create(int level, String label) {
-    switch (level) {
-      case TRACE_LEVEL:
-        return trace(label);
-      case DEBUG_LEVEL:
-        return debug(label);
-      case INFO_LEVEL:
-        return info(label);
-      case NOTE_LEVEL:
-        return note(label);
-      case WARNING_LEVEL:
-        return warning(label);
-      case ERROR_LEVEL:
-        return error(label);
-      case ALERT_LEVEL:
-        return alert(label);
-      case FATAL_LEVEL:
-        return fatal(label);
-      default:
-        throw new IllegalArgumentException(Integer.toString(level));
-    }
-  }
-
-  /**
-   * Returns the {@code Severity} with the given importance {@code level}.
-   *
-   * @throws IllegalArgumentException if {@code level} is not a valid
-   *                                  level of importance.
-   */
-  public static Severity create(int level) {
-    return create(level, null);
-  }
-
-  /**
-   * Returns the {@code Severity} with {@code TRACE_LEVEL} of importance.
-   */
-  public static Severity trace() {
-    if (trace == null) {
-      trace = new Severity(TRACE_LEVEL, "trace");
-    }
-    return trace;
-  }
-
-  /**
-   * Returns a {@code Severity} with {@code TRACE_LEVEL} of importance,
-   * and the given descriptive {@code label}.
-   */
-  public static Severity trace(String label) {
-    if (label == null || "trace".equals(label)) {
-      return trace();
-    } else {
-      return new Severity(TRACE_LEVEL, label);
-    }
-  }
-
-  /**
-   * Returns the {@code Severity} with {@code DEBUG_LEVEL} of importance.
-   */
-  public static Severity debug() {
-    if (debug == null) {
-      debug = new Severity(DEBUG_LEVEL, "debug");
-    }
-    return debug;
-  }
-
-  /**
-   * Returns a {@code Severity} with {@code DEBUG_LEVEL} of importance,
-   * and the given descriptive {@code label}.
-   */
-  public static Severity debug(String label) {
-    if (label == null || "debug".equals(label)) {
-      return debug();
-    } else {
-      return new Severity(DEBUG_LEVEL, label);
-    }
-  }
-
-  /**
-   * Returns the {@code Severity} with {@code INFO_LEVEL} of importance.
-   */
-  public static Severity info() {
-    if (info == null) {
-      info = new Severity(INFO_LEVEL, "info");
-    }
-    return info;
-  }
-
-  /**
-   * Returns a {@code Severity} with {@code INFO_LEVEL} of importance,
-   * and the given descriptive {@code label}.
-   */
-  public static Severity info(String label) {
-    if (label == null || "info".equals(label)) {
-      return info();
-    } else {
-      return new Severity(INFO_LEVEL, label);
-    }
-  }
-
-  /**
-   * Returns the {@code Severity} with {@code NOTE_LEVEL} of importance.
-   */
-  public static Severity note() {
-    if (note == null) {
-      note = new Severity(NOTE_LEVEL, "note");
-    }
-    return note;
-  }
-
-  /**
-   * Returns a {@code Severity} with {@code NOTE_LEVEL} of importance,
-   * and the given descriptive {@code label}.
-   */
-  public static Severity note(String label) {
-    if (label == null || "note".equals(label)) {
-      return note();
-    } else {
-      return new Severity(NOTE_LEVEL, label);
-    }
-  }
-
-  /**
-   * Returns the {@code Severity} with {@code WARNING_LEVEL} of importance.
-   */
-  public static Severity warning() {
-    if (warning == null) {
-      warning = new Severity(WARNING_LEVEL, "warning");
-    }
-    return warning;
-  }
-
-  /**
-   * Returns a {@code Severity} with {@code WARNING_LEVEL} of importance,
-   * and the given descriptive {@code label}.
-   */
-  public static Severity warning(String label) {
-    if (label == null || "warning".equals(label)) {
-      return warning();
-    } else {
-      return new Severity(WARNING_LEVEL, label);
-    }
-  }
-
-  /**
-   * Returns the {@code Severity} with {@code ERROR_LEVEL} of importance.
-   */
-  public static Severity error() {
-    if (error == null) {
-      error = new Severity(ERROR_LEVEL, "error");
-    }
-    return error;
-  }
-
-  /**
-   * Returns a {@code Severity} with {@code ERROR_LEVEL} of importance,
-   * and the given descriptive {@code label}.
-   */
-  public static Severity error(String label) {
-    if (label == null || "error".equals(label)) {
-      return error();
-    } else {
-      return new Severity(ERROR_LEVEL, label);
-    }
-  }
-
-  /**
-   * Returns the {@code Severity} with {@code ALERT_LEVEL} of importance.
-   */
-  public static Severity alert() {
-    if (alert == null) {
-      alert = new Severity(ALERT_LEVEL, "alert");
-    }
-    return alert;
-  }
-
-  /**
-   * Returns a {@code Severity} with {@code ALERT_LEVEL} of importance,
-   * and the given descriptive {@code label}.
-   */
-  public static Severity alert(String label) {
-    if (label == null || "alert".equals(label)) {
-      return alert();
-    } else {
-      return new Severity(ALERT_LEVEL, label);
-    }
-  }
-
-  /**
-   * Returns the {@code Severity} with {@code FATAL_LEVEL} of importance.
-   */
-  public static Severity fatal() {
-    if (fatal == null) {
-      fatal = new Severity(FATAL_LEVEL, "fatal");
-    }
-    return fatal;
-  }
-
-  /**
-   * Returns a {@code Severity} with {@code FATAL_LEVEL} of importance,
-   * and the given descriptive {@code label}.
-   */
-  public static Severity fatal(String label) {
-    if (label == null || "fatal".equals(label)) {
-      return fatal();
-    } else {
-      return new Severity(FATAL_LEVEL, label);
-    }
-  }
-
-  /**
    * Returns the integer level of importance of this {@code Severity}, with
    * higher levels signifying greater importance.
    *
-   * @return an integer between {@code 0} and {@code 7}, inclusive.  One of
+   * @return an integer between {@code 0} and {@code 7}, inclusive. One of
    * {@code TRACE_LEVEL}, {@code DEBUG_LEVEL}, {@code INFO_LEVEL},
    * {@code NOTE_LEVEL}, {@code WARNING_LEVEL}, {@code ERROR_LEVEL},
    * {@code ALERT_LEVEL}, or {@code FATAL_LEVEL}.
@@ -288,7 +55,7 @@ public final class Severity implements Comparable<Severity> {
     if (this.label.equals(label)) {
       return this;
     } else {
-      return create(this.level, label);
+      return Severity.create(this.level, label);
     }
   }
 
@@ -297,7 +64,7 @@ public final class Severity implements Comparable<Severity> {
    * of importance.
    */
   public boolean isTrace() {
-    return this.level == TRACE_LEVEL;
+    return this.level == Severity.TRACE_LEVEL;
   }
 
   /**
@@ -305,7 +72,7 @@ public final class Severity implements Comparable<Severity> {
    * of importance.
    */
   public boolean isDebug() {
-    return this.level == DEBUG_LEVEL;
+    return this.level == Severity.DEBUG_LEVEL;
   }
 
   /**
@@ -313,7 +80,7 @@ public final class Severity implements Comparable<Severity> {
    * of importance.
    */
   public boolean isInfo() {
-    return this.level == INFO_LEVEL;
+    return this.level == Severity.INFO_LEVEL;
   }
 
   /**
@@ -321,7 +88,7 @@ public final class Severity implements Comparable<Severity> {
    * of importance.
    */
   public boolean isNote() {
-    return this.level == NOTE_LEVEL;
+    return this.level == Severity.NOTE_LEVEL;
   }
 
   /**
@@ -329,7 +96,7 @@ public final class Severity implements Comparable<Severity> {
    * of importance.
    */
   public boolean isWarning() {
-    return this.level == WARNING_LEVEL;
+    return this.level == Severity.WARNING_LEVEL;
   }
 
   /**
@@ -337,7 +104,7 @@ public final class Severity implements Comparable<Severity> {
    * of importance.
    */
   public boolean isError() {
-    return this.level == ERROR_LEVEL;
+    return this.level == Severity.ERROR_LEVEL;
   }
 
   /**
@@ -345,7 +112,7 @@ public final class Severity implements Comparable<Severity> {
    * of importance.
    */
   public boolean isAlert() {
-    return this.level == ALERT_LEVEL;
+    return this.level == Severity.ALERT_LEVEL;
   }
 
   /**
@@ -353,7 +120,7 @@ public final class Severity implements Comparable<Severity> {
    * of importance.
    */
   public boolean isFatal() {
-    return this.level == FATAL_LEVEL;
+    return this.level == Severity.FATAL_LEVEL;
   }
 
   @Override
@@ -380,18 +147,254 @@ public final class Severity implements Comparable<Severity> {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Severity.class);
+    if (Severity.hashSeed == 0) {
+      Severity.hashSeed = Murmur3.seed(Severity.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Severity.hashSeed,
         this.level), this.label.hashCode()));
   }
 
   @Override
   public String toString() {
     return this.label;
+  }
+
+  public static final int TRACE_LEVEL = 0;
+  public static final int DEBUG_LEVEL = 1;
+  public static final int INFO_LEVEL = 2;
+  public static final int NOTE_LEVEL = 3;
+  public static final int WARNING_LEVEL = 4;
+  public static final int ERROR_LEVEL = 5;
+  public static final int ALERT_LEVEL = 6;
+  public static final int FATAL_LEVEL = 7;
+
+  private static Severity trace;
+  private static Severity debug;
+  private static Severity info;
+  private static Severity note;
+  private static Severity warning;
+  private static Severity error;
+  private static Severity alert;
+  private static Severity fatal;
+
+  /**
+   * Returns a {@code Severity} with the given importance {@code level},
+   * and descriptive {@code label}.
+   *
+   * @throws IllegalArgumentException if {@code level} is not a valid
+   *                                  level of importance.
+   */
+  public static Severity create(int level, String label) {
+    switch (level) {
+      case TRACE_LEVEL:
+        return Severity.trace(label);
+      case DEBUG_LEVEL:
+        return Severity.debug(label);
+      case INFO_LEVEL:
+        return Severity.info(label);
+      case NOTE_LEVEL:
+        return Severity.note(label);
+      case WARNING_LEVEL:
+        return Severity.warning(label);
+      case ERROR_LEVEL:
+        return Severity.error(label);
+      case ALERT_LEVEL:
+        return Severity.alert(label);
+      case FATAL_LEVEL:
+        return Severity.fatal(label);
+      default:
+        throw new IllegalArgumentException(Integer.toString(level));
+    }
+  }
+
+  /**
+   * Returns the {@code Severity} with the given importance {@code level}.
+   *
+   * @throws IllegalArgumentException if {@code level} is not a valid
+   *                                  level of importance.
+   */
+  public static Severity from(int level) {
+    return Severity.create(level, null);
+  }
+
+  /**
+   * Returns the {@code Severity} with {@code TRACE_LEVEL} of importance.
+   */
+  public static Severity trace() {
+    if (Severity.trace == null) {
+      Severity.trace = new Severity(Severity.TRACE_LEVEL, "trace");
+    }
+    return Severity.trace;
+  }
+
+  /**
+   * Returns a {@code Severity} with {@code TRACE_LEVEL} of importance,
+   * and the given descriptive {@code label}.
+   */
+  public static Severity trace(String label) {
+    if (label == null || "trace".equals(label)) {
+      return Severity.trace();
+    } else {
+      return new Severity(Severity.TRACE_LEVEL, label);
+    }
+  }
+
+  /**
+   * Returns the {@code Severity} with {@code DEBUG_LEVEL} of importance.
+   */
+  public static Severity debug() {
+    if (Severity.debug == null) {
+      Severity.debug = new Severity(Severity.DEBUG_LEVEL, "debug");
+    }
+    return Severity.debug;
+  }
+
+  /**
+   * Returns a {@code Severity} with {@code DEBUG_LEVEL} of importance,
+   * and the given descriptive {@code label}.
+   */
+  public static Severity debug(String label) {
+    if (label == null || "debug".equals(label)) {
+      return Severity.debug();
+    } else {
+      return new Severity(Severity.DEBUG_LEVEL, label);
+    }
+  }
+
+  /**
+   * Returns the {@code Severity} with {@code INFO_LEVEL} of importance.
+   */
+  public static Severity info() {
+    if (Severity.info == null) {
+      Severity.info = new Severity(Severity.INFO_LEVEL, "info");
+    }
+    return Severity.info;
+  }
+
+  /**
+   * Returns a {@code Severity} with {@code INFO_LEVEL} of importance,
+   * and the given descriptive {@code label}.
+   */
+  public static Severity info(String label) {
+    if (label == null || "info".equals(label)) {
+      return Severity.info();
+    } else {
+      return new Severity(Severity.INFO_LEVEL, label);
+    }
+  }
+
+  /**
+   * Returns the {@code Severity} with {@code NOTE_LEVEL} of importance.
+   */
+  public static Severity note() {
+    if (Severity.note == null) {
+      Severity.note = new Severity(Severity.NOTE_LEVEL, "note");
+    }
+    return Severity.note;
+  }
+
+  /**
+   * Returns a {@code Severity} with {@code NOTE_LEVEL} of importance,
+   * and the given descriptive {@code label}.
+   */
+  public static Severity note(String label) {
+    if (label == null || "note".equals(label)) {
+      return Severity.note();
+    } else {
+      return new Severity(Severity.NOTE_LEVEL, label);
+    }
+  }
+
+  /**
+   * Returns the {@code Severity} with {@code WARNING_LEVEL} of importance.
+   */
+  public static Severity warning() {
+    if (Severity.warning == null) {
+      Severity.warning = new Severity(Severity.WARNING_LEVEL, "warning");
+    }
+    return Severity.warning;
+  }
+
+  /**
+   * Returns a {@code Severity} with {@code WARNING_LEVEL} of importance,
+   * and the given descriptive {@code label}.
+   */
+  public static Severity warning(String label) {
+    if (label == null || "warning".equals(label)) {
+      return Severity.warning();
+    } else {
+      return new Severity(Severity.WARNING_LEVEL, label);
+    }
+  }
+
+  /**
+   * Returns the {@code Severity} with {@code ERROR_LEVEL} of importance.
+   */
+  public static Severity error() {
+    if (Severity.error == null) {
+      Severity.error = new Severity(Severity.ERROR_LEVEL, "error");
+    }
+    return Severity.error;
+  }
+
+  /**
+   * Returns a {@code Severity} with {@code ERROR_LEVEL} of importance,
+   * and the given descriptive {@code label}.
+   */
+  public static Severity error(String label) {
+    if (label == null || "error".equals(label)) {
+      return Severity.error();
+    } else {
+      return new Severity(Severity.ERROR_LEVEL, label);
+    }
+  }
+
+  /**
+   * Returns the {@code Severity} with {@code ALERT_LEVEL} of importance.
+   */
+  public static Severity alert() {
+    if (Severity.alert == null) {
+      Severity.alert = new Severity(Severity.ALERT_LEVEL, "alert");
+    }
+    return Severity.alert;
+  }
+
+  /**
+   * Returns a {@code Severity} with {@code ALERT_LEVEL} of importance,
+   * and the given descriptive {@code label}.
+   */
+  public static Severity alert(String label) {
+    if (label == null || "alert".equals(label)) {
+      return Severity.alert();
+    } else {
+      return new Severity(Severity.ALERT_LEVEL, label);
+    }
+  }
+
+  /**
+   * Returns the {@code Severity} with {@code FATAL_LEVEL} of importance.
+   */
+  public static Severity fatal() {
+    if (Severity.fatal == null) {
+      Severity.fatal = new Severity(Severity.FATAL_LEVEL, "fatal");
+    }
+    return Severity.fatal;
+  }
+
+  /**
+   * Returns a {@code Severity} with {@code FATAL_LEVEL} of importance,
+   * and the given descriptive {@code label}.
+   */
+  public static Severity fatal(String label) {
+    if (label == null || "fatal".equals(label)) {
+      return Severity.fatal();
+    } else {
+      return new Severity(Severity.FATAL_LEVEL, label);
+    }
   }
 
 }

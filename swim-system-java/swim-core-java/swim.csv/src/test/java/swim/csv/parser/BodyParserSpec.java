@@ -16,8 +16,8 @@ package swim.csv.parser;
 
 import org.testng.annotations.Test;
 import swim.codec.ParserException;
-import swim.csv.Assertions;
 import swim.csv.Csv;
+import swim.csv.CsvAssertions;
 import swim.csv.schema.CsvHeader;
 import swim.csv.structure.CsvStructure;
 import swim.structure.Item;
@@ -29,12 +29,32 @@ import static org.testng.Assert.assertThrows;
 
 public class BodyParserSpec {
 
+  @Test
+  public void parseBodyWithPredefinedHeader() {
+    assertParses("2,3\n5,7\n",
+                 Record.of(Record.of(Slot.of("x", "2"), Slot.of("y", "3")),
+                           Record.of(Slot.of("x", "5"), Slot.of("y", "7"))),
+                 CsvStructure.header(CsvStructure.stringCol("x"),
+                                     CsvStructure.stringCol("y")));
+  }
+
+  @Test
+  public void parseBodyWithNestedCsvCells() {
+    assertParses("1,2^3,4\n5,6^7,8\n",
+                 Record.of(Record.of(Slot.of("a", 1), Slot.of("b", Record.of(Slot.of("c", 2), Slot.of("d", 3))), Slot.of("e", 4)),
+                           Record.of(Slot.of("a", 5), Slot.of("b", Record.of(Slot.of("c", 6), Slot.of("d", 7))), Slot.of("e", 8))),
+                 CsvStructure.header(CsvStructure.numberCol("a"),
+                                     CsvStructure.parsedCol("b", Csv.rowParser('^', CsvStructure.header(CsvStructure.numberCol("c"),
+                                                                                                        CsvStructure.numberCol("d")))),
+                                     CsvStructure.numberCol("e")));
+  }
+
   public static void assertParses(String csvString, Record expected, CsvHeader<Record, Value, Item> header) {
     assertParses(',', csvString, expected, header);
   }
 
   public static void assertParses(int delimiter, String csvString, Record expected, CsvHeader<Record, Value, Item> header) {
-    Assertions.assertParses(Csv.bodyParser(delimiter, header), csvString, expected);
+    CsvAssertions.assertParses(Csv.bodyParser(delimiter, header), csvString, expected);
   }
 
   public static void assertParseFails(final String csvString, CsvHeader<Record, Value, Item> header) {
@@ -48,26 +68,6 @@ public class BodyParserSpec {
         Csv.parseBody(delimiter, csvString, header);
       }
     });
-  }
-
-  @Test
-  public void parseBodyWithPredefinedHeader() {
-    assertParses("2,3\n5,7\n",
-        Record.of(Record.of(Slot.of("x", "2"), Slot.of("y", "3")),
-            Record.of(Slot.of("x", "5"), Slot.of("y", "7"))),
-        CsvStructure.header(CsvStructure.stringCol("x"),
-            CsvStructure.stringCol("y")));
-  }
-
-  @Test
-  public void parseBodyWithNestedCsvCells() {
-    assertParses("1,2^3,4\n5,6^7,8\n",
-        Record.of(Record.of(Slot.of("a", 1), Slot.of("b", Record.of(Slot.of("c", 2), Slot.of("d", 3))), Slot.of("e", 4)),
-            Record.of(Slot.of("a", 5), Slot.of("b", Record.of(Slot.of("c", 6), Slot.of("d", 7))), Slot.of("e", 8))),
-        CsvStructure.header(CsvStructure.numberCol("a"),
-            CsvStructure.parsedCol("b", Csv.rowParser('^', CsvStructure.header(CsvStructure.numberCol("c"),
-                CsvStructure.numberCol("d")))),
-            CsvStructure.numberCol("e")));
   }
 
 }

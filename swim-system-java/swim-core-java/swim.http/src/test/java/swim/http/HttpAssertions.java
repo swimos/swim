@@ -36,22 +36,22 @@ import static org.testng.Assert.fail;
 public final class HttpAssertions {
 
   private HttpAssertions() {
-    // stub
+    // static
   }
 
   static <O> void assertParsed(O actual, O expected, String a, String b, int part) {
     if (!actual.equals(expected)) {
-      final Output<String> message = Unicode.stringOutput();
-      message.write("when parsing part ").debug(part)
-          .write(" of ").debug(a).write(", ").debug(b);
+      Output<String> message = Unicode.stringOutput();
+      message = message.write("when parsing part ").debug(part)
+                       .write(" of ").debug(a).write(", ").debug(b);
       assertEquals(actual, expected, message.toString());
     }
   }
 
   static void parseFailed(Throwable cause, String a, String b, int part) {
-    final Output<String> message = Unicode.stringOutput();
-    message.write("failed to parse part ").debug(part)
-        .write(" of ").debug(a).write(", ").debug(b).write(": ").write(cause.getMessage());
+    Output<String> message = Unicode.stringOutput();
+    message = message.write("failed to parse part ").debug(part)
+                     .write(" of ").debug(a).write(", ").debug(b).write(": ").write(cause.getMessage());
     fail(message.toString(), cause);
   }
 
@@ -80,8 +80,8 @@ public final class HttpAssertions {
       } else if (parser.isError()) {
         parseFailed(parser.trap(), a, b, 2);
       } else {
-        final Output<String> message = Unicode.stringOutput();
-        message.write("failed to completely parse ").debug(a).write(", ").debug(b);
+        Output<String> message = Unicode.stringOutput();
+        message = message.write("failed to completely parse ").debug(a).write(", ").debug(b);
         fail(message.toString());
       }
     }
@@ -149,11 +149,11 @@ public final class HttpAssertions {
     assertTrue(encoder.isDone());
     actual.flip();
     if (!actual.equals(expected)) {
-      final Output<String> message = Unicode.stringOutput();
-      message.write("expected ")
-          .debug(new String(expected.array(), expected.arrayOffset(), expected.remaining()))
-          .write(" but found ")
-          .debug(new String(actual.array(), actual.arrayOffset(), actual.remaining()));
+      Output<String> message = Unicode.stringOutput();
+      message = message.write("expected ")
+                       .debug(new String(expected.array(), expected.arrayOffset(), expected.remaining()))
+                       .write(" but found ")
+                       .debug(new String(actual.array(), actual.arrayOffset(), actual.remaining()));
       fail(message.toString());
     }
   }

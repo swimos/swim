@@ -29,41 +29,36 @@ import static org.testng.Assert.assertEquals;
 
 public class WarpSettingsSpec {
 
-  void assertDecodes(Value actualValue, WarpSettings expected) {
-    final WarpSettings actual = WarpSettings.form().cast(actualValue);
-    assertEquals(actual, expected);
-  }
-
   @Test
   public void decodesStandardSettings() {
-    assertDecodes(Record.empty(), WarpSettings.standard());
+    assertCasts(Record.empty(), WarpSettings.standard());
   }
 
   @Test
   public void decodesWarpWebSocketHttpTlsAndTcpSettings() {
     final WarpSettings settings = WarpSettings.form().cast(
         Record.of(Record.of(Attr.of("websocket"),
-            Slot.of("maxFrameSize", 2),
-            Slot.of("maxMessageSize", 3)),
-            Record.of(Attr.of("http"),
-                Slot.of("maxMessageSize", 5)),
-            Record.of(Attr.of("tls", Record.of(Slot.of("protocol", "TLS"))),
-                Slot.of("clientAuth", "need"),
-                Slot.of("cipherSuites", Record.of("ECDHE-ECDSA-AES128-GCM-SHA256", "ECDHE-RSA-AES128-GCM-SHA256")),
-                Slot.of("protocols", Record.of("TLSv1.1", "TLSv1.2")),
-                Record.of(Attr.of("keyStore", Record.of(Slot.of("type", "jks"))),
-                    Slot.of("resource", "keystore.jks"),
-                    Slot.of("password", "default")),
-                Record.of(Attr.of("trustStore", Record.of(Slot.of("type", "jks"))),
-                    Slot.of("resource", "cacerts.jks"),
-                    Slot.of("password", "default"))),
-            Record.of(Attr.of("tcp"),
-                Slot.of("keepAlive", true),
-                Slot.of("noDelay", true),
-                Slot.of("receiveBufferSize", 7),
-                Slot.of("sendBufferSize", 11),
-                Slot.of("readBufferSize", 13),
-                Slot.of("writeBufferSize", 17))));
+                            Slot.of("maxFrameSize", 2),
+                            Slot.of("maxMessageSize", 3)),
+                  Record.of(Attr.of("http"),
+                            Slot.of("maxMessageSize", 5)),
+                  Record.of(Attr.of("tls", Record.of(Slot.of("protocol", "TLS"))),
+                            Slot.of("clientAuth", "need"),
+                            Slot.of("cipherSuites", Record.of("ECDHE-ECDSA-AES128-GCM-SHA256", "ECDHE-RSA-AES128-GCM-SHA256")),
+                            Slot.of("protocols", Record.of("TLSv1.1", "TLSv1.2")),
+                            Record.of(Attr.of("keyStore", Record.of(Slot.of("type", "jks"))),
+                                      Slot.of("resource", "keystore.jks"),
+                                      Slot.of("password", "default")),
+                            Record.of(Attr.of("trustStore", Record.of(Slot.of("type", "jks"))),
+                                      Slot.of("resource", "cacerts.jks"),
+                                      Slot.of("password", "default"))),
+                  Record.of(Attr.of("tcp"),
+                            Slot.of("keepAlive", true),
+                            Slot.of("noDelay", true),
+                            Slot.of("receiveBufferSize", 7),
+                            Slot.of("sendBufferSize", 11),
+                            Slot.of("readBufferSize", 13),
+                            Slot.of("writeBufferSize", 17))));
 
     final WsSettings wsSettings = settings.wsSettings();
     assertEquals(wsSettings.maxFrameSize(), 2);
@@ -80,6 +75,11 @@ public class WarpSettingsSpec {
 
     final TcpSettings tcpSettings = settings.tcpSettings();
     assertEquals(tcpSettings, new TcpSettings(true, true, 7, 11, 13, 17));
+  }
+
+  static void assertCasts(Value actualValue, WarpSettings expected) {
+    final WarpSettings actual = WarpSettings.form().cast(actualValue);
+    assertEquals(actual, expected);
   }
 
 }

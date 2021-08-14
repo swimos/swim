@@ -23,17 +23,12 @@ import swim.util.Murmur3;
 
 public class EcCharacteristic2FieldDef extends EcFieldDef {
 
-  private static int hashSeed;
   protected final int size;
   protected final BigInteger basis;
 
   public EcCharacteristic2FieldDef(int size, BigInteger basis) {
     this.size = size;
     this.basis = basis;
-  }
-
-  public static EcCharacteristic2FieldDef from(ECFieldF2m field) {
-    return new EcCharacteristic2FieldDef(field.getM(), field.getReductionPolynomial());
   }
 
   public final int size() {
@@ -55,9 +50,8 @@ public class EcCharacteristic2FieldDef extends EcFieldDef {
 
   @Override
   public Value toValue() {
-    return Record.create(2)
-        .attr("ECField", Record.create(1).slot("size", this.size))
-        .slot("basis", Num.from(this.basis));
+    return Record.create(2).attr("ECField", Record.create(1).slot("size", this.size))
+                           .slot("basis", Num.from(this.basis));
   }
 
   @Override
@@ -71,13 +65,19 @@ public class EcCharacteristic2FieldDef extends EcFieldDef {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(EcCharacteristic2FieldDef.class);
+    if (EcCharacteristic2FieldDef.hashSeed == 0) {
+      EcCharacteristic2FieldDef.hashSeed = Murmur3.seed(EcCharacteristic2FieldDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(EcCharacteristic2FieldDef.hashSeed,
         this.size), this.basis.hashCode()));
+  }
+
+  public static EcCharacteristic2FieldDef from(ECFieldF2m field) {
+    return new EcCharacteristic2FieldDef(field.getM(), field.getReductionPolynomial());
   }
 
 }

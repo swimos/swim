@@ -21,21 +21,6 @@ import swim.util.Cursor;
 
 public abstract class STreePage extends Page {
 
-  public static STreePage empty(PageContext context, int stem, long version) {
-    return STreeLeaf.empty(context, stem, version);
-  }
-
-  public static STreePage fromValue(STreePageRef pageRef, Value value) {
-    switch (pageRef.pageType()) {
-      case LEAF:
-        return STreeLeaf.fromValue(pageRef, value);
-      case NODE:
-        return STreeNode.fromValue(pageRef, value);
-      default:
-        throw new IllegalArgumentException(pageRef.toString());
-    }
-  }
-
   @Override
   public boolean isSTreePage() {
     return true;
@@ -63,11 +48,11 @@ public abstract class STreePage extends Page {
   public abstract STreePage inserted(long index, Value key, Value newValue, long newVersion);
 
   public STreePage appended(Value key, Value newValue, long newVersion) {
-    return inserted(span(), key, newValue, newVersion);
+    return this.inserted(this.span(), key, newValue, newVersion);
   }
 
   public STreePage prepended(Value key, Value newValue, long newVersion) {
-    return inserted(0L, key, newValue, newVersion);
+    return this.inserted(0L, key, newValue, newVersion);
   }
 
   public abstract STreePage removed(long index, long newVersion);
@@ -112,5 +97,17 @@ public abstract class STreePage extends Page {
   public abstract Cursor<Slot> depthCursor(int maxDepth);
 
   public abstract Cursor<Slot> deltaCursor(long sinceVersion);
+
+  public static STreePage empty(PageContext context, int stem, long version) {
+    return STreeLeaf.empty(context, stem, version);
+  }
+
+  public static STreePage fromValue(STreePageRef pageRef, Value value) {
+    switch (pageRef.pageType()) {
+      case LEAF: return STreeLeaf.fromValue(pageRef, value);
+      case NODE: return STreeNode.fromValue(pageRef, value);
+      default: throw new IllegalArgumentException(pageRef.toString());
+    }
+  }
 
 }

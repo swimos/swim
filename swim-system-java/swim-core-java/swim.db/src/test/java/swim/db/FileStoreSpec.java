@@ -21,7 +21,7 @@ import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import org.testng.annotations.Test;
 import swim.concurrent.Theater;
-import swim.math.PointR2;
+import swim.math.R2Point;
 import swim.math.R2Shape;
 import swim.spatial.GeoProjection;
 import swim.spatial.SpatialMap;
@@ -37,11 +37,12 @@ public class FileStoreSpec {
   final File testOutputDir = new File("build/test-output");
 
   final StoreSettings storeSettings = StoreSettings.standard()
-      .deleteDelay(0).databaseCommitTimeout(10 * 1000);
+                                                   .deleteDelay(0)
+                                                   .databaseCommitTimeout(10 * 1000);
 
   @Test
   public void testOpenStore() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "store.swimdb");
+    final File storePath = new File(this.testOutputDir, "store.swimdb");
     final Theater stage = new Theater();
     final FileStore store = new FileStore(storePath, stage);
     try {
@@ -57,7 +58,7 @@ public class FileStoreSpec {
 
   @Test
   public void testOpenDatabase() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "database.swimdb");
+    final File storePath = new File(this.testOutputDir, "database.swimdb");
     final Theater stage = new Theater();
     final FileStore store = new FileStore(storePath, stage);
     try {
@@ -74,7 +75,7 @@ public class FileStoreSpec {
 
   @Test
   public void testLoadTree() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "load.swimdb");
+    final File storePath = new File(this.testOutputDir, "load.swimdb");
     final Theater stage = new Theater();
     final FileStore store = new FileStore(storePath, stage);
     try {
@@ -82,8 +83,8 @@ public class FileStoreSpec {
       store.open();
       final Database database = store.openDatabase();
       final Map<String, Integer> map = database.openBTreeMap("test").load()
-          .keyForm(Form.forString())
-          .valueForm(Form.forInteger());
+                                               .keyForm(Form.forString())
+                                               .valueForm(Form.forInteger());
       assertNotNull(map);
       store.close();
       store.delete();
@@ -94,9 +95,9 @@ public class FileStoreSpec {
 
   @Test
   public void testBTreeMap() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "btree-map.swimdb");
+    final File storePath = new File(this.testOutputDir, "btree-map.swimdb");
     final Theater stage = new Theater();
-    final StoreContext storeContext = new StoreContext(storeSettings) {
+    final StoreContext storeContext = new StoreContext(this.storeSettings) {
       @Override
       public boolean pageShouldSplit(Store store, Database database, Page page) {
         return page.arity() > 3;
@@ -122,8 +123,8 @@ public class FileStoreSpec {
       stage.start();
       final Database database = store.openDatabase();
       final Map<String, Integer> map = database.openBTreeMap("test").load()
-          .keyForm(Form.forString())
-          .valueForm(Form.forInteger());
+                                               .keyForm(Form.forString())
+                                               .valueForm(Form.forInteger());
 
       map.put("a", 1);
       map.put("b", 2);
@@ -181,9 +182,9 @@ public class FileStoreSpec {
 
   @Test
   public void testSTreeList() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "stree-list.swimdb");
+    final File storePath = new File(this.testOutputDir, "stree-list.swimdb");
     final Theater stage = new Theater();
-    final StoreContext storeContext = new StoreContext(storeSettings) {
+    final StoreContext storeContext = new StoreContext(this.storeSettings) {
       @Override
       public boolean pageShouldSplit(Store store, Database database, Page page) {
         return page.arity() > 3;
@@ -209,7 +210,7 @@ public class FileStoreSpec {
       stage.start();
       final Database database = store.openDatabase();
       final List<String> list = database.openSTreeList("test").load()
-          .valueForm(Form.forString());
+                                        .valueForm(Form.forString());
 
       list.add("a");
       list.add("b");
@@ -258,9 +259,9 @@ public class FileStoreSpec {
 
   @Test
   public void testUTreeValue() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "utree-value.swimdb");
+    final File storePath = new File(this.testOutputDir, "utree-value.swimdb");
     final Theater stage = new Theater();
-    final StoreContext storeContext = new StoreContext(storeSettings) {
+    final StoreContext storeContext = new StoreContext(this.storeSettings) {
       @Override
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
@@ -302,10 +303,10 @@ public class FileStoreSpec {
 
   @Test
   public void testAutoCommit() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "auto-commit.swimdb");
+    final File storePath = new File(this.testOutputDir, "auto-commit.swimdb");
     final Theater stage = new Theater();
     final CountDownLatch didCommit = new CountDownLatch(1);
-    final StoreContext storeContext = new StoreContext(storeSettings) {
+    final StoreContext storeContext = new StoreContext(this.storeSettings) {
       @Override
       public boolean pageShouldSplit(Store store, Database database, Page page) {
         return page.arity() > 3;
@@ -333,8 +334,8 @@ public class FileStoreSpec {
       stage.start();
       final Database database = store.openDatabase();
       final Map<String, Long> map = database.openBTreeMap("test")
-          .keyForm(Form.forString())
-          .valueForm(Form.forLong());
+                                            .keyForm(Form.forString())
+                                            .valueForm(Form.forLong());
 
       for (int i = 0; i < 128; i += 1) {
         map.put("t" + i, System.currentTimeMillis());
@@ -350,10 +351,10 @@ public class FileStoreSpec {
 
   @Test
   public void testAutoShiftZone() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "auto-shift.swimdb");
+    final File storePath = new File(this.testOutputDir, "auto-shift.swimdb");
     final Theater stage = new Theater();
     final CountDownLatch didShiftZone = new CountDownLatch(1);
-    final StoreContext storeContext = new StoreContext(storeSettings) {
+    final StoreContext storeContext = new StoreContext(this.storeSettings) {
       @Override
       public boolean pageShouldSplit(Store store, Database database, Page page) {
         return page.arity() > 3;
@@ -395,8 +396,8 @@ public class FileStoreSpec {
       stage.start();
       final Database database = store.openDatabase();
       final Map<String, Long> map = database.openBTreeMap("test")
-          .keyForm(Form.forString())
-          .valueForm(Form.forLong());
+                                            .keyForm(Form.forString())
+                                            .valueForm(Form.forLong());
 
       for (int i = 0; i < 400; i += 1) {
         map.put("t" + i, System.currentTimeMillis());
@@ -417,10 +418,10 @@ public class FileStoreSpec {
 
   @Test
   public void testAutoCompact() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "auto-compact.swimdb");
+    final File storePath = new File(this.testOutputDir, "auto-compact.swimdb");
     final Theater stage = new Theater();
     final CountDownLatch didCompact = new CountDownLatch(1);
-    final StoreContext storeContext = new StoreContext(storeSettings) {
+    final StoreContext storeContext = new StoreContext(this.storeSettings) {
       @Override
       public boolean pageShouldSplit(Store store, Database database, Page page) {
         return page.arity() > 3;
@@ -448,8 +449,8 @@ public class FileStoreSpec {
       stage.start();
       final Database database = store.openDatabase();
       final Map<String, Long> map = database.openBTreeMap("test")
-          .keyForm(Form.forString())
-          .valueForm(Form.forLong());
+                                            .keyForm(Form.forString())
+                                            .valueForm(Form.forLong());
 
       for (int i = 0; i < 10; i += 1) {
         for (int j = 0; j < 100; j += 1) {
@@ -468,9 +469,9 @@ public class FileStoreSpec {
 
   @Test
   public void benchmarkLargeWrites() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "large-writes.swimdb");
+    final File storePath = new File(this.testOutputDir, "large-writes.swimdb");
     final Theater stage = new Theater();
-    final StoreContext storeContext = new StoreContext(storeSettings) {
+    final StoreContext storeContext = new StoreContext(this.storeSettings) {
       @Override
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
@@ -521,9 +522,9 @@ public class FileStoreSpec {
 
   @Test
   public void benchmarkSmallWrites() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "small-writes.swimdb");
+    final File storePath = new File(this.testOutputDir, "small-writes.swimdb");
     final Theater stage = new Theater();
-    final StoreContext storeContext = new StoreContext(storeSettings) {
+    final StoreContext storeContext = new StoreContext(this.storeSettings) {
       @Override
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
@@ -574,9 +575,9 @@ public class FileStoreSpec {
 
   @Test
   public void benchmarkStateChanges() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "state-changes.swimdb");
+    final File storePath = new File(this.testOutputDir, "state-changes.swimdb");
     final Theater stage = new Theater();
-    final StoreContext storeContext = new StoreContext(storeSettings) {
+    final StoreContext storeContext = new StoreContext(this.storeSettings) {
       @Override
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
@@ -593,8 +594,8 @@ public class FileStoreSpec {
       stage.start();
       final Database database = store.openDatabase();
       final Map<String, Long> map = database.openBTreeMap("test").load()
-          .keyForm(Form.forString())
-          .valueForm(Form.forLong());
+                                            .keyForm(Form.forString())
+                                            .valueForm(Form.forLong());
 
       System.out.println("Benchmarking ...");
       final long t0 = System.currentTimeMillis();
@@ -620,9 +621,9 @@ public class FileStoreSpec {
 
   @Test
   public void benchmarkQTreeUpdates() throws InterruptedException {
-    final File storePath = new File(testOutputDir, "qtree-updates.swimdb");
+    final File storePath = new File(this.testOutputDir, "qtree-updates.swimdb");
     final Theater stage = new Theater();
-    final StoreContext storeContext = new StoreContext(storeSettings) {
+    final StoreContext storeContext = new StoreContext(this.storeSettings) {
       @Override
       public Commit databaseWillCommit(Store store, Database database, Commit commit) {
         return commit; // Override auto shift behavior.
@@ -639,8 +640,8 @@ public class FileStoreSpec {
       stage.start();
       final Database database = store.openDatabase();
       final SpatialMap<Long, R2Shape, Long> map = database.openQTreeMap("test", GeoProjection.wgs84Form()).load()
-          .keyForm(Form.forLong())
-          .valueForm(Form.forLong());
+                                                          .keyForm(Form.forLong())
+                                                          .valueForm(Form.forLong());
 
       System.out.println("Benchmarking ...");
       final Random random = new Random(0L);
@@ -649,7 +650,7 @@ public class FileStoreSpec {
       while (System.currentTimeMillis() - t0 < duration) {
         final double lng = random.nextDouble() * 180.0;
         final double lat = random.nextDouble() * 80.0;
-        map.put(i, new PointR2(lng, lat), -i);
+        map.put(i, new R2Point(lng, lat), -i);
         i += 1L;
       }
       database.commit(Commit.forced());

@@ -48,7 +48,7 @@ public class ValueLaneUplink extends DemandUplinkModem {
 
   @Override
   protected void willSync(SyncRequest request) {
-    cueDown();
+    this.cueDown();
     super.willSync(request);
   }
 

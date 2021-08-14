@@ -24,7 +24,6 @@ import swim.util.Murmur3;
 
 public class WebServiceDef implements ServiceDef, Debug {
 
-  private static int hashSeed;
   final String serviceName;
   final String address;
   final int port;
@@ -47,22 +46,14 @@ public class WebServiceDef implements ServiceDef, Debug {
     this.warpSettings = warpSettings;
   }
 
-  public static WebServiceDef standard() {
-    return new WebServiceDef("web", "0.0.0.0", 80, false, null, null, null, WarpSettings.standard());
-  }
-
-  public static WebServiceDef secure() {
-    return new WebServiceDef("web", "0.0.0.0", 443, true, null, null, null, WarpSettings.standard());
-  }
-
   @Override
   public final String serviceName() {
     return this.serviceName;
   }
 
   public WebServiceDef serviceName(String serviceName) {
-    return copy(serviceName, this.address, this.port, this.isSecure,
-        this.spaceName, this.documentRoot, this.resourceRoot, this.warpSettings);
+    return this.copy(serviceName, this.address, this.port, this.isSecure,
+                     this.spaceName, this.documentRoot, this.resourceRoot, this.warpSettings);
   }
 
   public final String address() {
@@ -70,8 +61,8 @@ public class WebServiceDef implements ServiceDef, Debug {
   }
 
   public WebServiceDef address(String address) {
-    return copy(this.serviceName, address, this.port, this.isSecure,
-        this.spaceName, this.documentRoot, this.resourceRoot, this.warpSettings);
+    return this.copy(this.serviceName, address, this.port, this.isSecure,
+                     this.spaceName, this.documentRoot, this.resourceRoot, this.warpSettings);
   }
 
   public final int port() {
@@ -79,8 +70,8 @@ public class WebServiceDef implements ServiceDef, Debug {
   }
 
   public WebServiceDef port(int port) {
-    return copy(this.serviceName, this.address, port, this.isSecure,
-        this.spaceName, this.documentRoot, this.resourceRoot, this.warpSettings);
+    return this.copy(this.serviceName, this.address, port, this.isSecure,
+                     this.spaceName, this.documentRoot, this.resourceRoot, this.warpSettings);
   }
 
   public final String spaceName() {
@@ -88,8 +79,8 @@ public class WebServiceDef implements ServiceDef, Debug {
   }
 
   public WebServiceDef spaceName(String spaceName) {
-    return copy(this.serviceName, this.address, this.port, this.isSecure,
-        spaceName, this.documentRoot, this.resourceRoot, this.warpSettings);
+    return this.copy(this.serviceName, this.address, this.port, this.isSecure,
+                     spaceName, this.documentRoot, this.resourceRoot, this.warpSettings);
   }
 
   public final UriPath documentRoot() {
@@ -97,8 +88,8 @@ public class WebServiceDef implements ServiceDef, Debug {
   }
 
   public WebServiceDef documentRoot(UriPath documentRoot) {
-    return copy(this.serviceName, this.address, this.port, this.isSecure,
-        this.spaceName, documentRoot, this.resourceRoot, this.warpSettings);
+    return this.copy(this.serviceName, this.address, this.port, this.isSecure,
+                     this.spaceName, documentRoot, this.resourceRoot, this.warpSettings);
   }
 
   public final UriPath resourceRoot() {
@@ -106,8 +97,8 @@ public class WebServiceDef implements ServiceDef, Debug {
   }
 
   public WebServiceDef resourceRoot(UriPath resourceRoot) {
-    return copy(this.serviceName, this.address, this.port, this.isSecure,
-        this.spaceName, this.documentRoot, resourceRoot, this.warpSettings);
+    return this.copy(this.serviceName, this.address, this.port, this.isSecure,
+                     this.spaceName, this.documentRoot, resourceRoot, this.warpSettings);
   }
 
   public final WarpSettings warpSettings() {
@@ -115,15 +106,15 @@ public class WebServiceDef implements ServiceDef, Debug {
   }
 
   public WebServiceDef warpSettings(WarpSettings warpSettings) {
-    return copy(this.serviceName, this.address, this.port, this.isSecure,
-        this.spaceName, this.documentRoot, this.resourceRoot, warpSettings);
+    return this.copy(this.serviceName, this.address, this.port, this.isSecure,
+                     this.spaceName, this.documentRoot, this.resourceRoot, warpSettings);
   }
 
   protected WebServiceDef copy(String serviceName, String address, int port, boolean isSecure,
                                String spaceName, UriPath documentRoot, UriPath resourceRoot,
                                WarpSettings warpSettings) {
     return new WebServiceDef(serviceName, address, port, isSecure, spaceName,
-        documentRoot, resourceRoot, warpSettings);
+                             documentRoot, resourceRoot, warpSettings);
   }
 
   @Override
@@ -142,29 +133,31 @@ public class WebServiceDef implements ServiceDef, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(WebServiceDef.class);
+    if (WebServiceDef.hashSeed == 0) {
+      WebServiceDef.hashSeed = Murmur3.seed(WebServiceDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed, Murmur3.hash(this.serviceName)),
-            this.address.hashCode()), this.port), Murmur3.hash(this.isSecure)),
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        Murmur3.mix(Murmur3.mix(WebServiceDef.hashSeed, Murmur3.hash(this.serviceName)),
+        this.address.hashCode()), this.port), Murmur3.hash(this.isSecure)),
         Murmur3.hash(this.spaceName)), Murmur3.hash(this.documentRoot)),
         Murmur3.hash(this.resourceRoot)), this.warpSettings.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("WebServiceDef").write('.')
-        .write(this.isSecure ? "secure" : "standard").write('(').write(')');
+                   .write(this.isSecure ? "secure" : "standard").write('(').write(')');
     if (!"web".equals(this.serviceName)) {
       output = output.write('.').write("serviceName").write('(').debug(this.serviceName).write(')');
     }
     if (!"0.0.0.0".equals(this.address)) {
       output = output.write('.').write("address").write('(').debug(this.address).write(')');
     }
-    if (this.isSecure && this.port != 443 || !this.isSecure && port != 80) {
+    if (this.isSecure && this.port != 443 || !this.isSecure && this.port != 80) {
       output = output.write('.').write("port").write('(').debug(this.port).write(')');
     }
     if (this.spaceName != null) {
@@ -179,11 +172,20 @@ public class WebServiceDef implements ServiceDef, Debug {
     if (this.warpSettings != WarpSettings.standard()) {
       output = output.write('.').write("warpSettings").write('(').debug(this.warpSettings).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static WebServiceDef standard() {
+    return new WebServiceDef("web", "0.0.0.0", 80, false, null, null, null, WarpSettings.standard());
+  }
+
+  public static WebServiceDef secure() {
+    return new WebServiceDef("web", "0.0.0.0", 443, true, null, null, null, WarpSettings.standard());
   }
 
 }

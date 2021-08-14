@@ -24,36 +24,8 @@ import swim.util.Murmur3;
 
 public abstract class UriPattern implements Debug, Display {
 
-  private static int hashSeed;
-  private static UriPattern empty;
-  private static Form<UriPattern> form;
-
   UriPattern() {
-    // stub
-  }
-
-  public static UriPattern empty() {
-    if (empty == null) {
-      empty = new UriConstantPattern(Uri.empty());
-    }
-    return empty;
-  }
-
-  public static UriPattern from(Uri pattern) {
-    return UriSchemePattern.compile(pattern, pattern.scheme(), pattern.authority(),
-        pattern.path(), pattern.query(), pattern.fragment());
-  }
-
-  public static UriPattern parse(String pattern) {
-    return from(Uri.parse(pattern));
-  }
-
-  @Kind
-  public static Form<UriPattern> form() {
-    if (form == null) {
-      form = new UriPatternForm(UriPattern.empty());
-    }
-    return form;
+    // sealed
   }
 
   public abstract boolean isUri();
@@ -61,27 +33,27 @@ public abstract class UriPattern implements Debug, Display {
   public abstract Uri toUri();
 
   public Uri apply(String... args) {
-    return apply(args, 0);
+    return this.apply(args, 0);
   }
 
   Uri apply(String[] args, int index) {
-    return apply(UriScheme.undefined(), args, index);
+    return this.apply(UriScheme.undefined(), args, index);
   }
 
   Uri apply(UriScheme scheme, String[] args, int index) {
-    return apply(scheme, UriAuthority.undefined(), args, index);
+    return this.apply(scheme, UriAuthority.undefined(), args, index);
   }
 
   Uri apply(UriScheme scheme, UriAuthority authority, String[] args, int index) {
-    return apply(scheme, authority, UriPath.empty(), args, index);
+    return this.apply(scheme, authority, UriPath.empty(), args, index);
   }
 
   Uri apply(UriScheme scheme, UriAuthority authority, UriPath path, String[] args, int index) {
-    return apply(scheme, authority, path, UriQuery.undefined(), args, index);
+    return this.apply(scheme, authority, path, UriQuery.undefined(), args, index);
   }
 
   Uri apply(UriScheme scheme, UriAuthority authority, UriPath path, UriQuery query, String[] args, int index) {
-    return apply(scheme, authority, path, query, UriFragment.undefined(), args, index);
+    return this.apply(scheme, authority, path, query, UriFragment.undefined(), args, index);
   }
 
   Uri apply(UriScheme scheme, UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment, String[] args, int index) {
@@ -91,21 +63,21 @@ public abstract class UriPattern implements Debug, Display {
   public abstract HashTrieMap<String, String> unapply(Uri uri, HashTrieMap<String, String> defaults);
 
   public HashTrieMap<String, String> unapply(String uri, HashTrieMap<String, String> defaults) {
-    return unapply(Uri.parse(uri), defaults);
+    return this.unapply(Uri.parse(uri), defaults);
   }
 
   public HashTrieMap<String, String> unapply(Uri uri) {
-    return unapply(uri, HashTrieMap.<String, String>empty());
+    return this.unapply(uri, HashTrieMap.<String, String>empty());
   }
 
   public HashTrieMap<String, String> unapply(String uri) {
-    return unapply(Uri.parse(uri), HashTrieMap.<String, String>empty());
+    return this.unapply(Uri.parse(uri), HashTrieMap.<String, String>empty());
   }
 
   public abstract boolean matches(Uri uri);
 
   public boolean matches(String uri) {
-    return matches(Uri.parse(uri));
+    return this.matches(Uri.parse(uri));
   }
 
   @Override
@@ -114,38 +86,70 @@ public abstract class UriPattern implements Debug, Display {
       return true;
     } else if (other instanceof UriPattern) {
       final UriPattern that = (UriPattern) other;
-      return toUri().equals(that.toUri());
+      return this.toUri().equals(that.toUri());
     }
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(UriPattern.class);
+    if (UriPattern.hashSeed == 0) {
+      UriPattern.hashSeed = Murmur3.seed(UriPattern.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, toUri().hashCode()));
+    return Murmur3.mash(Murmur3.mix(UriPattern.hashSeed, this.toUri().hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    final Uri uri = toUri();
+  public <T> Output<T> debug(Output<T> output) {
+    final Uri uri = this.toUri();
     output = output.write("UriPattern").write('.');
     if (uri.isDefined()) {
-      output = output.write("parse").write('(').debug(uri.toString()).write(')');
+      output = output.write("parse").write('(').debug(uri.toString());
     } else {
-      output = output.write("empty").write('(').write(')');
+      output = output.write("empty").write('(');
     }
+    output = output.write(')');
+    return output;
   }
 
   @Override
-  public void display(Output<?> output) {
-    toUri().display(output);
+  public <T> Output<T> display(Output<T> output) {
+    return this.toUri().display(output);
   }
 
   @Override
   public String toString() {
-    return toUri().toString();
+    return this.toUri().toString();
+  }
+
+  private static UriPattern empty;
+
+  public static UriPattern empty() {
+    if (UriPattern.empty == null) {
+      UriPattern.empty = new UriConstantPattern(Uri.empty());
+    }
+    return UriPattern.empty;
+  }
+
+  public static UriPattern from(Uri pattern) {
+    return UriSchemePattern.compile(pattern, pattern.scheme(), pattern.authority(),
+                                    pattern.path(), pattern.query(), pattern.fragment());
+  }
+
+  public static UriPattern parse(String pattern) {
+    return UriPattern.from(Uri.parse(pattern));
+  }
+
+  private static Form<UriPattern> form;
+
+  @Kind
+  public static Form<UriPattern> form() {
+    if (UriPattern.form == null) {
+      UriPattern.form = new UriPatternForm(UriPattern.empty());
+    }
+    return UriPattern.form;
   }
 
 }

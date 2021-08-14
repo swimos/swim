@@ -62,9 +62,9 @@ public abstract class IpModemBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
+      this.bind(endpoint, service);
       serverBind.await();
-      connect(endpoint, client);
+      this.connect(endpoint, client);
       serverConnect.await();
       clientConnect.await();
     } catch (InterruptedException cause) {
@@ -90,7 +90,7 @@ public abstract class IpModemBehaviors {
     try {
       stage.start();
       endpoint.start();
-      connect(endpoint, modem);
+      this.connect(endpoint, modem);
       clientDisconnect.await();
     } catch (InterruptedException cause) {
       throw new TestException(cause);
@@ -152,8 +152,8 @@ public abstract class IpModemBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       clientConnect.await();
       clientDisconnect.await();
       serverConnect.await();
@@ -219,8 +219,8 @@ public abstract class IpModemBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       serverConnect.await();
       serverDisconnect.await();
       clientConnect.await();
@@ -289,8 +289,8 @@ public abstract class IpModemBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       clientWrite.await();
       serverWrite.await();
       clientRead.await();
@@ -326,8 +326,8 @@ public abstract class IpModemBehaviors {
 
       @Override
       public void didWrite(String line) {
-        writeCount += 1;
-        if (writeCount < lineCount) {
+        this.writeCount += 1;
+        if (this.writeCount < lineCount) {
           write(Utf8.stringWriter(line));
         } else {
           write(Utf8.stringWriter("\n"));
@@ -338,8 +338,8 @@ public abstract class IpModemBehaviors {
       @Override
       public void didRead(String line) {
         assertEquals(line, phrase);
-        readCount += 1;
-        if (readCount < lineCount) {
+        this.readCount += 1;
+        if (this.readCount < lineCount) {
           read(Utf8.decodedParser(Unicode.lineParser()));
         } else {
           clientRead.countDown();
@@ -358,8 +358,8 @@ public abstract class IpModemBehaviors {
 
       @Override
       public void didWrite(String line) {
-        writeCount += 1;
-        if (writeCount < lineCount) {
+        this.writeCount += 1;
+        if (this.writeCount < lineCount) {
           write(Utf8.stringWriter(line));
         } else {
           write(Utf8.stringWriter("\n"));
@@ -370,8 +370,8 @@ public abstract class IpModemBehaviors {
       @Override
       public void didRead(String line) {
         assertEquals(line, phrase);
-        readCount += 1;
-        if (readCount < lineCount) {
+        this.readCount += 1;
+        if (this.readCount < lineCount) {
           read(Utf8.decodedParser(Unicode.lineParser()));
         } else {
           serverRead.countDown();
@@ -388,8 +388,8 @@ public abstract class IpModemBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       clientWrite.await();
       serverWrite.await();
       clientRead.await();
@@ -402,7 +402,7 @@ public abstract class IpModemBehaviors {
     }
   }
 
-  private String blob(int size) {
+  private static String blob(int size) {
     final StringBuilder s = new StringBuilder(size);
     for (int i = 0; i < size; i += 1) {
       s.append(' ');
@@ -432,8 +432,8 @@ public abstract class IpModemBehaviors {
 
       @Override
       public void didWrite(String line) {
-        writeCount += 1;
-        if (writeCount < chunkCount) {
+        this.writeCount += 1;
+        if (this.writeCount < chunkCount) {
           write(Utf8.stringWriter(chunk));
         } else {
           write(Utf8.stringWriter("\n"));
@@ -458,8 +458,8 @@ public abstract class IpModemBehaviors {
 
       @Override
       public void didWrite(String line) {
-        writeCount += 1;
-        if (writeCount < chunkCount) {
+        this.writeCount += 1;
+        if (this.writeCount < chunkCount) {
           write(Utf8.stringWriter(chunk));
         } else {
           write(Utf8.stringWriter("\n"));
@@ -483,8 +483,8 @@ public abstract class IpModemBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       clientWrite.await();
       serverWrite.await();
       clientRead.await();

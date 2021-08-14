@@ -40,8 +40,8 @@ final class ConditionalOperatorParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.ifParser, this.thenParser,
-                 this.elseParser, this.step);
+    return ConditionalOperatorParser.parse(input, this.recon, this.builder, this.ifParser,
+                                           this.thenParser, this.elseParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -108,10 +108,10 @@ final class ConditionalOperatorParser<I, V> extends Parser<V> {
           input = input.step();
           step = 5;
         } else {
-          return error(Diagnostic.expected(':', input));
+          return Parser.error(Diagnostic.expected(':', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected(':', input));
+        return Parser.error(Diagnostic.expected(':', input));
       }
     }
     if (step == 5) {
@@ -125,19 +125,19 @@ final class ConditionalOperatorParser<I, V> extends Parser<V> {
         final V ifTerm = ifParser.bind();
         final V thenTerm = thenParser.bind();
         final V elseTerm = elseParser.bind();
-        return done(recon.conditional(ifTerm, thenTerm, elseTerm));
+        return Parser.done(recon.conditional(ifTerm, thenTerm, elseTerm));
       } else if (elseParser.isError()) {
         return elseParser.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ConditionalOperatorParser<I, V>(recon, builder, ifParser, thenParser, elseParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, null, null, 1);
+    return ConditionalOperatorParser.parse(input, recon, builder, null, null, null, 1);
   }
 
 }

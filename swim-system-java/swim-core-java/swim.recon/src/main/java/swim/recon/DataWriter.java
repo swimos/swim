@@ -34,7 +34,7 @@ final class DataWriter extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.buffer, this.part, this.step);
+    return DataWriter.write(output, this.buffer, this.part, this.step);
   }
 
   static int sizeOf(int length) {
@@ -55,21 +55,21 @@ final class DataWriter extends Writer<Object, Object> {
       }
       if (part.isDone()) {
         part = null;
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new DataWriter(buffer, part, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, ByteBuffer buffer) {
-    return write(output, buffer, null, 1);
+    return DataWriter.write(output, buffer, null, 1);
   }
 
 }

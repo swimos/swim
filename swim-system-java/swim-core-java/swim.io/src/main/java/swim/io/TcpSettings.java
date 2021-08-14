@@ -31,9 +31,6 @@ import swim.util.Murmur3;
  */
 public class TcpSettings implements Debug {
 
-  private static int hashSeed;
-  private static TcpSettings standard;
-  private static Form<TcpSettings> form;
   protected final boolean keepAlive;
   protected final boolean noDelay;
   protected final int receiveBufferSize;
@@ -52,10 +49,197 @@ public class TcpSettings implements Debug {
   }
 
   /**
+   * Returns {@code true} if TCP should be configured with the {@code
+   * SO_KEEPALIVE} socket option to send keepalive probes to prevent idle
+   * connections from timing out.
+   */
+  public final boolean keepAlive() {
+    return this.keepAlive;
+  }
+
+  /**
+   * Returns a copy of these {@code TcpSettings} configured with the given
+   * {@code keepAlive} value for the {@code SO_KEEPALIVE} socket option.
+   */
+  public TcpSettings keepAlive(boolean keepAlive) {
+    return this.copy(keepAlive, this.noDelay, this.receiveBufferSize,
+                     this.sendBufferSize, this.readBufferSize, this.writeBufferSize);
+  }
+
+  /**
+   * Returns {@code true} if TCP should be configured with the {@code
+   * TCP_NODELAY} socket option to disable Nagle's algorithm.
+   */
+  public final boolean noDelay() {
+    return this.noDelay;
+  }
+
+  /**
+   * Returns a copy of these {@code TcpSettings} configured with the given
+   * {@code noDelay} value for the {@code TCP_NODELAY} socket option.
+   */
+  public TcpSettings noDelay(boolean noDelay) {
+    return this.copy(this.keepAlive, noDelay, this.receiveBufferSize,
+                     this.sendBufferSize, this.readBufferSize, this.writeBufferSize);
+  }
+
+  /**
+   * Returns the value of the {@code SO_RCVBUF} socket option with which TCP
+   * should be configured to control the size of receive buffers.
+   */
+  public final int receiveBufferSize() {
+    return this.receiveBufferSize;
+  }
+
+  /**
+   * Returns a copy of these {@code TcpSettings} configured with the given
+   * {@code receiveBufferSize} value for the {@code SO_RCVBUF} socket option.
+   */
+  public TcpSettings receiveBufferSize(int receiveBufferSize) {
+    return this.copy(this.keepAlive, this.noDelay, receiveBufferSize,
+                     this.sendBufferSize, this.readBufferSize, this.writeBufferSize);
+  }
+
+  /**
+   * Returns the value of the {@code SO_SNDBUF} socket option with which TCP
+   * should be configured to control the size of send buffers.
+   */
+  public final int sendBufferSize() {
+    return this.sendBufferSize;
+  }
+
+  /**
+   * Returns a copy of these {@code TcpSettings} configured with the given
+   * {@code sendBufferSize} value for the {@code SO_SNDBUF} socket option.
+   */
+  public TcpSettings sendBufferSize(int sendBufferSize) {
+    return this.copy(this.keepAlive, this.noDelay, this.receiveBufferSize,
+                     sendBufferSize, this.readBufferSize, this.writeBufferSize);
+  }
+
+  /**
+   * Returns the size in bytes of the per-socket userspace buffers into which
+   * data is received.
+   */
+  public final int readBufferSize() {
+    return this.readBufferSize;
+  }
+
+  /**
+   * Returns a copy of these {@code TcpSettings} configured with the given
+   * {@code readBufferSize} for per-socket userspace read buffers.
+   */
+  public TcpSettings readBufferSize(int readBufferSize) {
+    return this.copy(this.keepAlive, this.noDelay, this.receiveBufferSize,
+                     this.sendBufferSize, readBufferSize, this.writeBufferSize);
+  }
+
+  /**
+   * Returns the size in bytes of the per-socket userspace buffers from which
+   * data is sent.
+   */
+  public final int writeBufferSize() {
+    return this.writeBufferSize;
+  }
+
+  /**
+   * Returns a copy of these {@code TcpSettings} configured with the given
+   * {@code writeBufferSize} for per-socket userspace write buffers.
+   */
+  public TcpSettings writeBufferSize(int writeBufferSize) {
+    return this.copy(this.keepAlive, this.noDelay, this.receiveBufferSize,
+                     this.sendBufferSize, this.readBufferSize, writeBufferSize);
+  }
+
+  /**
+   * Returns a new {@code TcpSettings} instance with the given options.
+   * Subclasses may override this method to ensure the proper class is
+   * instantiated when updating settings.
+   */
+  protected TcpSettings copy(boolean keepAlive, boolean noDelay, int receiveBufferSize,
+                             int sendBufferSize, int readBufferSize, int writeBufferSize) {
+    return new TcpSettings(keepAlive, noDelay, receiveBufferSize,
+                           sendBufferSize, readBufferSize, writeBufferSize);
+  }
+
+  /**
+   * Configures the {@code socket} with these {@code TcpSettings}.
+   */
+  public void configure(Socket socket) throws SocketException {
+    socket.setKeepAlive(this.keepAlive);
+    socket.setTcpNoDelay(this.noDelay);
+    if (this.receiveBufferSize != 0) {
+      socket.setReceiveBufferSize(this.receiveBufferSize);
+    }
+    if (this.sendBufferSize != 0) {
+      socket.setSendBufferSize(this.sendBufferSize);
+    }
+  }
+
+  /**
+   * Returns a structural {@code Value} representing these {@code TcpSettings}.
+   */
+  public Value toValue() {
+    return TcpSettings.form().mold(this).toValue();
+  }
+
+  /**
+   * Returns {@code true} if these {@code TcpSettings} can possibly equal some
+   * {@code other} object.
+   */
+  public boolean canEqual(Object other) {
+    return other instanceof TcpSettings;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof TcpSettings) {
+      final TcpSettings that = (TcpSettings) other;
+      return that.canEqual(this) && this.keepAlive == that.keepAlive && this.noDelay == that.noDelay
+          && this.receiveBufferSize == that.receiveBufferSize && this.sendBufferSize == that.sendBufferSize
+          && this.readBufferSize == that.readBufferSize && this.writeBufferSize == that.writeBufferSize;
+    }
+    return false;
+  }
+
+  private static int hashSeed;
+
+  @Override
+  public int hashCode() {
+    if (TcpSettings.hashSeed == 0) {
+      TcpSettings.hashSeed = Murmur3.seed(TcpSettings.class);
+    }
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        TcpSettings.hashSeed, Murmur3.hash(this.keepAlive)), Murmur3.hash(this.noDelay)), this.receiveBufferSize),
+        this.sendBufferSize), this.readBufferSize), this.writeBufferSize));
+  }
+
+  @Override
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("TcpSettings").write('.').write("standard").write('(').write(')')
+                   .write('.').write("noDelay").write('(').debug(this.noDelay).write(')')
+                   .write('.').write("keepAlive").write('(').debug(this.keepAlive).write(')')
+                   .write('.').write("receiveBufferSize").write('(').debug(this.receiveBufferSize).write(')')
+                   .write('.').write("sendBufferSize").write('(').debug(this.sendBufferSize).write(')')
+                   .write('.').write("readBufferSize").write('(').debug(this.readBufferSize).write(')')
+                   .write('.').write("writeBufferSize").write('(').debug(this.writeBufferSize).write(')');
+    return output;
+  }
+
+  @Override
+  public String toString() {
+    return Format.debug(this);
+  }
+
+  private static TcpSettings standard;
+
+  /**
    * Returns the default {@code TcpSettings} instance.
    */
   public static TcpSettings standard() {
-    if (standard == null) {
+    if (TcpSettings.standard == null) {
       final boolean keepAlive = Boolean.parseBoolean(System.getProperty("swim.tcp.keepalive"));
 
       final boolean noDelay = Boolean.parseBoolean(System.getProperty("swim.tcp.nodelay"));
@@ -88,203 +272,23 @@ public class TcpSettings implements Debug {
         writeBufferSize = 4096;
       }
 
-      standard = new TcpSettings(keepAlive, noDelay, receiveBufferSize,
-          sendBufferSize, readBufferSize, writeBufferSize);
+      TcpSettings.standard = new TcpSettings(keepAlive, noDelay, receiveBufferSize,
+                                             sendBufferSize, readBufferSize, writeBufferSize);
     }
-    return standard;
+    return TcpSettings.standard;
   }
+
+  private static Form<TcpSettings> form;
 
   /**
    * Returns the structural {@code Form} of {@code TcpSettings}.
    */
   @Kind
   public static Form<TcpSettings> form() {
-    if (form == null) {
-      form = new TcpSettingsForm();
+    if (TcpSettings.form == null) {
+      TcpSettings.form = new TcpSettingsForm();
     }
-    return form;
-  }
-
-  /**
-   * Returns {@code true} if TCP should be configured with the {@code
-   * SO_KEEPALIVE} socket option to send keepalive probes to prevent idle
-   * connections from timing out.
-   */
-  public final boolean keepAlive() {
-    return this.keepAlive;
-  }
-
-  /**
-   * Returns a copy of these {@code TcpSettings} configured with the given
-   * {@code keepAlive} value for the {@code SO_KEEPALIVE} socket option.
-   */
-  public TcpSettings keepAlive(boolean keepAlive) {
-    return copy(keepAlive, this.noDelay, this.receiveBufferSize,
-        this.sendBufferSize, this.readBufferSize, this.writeBufferSize);
-  }
-
-  /**
-   * Returns {@code true} if TCP should be configured with the {@code
-   * TCP_NODELAY} socket option to disable Nagle's algorithm.
-   */
-  public final boolean noDelay() {
-    return this.noDelay;
-  }
-
-  /**
-   * Returns a copy of these {@code TcpSettings} configured with the given
-   * {@code noDelay} value for the {@code TCP_NODELAY} socket option.
-   */
-  public TcpSettings noDelay(boolean noDelay) {
-    return copy(this.keepAlive, noDelay, this.receiveBufferSize,
-        this.sendBufferSize, this.readBufferSize, this.writeBufferSize);
-  }
-
-  /**
-   * Returns the value of the {@code SO_RCVBUF} socket option with which TCP
-   * should be configured to control the size of receive buffers.
-   */
-  public final int receiveBufferSize() {
-    return this.receiveBufferSize;
-  }
-
-  /**
-   * Returns a copy of these {@code TcpSettings} configured with the given
-   * {@code receiveBufferSize} value for the {@code SO_RCVBUF} socket option.
-   */
-  public TcpSettings receiveBufferSize(int receiveBufferSize) {
-    return copy(this.keepAlive, this.noDelay, receiveBufferSize,
-        this.sendBufferSize, this.readBufferSize, this.writeBufferSize);
-  }
-
-  /**
-   * Returns the value of the {@code SO_SNDBUF} socket option with which TCP
-   * should be configured to control the size of send buffers.
-   */
-  public final int sendBufferSize() {
-    return this.sendBufferSize;
-  }
-
-  /**
-   * Returns a copy of these {@code TcpSettings} configured with the given
-   * {@code sendBufferSize} value for the {@code SO_SNDBUF} socket option.
-   */
-  public TcpSettings sendBufferSize(int sendBufferSize) {
-    return copy(this.keepAlive, this.noDelay, this.receiveBufferSize,
-        sendBufferSize, this.readBufferSize, this.writeBufferSize);
-  }
-
-  /**
-   * Returns the size in bytes of the per-socket userspace buffers into which
-   * data is received.
-   */
-  public final int readBufferSize() {
-    return this.readBufferSize;
-  }
-
-  /**
-   * Returns a copy of these {@code TcpSettings} configured with the given
-   * {@code readBufferSize} for per-socket userspace read buffers.
-   */
-  public TcpSettings readBufferSize(int readBufferSize) {
-    return copy(this.keepAlive, this.noDelay, this.receiveBufferSize,
-        this.sendBufferSize, readBufferSize, this.writeBufferSize);
-  }
-
-  /**
-   * Returns the size in bytes of the per-socket userspace buffers from which
-   * data is sent.
-   */
-  public final int writeBufferSize() {
-    return this.writeBufferSize;
-  }
-
-  /**
-   * Returns a copy of these {@code TcpSettings} configured with the given
-   * {@code writeBufferSize} for per-socket userspace write buffers.
-   */
-  public TcpSettings writeBufferSize(int writeBufferSize) {
-    return copy(this.keepAlive, this.noDelay, this.receiveBufferSize,
-        this.sendBufferSize, this.readBufferSize, writeBufferSize);
-  }
-
-  /**
-   * Returns a new {@code TcpSettings} instance with the given options.
-   * Subclasses may override this method to ensure the proper class is
-   * instantiated when updating settings.
-   */
-  protected TcpSettings copy(boolean keepAlive, boolean noDelay, int receiveBufferSize,
-                             int sendBufferSize, int readBufferSize, int writeBufferSize) {
-    return new TcpSettings(keepAlive, noDelay, receiveBufferSize,
-        sendBufferSize, readBufferSize, writeBufferSize);
-  }
-
-  /**
-   * Configures the {@code socket} with these {@code TcpSettings}.
-   */
-  public void configure(Socket socket) throws SocketException {
-    socket.setKeepAlive(this.keepAlive);
-    socket.setTcpNoDelay(this.noDelay);
-    if (this.receiveBufferSize != 0) {
-      socket.setReceiveBufferSize(this.receiveBufferSize);
-    }
-    if (this.sendBufferSize != 0) {
-      socket.setSendBufferSize(this.sendBufferSize);
-    }
-  }
-
-  /**
-   * Returns a structural {@code Value} representing these {@code TcpSettings}.
-   */
-  public Value toValue() {
-    return form().mold(this).toValue();
-  }
-
-  /**
-   * Returns {@code true} if these {@code TcpSettings} can possibly equal some
-   * {@code other} object.
-   */
-  public boolean canEqual(Object other) {
-    return other instanceof TcpSettings;
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    } else if (other instanceof TcpSettings) {
-      final TcpSettings that = (TcpSettings) other;
-      return that.canEqual(this) && this.keepAlive == that.keepAlive && this.noDelay == that.noDelay
-          && this.receiveBufferSize == that.receiveBufferSize && this.sendBufferSize == that.sendBufferSize
-          && this.readBufferSize == that.readBufferSize && this.writeBufferSize == that.writeBufferSize;
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(TcpSettings.class);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        hashSeed, Murmur3.hash(this.keepAlive)), Murmur3.hash(this.noDelay)), this.receiveBufferSize),
-        this.sendBufferSize), this.readBufferSize), this.writeBufferSize));
-  }
-
-  @Override
-  public void debug(Output<?> output) {
-    output = output.write("TcpSettings").write('.').write("standard").write('(').write(')')
-        .write('.').write("noDelay").write('(').debug(this.noDelay).write(')')
-        .write('.').write("keepAlive").write('(').debug(this.keepAlive).write(')')
-        .write('.').write("receiveBufferSize").write('(').debug(this.receiveBufferSize).write(')')
-        .write('.').write("sendBufferSize").write('(').debug(this.sendBufferSize).write(')')
-        .write('.').write("readBufferSize").write('(').debug(this.readBufferSize).write(')')
-        .write('.').write("writeBufferSize").write('(').debug(this.writeBufferSize).write(')');
-  }
-
-  @Override
-  public String toString() {
-    return Format.debug(this);
+    return TcpSettings.form;
   }
 
 }
@@ -310,7 +314,7 @@ final class TcpSettingsForm extends Form<TcpSettings> {
   public Item mold(TcpSettings settings) {
     if (settings != null) {
       final TcpSettings standard = TcpSettings.standard();
-      final Record record = Record.create(7).attr(tag());
+      final Record record = Record.create(7).attr(this.tag());
       if (settings.keepAlive != standard.keepAlive) {
         record.slot("keepAlive", true);
       }
@@ -338,7 +342,7 @@ final class TcpSettingsForm extends Form<TcpSettings> {
   @Override
   public TcpSettings cast(Item item) {
     final Value value = item.toValue();
-    if (value.getAttr(tag()).isDefined()) {
+    if (value.getAttr(this.tag()).isDefined()) {
       final TcpSettings standard = TcpSettings.standard();
       final boolean keepAlive = value.get("keepAlive").booleanValue(standard.keepAlive);
       final boolean noDelay = value.get("noDelay").booleanValue(standard.noDelay);
@@ -346,8 +350,8 @@ final class TcpSettingsForm extends Form<TcpSettings> {
       final int sendBufferSize = value.get("sendBufferSize").intValue(standard.sendBufferSize);
       final int readBufferSize = value.get("readBufferSize").intValue(standard.readBufferSize);
       final int writeBufferSize = value.get("writeBufferSize").intValue(standard.writeBufferSize);
-      return new TcpSettings(keepAlive, noDelay, receiveBufferSize,
-          sendBufferSize, readBufferSize, writeBufferSize);
+      return new TcpSettings(keepAlive, noDelay, receiveBufferSize, sendBufferSize,
+                             readBufferSize, writeBufferSize);
     }
     return null;
   }

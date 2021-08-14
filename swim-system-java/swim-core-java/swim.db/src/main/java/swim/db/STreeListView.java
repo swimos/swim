@@ -18,7 +18,6 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.structure.Form;
 import swim.structure.Slot;
 import swim.structure.Value;
@@ -39,10 +38,10 @@ public class STreeListView implements List<Value> {
 
   public void loadAsync(Cont<STreeListView> cont) {
     try {
-      final Cont<Tree> andThen = Conts.constant(cont, this);
+      final Cont<Tree> andThen = Cont.constant(cont, this);
       this.tree.loadAsync(andThen);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -68,7 +67,7 @@ public class STreeListView implements List<Value> {
   }
 
   public <V> ValueList<V> valueClass(Class<V> valueClass) {
-    return valueForm(Form.<V>forClass(valueClass));
+    return this.valueForm(Form.<V>forClass(valueClass));
   }
 
   @Override
@@ -92,7 +91,7 @@ public class STreeListView implements List<Value> {
   @Override
   public boolean containsAll(Collection<?> values) {
     for (Object value : values) {
-      if (!(value instanceof Value && contains((Value) value))) {
+      if (!(value instanceof Value && this.contains((Value) value))) {
         return false;
       }
     }

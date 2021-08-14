@@ -14,7 +14,7 @@
 
 package swim.runtime;
 
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 
 public abstract class DownlinkRelay<Model extends DownlinkModel<View>, View extends DownlinkView> implements Runnable {
@@ -34,7 +34,7 @@ public abstract class DownlinkRelay<Model extends DownlinkModel<View>, View exte
     if (this.views instanceof DownlinkView) {
       this.viewCount = 1;
     } else if (this.views instanceof DownlinkView[]) {
-      this.viewCount = ((DownlinkView[]) views).length;
+      this.viewCount = ((DownlinkView[]) this.views).length;
     } else {
       this.viewCount = 0;
     }
@@ -42,7 +42,7 @@ public abstract class DownlinkRelay<Model extends DownlinkModel<View>, View exte
     this.phaseCount = phaseCount;
     this.preemptive = true;
     this.stage = stage;
-    beginPhase(phase);
+    this.beginPhase(this.phase);
   }
 
   protected DownlinkRelay(Model model, int phaseCount) {
@@ -58,7 +58,7 @@ public abstract class DownlinkRelay<Model extends DownlinkModel<View>, View exte
   }
 
   protected void beginPhase(int phase) {
-    // stub
+    // hook
   }
 
   protected boolean runPhase(View view, int phase, boolean preemptive) {
@@ -66,18 +66,18 @@ public abstract class DownlinkRelay<Model extends DownlinkModel<View>, View exte
   }
 
   protected void endPhase(int phase) {
-    // stub
+    // hook
   }
 
   protected void done() {
-    // stub
+    // hook
   }
 
   void pass(View view) {
     do {
       if (this.viewIndex < this.viewCount) {
         try {
-          if (!runPhase(view, this.phase, this.preemptive) && this.preemptive) {
+          if (!this.runPhase(view, this.phase, this.preemptive) && this.preemptive) {
             this.preemptive = false;
             if (this.stage != view.stage) {
               this.stage = view.stage;
@@ -88,23 +88,23 @@ public abstract class DownlinkRelay<Model extends DownlinkModel<View>, View exte
             }
           }
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
+          if (Cont.isNonFatal(error)) {
             view.downlinkDidFail(error);
           }
           throw error;
         }
         this.viewIndex += 1;
       } else if (this.phase < this.phaseCount) {
-        endPhase(this.phase);
+        this.endPhase(this.phase);
         this.viewIndex = 0;
         this.phase += 1;
         this.preemptive = true;
         if (this.phase < this.phaseCount) {
-          beginPhase(this.phase);
+          this.beginPhase(this.phase);
         } else {
-          endPhase(this.phase);
+          this.endPhase(this.phase);
           this.phase += 1;
-          done();
+          this.done();
           return;
         }
       } else {
@@ -119,7 +119,7 @@ public abstract class DownlinkRelay<Model extends DownlinkModel<View>, View exte
       if (this.viewIndex < this.viewCount) {
         final View view = (View) views[this.viewIndex];
         try {
-          if (!runPhase(view, this.phase, this.preemptive) && this.preemptive) {
+          if (!this.runPhase(view, this.phase, this.preemptive) && this.preemptive) {
             this.preemptive = false;
             if (this.stage != view.stage) {
               this.stage = view.stage;
@@ -130,23 +130,23 @@ public abstract class DownlinkRelay<Model extends DownlinkModel<View>, View exte
             }
           }
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
+          if (Cont.isNonFatal(error)) {
             view.downlinkDidFail(error);
           }
           throw error;
         }
         this.viewIndex += 1;
       } else if (this.phase < this.phaseCount) {
-        endPhase(this.phase);
+        this.endPhase(this.phase);
         this.viewIndex = 0;
         this.phase += 1;
         this.preemptive = true;
         if (this.phase < this.phaseCount) {
-          beginPhase(this.phase);
+          this.beginPhase(this.phase);
         } else {
-          endPhase(this.phase);
+          this.endPhase(this.phase);
           this.phase += 1;
-          done();
+          this.done();
           return;
         }
       } else {
@@ -162,12 +162,12 @@ public abstract class DownlinkRelay<Model extends DownlinkModel<View>, View exte
     final long t0 = System.nanoTime();
     try {
       if (this.viewCount == 1) {
-        pass((View) views);
+        this.pass((View) this.views);
       } else if (this.viewCount > 1) {
-        pass((DownlinkView[]) views);
+        this.pass((DownlinkView[]) this.views);
       }
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
+      if (Cont.isNonFatal(error)) {
         this.model.didFail(error);
       } else {
         throw error;

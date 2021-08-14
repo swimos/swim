@@ -38,7 +38,8 @@ final class InvokeOperatorParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.exprParser, this.argsParser, this.step);
+    return InvokeOperatorParser.parse(input, this.recon, this.builder, this.exprParser,
+                                      this.argsParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -98,7 +99,7 @@ final class InvokeOperatorParser<I, V> extends Parser<V> {
             step = 4;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected(')', input));
+          return Parser.error(Diagnostic.expected(')', input));
         }
       }
       if (step == 4) {
@@ -133,22 +134,22 @@ final class InvokeOperatorParser<I, V> extends Parser<V> {
             step = 2;
             continue;
           } else {
-            return error(Diagnostic.expected(')', input));
+            return Parser.error(Diagnostic.expected(')', input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected(')', input));
+          return Parser.error(Diagnostic.expected(')', input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new InvokeOperatorParser<I, V>(recon, builder, exprParser, argsParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, null, 1);
+    return InvokeOperatorParser.parse(input, recon, builder, null, null, 1);
   }
 
 }

@@ -30,10 +30,6 @@ final class HeaderStructure extends CsvStructureHeader {
     this.cols = cols;
   }
 
-  public static HeaderStructure empty() {
-    return new HeaderStructure(FingerTrieSeq.empty());
-  }
-
   @Override
   public int colCount() {
     return this.cols.size();
@@ -98,6 +94,10 @@ final class HeaderStructure extends CsvStructureHeader {
   @Override
   public Builder<Value, Record> tableBuilder() {
     return (Builder<Value, Record>) (Builder<?, ?>) Record.create();
+  }
+
+  public static HeaderStructure empty() {
+    return new HeaderStructure(FingerTrieSeq.empty());
   }
 
 }

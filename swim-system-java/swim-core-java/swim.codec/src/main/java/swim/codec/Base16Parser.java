@@ -30,6 +30,11 @@ final class Base16Parser<O> extends Parser<O> {
     this(output, 0, 1);
   }
 
+  @Override
+  public Parser<O> feed(Input input) {
+    return Base16Parser.parse(input, this.output.clone(), this.p, this.step);
+  }
+
   static <O> Parser<O> parse(Input input, Output<O> output, int p, int step) {
     int c = 0;
     while (!input.isEmpty()) {
@@ -41,10 +46,10 @@ final class Base16Parser<O> extends Parser<O> {
             p = c;
             step = 2;
           } else {
-            return done(output.bind());
+            return Parser.done(output.bind());
           }
         } else if (input.isDone()) {
-          return done(output.bind());
+          return Parser.done(output.bind());
         }
       }
       if (step == 2) {
@@ -56,26 +61,21 @@ final class Base16Parser<O> extends Parser<O> {
             p = 0;
             step = 1;
           } else {
-            return error(Diagnostic.expected("base16 digit", input));
+            return Parser.error(Diagnostic.expected("base16 digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("base16 digit", input));
+          return Parser.error(Diagnostic.expected("base16 digit", input));
         }
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new Base16Parser<O>(output, p, step);
   }
 
   static <O> Parser<O> parse(Input input, Output<O> output) {
-    return parse(input, output, 0, 1);
-  }
-
-  @Override
-  public Parser<O> feed(Input input) {
-    return parse(input, this.output.clone(), this.p, this.step);
+    return Base16Parser.parse(input, output, 0, 1);
   }
 
 }

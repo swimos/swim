@@ -38,7 +38,7 @@ public class JsAgentSpec {
     final Kernel kernel = ServerLoader.loadServerStack().injectKernel(jsKernel);
     final ActorSpaceDef spaceDef = ActorSpaceDef.fromName("test")
         .nodeDef(ActorNodeDef.fromNodePattern("/command/:name")
-            .agentDef(JsAgentDef.fromModulePath("./src/test/js/TestCommandAgent")));
+                             .agentDef(JsAgentDef.fromModulePath("./src/test/js/TestCommandAgent")));
     final ActorSpace space = (ActorSpace) kernel.openSpace(spaceDef);
     final CountDownLatch linkOnEvent = new CountDownLatch(1);
 

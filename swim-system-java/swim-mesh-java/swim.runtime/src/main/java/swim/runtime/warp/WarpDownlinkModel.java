@@ -14,6 +14,7 @@
 
 package swim.runtime.warp;
 
+import swim.runtime.DownlinkModel;
 import swim.runtime.DownlinkRelay;
 import swim.runtime.DownlinkView;
 import swim.runtime.Push;
@@ -37,7 +38,7 @@ public abstract class WarpDownlinkModel<View extends WarpDownlinkView> extends W
 
   @Override
   public final boolean keepLinked() {
-    final Object views = this.views;
+    final Object views = DownlinkModel.VIEWS.get(this);
     if (views instanceof WarpDownlinkView) {
       return ((WarpDownlinkView) views).keepLinked();
     } else if (views instanceof DownlinkView[]) {
@@ -53,7 +54,7 @@ public abstract class WarpDownlinkModel<View extends WarpDownlinkView> extends W
 
   @Override
   public final boolean keepSynced() {
-    final Object views = this.views;
+    final Object views = DownlinkModel.VIEWS.get(this);
     if (views instanceof WarpDownlinkView) {
       return ((WarpDownlinkView) views).keepSynced();
     } else if (views instanceof DownlinkView[]) {
@@ -69,49 +70,49 @@ public abstract class WarpDownlinkModel<View extends WarpDownlinkView> extends W
 
   @Override
   protected void pushDownEvent(Push<EventMessage> push) {
-    onEvent(push.message());
+    this.onEvent(push.message());
     new WarpDownlinkRelayOnEvent<View>(this, push).run();
   }
 
   @Override
   protected void pushDownLinked(Push<LinkedResponse> push) {
-    didLink(push.message());
+    this.didLink(push.message());
     new WarpDownlinkRelayDidLink<View>(this, push).run();
   }
 
   @Override
   protected void pushDownSynced(Push<SyncedResponse> push) {
-    didSync(push.message());
+    this.didSync(push.message());
     new WarpDownlinkRelayDidSync<View>(this, push).run();
   }
 
   @Override
   protected void pushDownUnlinked(Push<UnlinkedResponse> push) {
-    didUnlink(push.message());
+    this.didUnlink(push.message());
     new WarpDownlinkRelayDidUnlink<View>(this, push).run();
   }
 
   @Override
   protected void pullUpCommand(CommandMessage message) {
-    onCommand(message);
+    this.onCommand(message);
     new WarpDownlinkRelayWillCommand<View>(this, message).run();
   }
 
   @Override
   protected void pullUpLink(LinkRequest request) {
-    willLink(request);
+    this.willLink(request);
     new WarpDownlinkRelayWillLink<View>(this, request).run();
   }
 
   @Override
   protected void pullUpSync(SyncRequest request) {
-    willSync(request);
+    this.willSync(request);
     new WarpDownlinkRelayWillSync<View>(this, request).run();
   }
 
   @Override
   protected void pullUpUnlink(UnlinkRequest request) {
-    willUnlink(request);
+    this.willUnlink(request);
     new WarpDownlinkRelayWillUnlink<View>(this, request).run();
   }
 

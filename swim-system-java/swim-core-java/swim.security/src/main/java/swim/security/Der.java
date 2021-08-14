@@ -14,108 +14,30 @@
 
 package swim.security;
 
-import java.math.BigInteger;
-import java.util.Iterator;
-import swim.codec.Binary;
-import swim.codec.Encoder;
-import swim.structure.Num;
-import swim.structure.Record;
 import swim.structure.Value;
-import swim.util.Builder;
 
 final class Der {
 
-  private static DerDecoder<Value> structureDecoder;
-  private static DerEncoder<Value> structureEncoder;
-
   private Der() {
-    // stub
+    // static
   }
+
+  private static DerDecoder<Value> structureDecoder;
 
   public static DerDecoder<Value> structureDecoder() {
-    if (structureDecoder == null) {
-      structureDecoder = new DerStructureDecoder();
+    if (Der.structureDecoder == null) {
+      Der.structureDecoder = new DerStructureDecoder();
     }
-    return structureDecoder;
+    return Der.structureDecoder;
   }
+
+  private static DerEncoder<Value> structureEncoder;
 
   public static DerEncoder<Value> structureEncoder() {
-    if (structureEncoder == null) {
-      structureEncoder = new DerStructureEncoder();
+    if (Der.structureEncoder == null) {
+      Der.structureEncoder = new DerStructureEncoder();
     }
-    return structureEncoder;
-  }
-
-}
-
-class DerStructureDecoder extends DerDecoder<Value> {
-
-  @Override
-  public Value integer(byte[] data) {
-    return Num.from(new BigInteger(data));
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public Builder<Value, Value> sequenceBuilder() {
-    return (Builder<Value, Value>) (Builder<?, ?>) Record.builder();
-  }
-
-}
-
-class DerStructureEncoder extends DerEncoder<Value> {
-
-  @Override
-  public boolean isSequence(Value value) {
-    if (value instanceof Record) {
-      final Record record = (Record) value;
-      return record.isArray();
-    }
-    return false;
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public Iterator<Value> iterator(Value value) {
-    if (value instanceof Record) {
-      final Record record = (Record) value;
-      if (record.isArray()) {
-        return (Iterator<Value>) (Iterator<?>) record.iterator();
-      }
-    }
-    return null;
-  }
-
-  @Override
-  public int tagOf(Value value) {
-    if (value instanceof Num) {
-      return 0x02;
-    } else if (value instanceof Record) {
-      final Record record = (Record) value;
-      if (record.isArray()) {
-        return 0x30;
-      }
-    }
-    throw new IllegalArgumentException(value.toString());
-  }
-
-  @Override
-  public int sizeOfPrimitive(Value value) {
-    if (value instanceof Num) {
-      final BigInteger integer = value.integerValue();
-      return (int) Math.ceil((double) (integer.bitLength() + 1) / 8.0);
-    }
-    throw new IllegalArgumentException(value.toString());
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public Encoder<?, ?> primitiveEncoder(int length, Value value) {
-    if (value instanceof Num) {
-      final BigInteger integer = value.integerValue();
-      return Binary.byteArrayWriter(integer.toByteArray());
-    }
-    throw new IllegalArgumentException(value.toString());
+    return Der.structureEncoder;
   }
 
 }

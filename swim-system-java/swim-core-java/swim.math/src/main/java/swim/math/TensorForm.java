@@ -28,19 +28,19 @@ public abstract class TensorForm<T> extends Form<T> {
   public abstract void toTensor(T object, TensorDims dims, double[] tensor, int offset);
 
   public Item moldTensor(TensorDims dims, float[] tensor, int offset) {
-    return mold(fromTensor(dims, tensor, offset));
+    return this.mold(this.fromTensor(dims, tensor, offset));
   }
 
   public Item moldTensor(TensorDims dims, double[] tensor, int offset) {
-    return mold(fromTensor(dims, tensor, offset));
+    return this.mold(this.fromTensor(dims, tensor, offset));
   }
 
   public void castTensor(Item item, TensorDims dims, float[] tensor, int offset) {
-    toTensor(cast(item), dims, tensor, offset);
+    this.toTensor(cast(item), dims, tensor, offset);
   }
 
   public void castTensor(Item item, TensorDims dims, double[] tensor, int offset) {
-    toTensor(cast(item), dims, tensor, offset);
+    this.toTensor(cast(item), dims, tensor, offset);
   }
 
 }

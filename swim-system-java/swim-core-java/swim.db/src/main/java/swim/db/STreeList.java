@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ThreadLocalRandom;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.structure.Form;
 import swim.structure.Item;
 import swim.structure.Num;
@@ -61,21 +60,21 @@ public class STreeList implements KeyedList<Value> {
   }
 
   public final TreeDelegate treeDelegate() {
-    return tree().treeDelegate();
+    return this.tree().treeDelegate();
   }
 
   public void setTreeDelegate(TreeDelegate treeDelegate) {
-    tree().setTreeDelegate(treeDelegate);
+    this.tree().setTreeDelegate(treeDelegate);
   }
 
   public boolean isResident() {
-    return tree().isResident();
+    return this.tree().isResident();
   }
 
   public STreeList isResident(boolean isResident) {
     do {
       final long newVersion = this.trunk.version();
-      final STree oldTree = tree();
+      final STree oldTree = this.tree();
       final STree newTree = oldTree.isResident(isResident);
       if (oldTree != newTree) {
         if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -89,13 +88,13 @@ public class STreeList implements KeyedList<Value> {
   }
 
   public boolean isTransient() {
-    return tree().isTransient();
+    return this.tree().isTransient();
   }
 
   public STreeList isTransient(boolean isTransient) {
     do {
       final long newVersion = this.trunk.version();
-      final STree oldTree = tree();
+      final STree oldTree = this.tree();
       final STree newTree = oldTree.isTransient(isTransient);
       if (oldTree != newTree) {
         if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -113,35 +112,35 @@ public class STreeList implements KeyedList<Value> {
   }
 
   public <V> ValueList<V> valueClass(Class<V> valueClass) {
-    return valueForm(Form.<V>forClass(valueClass));
+    return this.valueForm(Form.<V>forClass(valueClass));
   }
 
   public STreeListView snapshot() {
-    return new STreeListView(tree());
+    return new STreeListView(this.tree());
   }
 
   @Override
   public boolean isEmpty() {
-    return tree().isEmpty();
+    return this.tree().isEmpty();
   }
 
   @Override
   public int size() {
-    return (int) tree().span();
+    return (int) this.tree().span();
   }
 
   public long span() {
-    return tree().span();
+    return this.tree().span();
   }
 
   public long treeSize() {
-    return tree().treeSize();
+    return this.tree().treeSize();
   }
 
   @Override
   public boolean contains(Object value) {
     if (value instanceof Value) {
-      return contains((Value) value);
+      return this.contains((Value) value);
     }
     return false;
   }
@@ -150,13 +149,13 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        return tree().contains(value);
+        return this.tree().contains(value);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -167,7 +166,7 @@ public class STreeList implements KeyedList<Value> {
   @Override
   public boolean containsAll(Collection<?> values) {
     for (Object value : values) {
-      if (!(value instanceof Value && contains((Value) value))) {
+      if (!(value instanceof Value && this.contains((Value) value))) {
         return false;
       }
     }
@@ -179,18 +178,18 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        final long k = tree().indexOf(object);
+        final long k = this.tree().indexOf(object);
         final int i = (int) k;
         if (i != k) {
           throw new IndexOutOfBoundsException("index overflow");
         }
         return i;
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -203,18 +202,18 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        final long k = tree().lastIndexOf(object);
+        final long k = this.tree().lastIndexOf(object);
         final int i = (int) k;
         if (i != k) {
           throw new IndexOutOfBoundsException("index overflow");
         }
         return i;
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -224,7 +223,7 @@ public class STreeList implements KeyedList<Value> {
 
   @Override
   public Value get(int index) {
-    return get(index, null);
+    return this.get(index, null);
   }
 
   @Override
@@ -232,7 +231,7 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        final STree tree = tree();
+        final STree tree = this.tree();
         if (key != null) {
           index = (int) tree.lookup(index, key);
           if (index < 0) {
@@ -241,11 +240,11 @@ public class STreeList implements KeyedList<Value> {
         }
         return tree.get(index);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -255,7 +254,7 @@ public class STreeList implements KeyedList<Value> {
 
   @Override
   public Map.Entry<Object, Value> getEntry(int index) {
-    return getEntry(index, null);
+    return this.getEntry(index, null);
   }
 
   @SuppressWarnings("unchecked")
@@ -264,7 +263,7 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        final STree tree = tree();
+        final STree tree = this.tree();
         if (key != null) {
           index = (int) tree.lookup(index, key);
           if (index < 0) {
@@ -273,11 +272,11 @@ public class STreeList implements KeyedList<Value> {
         }
         return (Map.Entry<Object, Value>) (Map.Entry<?, ?>) tree.getEntry(index);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -287,7 +286,7 @@ public class STreeList implements KeyedList<Value> {
 
   @Override
   public Value set(int index, Value newValue) {
-    return set(index, newValue, null);
+    return this.set(index, newValue, null);
   }
 
   @Override
@@ -297,7 +296,7 @@ public class STreeList implements KeyedList<Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final STree oldTree = tree();
+        final STree oldTree = this.tree();
         if (key != null) {
           index = (int) oldTree.lookup(index, key);
           if (index < 0) {
@@ -319,11 +318,11 @@ public class STreeList implements KeyedList<Value> {
           return Value.absent();
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -333,7 +332,7 @@ public class STreeList implements KeyedList<Value> {
 
   @Override
   public boolean add(Value newValue) {
-    return add(newValue, null);
+    return this.add(newValue, null);
   }
 
   @Override
@@ -343,8 +342,8 @@ public class STreeList implements KeyedList<Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final STree oldTree = tree();
-        final Value newKey = key instanceof Value ? (Value) key : identify(newValue);
+        final STree oldTree = this.tree();
+        final Value newKey = key instanceof Value ? (Value) key : this.identify(newValue);
         final STree newTree = oldTree.appended(newKey, newValue, newVersion, newPost);
         if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
           final int index = (int) oldTree.span();
@@ -354,11 +353,11 @@ public class STreeList implements KeyedList<Value> {
           return true;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -370,7 +369,7 @@ public class STreeList implements KeyedList<Value> {
   public boolean addAll(Collection<? extends Value> newValues) {
     boolean modified = false;
     for (Value newValue : newValues) {
-      add(newValue);
+      this.add(newValue);
       modified = true;
     }
     return modified;
@@ -378,7 +377,7 @@ public class STreeList implements KeyedList<Value> {
 
   @Override
   public void add(int index, Value newValue) {
-    add(index, newValue, null);
+    this.add(index, newValue, null);
   }
 
   @Override
@@ -388,8 +387,8 @@ public class STreeList implements KeyedList<Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final STree oldTree = tree();
-        final Value newKey = key instanceof Value ? (Value) key : identify(newValue);
+        final STree oldTree = this.tree();
+        final Value newKey = key instanceof Value ? (Value) key : this.identify(newValue);
         final STree newTree = oldTree.inserted(index, newKey, newValue, newVersion, newPost);
         if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
           final TreeContext treeContext = newTree.treeContext();
@@ -398,11 +397,11 @@ public class STreeList implements KeyedList<Value> {
           return;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -414,7 +413,7 @@ public class STreeList implements KeyedList<Value> {
   public boolean addAll(int index, Collection<? extends Value> newValues) {
     boolean modified = false;
     for (Value newValue : newValues) {
-      add(index, newValue);
+      this.add(index, newValue);
       index += 1;
       modified = true;
     }
@@ -423,7 +422,7 @@ public class STreeList implements KeyedList<Value> {
 
   @Override
   public Value remove(int index) {
-    return remove(index, null);
+    return this.remove(index, null);
   }
 
   @Override
@@ -433,7 +432,7 @@ public class STreeList implements KeyedList<Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final STree oldTree = tree();
+        final STree oldTree = this.tree();
         if (key != null) {
           index = (int) oldTree.lookup(index, key);
           if (index < 0) {
@@ -451,11 +450,11 @@ public class STreeList implements KeyedList<Value> {
           return oldValue;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -466,7 +465,7 @@ public class STreeList implements KeyedList<Value> {
   @Override
   public boolean remove(Object value) {
     if (value instanceof Value) {
-      return remove((Value) value);
+      return this.remove((Value) value);
     }
     return false;
   }
@@ -477,7 +476,7 @@ public class STreeList implements KeyedList<Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final STree oldTree = tree();
+        final STree oldTree = this.tree();
         final STree newTree = oldTree.removed(value, newVersion, newPost);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -493,11 +492,11 @@ public class STreeList implements KeyedList<Value> {
           return false;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -512,7 +511,7 @@ public class STreeList implements KeyedList<Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final STree oldTree = tree();
+        final STree oldTree = this.tree();
         Record removed = null;
         STree newTree = oldTree;
         long n = newTree.span();
@@ -545,11 +544,11 @@ public class STreeList implements KeyedList<Value> {
           return false;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -564,7 +563,7 @@ public class STreeList implements KeyedList<Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final STree oldTree = tree();
+        final STree oldTree = this.tree();
         Record removed = null;
         STree newTree = oldTree;
         long n = newTree.span();
@@ -597,11 +596,11 @@ public class STreeList implements KeyedList<Value> {
           return false;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -611,7 +610,7 @@ public class STreeList implements KeyedList<Value> {
 
   @Override
   public void move(int fromIndex, int toIndex) {
-    move(fromIndex, toIndex, null);
+    this.move(fromIndex, toIndex, null);
   }
 
   @Override
@@ -621,7 +620,7 @@ public class STreeList implements KeyedList<Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final STree oldTree = tree();
+        final STree oldTree = this.tree();
         if (key != null) {
           fromIndex = (int) oldTree.lookup(fromIndex, key);
           if (fromIndex < 0) {
@@ -639,7 +638,7 @@ public class STreeList implements KeyedList<Value> {
           final Value oldKey = slot.key();
           final Value oldValue = slot.value();
           final STree newTree = oldTree.removed(fromIndex, newVersion, newPost)
-              .inserted(toIndex, oldKey, oldValue, newVersion, newPost);
+                                       .inserted(toIndex, oldKey, oldValue, newVersion, newPost);
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
             final TreeContext treeContext = newTree.treeContext();
             treeContext.streeDidMove(newTree, oldTree, fromIndex, toIndex, oldKey, oldValue);
@@ -648,11 +647,11 @@ public class STreeList implements KeyedList<Value> {
           }
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -666,7 +665,7 @@ public class STreeList implements KeyedList<Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final STree oldTree = tree();
+        final STree oldTree = this.tree();
         final STree newTree = oldTree.drop(lower, newVersion, newPost);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -679,11 +678,11 @@ public class STreeList implements KeyedList<Value> {
           return;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -697,7 +696,7 @@ public class STreeList implements KeyedList<Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final STree oldTree = tree();
+        final STree oldTree = this.tree();
         final STree newTree = oldTree.take(upper, newVersion, newPost);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -710,11 +709,11 @@ public class STreeList implements KeyedList<Value> {
           return;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -728,7 +727,7 @@ public class STreeList implements KeyedList<Value> {
     do {
       final long newVersion = this.trunk.version();
       try {
-        final STree oldTree = tree();
+        final STree oldTree = this.tree();
         final STree newTree = oldTree.cleared(newVersion);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -741,7 +740,7 @@ public class STreeList implements KeyedList<Value> {
           return;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
         } else {
           throw error;
@@ -755,7 +754,7 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        final STree tree = tree();
+        final STree tree = this.tree();
         final long k = tree.span();
         final int n = (int) k;
         if (n != k) {
@@ -765,11 +764,11 @@ public class STreeList implements KeyedList<Value> {
         tree.copyToArray(array, 0);
         return array;
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -783,7 +782,7 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        final STree tree = tree();
+        final STree tree = this.tree();
         final long k = tree.span();
         final int n = (int) k;
         if (n != k) {
@@ -798,11 +797,11 @@ public class STreeList implements KeyedList<Value> {
         }
         return array;
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -815,13 +814,13 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        return Cursor.values(tree().cursor());
+        return Cursor.values(this.tree().cursor());
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -834,13 +833,13 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        return Cursor.values(tree().cursor());
+        return Cursor.values(this.tree().cursor());
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -853,15 +852,15 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        final Cursor<Slot> cursor = tree().cursor();
+        final Cursor<Slot> cursor = this.tree().cursor();
         cursor.skip(index);
         return Cursor.values(cursor);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -874,13 +873,13 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        return Cursor.<Object>keys(tree().cursor());
+        return Cursor.<Object>keys(this.tree().cursor());
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -894,13 +893,13 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        return (Cursor<Map.Entry<Object, Value>>) (Cursor<?>) tree().cursor();
+        return (Cursor<Map.Entry<Object, Value>>) (Cursor<?>) this.tree().cursor();
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -912,13 +911,13 @@ public class STreeList implements KeyedList<Value> {
     int retries = 0;
     do {
       try {
-        return Cursor.values(tree().depthCursor(maxDepth));
+        return Cursor.values(this.tree().depthCursor(maxDepth));
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -936,11 +935,11 @@ public class STreeList implements KeyedList<Value> {
         }
         return new STreeSubList(this, fromIndex, toIndex);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -956,15 +955,15 @@ public class STreeList implements KeyedList<Value> {
   protected void didFail(StoreException error) {
     System.err.println(error.getMessage());
     error.printStackTrace();
-    clear();
+    this.clear();
   }
 
   public void loadAsync(Cont<STreeList> cont) {
     try {
-      final Cont<Tree> andThen = Conts.constant(cont, this);
-      tree().loadAsync(andThen);
+      final Cont<Tree> andThen = Cont.constant(cont, this);
+      this.tree().loadAsync(andThen);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -973,7 +972,7 @@ public class STreeList implements KeyedList<Value> {
   }
 
   public STreeList load() throws InterruptedException {
-    tree().load();
+    this.tree().load();
     return this;
   }
 
@@ -981,7 +980,7 @@ public class STreeList implements KeyedList<Value> {
     try {
       this.trunk.commitAsync(commit);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         commit.trap(cause);
       } else {
         throw cause;

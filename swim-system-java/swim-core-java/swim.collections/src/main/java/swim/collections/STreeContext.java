@@ -35,11 +35,11 @@ public abstract class STreeContext<T> {
   }
 
   protected boolean pageShouldSplit(STreePage<T> page) {
-    return page.arity() > pageSplitSize();
+    return page.arity() > this.pageSplitSize();
   }
 
   protected boolean pageShouldMerge(STreePage<T> page) {
-    return page.arity() < pageSplitSize() >>> 1;
+    return page.arity() < this.pageSplitSize() >>> 1;
   }
 
 }

@@ -21,12 +21,12 @@ public class AvroNamespaceSpec {
 
   @Test
   public void parseSingleComponentNamespaces() {
-    assertEquals(AvroNamespace.parse("foo"), AvroNamespace.from("foo"));
+    assertEquals(AvroNamespace.parse("foo"), AvroNamespace.of("foo"));
   }
 
   @Test
   public void parseMultiComponentNamespaces() {
-    assertEquals(AvroNamespace.parse("com.example"), AvroNamespace.from("com", "example"));
+    assertEquals(AvroNamespace.parse("com.example"), AvroNamespace.of("com", "example"));
   }
 
 }

@@ -51,7 +51,7 @@ public class StageClock extends Clock {
    * {@code stage}.
    */
   public StageClock(Stage stage) {
-    this(stage, TICK_MILLIS, TICK_COUNT);
+    this(stage, Clock.TICK_MILLIS, Clock.TICK_COUNT);
   }
 
   /**

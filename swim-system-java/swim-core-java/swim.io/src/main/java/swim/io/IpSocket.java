@@ -19,7 +19,7 @@ package swim.io;
  * non-blocking NIO network channel.
  * <p>
  * An {@code IpSocket} interfaces with the underlying asynchronous networking
- * system via an {@link IpSocketContext}.  The socket context invokes I/O
+ * system via an {@link IpSocketContext}. The socket context invokes I/O
  * callbacks on the {@code IpSocket} when the underlying network socket is
  * ready to perform I/O operations permitted by the socket context's {@link
  * FlowControl}.
@@ -39,8 +39,8 @@ public interface IpSocket {
 
   /**
    * Returns the number of idle milliseconds after which this {@code IpSocket}
-   * should be closed due to inactivity.  Returns {@code -1} if a default idle
-   * timeout should be used.  Returns {@code 0} if the underlying network
+   * should be closed due to inactivity. Returns {@code -1} if a default idle
+   * timeout should be used. Returns {@code 0} if the underlying network
    * socket should not time out.
    */
   long idleTimeout();
@@ -48,7 +48,7 @@ public interface IpSocket {
   /**
    * I/O callback invoked by the socket context asking this {@code IpSocket}
    * to read input data out of the socket context's {@link
-   * IpSocketContext#inputBuffer() inputBuffer}.  May be invoked concurrently
+   * IpSocketContext#inputBuffer() inputBuffer}. May be invoked concurrently
    * to other I/O callbacks, but never concurrently with other {@code doRead}
    * calls.
    */
@@ -57,7 +57,7 @@ public interface IpSocket {
   /**
    * I/O callback invoked by the socket context asking this {@code IpSocket}
    * to write output data into the socket context's {@link
-   * IpSocketContext#outputBuffer() outputBuffer}.  May be invoked concurrently
+   * IpSocketContext#outputBuffer() outputBuffer}. May be invoked concurrently
    * to other I/O callbacks, but never concurrently with other {@code doWrite}
    * or {@code didWrite} calls.
    */
@@ -65,7 +65,7 @@ public interface IpSocket {
 
   /**
    * I/O callback invoked by the socket context after the underlying network
-   * socket has completed writing all data in its {@code outputBuffer}.  May be
+   * socket has completed writing all data in its {@code outputBuffer}. May be
    * invoked concurrently to other I/O callbacks, but never concurrently with
    * other {@code doWrite} or {@code didWrite} calls.
    */
@@ -111,7 +111,7 @@ public interface IpSocket {
 
   /**
    * Lifecycle callback invoked by the socket context after the underlying
-   * network connection has timed out.  The socket will automatically be closed.
+   * network connection has timed out. The socket will automatically be closed.
    */
   void didTimeout();
 
@@ -123,7 +123,7 @@ public interface IpSocket {
 
   /**
    * Lifecycle callback invoked by the socket context when the underlying
-   * network socket fails by throwing an {@code error}.  The socket will
+   * network socket fails by throwing an {@code error}. The socket will
    * automatically be closed.
    */
   void didFail(Throwable error);

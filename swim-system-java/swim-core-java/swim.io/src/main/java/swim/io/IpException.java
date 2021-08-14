@@ -16,8 +16,6 @@ package swim.io;
 
 public class IpException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public IpException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class IpException extends RuntimeException {
   public IpException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

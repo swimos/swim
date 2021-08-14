@@ -36,6 +36,11 @@ final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<UpgradeProtocol> feed(Input input) {
+    return UpgradeProtocolParser.parse(input, this.http, this.name, this.version, this.step);
+  }
+
   static Parser<UpgradeProtocol> parse(Input input, HttpParser http, StringBuilder name,
                                        StringBuilder version, int step) {
     int c = 0;
@@ -50,10 +55,10 @@ final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
           name.appendCodePoint(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("upgrade protocol name", input));
+          return Parser.error(Diagnostic.expected("upgrade protocol name", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("upgrade protocol name", input));
+        return Parser.error(Diagnostic.expected("upgrade protocol name", input));
       }
     }
     if (step == 2) {
@@ -70,7 +75,7 @@ final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
         input = input.step();
         step = 3;
       } else if (!input.isEmpty()) {
-        return done(http.upgradeProtocol(name.toString(), ""));
+        return Parser.done(http.upgradeProtocol(name.toString(), ""));
       }
     }
     if (step == 3) {
@@ -84,10 +89,10 @@ final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
           version.appendCodePoint(c);
           step = 4;
         } else {
-          return error(Diagnostic.expected("upgrade protocol version", input));
+          return Parser.error(Diagnostic.expected("upgrade protocol version", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("upgrade protocol version", input));
+        return Parser.error(Diagnostic.expected("upgrade protocol version", input));
       }
     }
     if (step == 4) {
@@ -101,22 +106,17 @@ final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
         }
       }
       if (!input.isEmpty()) {
-        return done(http.upgradeProtocol(name.toString(), version.toString()));
+        return Parser.done(http.upgradeProtocol(name.toString(), version.toString()));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new UpgradeProtocolParser(http, name, version, step);
   }
 
   static Parser<UpgradeProtocol> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<UpgradeProtocol> feed(Input input) {
-    return parse(input, this.http, this.name, this.version, this.step);
+    return UpgradeProtocolParser.parse(input, http, null, null, 1);
   }
 
 }

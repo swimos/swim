@@ -33,10 +33,6 @@ import swim.util.Murmur3;
  */
 public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Cloneable, Debug {
 
-  @SuppressWarnings("rawtypes")
-  static final AtomicReferenceFieldUpdater<STreeList, STreePage> ROOT =
-      AtomicReferenceFieldUpdater.newUpdater(STreeList.class, STreePage.class, "root");
-  private static int hashSeed;
   volatile STreePage<T> root;
 
   protected STreeList(STreePage<T> root) {
@@ -47,37 +43,32 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
     this(STreePage.<T>empty());
   }
 
-  public static <T> STreeList<T> empty() {
-    return new STreeList<T>();
-  }
-
   @SuppressWarnings("unchecked")
-  public static <T> STree<T> of(T... values) {
-    final STree<T> tree = new STree<T>();
-    for (T value : values) {
-      tree.add(value);
-    }
-    return tree;
+  final STreePage<T> root() {
+    return (STreePage<T>) STreeList.ROOT.get(this);
   }
 
   @Override
   public boolean isEmpty() {
-    return this.root.isEmpty();
+    final STreePage<T> root = this.root();
+    return root.isEmpty();
   }
 
   @Override
   public int size() {
-    return this.root.size();
+    final STreePage<T> root = this.root();
+    return root.size();
   }
 
   @Override
   public boolean contains(Object value) {
-    return this.root.contains(value);
+    final STreePage<T> root = this.root();
+    return root.contains(value);
   }
 
   @Override
   public boolean containsAll(Collection<?> values) {
-    final STreePage<T> root = this.root;
+    final STreePage<T> root = this.root();
     for (Object value : values) {
       if (!root.contains(value)) {
         return false;
@@ -88,67 +79,71 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
 
   @Override
   public int indexOf(Object value) {
-    return this.root.indexOf(value);
+    final STreePage<T> root = this.root();
+    return root.indexOf(value);
   }
 
   @Override
   public int lastIndexOf(Object value) {
-    return this.root.lastIndexOf(value);
+    final STreePage<T> root = this.root();
+    return root.lastIndexOf(value);
   }
 
   @Override
   public T get(int index) {
-    return get(index, null);
+    return this.get(index, null);
   }
 
   @Override
   public T get(int index, Object key) {
+    final STreePage<T> root = this.root();
     if (key != null) {
-      index = lookup(index, key);
+      index = this.lookup(index, key, root);
       if (index < 0) {
         return null;
       }
     }
-    return this.root.get(index);
+    return root.get(index);
   }
 
   @Override
   public Map.Entry<Object, T> getEntry(int index) {
-    return getEntry(index, null);
+    return this.getEntry(index, null);
   }
 
   @Override
   public Map.Entry<Object, T> getEntry(int index, Object key) {
+    final STreePage<T> root = this.root();
     if (key != null) {
-      index = lookup(index, key);
+      index = this.lookup(index, key, root);
       if (index < 0) {
         return null;
       }
     }
-    return size() <= index ? null : this.root.getEntry(index);
+    return root.size() <= index ? null : root.getEntry(index);
   }
 
   @Override
   public T set(int index, T newValue) {
-    return set(index, newValue, null);
+    return this.set(index, newValue, null);
   }
 
   @Override
   public T set(int index, T newValue, Object key) {
-    if (key != null) {
-      index = lookup(index, key);
-      if (index < 0) {
-        throw new NoSuchElementException(key.toString());
-      }
-    }
     do {
-      final STreePage<T> oldRoot = this.root;
+      final STreePage<T> oldRoot = this.root();
+      if (key != null) {
+        index = this.lookup(index, key, oldRoot);
+        if (index < 0) {
+          throw new NoSuchElementException(key.toString());
+        }
+      }
       if (index < 0 || index >= oldRoot.size()) {
         throw new IndexOutOfBoundsException(Integer.toString(index));
       }
       final STreePage<T> newRoot = oldRoot.updated(index, newValue, this);
       if (oldRoot != newRoot) {
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (STreeList.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           return oldRoot.get(index);
         }
       } else {
@@ -159,15 +154,15 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
 
   @Override
   public boolean add(T newValue) {
-    return add(newValue, null);
+    return this.add(newValue, null);
   }
 
   @Override
   public boolean add(T newValue, Object key) {
     do {
-      final STreePage<T> oldRoot = this.root;
+      final STreePage<T> oldRoot = this.root();
       final STreePage<T> newRoot = oldRoot.appended(newValue, key, this).balanced(this);
-      if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+      if (STreeList.ROOT.compareAndSet(this, oldRoot, newRoot)) {
         return true;
       }
     } while (true);
@@ -177,7 +172,7 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
   public boolean addAll(Collection<? extends T> newValues) {
     boolean modified = false;
     for (T newValue : newValues) {
-      add(newValue);
+      this.add(newValue);
       modified = true;
     }
     return modified;
@@ -185,18 +180,18 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
 
   @Override
   public void add(int index, T newValue) {
-    add(index, newValue, null);
+    this.add(index, newValue, null);
   }
 
   @Override
   public void add(int index, T newValue, Object key) {
     do {
-      final STreePage<T> oldRoot = this.root;
+      final STreePage<T> oldRoot = this.root();
       if (index < 0 || index > oldRoot.size()) {
         throw new IndexOutOfBoundsException(Integer.toString(index));
       }
       final STreePage<T> newRoot = oldRoot.inserted(index, newValue, key, this).balanced(this);
-      if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+      if (STreeList.ROOT.compareAndSet(this, oldRoot, newRoot)) {
         return;
       }
     } while (true);
@@ -206,7 +201,7 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
   public boolean addAll(int index, Collection<? extends T> newValues) {
     boolean modified = false;
     for (T newValue : newValues) {
-      add(index, newValue);
+      this.add(index, newValue);
       index += 1;
       modified = true;
     }
@@ -215,25 +210,22 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
 
   @Override
   public T remove(int index) {
-    return remove(index, null);
+    return this.remove(index, null);
   }
 
   @Override
   public T remove(int index, Object key) {
-    if (key != null) {
-      index = lookup(index, key);
-      if (index < 0) {
-        return null;
-      }
-    }
     do {
-      final STreePage<T> oldRoot = this.root;
+      final STreePage<T> oldRoot = this.root();
+      if (key != null) {
+        index = this.lookup(index, key, oldRoot);
+      }
       if (index < 0 || index > oldRoot.size()) {
         return null;
       }
       final STreePage<T> newRoot = oldRoot.removed(index, this);
       if (oldRoot != newRoot) {
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (STreeList.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           return oldRoot.get(index);
         }
       } else {
@@ -245,10 +237,10 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
   @Override
   public boolean remove(Object value) {
     do {
-      final STreePage<T> oldRoot = this.root;
+      final STreePage<T> oldRoot = this.root();
       final STreePage<T> newRoot = oldRoot.removed(value, this);
       if (oldRoot != newRoot) {
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (STreeList.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           return true;
         }
       } else {
@@ -260,7 +252,7 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
   @Override
   public boolean removeAll(Collection<?> values) {
     do {
-      final STreePage<T> oldRoot = this.root;
+      final STreePage<T> oldRoot = this.root();
       STreePage<T> newRoot = oldRoot;
       int n = newRoot.size();
       int i = 0;
@@ -274,7 +266,7 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
         }
       }
       if (oldRoot != newRoot) {
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (STreeList.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           return true;
         }
       } else {
@@ -286,7 +278,7 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
   @Override
   public boolean retainAll(Collection<?> values) {
     do {
-      final STreePage<T> oldRoot = this.root;
+      final STreePage<T> oldRoot = this.root();
       STreePage<T> newRoot = oldRoot;
       int n = newRoot.size();
       int i = 0;
@@ -300,7 +292,7 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
         }
       }
       if (oldRoot != newRoot) {
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (STreeList.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           return true;
         }
       } else {
@@ -311,19 +303,19 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
 
   @Override
   public void move(int fromIndex, int toIndex) {
-    move(fromIndex, toIndex, null);
+    this.move(fromIndex, toIndex, null);
   }
 
   @Override
   public void move(int fromIndex, int toIndex, Object key) {
-    if (key != null) {
-      fromIndex = lookup(fromIndex, key);
-      if (fromIndex < 0) {
-        throw new NoSuchElementException(key.toString());
-      }
-    }
     do {
-      final STreePage<T> oldRoot = this.root;
+      final STreePage<T> oldRoot = this.root();
+      if (key != null) {
+        fromIndex = this.lookup(fromIndex, key, oldRoot);
+        if (fromIndex < 0) {
+          throw new NoSuchElementException(key.toString());
+        }
+      }
       if (fromIndex < 0 || fromIndex >= oldRoot.size()) {
         throw new IndexOutOfBoundsException(Integer.toString(fromIndex));
       }
@@ -333,9 +325,9 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
       if (fromIndex != toIndex) {
         final Map.Entry<Object, T> entry = oldRoot.getEntry(fromIndex);
         final STreePage<T> newRoot = oldRoot.removed(fromIndex, this)
-            .inserted(toIndex, entry.getValue(), entry.getKey(), this)
-            .balanced(this);
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+                                            .inserted(toIndex, entry.getValue(), entry.getKey(), this)
+                                            .balanced(this);
+        if (STreeList.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           break;
         }
       } else {
@@ -346,7 +338,7 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
 
   public void drop(int lower) {
     do {
-      final STreePage<T> oldRoot = this.root;
+      final STreePage<T> oldRoot = this.root();
       if (lower > 0 && oldRoot.size() > 0) {
         final STreePage<T> newRoot;
         if (lower < oldRoot.size()) {
@@ -354,7 +346,7 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
         } else {
           newRoot = STreePage.<T>empty();
         }
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (STreeList.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           break;
         }
       } else {
@@ -365,7 +357,7 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
 
   public void take(int keep) {
     do {
-      final STreePage<T> oldRoot = this.root;
+      final STreePage<T> oldRoot = this.root();
       if (keep < oldRoot.size() && oldRoot.size() > 0) {
         final STreePage<T> newRoot;
         if (keep > 0) {
@@ -373,7 +365,7 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
         } else {
           newRoot = STreePage.<T>empty();
         }
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (STreeList.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           break;
         }
       } else {
@@ -383,15 +375,22 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
   }
 
   public void clear() {
-    STreePage<T> oldRoot;
     do {
-      oldRoot = this.root;
-    } while (!ROOT.compareAndSet(this, oldRoot, STreePage.<T>empty()));
+      final STreePage<T> oldRoot = this.root();
+      final STreePage<T> newRoot = STreePage.empty();
+      if (oldRoot != newRoot) {
+        if (STreeList.ROOT.compareAndSet(this, oldRoot, newRoot)) {
+          break;
+        }
+      } else {
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public Object[] toArray() {
-    final STreePage<T> root = this.root;
+    final STreePage<T> root = this.root();
     final int n = root.size();
     final Object[] array = new Object[n];
     root.copyToArray(array, 0);
@@ -401,7 +400,7 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
   @SuppressWarnings("unchecked")
   @Override
   public <U> U[] toArray(U[] array) {
-    final STreePage<T> root = this.root;
+    final STreePage<T> root = this.root();
     final int n = root.size();
     if (array.length < n) {
       array = (U[]) Array.newInstance(array.getClass().getComponentType(), n);
@@ -415,45 +414,53 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
 
   @Override
   public Cursor<T> iterator() {
-    return this.root.iterator();
+    final STreePage<T> root = this.root();
+    return root.iterator();
   }
 
   @Override
   public Cursor<T> listIterator() {
-    return this.root.iterator();
+    final STreePage<T> root = this.root();
+    return root.iterator();
   }
 
   @Override
   public Cursor<T> listIterator(int index) {
-    final Cursor<T> cursor = listIterator();
+    final Cursor<T> cursor = this.listIterator();
     cursor.skip(index);
     return cursor;
   }
 
   @Override
   public Cursor<Object> keyIterator() {
-    return this.root.keyIterator();
+    final STreePage<T> root = this.root();
+    return root.keyIterator();
   }
 
   @Override
   public Cursor<Map.Entry<Object, T>> entryIterator() {
-    return this.root.entryIterator();
+    final STreePage<T> root = this.root();
+    return root.entryIterator();
   }
 
   public Cursor<T> reverseIterator() {
-    return this.root.reverseIterator();
+    final STreePage<T> root = this.root();
+    return root.reverseIterator();
   }
 
   public Cursor<Object> reverseKeyIterator() {
-    return this.root.reverseKeyIterator();
+    final STreePage<T> root = this.root();
+    return root.reverseKeyIterator();
   }
 
   public Cursor<Map.Entry<Object, T>> reverseEntryIterator() {
-    return this.root.reverseEntryIterator();
+    final STreePage<T> root = this.root();
+    return root.reverseEntryIterator();
   }
 
   public STree<T> snapshot() {
-    return new STree<T>(this.root);
+    final STreePage<T> root = this.root();
+    return new STree<T>(root);
   }
 
   @Override
@@ -465,21 +472,21 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
   }
 
   public STree<T> clone() {
-    return copy(this.root);
+    final STreePage<T> root = this.root();
+    return this.copy(root);
   }
 
   protected STree<T> copy(STreePage<T> root) {
     return new STree<T>(root);
   }
 
-  protected int lookup(int start, Object key) {
-    final STreePage<T> root = this.root;
+  protected int lookup(int start, Object key, STreePage<T> root) {
     start = Math.min(Math.max(0, start), root.size() - 1);
     if (start > -1) { // when root.size() is 0
       int index = start;
       do {
         final Map.Entry<Object, T> entry = root.getEntry(index);
-        if (entry != null && compare(entry.getKey(), key) == 0) {
+        if (entry != null && this.compare(entry.getKey(), key) == 0) {
           return index;
         }
         index = (index + 1) % root.size();
@@ -495,8 +502,9 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
       return true;
     } else if (other instanceof STree<?>) {
       final STree<T> that = (STree<T>) other;
-      if (this.size() == that.size()) {
-        final Cursor<T> these = iterator();
+      final STreePage<T> root = this.root();
+      if (root.size() == that.size()) {
+        final Cursor<T> these = root.iterator();
         final Cursor<T> those = that.iterator();
         while (these.hasNext() && those.hasNext()) {
           final T x = these.next();
@@ -511,13 +519,15 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(STree.class);
+    if (STreeList.hashSeed == 0) {
+      STreeList.hashSeed = Murmur3.seed(STree.class);
     }
-    int h = hashSeed;
-    final Cursor<T> these = iterator();
+    int h = STreeList.hashSeed;
+    final Cursor<T> these = this.iterator();
     while (these.hasNext()) {
       h = Murmur3.mix(h, Murmur3.hash(these.next()));
     }
@@ -525,9 +535,9 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <U> Output<U> debug(Output<U> output) {
     output = output.write("STreeList").write('.');
-    final Cursor<T> these = iterator();
+    final Cursor<T> these = this.iterator();
     if (these.hasNext()) {
       output = output.write("of").write('(').debug(these.next());
       while (these.hasNext()) {
@@ -537,11 +547,29 @@ public class STreeList<T> extends STreeContext<T> implements KeyedList<T>, Clone
       output = output.write("empty").write('(');
     }
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  @SuppressWarnings("rawtypes")
+  static final AtomicReferenceFieldUpdater<STreeList, STreePage> ROOT =
+      AtomicReferenceFieldUpdater.newUpdater(STreeList.class, STreePage.class, "root");
+
+  public static <T> STreeList<T> empty() {
+    return new STreeList<T>();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> STree<T> of(T... values) {
+    final STree<T> tree = new STree<T>();
+    for (T value : values) {
+      tree.add(value);
+    }
+    return tree;
   }
 
 }

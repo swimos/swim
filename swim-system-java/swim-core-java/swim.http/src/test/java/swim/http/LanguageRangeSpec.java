@@ -19,33 +19,33 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class LanguageRangeSpec {
 
-  public void assertParses(String string, LanguageRange language) {
-    HttpAssertions.assertParses(Http.standardParser().languageRangeParser(), string, language);
-  }
-
   @Test
   public void parseLanguageRanges() {
     assertParses("*", LanguageRange.star());
-    assertParses("en", LanguageRange.from("en"));
-    assertParses("en-US", LanguageRange.from("en", "US"));
+    assertParses("en", LanguageRange.create("en"));
+    assertParses("en-US", LanguageRange.create("en", "US"));
   }
 
   @Test
   public void writeLanguageRanges() {
     assertWrites(LanguageRange.star(), "*");
-    assertWrites(LanguageRange.from("en"), "en");
-    assertWrites(LanguageRange.from("en", "US"), "en-US");
+    assertWrites(LanguageRange.create("en"), "en");
+    assertWrites(LanguageRange.create("en", "US"), "en-US");
   }
 
   @Test
   public void parseLanguageRangesWithWeights() {
-    assertParses("en-US;q=0.5", LanguageRange.from("en", "US", 0.5f));
-    assertParses("en-US ; q=0.5", LanguageRange.from("en", "US", 0.5f));
+    assertParses("en-US;q=0.5", LanguageRange.create("en", "US", 0.5f));
+    assertParses("en-US ; q=0.5", LanguageRange.create("en", "US", 0.5f));
   }
 
   @Test
   public void writeLanguageRangesWithWeights() {
-    assertWrites(LanguageRange.from("en", "US", 0.5f), "en-US; q=0.5");
+    assertWrites(LanguageRange.create("en", "US", 0.5f), "en-US; q=0.5");
+  }
+
+  public static void assertParses(String string, LanguageRange language) {
+    HttpAssertions.assertParses(Http.standardParser().languageRangeParser(), string, language);
   }
 
 }

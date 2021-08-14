@@ -36,6 +36,7 @@ public class HostProxy implements HostBinding, HostContext {
 
   public HostProxy(HostBinding hostBinding) {
     this.hostBinding = hostBinding;
+    this.hostContext = null;
   }
 
   @Override
@@ -59,7 +60,7 @@ public class HostProxy implements HostBinding, HostContext {
 
   @Override
   public final HostContext hostContext() {
-    return hostContext;
+    return this.hostContext;
   }
 
   @Override
@@ -71,7 +72,7 @@ public class HostProxy implements HostBinding, HostContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapHost(Class<T> hostClass) {
-    if (hostClass.isAssignableFrom(getClass())) {
+    if (hostClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.hostContext.unwrapHost(hostClass);
@@ -82,7 +83,7 @@ public class HostProxy implements HostBinding, HostContext {
   @Override
   public <T> T bottomHost(Class<T> hostClass) {
     T host = this.hostContext.bottomHost(hostClass);
-    if (host == null && hostClass.isAssignableFrom(getClass())) {
+    if (host == null && hostClass.isAssignableFrom(this.getClass())) {
       host = (T) this;
     }
     return host;

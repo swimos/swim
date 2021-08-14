@@ -16,24 +16,6 @@ package swim.math;
 
 public abstract class Distribution {
 
-  public static Distribution sigmoidUniform(Random random, double fanIn, double fanOut) {
-    final double r = 4.0 * Math.sqrt(6.0 / (fanIn + fanOut));
-    return new UniformDistribution(-r, r);
-  }
-
-  public static Distribution sigmoidUniform(double fanIn, double fanOut) {
-    return sigmoidUniform(Random.get(), fanIn, fanOut);
-  }
-
-  public static Distribution reluUniform(Random random, double fanIn, double fanOut) {
-    final double u = Math.sqrt(6.0 / fanIn);
-    return new UniformDistribution(-u, u);
-  }
-
-  public static Distribution reluUniform(double fanIn, double fanOut) {
-    return reluUniform(Random.get(), fanIn, fanOut);
-  }
-
   public abstract double density(double x);
 
   public abstract double sample();
@@ -41,11 +23,11 @@ public abstract class Distribution {
   public MutableTensor sample(TensorDims dims, Precision prec) {
     if (prec.isDouble()) {
       final double[] us = new double[dims.size * dims.stride];
-      sample(dims, us, 0);
+      this.sample(dims, us, 0);
       return new MutableTensor(dims, us);
     } else if (prec.isSingle()) {
       final float[] us = new float[dims.size * dims.stride];
-      sample(dims, us, 0);
+      this.sample(dims, us, 0);
       return new MutableTensor(dims, us);
     } else {
       throw new IllegalArgumentException(prec.toString());
@@ -56,12 +38,12 @@ public abstract class Distribution {
     final int un = ui + ud.size * ud.stride;
     if (ud.next != null) {
       while (ui < un) {
-        sample(ud.next, us, ui);
+        this.sample(ud.next, us, ui);
         ui += ud.stride;
       }
     } else {
       while (ui < un) {
-        us[ui] = sample();
+        us[ui] = this.sample();
         ui += ud.stride;
       }
     }
@@ -71,15 +53,33 @@ public abstract class Distribution {
     final int un = ui + ud.size * ud.stride;
     if (ud.next != null) {
       while (ui < un) {
-        sample(ud.next, us, ui);
+        this.sample(ud.next, us, ui);
         ui += ud.stride;
       }
     } else {
       while (ui < un) {
-        us[ui] = (float) sample();
+        us[ui] = (float) this.sample();
         ui += ud.stride;
       }
     }
+  }
+
+  public static Distribution sigmoidUniform(Random random, double fanIn, double fanOut) {
+    final double r = 4.0 * Math.sqrt(6.0 / (fanIn + fanOut));
+    return new UniformDistribution(-r, r);
+  }
+
+  public static Distribution sigmoidUniform(double fanIn, double fanOut) {
+    return Distribution.sigmoidUniform(Random.get(), fanIn, fanOut);
+  }
+
+  public static Distribution reluUniform(Random random, double fanIn, double fanOut) {
+    final double u = Math.sqrt(6.0 / fanIn);
+    return new UniformDistribution(-u, u);
+  }
+
+  public static Distribution reluUniform(double fanIn, double fanOut) {
+    return Distribution.reluUniform(Random.get(), fanIn, fanOut);
   }
 
 }

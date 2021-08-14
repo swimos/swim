@@ -49,12 +49,12 @@ public final class NodeAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public NodeAddress meshUri(Uri meshUri) {
-    return copy(this.edgeName, meshUri, this.partKey, this.hostUri, this.nodeUri);
+    return this.copy(this.edgeName, meshUri, this.partKey, this.hostUri, this.nodeUri);
   }
 
   @Override
   public NodeAddress meshUri(String meshUri) {
-    return meshUri(Uri.parse(meshUri));
+    return this.meshUri(Uri.parse(meshUri));
   }
 
   @Override
@@ -64,7 +64,7 @@ public final class NodeAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public NodeAddress partKey(Value partKey) {
-    return copy(this.edgeName, this.meshUri, partKey, this.hostUri, this.nodeUri);
+    return this.copy(this.edgeName, this.meshUri, partKey, this.hostUri, this.nodeUri);
   }
 
   @Override
@@ -74,12 +74,12 @@ public final class NodeAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public NodeAddress hostUri(Uri hostUri) {
-    return copy(this.edgeName, this.meshUri, this.partKey, hostUri, this.nodeUri);
+    return this.copy(this.edgeName, this.meshUri, this.partKey, hostUri, this.nodeUri);
   }
 
   @Override
   public NodeAddress hostUri(String hostUri) {
-    return hostUri(Uri.parse(hostUri));
+    return this.hostUri(Uri.parse(hostUri));
   }
 
   @Override
@@ -89,12 +89,12 @@ public final class NodeAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public NodeAddress nodeUri(Uri nodeUri) {
-    return copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, nodeUri);
+    return this.copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, nodeUri);
   }
 
   @Override
   public NodeAddress nodeUri(String nodeUri) {
-    return nodeUri(Uri.parse(nodeUri));
+    return this.nodeUri(Uri.parse(nodeUri));
   }
 
   NodeAddress copy(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
@@ -108,7 +108,7 @@ public final class NodeAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public LaneAddress laneUri(String laneUri) {
-    return laneUri(Uri.parse(laneUri));
+    return this.laneUri(Uri.parse(laneUri));
   }
 
   @Override
@@ -124,22 +124,25 @@ public final class NodeAddress implements EdgeAddressed, MeshAddressed, PartAddr
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.hash(NodeAddress.class);
+    if (NodeAddress.hashSeed == 0) {
+      NodeAddress.hashSeed = Murmur3.hash(NodeAddress.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(NodeAddress.hashSeed,
         this.edgeName.hashCode()), this.meshUri.hashCode()), this.partKey.hashCode()),
         this.hostUri.hashCode()), this.nodeUri.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("NodeAddress").write('.').write("from").write('(')
-        .debug(this.edgeName).write(", ").debug(this.meshUri.toString()).write(", ")
-        .debug(this.partKey).write(", ").debug(this.hostUri.toString()).write(", ")
-        .debug(this.nodeUri).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("NodeAddress").write('.').write("create").write('(')
+                   .debug(this.edgeName).write(", ").debug(this.meshUri.toString()).write(", ")
+                   .debug(this.partKey).write(", ").debug(this.hostUri.toString()).write(", ")
+                   .debug(this.nodeUri).write(')');
+    return output;
   }
 
   @Override
@@ -147,13 +150,11 @@ public final class NodeAddress implements EdgeAddressed, MeshAddressed, PartAddr
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static NodeAddress from(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
+  public static NodeAddress create(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri) {
     return new NodeAddress(edgeName, meshUri, partKey, hostUri, nodeUri);
   }
 
-  public static NodeAddress from(String edgeName, String meshUri, Value partKey, String hostUri, String nodeUri) {
+  public static NodeAddress create(String edgeName, String meshUri, Value partKey, String hostUri, String nodeUri) {
     return new NodeAddress(edgeName, Uri.parse(meshUri), partKey, Uri.parse(hostUri), Uri.parse(nodeUri));
   }
 

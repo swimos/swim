@@ -28,11 +28,6 @@ import swim.util.Murmur3;
 
 public final class FingerTrieSeq<T> implements List<T>, Debug {
 
-  static final Object[] EMPTY_LEAF = new Object[0];
-  static final FingerTrieSeq<?> EMPTY = new FingerTrieSeq<Object>();
-  @SuppressWarnings("unchecked")
-  static final FingerTrieSeq<Object[]> EMPTY_NODE = (FingerTrieSeq<Object[]>) EMPTY;
-  private static int hashSeed;
   final Object[] prefix;
   final FingerTrieSeq<Object[]> branch;
   final Object[] suffix;
@@ -47,47 +42,10 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
 
   @SuppressWarnings("unchecked")
   FingerTrieSeq() {
-    this.prefix = EMPTY_LEAF;
+    this.prefix = FingerTrieSeq.EMPTY_LEAF;
     this.branch = (FingerTrieSeq<Object[]>) this;
-    this.suffix = EMPTY_LEAF;
+    this.suffix = FingerTrieSeq.EMPTY_LEAF;
     this.length = 0;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> FingerTrieSeq<T> empty() {
-    return (FingerTrieSeq<T>) EMPTY;
-  }
-
-  public static <T> FingerTrieSeq<T> of(T elem0, T elem1) {
-    final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>();
-    builder.add(elem0);
-    builder.add(elem1);
-    return builder.bind();
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> FingerTrieSeq<T> of(T... elems) {
-    final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>();
-    for (T elem : elems) {
-      builder.add(elem);
-    }
-    return builder.bind();
-  }
-
-  public static <T> FingerTrieSeq<T> from(Iterable<? extends T> elems) {
-    final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>();
-    for (T elem : elems) {
-      builder.add(elem);
-    }
-    return builder.bind();
-  }
-
-  public static <T> Builder<T, FingerTrieSeq<T>> builder(FingerTrieSeq<? extends T> trie) {
-    return new FingerTrieSeqBuilder<T>(trie);
-  }
-
-  public static <T> Builder<T, FingerTrieSeq<T>> builder() {
-    return new FingerTrieSeqBuilder<T>();
   }
 
   @Override
@@ -102,7 +60,7 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
 
   @Override
   public boolean contains(Object elem) {
-    final Iterator<T> iter = iterator();
+    final Iterator<T> iter = this.iterator();
     while (iter.hasNext()) {
       final T next = iter.next();
       if (elem == null ? next == null : elem.equals(next)) {
@@ -115,7 +73,7 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
   @Override
   public boolean containsAll(Collection<?> elems) {
     for (Object elem : elems) {
-      if (!contains(elem)) {
+      if (!this.contains(elem)) {
         return false;
       }
     }
@@ -192,8 +150,8 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
 
   @Override
   public int indexOf(Object elem) {
-    for (int i = 0, n = length; i < n; i += 1) {
-      if (elem == null ? get(i) == null : elem.equals(get(i))) {
+    for (int i = 0, n = this.length; i < n; i += 1) {
+      if (elem == null ? this.get(i) == null : elem.equals(this.get(i))) {
         return i;
       }
     }
@@ -202,8 +160,8 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
 
   @Override
   public int lastIndexOf(Object elem) {
-    for (int i = length - 1; i >= 0; i -= 1) {
-      if (elem == null ? get(i) == null : elem.equals(get(i))) {
+    for (int i = this.length - 1; i >= 0; i -= 1) {
+      if (elem == null ? this.get(i) == null : elem.equals(this.get(i))) {
         return i;
       }
     }
@@ -252,14 +210,14 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
     if (this.length == 0) {
       throw new UnsupportedOperationException();
     }
-    return drop(1);
+    return this.drop(1);
   }
 
   public FingerTrieSeq<T> body() {
     if (this.length == 0) {
       throw new UnsupportedOperationException();
     }
-    return take(this.length - 1);
+    return this.take(this.length - 1);
   }
 
   @SuppressWarnings("unchecked")
@@ -279,7 +237,7 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
     if (lower <= 0) {
       return this;
     } else if (lower >= this.length) {
-      return (FingerTrieSeq<T>) EMPTY;
+      return (FingerTrieSeq<T>) FingerTrieSeq.EMPTY;
     } else {
       final int n = lower - this.prefix.length;
       final int k = this.length - lower;
@@ -288,7 +246,7 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
         if (oldBranch.length > 0) {
           return new FingerTrieSeq<T>(oldBranch.head(), oldBranch.tail(), this.suffix, k);
         } else {
-          return new FingerTrieSeq<T>(this.suffix, EMPTY_NODE, EMPTY_LEAF, k);
+          return new FingerTrieSeq<T>(this.suffix, FingerTrieSeq.EMPTY_NODE, FingerTrieSeq.EMPTY_LEAF, k);
         }
       } else if (n < 0) {
         final Object[] newPrefix = new Object[-n];
@@ -305,7 +263,7 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
         } else {
           final Object[] newPrefix = new Object[k];
           System.arraycopy(this.suffix, j, newPrefix, 0, k);
-          return new FingerTrieSeq<T>(newPrefix, EMPTY_NODE, EMPTY_LEAF, k);
+          return new FingerTrieSeq<T>(newPrefix, FingerTrieSeq.EMPTY_NODE, FingerTrieSeq.EMPTY_LEAF, k);
         }
       }
     }
@@ -314,17 +272,17 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
   @SuppressWarnings("unchecked")
   public FingerTrieSeq<T> take(int upper) {
     if (upper <= 0) {
-      return (FingerTrieSeq<T>) EMPTY;
+      return (FingerTrieSeq<T>) FingerTrieSeq.EMPTY;
     } else if (upper >= this.length) {
       return this;
     } else {
       final int n = upper - this.prefix.length;
       if (n == 0) {
-        return new FingerTrieSeq<T>(this.prefix, EMPTY_NODE, EMPTY_LEAF, upper);
+        return new FingerTrieSeq<T>(this.prefix, FingerTrieSeq.EMPTY_NODE, FingerTrieSeq.EMPTY_LEAF, upper);
       } else if (n < 0) {
         final Object[] newPrefix = new Object[upper];
         System.arraycopy(this.prefix, 0, newPrefix, 0, upper);
-        return new FingerTrieSeq<T>(newPrefix, EMPTY_NODE, EMPTY_LEAF, upper);
+        return new FingerTrieSeq<T>(newPrefix, FingerTrieSeq.EMPTY_NODE, FingerTrieSeq.EMPTY_LEAF, upper);
       } else {
         final FingerTrieSeq<Object[]> oldBranch = this.branch;
         final int j = n - (oldBranch.length << 5);
@@ -332,7 +290,7 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
           if (oldBranch.length > 0) {
             return new FingerTrieSeq<T>(this.prefix, oldBranch.body(), oldBranch.foot(), upper);
           } else {
-            return new FingerTrieSeq<T>(this.suffix, EMPTY_NODE, EMPTY_LEAF, upper);
+            return new FingerTrieSeq<T>(this.suffix, FingerTrieSeq.EMPTY_NODE, FingerTrieSeq.EMPTY_LEAF, upper);
           }
         } else if (j < 0) {
           final FingerTrieSeq<Object[]> split = oldBranch.take(((n + 0x1F) & 0xFFFFFFE0) >> 5);
@@ -352,9 +310,9 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
   @SuppressWarnings("unchecked")
   public FingerTrieSeq<T> slice(int lower, int upper) {
     if (lower >= upper) {
-      return (FingerTrieSeq<T>) EMPTY;
+      return (FingerTrieSeq<T>) FingerTrieSeq.EMPTY;
     } else {
-      return drop(lower).take(upper - Math.max(0, lower));
+      return this.drop(lower).take(upper - Math.max(0, lower));
     }
   }
 
@@ -366,13 +324,13 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
       final Object[] newPrefix = new Object[i + 1];
       System.arraycopy(this.prefix, 0, newPrefix, 0, i);
       newPrefix[i] = elem;
-      return new FingerTrieSeq<T>(newPrefix, EMPTY_NODE, EMPTY_LEAF, this.length + 1);
+      return new FingerTrieSeq<T>(newPrefix, FingerTrieSeq.EMPTY_NODE, FingerTrieSeq.EMPTY_LEAF, this.length + 1);
     } else if (n == 0 && i + j < 32) {
       final Object[] newPrefix = new Object[i + j + 1];
       System.arraycopy(this.prefix, 0, newPrefix, 0, i);
       System.arraycopy(this.suffix, 0, newPrefix, i, j);
       newPrefix[i + j] = elem;
-      return new FingerTrieSeq<T>(newPrefix, EMPTY_NODE, EMPTY_LEAF, this.length + 1);
+      return new FingerTrieSeq<T>(newPrefix, FingerTrieSeq.EMPTY_NODE, FingerTrieSeq.EMPTY_LEAF, this.length + 1);
     } else if (n == 0 && i + j < 64) {
       final Object[] newPrefix = new Object[32];
       System.arraycopy(this.prefix, 0, newPrefix, 0, i);
@@ -380,7 +338,7 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
       final Object[] newSuffix = new Object[i + j - 32 + 1];
       System.arraycopy(this.suffix, 32 - i, newSuffix, 0, i + j - 32);
       newSuffix[i + j - 32] = elem;
-      return new FingerTrieSeq<T>(newPrefix, EMPTY_NODE, newSuffix, this.length + 1);
+      return new FingerTrieSeq<T>(newPrefix, FingerTrieSeq.EMPTY_NODE, newSuffix, this.length + 1);
     } else if (j < 32) {
       final Object[] newSuffix = new Object[j + 1];
       System.arraycopy(this.suffix, 0, newSuffix, 0, j);
@@ -408,13 +366,13 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
       final Object[] newPrefix = new Object[1 + i];
       newPrefix[0] = elem;
       System.arraycopy(this.prefix, 0, newPrefix, 1, i);
-      return new FingerTrieSeq<T>(newPrefix, EMPTY_NODE, EMPTY_LEAF, 1 + this.length);
+      return new FingerTrieSeq<T>(newPrefix, FingerTrieSeq.EMPTY_NODE, FingerTrieSeq.EMPTY_LEAF, 1 + this.length);
     } else if (n == 0 && i + j < 32) {
       final Object[] newPrefix = new Object[1 + i + j];
       newPrefix[0] = elem;
       System.arraycopy(this.prefix, 0, newPrefix, 1, i);
       System.arraycopy(this.suffix, 0, newPrefix, 1 + i, j);
-      return new FingerTrieSeq<T>(newPrefix, EMPTY_NODE, EMPTY_LEAF, 1 + this.length);
+      return new FingerTrieSeq<T>(newPrefix, FingerTrieSeq.EMPTY_NODE, FingerTrieSeq.EMPTY_LEAF, 1 + this.length);
     } else if (n == 0 && i + j < 64) {
       final Object[] newPrefix = new Object[1 + i + j - 32];
       newPrefix[0] = elem;
@@ -422,7 +380,7 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
       final Object[] newSuffix = new Object[32];
       System.arraycopy(this.prefix, i + j - 32, newSuffix, 0, 32 - j);
       System.arraycopy(this.suffix, 0, newSuffix, 32 - j, j);
-      return new FingerTrieSeq<T>(newPrefix, EMPTY_NODE, newSuffix, 1 + this.length);
+      return new FingerTrieSeq<T>(newPrefix, FingerTrieSeq.EMPTY_NODE, newSuffix, 1 + this.length);
     } else if (i < 32) {
       final Object[] newPrefix = new Object[1 + i];
       newPrefix[0] = elem;
@@ -444,20 +402,20 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
   }
 
   public FingerTrieSeq<T> removed(int index) {
-    if (index < 0 || index >= length) {
+    if (index < 0 || index >= this.length) {
       throw new IndexOutOfBoundsException(String.valueOf(index));
     }
     if (index == 0) {
-      return drop(1);
+      return this.drop(1);
     } else {
-      final int newLength = length - 1;
+      final int newLength = this.length - 1;
       if (index == newLength) {
-        return take(index);
+        return this.take(index);
       } else if (index > 0) {
-        final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>(take(index));
+        final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>(this.take(index));
         do {
           index += 1;
-          builder.add(get(index));
+          builder.add(this.get(index));
         } while (index < newLength);
         return builder.bind();
       } else {
@@ -467,9 +425,9 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
   }
 
   public FingerTrieSeq<T> removed(Object elem) {
-    final int index = indexOf(elem);
+    final int index = this.indexOf(elem);
     if (index >= 0) {
-      return removed(index);
+      return this.removed(index);
     } else {
       return this;
     }
@@ -477,18 +435,18 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
 
   @Override
   public FingerTrieSeq<T> subList(int fromIndex, int toIndex) {
-    if (fromIndex < 0 || toIndex > length || fromIndex > toIndex) {
+    if (fromIndex < 0 || toIndex > this.length || fromIndex > toIndex) {
       throw new IndexOutOfBoundsException(fromIndex + ", " + toIndex);
     }
-    return drop(fromIndex).take(toIndex - fromIndex);
+    return this.drop(fromIndex).take(toIndex - fromIndex);
   }
 
   @Override
   public Object[] toArray() {
-    final int n = length;
+    final int n = this.length;
     final Object[] array = new Object[n];
     for (int i = 0; i < n; i += 1) {
-      array[i] = get(i);
+      array[i] = this.get(i);
     }
     return array;
   }
@@ -496,12 +454,12 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T[] toArray(T[] array) {
-    final int n = length;
+    final int n = this.length;
     if (array.length < n) {
       array = (T[]) Array.newInstance(array.getClass().getComponentType(), n);
     }
     for (int i = 0; i < n; i += 1) {
-      array[i] = (T) get(i);
+      array[i] = (T) this.get(i);
     }
     if (array.length > n) {
       array[n] = null;
@@ -532,7 +490,7 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
     } else if (other instanceof FingerTrieSeq<?>) {
       final FingerTrieSeq<T> that = (FingerTrieSeq<T>) other;
       if (this.length == that.length) {
-        final Iterator<T> these = iterator();
+        final Iterator<T> these = this.iterator();
         final Iterator<T> those = that.iterator();
         while (these.hasNext() && those.hasNext()) {
           final T x = these.next();
@@ -547,13 +505,15 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(FingerTrieSeq.class);
+    if (FingerTrieSeq.hashSeed == 0) {
+      FingerTrieSeq.hashSeed = Murmur3.seed(FingerTrieSeq.class);
     }
-    int h = hashSeed;
-    final Iterator<T> these = iterator();
+    int h = FingerTrieSeq.hashSeed;
+    final Iterator<T> these = this.iterator();
     while (these.hasNext()) {
       h = Murmur3.mix(h, Murmur3.hash(these.next()));
     }
@@ -561,9 +521,9 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <U> Output<U> debug(Output<U> output) {
     output = output.write("FingerTrieSeq").write('.');
-    final Iterator<T> these = iterator();
+    final Iterator<T> these = this.iterator();
     if (these.hasNext()) {
       output = output.write("of").write('(').debug(these.next());
       while (these.hasNext()) {
@@ -573,11 +533,56 @@ public final class FingerTrieSeq<T> implements List<T>, Debug {
       output = output.write("empty").write('(');
     }
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  static final Object[] EMPTY_LEAF = new Object[0];
+
+  static final FingerTrieSeq<?> EMPTY = new FingerTrieSeq<Object>();
+
+  @SuppressWarnings("unchecked")
+  static final FingerTrieSeq<Object[]> EMPTY_NODE = (FingerTrieSeq<Object[]>) FingerTrieSeq.EMPTY;
+
+  @SuppressWarnings("unchecked")
+  public static <T> FingerTrieSeq<T> empty() {
+    return (FingerTrieSeq<T>) FingerTrieSeq.EMPTY;
+  }
+
+  public static <T> FingerTrieSeq<T> of(T elem0, T elem1) {
+    final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>();
+    builder.add(elem0);
+    builder.add(elem1);
+    return builder.bind();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> FingerTrieSeq<T> of(T... elems) {
+    final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>();
+    for (T elem : elems) {
+      builder.add(elem);
+    }
+    return builder.bind();
+  }
+
+  public static <T> FingerTrieSeq<T> from(Iterable<? extends T> elems) {
+    final FingerTrieSeqBuilder<T> builder = new FingerTrieSeqBuilder<T>();
+    for (T elem : elems) {
+      builder.add(elem);
+    }
+    return builder.bind();
+  }
+
+  public static <T> Builder<T, FingerTrieSeq<T>> builder(FingerTrieSeq<? extends T> trie) {
+    return new FingerTrieSeqBuilder<T>(trie);
+  }
+
+  public static <T> Builder<T, FingerTrieSeq<T>> builder() {
+    return new FingerTrieSeqBuilder<T>();
   }
 
 }
@@ -615,7 +620,7 @@ final class FingerTrieSeqBuilder<T> implements Builder<T, FingerTrieSeq<T>> {
 
   @Override
   public boolean add(T elem) {
-    final int offset = getSkew();
+    final int offset = this.getSkew();
     if (offset == 0) {
       if (this.buffer != null) {
         if (this.prefix == null) {
@@ -641,10 +646,10 @@ final class FingerTrieSeqBuilder<T> implements Builder<T, FingerTrieSeq<T>> {
   @Override
   public boolean addAll(Collection<? extends T> elems) {
     if (elems instanceof FingerTrieSeq<?>) {
-      return addAll((FingerTrieSeq<? extends T>) elems);
+      return this.addAll((FingerTrieSeq<? extends T>) elems);
     } else {
       for (T elem : elems) {
-        add(elem);
+        this.add(elem);
       }
       return true;
     }
@@ -663,9 +668,9 @@ final class FingerTrieSeqBuilder<T> implements Builder<T, FingerTrieSeq<T>> {
       }
       this.length = that.length;
     } else if (that.length != 0) {
-      final int offset = getSkew();
+      final int offset = this.getSkew();
       if (((offset + that.prefix.length) & 0x1F) == 0) {
-        if (buffer.length < 32) {
+        if (this.buffer.length < 32) {
           final Object[] newBuffer = new Object[32];
           System.arraycopy(this.buffer, 0, newBuffer, 0, offset);
           this.buffer = newBuffer;
@@ -694,7 +699,7 @@ final class FingerTrieSeqBuilder<T> implements Builder<T, FingerTrieSeq<T>> {
         this.length += that.length;
       } else {
         for (T elem : that) {
-          add(elem);
+          this.add(elem);
         }
       }
     }
@@ -714,16 +719,15 @@ final class FingerTrieSeqBuilder<T> implements Builder<T, FingerTrieSeq<T>> {
     if (this.length == 0) {
       return (FingerTrieSeq<T>) FingerTrieSeq.EMPTY;
     } else {
-      final int offset = getSkew();
+      final int offset = this.getSkew();
       if (offset != 0 && offset != this.buffer.length) {
         final Object[] suffix = new Object[offset];
         System.arraycopy(this.buffer, 0, suffix, 0, offset);
         this.buffer = suffix;
       }
-      if (prefix == null) {
-        return new FingerTrieSeq<T>(this.buffer, FingerTrieSeq.EMPTY_NODE,
-            FingerTrieSeq.EMPTY_LEAF, this.length);
-      } else if (branch == null) {
+      if (this.prefix == null) {
+        return new FingerTrieSeq<T>(this.buffer, FingerTrieSeq.EMPTY_NODE, FingerTrieSeq.EMPTY_LEAF, this.length);
+      } else if (this.branch == null) {
         return new FingerTrieSeq<T>(this.prefix, FingerTrieSeq.EMPTY_NODE, this.buffer, this.length);
       } else {
         return new FingerTrieSeq<T>(this.prefix, this.branch.bind(), this.buffer, this.length);

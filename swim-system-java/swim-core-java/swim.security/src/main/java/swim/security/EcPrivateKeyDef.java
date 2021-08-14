@@ -30,8 +30,6 @@ import swim.util.Murmur3;
 
 public class EcPrivateKeyDef extends PrivateKeyDef implements EcKeyDef {
 
-  private static int hashSeed;
-  private static Form<EcPrivateKeyDef> form;
   protected final EcDomainDef domain;
   protected final BigInteger secret;
   protected ECPrivateKey privateKey;
@@ -44,18 +42,6 @@ public class EcPrivateKeyDef extends PrivateKeyDef implements EcKeyDef {
 
   public EcPrivateKeyDef(EcDomainDef domain, BigInteger secret) {
     this(domain, secret, null);
-  }
-
-  public static EcPrivateKeyDef from(ECPrivateKey key) {
-    return new EcPrivateKeyDef(EcDomainDef.from(key.getParams()), key.getS(), key);
-  }
-
-  @Kind
-  public static Form<EcPrivateKeyDef> form() {
-    if (form == null) {
-      form = new EcPrivateKeyForm();
-    }
-    return form;
   }
 
   @Override
@@ -85,12 +71,12 @@ public class EcPrivateKeyDef extends PrivateKeyDef implements EcKeyDef {
 
   @Override
   public Key key() {
-    return privateKey();
+    return this.privateKey();
   }
 
   @Override
   public Value toValue() {
-    return form().mold(this).toValue();
+    return EcPrivateKeyDef.form().mold(this).toValue();
   }
 
   @Override
@@ -104,13 +90,29 @@ public class EcPrivateKeyDef extends PrivateKeyDef implements EcKeyDef {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(EcPrivateKeyDef.class);
+    if (EcPrivateKeyDef.hashSeed == 0) {
+      EcPrivateKeyDef.hashSeed = Murmur3.seed(EcPrivateKeyDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(EcPrivateKeyDef.hashSeed,
         this.domain.hashCode()), this.secret.hashCode()));
+  }
+
+  public static EcPrivateKeyDef from(ECPrivateKey key) {
+    return new EcPrivateKeyDef(EcDomainDef.create(key.getParams()), key.getS(), key);
+  }
+
+  private static Form<EcPrivateKeyDef> form;
+
+  @Kind
+  public static Form<EcPrivateKeyDef> form() {
+    if (EcPrivateKeyDef.form == null) {
+      EcPrivateKeyDef.form = new EcPrivateKeyForm();
+    }
+    return EcPrivateKeyDef.form;
   }
 
 }
@@ -130,15 +132,15 @@ final class EcPrivateKeyForm extends Form<EcPrivateKeyDef> {
   @Override
   public Item mold(EcPrivateKeyDef keyDef) {
     return Record.create(3)
-        .attr(tag())
-        .slot("domain", keyDef.domain.toValue())
-        .slot("secret", Num.from(keyDef.secret));
+                 .attr(this.tag())
+                 .slot("domain", keyDef.domain.toValue())
+                 .slot("secret", Num.from(keyDef.secret));
   }
 
   @Override
   public EcPrivateKeyDef cast(Item item) {
     final Value value = item.toValue();
-    if (value.getAttr(tag()).isDefined()) {
+    if (value.getAttr(this.tag()).isDefined()) {
       final EcDomainDef domain = EcDomainDef.form().cast(value.get("domain"));
       final BigInteger secret = value.get("secret").integerValue(null);
       if (domain != null && secret != null) {

@@ -47,6 +47,12 @@ final class ArrayDecoder<I, T> extends Decoder<T> {
     this(avro, type, null, 0L, 0L, 0, null, 1);
   }
 
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return ArrayDecoder.decode(input, this.avro, this.type, this.builder, this.count,
+                               this.blockSize, this.shift, this.itemDecoder, this.step);
+  }
+
   static <I, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroArrayType<I, T> type,
                                   Builder<I, T> builder, long count, long blockSize,
                                   int shift, Decoder<? extends I> itemDecoder, int step) {
@@ -58,7 +64,7 @@ final class ArrayDecoder<I, T> extends Decoder<T> {
             input = input.step();
             count |= (long) (b & 0x7f) << shift;
           } else {
-            return error(new DecoderException("array count overflow"));
+            return Decoder.error(new DecoderException("array count overflow"));
           }
           if ((b & 0x80) == 0) {
             count = (count >>> 1) ^ (count << 63 >> 63);
@@ -75,7 +81,7 @@ final class ArrayDecoder<I, T> extends Decoder<T> {
               if (builder == null) {
                 builder = type.arrayBuilder();
               }
-              return done(builder.bind());
+              return Decoder.done(builder.bind());
             }
           }
           shift += 7;
@@ -88,7 +94,7 @@ final class ArrayDecoder<I, T> extends Decoder<T> {
             input = input.step();
             blockSize |= (long) (b & 0x7f) << shift;
           } else {
-            return error(new DecoderException("array block size overflow"));
+            return Decoder.error(new DecoderException("array block size overflow"));
           }
           if ((b & 0x80) == 0) {
             blockSize = (blockSize >>> 1) ^ (blockSize << 63 >> 63);
@@ -125,21 +131,15 @@ final class ArrayDecoder<I, T> extends Decoder<T> {
       break;
     } while (true);
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new ArrayDecoder<I, T>(avro, type, builder, count, blockSize, shift, itemDecoder, step);
   }
 
   static <I, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroArrayType<I, T> type) {
-    return decode(input, avro, type, null, 0L, 0L, 0, null, 1);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.avro, this.type, this.builder, this.count,
-        this.blockSize, this.shift, this.itemDecoder, this.step);
+    return ArrayDecoder.decode(input, avro, type, null, 0L, 0L, 0, null, 1);
   }
 
 }

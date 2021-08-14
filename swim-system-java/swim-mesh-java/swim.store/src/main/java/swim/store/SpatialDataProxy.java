@@ -58,7 +58,7 @@ public class SpatialDataProxy<S> implements SpatialDataBinding<S>, SpatialDataCo
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapData(Class<T> dataClass) {
-    if (dataClass.isAssignableFrom(getClass())) {
+    if (dataClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.dataBinding.unwrapData(dataClass);
@@ -87,7 +87,7 @@ public class SpatialDataProxy<S> implements SpatialDataBinding<S>, SpatialDataCo
 
   @Override
   public <K> SpatialData<K, S, Value> keyClass(Class<K> keyClass) {
-    return keyForm(Form.<K>forClass(keyClass));
+    return this.keyForm(Form.<K>forClass(keyClass));
   }
 
   @Override
@@ -107,7 +107,7 @@ public class SpatialDataProxy<S> implements SpatialDataBinding<S>, SpatialDataCo
 
   @Override
   public <V> SpatialData<Value, S, V> valueClass(Class<V> valueClass) {
-    return valueForm(Form.<V>forClass(valueClass));
+    return this.valueForm(Form.<V>forClass(valueClass));
   }
 
   @Override

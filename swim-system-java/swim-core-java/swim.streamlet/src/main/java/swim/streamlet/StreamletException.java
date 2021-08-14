@@ -16,8 +16,6 @@ package swim.streamlet;
 
 public class StreamletException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public StreamletException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class StreamletException extends RuntimeException {
   public StreamletException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

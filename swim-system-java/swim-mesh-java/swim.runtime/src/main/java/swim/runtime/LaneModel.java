@@ -25,7 +25,7 @@ import swim.api.lane.function.OnSyncKeys;
 import swim.api.policy.Policy;
 import swim.api.warp.WarpUplink;
 import swim.collections.FingerTrieSeq;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.runtime.agent.AgentNode;
@@ -38,13 +38,6 @@ import swim.warp.CommandMessage;
 
 public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkContext> extends AbstractTierBinding implements LaneBinding {
 
-  @SuppressWarnings("unchecked")
-  protected static final AtomicReferenceFieldUpdater<LaneModel<?, ?>, Object> VIEWS =
-      AtomicReferenceFieldUpdater.newUpdater((Class<LaneModel<?, ?>>) (Class<?>) LaneModel.class, Object.class, "views");
-  @SuppressWarnings("unchecked")
-  protected static final AtomicReferenceFieldUpdater<LaneModel<?, ?>, FingerTrieSeq<? extends LinkContext>> UPLINKS =
-      AtomicReferenceFieldUpdater.newUpdater((Class<LaneModel<?, ?>>) (Class<?>) LaneModel.class, (Class<FingerTrieSeq<? extends LinkContext>>) (Class<?>) FingerTrieSeq.class, "uplinks");
-  static final Uri UPLINKS_URI = Uri.parse("uplinks");
   protected LaneContext laneContext;
   protected volatile Object views; // View | LaneView[]
   protected volatile FingerTrieSeq<U> uplinks;
@@ -52,7 +45,11 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   DemandMapLane<Value, UplinkInfo> metaUplinks;
 
   public LaneModel() {
+    this.laneContext = null;
+    this.views = null;
     this.uplinks = FingerTrieSeq.empty();
+    this.metaNode = null;
+    this.metaUplinks = null;
   }
 
   @Override
@@ -83,7 +80,7 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapLane(Class<T> laneClass) {
-    if (laneClass.isAssignableFrom(getClass())) {
+    if (laneClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.laneContext.unwrapLane(laneClass);
@@ -94,7 +91,7 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   @Override
   public <T> T bottomLane(Class<T> laneClass) {
     T lane = this.laneContext.bottomLane(laneClass);
-    if (lane == null && laneClass.isAssignableFrom(getClass())) {
+    if (lane == null && laneClass.isAssignableFrom(this.getClass())) {
       lane = (T) this;
     }
     return lane;
@@ -103,7 +100,7 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   protected abstract U createUplink(LinkBinding link);
 
   protected UplinkAddress createUplinkAddress(LinkBinding link) {
-    return cellAddress().linkKey(LinkKeys.generateLinkKey());
+    return this.cellAddress().linkKey(LinkKeys.generateLinkKey());
   }
 
   @Override
@@ -163,7 +160,7 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
 
   @Override
   public Lane getLaneView(AgentContext agentContext) {
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     LaneView view;
     if (views instanceof LaneView) {
       view = (LaneView) views;
@@ -185,10 +182,9 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   @SuppressWarnings("unchecked")
   @Override
   public void openLaneView(Lane view) {
-    Object oldLaneViews;
-    Object newLaneViews;
     do {
-      oldLaneViews = this.views;
+      final Object oldLaneViews = LaneModel.VIEWS.get(this);
+      final Object newLaneViews;
       if (oldLaneViews instanceof LaneView) {
         newLaneViews = new LaneView[] {(LaneView) oldLaneViews, (LaneView) view};
       } else if (oldLaneViews instanceof LaneView[]) {
@@ -201,22 +197,25 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
       } else {
         newLaneViews = (LaneView) view;
       }
-    } while (!VIEWS.compareAndSet(this, oldLaneViews, newLaneViews));
-    didOpenLaneView((View) view);
-    activate((View) view);
+      if (LaneModel.VIEWS.compareAndSet(this, oldLaneViews, newLaneViews)) {
+        this.didOpenLaneView((View) view);
+        this.activate((View) view);
+        break;
+      }
+    } while (true);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public void closeLaneView(Lane view) {
-    Object oldLaneViews;
-    Object newLaneViews;
     do {
-      oldLaneViews = this.views;
+      final Object oldLaneViews = LaneModel.VIEWS.get(this);
+      final Object newLaneViews;
       if (oldLaneViews instanceof LaneView) {
         if (oldLaneViews == view) {
           newLaneViews = null;
-          continue;
+        } else {
+          break;
         }
       } else if (oldLaneViews instanceof LaneView[]) {
         final LaneView[] oldLaneViewArray = (LaneView[]) oldLaneViews;
@@ -224,10 +223,10 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
         if (n == 2) {
           if (oldLaneViewArray[0] == view) {
             newLaneViews = oldLaneViewArray[1];
-            continue;
           } else if (oldLaneViewArray[1] == view) {
             newLaneViews = oldLaneViewArray[0];
-            continue;
+          } else {
+            break;
           }
         } else { // n > 2
           final LaneView[] newLaneViewArray = new LaneView[n - 1];
@@ -245,37 +244,39 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
           if (i < n) {
             System.arraycopy(oldLaneViewArray, i + 1, newLaneViewArray, i, n - (i + 1));
             newLaneViews = newLaneViewArray;
-            continue;
+          } else {
+            break;
           }
         }
+      } else {
+        break;
       }
-      newLaneViews = oldLaneViews;
-      break;
-    } while (!VIEWS.compareAndSet(this, oldLaneViews, newLaneViews));
-    if (oldLaneViews != newLaneViews) {
-      ((View) view).didClose();
-      didCloseLaneView((View) view);
-    }
-    if (newLaneViews == null) {
-      close();
-    }
+      if (LaneModel.VIEWS.compareAndSet(this, oldLaneViews, newLaneViews)) {
+        ((View) view).didClose();
+        this.didCloseLaneView((View) view);
+        if (newLaneViews == null) {
+          this.close();
+        }
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public boolean isLinked() {
-    return !this.uplinks.isEmpty();
+    return !LaneModel.UPLINKS.get(this).isEmpty();
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public FingerTrieSeq<LinkContext> uplinks() {
-    return (FingerTrieSeq<LinkContext>) (FingerTrieSeq<?>) this.uplinks;
+    return (FingerTrieSeq<LinkContext>) (FingerTrieSeq<?>) LaneModel.UPLINKS.get(this);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public LinkContext getUplink(Value linkKey) {
-    final FingerTrieSeq<U> uplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) this.uplinks;
+    final FingerTrieSeq<U> uplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) LaneModel.UPLINKS.get(this);
     for (int i = 0, n = uplinks.size(); i < n; i += 1) {
       final U uplink = uplinks.get(i);
       if (linkKey.equals(uplink.linkKey())) {
@@ -290,14 +291,14 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   public void openUplink(LinkBinding link) {
     FingerTrieSeq<U> oldUplinks;
     FingerTrieSeq<U> newUplinks;
-    final U uplink = createUplink(link);
+    final U uplink = this.createUplink(link);
     if (uplink != null) {
       link.setLinkContext(uplink);
       do {
-        oldUplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) this.uplinks;
+        oldUplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) LaneModel.UPLINKS.get(this);
         newUplinks = oldUplinks.appended(uplink);
-      } while (!UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
-      didOpenUplink(uplink);
+      } while (!LaneModel.UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
+      this.didOpenUplink(uplink);
       // TODO: onEnter
       final DemandMapLane<Value, UplinkInfo> metaUplinks = this.metaUplinks;
       if (metaUplinks != null) {
@@ -311,52 +312,49 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   @SuppressWarnings("unchecked")
   @Override
   public void closeUplink(Value linkKey) {
-    FingerTrieSeq<U> oldUplinks;
-    FingerTrieSeq<U> newUplinks;
-    U linkContext;
-    do {
-      oldUplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) this.uplinks;
-      newUplinks = oldUplinks;
-      linkContext = null;
+    outer: do {
+      final FingerTrieSeq<U> oldUplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) LaneModel.UPLINKS.get(this);
       for (int i = 0, n = oldUplinks.size(); i < n; i += 1) {
         final U uplink = oldUplinks.get(i);
         if (linkKey.equals(uplink.linkKey())) {
-          linkContext = uplink;
-          newUplinks = oldUplinks.removed(i);
-          break;
+          final FingerTrieSeq<U> newUplinks = oldUplinks.removed(i);
+          if (LaneModel.UPLINKS.compareAndSet(this, oldUplinks, newUplinks)) {
+            uplink.linkBinding().didCloseUp();
+            final DemandMapLane<Value, UplinkInfo> metaUplinks = this.metaUplinks;
+            if (metaUplinks != null) {
+              metaUplinks.remove(linkKey);
+            }
+            // TODO: onLeave
+            this.didCloseUplink(uplink);
+            break outer;
+          } else {
+            continue;
+          }
         }
       }
-    } while (!UPLINKS.compareAndSet(this, oldUplinks, newUplinks));
-    if (linkContext != null) {
-      linkContext.linkBinding().didCloseUp();
-      final DemandMapLane<Value, UplinkInfo> metaUplinks = this.metaUplinks;
-      if (metaUplinks != null) {
-        metaUplinks.remove(linkKey);
-      }
-      // TODO: onLeave
-      didCloseUplink(linkContext);
-    }
+      break;
+    } while (true);
   }
 
   @Override
   public void openMetaLane(LaneBinding lane, NodeBinding metaLane) {
     if (metaLane instanceof AgentNode) {
       this.metaNode = (AgentNode) metaLane;
-      openMetaLanes(lane, (AgentNode) metaLane);
+      this.openMetaLanes(lane, (AgentNode) metaLane);
     }
     this.laneContext.openMetaLane(lane, metaLane);
   }
 
   protected void openMetaLanes(LaneBinding lane, AgentNode metaLane) {
-    openReflectLanes(lane, metaLane);
+    this.openReflectLanes(lane, metaLane);
   }
 
   protected void openReflectLanes(LaneBinding lane, AgentNode metaLane) {
     this.metaUplinks = metaLane.demandMapLane()
-        .keyForm(Form.forValue())
-        .valueForm(UplinkInfo.uplinkForm())
-        .observe(new LaneModelUplinksController(lane));
-    metaLane.openLane(UPLINKS_URI, this.metaUplinks);
+                               .keyForm(Form.forValue())
+                               .valueForm(UplinkInfo.uplinkForm())
+                               .observe(new LaneModelUplinksController(lane));
+    metaLane.openLane(LaneModel.UPLINKS_URI, this.metaUplinks);
   }
 
   @Override
@@ -450,7 +448,7 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   @Override
   protected void willOpen() {
     super.willOpen();
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof LaneView) {
       ((LaneView) views).open();
     } else if (views instanceof LaneView[]) {
@@ -464,7 +462,7 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   @Override
   protected void willLoad() {
     super.willLoad();
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof LaneView) {
       ((LaneView) views).load();
     } else if (views instanceof LaneView[]) {
@@ -478,7 +476,7 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   @Override
   protected void willStart() {
     super.willStart();
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof LaneView) {
       ((LaneView) views).start();
     } else if (views instanceof LaneView[]) {
@@ -492,7 +490,7 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   @Override
   protected void willStop() {
     super.willStop();
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof LaneView) {
       ((LaneView) views).stop();
     } else if (views instanceof LaneView[]) {
@@ -506,7 +504,7 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   @Override
   protected void willUnload() {
     super.willUnload();
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof LaneView) {
       ((LaneView) views).unload();
     } else if (views instanceof LaneView[]) {
@@ -521,11 +519,11 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   @Override
   protected void willClose() {
     super.willClose();
-    final FingerTrieSeq<U> uplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) this.uplinks;
+    final FingerTrieSeq<U> uplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) LaneModel.UPLINKS.get(this);
     for (int i = 0, n = uplinks.size(); i < n; i += 1) {
       uplinks.get(i).close();
     }
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof LaneView) {
       ((LaneView) views).close();
     } else if (views instanceof LaneView[]) {
@@ -550,8 +548,8 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
 
   @Override
   public void didFail(Throwable error) {
-    if (Conts.isNonFatal(error)) {
-      fail(error);
+    if (Cont.isNonFatal(error)) {
+      this.fail(error);
     } else {
       error.printStackTrace();
     }
@@ -560,6 +558,15 @@ public abstract class LaneModel<View extends LaneView, U extends AbstractUplinkC
   public void accumulateExecTime(long execDelta) {
     // hook
   }
+
+  @SuppressWarnings("unchecked")
+  protected static final AtomicReferenceFieldUpdater<LaneModel<?, ?>, Object> VIEWS =
+      AtomicReferenceFieldUpdater.newUpdater((Class<LaneModel<?, ?>>) (Class<?>) LaneModel.class, Object.class, "views");
+  @SuppressWarnings("unchecked")
+  protected static final AtomicReferenceFieldUpdater<LaneModel<?, ?>, FingerTrieSeq<? extends LinkContext>> UPLINKS =
+      AtomicReferenceFieldUpdater.newUpdater((Class<LaneModel<?, ?>>) (Class<?>) LaneModel.class, (Class<FingerTrieSeq<? extends LinkContext>>) (Class<?>) FingerTrieSeq.class, "uplinks");
+
+  static final Uri UPLINKS_URI = Uri.parse("uplinks");
 
 }
 
@@ -577,7 +584,7 @@ final class LaneModelUplinksController implements OnCueKey<Value, UplinkInfo>, O
     if (linkContext == null) {
       return null;
     }
-    return UplinkInfo.from(linkContext);
+    return UplinkInfo.create(linkContext);
   }
 
   @Override

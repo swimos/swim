@@ -65,8 +65,9 @@ final class HttpEmpty extends HttpEntity<Object> implements Debug {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("HttpEntity").write('.').write("empty").write('(').write(')');
+    return output;
   }
 
   @Override

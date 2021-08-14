@@ -17,7 +17,6 @@ package swim.db;
 import java.util.Comparator;
 import java.util.Map;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.structure.Form;
 import swim.structure.Slot;
 import swim.structure.Value;
@@ -57,21 +56,21 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   }
 
   public final TreeDelegate treeDelegate() {
-    return tree().treeDelegate();
+    return this.tree().treeDelegate();
   }
 
   public void setTreeDelegate(TreeDelegate treeDelegate) {
-    tree().setTreeDelegate(treeDelegate);
+    this.tree().setTreeDelegate(treeDelegate);
   }
 
   public boolean isResident() {
-    return tree().isResident();
+    return this.tree().isResident();
   }
 
   public BTreeMap isResident(boolean isResident) {
     do {
       final long newVersion = this.trunk.version();
-      final BTree oldTree = tree();
+      final BTree oldTree = this.tree();
       final BTree newTree = oldTree.isResident(isResident);
       if (oldTree != newTree) {
         if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -85,13 +84,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   }
 
   public boolean isTransient() {
-    return tree().isTransient();
+    return this.tree().isTransient();
   }
 
   public BTreeMap isTransient(boolean isTransient) {
     do {
       final long newVersion = this.trunk.version();
-      final BTree oldTree = tree();
+      final BTree oldTree = this.tree();
       final BTree newTree = oldTree.isTransient(isTransient);
       if (oldTree != newTree) {
         if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -109,7 +108,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   }
 
   public <K> ValueMap<K, Value> keyClass(Class<K> keyClass) {
-    return keyForm(Form.<K>forClass(keyClass));
+    return this.keyForm(Form.<K>forClass(keyClass));
   }
 
   public <V> ValueMap<Value, V> valueForm(Form<V> valueForm) {
@@ -117,35 +116,35 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   }
 
   public <V> ValueMap<Value, V> valueClass(Class<V> valueClass) {
-    return valueForm(Form.<V>forClass(valueClass));
+    return this.valueForm(Form.<V>forClass(valueClass));
   }
 
   public BTreeMapView snapshot() {
-    return new BTreeMapView(tree());
+    return new BTreeMapView(this.tree());
   }
 
   @Override
   public boolean isEmpty() {
-    return tree().isEmpty();
+    return this.tree().isEmpty();
   }
 
   @Override
   public int size() {
-    return (int) tree().span();
+    return (int) this.tree().span();
   }
 
   public long span() {
-    return tree().span();
+    return this.tree().span();
   }
 
   public long treeSize() {
-    return tree().treeSize();
+    return this.tree().treeSize();
   }
 
   @Override
   public boolean containsKey(Object key) {
     if (key instanceof Value) {
-      return containsKey((Value) key);
+      return this.containsKey((Value) key);
     }
     return false;
   }
@@ -154,13 +153,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().containsKey(key);
+        return this.tree().containsKey(key);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -171,7 +170,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   @Override
   public boolean containsValue(Object value) {
     if (value instanceof Value) {
-      return containsValue((Value) value);
+      return this.containsValue((Value) value);
     }
     return false;
   }
@@ -180,13 +179,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().containsValue(value);
+        return this.tree().containsValue(value);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -197,7 +196,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   @Override
   public int indexOf(Object key) {
     if (key instanceof Value) {
-      return (int) indexOf((Value) key);
+      return (int) this.indexOf((Value) key);
     }
     throw new IllegalArgumentException(key.toString());
   }
@@ -206,13 +205,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().indexOf(key);
+        return this.tree().indexOf(key);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -223,7 +222,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   @Override
   public Value get(Object key) {
     if (key instanceof Value) {
-      return get((Value) key);
+      return this.get((Value) key);
     }
     return Value.absent();
   }
@@ -232,13 +231,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().get(key);
+        return this.tree().get(key);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -249,7 +248,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   @Override
   public Slot getEntry(Object key) {
     if (key instanceof Value) {
-      return getEntry((Value) key);
+      return this.getEntry((Value) key);
     }
     return null;
   }
@@ -258,13 +257,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().getEntry(key);
+        return this.tree().getEntry(key);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -274,20 +273,20 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
 
   @Override
   public Slot getIndex(int index) {
-    return getIndex((long) index);
+    return this.getIndex((long) index);
   }
 
   public Slot getIndex(long index) {
     int retries = 0;
     do {
       try {
-        return tree().getIndex(index);
+        return this.tree().getIndex(index);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -300,13 +299,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().firstEntry();
+        return this.tree().firstEntry();
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -319,13 +318,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().firstKey();
+        return this.tree().firstKey();
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -338,13 +337,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().firstValue();
+        return this.tree().firstValue();
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -357,13 +356,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().lastEntry();
+        return this.tree().lastEntry();
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -376,13 +375,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().lastKey();
+        return this.tree().lastKey();
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -395,13 +394,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().lastValue();
+        return this.tree().lastValue();
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -414,13 +413,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().nextEntry(key);
+        return this.tree().nextEntry(key);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -433,13 +432,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().nextKey(key);
+        return this.tree().nextKey(key);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -452,13 +451,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().nextValue(key);
+        return this.tree().nextValue(key);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -471,13 +470,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().previousEntry(key);
+        return this.tree().previousEntry(key);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -490,13 +489,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().previousKey(key);
+        return this.tree().previousKey(key);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -509,13 +508,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().previousValue(key);
+        return this.tree().previousValue(key);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -530,7 +529,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final BTree oldTree = tree();
+        final BTree oldTree = this.tree();
         final BTree newTree = oldTree.updated(key, newValue, newVersion, newPost);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -544,11 +543,11 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
           return oldTree.get(key);
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -559,14 +558,14 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   @Override
   public void putAll(Map<? extends Value, ? extends Value> map) {
     for (Entry<? extends Value, ? extends Value> entry : map.entrySet()) {
-      put(entry.getKey(), entry.getValue());
+      this.put(entry.getKey(), entry.getValue());
     }
   }
 
   @Override
   public Value remove(Object key) {
     if (key instanceof Value) {
-      return remove((Value) key);
+      return this.remove((Value) key);
     }
     return Value.absent();
   }
@@ -577,7 +576,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final BTree oldTree = tree();
+        final BTree oldTree = this.tree();
         final BTree newTree = oldTree.removed(key, newVersion, newPost);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -591,11 +590,11 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
           return Value.absent();
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -609,7 +608,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final BTree oldTree = tree();
+        final BTree oldTree = this.tree();
         final BTree newTree = oldTree.drop(lower, newVersion, newPost);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -622,11 +621,11 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
           return;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -640,7 +639,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final BTree oldTree = tree();
+        final BTree oldTree = this.tree();
         final BTree newTree = oldTree.take(upper, newVersion, newPost);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -653,11 +652,11 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
           return;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -671,7 +670,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     do {
       final long newVersion = this.trunk.version();
       try {
-        final BTree oldTree = tree();
+        final BTree oldTree = this.tree();
         final BTree newTree = oldTree.cleared(newVersion);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -684,7 +683,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
           return;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
         } else {
           throw error;
@@ -701,7 +700,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final BTree oldTree = tree();
+        final BTree oldTree = this.tree();
         final BTree newTree = oldTree.reduced(identity, accumulator, combiner, newVersion, newPost);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -713,11 +712,11 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
           return newTree.rootRef.fold();
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -730,13 +729,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return tree().cursor();
+        return this.tree().cursor();
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -749,13 +748,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return Cursor.keys(tree().cursor());
+        return Cursor.keys(this.tree().cursor());
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -768,13 +767,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return Cursor.values(tree().cursor());
+        return Cursor.values(this.tree().cursor());
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -786,13 +785,13 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     int retries = 0;
     do {
       try {
-        return Cursor.values(tree().depthCursor(maxDepth));
+        return Cursor.values(this.tree().depthCursor(maxDepth));
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -803,15 +802,15 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   protected void didFail(StoreException error) {
     System.err.println(error.getMessage());
     error.printStackTrace();
-    clear();
+    this.clear();
   }
 
   public void loadAsync(Cont<BTreeMap> cont) {
     try {
-      final Cont<Tree> andThen = Conts.constant(cont, this);
-      tree().loadAsync(andThen);
+      final Cont<Tree> andThen = Cont.constant(cont, this);
+      this.tree().loadAsync(andThen);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -820,7 +819,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
   }
 
   public BTreeMap load() throws InterruptedException {
-    tree().load();
+    this.tree().load();
     return this;
   }
 
@@ -828,7 +827,7 @@ public class BTreeMap implements OrderedMap<Value, Value>, ReducedMap<Value, Val
     try {
       this.trunk.commitAsync(commit);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         commit.trap(cause);
       } else {
         throw cause;

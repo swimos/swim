@@ -22,81 +22,12 @@ import swim.util.Murmur3;
 
 public final class ContentCoding extends HttpPart implements Debug {
 
-  private static int hashSeed;
-  private static ContentCoding star;
-  private static ContentCoding identity;
-  private static ContentCoding compress;
-  private static ContentCoding deflate;
-  private static ContentCoding gzip;
   final String name;
   final float weight;
 
   ContentCoding(String name, float weight) {
     this.name = name;
     this.weight = weight;
-  }
-
-  public static ContentCoding star() {
-    if (star == null) {
-      star = new ContentCoding("*", 1f);
-    }
-    return star;
-  }
-
-  public static ContentCoding identity() {
-    if (identity == null) {
-      identity = new ContentCoding("identity", 1f);
-    }
-    return identity;
-  }
-
-  public static ContentCoding compress() {
-    if (compress == null) {
-      compress = new ContentCoding("compress", 1f);
-    }
-    return compress;
-  }
-
-  public static ContentCoding deflate() {
-    if (deflate == null) {
-      deflate = new ContentCoding("deflate", 1f);
-    }
-    return deflate;
-  }
-
-  public static ContentCoding gzip() {
-    if (gzip == null) {
-      gzip = new ContentCoding("gzip", 1f);
-    }
-    return gzip;
-  }
-
-  public static ContentCoding from(String name, float weight) {
-    if (weight == 1f) {
-      return from(name);
-    } else {
-      return new ContentCoding(name, weight);
-    }
-  }
-
-  public static ContentCoding from(String name) {
-    if ("*".equals(name)) {
-      return star();
-    } else if ("identity".equals(name)) {
-      return identity();
-    } else if ("compress".equals(name)) {
-      return compress();
-    } else if ("deflate".equals(name)) {
-      return deflate();
-    } else if ("gzip".equals(name)) {
-      return gzip();
-    } else {
-      return new ContentCoding(name, 1f);
-    }
-  }
-
-  public static ContentCoding parse(String string) {
-    return Http.standardParser().parseContentCodingString(string);
   }
 
   public String name() {
@@ -111,7 +42,7 @@ public final class ContentCoding extends HttpPart implements Debug {
     if (this.weight == weight) {
       return this;
     } else {
-      return from(this.name, weight);
+      return ContentCoding.create(this.name, weight);
     }
   }
 
@@ -158,27 +89,103 @@ public final class ContentCoding extends HttpPart implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ContentCoding.class);
+    if (ContentCoding.hashSeed == 0) {
+      ContentCoding.hashSeed = Murmur3.seed(ContentCoding.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(ContentCoding.hashSeed,
         this.name.hashCode()), Murmur3.hash(this.weight)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("ContentCoding").write('.').write("from").write('(').debug(this.name);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("ContentCoding").write('.').write("create").write('(').debug(this.name);
     if (this.weight != 1f) {
       output = output.write(", ").debug(this.weight);
     }
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static ContentCoding star;
+
+  public static ContentCoding star() {
+    if (ContentCoding.star == null) {
+      ContentCoding.star = new ContentCoding("*", 1f);
+    }
+    return ContentCoding.star;
+  }
+
+  private static ContentCoding identity;
+
+  public static ContentCoding identity() {
+    if (ContentCoding.identity == null) {
+      ContentCoding.identity = new ContentCoding("identity", 1f);
+    }
+    return ContentCoding.identity;
+  }
+
+  private static ContentCoding compress;
+
+  public static ContentCoding compress() {
+    if (ContentCoding.compress == null) {
+      ContentCoding.compress = new ContentCoding("compress", 1f);
+    }
+    return ContentCoding.compress;
+  }
+
+  private static ContentCoding deflate;
+
+  public static ContentCoding deflate() {
+    if (ContentCoding.deflate == null) {
+      ContentCoding.deflate = new ContentCoding("deflate", 1f);
+    }
+    return ContentCoding.deflate;
+  }
+
+  private static ContentCoding gzip;
+
+  public static ContentCoding gzip() {
+    if (ContentCoding.gzip == null) {
+      ContentCoding.gzip = new ContentCoding("gzip", 1f);
+    }
+    return ContentCoding.gzip;
+  }
+
+  public static ContentCoding create(String name, float weight) {
+    if (weight == 1f) {
+      return ContentCoding.create(name);
+    } else {
+      return new ContentCoding(name, weight);
+    }
+  }
+
+  public static ContentCoding create(String name) {
+    if ("*".equals(name)) {
+      return ContentCoding.star();
+    } else if ("identity".equals(name)) {
+      return ContentCoding.identity();
+    } else if ("compress".equals(name)) {
+      return ContentCoding.compress();
+    } else if ("deflate".equals(name)) {
+      return ContentCoding.deflate();
+    } else if ("gzip".equals(name)) {
+      return ContentCoding.gzip();
+    } else {
+      return new ContentCoding(name, 1f);
+    }
+  }
+
+  public static ContentCoding parse(String string) {
+    return Http.standardParser().parseContentCodingString(string);
   }
 
 }

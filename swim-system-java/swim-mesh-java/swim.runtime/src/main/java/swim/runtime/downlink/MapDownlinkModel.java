@@ -20,8 +20,8 @@ import java.util.Set;
 import swim.api.DownlinkException;
 import swim.collections.BTreeMap;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Stage;
+import swim.runtime.DownlinkModel;
 import swim.runtime.DownlinkRelay;
 import swim.runtime.DownlinkView;
 import swim.runtime.Push;
@@ -38,28 +38,27 @@ import swim.warp.EventMessage;
 
 public class MapDownlinkModel extends MapDownlinkModem<MapDownlinkView<?, ?>> {
 
-  protected static final int STATEFUL = 1 << 0;
   protected final BTreeMap<Value, Value, Value> state;
   protected int flags;
 
   public MapDownlinkModel(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
                           float prio, float rate, Value body) {
     super(meshUri, hostUri, nodeUri, laneUri, prio, rate, body);
-    this.flags = 0;
     this.state = BTreeMap.empty();
+    this.flags = 0;
   }
 
   public final boolean isStateful() {
-    return (this.flags & STATEFUL) != 0;
+    return (this.flags & MapDownlinkModel.STATEFUL) != 0;
   }
 
   public MapDownlinkModel isStateful(boolean isStateful) {
     if (isStateful) {
-      this.flags |= STATEFUL;
+      this.flags |= MapDownlinkModel.STATEFUL;
     } else {
-      this.flags &= ~STATEFUL;
+      this.flags &= ~MapDownlinkModel.STATEFUL;
     }
-    final Object views = this.views;
+    final Object views = DownlinkModel.VIEWS.get(this);
     if (views instanceof DownlinkView) {
       ((MapDownlinkView<?, ?>) views).didSetStateful(isStateful);
     } else if (views instanceof DownlinkView[]) {
@@ -74,7 +73,7 @@ public class MapDownlinkModel extends MapDownlinkModem<MapDownlinkView<?, ?>> {
   @Override
   protected void pushDownEvent(Push<EventMessage> push) {
     final EventMessage message = push.message();
-    onEvent(message);
+    this.onEvent(message);
     final Value payload = message.body();
     final String tag = payload.tag();
     if ("update".equals(tag)) {
@@ -114,8 +113,8 @@ public class MapDownlinkModel extends MapDownlinkModem<MapDownlinkView<?, ?>> {
   @Override
   protected void didAddDownlink(MapDownlinkView<?, ?> view) {
     super.didAddDownlink(view);
-    if (this.views instanceof DownlinkView) {
-      isStateful(((MapDownlinkView<?, ?>) view).isStateful());
+    if (DownlinkModel.VIEWS.get(this) instanceof DownlinkView) {
+      this.isStateful(((MapDownlinkView<?, ?>) view).isStateful());
     }
   }
 
@@ -258,7 +257,7 @@ public class MapDownlinkModel extends MapDownlinkModem<MapDownlinkView<?, ?>> {
 
   public void drop(MapDownlinkView<?, ?> view, int lower) {
     if (lower > 0) {
-      pushUp(Record.create(1).attr("drop", lower)); // TODO: drop top key
+      this.pushUp(Record.create(1).attr("drop", lower)); // TODO: drop top key
     }
     //final MapDownlinkRelayDrop relay = new MapDownlinkRelayDrop(this, view.stage(), lower);
     //relay.run();
@@ -266,7 +265,7 @@ public class MapDownlinkModel extends MapDownlinkModem<MapDownlinkView<?, ?>> {
 
   public void take(MapDownlinkView<?, ?> view, int upper) {
     if (upper > 0) {
-      pushUp(Record.create(1).attr("take", upper)); // TODO: take to key
+      this.pushUp(Record.create(1).attr("take", upper)); // TODO: take to key
     }
     //final MapDownlinkRelayTake relay = new MapDownlinkRelayTake(this, view.stage(), upper);
     //relay.run();
@@ -312,6 +311,8 @@ public class MapDownlinkModel extends MapDownlinkModem<MapDownlinkView<?, ?>> {
   public Cursor<Value> valueIterator() {
     return this.state.valueIterator();
   }
+
+  protected static final int STATEFUL = 1 << 0;
 
 }
 
@@ -385,7 +386,7 @@ final class MapDownlinkRelayUpdate extends DownlinkRelay<MapDownlinkModel, MapDo
         if (this.oldObject == null) {
           this.oldObject = valueForm.unit();
         }
-        newObject = valueForm.cast(this.newValue);
+        this.newObject = valueForm.cast(this.newValue);
       }
       if (preemptive) {
         this.newObject = ((MapDownlinkView<Object, Object>) view).downlinkWillUpdate(this.keyObject, this.newObject);
@@ -444,7 +445,7 @@ final class MapDownlinkRelayUpdate extends DownlinkRelay<MapDownlinkModel, MapDo
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -574,7 +575,7 @@ final class MapDownlinkRelayRemove extends DownlinkRelay<MapDownlinkModel, MapDo
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -652,7 +653,7 @@ final class MapDownlinkRelayDrop extends DownlinkRelay<MapDownlinkModel, MapDown
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -730,7 +731,7 @@ final class MapDownlinkRelayTake extends DownlinkRelay<MapDownlinkModel, MapDown
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -805,7 +806,7 @@ final class MapDownlinkRelayClear extends DownlinkRelay<MapDownlinkModel, MapDow
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;

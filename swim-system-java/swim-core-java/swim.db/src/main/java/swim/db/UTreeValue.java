@@ -15,7 +15,6 @@
 package swim.db;
 
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.structure.Value;
 
 public class UTreeValue {
@@ -47,21 +46,21 @@ public class UTreeValue {
   }
 
   public final TreeDelegate treeDelegate() {
-    return tree().treeDelegate();
+    return this.tree().treeDelegate();
   }
 
   public void setTreeDelegate(TreeDelegate treeDelegate) {
-    tree().setTreeDelegate(treeDelegate);
+    this.tree().setTreeDelegate(treeDelegate);
   }
 
   public boolean isResident() {
-    return tree().isResident();
+    return this.tree().isResident();
   }
 
   public UTreeValue isResident(boolean isResident) {
     do {
       final long newVersion = this.trunk.version();
-      final UTree oldTree = tree();
+      final UTree oldTree = this.tree();
       final UTree newTree = oldTree.isResident(isResident);
       if (oldTree != newTree) {
         if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -75,13 +74,13 @@ public class UTreeValue {
   }
 
   public boolean isTransient() {
-    return tree().isTransient();
+    return this.tree().isTransient();
   }
 
   public UTreeValue isTransient(boolean isTransient) {
     do {
       final long newVersion = this.trunk.version();
-      final UTree oldTree = tree();
+      final UTree oldTree = this.tree();
       final UTree newTree = oldTree.isTransient(isTransient);
       if (oldTree != newTree) {
         if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -98,13 +97,13 @@ public class UTreeValue {
     int retries = 0;
     do {
       try {
-        return tree().get();
+        return this.tree().get();
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -118,7 +117,7 @@ public class UTreeValue {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final UTree oldTree = tree();
+        final UTree oldTree = this.tree();
         final UTree newTree = oldTree.updated(newValue, newVersion, newPost);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -132,11 +131,11 @@ public class UTreeValue {
           return oldTree.get();
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -145,21 +144,44 @@ public class UTreeValue {
   }
 
   public void clear() {
-    set(Value.extant());
+    int retries = 0;
+    do {
+      final long newVersion = this.trunk.version();
+      try {
+        final UTree oldTree = this.tree();
+        final UTree newTree = oldTree.cleared(newVersion);
+        if (oldTree != newTree) {
+          if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
+            final TreeContext treeContext = newTree.treeContext();
+            treeContext.treeDidClear(newTree, oldTree);
+            treeContext.treeDidChange(newTree, oldTree);
+            return;
+          }
+        } else {
+          return;
+        }
+      } catch (StoreException error) {
+        if (retries < this.settings().maxRetries) {
+          retries += 1;
+        } else {
+          throw error;
+        }
+      }
+    } while (true);
   }
 
   protected void didFail(StoreException error) {
     System.err.println(error.getMessage());
     error.printStackTrace();
-    clear();
+    this.clear();
   }
 
   public void loadAsync(Cont<UTreeValue> cont) {
     try {
-      final Cont<Tree> andThen = Conts.constant(cont, this);
-      tree().loadAsync(andThen);
+      final Cont<Tree> andThen = Cont.constant(cont, this);
+      this.tree().loadAsync(andThen);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -168,7 +190,7 @@ public class UTreeValue {
   }
 
   public UTreeValue load() throws InterruptedException {
-    tree().load();
+    this.tree().load();
     return this;
   }
 
@@ -176,7 +198,7 @@ public class UTreeValue {
     try {
       this.trunk.commitAsync(commit);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         commit.trap(cause);
       } else {
         throw cause;

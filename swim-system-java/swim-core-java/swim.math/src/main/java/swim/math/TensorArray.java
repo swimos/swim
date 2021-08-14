@@ -21,21 +21,12 @@ import swim.util.Murmur3;
 
 public class TensorArray<V, S> implements Debug {
 
-  private static int hashSeed;
   final TensorSpace<TensorArray<V, S>, S> space;
   final Object[] array;
 
   public TensorArray(TensorSpace<TensorArray<V, S>, S> space, Object... array) {
     this.space = space;
     this.array = array;
-  }
-
-  public static <V, S> TensorArraySpace<TensorArray<V, S>, V, S> space(TensorSpace<V, S> next, TensorDims dims) {
-    return new TensorArrayObjectSpace<V, S>(next, dims);
-  }
-
-  public static <V, S> TensorArraySpace<TensorArray<V, S>, V, S> space(TensorSpace<V, S> next, int n) {
-    return new TensorArrayObjectSpace<V, S>(next, next.dimensions().by(n));
   }
 
   public final TensorSpace<TensorArray<V, S>, S> space() {
@@ -96,12 +87,14 @@ public class TensorArray<V, S> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(TensorArray.class);
+    if (TensorArray.hashSeed == 0) {
+      TensorArray.hashSeed = Murmur3.seed(TensorArray.class);
     }
-    int code = hashSeed;
+    int code = TensorArray.hashSeed;
     final Object[] us = this.array;
     for (int i = 0, n = us.length; i < n; i += 1) {
       code = Murmur3.mix(code, Murmur3.hash(us[i]));
@@ -110,7 +103,7 @@ public class TensorArray<V, S> implements Debug {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.debug(this.space).write('.').write("fromArray").write('(');
     final Object[] us = this.array;
     final int n = us.length;
@@ -121,11 +114,20 @@ public class TensorArray<V, S> implements Debug {
       }
     }
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static <V, S> TensorArraySpace<TensorArray<V, S>, V, S> space(TensorSpace<V, S> next, TensorDims dims) {
+    return new TensorArrayObjectSpace<V, S>(next, dims);
+  }
+
+  public static <V, S> TensorArraySpace<TensorArray<V, S>, V, S> space(TensorSpace<V, S> next, int n) {
+    return new TensorArrayObjectSpace<V, S>(next, next.dimensions().by(n));
   }
 
 }

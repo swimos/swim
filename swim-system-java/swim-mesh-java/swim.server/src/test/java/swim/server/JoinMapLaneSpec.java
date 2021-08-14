@@ -56,7 +56,7 @@ public class JoinMapLaneSpec {
   public void testLinkToJoinMapLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestJoinMapPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestJoinMapPlane.class);
+                                         .openPlane("test", TestJoinMapPlane.class);
 
     final CountDownLatch joinDidReceive = new CountDownLatch(4);
     final CountDownLatch joinDidUpdate = new CountDownLatch(4);
@@ -221,8 +221,8 @@ public class JoinMapLaneSpec {
 
     @Override
     public void didStart() {
-      testJoinMap.downlink("xs").hostUri("warp://localhost:53556").nodeUri("/map/xs").laneUri("map").open();
-      testJoinMap.downlink("ys").hostUri("warp://localhost:53556").nodeUri("/map/ys").laneUri("map").open();
+      this.testJoinMap.downlink("xs").hostUri("warp://localhost:53556").nodeUri("/map/xs").laneUri("map").open();
+      this.testJoinMap.downlink("ys").hostUri("warp://localhost:53556").nodeUri("/map/ys").laneUri("map").open();
     }
 
     class TestJoinMapLaneController implements WillDownlinkMap<String>, DidDownlinkMap<String>,

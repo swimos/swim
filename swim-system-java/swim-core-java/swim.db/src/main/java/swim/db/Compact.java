@@ -16,7 +16,6 @@ package swim.db;
 
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 
 public final class Compact {
 
@@ -35,10 +34,6 @@ public final class Compact {
 
   public Compact(int deleteDelay, boolean isForced, boolean isShifted) {
     this(deleteDelay, isForced, isShifted, FingerTrieSeq.<Cont<Store>>empty());
-  }
-
-  public static Compact forced(int deleteDelay) {
-    return new Compact(deleteDelay, true, false);
   }
 
   public int deleteDelay() {
@@ -74,11 +69,11 @@ public final class Compact {
   }
 
   public void bind(Store store) {
-    for (Cont<Store> cont : conts) {
+    for (Cont<Store> cont : this.conts) {
       try {
         cont.bind(store);
       } catch (Throwable cause) {
-        if (Conts.isNonFatal(cause)) {
+        if (Cont.isNonFatal(cause)) {
           cont.trap(cause);
         } else {
           throw cause;
@@ -88,11 +83,11 @@ public final class Compact {
   }
 
   public void trap(Throwable error) {
-    for (Cont<Store> cont : conts) {
+    for (Cont<Store> cont : this.conts) {
       try {
         cont.trap(error);
       } catch (Throwable cause) {
-        if (Conts.isNonFatal(cause)) {
+        if (Cont.isNonFatal(cause)) {
           cause.printStackTrace(); // swallow
         } else {
           throw cause;
@@ -111,6 +106,10 @@ public final class Compact {
 
   public Commit commit() {
     return new Commit(false, this.isForced, this.isShifted);
+  }
+
+  public static Compact forced(int deleteDelay) {
+    return new Compact(deleteDelay, true, false);
   }
 
 }

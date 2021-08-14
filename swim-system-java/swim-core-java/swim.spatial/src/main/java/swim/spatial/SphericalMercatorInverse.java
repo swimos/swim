@@ -19,12 +19,27 @@ import swim.math.Z2ToR2Operator;
 
 final class SphericalMercatorInverse implements Z2ToR2Operator {
 
+  @Override
+  public double transformX(long x, long y) {
+    return SphericalMercatorInverse.transformX(x);
+  }
+
+  @Override
+  public double transformY(long x, long y) {
+    return SphericalMercatorInverse.transformY(y);
+  }
+
+  @Override
+  public R2ToZ2Operator inverse() {
+    return GeoProjection.sphericalMercator();
+  }
+
   static double transformX(long x) {
-    return round(Math.toDegrees(unscale(x)));
+    return SphericalMercatorInverse.round(Math.toDegrees(SphericalMercatorInverse.unscale(x)));
   }
 
   static double transformY(long y) {
-    return round(Math.toDegrees(Math.atan(Math.exp(unscale(y))) * 2.0 - Math.PI / 2.0));
+    return SphericalMercatorInverse.round(Math.toDegrees(Math.atan(Math.exp(SphericalMercatorInverse.unscale(y))) * 2.0 - Math.PI / 2.0));
   }
 
   static double unscale(long x) {
@@ -33,21 +48,6 @@ final class SphericalMercatorInverse implements Z2ToR2Operator {
 
   static double round(double value) {
     return (double) Math.round(value * 100000000.0) / 100000000.0;
-  }
-
-  @Override
-  public double transformX(long x, long y) {
-    return transformX(x);
-  }
-
-  @Override
-  public double transformY(long x, long y) {
-    return transformY(y);
-  }
-
-  @Override
-  public R2ToZ2Operator inverse() {
-    return GeoProjection.sphericalMercator();
   }
 
 }

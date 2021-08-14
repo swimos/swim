@@ -41,10 +41,10 @@ final class ChannelEncoder extends Encoder<ReadableByteChannel, ReadableByteChan
       final int k = output.write(input);
       if (k < 0 || !output.isPart()) {
         input.close();
-        return done(input);
+        return Encoder.done(input);
       } else if (output.isError()) {
         input.close();
-        return error(output.trap());
+        return Encoder.error(output.trap());
       } else {
         return this;
       }
@@ -54,7 +54,7 @@ final class ChannelEncoder extends Encoder<ReadableByteChannel, ReadableByteChan
       } catch (IOException ignore) {
         // swallow
       }
-      return error(error);
+      return Encoder.error(error);
     } catch (Throwable error) {
       try {
         input.close();

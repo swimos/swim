@@ -20,20 +20,20 @@ import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttUnsubAckSpec {
 
-  public static void assertDecodes(Data data, MqttUnsubAck packet) {
-    MqttAssertions.assertDecodesPacket(data, packet);
-  }
-
   @Test
   public void decodeUnsubAckPackets() {
-    assertDecodes(Data.fromBase16("B0020000"), MqttUnsubAck.from(0x0000));
-    assertDecodes(Data.fromBase16("B0027E96"), MqttUnsubAck.from(0x7E96));
+    assertDecodes(Data.fromBase16("B0020000"), MqttUnsubAck.create(0x0000));
+    assertDecodes(Data.fromBase16("B0027E96"), MqttUnsubAck.create(0x7E96));
   }
 
   @Test
   public void encodeUnsubAckPackets() {
-    assertEncodes(MqttUnsubAck.from(0x0000), Data.fromBase16("B0020000"));
-    assertEncodes(MqttUnsubAck.from(0x7E96), Data.fromBase16("B0027E96"));
+    assertEncodes(MqttUnsubAck.create(0x0000), Data.fromBase16("B0020000"));
+    assertEncodes(MqttUnsubAck.create(0x7E96), Data.fromBase16("B0027E96"));
+  }
+
+  public static void assertDecodes(Data data, MqttUnsubAck packet) {
+    MqttAssertions.assertDecodesPacket(data, packet);
   }
 
 }

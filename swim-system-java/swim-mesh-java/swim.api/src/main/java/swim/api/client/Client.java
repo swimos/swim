@@ -14,9 +14,9 @@
 
 package swim.api.client;
 
-import swim.api.ref.SwimRef;
+import swim.api.ref.WarpRef;
 
-public interface Client extends SwimRef {
+public interface Client extends WarpRef {
 
   //Credentials getCredentials(Uri hostUri);
 

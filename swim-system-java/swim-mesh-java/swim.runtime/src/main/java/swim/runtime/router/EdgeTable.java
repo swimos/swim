@@ -28,7 +28,7 @@ import swim.api.lane.function.OnSyncKeys;
 import swim.api.policy.Policy;
 import swim.api.warp.WarpUplink;
 import swim.collections.HashTrieMap;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.runtime.AbstractTierBinding;
@@ -67,6 +67,7 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   protected EdgeContext edgeContext;
   volatile HashTrieMap<Uri, MeshBinding> meshes;
   volatile MeshBinding network;
+
   volatile int meshOpenDelta;
   volatile long meshOpenCount;
   volatile int meshCloseDelta;
@@ -114,6 +115,7 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   volatile int uplinkCommandRate;
   volatile long uplinkCommandCount;
   volatile long lastReportTime;
+
   EdgePulse pulse;
   AgentNode metaNode;
   DemandMapLane<Uri, MeshInfo> metaMeshes;
@@ -126,7 +128,68 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   SupplyLane<LogEntry> metaFailLog;
 
   public EdgeTable() {
+    this.edgeContext = null;
     this.meshes = HashTrieMap.empty();
+    this.network = null;
+
+    this.meshOpenDelta = 0;
+    this.meshOpenCount = 0L;
+    this.meshCloseDelta = 0;
+    this.meshCloseCount = 0L;
+    this.partOpenDelta = 0;
+    this.partOpenCount = 0L;
+    this.partCloseDelta = 0;
+    this.partCloseCount = 0L;
+    this.hostOpenDelta = 0;
+    this.hostOpenCount = 0L;
+    this.hostCloseDelta = 0;
+    this.hostCloseCount = 0L;
+    this.nodeOpenDelta = 0;
+    this.nodeOpenCount = 0L;
+    this.nodeCloseDelta = 0;
+    this.nodeCloseCount = 0L;
+    this.agentOpenDelta = 0;
+    this.agentOpenCount = 0L;
+    this.agentCloseDelta = 0;
+    this.agentCloseCount = 0L;
+    this.agentExecDelta = 0L;
+    this.agentExecRate = 0L;
+    this.agentExecTime = 0L;
+    this.timerEventDelta = 0;
+    this.timerEventRate = 0;
+    this.timerEventCount = 0L;
+    this.downlinkOpenDelta = 0;
+    this.downlinkOpenCount = 0L;
+    this.downlinkCloseDelta = 0;
+    this.downlinkCloseCount = 0L;
+    this.downlinkEventDelta = 0;
+    this.downlinkEventRate = 0;
+    this.downlinkEventCount = 0L;
+    this.downlinkCommandDelta = 0;
+    this.downlinkCommandRate = 0;
+    this.downlinkCommandCount = 0L;
+    this.uplinkOpenDelta = 0;
+    this.uplinkOpenCount = 0L;
+    this.uplinkCloseDelta = 0;
+    this.uplinkCloseCount = 0L;
+    this.uplinkEventDelta = 0;
+    this.uplinkEventRate = 0;
+    this.uplinkEventCount = 0L;
+    this.uplinkCommandDelta = 0;
+    this.uplinkCommandRate = 0;
+    this.uplinkCommandCount = 0L;
+    this.lastReportTime = 0L;
+
+    this.pulse = null;
+    this.metaNode = null;
+    this.metaMeshes = null;
+    this.metaPulse = null;
+    this.metaTraceLog = null;
+    this.metaDebugLog = null;
+    this.metaInfoLog = null;
+    this.metaWarnLog = null;
+    this.metaErrorLog = null;
+    this.metaFailLog = null;
   }
 
   @Override
@@ -152,7 +215,7 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapEdge(Class<T> edgeClass) {
-    if (edgeClass.isAssignableFrom(getClass())) {
+    if (edgeClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.edgeContext.unwrapEdge(edgeClass);
@@ -163,7 +226,7 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   @Override
   public <T> T bottomEdge(Class<T> edgeClass) {
     T edge = this.edgeContext.bottomEdge(edgeClass);
-    if (edge == null && edgeClass.isAssignableFrom(getClass())) {
+    if (edge == null && edgeClass.isAssignableFrom(this.getClass())) {
       edge = (T) this;
     }
     return edge;
@@ -212,52 +275,46 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   public void openMetaEdge(EdgeBinding edge, NodeBinding metaEdge) {
     if (metaEdge instanceof AgentNode) {
       this.metaNode = (AgentNode) metaEdge;
-      openMetaLanes(edge, (AgentNode) metaEdge);
+      this.openMetaLanes(edge, (AgentNode) metaEdge);
     }
     this.edgeContext.openMetaEdge(edge, metaEdge);
   }
 
   protected void openMetaLanes(EdgeBinding edge, AgentNode metaEdge) {
-    openReflectLanes(edge, metaEdge);
-    openLogLanes(edge, metaEdge);
+    this.openReflectLanes(edge, metaEdge);
+    this.openLogLanes(edge, metaEdge);
   }
 
   protected void openReflectLanes(EdgeBinding edge, AgentNode metaEdge) {
     this.metaMeshes = metaEdge.demandMapLane()
-        .keyForm(Uri.form())
-        .valueForm(MeshInfo.form())
-        .observe(new EdgeTableMeshesController(edge));
-    metaEdge.openLane(MESHES_URI, this.metaMeshes);
+                              .keyForm(Uri.form())
+                              .valueForm(MeshInfo.form())
+                              .observe(new EdgeTableMeshesController(edge));
+    metaEdge.openLane(EdgeTable.MESHES_URI, this.metaMeshes);
 
-    this.metaPulse = metaNode.demandLane()
-        .valueForm(EdgePulse.form())
-        .observe(new EdgeTablePulseController(this));
-    metaNode.openLane(EdgePulse.PULSE_URI, this.metaPulse);
+    this.metaPulse = this.metaNode.demandLane()
+                                  .valueForm(EdgePulse.form())
+                                  .observe(new EdgeTablePulseController(this));
+    this.metaNode.openLane(EdgePulse.PULSE_URI, this.metaPulse);
   }
 
   protected void openLogLanes(EdgeBinding edge, AgentNode metaEdge) {
-    this.metaTraceLog = metaEdge.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaTraceLog = metaEdge.supplyLane().valueForm(LogEntry.form());
     metaEdge.openLane(LogEntry.TRACE_LOG_URI, this.metaTraceLog);
 
-    this.metaDebugLog = metaEdge.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaDebugLog = metaEdge.supplyLane().valueForm(LogEntry.form());
     metaEdge.openLane(LogEntry.DEBUG_LOG_URI, this.metaDebugLog);
 
-    this.metaInfoLog = metaEdge.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaInfoLog = metaEdge.supplyLane().valueForm(LogEntry.form());
     metaEdge.openLane(LogEntry.INFO_LOG_URI, this.metaInfoLog);
 
-    this.metaWarnLog = metaEdge.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaWarnLog = metaEdge.supplyLane().valueForm(LogEntry.form());
     metaEdge.openLane(LogEntry.WARN_LOG_URI, this.metaWarnLog);
 
-    this.metaErrorLog = metaEdge.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaErrorLog = metaEdge.supplyLane().valueForm(LogEntry.form());
     metaEdge.openLane(LogEntry.ERROR_LOG_URI, this.metaErrorLog);
 
-    this.metaFailLog = metaEdge.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaFailLog = metaEdge.supplyLane().valueForm(LogEntry.form());
     metaEdge.openLane(LogEntry.FAIL_LOG_URI, this.metaFailLog);
   }
 
@@ -273,21 +330,19 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
 
   @Override
   public HashTrieMap<Uri, MeshBinding> meshes() {
-    return this.meshes;
+    return EdgeTable.MESHES.get(this);
   }
 
   @Override
   public MeshBinding getMesh(Uri meshUri) {
-    return this.meshes.get(meshUri);
+    return EdgeTable.MESHES.get(this).get(meshUri);
   }
 
   @Override
   public MeshBinding openMesh(Uri meshUri) {
-    HashTrieMap<Uri, MeshBinding> oldMeshes;
-    HashTrieMap<Uri, MeshBinding> newMeshes;
     MeshBinding meshBinding = null;
     do {
-      oldMeshes = this.meshes;
+      final HashTrieMap<Uri, MeshBinding> oldMeshes = EdgeTable.MESHES.get(this);
       final MeshBinding mesh = oldMeshes.get(meshUri);
       if (mesh != null) {
         if (meshBinding != null) {
@@ -295,87 +350,79 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
           meshBinding.close();
         }
         meshBinding = mesh;
-        newMeshes = oldMeshes;
         break;
-      } else if (meshBinding == null) {
-        final MeshAddress meshAddress = cellAddress().meshUri(meshUri);
-        meshBinding = this.edgeContext.createMesh(meshAddress);
-        if (meshBinding != null) {
-          meshBinding = this.edgeContext.injectMesh(meshAddress, meshBinding);
-          final MeshContext meshContext = createMeshContext(meshAddress, meshBinding);
-          meshBinding.setMeshContext(meshContext);
-          meshBinding = meshBinding.meshWrapper();
-          newMeshes = oldMeshes.updated(meshUri, meshBinding);
-        } else {
-          newMeshes = oldMeshes;
+      } else {
+        if (meshBinding == null) {
+          final MeshAddress meshAddress = this.cellAddress().meshUri(meshUri);
+          meshBinding = this.edgeContext.createMesh(meshAddress);
+          if (meshBinding != null) {
+            meshBinding = this.edgeContext.injectMesh(meshAddress, meshBinding);
+            final MeshContext meshContext = this.createMeshContext(meshAddress, meshBinding);
+            meshBinding.setMeshContext(meshContext);
+            meshBinding = meshBinding.meshWrapper();
+          } else {
+            break;
+          }
+        }
+        final HashTrieMap<Uri, MeshBinding> newMeshes = oldMeshes.updated(meshUri, meshBinding);
+        if (EdgeTable.MESHES.compareAndSet(this, oldMeshes, newMeshes)) {
+          this.activate(meshBinding);
+          this.didOpenMesh(meshBinding);
           break;
         }
-      } else {
-        newMeshes = oldMeshes.updated(meshUri, meshBinding);
       }
-    } while (oldMeshes != newMeshes && !MESHES.compareAndSet(this, oldMeshes, newMeshes));
-    if (oldMeshes != newMeshes) {
-      activate(meshBinding);
-      didOpenMesh(meshBinding);
-    }
+    } while (true);
     return meshBinding;
   }
 
   @Override
   public MeshBinding openMesh(Uri meshUri, MeshBinding mesh) {
-    HashTrieMap<Uri, MeshBinding> oldMeshes;
-    HashTrieMap<Uri, MeshBinding> newMeshes;
     MeshBinding meshBinding = null;
     do {
-      oldMeshes = this.meshes;
+      final HashTrieMap<Uri, MeshBinding> oldMeshes = EdgeTable.MESHES.get(this);
       if (oldMeshes.containsKey(meshUri)) {
         meshBinding = null;
-        newMeshes = oldMeshes;
         break;
       } else {
         if (meshBinding == null) {
-          final MeshAddress meshAddress = cellAddress().meshUri(meshUri);
+          final MeshAddress meshAddress = this.cellAddress().meshUri(meshUri);
           meshBinding = this.edgeContext.injectMesh(meshAddress, mesh);
-          final MeshContext meshContext = createMeshContext(meshAddress, meshBinding);
+          final MeshContext meshContext = this.createMeshContext(meshAddress, meshBinding);
           meshBinding.setMeshContext(meshContext);
           meshBinding = meshBinding.meshWrapper();
         }
-        newMeshes = oldMeshes.updated(meshUri, meshBinding);
+        final HashTrieMap<Uri, MeshBinding> newMeshes = oldMeshes.updated(meshUri, meshBinding);
+        if (EdgeTable.MESHES.compareAndSet(this, oldMeshes, newMeshes)) {
+          this.activate(meshBinding);
+          this.didOpenMesh(meshBinding);
+          break;
+        }
       }
-    } while (oldMeshes != newMeshes && !MESHES.compareAndSet(this, oldMeshes, newMeshes));
-    if (meshBinding != null) {
-      activate(meshBinding);
-      didOpenMesh(meshBinding);
-    }
+    } while (true);
     return meshBinding;
   }
 
   public void closeMesh(Uri meshUri) {
-    HashTrieMap<Uri, MeshBinding> oldMeshes;
-    HashTrieMap<Uri, MeshBinding> newMeshes;
-    MeshBinding meshBinding = null;
     do {
-      oldMeshes = this.meshes;
-      final MeshBinding mesh = oldMeshes.get(meshUri);
-      if (mesh != null) {
-        meshBinding = mesh;
-        newMeshes = oldMeshes.removed(meshUri);
+      final HashTrieMap<Uri, MeshBinding> oldMeshes = EdgeTable.MESHES.get(this);
+      final MeshBinding meshBinding = oldMeshes.get(meshUri);
+      if (meshBinding != null) {
+        final HashTrieMap<Uri, MeshBinding> newMeshes = oldMeshes.removed(meshUri);
+        if (EdgeTable.MESHES.compareAndSet(this, oldMeshes, newMeshes)) {
+          if (this.network == meshBinding) {
+            this.network = null;
+          }
+          meshBinding.didClose();
+          this.didCloseMesh(meshBinding);
+          if (newMeshes.isEmpty()) {
+            this.close();
+          }
+          break;
+        }
       } else {
-        meshBinding = null;
-        newMeshes = oldMeshes;
         break;
       }
-    } while (oldMeshes != newMeshes && !MESHES.compareAndSet(this, oldMeshes, newMeshes));
-    if (meshBinding != null) {
-      if (this.network == meshBinding) {
-        this.network = null;
-      }
-      meshBinding.didClose();
-      didCloseMesh(meshBinding);
-      if (newMeshes.isEmpty()) {
-        close();
-      }
-    }
+    } while (true);
   }
 
   protected void didOpenMesh(MeshBinding mesh) {
@@ -383,8 +430,8 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
     if (metaMeshes != null) {
       metaMeshes.cue(mesh.meshUri());
     }
-    MESH_OPEN_DELTA.incrementAndGet(this);
-    flushMetrics();
+    EdgeTable.MESH_OPEN_DELTA.incrementAndGet(this);
+    this.flushMetrics();
   }
 
   protected void didCloseMesh(MeshBinding mesh) {
@@ -392,8 +439,8 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
     if (metaMeshes != null) {
       metaMeshes.remove(mesh.meshUri());
     }
-    MESH_CLOSE_DELTA.incrementAndGet(this);
-    flushMetrics();
+    EdgeTable.MESH_CLOSE_DELTA.incrementAndGet(this);
+    this.flushMetrics();
   }
 
   @Override
@@ -435,14 +482,14 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   public LinkBinding bindDownlink(Downlink downlink) {
     final LinkBinding link = ((DownlinkView) downlink).createDownlinkModel();
     link.setCellContext(this);
-    final EdgeBinding edgeBinding = bottomEdge(EdgeBinding.class);
+    final EdgeBinding edgeBinding = this.bottomEdge(EdgeBinding.class);
     edgeBinding.openUplink(link);
     return link;
   }
 
   @Override
   public void openDownlink(LinkBinding link) {
-    final EdgeBinding edgeBinding = bottomEdge(EdgeBinding.class);
+    final EdgeBinding edgeBinding = this.bottomEdge(EdgeBinding.class);
     edgeBinding.openUplink(link);
     link.setCellContext(this);
   }
@@ -454,7 +501,7 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
 
   @Override
   public void openUplink(LinkBinding link) {
-    MeshBinding meshBinding = openMesh(link.meshUri());
+    MeshBinding meshBinding = this.openMesh(link.meshUri());
     if (meshBinding != null) {
       meshBinding = meshBinding.bottomMesh(MeshBinding.class);
     }
@@ -467,13 +514,13 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
 
   @Override
   public void pushDown(Push<?> push) {
-    pushUp(push);
+    this.pushUp(push);
   }
 
   @Override
   public void pushUp(Push<?> push) {
     final Uri meshUri = push.meshUri();
-    MeshBinding meshBinding = openMesh(meshUri);
+    MeshBinding meshBinding = this.openMesh(meshUri);
     if (meshBinding != null) {
       meshBinding = meshBinding.bottomMesh(MeshBinding.class);
     }
@@ -541,7 +588,7 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   @Override
   protected void willOpen() {
     super.willOpen();
-    final Iterator<MeshBinding> meshesIterator = this.meshes.valueIterator();
+    final Iterator<MeshBinding> meshesIterator = EdgeTable.MESHES.get(this).valueIterator();
     while (meshesIterator.hasNext()) {
       meshesIterator.next().open();
     }
@@ -550,7 +597,7 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   @Override
   protected void willLoad() {
     super.willLoad();
-    final Iterator<MeshBinding> meshesIterator = this.meshes.valueIterator();
+    final Iterator<MeshBinding> meshesIterator = EdgeTable.MESHES.get(this).valueIterator();
     while (meshesIterator.hasNext()) {
       meshesIterator.next().load();
     }
@@ -559,7 +606,7 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   @Override
   protected void willStart() {
     super.willStart();
-    final Iterator<MeshBinding> meshesIterator = this.meshes.valueIterator();
+    final Iterator<MeshBinding> meshesIterator = EdgeTable.MESHES.get(this).valueIterator();
     while (meshesIterator.hasNext()) {
       meshesIterator.next().start();
     }
@@ -568,7 +615,7 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   @Override
   protected void willStop() {
     super.willStop();
-    final Iterator<MeshBinding> meshesIterator = this.meshes.valueIterator();
+    final Iterator<MeshBinding> meshesIterator = EdgeTable.MESHES.get(this).valueIterator();
     while (meshesIterator.hasNext()) {
       meshesIterator.next().stop();
     }
@@ -577,7 +624,7 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   @Override
   protected void willUnload() {
     super.willUnload();
-    final Iterator<MeshBinding> meshesIterator = this.meshes.valueIterator();
+    final Iterator<MeshBinding> meshesIterator = EdgeTable.MESHES.get(this).valueIterator();
     while (meshesIterator.hasNext()) {
       meshesIterator.next().unload();
     }
@@ -586,7 +633,7 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   @Override
   protected void willClose() {
     super.willClose();
-    final Iterator<MeshBinding> meshesIterator = this.meshes.valueIterator();
+    final Iterator<MeshBinding> meshesIterator = EdgeTable.MESHES.get(this).valueIterator();
     while (meshesIterator.hasNext()) {
       meshesIterator.next().close();
     }
@@ -607,13 +654,13 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
       this.metaErrorLog = null;
       this.metaFailLog = null;
     }
-    flushMetrics();
+    this.flushMetrics();
   }
 
   @Override
   public void didFail(Throwable error) {
-    if (Conts.isNonFatal(error)) {
-      fail(error);
+    if (Cont.isNonFatal(error)) {
+      this.fail(error);
     } else {
       error.printStackTrace();
     }
@@ -622,64 +669,64 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   @Override
   public void reportDown(Metric metric) {
     if (metric instanceof MeshProfile) {
-      accumulateMeshProfile((MeshProfile) metric);
+      this.accumulateMeshProfile((MeshProfile) metric);
     } else if (metric instanceof WarpDownlinkProfile) {
-      accumulateWarpDownlinkProfile((WarpDownlinkProfile) metric);
+      this.accumulateWarpDownlinkProfile((WarpDownlinkProfile) metric);
     } else {
       this.edgeContext.reportDown(metric);
     }
   }
 
   protected void accumulateMeshProfile(MeshProfile profile) {
-    PART_OPEN_DELTA.addAndGet(this, profile.partOpenDelta());
-    PART_CLOSE_DELTA.addAndGet(this, profile.partCloseDelta());
-    HOST_OPEN_DELTA.addAndGet(this, profile.hostOpenDelta());
-    HOST_CLOSE_DELTA.addAndGet(this, profile.hostCloseDelta());
-    NODE_OPEN_DELTA.addAndGet(this, profile.nodeOpenDelta());
-    NODE_CLOSE_DELTA.addAndGet(this, profile.nodeCloseDelta());
-    AGENT_OPEN_DELTA.addAndGet(this, profile.agentOpenDelta());
-    AGENT_CLOSE_DELTA.addAndGet(this, profile.agentCloseDelta());
-    AGENT_EXEC_DELTA.addAndGet(this, profile.agentExecDelta());
-    AGENT_EXEC_RATE.addAndGet(this, profile.agentExecRate());
-    TIMER_EVENT_DELTA.addAndGet(this, profile.timerEventDelta());
-    TIMER_EVENT_RATE.addAndGet(this, profile.timerEventRate());
-    DOWNLINK_OPEN_DELTA.addAndGet(this, profile.downlinkOpenDelta());
-    DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.downlinkCloseDelta());
-    DOWNLINK_EVENT_DELTA.addAndGet(this, profile.downlinkEventDelta());
-    DOWNLINK_EVENT_RATE.addAndGet(this, profile.downlinkEventRate());
-    DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.downlinkCommandDelta());
-    DOWNLINK_COMMAND_RATE.addAndGet(this, profile.downlinkCommandRate());
-    UPLINK_OPEN_DELTA.addAndGet(this, profile.uplinkOpenDelta());
-    UPLINK_CLOSE_DELTA.addAndGet(this, profile.uplinkCloseDelta());
-    UPLINK_EVENT_DELTA.addAndGet(this, profile.uplinkEventDelta());
-    UPLINK_EVENT_RATE.addAndGet(this, profile.uplinkEventRate());
-    UPLINK_COMMAND_DELTA.addAndGet(this, profile.uplinkCommandDelta());
-    UPLINK_COMMAND_RATE.addAndGet(this, profile.uplinkCommandRate());
-    didUpdateMetrics();
+    EdgeTable.PART_OPEN_DELTA.addAndGet(this, profile.partOpenDelta());
+    EdgeTable.PART_CLOSE_DELTA.addAndGet(this, profile.partCloseDelta());
+    EdgeTable.HOST_OPEN_DELTA.addAndGet(this, profile.hostOpenDelta());
+    EdgeTable.HOST_CLOSE_DELTA.addAndGet(this, profile.hostCloseDelta());
+    EdgeTable.NODE_OPEN_DELTA.addAndGet(this, profile.nodeOpenDelta());
+    EdgeTable.NODE_CLOSE_DELTA.addAndGet(this, profile.nodeCloseDelta());
+    EdgeTable.AGENT_OPEN_DELTA.addAndGet(this, profile.agentOpenDelta());
+    EdgeTable.AGENT_CLOSE_DELTA.addAndGet(this, profile.agentCloseDelta());
+    EdgeTable.AGENT_EXEC_DELTA.addAndGet(this, profile.agentExecDelta());
+    EdgeTable.AGENT_EXEC_RATE.addAndGet(this, profile.agentExecRate());
+    EdgeTable.TIMER_EVENT_DELTA.addAndGet(this, profile.timerEventDelta());
+    EdgeTable.TIMER_EVENT_RATE.addAndGet(this, profile.timerEventRate());
+    EdgeTable.DOWNLINK_OPEN_DELTA.addAndGet(this, profile.downlinkOpenDelta());
+    EdgeTable.DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.downlinkCloseDelta());
+    EdgeTable.DOWNLINK_EVENT_DELTA.addAndGet(this, profile.downlinkEventDelta());
+    EdgeTable.DOWNLINK_EVENT_RATE.addAndGet(this, profile.downlinkEventRate());
+    EdgeTable.DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.downlinkCommandDelta());
+    EdgeTable.DOWNLINK_COMMAND_RATE.addAndGet(this, profile.downlinkCommandRate());
+    EdgeTable.UPLINK_OPEN_DELTA.addAndGet(this, profile.uplinkOpenDelta());
+    EdgeTable.UPLINK_CLOSE_DELTA.addAndGet(this, profile.uplinkCloseDelta());
+    EdgeTable.UPLINK_EVENT_DELTA.addAndGet(this, profile.uplinkEventDelta());
+    EdgeTable.UPLINK_EVENT_RATE.addAndGet(this, profile.uplinkEventRate());
+    EdgeTable.UPLINK_COMMAND_DELTA.addAndGet(this, profile.uplinkCommandDelta());
+    EdgeTable.UPLINK_COMMAND_RATE.addAndGet(this, profile.uplinkCommandRate());
+    this.didUpdateMetrics();
   }
 
   protected void accumulateWarpDownlinkProfile(WarpDownlinkProfile profile) {
-    DOWNLINK_OPEN_DELTA.addAndGet(this, profile.openDelta());
-    DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.closeDelta());
-    DOWNLINK_EVENT_DELTA.addAndGet(this, profile.eventDelta());
-    DOWNLINK_EVENT_RATE.addAndGet(this, profile.eventRate());
-    DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.commandDelta());
-    DOWNLINK_COMMAND_RATE.addAndGet(this, profile.commandRate());
-    didUpdateMetrics();
+    EdgeTable.DOWNLINK_OPEN_DELTA.addAndGet(this, profile.openDelta());
+    EdgeTable.DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.closeDelta());
+    EdgeTable.DOWNLINK_EVENT_DELTA.addAndGet(this, profile.eventDelta());
+    EdgeTable.DOWNLINK_EVENT_RATE.addAndGet(this, profile.eventRate());
+    EdgeTable.DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.commandDelta());
+    EdgeTable.DOWNLINK_COMMAND_RATE.addAndGet(this, profile.commandRate());
+    this.didUpdateMetrics();
   }
 
   protected void didUpdateMetrics() {
     do {
       final long newReportTime = System.currentTimeMillis();
-      final long oldReportTime = this.lastReportTime;
+      final long oldReportTime = EdgeTable.LAST_REPORT_TIME.get(this);
       final long dt = newReportTime - oldReportTime;
       if (dt >= Metric.REPORT_INTERVAL) {
-        if (LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
+        if (EdgeTable.LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
           try {
-            reportMetrics(dt);
+            this.reportMetrics(dt);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              didFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.didFail(error);
             } else {
               throw error;
             }
@@ -694,13 +741,13 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
 
   protected void flushMetrics() {
     final long newReportTime = System.currentTimeMillis();
-    final long oldReportTime = LAST_REPORT_TIME.getAndSet(this, newReportTime);
+    final long oldReportTime = EdgeTable.LAST_REPORT_TIME.getAndSet(this, newReportTime);
     final long dt = newReportTime - oldReportTime;
     try {
-      reportMetrics(dt);
+      this.reportMetrics(dt);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
+      if (Cont.isNonFatal(error)) {
+        this.didFail(error);
       } else {
         throw error;
       }
@@ -708,64 +755,64 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   }
 
   protected void reportMetrics(long dt) {
-    final EdgeProfile profile = collectProfile(dt);
+    final EdgeProfile profile = this.collectProfile(dt);
     this.edgeContext.reportDown(profile);
   }
 
   protected EdgeProfile collectProfile(long dt) {
-    final int meshOpenDelta = MESH_OPEN_DELTA.getAndSet(this, 0);
-    final long meshOpenCount = MESH_OPEN_COUNT.addAndGet(this, (long) meshOpenDelta);
-    final int meshCloseDelta = MESH_CLOSE_DELTA.getAndSet(this, 0);
-    final long meshCloseCount = MESH_CLOSE_COUNT.addAndGet(this, (long) meshCloseDelta);
+    final int meshOpenDelta = EdgeTable.MESH_OPEN_DELTA.getAndSet(this, 0);
+    final long meshOpenCount = EdgeTable.MESH_OPEN_COUNT.addAndGet(this, (long) meshOpenDelta);
+    final int meshCloseDelta = EdgeTable.MESH_CLOSE_DELTA.getAndSet(this, 0);
+    final long meshCloseCount = EdgeTable.MESH_CLOSE_COUNT.addAndGet(this, (long) meshCloseDelta);
 
-    final int partOpenDelta = PART_OPEN_DELTA.getAndSet(this, 0);
-    final long partOpenCount = PART_OPEN_COUNT.addAndGet(this, (long) partOpenDelta);
-    final int partCloseDelta = PART_CLOSE_DELTA.getAndSet(this, 0);
-    final long partCloseCount = PART_CLOSE_COUNT.addAndGet(this, (long) partCloseDelta);
+    final int partOpenDelta = EdgeTable.PART_OPEN_DELTA.getAndSet(this, 0);
+    final long partOpenCount = EdgeTable.PART_OPEN_COUNT.addAndGet(this, (long) partOpenDelta);
+    final int partCloseDelta = EdgeTable.PART_CLOSE_DELTA.getAndSet(this, 0);
+    final long partCloseCount = EdgeTable.PART_CLOSE_COUNT.addAndGet(this, (long) partCloseDelta);
 
-    final int hostOpenDelta = HOST_OPEN_DELTA.getAndSet(this, 0);
-    final long hostOpenCount = HOST_OPEN_COUNT.addAndGet(this, (long) hostOpenDelta);
-    final int hostCloseDelta = HOST_CLOSE_DELTA.getAndSet(this, 0);
-    final long hostCloseCount = HOST_CLOSE_COUNT.addAndGet(this, (long) hostCloseDelta);
+    final int hostOpenDelta = EdgeTable.HOST_OPEN_DELTA.getAndSet(this, 0);
+    final long hostOpenCount = EdgeTable.HOST_OPEN_COUNT.addAndGet(this, (long) hostOpenDelta);
+    final int hostCloseDelta = EdgeTable.HOST_CLOSE_DELTA.getAndSet(this, 0);
+    final long hostCloseCount = EdgeTable.HOST_CLOSE_COUNT.addAndGet(this, (long) hostCloseDelta);
 
-    final int nodeOpenDelta = NODE_OPEN_DELTA.getAndSet(this, 0);
-    final long nodeOpenCount = NODE_OPEN_COUNT.addAndGet(this, (long) nodeOpenDelta);
-    final int nodeCloseDelta = NODE_CLOSE_DELTA.getAndSet(this, 0);
-    final long nodeCloseCount = NODE_CLOSE_COUNT.addAndGet(this, (long) nodeCloseDelta);
+    final int nodeOpenDelta = EdgeTable.NODE_OPEN_DELTA.getAndSet(this, 0);
+    final long nodeOpenCount = EdgeTable.NODE_OPEN_COUNT.addAndGet(this, (long) nodeOpenDelta);
+    final int nodeCloseDelta = EdgeTable.NODE_CLOSE_DELTA.getAndSet(this, 0);
+    final long nodeCloseCount = EdgeTable.NODE_CLOSE_COUNT.addAndGet(this, (long) nodeCloseDelta);
 
-    final int agentOpenDelta = AGENT_OPEN_DELTA.getAndSet(this, 0);
-    final long agentOpenCount = AGENT_OPEN_COUNT.addAndGet(this, (long) agentOpenDelta);
-    final int agentCloseDelta = AGENT_CLOSE_DELTA.getAndSet(this, 0);
-    final long agentCloseCount = AGENT_CLOSE_COUNT.addAndGet(this, (long) agentCloseDelta);
-    final long agentExecDelta = AGENT_EXEC_DELTA.getAndSet(this, 0L);
-    final long agentExecRate = AGENT_EXEC_RATE.getAndSet(this, 0L);
-    final long agentExecTime = AGENT_EXEC_TIME.addAndGet(this, agentExecDelta);
+    final int agentOpenDelta = EdgeTable.AGENT_OPEN_DELTA.getAndSet(this, 0);
+    final long agentOpenCount = EdgeTable.AGENT_OPEN_COUNT.addAndGet(this, (long) agentOpenDelta);
+    final int agentCloseDelta = EdgeTable.AGENT_CLOSE_DELTA.getAndSet(this, 0);
+    final long agentCloseCount = EdgeTable.AGENT_CLOSE_COUNT.addAndGet(this, (long) agentCloseDelta);
+    final long agentExecDelta = EdgeTable.AGENT_EXEC_DELTA.getAndSet(this, 0L);
+    final long agentExecRate = EdgeTable.AGENT_EXEC_RATE.getAndSet(this, 0L);
+    final long agentExecTime = EdgeTable.AGENT_EXEC_TIME.addAndGet(this, agentExecDelta);
 
-    final int timerEventDelta = TIMER_EVENT_DELTA.getAndSet(this, 0);
-    final int timerEventRate = TIMER_EVENT_RATE.getAndSet(this, 0);
-    final long timerEventCount = TIMER_EVENT_COUNT.addAndGet(this, (long) timerEventDelta);
+    final int timerEventDelta = EdgeTable.TIMER_EVENT_DELTA.getAndSet(this, 0);
+    final int timerEventRate = EdgeTable.TIMER_EVENT_RATE.getAndSet(this, 0);
+    final long timerEventCount = EdgeTable.TIMER_EVENT_COUNT.addAndGet(this, (long) timerEventDelta);
 
-    final int downlinkOpenDelta = DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
-    final long downlinkOpenCount = DOWNLINK_OPEN_COUNT.addAndGet(this, (long) downlinkOpenDelta);
-    final int downlinkCloseDelta = DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
-    final long downlinkCloseCount = DOWNLINK_CLOSE_COUNT.addAndGet(this, (long) downlinkCloseDelta);
-    final int downlinkEventDelta = DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
-    final int downlinkEventRate = DOWNLINK_EVENT_RATE.getAndSet(this, 0);
-    final long downlinkEventCount = DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
-    final int downlinkCommandDelta = DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
-    final int downlinkCommandRate = DOWNLINK_COMMAND_RATE.getAndSet(this, 0);
-    final long downlinkCommandCount = DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
+    final int downlinkOpenDelta = EdgeTable.DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long downlinkOpenCount = EdgeTable.DOWNLINK_OPEN_COUNT.addAndGet(this, (long) downlinkOpenDelta);
+    final int downlinkCloseDelta = EdgeTable.DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long downlinkCloseCount = EdgeTable.DOWNLINK_CLOSE_COUNT.addAndGet(this, (long) downlinkCloseDelta);
+    final int downlinkEventDelta = EdgeTable.DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int downlinkEventRate = EdgeTable.DOWNLINK_EVENT_RATE.getAndSet(this, 0);
+    final long downlinkEventCount = EdgeTable.DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
+    final int downlinkCommandDelta = EdgeTable.DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int downlinkCommandRate = EdgeTable.DOWNLINK_COMMAND_RATE.getAndSet(this, 0);
+    final long downlinkCommandCount = EdgeTable.DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
 
-    final int uplinkOpenDelta = UPLINK_OPEN_DELTA.getAndSet(this, 0);
-    final long uplinkOpenCount = UPLINK_OPEN_COUNT.addAndGet(this, (long) uplinkOpenDelta);
-    final int uplinkCloseDelta = UPLINK_CLOSE_DELTA.getAndSet(this, 0);
-    final long uplinkCloseCount = UPLINK_CLOSE_COUNT.addAndGet(this, (long) uplinkCloseDelta);
-    final int uplinkEventDelta = UPLINK_EVENT_DELTA.getAndSet(this, 0);
-    final int uplinkEventRate = UPLINK_EVENT_RATE.getAndSet(this, 0);
-    final long uplinkEventCount = UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
-    final int uplinkCommandDelta = UPLINK_COMMAND_DELTA.getAndSet(this, 0);
-    final int uplinkCommandRate = UPLINK_COMMAND_RATE.getAndSet(this, 0);
-    final long uplinkCommandCount = UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
+    final int uplinkOpenDelta = EdgeTable.UPLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long uplinkOpenCount = EdgeTable.UPLINK_OPEN_COUNT.addAndGet(this, (long) uplinkOpenDelta);
+    final int uplinkCloseDelta = EdgeTable.UPLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long uplinkCloseCount = EdgeTable.UPLINK_CLOSE_COUNT.addAndGet(this, (long) uplinkCloseDelta);
+    final int uplinkEventDelta = EdgeTable.UPLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int uplinkEventRate = EdgeTable.UPLINK_EVENT_RATE.getAndSet(this, 0);
+    final long uplinkEventCount = EdgeTable.UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
+    final int uplinkCommandDelta = EdgeTable.UPLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int uplinkCommandRate = EdgeTable.UPLINK_COMMAND_RATE.getAndSet(this, 0);
+    final long uplinkCommandCount = EdgeTable.UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
 
     final int meshCount = (int) (meshOpenCount - meshCloseCount);
     final int partCount = (int) (partOpenCount - partCloseCount);
@@ -775,30 +822,30 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
     final AgentPulse agentPulse = new AgentPulse(agentCount, agentExecRate, agentExecTime, timerEventRate, timerEventCount);
     final long downlinkCount = downlinkOpenCount - downlinkCloseCount;
     final WarpDownlinkPulse downlinkPulse = new WarpDownlinkPulse(downlinkCount, downlinkEventRate, downlinkEventCount,
-        downlinkCommandRate, downlinkCommandCount);
+                                                                  downlinkCommandRate, downlinkCommandCount);
     final long uplinkCount = uplinkOpenCount - uplinkCloseCount;
     final WarpUplinkPulse uplinkPulse = new WarpUplinkPulse(uplinkCount, uplinkEventRate, uplinkEventCount,
-        uplinkCommandRate, uplinkCommandCount);
+                                                            uplinkCommandRate, uplinkCommandCount);
     this.pulse = new EdgePulse(meshCount, partCount, hostCount, nodeCount, agentPulse, downlinkPulse, uplinkPulse);
     final DemandLane<EdgePulse> metaPulse = this.metaPulse;
     if (metaPulse != null) {
       metaPulse.cue();
     }
 
-    return new EdgeProfile(cellAddress(),
-        meshOpenDelta, meshOpenCount, meshCloseDelta, meshCloseCount,
-        partOpenDelta, partOpenCount, partCloseDelta, partCloseCount,
-        hostOpenDelta, hostOpenCount, hostCloseDelta, hostCloseCount,
-        nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
-        agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
-        agentExecDelta, agentExecRate, agentExecTime,
-        timerEventDelta, timerEventRate, timerEventCount,
-        downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
-        downlinkEventDelta, downlinkEventRate, downlinkEventCount,
-        downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
-        uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
-        uplinkEventDelta, uplinkEventRate, uplinkEventCount,
-        uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
+    return new EdgeProfile(this.cellAddress(),
+                           meshOpenDelta, meshOpenCount, meshCloseDelta, meshCloseCount,
+                           partOpenDelta, partOpenCount, partCloseDelta, partCloseCount,
+                           hostOpenDelta, hostOpenCount, hostCloseDelta, hostCloseCount,
+                           nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
+                           agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
+                           agentExecDelta, agentExecRate, agentExecTime,
+                           timerEventDelta, timerEventRate, timerEventCount,
+                           downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
+                           downlinkEventDelta, downlinkEventRate, downlinkEventCount,
+                           downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
+                           uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
+                           uplinkEventDelta, uplinkEventRate, uplinkEventCount,
+                           uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
   }
 
   static final Uri MESHES_URI = Uri.parse("meshes");
@@ -806,6 +853,7 @@ public class EdgeTable extends AbstractTierBinding implements EdgeBinding {
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<EdgeTable, HashTrieMap<Uri, MeshBinding>> MESHES =
       AtomicReferenceFieldUpdater.newUpdater(EdgeTable.class, (Class<HashTrieMap<Uri, MeshBinding>>) (Class<?>) HashTrieMap.class, "meshes");
+
   static final AtomicIntegerFieldUpdater<EdgeTable> MESH_OPEN_DELTA =
       AtomicIntegerFieldUpdater.newUpdater(EdgeTable.class, "meshOpenDelta");
   static final AtomicLongFieldUpdater<EdgeTable> MESH_OPEN_COUNT =
@@ -915,7 +963,7 @@ final class EdgeTableMeshesController implements OnCueKey<Uri, MeshInfo>, OnSync
   public MeshInfo onCue(Uri meshUri, WarpUplink uplink) {
     final MeshBinding meshBinding = this.edge.getMesh(meshUri);
     if (meshBinding != null) {
-      return MeshInfo.from(meshBinding);
+      return MeshInfo.create(meshBinding);
     }
     return null;
   }

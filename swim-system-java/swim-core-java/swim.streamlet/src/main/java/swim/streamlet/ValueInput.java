@@ -34,7 +34,7 @@ public class ValueInput<O> extends AbstractOutlet<O> {
   public O set(O newState) {
     final O oldState = this.state;
     this.state = newState;
-    decohereInput();
+    this.decohereInput();
     return oldState;
   }
 

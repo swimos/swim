@@ -23,6 +23,10 @@ import swim.dynamic.java.lang.HostObject;
 
 public final class HostAgentRouteContext {
 
+  private HostAgentRouteContext() {
+    // static
+  }
+
   public static final HostObjectType<AgentRouteContext> TYPE;
 
   static {
@@ -31,10 +35,6 @@ public final class HostAgentRouteContext {
     type.inheritType(HostObject.TYPE);
     type.addMember(new HostAgentRouteContextRouteName());
     type.addMember(new HostAgentRouteContextPattern());
-  }
-
-  private HostAgentRouteContext() {
-    // static
   }
 
 }

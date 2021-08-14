@@ -22,11 +22,11 @@ import swim.structure.selector.KeysSelector;
  * Selector Selector's} {@link Selector#mapSelected} or {@link
  * Selector#forSelected} methods.
  */
-//@FunctionalInterface
+@FunctionalInterface
 public interface Selectee<T> {
 
   /**
-   * Performs this operation against {@code interpreter}.  By convention, a null
+   * Performs this operation against {@code interpreter}. By convention, a null
    * return value indicates to "collection-oriented" calling {@code Selectors}
    * (e.g. {@link ChildrenSelector}, {@link KeysSelector}) that {@code
    * forSelected} should continue to be invoked, if possible. A non-null value

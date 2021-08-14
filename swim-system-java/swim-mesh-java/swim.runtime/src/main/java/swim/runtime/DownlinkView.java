@@ -28,13 +28,11 @@ import swim.api.function.DidConnect;
 import swim.api.function.DidDisconnect;
 import swim.api.function.DidFail;
 import swim.collections.FingerTrieSeq;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 
 public abstract class DownlinkView implements Downlink {
 
-  static final AtomicReferenceFieldUpdater<DownlinkView, Object> OBSERVERS =
-      AtomicReferenceFieldUpdater.newUpdater(DownlinkView.class, Object.class, "observers");
   protected final CellContext cellContext;
   protected final Stage stage;
   protected volatile Object observers; // Observer | Observer[]
@@ -57,25 +55,25 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public boolean isConnected() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     return model != null && model.isConnected();
   }
 
   @Override
   public boolean isRemote() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     return model != null && model.isRemote();
   }
 
   @Override
   public boolean isSecure() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     return model != null && model.isSecure();
   }
 
   @Override
   public String securityProtocol() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       return model.securityProtocol();
     } else {
@@ -85,7 +83,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public String cipherSuite() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       return model.cipherSuite();
     } else {
@@ -95,7 +93,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public InetSocketAddress localAddress() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       return model.localAddress();
     } else {
@@ -105,7 +103,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public Identity localIdentity() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       return model.localIdentity();
     } else {
@@ -115,7 +113,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public Principal localPrincipal() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       return model.localPrincipal();
     } else {
@@ -125,7 +123,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public Collection<Certificate> localCertificates() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       return model.localCertificates();
     } else {
@@ -135,7 +133,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public InetSocketAddress remoteAddress() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       return model.remoteAddress();
     } else {
@@ -145,7 +143,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public Identity remoteIdentity() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       return model.remoteIdentity();
     } else {
@@ -155,7 +153,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public Principal remotePrincipal() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       return model.remotePrincipal();
     } else {
@@ -165,7 +163,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public Collection<Certificate> remoteCertificates() {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       return model.remoteCertificates();
     } else {
@@ -176,7 +174,7 @@ public abstract class DownlinkView implements Downlink {
   @Override
   public DownlinkView observe(Object newObserver) {
     do {
-      final Object oldObservers = this.observers;
+      final Object oldObservers = DownlinkView.OBSERVERS.get(this);
       final Object newObservers;
       if (oldObservers == null) {
         newObservers = newObserver;
@@ -193,7 +191,7 @@ public abstract class DownlinkView implements Downlink {
         newArray[oldCount] = newObserver;
         newObservers = newArray;
       }
-      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
+      if (DownlinkView.OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
         break;
       }
     } while (true);
@@ -203,7 +201,7 @@ public abstract class DownlinkView implements Downlink {
   @Override
   public DownlinkView unobserve(Object oldObserver) {
     do {
-      final Object oldObservers = this.observers;
+      final Object oldObservers = DownlinkView.OBSERVERS.get(this);
       final Object newObservers;
       if (oldObservers == null) {
         break;
@@ -242,7 +240,7 @@ public abstract class DownlinkView implements Downlink {
           }
         }
       }
-      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
+      if (DownlinkView.OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
         break;
       }
     } while (true);
@@ -265,15 +263,15 @@ public abstract class DownlinkView implements Downlink {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
-      final Object observers = this.observers;
+      final Object observers = DownlinkView.OBSERVERS.get(this);
       boolean complete = true;
       if (observers instanceof DidConnect) {
         if (((DidConnect) observers).isPreemptive() == preemptive) {
           try {
             ((DidConnect) observers).didConnect();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -289,8 +287,8 @@ public abstract class DownlinkView implements Downlink {
               try {
                 ((DidConnect) observer).didConnect();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -310,15 +308,15 @@ public abstract class DownlinkView implements Downlink {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
-      final Object observers = this.observers;
+      final Object observers = DownlinkView.OBSERVERS.get(this);
       boolean complete = true;
       if (observers instanceof DidDisconnect) {
         if (((DidDisconnect) observers).isPreemptive() == preemptive) {
           try {
             ((DidDisconnect) observers).didDisconnect();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -334,8 +332,8 @@ public abstract class DownlinkView implements Downlink {
               try {
                 ((DidDisconnect) observer).didDisconnect();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -355,15 +353,15 @@ public abstract class DownlinkView implements Downlink {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
-      final Object observers = this.observers;
+      final Object observers = DownlinkView.OBSERVERS.get(this);
       boolean complete = true;
       if (observers instanceof DidClose) {
         if (((DidClose) observers).isPreemptive() == preemptive) {
           try {
             ((DidClose) observers).didClose();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -379,8 +377,8 @@ public abstract class DownlinkView implements Downlink {
               try {
                 ((DidClose) observer).didClose();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -400,15 +398,15 @@ public abstract class DownlinkView implements Downlink {
     final Link oldLink = SwimContext.getLink();
     try {
       SwimContext.setLink(this);
-      final Object observers = this.observers;
+      final Object observers = DownlinkView.OBSERVERS.get(this);
       boolean complete = true;
       if (observers instanceof DidFail) {
         if (((DidFail) observers).isPreemptive() == preemptive) {
           try {
             ((DidFail) observers).didFail(cause);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -424,8 +422,8 @@ public abstract class DownlinkView implements Downlink {
               try {
                 ((DidFail) observer).didFail(cause);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -442,19 +440,19 @@ public abstract class DownlinkView implements Downlink {
   }
 
   public void downlinkDidConnect() {
-    // stub
+    // hook
   }
 
   public void downlinkDidDisconnect() {
-    // stub
+    // hook
   }
 
   public void downlinkDidClose() {
-    // stub
+    // hook
   }
 
   public void downlinkDidFail(Throwable error) {
-    // stub
+    // hook
   }
 
   public abstract DownlinkModel<?> createDownlinkModel();
@@ -465,12 +463,12 @@ public abstract class DownlinkView implements Downlink {
   @SuppressWarnings("unchecked")
   @Override
   public void close() {
-    ((DownlinkModel<DownlinkView>) downlinkModel()).removeDownlink(this);
+    ((DownlinkModel<DownlinkView>) this.downlinkModel()).removeDownlink(this);
   }
 
   @Override
   public void trace(Object message) {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       model.trace(message);
     }
@@ -478,7 +476,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public void debug(Object message) {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       model.debug(message);
     }
@@ -486,7 +484,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public void info(Object message) {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       model.info(message);
     }
@@ -494,7 +492,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public void warn(Object message) {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       model.warn(message);
     }
@@ -502,7 +500,7 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public void error(Object message) {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       model.error(message);
     }
@@ -510,10 +508,13 @@ public abstract class DownlinkView implements Downlink {
 
   @Override
   public void fail(Object message) {
-    final DownlinkModel<?> model = downlinkModel();
+    final DownlinkModel<?> model = this.downlinkModel();
     if (model != null) {
       model.fail(message);
     }
   }
+
+  static final AtomicReferenceFieldUpdater<DownlinkView, Object> OBSERVERS =
+      AtomicReferenceFieldUpdater.newUpdater(DownlinkView.class, Object.class, "observers");
 
 }

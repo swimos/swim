@@ -62,7 +62,7 @@ public class Data extends Value {
     this.array = null;
     this.offset = 0;
     this.size = 0;
-    this.flags = ALIASED;
+    this.flags = Data.ALIASED;
   }
 
   @Override
@@ -82,16 +82,16 @@ public class Data extends Value {
   }
 
   public Data setByte(int index, byte value) {
-    final int flags = this.flags;
-    if ((flags & IMMUTABLE) != 0) {
+    final int flags = Data.FLAGS.get(this);
+    if ((flags & Data.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
     } else if (index < 0 || index >= this.size) {
       throw new IndexOutOfBoundsException(Integer.toString(index));
     }
-    if ((flags & ALIASED) != 0) {
-      return setByteAliased(index, value);
+    if ((flags & Data.ALIASED) != 0) {
+      return this.setByteAliased(index, value);
     } else {
-      return setByteMutable(index, value);
+      return this.setByteMutable(index, value);
     }
   }
 
@@ -104,8 +104,8 @@ public class Data extends Value {
     this.array = newArray;
     this.offset = 0;
     do {
-      final int oldFlags = this.flags;
-      final int newFlags = oldFlags & ~ALIASED;
+      final int oldFlags = Data.FLAGS.get(this);
+      final int newFlags = oldFlags & ~Data.ALIASED;
       if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
         break;
       }
@@ -119,14 +119,14 @@ public class Data extends Value {
   }
 
   public Data addByte(byte value) {
-    final int flags = this.flags;
-    if ((flags & IMMUTABLE) != 0) {
+    final int flags = Data.FLAGS.get(this);
+    if ((flags & Data.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
     }
-    if ((flags & ALIASED) != 0) {
-      return addByteAliased(value);
+    if ((flags & Data.ALIASED) != 0) {
+      return this.addByteAliased(value);
     } else {
-      return addByteMutable(value);
+      return this.addByteMutable(value);
     }
   }
 
@@ -142,8 +142,8 @@ public class Data extends Value {
     this.offset = 0;
     this.size = n + 1;
     do {
-      final int oldFlags = this.flags;
-      final int newFlags = oldFlags & ~ALIASED;
+      final int oldFlags = Data.FLAGS.get(this);
+      final int newFlags = oldFlags & ~Data.ALIASED;
       if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
         break;
       }
@@ -171,19 +171,19 @@ public class Data extends Value {
   }
 
   public Data addByteArray(byte[] array, int offset, int size) {
-    final int flags = this.flags;
-    if ((flags & IMMUTABLE) != 0) {
+    final int flags = Data.FLAGS.get(this);
+    if ((flags & Data.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
     }
-    if ((flags & ALIASED) != 0) {
-      return addByteArrayAliased(array, offset, size);
+    if ((flags & Data.ALIASED) != 0) {
+      return this.addByteArrayAliased(array, offset, size);
     } else {
-      return addByteArrayMutable(array, offset, size);
+      return this.addByteArrayMutable(array, offset, size);
     }
   }
 
   public Data addByteArray(byte[] array) {
-    return addByteArray(array, 0, array.length);
+    return this.addByteArray(array, 0, array.length);
   }
 
   private Data addByteArrayAliased(byte[] array, int offset, int size) {
@@ -201,8 +201,8 @@ public class Data extends Value {
     this.offset = 0;
     this.size = n + size;
     do {
-      final int oldFlags = this.flags;
-      final int newFlags = oldFlags & ~ALIASED;
+      final int oldFlags = Data.FLAGS.get(this);
+      final int newFlags = oldFlags & ~Data.ALIASED;
       if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
         break;
       }
@@ -233,30 +233,30 @@ public class Data extends Value {
   }
 
   public Data addData(Data data) {
-    return addByteArray(data.array, data.offset, data.size);
+    return this.addByteArray(data.array, data.offset, data.size);
   }
 
   public void clear() {
-    if ((this.flags & IMMUTABLE) != 0) {
+    if ((Data.FLAGS.get(this) & Data.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
     }
     this.array = null;
     this.offset = 0;
     this.size = 0;
-    this.flags = Data.ALIASED;
+    Data.FLAGS.set(this, Data.ALIASED);
   }
 
   public byte[] toByteArray() {
     final int n = this.size;
     final byte[] oldArray = this.array;
-    final int flags = this.flags;
+    final int flags = Data.FLAGS.get(this);
     if ((flags & IMMUTABLE) != 0) {
       final byte[] newArray = new byte[n];
       if (oldArray != null) {
         System.arraycopy(oldArray, this.offset, newArray, 0, n);
       }
       return newArray;
-    } else if ((flags & ALIASED) != 0 || n != oldArray.length) {
+    } else if ((flags & Data.ALIASED) != 0 || n != oldArray.length) {
       final byte[] newArray = new byte[n];
       if (oldArray != null) {
         System.arraycopy(oldArray, this.offset, newArray, 0, n);
@@ -264,8 +264,8 @@ public class Data extends Value {
       this.array = newArray;
       this.offset = 0;
       do {
-        final int oldFlags = this.flags;
-        final int newFlags = oldFlags & ~ALIASED;
+        final int oldFlags = Data.FLAGS.get(this);
+        final int newFlags = oldFlags & ~Data.ALIASED;
         if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
           break;
         }
@@ -281,8 +281,8 @@ public class Data extends Value {
   }
 
   public ByteBuffer toByteBuffer() {
-    final int flags = this.flags;
-    if ((flags & ALIASED) != 0) {
+    final int flags = Data.FLAGS.get(this);
+    if ((flags & Data.ALIASED) != 0) {
       final int n = this.size;
       final byte[] oldArray = this.array;
       final byte[] newArray = new byte[n];
@@ -292,12 +292,12 @@ public class Data extends Value {
       return ByteBuffer.wrap(newArray);
     } else {
       ByteBuffer buffer = ByteBuffer.wrap(this.array, this.offset, this.size);
-      if ((flags & IMMUTABLE) != 0) {
+      if ((flags & Data.IMMUTABLE) != 0) {
         buffer = buffer.asReadOnlyBuffer();
       }
       do {
         final int oldFlags = FLAGS.get(this);
-        final int newFlags = oldFlags | ALIASED;
+        final int newFlags = oldFlags | Data.ALIASED;
         if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
           break;
         }
@@ -315,25 +315,25 @@ public class Data extends Value {
   }
 
   public InputBuffer toInputBuffer() {
-    return Binary.inputBuffer(toByteArray());
+    return Binary.inputBuffer(this.toByteArray());
   }
 
   @Override
   public boolean isAliased() {
-    return (this.flags & ALIASED) != 0;
+    return (Data.FLAGS.get(this) & Data.ALIASED) != 0;
   }
 
   @Override
   public boolean isMutable() {
-    return (this.flags & IMMUTABLE) == 0;
+    return (Data.FLAGS.get(this) & Data.IMMUTABLE) == 0;
   }
 
   @Override
   public Data branch() {
     do {
-      final int oldFlags = this.flags;
-      if ((oldFlags & ALIASED) == 0) {
-        final int newFlags = oldFlags | ALIASED;
+      final int oldFlags = Data.FLAGS.get(this);
+      if ((oldFlags & Data.ALIASED) == 0) {
+        final int newFlags = oldFlags | Data.ALIASED;
         if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
           break;
         }
@@ -341,15 +341,15 @@ public class Data extends Value {
         break;
       }
     } while (true);
-    return new Data(this.array, this.offset, this.size, ALIASED);
+    return new Data(this.array, this.offset, this.size, Data.ALIASED);
   }
 
   @Override
   public Data commit() {
     do {
-      final int oldFlags = this.flags;
-      if ((oldFlags & IMMUTABLE) == 0) {
-        final int newFlags = oldFlags | IMMUTABLE;
+      final int oldFlags = Data.FLAGS.get(this);
+      if ((oldFlags & Data.IMMUTABLE) == 0) {
+        final int newFlags = oldFlags | Data.IMMUTABLE;
         if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
           break;
         }
@@ -365,8 +365,8 @@ public class Data extends Value {
       final ByteBuffer buffer = ByteBuffer.wrap(this.array, 0, this.size);
       do {
         final int oldFlags = FLAGS.get(this);
-        if ((oldFlags & ALIASED) == 0) {
-          final int newFlags = oldFlags | ALIASED;
+        if ((oldFlags & Data.ALIASED) == 0) {
+          final int newFlags = oldFlags | Data.ALIASED;
           if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
             break;
           }
@@ -385,8 +385,8 @@ public class Data extends Value {
       final ByteBuffer buffer = ByteBuffer.wrap(this.array, 0, this.size);
       do {
         final int oldFlags = FLAGS.get(this);
-        if ((oldFlags & ALIASED) == 0) {
-          final int newFlags = oldFlags | ALIASED;
+        if ((oldFlags & Data.ALIASED) == 0) {
+          final int newFlags = oldFlags | Data.ALIASED;
           if (FLAGS.compareAndSet(this, oldFlags, newFlags)) {
             break;
           }
@@ -409,17 +409,17 @@ public class Data extends Value {
   }
 
   public Writer<?, ?> writeBase16(Output<?> output) {
-    return writeBase16(output, Base16.uppercase());
+    return this.writeBase16(output, Base16.uppercase());
   }
 
   public String toBase16(Base16 base16) {
     final Output<String> output = Unicode.stringOutput();
-    writeBase16(output, base16);
+    this.writeBase16(output, base16).bind();
     return output.bind();
   }
 
   public String toBase16() {
-    return toBase16(Base16.uppercase());
+    return this.toBase16(Base16.uppercase());
   }
 
   public Writer<?, ?> writeBase64(Output<?> output, Base64 base64) {
@@ -431,17 +431,17 @@ public class Data extends Value {
   }
 
   public Writer<?, ?> writeBase64(Output<?> output) {
-    return writeBase64(output, Base64.standard());
+    return this.writeBase64(output, Base64.standard());
   }
 
   public String toBase64(Base64 base64) {
     final Output<String> output = Unicode.stringOutput();
-    writeBase64(output, base64);
+    this.writeBase64(output, base64).bind();
     return output.bind();
   }
 
   public String toBase64() {
-    return toBase64(Base64.standard());
+    return this.toBase64(Base64.standard());
   }
 
   @Override
@@ -452,9 +452,9 @@ public class Data extends Value {
   @Override
   public int compareTo(Item other) {
     if (other instanceof Data) {
-      return compareTo((Data) other);
+      return this.compareTo((Data) other);
     }
-    return Integer.compare(typeOrder(), other.typeOrder());
+    return Integer.compare(this.typeOrder(), other.typeOrder());
   }
 
   int compareTo(Data that) {
@@ -516,35 +516,49 @@ public class Data extends Value {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Data.class);
+    if (Data.hashSeed == 0) {
+      Data.hashSeed = Murmur3.seed(Data.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.array, this.offset, this.size));
+    return Murmur3.mash(Murmur3.mix(Data.hashSeed, this.array, this.offset, this.size));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Data").write('.');
     if (this.size == 0) {
       output = output.write("empty").write('(').write(')');
     } else {
       output = output.write("fromBase16").write('(').write('"');
-      writeBase16(output);
+      final Writer<?, ?> writer = this.writeBase16(output);
+      if (!writer.isDone()) {
+        return Output.error(writer.trap());
+      }
       output = output.write('"').write(')');
     }
+    return output;
   }
 
+  static final int ALIASED = 1 << 0;
+  static final int IMMUTABLE = 1 << 1;
+
+  static final AtomicIntegerFieldUpdater<Data> FLAGS =
+      AtomicIntegerFieldUpdater.newUpdater(Data.class, "flags");
+
+  private static Data empty;
+
   public static Data empty() {
-    if (empty == null) {
-      empty = new Data(null, 0, 0, ALIASED | IMMUTABLE);
+    if (Data.empty == null) {
+      Data.empty = new Data(null, 0, 0, Data.ALIASED | Data.IMMUTABLE);
     }
-    return empty;
+    return Data.empty;
   }
 
   public static Data create() {
-    return new Data(null, 0, 0, ALIASED);
+    return new Data(null, 0, 0, Data.ALIASED);
   }
 
   public static Data create(int initialCapacity) {
@@ -555,22 +569,22 @@ public class Data extends Value {
     if (!buffer.hasArray()) {
       throw new IllegalArgumentException();
     }
-    return new Data(buffer.array(), buffer.arrayOffset(), buffer.remaining(), ALIASED);
+    return new Data(buffer.array(), buffer.arrayOffset(), buffer.remaining(), Data.ALIASED);
   }
 
   public static Data wrap(byte[] array, int offset, int size) {
-    return new Data(array, offset, size, ALIASED);
+    return new Data(array, offset, size, Data.ALIASED);
   }
 
   public static Data wrap(byte[] array) {
-    return new Data(array, 0, array.length, ALIASED);
+    return new Data(array, 0, array.length, Data.ALIASED);
   }
 
   public static Data from(ByteBuffer buffer) {
     final int n = buffer.remaining();
     if (buffer.hasArray()) {
       final byte[] array = buffer.array();
-      return new Data(array, buffer.arrayOffset(), buffer.remaining(), ALIASED);
+      return new Data(array, buffer.arrayOffset(), buffer.remaining(), Data.ALIASED);
     } else {
       final byte[] array = new byte[n];
       buffer.get(array);
@@ -622,15 +636,5 @@ public class Data extends Value {
     n |= n >> 16;
     return n + 1;
   }
-
-  static final int ALIASED = 1 << 0;
-  static final int IMMUTABLE = 1 << 1;
-
-  static final AtomicIntegerFieldUpdater<Data> FLAGS =
-      AtomicIntegerFieldUpdater.newUpdater(Data.class, "flags");
-
-  private static Data empty;
-
-  private static int hashSeed;
 
 }

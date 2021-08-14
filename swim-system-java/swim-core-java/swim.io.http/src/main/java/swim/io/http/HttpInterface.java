@@ -28,72 +28,72 @@ public interface HttpInterface extends IpInterface {
 
   default IpServiceRef bindHttp(InetSocketAddress localAddress, HttpService service, HttpSettings httpSettings) {
     final HttpSocketService tcpService = new HttpSocketService(service, httpSettings);
-    return bindTcp(localAddress, tcpService, httpSettings.ipSettings());
+    return this.bindTcp(localAddress, tcpService, httpSettings.ipSettings());
   }
 
   default IpServiceRef bindHttp(InetSocketAddress localAddress, HttpService service) {
-    return bindHttp(localAddress, service, httpSettings());
+    return this.bindHttp(localAddress, service, this.httpSettings());
   }
 
   default IpServiceRef bindHttp(String address, int port, HttpService service, HttpSettings httpSettings) {
-    return bindHttp(new InetSocketAddress(address, port), service, httpSettings);
+    return this.bindHttp(new InetSocketAddress(address, port), service, httpSettings);
   }
 
   default IpServiceRef bindHttp(String address, int port, HttpService service) {
-    return bindHttp(new InetSocketAddress(address, port), service, httpSettings());
+    return this.bindHttp(new InetSocketAddress(address, port), service, this.httpSettings());
   }
 
   default IpServiceRef bindHttps(InetSocketAddress localAddress, HttpService service, HttpSettings httpSettings) {
     final HttpSocketService tlsService = new HttpSocketService(service, httpSettings);
-    return bindTls(localAddress, tlsService, httpSettings.ipSettings());
+    return this.bindTls(localAddress, tlsService, httpSettings.ipSettings());
   }
 
   default IpServiceRef bindHttps(InetSocketAddress localAddress, HttpService service) {
-    return bindHttps(localAddress, service, httpSettings());
+    return this.bindHttps(localAddress, service, this.httpSettings());
   }
 
   default IpServiceRef bindHttps(String address, int port, HttpService service, HttpSettings httpSettings) {
-    return bindHttps(new InetSocketAddress(address, port), service, httpSettings);
+    return this.bindHttps(new InetSocketAddress(address, port), service, httpSettings);
   }
 
   default IpServiceRef bindHttps(String address, int port, HttpService service) {
-    return bindHttps(new InetSocketAddress(address, port), service, httpSettings());
+    return this.bindHttps(new InetSocketAddress(address, port), service, this.httpSettings());
   }
 
   default IpSocketRef connectHttp(InetSocketAddress remoteAddress, HttpClient client, HttpSettings httpSettings) {
     final HttpClientModem modem = new HttpClientModem(client, httpSettings);
     final IpSocketModem<HttpResponse<?>, HttpRequest<?>> socket = new IpSocketModem<HttpResponse<?>, HttpRequest<?>>(modem);
-    return connectTcp(remoteAddress, socket, httpSettings.ipSettings());
+    return this.connectTcp(remoteAddress, socket, httpSettings.ipSettings());
   }
 
   default IpSocketRef connectHttp(InetSocketAddress remoteAddress, HttpClient client) {
-    return connectHttp(remoteAddress, client, httpSettings());
+    return this.connectHttp(remoteAddress, client, this.httpSettings());
   }
 
   default IpSocketRef connectHttp(String address, int port, HttpClient client, HttpSettings httpSettings) {
-    return connectHttp(new InetSocketAddress(address, port), client, httpSettings);
+    return this.connectHttp(new InetSocketAddress(address, port), client, httpSettings);
   }
 
   default IpSocketRef connectHttp(String address, int port, HttpClient client) {
-    return connectHttp(new InetSocketAddress(address, port), client, httpSettings());
+    return this.connectHttp(new InetSocketAddress(address, port), client, this.httpSettings());
   }
 
   default IpSocketRef connectHttps(InetSocketAddress remoteAddress, HttpClient client, HttpSettings httpSettings) {
     final HttpClientModem modem = new HttpClientModem(client, httpSettings);
     final IpSocketModem<HttpResponse<?>, HttpRequest<?>> socket = new IpSocketModem<HttpResponse<?>, HttpRequest<?>>(modem);
-    return connectTls(remoteAddress, socket, httpSettings.ipSettings());
+    return this.connectTls(remoteAddress, socket, httpSettings.ipSettings());
   }
 
   default IpSocketRef connectHttps(InetSocketAddress remoteAddress, HttpClient client) {
-    return connectHttps(remoteAddress, client, httpSettings());
+    return this.connectHttps(remoteAddress, client, this.httpSettings());
   }
 
   default IpSocketRef connectHttps(String address, int port, HttpClient client, HttpSettings httpSettings) {
-    return connectHttps(new InetSocketAddress(address, port), client, httpSettings);
+    return this.connectHttps(new InetSocketAddress(address, port), client, httpSettings);
   }
 
   default IpSocketRef connectHttps(String address, int port, HttpClient client) {
-    return connectHttps(new InetSocketAddress(address, port), client, httpSettings());
+    return this.connectHttps(new InetSocketAddress(address, port), client, this.httpSettings());
   }
 
 }

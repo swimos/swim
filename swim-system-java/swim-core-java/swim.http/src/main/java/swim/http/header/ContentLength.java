@@ -26,22 +26,10 @@ import swim.util.Murmur3;
 
 public final class ContentLength extends HttpHeader {
 
-  private static int hashSeed;
   final long length;
 
   ContentLength(long length) {
     this.length = length;
-  }
-
-  public static ContentLength from(long length) {
-    if (length < 0L) {
-      throw new IllegalArgumentException(Long.toString(length));
-    }
-    return new ContentLength(length);
-  }
-
-  public static Parser<ContentLength> parseHttpValue(Input input, HttpParser http) {
-    return ContentLengthParser.parse(input);
   }
 
   @Override
@@ -74,18 +62,32 @@ public final class ContentLength extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ContentLength.class);
+    if (ContentLength.hashSeed == 0) {
+      ContentLength.hashSeed = Murmur3.seed(ContentLength.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, Murmur3.hash(this.length)));
+    return Murmur3.mash(Murmur3.mix(ContentLength.hashSeed, Murmur3.hash(this.length)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("ContentLength").write('.').write("from").write('(')
-        .debug(this.length).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("ContentLength").write('.').write("create").write('(')
+                   .debug(this.length).write(')');
+    return output;
+  }
+
+  public static ContentLength create(long length) {
+    if (length < 0L) {
+      throw new IllegalArgumentException(Long.toString(length));
+    }
+    return new ContentLength(length);
+  }
+
+  public static Parser<ContentLength> parseHttpValue(Input input, HttpParser http) {
+    return ContentLengthParser.parse(input);
   }
 
 }

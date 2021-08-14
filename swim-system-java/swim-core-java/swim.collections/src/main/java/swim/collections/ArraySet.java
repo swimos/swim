@@ -23,53 +23,24 @@ import swim.util.Murmur3;
 
 final class ArraySet<T> implements Debug {
 
-  private static int hashSeed;
-  private static ArraySet<Object> empty;
   final Object[] slots;
 
   ArraySet(Object[] slots) {
     this.slots = slots;
   }
 
-  ArraySet(T elem) {
-    slots = new Object[1];
-    slots[0] = elem;
-  }
-
-  ArraySet(T elem0, T elem1) {
-    slots = new Object[2];
-    slots[0] = elem0;
-    slots[1] = elem1;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> ArraySet<T> empty() {
-    if (empty == null) {
-      empty = new ArraySet<Object>(new Object[0]);
-    }
-    return (ArraySet<T>) empty;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> ArraySet<T> of(T... elems) {
-    final int n = elems.length;
-    final Object[] slots = new Object[n];
-    System.arraycopy(elems, 0, slots, 0, n);
-    return new ArraySet<T>(slots);
-  }
-
   public boolean isEmpty() {
-    return slots.length == 0;
+    return this.slots.length == 0;
   }
 
   public int size() {
-    return slots.length;
+    return this.slots.length;
   }
 
   public boolean contains(Object elem) {
-    final int n = slots.length;
+    final int n = this.slots.length;
     for (int i = 0; i < n; i += 1) {
-      if (elem.equals(slots[i])) {
+      if (elem.equals(this.slots[i])) {
         return true;
       }
     }
@@ -78,8 +49,8 @@ final class ArraySet<T> implements Debug {
 
   @SuppressWarnings("unchecked")
   public T head() {
-    if (slots.length > 0) {
-      return (T) slots[0];
+    if (this.slots.length > 0) {
+      return (T) this.slots[0];
     } else {
       return null;
     }
@@ -87,41 +58,43 @@ final class ArraySet<T> implements Debug {
 
   @SuppressWarnings("unchecked")
   public T next(Object elem) {
-    final int n = slots.length;
+    final int n = this.slots.length;
     if (n > 0 && elem == null) {
-      return (T) slots[0];
+      return (T) this.slots[0];
     }
     for (int i = 0; i < n; i += 1) {
-      if (elem.equals(slots[i]) && i + 1 < n) {
-        return (T) slots[i + 1];
+      if (elem.equals(this.slots[i]) && i + 1 < n) {
+        return (T) this.slots[i + 1];
       }
     }
     return null;
   }
 
   public ArraySet<T> added(T elem) {
-    final int n = slots.length;
+    final Object[] oldSlots = this.slots;
+    final int n = oldSlots.length;
     for (int i = 0; i < n; i += 1) {
-      if (elem.equals(slots[i])) {
+      if (elem.equals(oldSlots[i])) {
         return this;
       }
     }
     final Object[] newSlots = new Object[n + 1];
-    System.arraycopy(slots, 0, newSlots, 0, n);
+    System.arraycopy(oldSlots, 0, newSlots, 0, n);
     newSlots[n] = elem;
     return new ArraySet<T>(newSlots);
   }
 
   public ArraySet<T> removed(T elem) {
-    final int n = slots.length;
+    final Object[] oldSlots = this.slots;
+    final int n = oldSlots.length;
     for (int i = 0; i < n; i += 1) {
-      if (elem.equals(slots[i])) {
+      if (elem.equals(oldSlots[i])) {
         if (n == 1) {
           return empty();
         } else {
           final Object[] newSlots = new Object[n - 1];
-          System.arraycopy(slots, 0, newSlots, 0, i);
-          System.arraycopy(slots, i + 1, newSlots, i, (n - 1) - i);
+          System.arraycopy(oldSlots, 0, newSlots, 0, i);
+          System.arraycopy(oldSlots, i + 1, newSlots, i, (n - 1) - i);
           return new ArraySet<T>(newSlots);
         }
       }
@@ -130,21 +103,21 @@ final class ArraySet<T> implements Debug {
   }
 
   boolean isUnary() {
-    return slots.length == 1;
+    return this.slots.length == 1;
   }
 
   @SuppressWarnings("unchecked")
   T unaryElem() {
-    return (T) slots[0];
+    return (T) this.slots[0];
   }
 
   @SuppressWarnings("unchecked")
   T elemAt(int index) {
-    return (T) slots[index];
+    return (T) this.slots[index];
   }
 
   public Iterator<T> iterator() {
-    return new ArraySetIterator<T>(slots);
+    return new ArraySetIterator<T>(this.slots);
   }
 
   @SuppressWarnings("unchecked")
@@ -154,10 +127,10 @@ final class ArraySet<T> implements Debug {
       return true;
     } else if (other instanceof ArraySet<?>) {
       final ArraySet<T> that = (ArraySet<T>) other;
-      if (size() == that.size()) {
+      if (this.size() == that.size()) {
         final Iterator<T> those = that.iterator();
         while (those.hasNext()) {
-          if (!contains(those.next())) {
+          if (!this.contains(those.next())) {
             return false;
           }
         }
@@ -167,15 +140,17 @@ final class ArraySet<T> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ArraySet.class);
+    if (ArraySet.hashSeed == 0) {
+      ArraySet.hashSeed = Murmur3.seed(ArraySet.class);
     }
     int a = 0;
     int b = 0;
     int c = 1;
-    final Iterator<T> these = iterator();
+    final Iterator<T> these = this.iterator();
     while (these.hasNext()) {
       final int h = Murmur3.hash(these.next());
       a ^= h;
@@ -184,13 +159,13 @@ final class ArraySet<T> implements Debug {
         c *= h;
       }
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed, a), b), c));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(ArraySet.hashSeed, a), b), c));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <U> Output<U> debug(Output<U> output) {
     output = output.write("ArraySet").write('.');
-    final Iterator<T> these = iterator();
+    final Iterator<T> these = this.iterator();
     if (these.hasNext()) {
       output = output.write("of").write('(').debug(these.next());
       while (these.hasNext()) {
@@ -200,11 +175,30 @@ final class ArraySet<T> implements Debug {
       output = output.write("empty").write('(');
     }
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static ArraySet<Object> empty;
+
+  @SuppressWarnings("unchecked")
+  public static <T> ArraySet<T> empty() {
+    if (ArraySet.empty == null) {
+      ArraySet.empty = new ArraySet<Object>(new Object[0]);
+    }
+    return (ArraySet<T>) ArraySet.empty;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> ArraySet<T> of(T... elems) {
+    final int n = elems.length;
+    final Object[] slots = new Object[n];
+    System.arraycopy(elems, 0, slots, 0, n);
+    return new ArraySet<T>(slots);
   }
 
 }
@@ -220,17 +214,18 @@ final class ArraySetIterator<T> implements Iterator<T> {
 
   @Override
   public boolean hasNext() {
-    return index < slots.length;
+    return this.index < this.slots.length;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public T next() {
-    if (index >= slots.length) {
+    final int index = this.index;
+    if (index >= this.slots.length) {
       throw new NoSuchElementException();
     }
-    final T elem = (T) slots[index];
-    index += 1;
+    final T elem = (T) this.slots[index];
+    this.index = index + 1;
     return elem;
   }
 

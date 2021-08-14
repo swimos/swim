@@ -38,6 +38,10 @@ final class HttpMessageEncoder<T> extends Encoder<Object, HttpMessage<T>> {
     this(http, message, null, 1);
   }
 
+  public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
+    return HttpMessageEncoder.encode(output, this.http, this.message, this.part, this.step);
+  }
+
   @SuppressWarnings("unchecked")
   static <T> Encoder<Object, HttpMessage<T>> encode(OutputBuffer<?> output, HttpWriter http,
                                                     HttpMessage<T> message, Object part, int step) {
@@ -52,7 +56,7 @@ final class HttpMessageEncoder<T> extends Encoder<Object, HttpMessage<T>> {
         part = null;
         step = 2;
       } else if (writer.isError()) {
-        return error(writer.trap());
+        return writer.asError();
       }
     }
     if (step == 2) {
@@ -69,20 +73,16 @@ final class HttpMessageEncoder<T> extends Encoder<Object, HttpMessage<T>> {
       }
     }
     if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new HttpMessageEncoder<T>(http, message, part, step);
   }
 
   static <T> Encoder<Object, HttpMessage<T>> encode(OutputBuffer<?> output, HttpWriter http,
                                                     HttpMessage<T> message) {
-    return encode(output, http, message, null, 1);
-  }
-
-  public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
-    return encode(output, this.http, this.message, this.part, this.step);
+    return HttpMessageEncoder.encode(output, http, message, null, 1);
   }
 
 }

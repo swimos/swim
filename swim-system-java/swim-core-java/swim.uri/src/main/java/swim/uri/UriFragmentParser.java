@@ -39,6 +39,11 @@ final class UriFragmentParser extends Parser<UriFragment> {
     this(uri, null, 0, 1);
   }
 
+  @Override
+  public Parser<UriFragment> feed(Input input) {
+    return UriFragmentParser.parse(input, this.uri, this.output, this.c1, this.step);
+  }
+
   static Parser<UriFragment> parse(Input input, UriParser uri,
                                    Output<String> output, int c1, int step) {
     int c = 0;
@@ -60,7 +65,7 @@ final class UriFragmentParser extends Parser<UriFragment> {
           input = input.step();
           step = 2;
         } else if (!input.isEmpty()) {
-          return done(uri.fragment(output.bind()));
+          return Parser.done(uri.fragment(output.bind()));
         }
       }
       if (step == 2) {
@@ -71,10 +76,10 @@ final class UriFragmentParser extends Parser<UriFragment> {
             c1 = c;
             step = 3;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       if (step == 3) {
@@ -87,27 +92,22 @@ final class UriFragmentParser extends Parser<UriFragment> {
             step = 1;
             continue;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new UriFragmentParser(uri, output, c1, step);
   }
 
   static Parser<UriFragment> parse(Input input, UriParser uri) {
-    return parse(input, uri, null, 0, 1);
-  }
-
-  @Override
-  public Parser<UriFragment> feed(Input input) {
-    return parse(input, this.uri, this.output, this.c1, this.step);
+    return UriFragmentParser.parse(input, uri, null, 0, 1);
   }
 
 }

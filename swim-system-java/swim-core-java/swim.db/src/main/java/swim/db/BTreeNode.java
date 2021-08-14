@@ -17,7 +17,6 @@ package swim.db;
 import swim.codec.Output;
 import swim.codec.Unicode;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.recon.Recon;
 import swim.structure.Num;
 import swim.structure.Record;
@@ -28,8 +27,6 @@ import swim.util.OrderedMapCursor;
 
 public final class BTreeNode extends BTreePage {
 
-  static final BTreePageRef[] EMPTY_CHILD_REFS = new BTreePageRef[0];
-  static final Value[] EMPTY_KNOT_KEYS = new Value[0];
   final BTreePageRef pageRef;
   final long version;
   final BTreePageRef[] childRefs;
@@ -46,63 +43,6 @@ public final class BTreeNode extends BTreePage {
         throw new AssertionError();
       }
     }
-  }
-
-  public static BTreeNode create(PageContext context, int stem, long version,
-                                 int post, int zone, long base, long span, Value fold,
-                                 BTreePageRef[] childRefs, Value[] knotKeys) {
-    final BTreePageRef pageRef = new BTreePageRef(context, PageType.NODE, stem,
-        post, zone, base, span, fold);
-    final BTreeNode page = new BTreeNode(pageRef, version, childRefs, knotKeys);
-    pageRef.page = page;
-    return page;
-  }
-
-  public static BTreeNode create(PageContext context, int stem, long version,
-                                 int zone, long base, long span, Value fold,
-                                 BTreePageRef[] childRefs, Value[] knotKeys) {
-    int post = zone;
-    for (int i = 0, n = childRefs.length; i < n; i += 1) {
-      final int childPost = childRefs[i].post;
-      if (childPost != 0) {
-        post = post == 0 ? childPost : Math.min(post, childPost);
-      }
-    }
-    return create(context, stem, version, post, zone, base, span, fold, childRefs, knotKeys);
-  }
-
-  public static BTreeNode create(PageContext context, int stem, long version, long span,
-                                 Value fold, BTreePageRef[] childRefs, Value[] knotKeys) {
-    return create(context, stem, version, 0, 0L, span, fold, childRefs, knotKeys);
-  }
-
-  public static BTreeNode fromValue(BTreePageRef pageRef, Value value) {
-    Throwable cause = null;
-    try {
-      final Value header = value.header("bnode");
-      final long version = header.get("v").longValue();
-      final Record tail = value.tail();
-      final int n = tail.size() >>> 1;
-      final BTreePageRef[] childRefs = new BTreePageRef[n + 1];
-      final Value[] knotKeys = new Value[n];
-      childRefs[0] = BTreePageRef.fromValue(pageRef.context, pageRef.stem,
-          tail.get(0).toValue());
-      for (int i = 1; i <= n; i += 1) {
-        knotKeys[i - 1] = tail.get(2 * i - 1).header("knot").get("key");
-        childRefs[i] = BTreePageRef.fromValue(pageRef.context, pageRef.stem,
-            tail.get(2 * i).toValue());
-      }
-      return new BTreeNode(pageRef, version, childRefs, knotKeys);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        cause = error;
-      } else {
-        throw error;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed bnode: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), cause);
   }
 
   @Override
@@ -150,8 +90,8 @@ public final class BTreeNode extends BTreePage {
     try {
       return this.childRefs[index].page();
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -170,12 +110,12 @@ public final class BTreeNode extends BTreePage {
 
   @Override
   public Value minKey() {
-    return getChild(0).minKey();
+    return this.getChild(0).minKey();
   }
 
   @Override
   public Value maxKey() {
-    return getChild(this.childRefs.length - 1).maxKey();
+    return this.getChild(this.childRefs.length - 1).maxKey();
   }
 
   int lookup(Value key) {
@@ -198,7 +138,7 @@ public final class BTreeNode extends BTreePage {
 
   @Override
   public boolean containsKey(Value key) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x > 0) {
       x += 1;
     } else if (x < 0) {
@@ -206,7 +146,7 @@ public final class BTreeNode extends BTreePage {
     } else {
       return true;
     }
-    return getChild(x).containsKey(key);
+    return this.getChild(x).containsKey(key);
   }
 
   @Override
@@ -220,8 +160,8 @@ public final class BTreeNode extends BTreePage {
       }
       return false;
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -230,7 +170,7 @@ public final class BTreeNode extends BTreePage {
 
   @Override
   public long indexOf(Value key) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x >= 0) {
       x += 1;
     } else {
@@ -248,8 +188,8 @@ public final class BTreeNode extends BTreePage {
         return index - count;
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -258,24 +198,24 @@ public final class BTreeNode extends BTreePage {
 
   @Override
   public Value get(Value key) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x >= 0) {
       x += 1;
     } else {
       x = -(x + 1);
     }
-    return getChild(x).get(key);
+    return this.getChild(x).get(key);
   }
 
   @Override
   public Slot getEntry(Value key) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x >= 0) {
       x += 1;
     } else {
       x = -(x + 1);
     }
-    return getChild(x).getEntry(key);
+    return this.getChild(x).getEntry(key);
   }
 
   @Override
@@ -288,8 +228,8 @@ public final class BTreeNode extends BTreePage {
         try {
           return childRef.page().getIndex(index);
         } catch (Throwable cause) {
-          if (Conts.isNonFatal(cause)) {
-            throw new StoreException(toDebugString(), cause);
+          if (Cont.isNonFatal(cause)) {
+            throw new StoreException(this.toDebugString(), cause);
           } else {
             throw cause;
           }
@@ -303,7 +243,7 @@ public final class BTreeNode extends BTreePage {
 
   @Override
   public Slot firstEntry(Value key) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x >= 0) {
       x += 1;
     } else {
@@ -312,8 +252,8 @@ public final class BTreeNode extends BTreePage {
     try {
       return this.childRefs[x].page().firstEntry(key);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -327,8 +267,8 @@ public final class BTreeNode extends BTreePage {
       try {
         return childRefs[0].page().firstEntry();
       } catch (Throwable cause) {
-        if (Conts.isNonFatal(cause)) {
-          throw new StoreException(toDebugString(), cause);
+        if (Cont.isNonFatal(cause)) {
+          throw new StoreException(this.toDebugString(), cause);
         } else {
           throw cause;
         }
@@ -345,8 +285,8 @@ public final class BTreeNode extends BTreePage {
       try {
         return childRefs[childRefs.length - 1].page().lastEntry();
       } catch (Throwable cause) {
-        if (Conts.isNonFatal(cause)) {
-          throw new StoreException(toDebugString(), cause);
+        if (Cont.isNonFatal(cause)) {
+          throw new StoreException(this.toDebugString(), cause);
         } else {
           throw cause;
         }
@@ -358,7 +298,7 @@ public final class BTreeNode extends BTreePage {
 
   @Override
   public Slot nextEntry(Value key) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x >= 0) {
       x += 1;
     } else {
@@ -372,8 +312,8 @@ public final class BTreeNode extends BTreePage {
       }
       return entry;
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -382,7 +322,7 @@ public final class BTreeNode extends BTreePage {
 
   @Override
   public Slot previousEntry(Value key) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x >= 0) {
       x += 1;
     } else {
@@ -396,8 +336,8 @@ public final class BTreeNode extends BTreePage {
       }
       return entry;
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -406,19 +346,19 @@ public final class BTreeNode extends BTreePage {
 
   @Override
   public BTreePage updated(Value key, Value newValue, long newVersion) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x >= 0) {
       x += 1;
     } else {
       x = -(x + 1);
     }
-    final BTreePage oldPage = getChild(x);
+    final BTreePage oldPage = this.getChild(x);
     final BTreePage newPage = oldPage.updated(key, newValue, newVersion);
     if (oldPage != newPage) {
       if (oldPage.span() != newPage.span() && this.pageRef.context.pageShouldSplit(newPage)) {
-        return updatedPageSplit(x, newPage, oldPage, newVersion);
+        return this.updatedPageSplit(x, newPage, oldPage, newVersion);
       } else {
-        return updatedPage(x, newPage, oldPage, newVersion);
+        return this.updatedPage(x, newPage, oldPage, newVersion);
       }
     } else {
       return this;
@@ -441,12 +381,12 @@ public final class BTreeNode extends BTreePage {
         newKnotKeys[x - 1] = newPage.minKey();
       }
     } else {
-      newKnotKeys = EMPTY_KNOT_KEYS;
+      newKnotKeys = BTreeNode.EMPTY_KNOT_KEYS;
     }
 
     final long newSpan = this.pageRef.span - oldPage.span() + newPage.span();
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        newSpan, Value.absent(), newChildRefs, newKnotKeys);
+    return BTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            newSpan, Value.absent(), newChildRefs, newKnotKeys);
   }
 
   BTreeNode updatedPageSplit(int x, BTreePage newPage, BTreePage oldPage, long newVersion) {
@@ -475,8 +415,8 @@ public final class BTreeNode extends BTreePage {
     }
 
     final long newSpan = this.pageRef.span - oldPage.span() + newPage.span();
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        newSpan, Value.absent(), newChildRefs, newKnotKeys);
+    return BTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            newSpan, Value.absent(), newChildRefs, newKnotKeys);
   }
 
   BTreeNode updatedPageMerge(int x, BTreeNode newPage, BTreePage oldPage, long newVersion) {
@@ -505,11 +445,11 @@ public final class BTreeNode extends BTreePage {
       }
 
       final long newSpan = this.pageRef.span - oldPage.span() + newPage.span();
-      return create(this.pageRef.context, this.pageRef.stem, newVersion,
-          newSpan, Value.absent(), newChildRefs, newKnotKeys);
+      return BTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                              newSpan, Value.absent(), newChildRefs, newKnotKeys);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -518,16 +458,16 @@ public final class BTreeNode extends BTreePage {
 
   @Override
   public BTreePage removed(Value key, long newVersion) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x >= 0) {
       x += 1;
     } else {
       x = -(x + 1);
     }
-    final BTreePage oldPage = getChild(x);
+    final BTreePage oldPage = this.getChild(x);
     final BTreePage newPage = oldPage.removed(key, newVersion);
     if (oldPage != newPage) {
-      return replacedPage(x, newPage, oldPage, newVersion);
+      return this.replacedPage(x, newPage, oldPage, newVersion);
     } else {
       return this;
     }
@@ -536,17 +476,17 @@ public final class BTreeNode extends BTreePage {
   BTreePage replacedPage(int x, BTreePage newPage, BTreePage oldPage, long newVersion) {
     if (!newPage.isEmpty()) {
       if (newPage.isNode() && this.pageRef.context.pageShouldMerge(newPage)) {
-        return updatedPageMerge(x, (BTreeNode) newPage, oldPage, newVersion);
+        return this.updatedPageMerge(x, (BTreeNode) newPage, oldPage, newVersion);
       } else {
-        return updatedPage(x, newPage, oldPage, newVersion);
+        return this.updatedPage(x, newPage, oldPage, newVersion);
       }
     } else if (this.childRefs.length > 2) {
-      return removedPage(x, newPage, oldPage, newVersion);
+      return this.removedPage(x, newPage, oldPage, newVersion);
     } else if (this.childRefs.length > 1) {
       if (x == 0) {
-        return getChild(1);
+        return this.getChild(1);
       } else {
-        return getChild(0);
+        return this.getChild(0);
       }
     } else {
       return BTreeLeaf.empty(this.pageRef.context, this.pageRef.stem, newVersion);
@@ -570,15 +510,15 @@ public final class BTreeNode extends BTreePage {
     }
 
     final long newSpan = this.pageRef.span - oldPage.span();
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        newSpan, Value.absent(), newChildRefs, newKnotKeys);
+    return BTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            newSpan, Value.absent(), newChildRefs, newKnotKeys);
   }
 
   @Override
   public BTreePage drop(long lower, long newVersion) {
     try {
       if (lower > 0L) {
-        long newSpan = span();
+        long newSpan = this.span();
         if (lower < newSpan) {
           final BTreePageRef[] oldChildRefs = this.childRefs;
           final int k = oldChildRefs.length;
@@ -601,8 +541,8 @@ public final class BTreeNode extends BTreePage {
               System.arraycopy(oldChildRefs, x, newChildRefs, 0, n);
               final Value[] newKnotKeys = new Value[n - 1];
               System.arraycopy(this.knotKeys, x, newKnotKeys, 0, n - 1);
-              newNode = create(this.pageRef.context, this.pageRef.stem, newVersion,
-                  newSpan, Value.absent(), newChildRefs, newKnotKeys);
+              newNode = BTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                                         newSpan, Value.absent(), newChildRefs, newKnotKeys);
             } else {
               newNode = this;
             }
@@ -623,8 +563,8 @@ public final class BTreeNode extends BTreePage {
         return this;
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -634,7 +574,7 @@ public final class BTreeNode extends BTreePage {
   @Override
   public BTreePage take(long upper, long newVersion) {
     try {
-      if (upper < span()) {
+      if (upper < this.span()) {
         if (upper > 0L) {
           final BTreePageRef[] oldChildRefs = this.childRefs;
           final int k = oldChildRefs.length;
@@ -658,8 +598,8 @@ public final class BTreeNode extends BTreePage {
               System.arraycopy(oldChildRefs, 0, newChildRefs, 0, n);
               final Value[] newKnotKeys = new Value[n - 1];
               System.arraycopy(this.knotKeys, 0, newKnotKeys, 0, n - 1);
-              newNode = create(this.pageRef.context, this.pageRef.stem, newVersion,
-                  newSpan, Value.absent(), newChildRefs, newKnotKeys);
+              newNode = BTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                                         newSpan, Value.absent(), newChildRefs, newKnotKeys);
             } else {
               newNode = this;
             }
@@ -682,8 +622,8 @@ public final class BTreeNode extends BTreePage {
         return this;
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -694,7 +634,7 @@ public final class BTreeNode extends BTreePage {
   public BTreeNode balanced(long newVersion) {
     if (this.childRefs.length > 1 && this.pageRef.context.pageShouldSplit(this)) {
       final int x = this.knotKeys.length >>> 1;
-      return split(x, newVersion);
+      return this.split(x, newVersion);
     } else {
       return this;
     }
@@ -703,16 +643,16 @@ public final class BTreeNode extends BTreePage {
   @Override
   public BTreeNode split(int x, long newVersion) {
     final BTreePageRef[] newChildRefs = new BTreePageRef[2];
-    final BTreeNode newLeftPage = splitLeft(x, newVersion);
-    final BTreeNode newRightPage = splitRight(x, newVersion);
+    final BTreeNode newLeftPage = this.splitLeft(x, newVersion);
+    final BTreeNode newRightPage = this.splitRight(x, newVersion);
     newChildRefs[0] = newLeftPage.pageRef();
     newChildRefs[1] = newRightPage.pageRef();
 
     final Value[] newKnotKeys = new Value[1];
     newKnotKeys[0] = newRightPage.minKey();
 
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        this.pageRef.span, Value.absent(), newChildRefs, newKnotKeys);
+    return BTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            this.pageRef.span, Value.absent(), newChildRefs, newKnotKeys);
   }
 
   @Override
@@ -730,8 +670,8 @@ public final class BTreeNode extends BTreePage {
       newSpan += newChildRefs[i].span();
     }
 
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        newSpan, Value.absent(), newChildRefs, newKnotKeys);
+    return BTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            newSpan, Value.absent(), newChildRefs, newKnotKeys);
   }
 
   @Override
@@ -750,8 +690,8 @@ public final class BTreeNode extends BTreePage {
       newSpan += newChildRefs[i].span();
     }
 
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        newSpan, Value.absent(), newChildRefs, newKnotKeys);
+    return BTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            newSpan, Value.absent(), newChildRefs, newKnotKeys);
   }
 
   @Override
@@ -811,15 +751,14 @@ public final class BTreeNode extends BTreePage {
 
   @Override
   public Value toHeader() {
-    final Record header = Record.create(2)
-        .slot("stem", this.pageRef.stem)
-        .slot("v", this.version);
+    final Record header = Record.create(2).slot("stem", this.pageRef.stem)
+                                          .slot("v", this.version);
     return Record.create(1).attr("bnode", header);
   }
 
   @Override
   public Value toValue() {
-    final Record record = (Record) toHeader();
+    final Record record = (Record) this.toHeader();
     final BTreePageRef[] childRefs = this.childRefs;
     final Value[] knotKeys = this.knotKeys;
     for (int i = 0, n = childRefs.length; i < n; i += 1) {
@@ -845,8 +784,8 @@ public final class BTreeNode extends BTreePage {
     for (int i = 1; i < n; i += 1) {
       fold = combiner.combine(fold, newChildRefs[i].fold());
     }
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        this.pageRef.span, fold, newChildRefs, this.knotKeys);
+    return BTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            this.pageRef.span, fold, newChildRefs, this.knotKeys);
   }
 
   @Override
@@ -865,8 +804,8 @@ public final class BTreeNode extends BTreePage {
           if (i < n) {
             System.arraycopy(oldChildRefs, i, newChildRefs, i, n - i);
           }
-          return create(this.pageRef.context, this.pageRef.stem, version,
-              this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotKeys);
+          return BTreeNode.create(this.pageRef.context, this.pageRef.stem, version,
+                                  this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotKeys);
         }
       }
     }
@@ -891,8 +830,8 @@ public final class BTreeNode extends BTreePage {
       }
     }
 
-    return create(this.pageRef.context, this.pageRef.stem, version, zone, step,
-        this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotKeys);
+    return BTreeNode.create(this.pageRef.context, this.pageRef.stem, version, zone, step,
+                            this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotKeys);
   }
 
   @Override
@@ -903,14 +842,14 @@ public final class BTreeNode extends BTreePage {
     for (int i = 0; i < n; i += 1) {
       newChildRefs[i] = oldChildRefs[i].uncommitted(version);
     }
-    return create(this.pageRef.context, this.pageRef.stem, version,
-        this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotKeys);
+    return BTreeNode.create(this.pageRef.context, this.pageRef.stem, version,
+                            this.pageRef.span, this.pageRef.fold, newChildRefs, this.knotKeys);
   }
 
   @Override
   public void writePage(Output<?> output) {
-    Recon.write(toHeader(), output);
-    writePageContent(output);
+    Recon.write(this.toHeader(), output);
+    this.writePageContent(output);
     output.write('\n');
   }
 
@@ -923,7 +862,7 @@ public final class BTreeNode extends BTreePage {
       for (int i = 0; i < n; i += 1) {
         if (i > 0) {
           output.write(',').write('@').write('k').write('n').write('o').write('t')
-              .write('(').write('k').write('e').write('y').write(':');
+                .write('(').write('k').write('e').write('y').write(':');
           Recon.write(knotKeys[i - 1], output);
           output.write(')').write(',');
         }
@@ -942,7 +881,7 @@ public final class BTreeNode extends BTreePage {
         childRef.writeDiff(output);
       }
     }
-    writePage(output);
+    this.writePage(output);
   }
 
   @Override
@@ -953,10 +892,10 @@ public final class BTreeNode extends BTreePage {
         childRefs[0].loadTreeAsync(pageLoader, new LoadSubtree(pageLoader, this, 1, cont));
       } else {
         // Call continuation on fresh stack
-        this.pageRef.context.stage().execute(Conts.async(cont, this));
+        this.pageRef.context.stage().execute(Cont.async(cont, this));
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -989,10 +928,69 @@ public final class BTreeNode extends BTreePage {
 
   @Override
   public String toString() {
-    final Output<String> output = Unicode.stringOutput(pageSize() - 1); // ignore trailing '\n'
-    Recon.write(toHeader(), output);
-    writePageContent(output);
+    final Output<String> output = Unicode.stringOutput(this.pageSize() - 1); // ignore trailing '\n'
+    Recon.write(this.toHeader(), output);
+    this.writePageContent(output);
     return output.bind();
+  }
+
+  static final Value[] EMPTY_KNOT_KEYS = new Value[0];
+
+  public static BTreeNode create(PageContext context, int stem, long version,
+                                 int post, int zone, long base, long span, Value fold,
+                                 BTreePageRef[] childRefs, Value[] knotKeys) {
+    final BTreePageRef pageRef = new BTreePageRef(context, PageType.NODE, stem,
+                                                  post, zone, base, span, fold);
+    final BTreeNode page = new BTreeNode(pageRef, version, childRefs, knotKeys);
+    pageRef.page = page;
+    return page;
+  }
+
+  public static BTreeNode create(PageContext context, int stem, long version,
+                                 int zone, long base, long span, Value fold,
+                                 BTreePageRef[] childRefs, Value[] knotKeys) {
+    int post = zone;
+    for (int i = 0, n = childRefs.length; i < n; i += 1) {
+      final int childPost = childRefs[i].post;
+      if (childPost != 0) {
+        post = post == 0 ? childPost : Math.min(post, childPost);
+      }
+    }
+    return BTreeNode.create(context, stem, version, post, zone, base, span, fold, childRefs, knotKeys);
+  }
+
+  public static BTreeNode create(PageContext context, int stem, long version, long span,
+                                 Value fold, BTreePageRef[] childRefs, Value[] knotKeys) {
+    return BTreeNode.create(context, stem, version, 0, 0L, span, fold, childRefs, knotKeys);
+  }
+
+  public static BTreeNode fromValue(BTreePageRef pageRef, Value value) {
+    Throwable cause = null;
+    try {
+      final Value header = value.header("bnode");
+      final long version = header.get("v").longValue();
+      final Record tail = value.tail();
+      final int n = tail.size() >>> 1;
+      final BTreePageRef[] childRefs = new BTreePageRef[n + 1];
+      final Value[] knotKeys = new Value[n];
+      childRefs[0] = BTreePageRef.fromValue(pageRef.context, pageRef.stem,
+                                            tail.get(0).toValue());
+      for (int i = 1; i <= n; i += 1) {
+        knotKeys[i - 1] = tail.get(2 * i - 1).header("knot").get("key");
+        childRefs[i] = BTreePageRef.fromValue(pageRef.context, pageRef.stem,
+                                              tail.get(2 * i).toValue());
+      }
+      return new BTreeNode(pageRef, version, childRefs, knotKeys);
+    } catch (Throwable error) {
+      if (Cont.isNonFatal(error)) {
+        cause = error;
+      } else {
+        throw error;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed bnode: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), cause);
   }
 
 }

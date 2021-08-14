@@ -84,7 +84,7 @@ import swim.structure.selector.ValuesSelector;
 public final class Dataflow {
 
   private Dataflow() {
-    // nop
+    // static
   }
 
   /**
@@ -103,32 +103,32 @@ public final class Dataflow {
     if (expr.isConstant()) {
       return new ValueInput<Value>(expr);
     } else if (expr instanceof Selector) {
-      return compileSelector((Selector) expr, scope);
+      return Dataflow.compileSelector((Selector) expr, scope);
     } else if (expr instanceof Operator) {
-      return compileOperator((Operator) expr, scope);
+      return Dataflow.compileOperator((Operator) expr, scope);
     }
     throw new IllegalArgumentException(expr.toString());
   }
 
   private static Outlet<Value> compileSelector(Selector selector, Outlet<? extends Value> scope) {
     if (selector instanceof IdentitySelector) {
-      return compileIdentitySelector(scope);
+      return Dataflow.compileIdentitySelector(scope);
     } else if (selector instanceof GetSelector) {
-      return compileGetSelector((GetSelector) selector, scope);
+      return Dataflow.compileGetSelector((GetSelector) selector, scope);
     } else if (selector instanceof GetAttrSelector) {
-      return compileGetAttrSelector((GetAttrSelector) selector, scope);
+      return Dataflow.compileGetAttrSelector((GetAttrSelector) selector, scope);
     } else if (selector instanceof GetItemSelector) {
-      return compileGetItemSelector((GetItemSelector) selector, scope);
+      return Dataflow.compileGetItemSelector((GetItemSelector) selector, scope);
     } else if (selector instanceof KeysSelector) {
-      return compileKeysSelector(scope);
+      return Dataflow.compileKeysSelector(scope);
     } else if (selector instanceof ValuesSelector) {
-      return compileValuesSelector(scope);
+      return Dataflow.compileValuesSelector(scope);
     } else if (selector instanceof ChildrenSelector) {
-      return compileChildrenSelector(scope);
+      return Dataflow.compileChildrenSelector(scope);
     } else if (selector instanceof DescendantsSelector) {
-      return compileDescendantsSelector(scope);
+      return Dataflow.compileDescendantsSelector(scope);
     } else if (selector instanceof FilterSelector) {
-      return compileFilterSelector((FilterSelector) selector, scope);
+      return Dataflow.compileFilterSelector((FilterSelector) selector, scope);
     }
     throw new IllegalArgumentException(selector.toString());
   }
@@ -145,20 +145,20 @@ public final class Dataflow {
       if (scope instanceof RecordOutlet) {
         final Outlet<Value> outlet = ((RecordScope) scope).outlet(key);
         if (outlet != null) {
-          return compile(selector.then(), outlet);
+          return Dataflow.compile(selector.then(), outlet);
         }
       } else if (scope instanceof StreamletScope<?>) {
         final String name = key.stringValue(null);
         if (name != null) {
           final Outlet<Value> outlet = ((StreamletScope<Value>) scope).outlet(name);
           if (outlet != null) {
-            return compile(selector.then(), outlet);
+            return Dataflow.compile(selector.then(), outlet);
           }
         }
       }
     } else {
       final GetOutlet getOutlet = new GetOutlet();
-      final Outlet<Value> outlet = compile(key, scope);
+      final Outlet<Value> outlet = Dataflow.compile(key, scope);
       getOutlet.keyInlet().bindInput(outlet);
       getOutlet.mapInlet().bindInput((Outlet<? extends Value>) scope);
       return getOutlet;
@@ -196,13 +196,13 @@ public final class Dataflow {
 
   private static Outlet<Value> compileOperator(Operator operator, Outlet<? extends Value> scope) {
     if (operator instanceof ConditionalOperator) {
-      return compileConditionalOperator((ConditionalOperator) operator, scope);
+      return Dataflow.compileConditionalOperator((ConditionalOperator) operator, scope);
     } else if (operator instanceof BinaryOperator) {
-      return compileBinaryOperator((BinaryOperator) operator, scope);
+      return Dataflow.compileBinaryOperator((BinaryOperator) operator, scope);
     } else if (operator instanceof UnaryOperator) {
-      return compileUnaryOperator((UnaryOperator) operator, scope);
+      return Dataflow.compileUnaryOperator((UnaryOperator) operator, scope);
     } else if (operator instanceof InvokeOperator) {
-      return compileInvokeOperator((InvokeOperator) operator, scope);
+      return Dataflow.compileInvokeOperator((InvokeOperator) operator, scope);
     }
     throw new IllegalArgumentException(operator.toString());
   }
@@ -223,138 +223,138 @@ public final class Dataflow {
 
   private static Outlet<Value> compileBinaryOperator(BinaryOperator operator, Outlet<? extends Value> scope) {
     if (operator instanceof OrOperator) {
-      return compileOrOperator((OrOperator) operator, scope);
+      return Dataflow.compileOrOperator((OrOperator) operator, scope);
     } else if (operator instanceof AndOperator) {
-      return compileAndOperator((AndOperator) operator, scope);
+      return Dataflow.compileAndOperator((AndOperator) operator, scope);
     } else if (operator instanceof BitwiseOrOperator) {
-      return compileBitwiseOrOperator((BitwiseOrOperator) operator, scope);
+      return Dataflow.compileBitwiseOrOperator((BitwiseOrOperator) operator, scope);
     } else if (operator instanceof BitwiseXorOperator) {
-      return compileBitwiseXorOperator((BitwiseXorOperator) operator, scope);
+      return Dataflow.compileBitwiseXorOperator((BitwiseXorOperator) operator, scope);
     } else if (operator instanceof BitwiseAndOperator) {
-      return compileBitwiseAndOperator((BitwiseAndOperator) operator, scope);
+      return Dataflow.compileBitwiseAndOperator((BitwiseAndOperator) operator, scope);
     } else if (operator instanceof LtOperator) {
-      return compileLtOperator((LtOperator) operator, scope);
+      return Dataflow.compileLtOperator((LtOperator) operator, scope);
     } else if (operator instanceof LeOperator) {
-      return compileLeOperator((LeOperator) operator, scope);
+      return Dataflow.compileLeOperator((LeOperator) operator, scope);
     } else if (operator instanceof EqOperator) {
-      return compileEqOperator((EqOperator) operator, scope);
+      return Dataflow.compileEqOperator((EqOperator) operator, scope);
     } else if (operator instanceof NeOperator) {
-      return compileNeOperator((NeOperator) operator, scope);
+      return Dataflow.compileNeOperator((NeOperator) operator, scope);
     } else if (operator instanceof GeOperator) {
-      return compileGeOperator((GeOperator) operator, scope);
+      return Dataflow.compileGeOperator((GeOperator) operator, scope);
     } else if (operator instanceof GtOperator) {
-      return compileGtOperator((GtOperator) operator, scope);
+      return Dataflow.compileGtOperator((GtOperator) operator, scope);
     } else if (operator instanceof PlusOperator) {
-      return compilePlusOperator((PlusOperator) operator, scope);
+      return Dataflow.compilePlusOperator((PlusOperator) operator, scope);
     } else if (operator instanceof MinusOperator) {
-      return compileMinusOperator((MinusOperator) operator, scope);
+      return Dataflow.compileMinusOperator((MinusOperator) operator, scope);
     } else if (operator instanceof TimesOperator) {
-      return compileTimesOperator((TimesOperator) operator, scope);
+      return Dataflow.compileTimesOperator((TimesOperator) operator, scope);
     } else if (operator instanceof DivideOperator) {
-      return compileDivideOperator((DivideOperator) operator, scope);
+      return Dataflow.compileDivideOperator((DivideOperator) operator, scope);
     } else if (operator instanceof ModuloOperator) {
-      return compileModuloOperator((ModuloOperator) operator, scope);
+      return Dataflow.compileModuloOperator((ModuloOperator) operator, scope);
     }
     throw new IllegalArgumentException(operator.toString());
   }
 
   private static Outlet<Value> compileBinaryOutlet(BinaryOperator operator, BinaryOutlet outlet, Outlet<? extends Value> scope) {
-    final Value operand1 = operator.operand1().toValue();
-    final Value operand2 = operator.operand2().toValue();
-    final Outlet<Value> operand1Outlet = compile(operand1, scope);
-    final Outlet<Value> operand2Outlet = compile(operand2, scope);
-    outlet.operand1Inlet().bindInput(operand1Outlet);
-    outlet.operand2Inlet().bindInput(operand2Outlet);
+    final Value lhs = operator.lhs().toValue();
+    final Value rhs = operator.rhs().toValue();
+    final Outlet<Value> operand1Outlet = compile(lhs, scope);
+    final Outlet<Value> operand2Outlet = compile(rhs, scope);
+    outlet.lhsInlet().bindInput(operand1Outlet);
+    outlet.rhsInlet().bindInput(operand2Outlet);
     return outlet;
   }
 
   private static Outlet<Value> compileOrOperator(OrOperator operator, Outlet<? extends Value> scope) {
     final OrOutlet outlet = new OrOutlet();
-    final Value operand1 = operator.operand1().toValue();
-    final Value operand2 = operator.operand2().toValue();
-    final Outlet<Value> operand1Outlet = compile(operand1, scope);
-    final Outlet<Value> operand2Outlet = compile(operand2, scope);
-    outlet.operand1Inlet().bindInput(operand1Outlet);
-    outlet.operand2Inlet().bindInput(operand2Outlet);
+    final Value lhs = operator.lhs().toValue();
+    final Value rhs = operator.rhs().toValue();
+    final Outlet<Value> operand1Outlet = compile(lhs, scope);
+    final Outlet<Value> operand2Outlet = compile(rhs, scope);
+    outlet.lhsInlet().bindInput(operand1Outlet);
+    outlet.rhsInlet().bindInput(operand2Outlet);
     return outlet;
   }
 
   private static Outlet<Value> compileAndOperator(AndOperator operator, Outlet<? extends Value> scope) {
     final AndOutlet outlet = new AndOutlet();
-    final Value operand1 = operator.operand1().toValue();
-    final Value operand2 = operator.operand2().toValue();
-    final Outlet<Value> operand1Outlet = compile(operand1, scope);
-    final Outlet<Value> operand2Outlet = compile(operand2, scope);
-    outlet.operand1Inlet().bindInput(operand1Outlet);
-    outlet.operand2Inlet().bindInput(operand2Outlet);
+    final Value lhs = operator.lhs().toValue();
+    final Value rhs = operator.rhs().toValue();
+    final Outlet<Value> operand1Outlet = compile(lhs, scope);
+    final Outlet<Value> operand2Outlet = compile(rhs, scope);
+    outlet.lhsInlet().bindInput(operand1Outlet);
+    outlet.rhsInlet().bindInput(operand2Outlet);
     return outlet;
   }
 
   private static Outlet<Value> compileBitwiseOrOperator(BitwiseOrOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new BitwiseOrOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new BitwiseOrOutlet(), scope);
   }
 
   private static Outlet<Value> compileBitwiseXorOperator(BitwiseXorOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new BitwiseXorOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new BitwiseXorOutlet(), scope);
   }
 
   private static Outlet<Value> compileBitwiseAndOperator(BitwiseAndOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new BitwiseAndOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new BitwiseAndOutlet(), scope);
   }
 
   private static Outlet<Value> compileLtOperator(LtOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new LtOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new LtOutlet(), scope);
   }
 
   private static Outlet<Value> compileLeOperator(LeOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new LeOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new LeOutlet(), scope);
   }
 
   private static Outlet<Value> compileEqOperator(EqOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new EqOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new EqOutlet(), scope);
   }
 
   private static Outlet<Value> compileNeOperator(NeOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new NeOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new NeOutlet(), scope);
   }
 
   private static Outlet<Value> compileGeOperator(GeOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new GeOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new GeOutlet(), scope);
   }
 
   private static Outlet<Value> compileGtOperator(GtOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new GtOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new GtOutlet(), scope);
   }
 
   private static Outlet<Value> compilePlusOperator(PlusOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new PlusOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new PlusOutlet(), scope);
   }
 
   private static Outlet<Value> compileMinusOperator(MinusOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new MinusOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new MinusOutlet(), scope);
   }
 
   private static Outlet<Value> compileTimesOperator(TimesOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new TimesOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new TimesOutlet(), scope);
   }
 
   private static Outlet<Value> compileDivideOperator(DivideOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new DivideOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new DivideOutlet(), scope);
   }
 
   private static Outlet<Value> compileModuloOperator(ModuloOperator operator, Outlet<? extends Value> scope) {
-    return compileBinaryOutlet(operator, new ModuloOutlet(), scope);
+    return Dataflow.compileBinaryOutlet(operator, new ModuloOutlet(), scope);
   }
 
   private static Outlet<Value> compileUnaryOperator(UnaryOperator operator, Outlet<? extends Value> scope) {
     if (operator instanceof NotOperator) {
-      return compileNotOperator((NotOperator) operator, scope);
+      return Dataflow.compileNotOperator((NotOperator) operator, scope);
     } else if (operator instanceof BitwiseNotOperator) {
-      return compileBitwiseNotOperator((BitwiseNotOperator) operator, scope);
+      return Dataflow.compileBitwiseNotOperator((BitwiseNotOperator) operator, scope);
     } else if (operator instanceof NegativeOperator) {
-      return compileNegativeOperator((NegativeOperator) operator, scope);
+      return Dataflow.compileNegativeOperator((NegativeOperator) operator, scope);
     } else if (operator instanceof PositiveOperator) {
-      return compilePositiveOperator((PositiveOperator) operator, scope);
+      return Dataflow.compilePositiveOperator((PositiveOperator) operator, scope);
     }
     throw new IllegalArgumentException(operator.toString());
   }
@@ -367,27 +367,27 @@ public final class Dataflow {
   }
 
   private static Outlet<Value> compileNotOperator(NotOperator operator, Outlet<? extends Value> scope) {
-    return compileUnaryOutlet(operator, new NotOutlet(), scope);
+    return Dataflow.compileUnaryOutlet(operator, new NotOutlet(), scope);
   }
 
   private static Outlet<Value> compileBitwiseNotOperator(BitwiseNotOperator operator, Outlet<? extends Value> scope) {
-    return compileUnaryOutlet(operator, new BitwiseNotOutlet(), scope);
+    return Dataflow.compileUnaryOutlet(operator, new BitwiseNotOutlet(), scope);
   }
 
   private static Outlet<Value> compileNegativeOperator(NegativeOperator operator, Outlet<? extends Value> scope) {
-    return compileUnaryOutlet(operator, new NegativeOutlet(), scope);
+    return Dataflow.compileUnaryOutlet(operator, new NegativeOutlet(), scope);
   }
 
   private static Outlet<Value> compilePositiveOperator(PositiveOperator operator, Outlet<? extends Value> scope) {
-    return compileUnaryOutlet(operator, new PositiveOutlet(), scope);
+    return Dataflow.compileUnaryOutlet(operator, new PositiveOutlet(), scope);
   }
 
   private static Outlet<Value> compileInvokeOperator(InvokeOperator operator, Outlet<? extends Value> scope) {
     final Value func = operator.func();
     final Value args = operator.args();
     final InvokeOutlet invokeOutlet = new InvokeOutlet((Record) scope);
-    final Outlet<Value> funcOutlet = compile(func, scope);
-    final Outlet<Value> argsOutlet = compile(args, scope);
+    final Outlet<Value> funcOutlet = Dataflow.compile(func, scope);
+    final Outlet<Value> argsOutlet = Dataflow.compile(args, scope);
     invokeOutlet.funcInlet().bindInput(funcOutlet);
     invokeOutlet.argsInlet().bindInput(argsOutlet);
     return invokeOutlet;

@@ -15,7 +15,7 @@
 package swim.concurrent;
 
 /**
- * Timetable for executing timers at their scheduled times.  {@code Schedule}
+ * Timetable for executing timers at their scheduled times. {@code Schedule}
  * is thread safe.
  *
  * @see Clock
@@ -30,7 +30,7 @@ public interface Schedule {
 
   /**
    * Schedules {@code timer} to execute after {@code millis} milliseconds
-   * have elapsed.  Returns a {@code TimerRef} that can be used to check the
+   * have elapsed. Returns a {@code TimerRef} that can be used to check the
    * status of, reschedule, and cancel {@code timer}.
    */
   TimerRef setTimer(long millis, TimerFunction timer);

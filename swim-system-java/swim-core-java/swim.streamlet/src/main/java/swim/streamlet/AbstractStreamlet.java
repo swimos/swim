@@ -33,12 +33,236 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
     this(null);
   }
 
+  @Override
+  public StreamletScope<? extends O> streamletScope() {
+    return this.scope;
+  }
+
+  @Override
+  public void setStreamletScope(StreamletScope<? extends O> scope) {
+    this.scope = scope;
+  }
+
+  @Override
+  public StreamletContext streamletContext() {
+    if (this.context != null) {
+      return this.context;
+    }
+    final StreamletScope<? extends O> scope = this.streamletScope();
+    if (scope != null) {
+      return scope.streamletContext();
+    }
+    return null;
+  }
+
+  @Override
+  public void setStreamletContext(StreamletContext context) {
+    this.context = context;
+  }
+
+  @Override
+  public Inlet<I> inlet(String key) {
+    return AbstractStreamlet.reflectInletKey(key, this, getClass());
+  }
+
+  protected <I2 extends I> Inlet<I2> inlet() {
+    return new StreamletInlet<I2>(this);
+  }
+
+  @Override
+  public void bindInput(String key, Outlet<? extends I> input) {
+    final Inlet<I> inlet = this.inlet(key);
+    if (inlet == null) {
+      throw new IllegalArgumentException(key.toString());
+    }
+    inlet.bindInput(input);
+  }
+
+  @Override
+  public void unbindInput(String key) {
+    final Inlet<I> inlet = this.inlet(key);
+    if (inlet == null) {
+      throw new IllegalArgumentException(key.toString());
+    }
+    inlet.unbindInput();
+  }
+
+  @Override
+  public Outlet<O> outlet(String key) {
+    return AbstractStreamlet.reflectOutletKey(key, this, getClass());
+  }
+
+  @SuppressWarnings("unchecked")
+  protected <O2> Outlet<O2> outlet() {
+    return new StreamletOutlet<O2>((Streamlet<I, ? extends O2>) this);
+  }
+
+  @SuppressWarnings("unchecked")
+  protected <I2 extends I, O2> Inoutlet<I2, O2> inoutlet() {
+    return new StreamletInoutlet<I2, O2>((Streamlet<? super I2, ? extends O2>) this);
+  }
+
+  @Override
+  public void decohere() {
+    if (this.version >= 0) {
+      this.willDecohere();
+      this.version = -1;
+      this.onDecohere();
+      this.onDecohereOutlets();
+      this.didDecohere();
+    }
+  }
+
+  @Override
+  public void recohere(int version) {
+    if (this.version < 0) {
+      this.willRecohere(version);
+      this.version = version;
+      this.onRecohereInlets(version);
+      this.onRecohere(version);
+      this.onRecohereOutlets(version);
+      this.didRecohere(version);
+    }
+  }
+
+  public <I2 extends I> I2 getInput(Inlet<I2> inlet) {
+    final Outlet<? extends I2> input = inlet.input();
+    if (input != null) {
+      return input.get();
+    }
+    return null;
+  }
+
+  @SuppressWarnings("unchecked")
+  public <I2 extends I> I2 getInput(String key) {
+    final Inlet<I2> inlet = (Inlet<I2>) this.inlet(key);
+    if (inlet != null) {
+      return this.getInput(inlet);
+    }
+    return null;
+  }
+
+  public <I2 extends I> I2 getInput(Inlet<I2> inlet, I2 orElse) {
+    I2 input = this.getInput(inlet);
+    if (input == null) {
+      input = orElse;
+    }
+    return input;
+  }
+
+  public <I2 extends I> I2 getInput(String key, I2 orElse) {
+    I2 input = this.getInput(key);
+    if (input == null) {
+      input = orElse;
+    }
+    return input;
+  }
+
+  @Override
+  public O getOutput(Outlet<? super O> outlet) {
+    return null;
+  }
+
+  public O getOutput(String key) {
+    final Outlet<O> outlet = this.outlet(key);
+    if (outlet != null) {
+      return this.getOutput(outlet);
+    }
+    return null;
+  }
+
+  @Override
+  public void disconnectInputs() {
+    AbstractStreamlet.disconnectInputs(this, this.getClass());
+  }
+
+  @Override
+  public void disconnectOutputs() {
+    AbstractStreamlet.disconnectOutputs(this, this.getClass());
+  }
+
+  @Override
+  public void willDecohereInlet(Inlet<? extends I> inlet) {
+    // hook
+  }
+
+  @Override
+  public void didDecohereInlet(Inlet<? extends I> inlet) {
+    this.decohere();
+  }
+
+  @Override
+  public void willRecohereInlet(Inlet<? extends I> inlet, int version) {
+    // hook
+  }
+
+  @Override
+  public void didRecohereInlet(Inlet<? extends I> inlet, int version) {
+    this.recohere(version);
+  }
+
+  @Override
+  public void willDecohereOutlet(Outlet<? super O> outlet) {
+    // hook
+  }
+
+  @Override
+  public void didDecohereOutlet(Outlet<? super O> outlet) {
+    // hook
+  }
+
+  @Override
+  public void willRecohereOutlet(Outlet<? super O> outlet, int version) {
+    // hook
+  }
+
+  @Override
+  public void didRecohereOutlet(Outlet<? super O> outlet, int version) {
+    // hook
+  }
+
+  protected void willDecohere() {
+    // hook
+  }
+
+  protected void onDecohere() {
+    // hook
+  }
+
+  protected void onDecohereOutlets() {
+    AbstractStreamlet.decohereOutlets(this, this.getClass());
+  }
+
+  protected void didDecohere() {
+    // hook
+  }
+
+  protected void willRecohere(int version) {
+    // hook
+  }
+
+  protected void onRecohereInlets(int version) {
+    AbstractStreamlet.recohereInlets(version, this, this.getClass());
+  }
+
+  protected void onRecohere(int version) {
+    // hook
+  }
+
+  protected void onRecohereOutlets(int version) {
+    AbstractStreamlet.recohereOutlets(version, this, this.getClass());
+  }
+
+  protected void didRecohere(int version) {
+    // hook
+  }
+
   public static <I, O> void disconnectInputs(Streamlet<I, O> streamlet, Class<?> streamletClass) {
     while (streamletClass != null) {
       final Field[] fields = streamletClass.getDeclaredFields();
       for (Field field : fields) {
         if (Inlet.class.isAssignableFrom(field.getType())) {
-          disconnectInputField(streamlet, field);
+          AbstractStreamlet.disconnectInputField(streamlet, field);
         }
       }
       streamletClass = streamletClass.getSuperclass();
@@ -47,10 +271,10 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
 
   private static <I, O> void disconnectInputField(Streamlet<I, O> streamlet, Field field) {
     if (field.getAnnotation(Out.class) != null) {
-      final Inlet<I> inlet = reflectInletField(streamlet, field);
+      final Inlet<I> inlet = AbstractStreamlet.reflectInletField(streamlet, field);
       inlet.disconnectInputs();
     } else if (field.getAnnotation(Inout.class) != null) {
-      final Inoutlet<I, O> inoutlet = reflectInoutletField(streamlet, field);
+      final Inoutlet<I, O> inoutlet = AbstractStreamlet.reflectInoutletField(streamlet, field);
       inoutlet.disconnectInputs();
     }
   }
@@ -60,7 +284,7 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
       final Field[] fields = streamletClass.getDeclaredFields();
       for (Field field : fields) {
         if (Outlet.class.isAssignableFrom(field.getType())) {
-          disconnectOutputField(streamlet, field);
+          AbstractStreamlet.disconnectOutputField(streamlet, field);
         }
       }
       streamletClass = streamletClass.getSuperclass();
@@ -69,10 +293,10 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
 
   private static <I, O> void disconnectOutputField(Streamlet<I, O> streamlet, Field field) {
     if (field.getAnnotation(Out.class) != null) {
-      final Outlet<O> outlet = reflectOutletField(streamlet, field);
+      final Outlet<O> outlet = AbstractStreamlet.reflectOutletField(streamlet, field);
       outlet.disconnectOutputs();
     } else if (field.getAnnotation(Inout.class) != null) {
-      final Inoutlet<I, O> inoutlet = reflectInoutletField(streamlet, field);
+      final Inoutlet<I, O> inoutlet = AbstractStreamlet.reflectInoutletField(streamlet, field);
       inoutlet.disconnectOutputs();
     }
   }
@@ -82,7 +306,7 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
       final Field[] fields = streamletClass.getDeclaredFields();
       for (Field field : fields) {
         if (Outlet.class.isAssignableFrom(field.getType())) {
-          decohereOutletField(streamlet, field);
+          AbstractStreamlet.decohereOutletField(streamlet, field);
         }
       }
       streamletClass = streamletClass.getSuperclass();
@@ -91,10 +315,10 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
 
   private static <I, O> void decohereOutletField(Streamlet<I, O> streamlet, Field field) {
     if (field.getAnnotation(Out.class) != null) {
-      final Outlet<O> outlet = reflectOutletField(streamlet, field);
+      final Outlet<O> outlet = AbstractStreamlet.reflectOutletField(streamlet, field);
       outlet.decohereInput();
     } else if (field.getAnnotation(Inout.class) != null) {
-      final Inoutlet<I, O> inoutlet = reflectInoutletField(streamlet, field);
+      final Inoutlet<I, O> inoutlet = AbstractStreamlet.reflectInoutletField(streamlet, field);
       inoutlet.decohereInput();
     }
   }
@@ -104,7 +328,7 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
       final Field[] fields = streamletClass.getDeclaredFields();
       for (Field field : fields) {
         if (Inlet.class.isAssignableFrom(field.getType())) {
-          recohereInletField(version, streamlet, field);
+          AbstractStreamlet.recohereInletField(version, streamlet, field);
         }
       }
       streamletClass = streamletClass.getSuperclass();
@@ -113,10 +337,10 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
 
   private static <I, O> void recohereInletField(int version, Streamlet<I, O> streamlet, Field field) {
     if (field.getAnnotation(In.class) != null) {
-      final Inlet<I> inlet = reflectInletField(streamlet, field);
+      final Inlet<I> inlet = AbstractStreamlet.reflectInletField(streamlet, field);
       inlet.recohereOutput(version);
     } else if (field.getAnnotation(Inout.class) != null) {
-      final Inoutlet<I, O> inoutlet = reflectInoutletField(streamlet, field);
+      final Inoutlet<I, O> inoutlet = AbstractStreamlet.reflectInoutletField(streamlet, field);
       inoutlet.recohereOutput(version);
     }
   }
@@ -126,7 +350,7 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
       final Field[] fields = streamletClass.getDeclaredFields();
       for (Field field : fields) {
         if (Outlet.class.isAssignableFrom(field.getType())) {
-          recohereOutletField(version, streamlet, field);
+          AbstractStreamlet.recohereOutletField(version, streamlet, field);
         }
       }
       streamletClass = streamletClass.getSuperclass();
@@ -135,10 +359,10 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
 
   private static <I, O> void recohereOutletField(int version, Streamlet<I, O> streamlet, Field field) {
     if (field.getAnnotation(Out.class) != null) {
-      final Outlet<O> outlet = reflectOutletField(streamlet, field);
+      final Outlet<O> outlet = AbstractStreamlet.reflectOutletField(streamlet, field);
       outlet.recohereInput(version);
     } else if (field.getAnnotation(Inout.class) != null) {
-      final Inoutlet<I, O> inoutlet = reflectInoutletField(streamlet, field);
+      final Inoutlet<I, O> inoutlet = AbstractStreamlet.reflectInoutletField(streamlet, field);
       inoutlet.recohereInput(version);
     }
   }
@@ -197,7 +421,7 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
           final In in = field.getAnnotation(In.class);
           if (in != null) {
             if (index == 0) {
-              return new AbstractMap.SimpleImmutableEntry<String, Inlet<I>>(field.getName(), reflectInletField(streamlet, field));
+              return new AbstractMap.SimpleImmutableEntry<String, Inlet<I>>(field.getName(), AbstractStreamlet.reflectInletField(streamlet, field));
             }
             index -= 1;
             continue;
@@ -205,7 +429,7 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
           final Inout inout = field.getAnnotation(Inout.class);
           if (inout != null) {
             if (index == 0) {
-              return new AbstractMap.SimpleImmutableEntry<String, Inlet<I>>(field.getName(), reflectInoutletField(streamlet, field));
+              return new AbstractMap.SimpleImmutableEntry<String, Inlet<I>>(field.getName(), AbstractStreamlet.reflectInoutletField(streamlet, field));
             }
             index -= 1;
             continue;
@@ -225,7 +449,7 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
           final Out out = field.getAnnotation(Out.class);
           if (out != null) {
             if (index == 0) {
-              return new AbstractMap.SimpleImmutableEntry<String, Outlet<O>>(field.getName(), reflectOutletField(streamlet, field));
+              return new AbstractMap.SimpleImmutableEntry<String, Outlet<O>>(field.getName(), AbstractStreamlet.reflectOutletField(streamlet, field));
             }
             index -= 1;
             continue;
@@ -233,7 +457,7 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
           final Inout inout = field.getAnnotation(Inout.class);
           if (inout != null) {
             if (index == 0) {
-              return new AbstractMap.SimpleImmutableEntry<String, Outlet<O>>(field.getName(), reflectInoutletField(streamlet, field));
+              return new AbstractMap.SimpleImmutableEntry<String, Outlet<O>>(field.getName(), AbstractStreamlet.reflectInoutletField(streamlet, field));
             }
             index -= 1;
             continue;
@@ -250,7 +474,7 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
       final Field[] fields = streamletClass.getDeclaredFields();
       for (Field field : fields) {
         if (Inlet.class.isAssignableFrom(field.getType())) {
-          final Inlet<I> inlet = reflectInletKeyField(key, streamlet, field);
+          final Inlet<I> inlet = AbstractStreamlet.reflectInletKeyField(key, streamlet, field);
           if (inlet != null) {
             return inlet;
           }
@@ -266,14 +490,14 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
     if (in != null) {
       final String name = in.value();
       if (name.equals(key) || name.isEmpty() && field.getName().equals(key)) {
-        return reflectInletField(streamlet, field);
+        return AbstractStreamlet.reflectInletField(streamlet, field);
       }
     }
     final Inout inout = field.getAnnotation(Inout.class);
     if (inout != null) {
       final String name = inout.value();
       if (name.equals(key) || name.isEmpty() && field.getName().equals(key)) {
-        return reflectInoutletField(streamlet, field);
+        return AbstractStreamlet.reflectInoutletField(streamlet, field);
       }
     }
     return null;
@@ -284,7 +508,7 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
       final Field[] fields = streamletClass.getDeclaredFields();
       for (Field field : fields) {
         if (Outlet.class.isAssignableFrom(field.getType())) {
-          final Outlet<O> outlet = reflectOutletKeyField(key, streamlet, field);
+          final Outlet<O> outlet = AbstractStreamlet.reflectOutletKeyField(key, streamlet, field);
           if (outlet != null) {
             return outlet;
           }
@@ -301,14 +525,14 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
     if (out != null) {
       final String name = out.value();
       if (name.equals(key) || name.isEmpty() && field.getName().equals(key)) {
-        return reflectOutletField(streamlet, field);
+        return AbstractStreamlet.reflectOutletField(streamlet, field);
       }
     }
     final Inout inout = field.getAnnotation(Inout.class);
     if (inout != null) {
       final String name = inout.value();
       if (name.equals(key) || name.isEmpty() && field.getName().equals(key)) {
-        return reflectInoutletField(streamlet, field);
+        return AbstractStreamlet.reflectInoutletField(streamlet, field);
       }
     }
     return null;
@@ -317,9 +541,9 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
   public static <I, O> Inlet<I> reflectInletField(Streamlet<I, O> streamlet, Field field) {
     field.setAccessible(true);
     if (MapInlet.class.isAssignableFrom(field.getType())) {
-      return reflectMapInletField(streamlet, field);
+      return AbstractStreamlet.reflectMapInletField(streamlet, field);
     } else {
-      return reflectValueInletField(streamlet, field);
+      return AbstractStreamlet.reflectValueInletField(streamlet, field);
     }
   }
 
@@ -348,9 +572,9 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
   public static <I, O> Outlet<O> reflectOutletField(Streamlet<I, O> streamlet, Field field) {
     field.setAccessible(true);
     if (MapOutlet.class.isAssignableFrom(field.getType())) {
-      return reflectMapOutletField(streamlet, field);
+      return AbstractStreamlet.reflectMapOutletField(streamlet, field);
     } else {
-      return reflectValueOutletField(streamlet, field);
+      return AbstractStreamlet.reflectValueOutletField(streamlet, field);
     }
   }
 
@@ -379,9 +603,9 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
   public static <I, O> Inoutlet<I, O> reflectInoutletField(Streamlet<I, O> streamlet, Field field) {
     field.setAccessible(true);
     if (MapInoutlet.class.isAssignableFrom(field.getType())) {
-      return reflectMapInoutletField(streamlet, field);
+      return AbstractStreamlet.reflectMapInoutletField(streamlet, field);
     } else {
-      return reflectValueInoutletField(streamlet, field);
+      return AbstractStreamlet.reflectValueInoutletField(streamlet, field);
     }
   }
 
@@ -405,230 +629,6 @@ public abstract class AbstractStreamlet<I, O> implements GenericStreamlet<I, O> 
 
   private static <I, O> Inoutlet<I, O> reflectMapInoutletField(Streamlet<I, O> streamlet, Field field) {
     return null; // TODO
-  }
-
-  @Override
-  public StreamletScope<? extends O> streamletScope() {
-    return this.scope;
-  }
-
-  @Override
-  public void setStreamletScope(StreamletScope<? extends O> scope) {
-    this.scope = scope;
-  }
-
-  @Override
-  public StreamletContext streamletContext() {
-    if (this.context != null) {
-      return this.context;
-    }
-    final StreamletScope<? extends O> scope = streamletScope();
-    if (scope != null) {
-      return scope.streamletContext();
-    }
-    return null;
-  }
-
-  @Override
-  public void setStreamletContext(StreamletContext context) {
-    this.context = context;
-  }
-
-  @Override
-  public Inlet<I> inlet(String key) {
-    return reflectInletKey(key, this, getClass());
-  }
-
-  protected <I2 extends I> Inlet<I2> inlet() {
-    return new StreamletInlet<I2>(this);
-  }
-
-  @Override
-  public void bindInput(String key, Outlet<? extends I> input) {
-    final Inlet<I> inlet = inlet(key);
-    if (inlet == null) {
-      throw new IllegalArgumentException(key.toString());
-    }
-    inlet.bindInput(input);
-  }
-
-  @Override
-  public void unbindInput(String key) {
-    final Inlet<I> inlet = inlet(key);
-    if (inlet == null) {
-      throw new IllegalArgumentException(key.toString());
-    }
-    inlet.unbindInput();
-  }
-
-  @Override
-  public Outlet<O> outlet(String key) {
-    return reflectOutletKey(key, this, getClass());
-  }
-
-  @SuppressWarnings("unchecked")
-  protected <O2> Outlet<O2> outlet() {
-    return new StreamletOutlet<O2>((Streamlet<I, ? extends O2>) this);
-  }
-
-  @SuppressWarnings("unchecked")
-  protected <I2 extends I, O2> Inoutlet<I2, O2> inoutlet() {
-    return new StreamletInoutlet<I2, O2>((Streamlet<? super I2, ? extends O2>) this);
-  }
-
-  @Override
-  public void decohere() {
-    if (this.version >= 0) {
-      willDecohere();
-      this.version = -1;
-      onDecohere();
-      onDecohereOutlets();
-      didDecohere();
-    }
-  }
-
-  @Override
-  public void recohere(int version) {
-    if (this.version < 0) {
-      willRecohere(version);
-      this.version = version;
-      onRecohereInlets(version);
-      onRecohere(version);
-      onRecohereOutlets(version);
-      didRecohere(version);
-    }
-  }
-
-  public <I2 extends I> I2 getInput(Inlet<I2> inlet) {
-    final Outlet<? extends I2> input = inlet.input();
-    if (input != null) {
-      return input.get();
-    }
-    return null;
-  }
-
-  @SuppressWarnings("unchecked")
-  public <I2 extends I> I2 getInput(String key) {
-    final Inlet<I2> inlet = (Inlet<I2>) inlet(key);
-    if (inlet != null) {
-      return getInput(inlet);
-    }
-    return null;
-  }
-
-  public <I2 extends I> I2 getInput(Inlet<I2> inlet, I2 orElse) {
-    I2 input = getInput(inlet);
-    if (input == null) {
-      input = orElse;
-    }
-    return input;
-  }
-
-  public <I2 extends I> I2 getInput(String key, I2 orElse) {
-    I2 input = getInput(key);
-    if (input == null) {
-      input = orElse;
-    }
-    return input;
-  }
-
-  @Override
-  public O getOutput(Outlet<? super O> outlet) {
-    return null;
-  }
-
-  public O getOutput(String key) {
-    final Outlet<O> outlet = outlet(key);
-    if (outlet != null) {
-      return getOutput(outlet);
-    }
-    return null;
-  }
-
-  @Override
-  public void disconnectInputs() {
-    disconnectInputs(this, getClass());
-  }
-
-  @Override
-  public void disconnectOutputs() {
-    disconnectOutputs(this, getClass());
-  }
-
-  @Override
-  public void willDecohereInlet(Inlet<? extends I> inlet) {
-    // hook
-  }
-
-  @Override
-  public void didDecohereInlet(Inlet<? extends I> inlet) {
-    decohere();
-  }
-
-  @Override
-  public void willRecohereInlet(Inlet<? extends I> inlet, int version) {
-    // hook
-  }
-
-  @Override
-  public void didRecohereInlet(Inlet<? extends I> inlet, int version) {
-    recohere(version);
-  }
-
-  @Override
-  public void willDecohereOutlet(Outlet<? super O> outlet) {
-    // hook
-  }
-
-  @Override
-  public void didDecohereOutlet(Outlet<? super O> outlet) {
-    // hook
-  }
-
-  @Override
-  public void willRecohereOutlet(Outlet<? super O> outlet, int version) {
-    // hook
-  }
-
-  @Override
-  public void didRecohereOutlet(Outlet<? super O> outlet, int version) {
-    // hook
-  }
-
-  protected void willDecohere() {
-    // hook
-  }
-
-  protected void onDecohere() {
-    // hook
-  }
-
-  protected void onDecohereOutlets() {
-    decohereOutlets(this, getClass());
-  }
-
-  protected void didDecohere() {
-    // hook
-  }
-
-  protected void willRecohere(int version) {
-    // hook
-  }
-
-  protected void onRecohereInlets(int version) {
-    recohereInlets(version, this, getClass());
-  }
-
-  protected void onRecohere(int version) {
-    // hook
-  }
-
-  protected void onRecohereOutlets(int version) {
-    recohereOutlets(version, this, getClass());
-  }
-
-  protected void didRecohere(int version) {
-    // hook
   }
 
 }

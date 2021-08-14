@@ -28,16 +28,10 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import swim.codec.Binary;
 import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 
 class TcpSocket implements Transport, IpSocketContext {
 
-  static final int CLIENT = 1 << 0;
-  static final int SERVER = 1 << 1;
-  static final int CONNECTING = 1 << 2;
-  static final int CONNECTED = 1 << 3;
-  static final AtomicIntegerFieldUpdater<TcpSocket> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(TcpSocket.class, "status");
   final InetSocketAddress localAddress;
   final InetSocketAddress remoteAddress;
   final ByteBuffer readBuffer;
@@ -56,7 +50,7 @@ class TcpSocket implements Transport, IpSocketContext {
     this.remoteAddress = remoteAddress;
     this.channel = channel;
     this.ipSettings = ipSettings;
-    this.status = isClient ? CLIENT : SERVER;
+    this.status = isClient ? TcpSocket.CLIENT : TcpSocket.SERVER;
     final TcpSettings tcpSettings = ipSettings.tcpSettings();
     this.readBuffer = ByteBuffer.allocate(tcpSettings.readBufferSize());
     this.writeBuffer = ByteBuffer.allocate(tcpSettings.writeBufferSize());
@@ -112,17 +106,17 @@ class TcpSocket implements Transport, IpSocketContext {
 
   @Override
   public boolean isConnected() {
-    return (STATUS.get(this) & CONNECTED) != 0;
+    return (TcpSocket.STATUS.get(this) & TcpSocket.CONNECTED) != 0;
   }
 
   @Override
   public boolean isClient() {
-    return (STATUS.get(this) & CLIENT) != 0;
+    return (TcpSocket.STATUS.get(this) & TcpSocket.CLIENT) != 0;
   }
 
   @Override
   public boolean isServer() {
-    return (STATUS.get(this) & SERVER) != 0;
+    return (TcpSocket.STATUS.get(this) & TcpSocket.SERVER) != 0;
   }
 
   @Override
@@ -192,12 +186,12 @@ class TcpSocket implements Transport, IpSocketContext {
       oldSocket.willBecome(newSocket);
     }
 
-    final int status = STATUS.get(this);
+    final int status = TcpSocket.STATUS.get(this);
     newSocket.setIpSocketContext(this);
     this.socket = newSocket;
-    if ((status & CONNECTED) != 0) {
+    if ((status & TcpSocket.CONNECTED) != 0) {
       newSocket.didConnect();
-    } else if ((status & CONNECTING) != 0) {
+    } else if ((status & TcpSocket.CONNECTING) != 0) {
       newSocket.willConnect();
     }
 
@@ -220,14 +214,14 @@ class TcpSocket implements Transport, IpSocketContext {
   public void doConnect() throws IOException {
     try {
       this.channel.finishConnect();
-      didConnect();
+      this.didConnect();
     } catch (ConnectException cause) {
-      didClose();
+      this.didClose();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
-      didFail(cause);
+      this.didFail(cause);
     }
   }
 
@@ -248,10 +242,10 @@ class TcpSocket implements Transport, IpSocketContext {
 
   void willConnect() {
     do {
-      final int oldStatus = STATUS.get(this);
-      if ((status & CONNECTING) == 0) {
-        final int newStatus = oldStatus | CONNECTING;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+      final int oldStatus = TcpSocket.STATUS.get(this);
+      if ((oldStatus & TcpSocket.CONNECTING) == 0) {
+        final int newStatus = oldStatus | TcpSocket.CONNECTING;
+        if (TcpSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.socket.willConnect();
           break;
         }
@@ -263,10 +257,10 @@ class TcpSocket implements Transport, IpSocketContext {
 
   void didConnect() {
     do {
-      final int oldStatus = STATUS.get(this);
-      if ((oldStatus & (CONNECTING | CONNECTED)) != CONNECTED) {
-        final int newStatus = oldStatus & ~CONNECTING | CONNECTED;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+      final int oldStatus = TcpSocket.STATUS.get(this);
+      if ((oldStatus & (TcpSocket.CONNECTING | TcpSocket.CONNECTED)) != TcpSocket.CONNECTED) {
+        final int newStatus = oldStatus & ~TcpSocket.CONNECTING | TcpSocket.CONNECTED;
+        if (TcpSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.socket.didConnect();
           break;
         }
@@ -279,10 +273,10 @@ class TcpSocket implements Transport, IpSocketContext {
   @Override
   public void didClose() {
     do {
-      final int oldStatus = STATUS.get(this);
-      if ((status & (CONNECTING | CONNECTED)) != 0) {
-        final int newStatus = oldStatus & ~(CONNECTING | CONNECTED);
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+      final int oldStatus = TcpSocket.STATUS.get(this);
+      if ((oldStatus & (TcpSocket.CONNECTING | TcpSocket.CONNECTED)) != 0) {
+        final int newStatus = oldStatus & ~(TcpSocket.CONNECTING | TcpSocket.CONNECTED);
+        if (TcpSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.socket.didDisconnect();
           break;
         }
@@ -304,18 +298,26 @@ class TcpSocket implements Transport, IpSocketContext {
       try {
         this.socket.didFail(error);
       } catch (Throwable cause) {
-        if (!Conts.isNonFatal(cause)) {
+        if (!Cont.isNonFatal(cause)) {
           throw cause;
         }
         failure = cause;
       }
     }
-    close();
+    this.close();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
       throw (Error) failure;
     }
   }
+
+  static final int CLIENT = 1 << 0;
+  static final int SERVER = 1 << 1;
+  static final int CONNECTING = 1 << 2;
+  static final int CONNECTED = 1 << 3;
+
+  static final AtomicIntegerFieldUpdater<TcpSocket> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(TcpSocket.class, "status");
 
 }

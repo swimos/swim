@@ -33,6 +33,11 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
     this.step = step;
   }
 
+  @Override
+  public Parser<HashTrieMap<String, String>> feed(Input input) {
+    return ParamMapParser.parse(input, this.key, this.value, this.params, this.step);
+  }
+
   static Parser<HashTrieMap<String, String>> parse(Input input, StringBuilder key, StringBuilder value,
                                                    HashTrieMap<String, String> params, int step) {
     int c = 0;
@@ -53,7 +58,7 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
           if (params == null) {
             params = HashTrieMap.empty();
           }
-          return done(params);
+          return Parser.done(params);
         }
       }
       if (step == 2) {
@@ -72,10 +77,10 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
             key.appendCodePoint(c);
             step = 3;
           } else {
-            return error(Diagnostic.expected("param name", input));
+            return Parser.error(Diagnostic.expected("param name", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("param name", input));
+          return Parser.error(Diagnostic.expected("param name", input));
         }
       }
       if (step == 3) {
@@ -91,7 +96,7 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
         if (input.isCont()) {
           step = 4;
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
@@ -107,7 +112,7 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
           input = input.step();
           step = 5;
         } else if (!input.isEmpty()) {
-          return error(Diagnostic.expected('=', input));
+          return Parser.error(Diagnostic.expected('=', input));
         }
       }
       if (step == 5) {
@@ -130,7 +135,7 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
             step = 6;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 6) {
@@ -141,10 +146,10 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
             value.appendCodePoint(c);
             step = 7;
           } else {
-            return error(Diagnostic.expected("param value", input));
+            return Parser.error(Diagnostic.expected("param value", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("param value", input));
+          return Parser.error(Diagnostic.expected("param value", input));
         }
       }
       if (step == 7) {
@@ -193,10 +198,10 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
             input = input.step();
             step = 9;
           } else {
-            return error(Diagnostic.unexpected(input));
+            return Parser.error(Diagnostic.unexpected(input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 9) {
@@ -208,35 +213,30 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
             step = 8;
             continue;
           } else {
-            return error(Diagnostic.expected("escape character", input));
+            return Parser.error(Diagnostic.expected("escape character", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("escape character", input));
+          return Parser.error(Diagnostic.expected("escape character", input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ParamMapParser(key, value, params, step);
   }
 
   static Parser<HashTrieMap<String, String>> parse(Input input) {
-    return parse(input, null, null, null, 1);
+    return ParamMapParser.parse(input, null, null, null, 1);
   }
 
   static Parser<HashTrieMap<String, String>> parseRest(Input input) {
-    return parse(input, null, null, null, 2);
+    return ParamMapParser.parse(input, null, null, null, 2);
   }
 
   static Parser<HashTrieMap<String, String>> parseRest(Input input, StringBuilder key) {
-    return parse(input, key, null, null, 3);
-  }
-
-  @Override
-  public Parser<HashTrieMap<String, String>> feed(Input input) {
-    return parse(input, this.key, this.value, this.params, this.step);
+    return ParamMapParser.parse(input, key, null, null, 3);
   }
 
 }

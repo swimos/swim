@@ -26,7 +26,8 @@ final class MqttPubAckDecoder extends Decoder<MqttPubAck> {
   final int remaining;
   final int step;
 
-  MqttPubAckDecoder(MqttDecoder mqtt, int packetFlags, int packetId, int remaining, int step) {
+  MqttPubAckDecoder(MqttDecoder mqtt, int packetFlags, int packetId,
+                    int remaining, int step) {
     this.mqtt = mqtt;
     this.packetFlags = packetFlags;
     this.packetId = packetId;
@@ -38,8 +39,15 @@ final class MqttPubAckDecoder extends Decoder<MqttPubAck> {
     this(mqtt, 0, 0, 0, 1);
   }
 
+  @Override
+  public Decoder<MqttPubAck> feed(InputBuffer input) {
+    return MqttPubAckDecoder.decode(input, this.mqtt, this.packetFlags,
+                                    this.packetId, this.remaining, this.step);
+  }
+
   static Decoder<MqttPubAck> decode(InputBuffer input, MqttDecoder mqtt,
-                                    int packetFlags, int packetId, int remaining, int step) {
+                                    int packetFlags, int packetId,
+                                    int remaining, int step) {
     if (step == 1 && input.isCont()) {
       packetFlags = input.head() & 0x0f;
       input = input.step();
@@ -55,7 +63,7 @@ final class MqttPubAckDecoder extends Decoder<MqttPubAck> {
       } else if (step < 5) {
         step += 1;
       } else {
-        return error(new MqttException("packet length too long"));
+        return Decoder.error(new MqttException("packet length too long"));
       }
     }
     if (step == 6 && remaining > 0 && input.isCont()) {
@@ -71,25 +79,20 @@ final class MqttPubAckDecoder extends Decoder<MqttPubAck> {
       step = 8;
     }
     if (step == 8 && remaining == 0) {
-      return done(mqtt.pubAck(packetFlags, packetId));
+      return Decoder.done(mqtt.pubAck(packetFlags, packetId));
     }
     if (remaining < 0) {
-      return error(new MqttException("packet length too short"));
+      return Decoder.error(new MqttException("packet length too short"));
     } else if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new MqttPubAckDecoder(mqtt, packetFlags, packetId, remaining, step);
   }
 
   static Decoder<MqttPubAck> decode(InputBuffer input, MqttDecoder mqtt) {
-    return decode(input, mqtt, 0, 0, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttPubAck> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.packetId, this.remaining, this.step);
+    return MqttPubAckDecoder.decode(input, mqtt, 0, 0, 0, 1);
   }
 
 }

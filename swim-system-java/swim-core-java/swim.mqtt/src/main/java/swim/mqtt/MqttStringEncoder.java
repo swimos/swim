@@ -37,6 +37,17 @@ final class MqttStringEncoder extends Encoder<String, String> {
     this(string, null, 0, 1);
   }
 
+  @Override
+  public Encoder<String, String> feed(String string) {
+    return new MqttStringEncoder(string, null, 0, 1);
+  }
+
+  @Override
+  public Encoder<String, String> pull(OutputBuffer<?> output) {
+    return MqttStringEncoder.encode(output, this.string, this.encoder,
+                                    this.length, this.step);
+  }
+
   static int sizeOf(String string) {
     return 2 + Utf8.sizeOf(string);
   }
@@ -46,7 +57,7 @@ final class MqttStringEncoder extends Encoder<String, String> {
     if (step == 1 && output.isCont()) {
       length = Utf8.sizeOf(string);
       if (length > 65535) {
-        return error(new MqttException("string too long (" + length + " bytes)"));
+        return Encoder.error(new MqttException("string too long (" + length + " bytes)"));
       }
       output = output.write(length >>> 8);
       step = 2;
@@ -62,31 +73,21 @@ final class MqttStringEncoder extends Encoder<String, String> {
         encoder = encoder.pull(output);
       }
       if (encoder.isDone()) {
-        return done(string);
+        return Encoder.done(string);
       } else if (encoder.isError()) {
         return encoder.asError();
       }
     }
     if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new MqttStringEncoder(string, encoder, length, step);
   }
 
   static Encoder<String, String> encode(OutputBuffer<?> output, String string) {
-    return encode(output, string, null, 0, 1);
-  }
-
-  @Override
-  public Encoder<String, String> feed(String string) {
-    return new MqttStringEncoder(string, null, 0, 1);
-  }
-
-  @Override
-  public Encoder<String, String> pull(OutputBuffer<?> output) {
-    return encode(output, this.string, this.encoder, this.length, this.step);
+    return MqttStringEncoder.encode(output, string, null, 0, 1);
   }
 
 }

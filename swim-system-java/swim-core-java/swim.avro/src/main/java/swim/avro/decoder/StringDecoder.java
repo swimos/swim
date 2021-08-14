@@ -43,6 +43,12 @@ final class StringDecoder<T> extends Decoder<T> {
     this(type, 0L, 0, null, 1);
   }
 
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return StringDecoder.decode(input, this.type, this.length, this.shift,
+                                this.parser, this.step);
+  }
+
   static <T> Decoder<T> decode(InputBuffer input, AvroStringType<T> type, long length,
                                int shift, Parser<T> parser, int step) {
     if (step == 1) {
@@ -52,7 +58,7 @@ final class StringDecoder<T> extends Decoder<T> {
           input = input.step();
           length |= (long) (b & 0x7f) << shift;
         } else {
-          return error(new DecoderException("string length overflow"));
+          return Decoder.error(new DecoderException("string length overflow"));
         }
         if ((b & 0x80) == 0) {
           length = (length >>> 1) ^ (length << 63 >> 63);
@@ -87,27 +93,22 @@ final class StringDecoder<T> extends Decoder<T> {
         if (length == 0L) {
           return parser;
         } else {
-          return error(new DecoderException("unconsumed input"));
+          return Decoder.error(new DecoderException("unconsumed input"));
         }
       } else if (parser.isError()) {
         return parser.asError();
       }
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new StringDecoder<T>(type, length, shift, parser, step);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, AvroStringType<T> type) {
-    return decode(input, type, 0L, 0, null, 1);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.length, this.shift, this.parser, this.step);
+    return StringDecoder.decode(input, type, 0L, 0, null, 1);
   }
 
 }

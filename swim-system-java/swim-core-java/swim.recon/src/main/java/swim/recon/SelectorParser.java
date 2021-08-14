@@ -38,7 +38,8 @@ final class SelectorParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.selector, this.valueParser, this.step);
+    return SelectorParser.parse(input, this.recon, this.builder, this.selector,
+                                this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -60,7 +61,7 @@ final class SelectorParser<I, V> extends Parser<V> {
         }
         step = 2;
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('$', input));
+        return Parser.error(Diagnostic.expected('$', input));
       }
     }
     if (step == 2) {
@@ -85,7 +86,7 @@ final class SelectorParser<I, V> extends Parser<V> {
           step = 3;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     do {
@@ -147,10 +148,10 @@ final class SelectorParser<I, V> extends Parser<V> {
             selector = recon.values(selector);
             step = 10;
           } else {
-            return error(Diagnostic.expected('*', input));
+            return Parser.error(Diagnostic.expected('*', input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected('*', input));
+          return Parser.error(Diagnostic.expected('*', input));
         }
       }
       if (step == 7) {
@@ -197,10 +198,10 @@ final class SelectorParser<I, V> extends Parser<V> {
             valueParser = null;
             step = 10;
           } else {
-            return error(Diagnostic.expected(']', input));
+            return Parser.error(Diagnostic.expected(']', input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected(']', input));
+          return Parser.error(Diagnostic.expected(']', input));
         }
       }
       if (step == 10) {
@@ -219,16 +220,16 @@ final class SelectorParser<I, V> extends Parser<V> {
             step = 11;
           } else if (builder != null) {
             builder.add(recon.item(selector));
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           } else {
-            return done(selector);
+            return Parser.done(selector);
           }
         } else if (input.isDone()) {
           if (builder != null) {
             builder.add(recon.item(selector));
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           } else {
-            return done(selector);
+            return Parser.done(selector);
           }
         }
       }
@@ -252,19 +253,19 @@ final class SelectorParser<I, V> extends Parser<V> {
             continue;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new SelectorParser<I, V>(recon, builder, selector, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, null, 1);
+    return SelectorParser.parse(input, recon, builder, null, null, 1);
   }
 
 }

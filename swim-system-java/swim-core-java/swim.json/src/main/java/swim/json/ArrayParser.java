@@ -37,6 +37,11 @@ final class ArrayParser<I, V> extends Parser<V> {
     this(json, null, null, 1);
   }
 
+  @Override
+  public Parser<V> feed(Input input) {
+    return ArrayParser.parse(input, this.json, this.builder, this.valueParser, this.step);
+  }
+
   static <I, V> Parser<V> parse(Input input, JsonParser<I, V> json, Builder<I, V> builder,
                                 Parser<V> valueParser, int step) {
     int c = 0;
@@ -54,10 +59,10 @@ final class ArrayParser<I, V> extends Parser<V> {
           input = input.step();
           step = 2;
         } else {
-          return error(Diagnostic.expected('[', input));
+          return Parser.error(Diagnostic.expected('[', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('[', input));
+        return Parser.error(Diagnostic.expected('[', input));
       }
     }
     if (step == 2) {
@@ -75,12 +80,12 @@ final class ArrayParser<I, V> extends Parser<V> {
         }
         if (c == ']') {
           input = input.step();
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         } else {
           step = 3;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected(']', input));
+        return Parser.error(Diagnostic.expected(']', input));
       }
     }
     while (step >= 3 && !input.isEmpty()) {
@@ -116,30 +121,25 @@ final class ArrayParser<I, V> extends Parser<V> {
             step = 3;
           } else if (c == ']') {
             input = input.step();
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           } else {
-            return error(Diagnostic.expected("',' or ']'", input));
+            return Parser.error(Diagnostic.expected("',' or ']'", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected(']', input));
+          return Parser.error(Diagnostic.expected(']', input));
         } else {
           break;
         }
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ArrayParser<I, V>(json, builder, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, JsonParser<I, V> json) {
-    return parse(input, json, null, null, 1);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.json, this.builder, this.valueParser, this.step);
+    return ArrayParser.parse(input, json, null, null, 1);
   }
 
 }

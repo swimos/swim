@@ -26,17 +26,6 @@ import swim.util.Murmur3;
 
 public final class IdentitySelector extends Selector {
 
-  private static final IdentitySelector IDENTITY = new IdentitySelector();
-  private static Selector keys;
-  private static Selector values;
-  private static Selector children;
-  private static Selector descendants;
-  private static int hashSeed;
-
-  public static IdentitySelector identity() {
-    return IDENTITY;
-  }
-
   @Override
   public Selector then() {
     return this;
@@ -94,34 +83,34 @@ public final class IdentitySelector extends Selector {
 
   @Override
   public Selector keys() {
-    if (keys == null) {
-      keys = new KeysSelector(this);
+    if (IdentitySelector.keys == null) {
+      IdentitySelector.keys = new KeysSelector(this);
     }
-    return keys;
+    return IdentitySelector.keys;
   }
 
   @Override
   public Selector values() {
-    if (values == null) {
-      values = new ValuesSelector(this);
+    if (IdentitySelector.values == null) {
+      IdentitySelector.values = new ValuesSelector(this);
     }
-    return values;
+    return IdentitySelector.values;
   }
 
   @Override
   public Selector children() {
-    if (children == null) {
-      children = new ChildrenSelector(this);
+    if (IdentitySelector.children == null) {
+      IdentitySelector.children = new ChildrenSelector(this);
     }
-    return children;
+    return IdentitySelector.children;
   }
 
   @Override
   public Selector descendants() {
-    if (descendants == null) {
-      descendants = new DescendantsSelector(this);
+    if (IdentitySelector.descendants == null) {
+      IdentitySelector.descendants = new DescendantsSelector(this);
     }
-    return descendants;
+    return IdentitySelector.descendants;
   }
 
   @Override
@@ -131,7 +120,7 @@ public final class IdentitySelector extends Selector {
 
   @Override
   protected int compareTo(Selector that) {
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   @Override
@@ -139,17 +128,30 @@ public final class IdentitySelector extends Selector {
     return this == other;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(IdentitySelector.class);
+    if (IdentitySelector.hashSeed == 0) {
+      IdentitySelector.hashSeed = Murmur3.seed(IdentitySelector.class);
     }
-    return hashSeed;
+    return IdentitySelector.hashSeed;
   }
 
   @Override
-  public void debugThen(Output<?> output) {
-    // nop
+  public <T> Output<T> debugThen(Output<T> output) {
+    return output; // blank
+  }
+
+  private static Selector keys;
+  private static Selector values;
+  private static Selector children;
+  private static Selector descendants;
+
+  private static final IdentitySelector IDENTITY = new IdentitySelector();
+
+  public static IdentitySelector identity() {
+    return IdentitySelector.IDENTITY;
   }
 
 }

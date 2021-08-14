@@ -66,23 +66,23 @@ public abstract class AbstractInlet<I> implements Inlet<I> {
   @Override
   public void decohereOutput() {
     if (this.version >= 0) {
-      willDecohereOutput();
+      this.willDecohereOutput();
       this.version = -1;
-      onDecohereOutput();
-      didDecohereOutput();
+      this.onDecohereOutput();
+      this.didDecohereOutput();
     }
   }
 
   @Override
   public void recohereOutput(int version) {
     if (this.version < 0) {
-      willRecohereOutput(version);
+      this.willRecohereOutput(version);
       this.version = version;
       if (this.input != null) {
         this.input.recohereInput(version);
       }
-      onRecohereOutput(version);
-      didRecohereOutput(version);
+      this.onRecohereOutput(version);
+      this.didRecohereOutput(version);
     }
   }
 

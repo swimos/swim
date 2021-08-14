@@ -35,6 +35,11 @@ final class EnumDecoder<T> extends Decoder<T> {
     this(type, 0, 0);
   }
 
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return EnumDecoder.decode(input, this.type, this.ordinal, this.shift);
+  }
+
   @SuppressWarnings("unchecked")
   static <T> Decoder<T> decode(InputBuffer input, AvroEnumType<T> type, int ordinal, int shift) {
     while (input.isCont()) {
@@ -43,29 +48,24 @@ final class EnumDecoder<T> extends Decoder<T> {
         input = input.step();
         ordinal |= (b & 0x7f) << shift;
       } else {
-        return error(new DecoderException("ordinal overflow"));
+        return Decoder.error(new DecoderException("ordinal overflow"));
       }
       if ((b & 0x80) == 0) {
         ordinal = (ordinal >>> 1) ^ (ordinal << 31 >> 31);
-        return done(type.cast(ordinal));
+        return Decoder.done(type.cast(ordinal));
       }
       shift += 7;
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new EnumDecoder<T>(type, ordinal, shift);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, AvroEnumType<T> type) {
-    return decode(input, type, 0, 0);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.ordinal, this.shift);
+    return EnumDecoder.decode(input, type, 0, 0);
   }
 
 }

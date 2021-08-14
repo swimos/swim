@@ -48,10 +48,10 @@ public class WsSettings extends WsEngineSettings {
   }
 
   public WsSettings httpSettings(HttpSettings httpSettings) {
-    return copy(httpSettings, this.maxFrameSize, this.maxMessageSize,
-                this.serverCompressionLevel, this.clientCompressionLevel,
-                this.serverNoContextTakeover, this.clientNoContextTakeover,
-                this.serverMaxWindowBits, this.clientMaxWindowBits);
+    return this.copy(httpSettings, this.maxFrameSize, this.maxMessageSize,
+                     this.serverCompressionLevel, this.clientCompressionLevel,
+                     this.serverNoContextTakeover, this.clientNoContextTakeover,
+                     this.serverMaxWindowBits, this.clientMaxWindowBits);
   }
 
   public final IpSettings ipSettings() {
@@ -59,7 +59,7 @@ public class WsSettings extends WsEngineSettings {
   }
 
   public WsSettings ipSettings(IpSettings ipSettings) {
-    return httpSettings(this.httpSettings.ipSettings(ipSettings));
+    return this.httpSettings(this.httpSettings.ipSettings(ipSettings));
   }
 
   public final TlsSettings tlsSettings() {
@@ -67,7 +67,7 @@ public class WsSettings extends WsEngineSettings {
   }
 
   public WsSettings tlsSettings(TlsSettings tlsSettings) {
-    return httpSettings(this.httpSettings.tlsSettings(tlsSettings));
+    return this.httpSettings(this.httpSettings.tlsSettings(tlsSettings));
   }
 
   public final TcpSettings tcpSettings() {
@@ -75,14 +75,14 @@ public class WsSettings extends WsEngineSettings {
   }
 
   public WsSettings tcpSettings(TcpSettings tcpSettings) {
-    return httpSettings(this.httpSettings.tcpSettings(tcpSettings));
+    return this.httpSettings(this.httpSettings.tcpSettings(tcpSettings));
   }
 
   public WsSettings engineSettings(WsEngineSettings engineSettings) {
-    return copy(engineSettings.maxFrameSize(), engineSettings.maxMessageSize(),
-                engineSettings.serverCompressionLevel(), engineSettings.clientCompressionLevel(),
-                engineSettings.serverNoContextTakeover(), engineSettings.clientNoContextTakeover(),
-                engineSettings.serverMaxWindowBits(), engineSettings.clientMaxWindowBits());
+    return this.copy(engineSettings.maxFrameSize(), engineSettings.maxMessageSize(),
+                     engineSettings.serverCompressionLevel(), engineSettings.clientCompressionLevel(),
+                     engineSettings.serverNoContextTakeover(), engineSettings.clientNoContextTakeover(),
+                     engineSettings.serverMaxWindowBits(), engineSettings.clientMaxWindowBits());
   }
 
   @Override
@@ -132,7 +132,7 @@ public class WsSettings extends WsEngineSettings {
 
   @Override
   public Value toValue() {
-    return form().mold(this).toValue();
+    return WsSettings.form().mold(this).toValue();
   }
 
   protected WsSettings copy(HttpSettings httpSettings, int maxFrameSize, int maxMessageSize,
@@ -150,10 +150,10 @@ public class WsSettings extends WsEngineSettings {
                             int serverCompressionLevel, int clientCompressionLevel,
                             boolean serverNoContextTakeover, boolean clientNoContextTakeover,
                             int serverMaxWindowBits, int clientMaxWindowBits) {
-    return copy(this.httpSettings, maxFrameSize, maxMessageSize,
-                serverCompressionLevel, clientCompressionLevel,
-                serverNoContextTakeover, clientNoContextTakeover,
-                serverMaxWindowBits, clientMaxWindowBits);
+    return this.copy(this.httpSettings, maxFrameSize, maxMessageSize,
+                     serverCompressionLevel, clientCompressionLevel,
+                     serverNoContextTakeover, clientNoContextTakeover,
+                     serverMaxWindowBits, clientMaxWindowBits);
   }
 
   public boolean canEqual(Object other) {
@@ -180,86 +180,88 @@ public class WsSettings extends WsEngineSettings {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(WsSettings.class);
+    if (WsSettings.hashSeed == 0) {
+      WsSettings.hashSeed = Murmur3.seed(WsSettings.class);
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed, this.httpSettings.hashCode()),
+        Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(WsSettings.hashSeed, this.httpSettings.hashCode()),
         this.maxFrameSize), this.maxMessageSize), this.serverCompressionLevel), this.clientCompressionLevel),
         Murmur3.hash(this.serverNoContextTakeover)), Murmur3.hash(this.clientNoContextTakeover)),
         this.serverMaxWindowBits), this.clientMaxWindowBits));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("WsSettings").write('.').write("standard").write('(').write(')')
-        .write('.').write("httpSettings").write('(').debug(this.httpSettings).write(')')
-        .write('.').write("maxFrameSize").write('(').debug(this.maxFrameSize).write(')')
-        .write('.').write("maxMessageSize").write('(').debug(this.maxMessageSize).write(')')
-        .write('.').write("serverCompressionLevel").write('(').debug(this.serverCompressionLevel).write(')')
-        .write('.').write("clientCompressionLevel").write('(').debug(this.clientCompressionLevel).write(')')
-        .write('.').write("serverNoContextTakeover").write('(').debug(this.serverNoContextTakeover).write(')')
-        .write('.').write("clientNoContextTakeover").write('(').debug(this.clientNoContextTakeover).write(')')
-        .write('.').write("serverMaxWindowBits").write('(').debug(this.serverMaxWindowBits).write(')')
-        .write('.').write("clientMaxWindowBits").write('(').debug(this.clientMaxWindowBits).write(')');
+                   .write('.').write("httpSettings").write('(').debug(this.httpSettings).write(')')
+                   .write('.').write("maxFrameSize").write('(').debug(this.maxFrameSize).write(')')
+                   .write('.').write("maxMessageSize").write('(').debug(this.maxMessageSize).write(')')
+                   .write('.').write("serverCompressionLevel").write('(').debug(this.serverCompressionLevel).write(')')
+                   .write('.').write("clientCompressionLevel").write('(').debug(this.clientCompressionLevel).write(')')
+                   .write('.').write("serverNoContextTakeover").write('(').debug(this.serverNoContextTakeover).write(')')
+                   .write('.').write("clientNoContextTakeover").write('(').debug(this.clientNoContextTakeover).write(')')
+                   .write('.').write("serverMaxWindowBits").write('(').debug(this.serverMaxWindowBits).write(')')
+                   .write('.').write("clientMaxWindowBits").write('(').debug(this.clientMaxWindowBits).write(')');
+    return output;
   }
 
-  private static int hashSeed;
   private static WsSettings standard;
-  private static Form<WsSettings> form;
 
   public static WsSettings standard() {
-    if (standard == null) {
+    if (WsSettings.standard == null) {
       final WsEngineSettings engineSettings = WsEngineSettings.standard();
-      standard = new WsSettings(HttpSettings.standard(),
-          engineSettings.maxFrameSize(), engineSettings.maxMessageSize(),
-          engineSettings.serverCompressionLevel(), engineSettings.clientCompressionLevel(),
-          engineSettings.serverNoContextTakeover(), engineSettings.clientNoContextTakeover(),
-          engineSettings.serverMaxWindowBits(), engineSettings.clientMaxWindowBits());
+      WsSettings.standard = new WsSettings(HttpSettings.standard(), engineSettings.maxFrameSize(), engineSettings.maxMessageSize(),
+                                           engineSettings.serverCompressionLevel(), engineSettings.clientCompressionLevel(),
+                                           engineSettings.serverNoContextTakeover(), engineSettings.clientNoContextTakeover(),
+                                           engineSettings.serverMaxWindowBits(), engineSettings.clientMaxWindowBits());
     }
-    return standard;
+    return WsSettings.standard;
   }
 
   public static WsSettings noCompression() {
-    return standard().engineSettings(WsEngineSettings.noCompression());
+    return WsSettings.standard().engineSettings(WsEngineSettings.noCompression());
   }
 
   public static WsSettings defaultCompression() {
-    return standard().engineSettings(WsEngineSettings.defaultCompression());
+    return WsSettings.standard().engineSettings(WsEngineSettings.defaultCompression());
   }
 
   public static WsSettings fastestCompression() {
-    return standard().engineSettings(WsEngineSettings.fastestCompression());
+    return WsSettings.standard().engineSettings(WsEngineSettings.fastestCompression());
   }
 
   public static WsSettings bestCompression() {
-    return standard().engineSettings(WsEngineSettings.bestCompression());
+    return WsSettings.standard().engineSettings(WsEngineSettings.bestCompression());
   }
 
-  public static WsSettings from(HttpSettings httpSettings) {
-    return standard().httpSettings(httpSettings);
+  public static WsSettings create(HttpSettings httpSettings) {
+    return WsSettings.standard().httpSettings(httpSettings);
   }
 
-  public static WsSettings from(IpSettings ipSettings) {
-    return standard().ipSettings(ipSettings);
+  public static WsSettings create(IpSettings ipSettings) {
+    return WsSettings.standard().ipSettings(ipSettings);
   }
 
   public static WsSettings from(WsEngineSettings engineSettings) {
     if (engineSettings instanceof WsSettings) {
       return (WsSettings) engineSettings;
     } else {
-      return standard().engineSettings(engineSettings);
+      return WsSettings.standard().engineSettings(engineSettings);
     }
   }
 
+  private static Form<WsSettings> form;
+
   @Kind
   public static Form<WsSettings> form() {
-    if (form == null) {
-      form = new WsSettingsForm();
+    if (WsSettings.form == null) {
+      WsSettings.form = new WsSettingsForm();
     }
-    return form;
+    return WsSettings.form;
   }
 
 }

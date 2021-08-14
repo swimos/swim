@@ -32,7 +32,7 @@ final class ValuesSelectorWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.then, this.step);
+    return ValuesSelectorWriter.write(output, this.recon, this.then, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, V then) {
@@ -42,8 +42,7 @@ final class ValuesSelectorWriter<I, V> extends Writer<Object, Object> {
   }
 
   @SuppressWarnings("unchecked")
-  static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon,
-                                             V then, int step) {
+  static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon, V then, int step) {
     if (step == 1 && output.isCont()) {
       output = output.write('$');
       step = 3;
@@ -60,19 +59,19 @@ final class ValuesSelectorWriter<I, V> extends Writer<Object, Object> {
       return (Writer<Object, Object>) recon.writeThen(then, output);
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new ValuesSelectorWriter<I, V>(recon, then, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon, V then) {
-    return write(output, recon, then, 1);
+    return ValuesSelectorWriter.write(output, recon, then, 1);
   }
 
   static <I, V> Writer<Object, Object> writeThen(Output<?> output, ReconWriter<I, V> recon, V then) {
-    return write(output, recon, then, 2);
+    return ValuesSelectorWriter.write(output, recon, then, 2);
   }
 
 }

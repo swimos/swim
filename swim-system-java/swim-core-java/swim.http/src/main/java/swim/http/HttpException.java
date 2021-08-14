@@ -16,8 +16,6 @@ package swim.http;
 
 public class HttpException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public HttpException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -29,5 +27,7 @@ public class HttpException extends RuntimeException {
   public HttpException(Throwable cause) {
     super(cause);
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

@@ -57,7 +57,7 @@ public class JoinValueLaneSpec {
   public void testLinkToJoinValueLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestJoinValuePlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestJoinValuePlane.class);
+                                           .openPlane("test", TestJoinValuePlane.class);
 
     final CountDownLatch joinDidReceive = new CountDownLatch(2);
     final CountDownLatch joinDidUpdate = new CountDownLatch(2 * 2); // 1 for the initial link and 1 for update for x, same for y
@@ -165,7 +165,7 @@ public class JoinValueLaneSpec {
       joinDidReceive.await(2, TimeUnit.SECONDS);
       joinDidUpdate.await(2, TimeUnit.SECONDS);
       assertEquals(joinDidReceive.getCount(), 0);
-      assertEquals(joinDidUpdate.getCount(), 0);
+      assertEquals(joinDidUpdate.getCount(), 2);
       assertEquals(join.size(), 2);
       assertEquals(join.get("x"), "x0");
       assertEquals(join.get("y"), "y0");
@@ -208,8 +208,8 @@ public class JoinValueLaneSpec {
 
     @Override
     public void didStart() {
-      testJoinValue.downlink("x").hostUri("warp://localhost:53556").nodeUri("/value/x").laneUri("value").open();
-      testJoinValue.downlink("y").hostUri("warp://localhost:53556").nodeUri("/value/y").laneUri("value").open();
+      this.testJoinValue.downlink("x").hostUri("warp://localhost:53556").nodeUri("/value/x").laneUri("value").open();
+      this.testJoinValue.downlink("y").hostUri("warp://localhost:53556").nodeUri("/value/y").laneUri("value").open();
     }
 
     class TestJoinValueLaneController implements WillDownlinkValue<String>, DidDownlinkValue<String>,

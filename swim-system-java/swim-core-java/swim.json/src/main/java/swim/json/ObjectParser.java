@@ -27,8 +27,8 @@ final class ObjectParser<I, V> extends Parser<V> {
   final Parser<V> valueParser;
   final int step;
 
-  ObjectParser(JsonParser<I, V> json, Builder<I, V> builder, Parser<V> keyParser,
-               Parser<V> valueParser, int step) {
+  ObjectParser(JsonParser<I, V> json, Builder<I, V> builder,
+               Parser<V> keyParser, Parser<V> valueParser, int step) {
     this.json = json;
     this.builder = builder;
     this.keyParser = keyParser;
@@ -38,6 +38,12 @@ final class ObjectParser<I, V> extends Parser<V> {
 
   ObjectParser(JsonParser<I, V> json) {
     this(json, null, null, null, 1);
+  }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return ObjectParser.parse(input, this.json, this.builder,
+                              this.keyParser, this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, JsonParser<I, V> json, Builder<I, V> builder,
@@ -57,10 +63,10 @@ final class ObjectParser<I, V> extends Parser<V> {
           input = input.step();
           step = 2;
         } else {
-          return error(Diagnostic.expected('{', input));
+          return Parser.error(Diagnostic.expected('{', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('{', input));
+        return Parser.error(Diagnostic.expected('{', input));
       }
     }
     if (step == 2) {
@@ -78,12 +84,12 @@ final class ObjectParser<I, V> extends Parser<V> {
         }
         if (c == '}') {
           input = input.step();
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         } else {
           step = 3;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('}', input));
+        return Parser.error(Diagnostic.expected('}', input));
       }
     }
     while (step >= 3 && !input.isEmpty()) {
@@ -116,10 +122,10 @@ final class ObjectParser<I, V> extends Parser<V> {
             input = input.step();
             step = 5;
           } else {
-            return error(Diagnostic.expected(':', input));
+            return Parser.error(Diagnostic.expected(':', input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected(':', input));
+          return Parser.error(Diagnostic.expected(':', input));
         } else {
           break;
         }
@@ -131,7 +137,7 @@ final class ObjectParser<I, V> extends Parser<V> {
         if (input.isCont()) {
           step = 6;
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("value", input));
+          return Parser.error(Diagnostic.expected("value", input));
         } else {
           break;
         }
@@ -169,30 +175,25 @@ final class ObjectParser<I, V> extends Parser<V> {
             step = 3;
           } else if (c == '}') {
             input = input.step();
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           } else {
-            return error(Diagnostic.expected("',' or '}'", input));
+            return Parser.error(Diagnostic.expected("',' or '}'", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected('}', input));
+          return Parser.error(Diagnostic.expected('}', input));
         } else {
           break;
         }
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ObjectParser<I, V>(json, builder, keyParser, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, JsonParser<I, V> json) {
-    return parse(input, json, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.json, this.builder, this.keyParser, this.valueParser, this.step);
+    return ObjectParser.parse(input, json, null, null, null, 1);
   }
 
 }

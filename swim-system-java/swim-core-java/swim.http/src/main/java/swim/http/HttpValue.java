@@ -24,21 +24,12 @@ import swim.util.Murmur3;
 
 public final class HttpValue<T> extends HttpEntity<T> implements Debug {
 
-  private static int hashSeed;
   final T value;
   final MediaType mediaType;
 
   HttpValue(T value, MediaType mediaType) {
     this.value = value;
     this.mediaType = mediaType;
-  }
-
-  public static <T> HttpValue<T> from(T value, MediaType mediaType) {
-    return new HttpValue<T>(value, mediaType);
-  }
-
-  public static <T> HttpValue<T> from(T value) {
-    return new HttpValue<T>(value, null);
   }
 
   @Override
@@ -94,27 +85,38 @@ public final class HttpValue<T> extends HttpEntity<T> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(HttpValue.class);
+    if (HttpValue.hashSeed == 0) {
+      HttpValue.hashSeed = Murmur3.seed(HttpValue.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpValue.hashSeed,
         Murmur3.hash(this.value)), Murmur3.hash(this.mediaType)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("HttpValue").write('.').write("from").write('(').debug(this.value);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("HttpValue").write('.').write("create").write('(').debug(this.value);
     if (this.mediaType != null) {
       output = output.write(", ").debug(this.mediaType);
     }
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static <T> HttpValue<T> create(T value, MediaType mediaType) {
+    return new HttpValue<T>(value, mediaType);
+  }
+
+  public static <T> HttpValue<T> create(T value) {
+    return new HttpValue<T>(value, null);
   }
 
 }

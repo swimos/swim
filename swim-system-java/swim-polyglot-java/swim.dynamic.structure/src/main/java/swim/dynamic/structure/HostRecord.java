@@ -20,16 +20,16 @@ import swim.structure.Record;
 
 public final class HostRecord {
 
+  private HostRecord() {
+    // static
+  }
+
   public static final HostObjectType<Record> TYPE;
 
   static {
     final JavaHostClassType<Record> type = new JavaHostClassType<>(Record.class);
     TYPE = type;
     type.extendType(HostValue.TYPE);
-  }
-
-  private HostRecord() {
-    // static
   }
 
 }

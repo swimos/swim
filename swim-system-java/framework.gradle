@@ -3,7 +3,7 @@ apply from: 'swim-mesh-java/framework.gradle'
 apply from: 'swim-polyglot-java/framework.gradle'
 
 ext.includeSwimSystem = { frameworkDir ->
-  gradle.ext.swimSystemDir = frameworkDir
+  gradle.ext.swimRuntimeDir = frameworkDir
 
   if (!frameworkDir.equals(rootProject.projectDir)) {
     include 'swim-system'

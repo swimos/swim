@@ -24,22 +24,12 @@ final class InputParser<O> extends Parser<O> {
     this.parser = parser;
   }
 
-  static <O> Parser<O> parse(Input input, Parser<O> parser) {
-    parser = parser.feed(input);
-    if (!parser.isCont()) {
-      return parser;
-    } else if (input.isError()) {
-      return error(input.trap());
-    }
-    return new InputParser<O>(input, parser);
-  }
-
   @Override
   public Parser<O> feed(Input input) {
     if (this.input != null) {
       input = this.input.fork(input);
     }
-    return parse(input, this.parser);
+    return InputParser.parse(input, this.parser);
   }
 
   @Override
@@ -55,6 +45,16 @@ final class InputParser<O> extends Parser<O> {
   @Override
   public Throwable trap() {
     return this.parser.trap();
+  }
+
+  static <O> Parser<O> parse(Input input, Parser<O> parser) {
+    parser = parser.feed(input);
+    if (!parser.isCont()) {
+      return parser;
+    } else if (input.isError()) {
+      return Parser.error(input.trap());
+    }
+    return new InputParser<O>(input, parser);
   }
 
 }

@@ -36,7 +36,7 @@ final class InvokeOperatorWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.func, this.args, this.part, this.step);
+    return InvokeOperatorWriter.write(output, this.recon, this.func, this.args, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, V func, V args) {
@@ -82,19 +82,18 @@ final class InvokeOperatorWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 4 && output.isCont()) {
       output = output.write(')');
-      return done();
+      return Writer.done();
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new InvokeOperatorWriter<I, V>(recon, func, args, part, step);
   }
 
-  static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon,
-                                             V func, V args) {
-    return write(output, recon, func, args, null, 1);
+  static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon, V func, V args) {
+    return InvokeOperatorWriter.write(output, recon, func, args, null, 1);
   }
 
 }

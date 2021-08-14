@@ -36,6 +36,16 @@ final class EnvelopeEncoder extends Encoder<Envelope, Envelope> {
     this(null, null);
   }
 
+  @Override
+  public Encoder<Envelope, Envelope> pull(OutputBuffer<?> output) {
+    return EnvelopeEncoder.encode(output, this.envelope, this.input);
+  }
+
+  @Override
+  public Encoder<Envelope, Envelope> feed(Envelope envelope) {
+    return new EnvelopeEncoder(envelope);
+  }
+
   static Encoder<Envelope, Envelope> encode(OutputBuffer<?> output, Envelope envelope, Encoder<?, ?> input) {
     if (input == null) {
       input = Utf8.writeEncoded(envelope.reconWriter(), output);
@@ -43,23 +53,13 @@ final class EnvelopeEncoder extends Encoder<Envelope, Envelope> {
       input = input.pull(output);
     }
     if (input.isDone()) {
-      return done(envelope);
+      return Encoder.done(envelope);
     } else if (input.isError()) {
-      return error(input.trap());
+      return Encoder.error(input.trap());
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new EnvelopeEncoder(envelope, input);
-  }
-
-  @Override
-  public Encoder<Envelope, Envelope> pull(OutputBuffer<?> output) {
-    return encode(output, this.envelope, this.input);
-  }
-
-  @Override
-  public Encoder<Envelope, Envelope> feed(Envelope envelope) {
-    return new EnvelopeEncoder(envelope);
   }
 
 }

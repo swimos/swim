@@ -60,24 +60,24 @@ final class CsvQuotedInput extends Input {
 
   @Override
   public boolean isCont() {
-    return next() >= 0;
+    return this.next() >= 0;
   }
 
   @Override
   public boolean isEmpty() {
-    final int head = next();
+    final int head = this.next();
     return head == -1 && this.input.isEmpty() || head == -2;
   }
 
   @Override
   public boolean isDone() {
-    final int head = next();
+    final int head = this.next();
     return head == -1 && this.input.isDone() || head == -3 || head == -4;
   }
 
   @Override
   public boolean isError() {
-    final int head = next();
+    final int head = this.next();
     return head == -1 && this.input.isError();
   }
 
@@ -93,7 +93,7 @@ final class CsvQuotedInput extends Input {
 
   @Override
   public int head() {
-    final int head = next();
+    final int head = this.next();
     if (head >= 0) {
       return head;
     } else {
@@ -103,13 +103,13 @@ final class CsvQuotedInput extends Input {
 
   @Override
   public Input step() {
-    final int head = next();
+    final int head = this.next();
     if (head >= 0) {
       this.head = -1;
       return this;
     } else {
       final Throwable error = new InputException("invalid step");
-      return Input.error(error, id(), mark(), settings());
+      return Input.error(error, this.id(), this.mark(), this.settings());
     }
   }
 

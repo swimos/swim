@@ -28,58 +28,6 @@ final class UriQueryKeySet implements Set<String> {
     this.query = query;
   }
 
-  private static boolean containsAll(UriQuery query, HashSet<?> missing) {
-    while (!query.isEmpty() && !missing.isEmpty()) {
-      missing.remove(query.key());
-      query = query.tail();
-    }
-    return missing.isEmpty();
-  }
-
-  private static void toArray(UriQuery query, Object[] array) {
-    int i = 0;
-    while (!query.isEmpty()) {
-      array[i] = query.key();
-      query = query.tail();
-      i += 1;
-    }
-  }
-
-  private static boolean equals(UriQuery query, Set<?> that) {
-    while (!query.isEmpty()) {
-      if (!that.contains(query.key())) {
-        return false;
-      }
-      query = query.tail();
-    }
-    return true;
-  }
-
-  private static int hashCode(UriQuery query) {
-    int code = 0;
-    while (!query.isEmpty()) {
-      final String key = query.key();
-      code += (key == null ? 0 : key.hashCode());
-      query = query.tail();
-    }
-    return code;
-  }
-
-  private static String toString(UriQuery query) {
-    final StringBuilder s = new StringBuilder();
-    s.append('[');
-    if (!query.isEmpty()) {
-      s.append(String.valueOf(query.key()));
-      query = query.tail();
-      while (!query.isEmpty()) {
-        s.append(", ").append(String.valueOf(query.key()));
-        query = query.tail();
-      }
-    }
-    s.append(']');
-    return s.toString();
-  }
-
   @Override
   public boolean isEmpty() {
     return this.query.isEmpty();
@@ -101,6 +49,14 @@ final class UriQueryKeySet implements Set<String> {
       throw new NullPointerException();
     }
     return UriQueryKeySet.containsAll(this.query, new HashSet<Object>(keys));
+  }
+
+  private static boolean containsAll(UriQuery query, HashSet<?> missing) {
+    while (!query.isEmpty() && !missing.isEmpty()) {
+      missing.remove(query.key());
+      query = query.tail();
+    }
+    return missing.isEmpty();
   }
 
   @Override
@@ -140,7 +96,7 @@ final class UriQueryKeySet implements Set<String> {
 
   @Override
   public Object[] toArray() {
-    final Object[] array = new Object[size()];
+    final Object[] array = new Object[this.size()];
     UriQueryKeySet.toArray(this.query, array);
     return array;
   }
@@ -148,7 +104,7 @@ final class UriQueryKeySet implements Set<String> {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T[] toArray(T[] array) {
-    final int n = size();
+    final int n = this.size();
     if (array.length < n) {
       array = (T[]) Array.newInstance(array.getClass().getComponentType(), n);
     }
@@ -159,17 +115,36 @@ final class UriQueryKeySet implements Set<String> {
     return array;
   }
 
+  private static void toArray(UriQuery query, Object[] array) {
+    int i = 0;
+    while (!query.isEmpty()) {
+      array[i] = query.key();
+      query = query.tail();
+      i += 1;
+    }
+  }
+
   @Override
   public boolean equals(Object other) {
     if (this == other) {
       return true;
     } else if (other instanceof Set<?>) {
       final Set<?> that = (Set<?>) other;
-      if (size() == that.size()) {
+      if (this.size() == that.size()) {
         return UriQueryKeySet.equals(this.query, that);
       }
     }
     return false;
+  }
+
+  private static boolean equals(UriQuery query, Set<?> that) {
+    while (!query.isEmpty()) {
+      if (!that.contains(query.key())) {
+        return false;
+      }
+      query = query.tail();
+    }
+    return true;
   }
 
   @Override
@@ -177,9 +152,34 @@ final class UriQueryKeySet implements Set<String> {
     return UriQueryKeySet.hashCode(this.query);
   }
 
+  private static int hashCode(UriQuery query) {
+    int code = 0;
+    while (!query.isEmpty()) {
+      final String key = query.key();
+      code += (key == null ? 0 : key.hashCode());
+      query = query.tail();
+    }
+    return code;
+  }
+
   @Override
   public String toString() {
     return UriQueryKeySet.toString(this.query);
+  }
+
+  private static String toString(UriQuery query) {
+    final StringBuilder s = new StringBuilder();
+    s.append('[');
+    if (!query.isEmpty()) {
+      s.append(String.valueOf(query.key()));
+      query = query.tail();
+      while (!query.isEmpty()) {
+        s.append(", ").append(String.valueOf(query.key()));
+        query = query.tail();
+      }
+    }
+    s.append(']');
+    return s.toString();
   }
 
 }

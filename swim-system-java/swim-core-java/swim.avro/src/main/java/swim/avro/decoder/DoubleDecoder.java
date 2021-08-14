@@ -35,6 +35,11 @@ final class DoubleDecoder<T> extends Decoder<T> {
     this(type, 0L, 0);
   }
 
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return DoubleDecoder.decode(input, this.type, this.value, this.shift);
+  }
+
   static <T> Decoder<T> decode(InputBuffer input, AvroDoubleType<T> type,
                                long value, int shift) {
     while (input.isCont()) {
@@ -42,24 +47,19 @@ final class DoubleDecoder<T> extends Decoder<T> {
       input = input.step();
       shift += 8;
       if (shift == 64) {
-        return done(type.cast(Double.longBitsToDouble(value)));
+        return Decoder.done(type.cast(Double.longBitsToDouble(value)));
       }
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new DoubleDecoder<T>(type, value, shift);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, AvroDoubleType<T> type) {
-    return decode(input, type, 0L, 0);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.value, this.shift);
+    return DoubleDecoder.decode(input, type, 0L, 0);
   }
 
 }

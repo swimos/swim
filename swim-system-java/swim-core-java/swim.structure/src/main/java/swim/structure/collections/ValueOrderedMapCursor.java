@@ -36,7 +36,7 @@ public class ValueOrderedMapCursor<K, V> extends ValueEntryCursor<K, V> implemen
 
   @Override
   public <K2> ValueOrderedMapCursor<K2, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   @Override
@@ -46,7 +46,7 @@ public class ValueOrderedMapCursor<K, V> extends ValueEntryCursor<K, V> implemen
 
   @Override
   public <V2> ValueOrderedMapCursor<K, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override

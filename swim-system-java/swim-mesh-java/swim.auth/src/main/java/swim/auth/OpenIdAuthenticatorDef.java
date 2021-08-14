@@ -30,8 +30,6 @@ import swim.util.Murmur3;
 
 public class OpenIdAuthenticatorDef implements AuthenticatorDef, Debug {
 
-  private static int hashSeed;
-  private static Form<OpenIdAuthenticatorDef> form;
   final String authenticatorName;
   final FingerTrieSeq<String> issuers;
   final FingerTrieSeq<String> audiences;
@@ -44,14 +42,6 @@ public class OpenIdAuthenticatorDef implements AuthenticatorDef, Debug {
     this.issuers = issuers;
     this.audiences = audiences;
     this.publicKeyDefs = publicKeyDefs;
-  }
-
-  @Kind
-  public static Form<OpenIdAuthenticatorDef> form() {
-    if (form == null) {
-      form = new OpenIdAuthenticatorForm();
-    }
-    return form;
   }
 
   @Override
@@ -84,26 +74,39 @@ public class OpenIdAuthenticatorDef implements AuthenticatorDef, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(OpenIdAuthenticatorDef.class);
+    if (OpenIdAuthenticatorDef.hashSeed == 0) {
+      OpenIdAuthenticatorDef.hashSeed = Murmur3.seed(OpenIdAuthenticatorDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(OpenIdAuthenticatorDef.hashSeed,
         Murmur3.hash(this.authenticatorName)), this.issuers.hashCode()),
         this.audiences.hashCode()), this.publicKeyDefs.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("new").write(' ').write("OpenIdAuthenticatorDef").write('(')
-        .debug(this.authenticatorName).write(", ").debug(this.issuers).write(", ")
-        .debug(this.audiences).write(", ").debug(this.publicKeyDefs).write(')');
+                   .debug(this.authenticatorName).write(", ").debug(this.issuers).write(", ")
+                   .debug(this.audiences).write(", ").debug(this.publicKeyDefs).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static Form<OpenIdAuthenticatorDef> form;
+
+  @Kind
+  public static Form<OpenIdAuthenticatorDef> form() {
+    if (OpenIdAuthenticatorDef.form == null) {
+      OpenIdAuthenticatorDef.form = new OpenIdAuthenticatorForm();
+    }
+    return OpenIdAuthenticatorDef.form;
   }
 
 }
@@ -123,7 +126,7 @@ final class OpenIdAuthenticatorForm extends Form<OpenIdAuthenticatorDef> {
   @Override
   public Item mold(OpenIdAuthenticatorDef authenticatorDef) {
     if (authenticatorDef != null) {
-      final Record record = Record.create().attr(tag());
+      final Record record = Record.create().attr(this.tag());
 
       Value issuers = Value.absent();
       for (String issuer : authenticatorDef.issuers) {
@@ -154,7 +157,7 @@ final class OpenIdAuthenticatorForm extends Form<OpenIdAuthenticatorDef> {
   @Override
   public OpenIdAuthenticatorDef cast(Item item) {
     final Value value = item.toValue();
-    final Value headers = value.getAttr(tag());
+    final Value headers = value.getAttr(this.tag());
     if (headers.isDefined()) {
       final String authenticatorName = item.key().stringValue(null);
       final Builder<String, FingerTrieSeq<String>> issuers = FingerTrieSeq.builder();
@@ -174,7 +177,7 @@ final class OpenIdAuthenticatorForm extends Form<OpenIdAuthenticatorDef> {
         }
       }
       return new OpenIdAuthenticatorDef(authenticatorName, issuers.bind(),
-          audiences.bind(), publicKeyDefs.bind());
+                                        audiences.bind(), publicKeyDefs.bind());
     }
     return null;
   }

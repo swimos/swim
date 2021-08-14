@@ -58,17 +58,17 @@ public class JsonStructureWriter extends JsonWriter<Item, Value> {
     if (item instanceof Field) {
       if (item instanceof Attr) {
         final Attr that = (Attr) item;
-        return writeField(Text.from('@' + that.key().stringValue()), that.value(), output);
+        return this.writeField(Text.from('@' + that.key().stringValue()), that.value(), output);
       } else if (item instanceof Slot) {
         final Slot that = (Slot) item;
         if (that.key() instanceof Text) {
-          return writeField(that.key(), that.value(), output);
+          return this.writeField(that.key(), that.value(), output);
         } else {
-          return writeValue(Record.of(Slot.of("$key", that.key()), Slot.of("$value", that.value())), output);
+          return this.writeValue(Record.of(Slot.of("$key", that.key()), Slot.of("$value", that.value())), output);
         }
       }
     } else if (item instanceof Value) {
-      return writeValue((Value) item, output);
+      return this.writeValue((Value) item, output);
     }
     return Writer.error(new WriterException("No JSON serialization for " + item));
   }
@@ -78,19 +78,19 @@ public class JsonStructureWriter extends JsonWriter<Item, Value> {
     if (item instanceof Field) {
       if (item instanceof Attr) {
         final Attr that = (Attr) item;
-        return writeField(Text.from('@' + that.key().stringValue()), that.value(), output);
+        return this.writeField(Text.from('@' + that.key().stringValue()), that.value(), output);
       } else if (item instanceof Slot) {
         final Slot that = (Slot) item;
         if (that.key() instanceof Text) {
-          return writeField(that.key(), that.value(), output);
+          return this.writeField(that.key(), that.value(), output);
         } else {
-          return writeField(Text.from("$" + index),
-              Record.of(Slot.of("$key", that.key()), Slot.of("$value", that.value())),
-              output);
+          return this.writeField(Text.from("$" + index),
+                                 Record.of(Slot.of("$key", that.key()), Slot.of("$value", that.value())),
+                                 output);
         }
       }
     } else if (item instanceof Value) {
-      return writeItem(Slot.of(Text.from("$" + index), (Value) item), output);
+      return this.writeItem(Slot.of(Text.from("$" + index), (Value) item), output);
     }
     return Writer.error(new WriterException("No JSON serialization for " + item));
   }
@@ -98,9 +98,9 @@ public class JsonStructureWriter extends JsonWriter<Item, Value> {
   @Override
   public Writer<?, ?> writeValue(Item item, Output<?> output, int index) {
     if (item instanceof Field) {
-      return writeValue(item.toValue(), output);
+      return this.writeValue(item.toValue(), output);
     } else if (item instanceof Value) {
-      return writeValue((Value) item, output);
+      return this.writeValue((Value) item, output);
     }
     return Writer.error(new WriterException("No JSON serialization for " + item));
   }
@@ -110,40 +110,40 @@ public class JsonStructureWriter extends JsonWriter<Item, Value> {
     if (value instanceof Record) {
       final Record that = (Record) value;
       if (that.isArray()) {
-        return writeArray(that, output);
+        return this.writeArray(that, output);
       } else {
-        return writeObject(that, output);
+        return this.writeObject(that, output);
       }
     } else if (value instanceof Data) {
       final Data that = (Data) value;
-      return writeData(that.asByteBuffer(), output);
+      return this.writeData(that.asByteBuffer(), output);
     } else if (value instanceof Text) {
       final Text that = (Text) value;
-      return writeText(that.stringValue(), output);
+      return this.writeText(that.stringValue(), output);
     } else if (value instanceof Num) {
       final Num that = (Num) value;
       if (that.isUint32()) {
-        return writeUint32(that.intValue(), output);
+        return this.writeUint32(that.intValue(), output);
       } else if (that.isUint64()) {
-        return writeUint64(that.longValue(), output);
+        return this.writeUint64(that.longValue(), output);
       } else if (that.isValidInt()) {
-        return writeNum(that.intValue(), output);
+        return this.writeNum(that.intValue(), output);
       } else if (that.isValidLong()) {
-        return writeNum(that.longValue(), output);
+        return this.writeNum(that.longValue(), output);
       } else if (that.isValidFloat()) {
-        return writeNum(that.floatValue(), output);
+        return this.writeNum(that.floatValue(), output);
       } else if (that.isValidDouble()) {
-        return writeNum(that.doubleValue(), output);
+        return this.writeNum(that.doubleValue(), output);
       } else if (that.isValidInteger()) {
-        return writeNum(that.integerValue(), output);
+        return this.writeNum(that.integerValue(), output);
       }
     } else if (value instanceof Bool) {
       final Bool that = (Bool) value;
-      return writeBool(that.booleanValue(), output);
+      return this.writeBool(that.booleanValue(), output);
     } else if (value instanceof Extant) {
-      return writeNull(output);
+      return this.writeNull(output);
     } else if (value instanceof Absent) {
-      return writeUndefined(output);
+      return this.writeUndefined(output);
     }
     return Writer.error(new WriterException("No JSON serialization for " + value));
   }

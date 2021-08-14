@@ -23,42 +23,12 @@ import swim.util.Murmur3;
 
 public final class WsClose<P, T> extends WsControl<P, T> implements Debug {
 
-  private static int hashSeed;
   final P payload;
   final Encoder<?, ?> content;
 
   WsClose(P payload, Encoder<?, ?> content) {
     this.payload = payload;
     this.content = content;
-  }
-
-  public static <P, T> WsClose<P, T> empty() {
-    return new WsClose<P, T>(null, Encoder.done());
-  }
-
-  public static <P, T> WsClose<P, T> from(P payload, Encoder<?, ?> content) {
-    return new WsClose<P, T>(payload, content);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <P, T> WsClose<P, T> from(P payload) {
-    if (payload instanceof WsStatus) {
-      return (WsClose<P, T>) from((WsStatus) payload);
-    } else {
-      return new WsClose<P, T>(payload, Encoder.done());
-    }
-  }
-
-  public static <T> WsClose<WsStatus, T> from(WsStatus status) {
-    return new WsClose<WsStatus, T>(status, status.encoder());
-  }
-
-  public static <T> WsClose<WsStatus, T> from(int code, String reason) {
-    return from(WsStatus.from(code, reason));
-  }
-
-  public static <T> WsClose<WsStatus, T> from(int code) {
-    return from(WsStatus.from(code));
   }
 
   @Override
@@ -92,23 +62,55 @@ public final class WsClose<P, T> extends WsControl<P, T> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(WsClose.class);
+    if (WsClose.hashSeed == 0) {
+      WsClose.hashSeed = Murmur3.seed(WsClose.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, Murmur3.hash(this.payload)));
+    return Murmur3.mash(Murmur3.mix(WsClose.hashSeed, Murmur3.hash(this.payload)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("WsClose").write('.').write("from").write('(')
-        .debug(this.payload).write(", ").debug(this.content).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("WsClose").write('.').write("create").write('(')
+                   .debug(this.payload).write(", ").debug(this.content).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static <P, T> WsClose<P, T> empty() {
+    return new WsClose<P, T>(null, Encoder.done());
+  }
+
+  public static <P, T> WsClose<P, T> create(P payload, Encoder<?, ?> content) {
+    return new WsClose<P, T>(payload, content);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <P, T> WsClose<P, T> create(P payload) {
+    if (payload instanceof WsStatus) {
+      return (WsClose<P, T>) WsClose.create((WsStatus) payload);
+    } else {
+      return new WsClose<P, T>(payload, Encoder.done());
+    }
+  }
+
+  public static <T> WsClose<WsStatus, T> create(WsStatus status) {
+    return new WsClose<WsStatus, T>(status, status.encoder());
+  }
+
+  public static <T> WsClose<WsStatus, T> create(int code, String reason) {
+    return WsClose.create(WsStatus.create(code, reason));
+  }
+
+  public static <T> WsClose<WsStatus, T> create(int code) {
+    return WsClose.create(WsStatus.create(code));
   }
 
 }

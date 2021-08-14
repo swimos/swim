@@ -41,7 +41,7 @@ final class DataDecoder<T> extends Decoder<T> {
 
   @Override
   public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.decoder, this.length, this.shift, this.step);
+    return DataDecoder.decode(input, this.type, this.decoder, this.length, this.shift, this.step);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, ProtobufDataType<T> type,
@@ -53,7 +53,7 @@ final class DataDecoder<T> extends Decoder<T> {
           input = input.step();
           length |= (long) (b & 0x7f) << shift;
         } else {
-          return error(new DecoderException("varint overflow"));
+          return Decoder.error(new DecoderException("varint overflow"));
         }
         if ((b & 0x80) == 0) {
           shift = 0;
@@ -86,22 +86,22 @@ final class DataDecoder<T> extends Decoder<T> {
         if (length == 0L) {
           return decoder;
         } else {
-          return error(new DecoderException("unconsumed input"));
+          return Decoder.error(new DecoderException("unconsumed input"));
         }
       } else if (decoder.isError()) {
         return decoder.asError();
       }
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new DataDecoder<T>(type, decoder, length, shift, step);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, ProtobufDataType<T> type) {
-    return decode(input, type, null, 0L, 0, 1);
+    return DataDecoder.decode(input, type, null, 0L, 0, 1);
   }
 
 }

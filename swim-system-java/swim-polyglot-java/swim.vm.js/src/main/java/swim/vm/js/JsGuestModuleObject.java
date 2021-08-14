@@ -41,7 +41,7 @@ public class JsGuestModuleObject implements ProxyObject {
     } else if ("exports".equals(key)) {
       return true;
     } else {
-      return hasDynamicMember(key);
+      return this.hasDynamicMember(key);
     }
   }
 
@@ -56,7 +56,7 @@ public class JsGuestModuleObject implements ProxyObject {
     } else if ("exports".equals(key)) {
       return this.module.moduleExports;
     } else {
-      return getDynamicMember(key);
+      return this.getDynamicMember(key);
     }
   }
 
@@ -71,7 +71,7 @@ public class JsGuestModuleObject implements ProxyObject {
     } else if ("exports".equals(key)) {
       this.module.setModuleExports(value);
     } else {
-      putDynamicMember(key, value);
+      this.putDynamicMember(key, value);
     }
   }
 
@@ -86,7 +86,7 @@ public class JsGuestModuleObject implements ProxyObject {
     } else if ("exports".equals(key)) {
       throw new UnsupportedOperationException();
     } else {
-      return removeDynamicMember(key);
+      return this.removeDynamicMember(key);
     }
   }
 

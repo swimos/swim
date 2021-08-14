@@ -18,12 +18,12 @@ import java.util.Collection;
 import swim.api.plane.Plane;
 import swim.api.plane.PlaneFactory;
 import swim.api.policy.PlanePolicy;
-import swim.api.ref.SwimRef;
+import swim.api.ref.WarpRef;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.util.Log;
 
-public interface Space extends SwimRef, Log {
+public interface Space extends WarpRef, Log {
 
   Schedule schedule();
 

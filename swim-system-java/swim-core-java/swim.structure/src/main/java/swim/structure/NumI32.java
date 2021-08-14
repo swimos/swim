@@ -22,7 +22,7 @@ import swim.util.HashGenCacheSet;
 final class NumI32 extends Num {
 
   final int value;
-  int flags;
+  final int flags;
 
   NumI32(int value, int flags) {
     this.value = value;
@@ -35,7 +35,7 @@ final class NumI32 extends Num {
 
   @Override
   public boolean isUint32() {
-    return (this.flags & UINT32) != 0;
+    return (this.flags & NumI32.UINT32) != 0;
   }
 
   @Override
@@ -148,8 +148,8 @@ final class NumI32 extends Num {
       return Value.absent();
     } else if (that instanceof NumF64) {
       return Value.absent();
-    } else if (that instanceof NumInt) {
-      return NumInt.from(BigInteger.valueOf(this.value).or(((NumInt) that).value));
+    } else if (that instanceof NumInteger) {
+      return NumInteger.from(BigInteger.valueOf(this.value).or(((NumInteger) that).value));
     } else {
       throw new AssertionError();
     }
@@ -165,8 +165,8 @@ final class NumI32 extends Num {
       return Value.absent();
     } else if (that instanceof NumF64) {
       return Value.absent();
-    } else if (that instanceof NumInt) {
-      return NumInt.from(BigInteger.valueOf(this.value).xor(((NumInt) that).value));
+    } else if (that instanceof NumInteger) {
+      return NumInteger.from(BigInteger.valueOf(this.value).xor(((NumInteger) that).value));
     } else {
       throw new AssertionError();
     }
@@ -182,8 +182,8 @@ final class NumI32 extends Num {
       return Value.absent();
     } else if (that instanceof NumF64) {
       return Value.absent();
-    } else if (that instanceof NumInt) {
-      return NumInt.from(BigInteger.valueOf(this.value).and(((NumInt) that).value));
+    } else if (that instanceof NumInteger) {
+      return NumInteger.from(BigInteger.valueOf(this.value).and(((NumInteger) that).value));
     } else {
       throw new AssertionError();
     }
@@ -199,8 +199,8 @@ final class NumI32 extends Num {
       return NumF32.from((float) this.value + ((NumF32) that).value);
     } else if (that instanceof NumF64) {
       return NumF64.from((double) this.value + ((NumF64) that).value);
-    } else if (that instanceof NumInt) {
-      return NumInt.from(BigInteger.valueOf(this.value).add(((NumInt) that).value));
+    } else if (that instanceof NumInteger) {
+      return NumInteger.from(BigInteger.valueOf(this.value).add(((NumInteger) that).value));
     } else {
       throw new AssertionError();
     }
@@ -216,8 +216,8 @@ final class NumI32 extends Num {
       return NumF32.from((float) this.value - ((NumF32) that).value);
     } else if (that instanceof NumF64) {
       return NumF64.from((double) this.value - ((NumF64) that).value);
-    } else if (that instanceof NumInt) {
-      return NumInt.from(BigInteger.valueOf(this.value).subtract(((NumInt) that).value));
+    } else if (that instanceof NumInteger) {
+      return NumInteger.from(BigInteger.valueOf(this.value).subtract(((NumInteger) that).value));
     } else {
       throw new AssertionError();
     }
@@ -233,8 +233,8 @@ final class NumI32 extends Num {
       return NumF32.from((float) this.value * ((NumF32) that).value);
     } else if (that instanceof NumF64) {
       return NumF64.from((double) this.value * ((NumF64) that).value);
-    } else if (that instanceof NumInt) {
-      return NumInt.from(BigInteger.valueOf(this.value).multiply(((NumInt) that).value));
+    } else if (that instanceof NumInteger) {
+      return NumInteger.from(BigInteger.valueOf(this.value).multiply(((NumInteger) that).value));
     } else {
       throw new AssertionError();
     }
@@ -250,8 +250,8 @@ final class NumI32 extends Num {
       return NumF64.from((double) this.value / (double) ((NumF32) that).value);
     } else if (that instanceof NumF64) {
       return NumF64.from((double) this.value / ((NumF64) that).value);
-    } else if (that instanceof NumInt) {
-      return NumF64.from((double) this.value / ((NumInt) that).value.doubleValue());
+    } else if (that instanceof NumInteger) {
+      return NumF64.from((double) this.value / ((NumInteger) that).value.doubleValue());
     } else {
       throw new AssertionError();
     }
@@ -267,8 +267,8 @@ final class NumI32 extends Num {
       return NumF32.from((float) this.value % ((NumF32) that).value);
     } else if (that instanceof NumF64) {
       return NumF64.from((double) this.value % ((NumF64) that).value);
-    } else if (that instanceof NumInt) {
-      return NumInt.from(BigInteger.valueOf(this.value).mod(((NumInt) that).value));
+    } else if (that instanceof NumInteger) {
+      return NumInteger.from(BigInteger.valueOf(this.value).mod(((NumInteger) that).value));
     } else {
       throw new AssertionError();
     }
@@ -320,8 +320,9 @@ final class NumI32 extends Num {
   }
 
   @Override
-  public void display(Output<?> output) {
-    Format.debugInt(this.value, output);
+  public <T> Output<T> display(Output<T> output) {
+    output = Format.debugInt(this.value, output);
+    return output;
   }
 
   static final int UINT32 = 1 << 0;
@@ -331,40 +332,40 @@ final class NumI32 extends Num {
   private static NumI32 negativeOne;
 
   static NumI32 zero() {
-    if (zero == null) {
-      zero = new NumI32(0);
+    if (NumI32.zero == null) {
+      NumI32.zero = new NumI32(0);
     }
-    return zero;
+    return NumI32.zero;
   }
 
   static NumI32 positiveOne() {
-    if (positiveOne == null) {
-      positiveOne = new NumI32(1);
+    if (NumI32.positiveOne == null) {
+      NumI32.positiveOne = new NumI32(1);
     }
-    return positiveOne;
+    return NumI32.positiveOne;
   }
 
   static NumI32 negativeOne() {
-    if (negativeOne == null) {
-      negativeOne = new NumI32(-1);
+    if (NumI32.negativeOne == null) {
+      NumI32.negativeOne = new NumI32(-1);
     }
-    return negativeOne;
+    return NumI32.negativeOne;
   }
 
   public static NumI32 from(int value) {
     if (value == 0) {
-      return zero();
+      return NumI32.zero();
     } else if (value == 1) {
-      return positiveOne();
+      return NumI32.positiveOne();
     } else if (value == -1) {
-      return negativeOne();
+      return NumI32.negativeOne();
     } else {
-      return cache().put(new NumI32(value));
+      return NumI32.cache().put(new NumI32(value));
     }
   }
 
   public static NumI32 uint32(int value) {
-    return new NumI32(value, UINT32);
+    return new NumI32(value, NumI32.UINT32);
   }
 
   private static ThreadLocal<HashGenCacheSet<NumI32>> cache = new ThreadLocal<>();

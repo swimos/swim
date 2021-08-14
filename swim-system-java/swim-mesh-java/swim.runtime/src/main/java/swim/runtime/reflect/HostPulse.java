@@ -22,7 +22,6 @@ import swim.structure.Value;
 
 public class HostPulse extends Pulse {
 
-  private static Form<HostPulse> form;
   protected final long nodeCount;
   protected final AgentPulse agents;
   protected final WarpDownlinkPulse downlinks;
@@ -34,14 +33,6 @@ public class HostPulse extends Pulse {
     this.agents = agents;
     this.downlinks = downlinks;
     this.uplinks = uplinks;
-  }
-
-  @Kind
-  public static Form<HostPulse> form() {
-    if (form == null) {
-      form = new HostPulseForm();
-    }
-    return form;
   }
 
   @Override
@@ -68,7 +59,17 @@ public class HostPulse extends Pulse {
 
   @Override
   public Value toValue() {
-    return form().mold(this).toValue();
+    return HostPulse.form().mold(this).toValue();
+  }
+
+  private static Form<HostPulse> form;
+
+  @Kind
+  public static Form<HostPulse> form() {
+    if (HostPulse.form == null) {
+      HostPulse.form = new HostPulseForm();
+    }
+    return HostPulse.form;
   }
 
 }

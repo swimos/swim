@@ -42,6 +42,11 @@ final class AcceptParser extends Parser<Accept> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<Accept> feed(Input input) {
+    return AcceptParser.parse(input, this.http, this.mediaRange, this.mediaRanges, this.step);
+  }
+
   static Parser<Accept> parse(Input input, HttpParser http, Parser<MediaRange> mediaRange,
                               Builder<MediaRange, FingerTrieSeq<MediaRange>> mediaRanges, int step) {
     int c = 0;
@@ -76,7 +81,7 @@ final class AcceptParser extends Parser<Accept> {
           input = input.step();
           step = 3;
         } else if (!input.isEmpty()) {
-          return done(Accept.from(mediaRanges.bind()));
+          return Parser.done(Accept.create(mediaRanges.bind()));
         }
       }
       if (step == 3) {
@@ -91,7 +96,7 @@ final class AcceptParser extends Parser<Accept> {
         if (input.isCont()) {
           step = 4;
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
@@ -112,18 +117,13 @@ final class AcceptParser extends Parser<Accept> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new AcceptParser(http, mediaRange, mediaRanges, step);
   }
 
   static Parser<Accept> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<Accept> feed(Input input) {
-    return parse(input, this.http, this.mediaRange, this.mediaRanges, this.step);
+    return AcceptParser.parse(input, http, null, null, 1);
   }
 
 }

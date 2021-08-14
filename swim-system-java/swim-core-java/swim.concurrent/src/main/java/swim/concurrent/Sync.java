@@ -18,38 +18,19 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 /**
- * A {@link Cont}inuation whose completion can be synchronously awaited.  A
+ * A {@link Cont}inuation whose completion can be synchronously awaited. A
  * {@code Sync} continuation is used to await the completion of an asynchronous
  * operation.
  */
 public class Sync<T> implements Cont<T>, ForkJoinPool.ManagedBlocker {
 
   /**
-   * {@link #status} value indicating the continuation completed with a value.
-   */
-  static final int BIND = 1;
-  /**
-   * {@link #status} value indicating the continuation failed with an exception.
-   */
-  static final int TRAP = 2;
-  /**
-   * Atomic {@link #status} field updater, used to linearize continuation completion.
-   */
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<Sync<?>> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<Sync<?>>) (Class<?>) Sync.class, "status");
-  /**
-   * Thread-local variable used to pass the await timeout through calls to
-   * {@code ForkJoinPool.managedBlock}.
-   */
-  static final ThreadLocal<Long> TIMEOUT = new ThreadLocal<Long>();
-  /**
    * Atomic completion status of this {@code Sync} continuation.
    */
   volatile int status;
   /**
    * Completed result of this {@code Sync} continuation; either the bound value
-   * of type {@code T}, or the trapped error of type {@code Throwable}.  The
+   * of type {@code T}, or the trapped error of type {@code Throwable}. The
    * type of {@code result} is decided by the flags of the {@code status} field.
    */
   volatile Object result;
@@ -59,7 +40,8 @@ public class Sync<T> implements Cont<T>, ForkJoinPool.ManagedBlocker {
    * {@code T}.
    */
   public Sync() {
-    // nop
+    this.status = 0;
+    this.result = null;
   }
 
   @Override
@@ -70,7 +52,7 @@ public class Sync<T> implements Cont<T>, ForkJoinPool.ManagedBlocker {
   @Override
   public synchronized boolean block() throws InterruptedException {
     if (this.status == 0) {
-      wait(TIMEOUT.get());
+      this.wait(Sync.TIMEOUT.get());
     }
     return true;
   }
@@ -80,9 +62,9 @@ public class Sync<T> implements Cont<T>, ForkJoinPool.ManagedBlocker {
     // Set the resulting value before updating the completion status.
     this.result = value;
     // Atomically set the status; linearization point for sync completion.
-    STATUS.set(this, BIND);
+    Sync.STATUS.set(this, Sync.BIND);
     // Release all waiting threads.
-    notifyAll();
+    this.notifyAll();
   }
 
   @Override
@@ -90,14 +72,14 @@ public class Sync<T> implements Cont<T>, ForkJoinPool.ManagedBlocker {
     // Set the resulting error before updating the completion status.
     this.result = error;
     // Atomically set the status; linearization point for sync completion.
-    STATUS.set(this, TRAP);
+    Sync.STATUS.set(this, Sync.TRAP);
     // Release all waiting threads.
-    notifyAll();
+    this.notifyAll();
   }
 
   /**
    * Waits a maximum of {@code timeout} milliseconds for this {@code Sync}
-   * continuation to complete.  Performs a managed block to avoid thread
+   * continuation to complete. Performs a managed block to avoid thread
    * starvation while waiting.
    *
    * @throws SyncException if the {@code timeout} milliseconds elapses and this
@@ -115,7 +97,7 @@ public class Sync<T> implements Cont<T>, ForkJoinPool.ManagedBlocker {
       if (this.status == 0) {
         // Set the thread local timeout variable to preserve it through the
         // call to ForkJoinPool.managedBlock.
-        TIMEOUT.set(timeout);
+        Sync.TIMEOUT.set(timeout);
         // Perform a managed block so as not to starve the thread pool, if
         // we're running in one.
         ForkJoinPool.managedBlock(this);
@@ -142,10 +124,10 @@ public class Sync<T> implements Cont<T>, ForkJoinPool.ManagedBlocker {
     final int status = this.status;
     // Load the completed result.
     final Object result = this.result;
-    if (status == BIND) {
+    if (status == Sync.BIND) {
       // Continuation completed with a value; return it.
       return (T) result;
-    } else if (status == TRAP) {
+    } else if (status == Sync.TRAP) {
       // Continuation failed with an exception; throw it.
       if (result instanceof Error) {
         // Throw unchecked Error.
@@ -165,11 +147,33 @@ public class Sync<T> implements Cont<T>, ForkJoinPool.ManagedBlocker {
 
   /**
    * Waits an unbounded amount of time for this {@code Sync} continuation to
-   * complete.  Performs a managed block to avoid thread starvation while
+   * complete. Performs a managed block to avoid thread starvation while
    * waiting.
    */
   public T await() throws InterruptedException {
-    return await(0L);
+    return this.await(0L);
   }
+
+  /**
+   * {@link #status} value indicating the continuation completed with a value.
+   */
+  static final int BIND = 1;
+  /**
+   * {@link #status} value indicating the continuation failed with an exception.
+   */
+  static final int TRAP = 2;
+
+  /**
+   * Atomic {@link #status} field updater, used to linearize continuation completion.
+   */
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<Sync<?>> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<Sync<?>>) (Class<?>) Sync.class, "status");
+
+  /**
+   * Thread-local variable used to pass the await timeout through calls to
+   * {@code ForkJoinPool.managedBlock}.
+   */
+  static final ThreadLocal<Long> TIMEOUT = new ThreadLocal<Long>();
 
 }

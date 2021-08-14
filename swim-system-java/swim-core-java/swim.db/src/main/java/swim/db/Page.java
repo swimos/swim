@@ -16,7 +16,6 @@ package swim.db;
 
 import swim.codec.Output;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.structure.Value;
 import swim.util.Cursor;
 
@@ -49,7 +48,7 @@ public abstract class Page {
   public abstract PageRef pageRef();
 
   public PageContext pageContext() {
-    return pageRef().pageContext();
+    return this.pageRef().pageContext();
   }
 
   public abstract PageType pageType();
@@ -57,27 +56,27 @@ public abstract class Page {
   public abstract long version();
 
   public int stem() {
-    return pageRef().stem();
+    return this.pageRef().stem();
   }
 
   public int post() {
-    return pageRef().post();
+    return this.pageRef().post();
   }
 
   public int zone() {
-    return pageRef().zone();
+    return this.pageRef().zone();
   }
 
   public long base() {
-    return pageRef().base();
+    return this.pageRef().base();
   }
 
   public long span() {
-    return pageRef().span();
+    return this.pageRef().span();
   }
 
   public Value fold() {
-    return pageRef().fold();
+    return this.pageRef().fold();
   }
 
   public abstract boolean isEmpty();
@@ -91,15 +90,15 @@ public abstract class Page {
   public abstract Page getChild(int index);
 
   public int pageSize() {
-    return pageRef().pageSize();
+    return this.pageRef().pageSize();
   }
 
   public int diffSize() {
-    return pageRef().diffSize();
+    return this.pageRef().diffSize();
   }
 
   public long treeSize() {
-    return pageRef().treeSize();
+    return this.pageRef().treeSize();
   }
 
   public abstract Value toHeader();
@@ -123,8 +122,8 @@ public abstract class Page {
   public abstract Cursor<? extends Object> cursor();
 
   public void printTree() {
-    System.out.println(pageRef());
-    printTree(0);
+    System.out.println(this.pageRef());
+    this.printTree(0);
   }
 
   void printTree(int indent) {
@@ -132,13 +131,13 @@ public abstract class Page {
       System.out.print(' ');
     }
     System.out.println(this);
-    for (int i = 0, n = childCount(); i < n; i += 1) {
-      getChildRef(i).page().printTree(indent + 2);
+    for (int i = 0, n = this.childCount(); i < n; i += 1) {
+      this.getChildRef(i).page().printTree(indent + 2);
     }
   }
 
   public String toDebugString() {
-    return pageRef().toDebugString();
+    return this.pageRef().toDebugString();
   }
 
   static final class LoadSubtree implements Cont<Page> {
@@ -167,8 +166,8 @@ public abstract class Page {
           this.page.getChildRef(i).loadTreeAsync(this.pageLoader, next);
         }
       } catch (Throwable cause) {
-        if (Conts.isNonFatal(cause)) {
-          trap(cause);
+        if (Cont.isNonFatal(cause)) {
+          this.trap(cause);
         } else {
           throw cause;
         }

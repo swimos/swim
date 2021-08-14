@@ -29,7 +29,7 @@ import swim.structure.Value;
  * <p>
  * A {@code Class} instance in Java can be completely described by its {@code
  * Class} <em>name</em>, its <em>field names</em>, and its <em>field
- * values</em>.  This, combined with the fact that some fields are more
+ * values</em>. This, combined with the fact that some fields are more
  * important than others, gives rise to the following rules for transforming
  * objects into structured {@code Items}:
  * <ol>
@@ -141,21 +141,21 @@ public final class ClassForm<T> extends Form<T> implements Cloneable {
         }
       }
     }
-    return addHeader(header);
+    return this.addHeader(header);
   }
 
   public ClassForm<T> putHeader(String name, Value key, Form<?> form) {
     try {
       final java.lang.reflect.Field field = this.type.getField(name);
       final Form<T> header = new SlotForm<T>(field, key, form);
-      return putHeader(header);
+      return this.putHeader(header);
     } catch (NoSuchFieldException cause) {
       throw new FormException(cause);
     }
   }
 
   public ClassForm<T> putHeader(String name, Form<?> form) {
-    return putHeader(name, Text.from(name), form);
+    return this.putHeader(name, Text.from(name), form);
   }
 
   @SuppressWarnings("unchecked")
@@ -185,21 +185,21 @@ public final class ClassForm<T> extends Form<T> implements Cloneable {
         }
       }
     }
-    return addMember(member);
+    return this.addMember(member);
   }
 
   public ClassForm<T> putMember(String name, Value key, Form<?> form) {
     try {
       final java.lang.reflect.Field field = this.type.getField(name);
       final Form<T> member = new SlotForm<T>(field, key, form);
-      return putMember(member);
+      return this.putMember(member);
     } catch (NoSuchFieldException cause) {
       throw new FormException(cause);
     }
   }
 
   public ClassForm<T> putMember(String name, Form<?> form) {
-    return putMember(name, Text.from(name), form);
+    return this.putMember(name, Text.from(name), form);
   }
 
   @Override
@@ -286,7 +286,7 @@ public final class ClassForm<T> extends Form<T> implements Cloneable {
     if (this.constructor != null) {
       try {
         final T object = this.constructor.newInstance();
-        return cast(item, object);
+        return this.cast(item, object);
       } catch (ReflectiveOperationException cause) {
         throw new FormException(cause);
       }

@@ -19,8 +19,6 @@ package swim.codec;
  */
 public class EncoderException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public EncoderException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -36,5 +34,7 @@ public class EncoderException extends RuntimeException {
   public EncoderException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

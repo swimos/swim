@@ -25,35 +25,6 @@ import swim.util.Cursor;
 
 public abstract class QTreePage extends Page {
 
-  static final QTreePageRef[] EMPTY_CHILD_REFS = new QTreePageRef[0];
-  static final Slot[] EMPTY_SLOTS = new Slot[0];
-  static final Comparator<QTreePageRef> PAGE_REF_ORDERING = new QTreePageRefOrdering();
-  static final Comparator<Slot> SLOT_ORDERING = new QTreeSlotOrdering();
-
-  public static QTreePage empty(PageContext context, int stem, long version) {
-    return QTreeLeaf.empty(context, stem, version);
-  }
-
-  public static QTreePage fromValue(QTreePageRef pageRef, Value value) {
-    switch (pageRef.pageType()) {
-      case LEAF:
-        return QTreeLeaf.fromValue(pageRef, value);
-      case NODE:
-        return QTreeNode.fromValue(pageRef, value);
-      default:
-        throw new IllegalArgumentException(pageRef.toString());
-    }
-  }
-
-  static Slot slot(Value key, long xk, long yk, Value value) {
-    return Slot.of(key, Record.create(2)
-        .attr("tile", Record.create(2)
-            .item(Num.uint64(xk))
-            .item(Num.uint64(yk)))
-        .concat(value))
-        .commit();
-  }
-
   @Override
   public boolean isQTreePage() {
     return true;
@@ -69,43 +40,43 @@ public abstract class QTreePage extends Page {
   public abstract QTreePage getChild(int index);
 
   public long x() {
-    return pageRef().x();
+    return this.pageRef().x();
   }
 
   public int xRank() {
-    return pageRef().xRank();
+    return this.pageRef().xRank();
   }
 
   public long xBase() {
-    return pageRef().xBase();
+    return this.pageRef().xBase();
   }
 
   public long xMask() {
-    return pageRef().xMask();
+    return this.pageRef().xMask();
   }
 
   public long xSplit() {
-    return pageRef().xSplit();
+    return this.pageRef().xSplit();
   }
 
   public long y() {
-    return pageRef().y();
+    return this.pageRef().y();
   }
 
   public int yRank() {
-    return pageRef().yRank();
+    return this.pageRef().yRank();
   }
 
   public long yBase() {
-    return pageRef().yBase();
+    return this.pageRef().yBase();
   }
 
   public long yMask() {
-    return pageRef().yMask();
+    return this.pageRef().yMask();
   }
 
   public long ySplit() {
-    return pageRef().ySplit();
+    return this.pageRef().ySplit();
   }
 
   public abstract int slotCount();
@@ -115,18 +86,18 @@ public abstract class QTreePage extends Page {
   public abstract boolean containsKey(Value key, long xk, long yk);
 
   public boolean containsKey(Value key, int xkRank, long xkBase, int ykRank, long ykBase) {
-    return containsKey(key, BitInterval.from(xkRank, xkBase), BitInterval.from(ykRank, ykBase));
+    return this.containsKey(key, BitInterval.from(xkRank, xkBase), BitInterval.from(ykRank, ykBase));
   }
 
   public abstract Value get(Value key, long xk, long yk);
 
   public Value get(Value key, int xkRank, long xkBase, int ykRank, long ykBase) {
-    return get(key, BitInterval.from(xkRank, xkBase), BitInterval.from(ykRank, ykBase));
+    return this.get(key, BitInterval.from(xkRank, xkBase), BitInterval.from(ykRank, ykBase));
   }
 
   public Record getAll(long x, long y) {
     final Record record = Record.of();
-    final Cursor<Slot> cursor = cursor(x, y);
+    final Cursor<Slot> cursor = this.cursor(x, y);
     while (cursor.hasNext()) {
       record.add(cursor.next());
     }
@@ -136,21 +107,21 @@ public abstract class QTreePage extends Page {
   public Record getAll(long x0, long y0, long x1, long y1) {
     final long x = BitInterval.span(x0, x1);
     final long y = BitInterval.span(y0, y1);
-    return getAll(x, y);
+    return this.getAll(x, y);
   }
 
   abstract QTreePage updated(Value key, long xk, long yk, Value newValue,
                              long newVersion, boolean canSplit);
 
   public QTreePage updated(Value key, long xk, long yk, Value newValue, long newVersion) {
-    return updated(key, xk, yk, newValue, newVersion, true);
+    return this.updated(key, xk, yk, newValue, newVersion, true);
   }
 
   public QTreePage updated(Value key, int xkRank, long xkBase, int ykRank, long ykBase,
                            Value newValue, long newVersion) {
     final long xk = BitInterval.from(xkRank, xkBase);
     final long yk = BitInterval.from(ykRank, ykBase);
-    return updated(key, xk, yk, newValue, newVersion);
+    return this.updated(key, xk, yk, newValue, newVersion);
   }
 
   abstract QTreePage insertedPageRef(QTreePageRef newPageRef, long newVersion);
@@ -167,7 +138,7 @@ public abstract class QTreePage extends Page {
                            int ykRank, long ykBase, long newVersion) {
     final long xk = BitInterval.from(xkRank, xkBase);
     final long yk = BitInterval.from(ykRank, ykBase);
-    return removed(key, xk, yk, newVersion);
+    return this.removed(key, xk, yk, newVersion);
   }
 
   public abstract QTreePage flattened(long newVersion);
@@ -192,7 +163,7 @@ public abstract class QTreePage extends Page {
 
   @Override
   public Cursor<Slot> cursor() {
-    return cursor(-1L, -1L);
+    return this.cursor(-1L, -1L);
   }
 
   public abstract Cursor<Slot> cursor(long x, long y);
@@ -200,19 +171,40 @@ public abstract class QTreePage extends Page {
   public abstract Cursor<Slot> depthCursor(long x, long y, int maxDepth);
 
   public Cursor<Slot> depthCursor(int maxDepth) {
-    return depthCursor(-1L, -1L, maxDepth);
+    return this.depthCursor(-1L, -1L, maxDepth);
   }
 
   public abstract Cursor<Slot> deltaCursor(long x, long y, long sinceVersion);
 
   public Cursor<Slot> deltaCursor(long sinceVersion) {
-    return deltaCursor(-1L, -1L, sinceVersion);
+    return this.deltaCursor(-1L, -1L, sinceVersion);
   }
 
   public abstract Cursor<Slot> tileCursor(long x, long y);
 
   public Cursor<Slot> tileCursor() {
-    return tileCursor(-1L, -1L);
+    return this.tileCursor(-1L, -1L);
+  }
+
+  static final Slot[] EMPTY_SLOTS = new Slot[0];
+  static final Comparator<QTreePageRef> PAGE_REF_ORDERING = new QTreePageRefOrdering();
+  static final Comparator<Slot> SLOT_ORDERING = new QTreeSlotOrdering();
+
+  public static QTreePage empty(PageContext context, int stem, long version) {
+    return QTreeLeaf.empty(context, stem, version);
+  }
+
+  public static QTreePage fromValue(QTreePageRef pageRef, Value value) {
+    switch (pageRef.pageType()) {
+      case LEAF: return QTreeLeaf.fromValue(pageRef, value);
+      case NODE: return QTreeNode.fromValue(pageRef, value);
+      default: throw new IllegalArgumentException(pageRef.toString());
+    }
+  }
+
+  static Slot slot(Value key, long xk, long yk, Value value) {
+    final Record tile = Record.create(2).item(Num.uint64(xk)).item(Num.uint64(yk));
+    return Slot.of(key, Record.create(2).attr("tile", tile).concat(value)).commit();
   }
 
 }

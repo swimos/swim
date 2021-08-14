@@ -26,13 +26,13 @@ final class NullDecoder<T> extends Decoder<T> {
     this.type = type;
   }
 
-  static <T> Decoder<T> decode(InputBuffer input, AvroNullType<T> type) {
-    return done(type.cast());
-  }
-
   @Override
   public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type);
+    return NullDecoder.decode(input, this.type);
+  }
+
+  static <T> Decoder<T> decode(InputBuffer input, AvroNullType<T> type) {
+    return Decoder.done(type.cast());
   }
 
 }

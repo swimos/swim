@@ -16,22 +16,18 @@ package swim.uri;
 
 abstract class UriAuthorityMapper<T> extends UriSchemeMapper<T> {
 
-  static <T> UriAuthorityMapper<T> compile(Uri pattern, UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment, T value) {
-    return UriPathMapper.compile(pattern, path, query, fragment, value);
-  }
-
   abstract UriMapper<T> getSuffix(UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment);
 
   @Override
   UriMapper<T> getSuffix(UriScheme scheme, UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
-    return getSuffix(authority, path, query, fragment);
+    return this.getSuffix(authority, path, query, fragment);
   }
 
   abstract T get(UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment);
 
   @Override
   T get(UriScheme scheme, UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
-    return get(authority, path, query, fragment);
+    return this.get(authority, path, query, fragment);
   }
 
   abstract UriAuthorityMapper<T> merged(UriAuthorityMapper<T> that);
@@ -39,7 +35,7 @@ abstract class UriAuthorityMapper<T> extends UriSchemeMapper<T> {
   @Override
   UriSchemeMapper<T> merged(UriSchemeMapper<T> that) {
     if (that instanceof UriAuthorityMapper<?>) {
-      return merged((UriAuthorityMapper<T>) that);
+      return this.merged((UriAuthorityMapper<T>) that);
     } else {
       return that;
     }
@@ -49,7 +45,7 @@ abstract class UriAuthorityMapper<T> extends UriSchemeMapper<T> {
 
   @Override
   UriSchemeMapper<T> removed(UriScheme scheme, UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment) {
-    return removed(authority, path, query, fragment);
+    return this.removed(authority, path, query, fragment);
   }
 
   abstract UriAuthorityMapper<T> unmerged(UriAuthorityMapper<T> that);
@@ -57,10 +53,14 @@ abstract class UriAuthorityMapper<T> extends UriSchemeMapper<T> {
   @Override
   UriSchemeMapper<T> unmerged(UriSchemeMapper<T> that) {
     if (that instanceof UriAuthorityMapper<?>) {
-      return unmerged((UriAuthorityMapper<T>) that);
+      return this.unmerged((UriAuthorityMapper<T>) that);
     } else {
       return this;
     }
+  }
+
+  static <T> UriAuthorityMapper<T> compile(Uri pattern, UriAuthority authority, UriPath path, UriQuery query, UriFragment fragment, T value) {
+    return UriPathMapper.compile(pattern, path, query, fragment, value);
   }
 
 }

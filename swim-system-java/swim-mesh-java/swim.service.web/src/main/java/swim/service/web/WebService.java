@@ -45,6 +45,7 @@ public class WebService implements Service, HttpService, HttpInterface {
     this.serviceContext = serviceContext;
     this.serviceDef = serviceDef;
     this.router = router;
+    this.httpServiceContext = null;
   }
 
   public final KernelContext kernel() {
@@ -120,32 +121,32 @@ public class WebService implements Service, HttpService, HttpInterface {
 
   @Override
   public void willStart() {
-    // stub
+    // hook
   }
 
   @Override
   public void didStart() {
     final WebServiceDef serviceDef = this.serviceDef;
     if (serviceDef.isSecure) {
-      bindHttps(serviceDef.address, serviceDef.port, this, serviceDef.warpSettings.httpSettings());
+      this.bindHttps(serviceDef.address, serviceDef.port, this, serviceDef.warpSettings.httpSettings());
     } else {
-      bindHttp(serviceDef.address, serviceDef.port, this, serviceDef.warpSettings.httpSettings());
+      this.bindHttp(serviceDef.address, serviceDef.port, this, serviceDef.warpSettings.httpSettings());
     }
   }
 
   @Override
   public void didBind() {
-    // stub
+    // hook
   }
 
   @Override
   public void didAccept(HttpServer server) {
-    // stub
+    // hook
   }
 
   @Override
   public void didUnbind() {
-    // stub
+    // hook
   }
 
   @Override
@@ -159,17 +160,17 @@ public class WebService implements Service, HttpService, HttpInterface {
 
   @Override
   public void didStop() {
-    // stub
+    // hook
   }
 
   @Override
   public void willClose() {
-    // stub
+    // hook
   }
 
   @Override
   public void didClose() {
-    // stub
+    // hook
   }
 
   @Override

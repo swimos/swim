@@ -32,6 +32,11 @@ final class DataWriter extends Writer<Object, Object> {
     this.step = step;
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return DataWriter.write(output, this.buffer, this.part, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, ByteBuffer buffer,
                                       Writer<?, ?> part, int step) {
     if (step == 1 && output.isCont()) {
@@ -53,23 +58,18 @@ final class DataWriter extends Writer<Object, Object> {
     }
     if (step == 3 && output.isCont()) {
       output = output.write('"');
-      return done();
+      return Writer.done();
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new DataWriter(buffer, part, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, ByteBuffer buffer) {
-    return write(output, buffer, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.buffer, this.part, this.step);
+    return DataWriter.write(output, buffer, null, 1);
   }
 
 }

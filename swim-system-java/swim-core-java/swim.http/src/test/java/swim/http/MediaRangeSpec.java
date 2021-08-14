@@ -19,61 +19,61 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class MediaRangeSpec {
 
-  public void assertParses(String string, MediaRange mediaRange) {
-    HttpAssertions.assertParses(Http.standardParser().mediaRangeParser(), string, mediaRange);
-  }
-
   @Test
   public void parseMediaRanges() {
-    assertParses("*/*", MediaRange.from("*", "*"));
-    assertParses("text/*", MediaRange.from("text", "*"));
-    assertParses("text/plain", MediaRange.from("text", "plain"));
+    assertParses("*/*", MediaRange.create("*", "*"));
+    assertParses("text/*", MediaRange.create("text", "*"));
+    assertParses("text/plain", MediaRange.create("text", "plain"));
   }
 
   @Test
   public void writeMediaRanges() {
-    assertWrites(MediaRange.from("*", "*"), "*/*");
-    assertWrites(MediaRange.from("text", "*"), "text/*");
-    assertWrites(MediaRange.from("text", "plain"), "text/plain");
+    assertWrites(MediaRange.create("*", "*"), "*/*");
+    assertWrites(MediaRange.create("text", "*"), "text/*");
+    assertWrites(MediaRange.create("text", "plain"), "text/plain");
   }
 
   @Test
   public void parseMediaRangesWithWeights() {
-    assertParses("text/*;q=0.5", MediaRange.from("text", "*", 0.5f));
-    assertParses("text/* ; q=0.5", MediaRange.from("text", "*", 0.5f));
+    assertParses("text/*;q=0.5", MediaRange.create("text", "*", 0.5f));
+    assertParses("text/* ; q=0.5", MediaRange.create("text", "*", 0.5f));
   }
 
   @Test
   public void writeMediaRangesWithWeights() {
-    assertWrites(MediaRange.from("text", "*", 0.5f), "text/*; q=0.5");
+    assertWrites(MediaRange.create("text", "*", 0.5f), "text/*; q=0.5");
   }
 
   @Test
   public void parseMediaRangesWithParams() {
     assertParses("text/*;charset=UTF-8",
-        MediaRange.from("text", "*").param("charset", "UTF-8"));
+                 MediaRange.create("text", "*").param("charset", "UTF-8"));
     assertParses("text/* ; charset = UTF-8",
-        MediaRange.from("text", "*").param("charset", "UTF-8"));
+                 MediaRange.create("text", "*").param("charset", "UTF-8"));
   }
 
   @Test
   public void writeMediaRangesWithParams() {
-    assertWrites(MediaRange.from("text", "*").param("charset", "UTF-8"),
-        "text/*; charset=UTF-8");
+    assertWrites(MediaRange.create("text", "*").param("charset", "UTF-8"),
+                 "text/*; charset=UTF-8");
   }
 
   @Test
   public void parseMediaRangesWithWeightsAndParams() {
     assertParses("text/*;q=0.5;charset=UTF-8",
-        MediaRange.from("text", "*", 0.5f).param("charset", "UTF-8"));
+                 MediaRange.create("text", "*", 0.5f).param("charset", "UTF-8"));
     assertParses("text/* ; q=0.5 ; charset = UTF-8",
-        MediaRange.from("text", "*", 0.5f).param("charset", "UTF-8"));
+                 MediaRange.create("text", "*", 0.5f).param("charset", "UTF-8"));
   }
 
   @Test
   public void writeMediaRangesWithWeightsAndParams() {
-    assertWrites(MediaRange.from("text", "*", 0.5f).param("charset", "UTF-8"),
-        "text/*; q=0.5; charset=UTF-8");
+    assertWrites(MediaRange.create("text", "*", 0.5f).param("charset", "UTF-8"),
+                 "text/*; q=0.5; charset=UTF-8");
+  }
+
+  public static void assertParses(String string, MediaRange mediaRange) {
+    HttpAssertions.assertParses(Http.standardParser().mediaRangeParser(), string, mediaRange);
   }
 
 }

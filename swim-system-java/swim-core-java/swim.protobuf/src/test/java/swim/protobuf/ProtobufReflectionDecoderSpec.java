@@ -26,137 +26,108 @@ import swim.util.Murmur3;
 
 public class ProtobufReflectionDecoderSpec {
 
-  public static <T> void assertDecodes(ProtobufType<T> type, Data data, T expected) {
-    Assertions.assertDecodes(Protobuf.typeDecoder(type), data, expected);
-  }
-
-  public static <T> void assertDecodesPayload(ProtobufType<T> type, Data data, T expected) {
-    Assertions.assertDecodes(Protobuf.payloadDecoder((ProtobufMessageType<T, ?>) type), data, expected);
-  }
-
   @Test
   public void decodeBooleanReflections() {
     assertDecodes(ProtobufReflection.booleanType(),
-        Data.fromBase16("00"), false);
+                  Data.fromBase16("00"), false);
     assertDecodes(ProtobufReflection.booleanType(),
-        Data.fromBase16("01"), true);
+                  Data.fromBase16("01"), true);
   }
 
   @Test
   public void decodeIntReflections() {
     assertDecodes(ProtobufReflection.intType(),
-        Data.fromBase16("00"), 0);
+                  Data.fromBase16("00"), 0);
     assertDecodes(ProtobufReflection.intType(),
-        Data.fromBase16("01"), -1);
+                  Data.fromBase16("01"), -1);
     assertDecodes(ProtobufReflection.intType(),
-        Data.fromBase16("02"), 1);
+                  Data.fromBase16("02"), 1);
     assertDecodes(ProtobufReflection.intType(),
-        Data.fromBase16("03"), -2);
+                  Data.fromBase16("03"), -2);
     assertDecodes(ProtobufReflection.intType(),
-        Data.fromBase16("04"), 2);
+                  Data.fromBase16("04"), 2);
     assertDecodes(ProtobufReflection.intType(),
-        Data.fromBase16("7f"), -64);
+                  Data.fromBase16("7f"), -64);
     assertDecodes(ProtobufReflection.intType(),
-        Data.fromBase16("8001"), 64);
+                  Data.fromBase16("8001"), 64);
   }
 
   @Test
   public void decodeLongReflections() {
     assertDecodes(ProtobufReflection.longType(),
-        Data.fromBase16("00"), 0L);
+                  Data.fromBase16("00"), 0L);
     assertDecodes(ProtobufReflection.longType(),
-        Data.fromBase16("01"), -1L);
+                  Data.fromBase16("01"), -1L);
     assertDecodes(ProtobufReflection.longType(),
-        Data.fromBase16("02"), 1L);
+                  Data.fromBase16("02"), 1L);
     assertDecodes(ProtobufReflection.longType(),
-        Data.fromBase16("03"), -2L);
+                  Data.fromBase16("03"), -2L);
     assertDecodes(ProtobufReflection.longType(),
-        Data.fromBase16("04"), 2L);
+                  Data.fromBase16("04"), 2L);
     assertDecodes(ProtobufReflection.longType(),
-        Data.fromBase16("7f"), -64L);
+                  Data.fromBase16("7f"), -64L);
     assertDecodes(ProtobufReflection.longType(),
-        Data.fromBase16("8001"), 64L);
+                  Data.fromBase16("8001"), 64L);
   }
 
   @Test
   public void decodeFloatReflections() {
     assertDecodes(ProtobufReflection.floatType(),
-        Data.fromBase16("00000000"), 0.0f);
+                  Data.fromBase16("00000000"), 0.0f);
     assertDecodes(ProtobufReflection.floatType(),
-        Data.fromBase16("0000803f"), 1.0f);
+                  Data.fromBase16("0000803f"), 1.0f);
     assertDecodes(ProtobufReflection.floatType(),
-        Data.fromBase16("000080bf"), -1.0f);
+                  Data.fromBase16("000080bf"), -1.0f);
     assertDecodes(ProtobufReflection.floatType(),
-        Data.fromBase16("0000c07f"), Float.NaN);
+                  Data.fromBase16("0000c07f"), Float.NaN);
     assertDecodes(ProtobufReflection.floatType(),
-        Data.fromBase16("0000807f"), Float.POSITIVE_INFINITY);
+                  Data.fromBase16("0000807f"), Float.POSITIVE_INFINITY);
     assertDecodes(ProtobufReflection.floatType(),
-        Data.fromBase16("000080ff"), Float.NEGATIVE_INFINITY);
+                  Data.fromBase16("000080ff"), Float.NEGATIVE_INFINITY);
   }
 
   @Test
   public void decodeDoubleReflections() {
     assertDecodes(ProtobufReflection.doubleType(),
-        Data.fromBase16("0000000000000000"), 0.0);
+                  Data.fromBase16("0000000000000000"), 0.0);
     assertDecodes(ProtobufReflection.doubleType(),
-        Data.fromBase16("000000000000f03f"), 1.0);
+                  Data.fromBase16("000000000000f03f"), 1.0);
     assertDecodes(ProtobufReflection.doubleType(),
-        Data.fromBase16("000000000000f0bf"), -1.0);
+                  Data.fromBase16("000000000000f0bf"), -1.0);
     assertDecodes(ProtobufReflection.doubleType(),
-        Data.fromBase16("000000000000f87f"), Double.NaN);
+                  Data.fromBase16("000000000000f87f"), Double.NaN);
     assertDecodes(ProtobufReflection.doubleType(),
-        Data.fromBase16("000000000000f07f"), Double.POSITIVE_INFINITY);
+                  Data.fromBase16("000000000000f07f"), Double.POSITIVE_INFINITY);
     assertDecodes(ProtobufReflection.doubleType(),
-        Data.fromBase16("000000000000f0ff"), Double.NEGATIVE_INFINITY);
+                  Data.fromBase16("000000000000f0ff"), Double.NEGATIVE_INFINITY);
   }
 
   @Test
   public void decodeDataReflections() {
     assertDecodes(ProtobufReflection.dataType(),
-        Data.fromBase16("04f0e1d2c3"), Data.fromBase16("f0e1d2c3").toByteBuffer());
+                  Data.fromBase16("04f0e1d2c3"), Data.fromBase16("f0e1d2c3").toByteBuffer());
   }
 
   @Test
   public void decodeStringReflections() {
     assertDecodes(ProtobufReflection.stringType(),
-        Data.fromBase16("03666f6f"), "foo");
+                  Data.fromBase16("03666f6f"), "foo");
   }
 
   @Test
   public void decodePackedArrayReflections() {
     assertDecodes(ProtobufReflection.arrayType(Long.TYPE, ProtobufReflection.longType()),
-        Data.fromBase16("069601"), new long[] {3, 75});
+                  Data.fromBase16("069601"), new long[] {3, 75});
   }
 
   @Test
   public void decodeMessageReflections() {
     assertDecodesPayload(ProtobufReflection.classType(TestMessage.class),
-        Data.fromBase16("0896011203666f6f"), new TestMessage(75, "foo"));
+                         Data.fromBase16("0896011203666f6f"), new TestMessage(75, "foo"));
     assertDecodesPayload(ProtobufReflection.classType(TestMessage.class),
-        Data.fromBase16("089601"), new TestMessage(75, null));
+                         Data.fromBase16("089601"), new TestMessage(75, null));
     assertDecodesPayload(ProtobufReflection.classType(TestMessage.class),
-        Data.fromBase16("1203666f6f"), new TestMessage(0, "foo"));
-  }
-
-  @Test
-  public void decodeRepeatedArrayFields() {
-    assertDecodesPayload(ProtobufReflection.classType(TestArrayMessage.class),
-        Data.fromBase16("0806089601"), new TestArrayMessage(new int[] {3, 75}));
-  }
-
-  @Test
-  public void decodePackedArrayFields() {
-    assertDecodesPayload(ProtobufReflection.classType(TestArrayMessage.class),
-        Data.fromBase16("0a069601"), new TestArrayMessage(new int[] {3, 75}));
-  }
-
-  @Test
-  public void decodeMapEntryFields() {
-    final Map<String, Integer> map = new HashMap<String, Integer>();
-    map.put("a", 3);
-    map.put("b", 75);
-    assertDecodesPayload(ProtobufReflection.classType(TestMapMessage.class),
-        Data.fromBase16("0a050a016110060a060a0162109601"), new TestMapMessage(map));
+                         Data.fromBase16("1203666f6f"), new TestMessage(0, "foo"));
   }
 
   public static class TestMessage {
@@ -172,7 +143,7 @@ public class ProtobufReflectionDecoderSpec {
     }
 
     public TestMessage() {
-      // stub
+      // default
     }
 
     @Override
@@ -197,6 +168,12 @@ public class ProtobufReflectionDecoderSpec {
 
   }
 
+  @Test
+  public void decodeRepeatedArrayFields() {
+    assertDecodesPayload(ProtobufReflection.classType(TestArrayMessage.class),
+                         Data.fromBase16("0806089601"), new TestArrayMessage(new int[] {3, 75}));
+  }
+
   public static class TestArrayMessage {
 
     @ProtobufMember(1)
@@ -207,7 +184,7 @@ public class ProtobufReflectionDecoderSpec {
     }
 
     public TestArrayMessage() {
-      // stub
+      // default
     }
 
     @Override
@@ -231,6 +208,21 @@ public class ProtobufReflectionDecoderSpec {
 
   }
 
+  @Test
+  public void decodePackedArrayFields() {
+    assertDecodesPayload(ProtobufReflection.classType(TestArrayMessage.class),
+                         Data.fromBase16("0a069601"), new TestArrayMessage(new int[] {3, 75}));
+  }
+
+  @Test
+  public void decodeMapEntryFields() {
+    final Map<String, Integer> map = new HashMap<String, Integer>();
+    map.put("a", 3);
+    map.put("b", 75);
+    assertDecodesPayload(ProtobufReflection.classType(TestMapMessage.class),
+                         Data.fromBase16("0a050a016110060a060a0162109601"), new TestMapMessage(map));
+  }
+
   public static class TestMapMessage {
 
     @ProtobufMember(1)
@@ -241,7 +233,7 @@ public class ProtobufReflectionDecoderSpec {
     }
 
     public TestMapMessage() {
-      // stub
+      // default
     }
 
     @Override
@@ -263,6 +255,14 @@ public class ProtobufReflectionDecoderSpec {
       return "new TestMapMessage(" + this.map + ")";
     }
 
+  }
+
+  public static <T> void assertDecodes(ProtobufType<T> type, Data data, T expected) {
+    ProtobufAssertions.assertDecodes(Protobuf.typeDecoder(type), data, expected);
+  }
+
+  public static <T> void assertDecodesPayload(ProtobufType<T> type, Data data, T expected) {
+    ProtobufAssertions.assertDecodes(Protobuf.payloadDecoder((ProtobufMessageType<T, ?>) type), data, expected);
   }
 
 }

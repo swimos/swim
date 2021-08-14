@@ -23,9 +23,9 @@ public abstract class ProtobufMapEntryType<K, V, E> extends ProtobufMessageType<
   @Override
   public ProtobufFieldType<?, E> getField(long fieldNumber) {
     if (fieldNumber == 1L) {
-      return keyField();
+      return this.keyField();
     } else if (fieldNumber == 2L) {
-      return valueField();
+      return this.valueField();
     } else {
       return null;
     }

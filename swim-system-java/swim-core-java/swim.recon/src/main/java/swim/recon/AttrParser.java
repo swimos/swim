@@ -34,7 +34,7 @@ final class AttrParser<I, V> extends Parser<I> {
 
   @Override
   public Parser<I> feed(Input input) {
-    return parse(input, this.recon, this.keyParser, this.valueParser, this.step);
+    return AttrParser.parse(input, this.recon, this.keyParser, this.valueParser, this.step);
   }
 
   static <I, V> Parser<I> parse(Input input, ReconParser<I, V> recon, Parser<V> keyParser,
@@ -47,10 +47,10 @@ final class AttrParser<I, V> extends Parser<I> {
           input = input.step();
           step = 2;
         } else {
-          return error(Diagnostic.expected('@', input));
+          return Parser.error(Diagnostic.expected('@', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('@', input));
+        return Parser.error(Diagnostic.expected('@', input));
       }
     }
     if (step == 2) {
@@ -62,10 +62,10 @@ final class AttrParser<I, V> extends Parser<I> {
           } else if (Recon.isIdentStartChar(c)) {
             keyParser = recon.parseIdent(input);
           } else {
-            return error(Diagnostic.expected("attribute name", input));
+            return Parser.error(Diagnostic.expected("attribute name", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("attribute name", input));
+          return Parser.error(Diagnostic.expected("attribute name", input));
         }
       } else {
         keyParser = keyParser.feed(input);
@@ -83,7 +83,7 @@ final class AttrParser<I, V> extends Parser<I> {
         input = input.step();
         step = 4;
       } else if (!input.isEmpty()) {
-        return done(recon.attr(keyParser.bind()));
+        return Parser.done(recon.attr(keyParser.bind()));
       }
     }
     if (step == 4) {
@@ -98,12 +98,12 @@ final class AttrParser<I, V> extends Parser<I> {
       if (input.isCont()) {
         if (c == ')') {
           input = input.step();
-          return done(recon.attr(keyParser.bind()));
+          return Parser.done(recon.attr(keyParser.bind()));
         } else {
           step = 5;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected(')', input));
+        return Parser.error(Diagnostic.expected(')', input));
       }
     }
     if (step == 5) {
@@ -131,22 +131,22 @@ final class AttrParser<I, V> extends Parser<I> {
       if (input.isCont()) {
         if (c == ')') {
           input = input.step();
-          return done(recon.attr(keyParser.bind(), valueParser.bind()));
+          return Parser.done(recon.attr(keyParser.bind(), valueParser.bind()));
         } else {
-          return error(Diagnostic.expected(')', input));
+          return Parser.error(Diagnostic.expected(')', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected(')', input));
+        return Parser.error(Diagnostic.expected(')', input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new AttrParser<I, V>(recon, keyParser, valueParser, step);
   }
 
   static <I, V> Parser<I> parse(Input input, ReconParser<I, V> recon) {
-    return parse(input, recon, null, null, 1);
+    return AttrParser.parse(input, recon, null, null, 1);
   }
 
 }

@@ -21,82 +21,8 @@ import swim.util.Murmur3;
  */
 public abstract class UtfErrorMode implements Debug {
 
-  private static UtfErrorMode fatal;
-  private static UtfErrorMode fatalNonZero;
-  private static UtfErrorMode replacement;
-  private static UtfErrorMode replacementNonZero;
-
   UtfErrorMode() {
-  }
-
-  /**
-   * Returns a {@code UtfErrorMode} that aborts Unicode decoding with an error
-   * when invalid code unit sequences are encountered.
-   */
-  public static UtfErrorMode fatal() {
-    if (fatal == null) {
-      fatal = new UtfFatalErrorMode(false);
-    }
-    return fatal;
-  }
-
-  /**
-   * Returns a {@code UtfErrorMode} that aborts Unicode decoding with an error
-   * when invalid code unit sequences, and {@code NUL} bytes, are encountered.
-   */
-  public static UtfErrorMode fatalNonZero() {
-    if (fatalNonZero == null) {
-      fatalNonZero = new UtfFatalErrorMode(true);
-    }
-    return fatalNonZero;
-  }
-
-  /**
-   * Returns a {@code UtfErrorMode} that substitutes invalid code unit
-   * sequences with the replacement character ({@code U+FFFD}).
-   */
-  public static UtfErrorMode replacement() {
-    if (replacement == null) {
-      replacement = new UtfReplacementErrorMode(0xfffd, false);
-    }
-    return replacement;
-  }
-
-  /**
-   * Returns a {@code UtfErrorMode} that substitutes invalid code unit
-   * sequences with the given {@code replacementChar}.
-   */
-  public static UtfErrorMode replacement(int replacementChar) {
-    if (replacementChar == 0xfffd) {
-      return replacement();
-    } else {
-      return new UtfReplacementErrorMode(replacementChar, false);
-    }
-  }
-
-  /**
-   * Returns a {@code UtfErrorMode} that substitutes invalid code unit
-   * sequences with the replacement character ({@code U+FFFD}), and aborts
-   * decoding with an error when {@code NUL} bytes are encountered.
-   */
-  public static UtfErrorMode replacementNonZero() {
-    if (replacementNonZero == null) {
-      replacementNonZero = new UtfReplacementErrorMode(0xfffd, true);
-    }
-    return replacementNonZero;
-  }
-
-  /**
-   * Returns a {@code UtfErrorMode} that substitutes invalid code unit
-   * sequences with the given {@code replacementChar}, and aborts decoding
-   * with an error when {@code NUL} bytes are encountered.
-   */
-  public static UtfErrorMode replacementNonZero(int replacementChar) {
-    if (replacementChar == 0xfffd) {
-      return replacementNonZero();
-    } else {
-      return new UtfReplacementErrorMode(replacementChar, true);
-    }
+    // sealed
   }
 
   /**
@@ -117,7 +43,7 @@ public abstract class UtfErrorMode implements Debug {
 
   /**
    * Returns the Unicode code point of the replacement character to substitute
-   * for invalid code unit sequences.  Defaults to {@code U+FFFD}.
+   * for invalid code unit sequences. Defaults to {@code U+FFFD}.
    */
   public int replacementChar() {
     return 0xfffd;
@@ -136,18 +62,95 @@ public abstract class UtfErrorMode implements Debug {
   public abstract UtfErrorMode isNonZero(boolean isNonZero);
 
   @Override
-  public abstract void debug(Output<?> output);
+  public abstract <T> Output<T> debug(Output<T> output);
 
   @Override
   public String toString() {
     return Format.debug(this);
   }
 
+  private static UtfErrorMode fatal;
+
+  /**
+   * Returns a {@code UtfErrorMode} that aborts Unicode decoding with an error
+   * when invalid code unit sequences are encountered.
+   */
+  public static UtfErrorMode fatal() {
+    if (UtfErrorMode.fatal == null) {
+      UtfErrorMode.fatal = new UtfFatalErrorMode(false);
+    }
+    return UtfErrorMode.fatal;
+  }
+
+  private static UtfErrorMode fatalNonZero;
+
+  /**
+   * Returns a {@code UtfErrorMode} that aborts Unicode decoding with an error
+   * when invalid code unit sequences, and {@code NUL} bytes, are encountered.
+   */
+  public static UtfErrorMode fatalNonZero() {
+    if (UtfErrorMode.fatalNonZero == null) {
+      UtfErrorMode.fatalNonZero = new UtfFatalErrorMode(true);
+    }
+    return UtfErrorMode.fatalNonZero;
+  }
+
+  private static UtfErrorMode replacement;
+
+  /**
+   * Returns a {@code UtfErrorMode} that substitutes invalid code unit
+   * sequences with the replacement character ({@code U+FFFD}).
+   */
+  public static UtfErrorMode replacement() {
+    if (UtfErrorMode.replacement == null) {
+      UtfErrorMode.replacement = new UtfReplacementErrorMode(0xfffd, false);
+    }
+    return UtfErrorMode.replacement;
+  }
+
+  /**
+   * Returns a {@code UtfErrorMode} that substitutes invalid code unit
+   * sequences with the given {@code replacementChar}.
+   */
+  public static UtfErrorMode replacement(int replacementChar) {
+    if (replacementChar == 0xfffd) {
+      return UtfErrorMode.replacement();
+    } else {
+      return new UtfReplacementErrorMode(replacementChar, false);
+    }
+  }
+
+  private static UtfErrorMode replacementNonZero;
+
+  /**
+   * Returns a {@code UtfErrorMode} that substitutes invalid code unit
+   * sequences with the replacement character ({@code U+FFFD}), and aborts
+   * decoding with an error when {@code NUL} bytes are encountered.
+   */
+  public static UtfErrorMode replacementNonZero() {
+    if (UtfErrorMode.replacementNonZero == null) {
+      UtfErrorMode.replacementNonZero = new UtfReplacementErrorMode(0xfffd, true);
+    }
+    return UtfErrorMode.replacementNonZero;
+  }
+
+  /**
+   * Returns a {@code UtfErrorMode} that substitutes invalid code unit
+   * sequences with the given {@code replacementChar}, and aborts decoding
+   * with an error when {@code NUL} bytes are encountered.
+   */
+  public static UtfErrorMode replacementNonZero(int replacementChar) {
+    if (replacementChar == 0xfffd) {
+      return UtfErrorMode.replacementNonZero();
+    } else {
+      return new UtfReplacementErrorMode(replacementChar, true);
+    }
+  }
+
 }
 
 final class UtfFatalErrorMode extends UtfErrorMode {
 
-  private static int hashSeed;
   private final boolean isNonZero;
 
   UtfFatalErrorMode(boolean isNonZero) {
@@ -184,26 +187,28 @@ final class UtfFatalErrorMode extends UtfErrorMode {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(UtfFatalErrorMode.class);
+    if (UtfFatalErrorMode.hashSeed == 0) {
+      UtfFatalErrorMode.hashSeed = Murmur3.seed(UtfFatalErrorMode.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, Murmur3.hash(this.isNonZero)));
+    return Murmur3.mash(Murmur3.mix(UtfFatalErrorMode.hashSeed, Murmur3.hash(this.isNonZero)));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("UtfErrorMode").write('.')
-        .write(this.isNonZero ? "fatalNonZero" : "fatal")
-        .write('(').write(')');
+                   .write(this.isNonZero ? "fatalNonZero" : "fatal")
+                   .write('(').write(')');
+    return output;
   }
 
 }
 
 final class UtfReplacementErrorMode extends UtfErrorMode {
 
-  private static int hashSeed;
   private final int replacementChar;
   private final boolean isNonZero;
 
@@ -252,24 +257,27 @@ final class UtfReplacementErrorMode extends UtfErrorMode {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(UtfReplacementErrorMode.class);
+    if (UtfReplacementErrorMode.hashSeed == 0) {
+      UtfReplacementErrorMode.hashSeed = Murmur3.seed(UtfReplacementErrorMode.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(UtfReplacementErrorMode.hashSeed,
         this.replacementChar), Murmur3.hash(this.isNonZero)));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("UtfErrorMode").write('.')
-        .write(this.isNonZero ? "replacementNonZero" : "replacement")
-        .write('(');
+                   .write(this.isNonZero ? "replacementNonZero" : "replacement")
+                   .write('(');
     if (this.replacementChar != 0xfffd) {
-      Format.debugChar(this.replacementChar, output);
+      output = Format.debugChar(this.replacementChar, output);
     }
     output = output.write(')');
+    return output;
   }
 
 }

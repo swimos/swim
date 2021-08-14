@@ -21,17 +21,17 @@ public interface MapInlet<K, V, I> extends Inlet<I> {
 
   /**
    * Marks this {@code MapInlet} as needing an {@code effect} applied to a
-   * given {@code key}.  Decohering an individual key decoheres the entire
-   * state of the {@code Inlet}.  But only the decoherent keys need to be
+   * given {@code key}. Decohering an individual key decoheres the entire
+   * state of the {@code Inlet}. But only the decoherent keys need to be
    * updated in order to recohere the overall state of the {@code Inlet}.
    */
   void decohereOutputKey(K key, KeyEffect effect);
 
   /**
    * Updates the state of an individual {@code key} in this {@code MapInlet} to
-   * make it consistent with the target {@code version}.  The {@code MapInlet}
+   * make it consistent with the target {@code version}. The {@code MapInlet}
    * only needs to update if the current {@code version} differs from the target
-   * {@code version}.  To update the state of a key, the {@code MapInlet}
+   * {@code version}. To update the state of a key, the {@code MapInlet}
    * first invokes {@link MapOutlet#recohereInputKey(Object, int)} on its
    * {@link #input() input}, if its input is a {@link MapOutlet}, or it invokes
    * {@link Outlet#recohereInput(int)}, if its input is not a {@code MapOutlet}.

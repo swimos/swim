@@ -59,9 +59,8 @@ final class STreeNode<T> extends STreePage<T> {
 
   @Override
   public boolean contains(Object value) {
-    final STreePage<T>[] pages = this.pages;
-    for (int i = 0, n = pages.length; i < n; i += 1) {
-      if (pages[i].contains(value)) {
+    for (int i = 0, n = this.pages.length; i < n; i += 1) {
+      if (this.pages[i].contains(value)) {
         return true;
       }
     }
@@ -70,10 +69,9 @@ final class STreeNode<T> extends STreePage<T> {
 
   @Override
   public int indexOf(Object object) {
-    final STreePage<T>[] pages = this.pages;
     int k = 0;
-    for (int x = 0, n = pages.length; x < n; x += 1) {
-      final STreePage<T> page = pages[x];
+    for (int x = 0, n = this.pages.length; x < n; x += 1) {
+      final STreePage<T> page = this.pages[x];
       final int i = page.indexOf(object);
       if (i >= 0) {
         return k + i;
@@ -85,10 +83,9 @@ final class STreeNode<T> extends STreePage<T> {
 
   @Override
   public int lastIndexOf(Object object) {
-    final STreePage<T>[] pages = this.pages;
     int k = this.size;
-    for (int x = pages.length - 1; x >= 0; x -= 1) {
-      final STreePage<T> page = pages[x];
+    for (int x = this.pages.length - 1; x >= 0; x -= 1) {
+      final STreePage<T> page = this.pages[x];
       final int i = page.lastIndexOf(object);
       k -= page.size();
       if (i >= 0) {
@@ -100,7 +97,7 @@ final class STreeNode<T> extends STreePage<T> {
 
   @Override
   public T get(int index) {
-    int x = lookup(index);
+    int x = this.lookup(index);
     if (x >= 0) {
       x += 1;
     } else {
@@ -112,7 +109,7 @@ final class STreeNode<T> extends STreePage<T> {
 
   @Override
   public Map.Entry<Object, T> getEntry(int index) {
-    int x = lookup(index);
+    int x = this.lookup(index);
     if (x >= 0) {
       x += 1;
     } else {
@@ -124,7 +121,7 @@ final class STreeNode<T> extends STreePage<T> {
 
   @Override
   public STreeNode<T> updated(int index, T newValue, STreeContext<T> tree) {
-    int x = lookup(index);
+    int x = this.lookup(index);
     if (x >= 0) {
       x += 1;
     } else {
@@ -135,9 +132,9 @@ final class STreeNode<T> extends STreePage<T> {
     final STreePage<T> newPage = oldPage.updated(i, newValue, tree);
     if (oldPage != newPage) {
       if (oldPage.size() != newPage.size() && tree.pageShouldSplit(newPage)) {
-        return updatedPageSplit(x, newPage, oldPage);
+        return this.updatedPageSplit(x, newPage, oldPage);
       } else {
-        return updatedPage(x, newPage, oldPage);
+        return this.updatedPage(x, newPage, oldPage);
       }
     } else {
       return this;
@@ -209,7 +206,7 @@ final class STreeNode<T> extends STreePage<T> {
 
   @Override
   public STreeNode<T> inserted(int index, T newValue, Object id, STreeContext<T> tree) {
-    int x = lookup(index);
+    int x = this.lookup(index);
     if (x >= 0) {
       x += 1;
     } else {
@@ -220,9 +217,9 @@ final class STreeNode<T> extends STreePage<T> {
     final STreePage<T> newPage = oldPage.inserted(i, newValue, id, tree);
     if (oldPage != newPage) {
       if (tree.pageShouldSplit(newPage)) {
-        return updatedPageSplit(x, newPage, oldPage);
+        return this.updatedPageSplit(x, newPage, oldPage);
       } else {
-        return updatedPage(x, newPage, oldPage);
+        return this.updatedPage(x, newPage, oldPage);
       }
     } else {
       return this;
@@ -231,7 +228,7 @@ final class STreeNode<T> extends STreePage<T> {
 
   @Override
   public STreePage<T> removed(int index, STreeContext<T> tree) {
-    int x = lookup(index);
+    int x = this.lookup(index);
     if (x >= 0) {
       x += 1;
     } else {
@@ -241,7 +238,7 @@ final class STreeNode<T> extends STreePage<T> {
     final STreePage<T> oldPage = this.pages[x];
     final STreePage<T> newPage = oldPage.removed(i, tree);
     if (oldPage != newPage) {
-      return replacedPage(x, newPage, oldPage, tree);
+      return this.replacedPage(x, newPage, oldPage, tree);
     } else {
       return this;
     }
@@ -251,12 +248,12 @@ final class STreeNode<T> extends STreePage<T> {
                                     STreePage<T> oldPage, STreeContext<T> tree) {
     if (!newPage.isEmpty()) {
       if (newPage instanceof STreeNode<?> && tree.pageShouldMerge(newPage)) {
-        return updatedPageMerge(x, (STreeNode<T>) newPage, oldPage);
+        return this.updatedPageMerge(x, (STreeNode<T>) newPage, oldPage);
       } else {
-        return updatedPage(x, newPage, oldPage);
+        return this.updatedPage(x, newPage, oldPage);
       }
     } else if (this.pages.length > 2) {
-      return removedPage(x, newPage, oldPage);
+      return this.removedPage(x, newPage, oldPage);
     } else if (this.pages.length > 1) {
       if (x == 0) {
         return this.pages[1];
@@ -296,12 +293,11 @@ final class STreeNode<T> extends STreePage<T> {
 
   @Override
   public STreePage<T> removed(Object value, STreeContext<T> tree) {
-    final STreePage<T>[] pages = this.pages;
-    for (int x = 0, n = pages.length; x < n; x += 1) {
-      final STreePage<T> oldPage = pages[x];
+    for (int x = 0, n = this.pages.length; x < n; x += 1) {
+      final STreePage<T> oldPage = this.pages[x];
       final STreePage<T> newPage = oldPage.removed(value, tree);
       if (oldPage != newPage) {
-        return replacedPage(x, newPage, oldPage, tree);
+        return this.replacedPage(x, newPage, oldPage, tree);
       }
     }
     return this;
@@ -312,7 +308,7 @@ final class STreeNode<T> extends STreePage<T> {
   public STreePage<T> drop(int lower, STreeContext<T> tree) {
     if (lower > 0) {
       if (lower < this.size) {
-        int x = lookup(lower);
+        int x = this.lookup(lower);
         if (x >= 0) {
           x += 1;
         } else {
@@ -354,7 +350,7 @@ final class STreeNode<T> extends STreePage<T> {
   public STreePage<T> take(int upper, STreeContext<T> tree) {
     if (upper < this.size) {
       if (upper > 0) {
-        int x = lookup(upper);
+        int x = this.lookup(upper);
         if (x >= 0) {
           x += 1;
         } else {
@@ -400,7 +396,7 @@ final class STreeNode<T> extends STreePage<T> {
   public STreeNode<T> balanced(STreeContext<T> tree) {
     if (this.pages.length > 1 && tree.pageShouldSplit(this)) {
       final int x = this.knots.length >>> 1;
-      return split(x);
+      return this.split(x);
     } else {
       return this;
     }
@@ -410,8 +406,8 @@ final class STreeNode<T> extends STreePage<T> {
   @Override
   public STreeNode<T> split(int x) {
     final STreePage<T>[] newPages = (STreePage<T>[]) new STreePage<?>[2];
-    final STreeNode<T> newLeftPage = splitLeft(x);
-    final STreeNode<T> newRightPage = splitRight(x);
+    final STreeNode<T> newLeftPage = this.splitLeft(x);
+    final STreeNode<T> newRightPage = this.splitRight(x);
     newPages[0] = newLeftPage;
     newPages[1] = newRightPage;
 
@@ -465,9 +461,8 @@ final class STreeNode<T> extends STreePage<T> {
 
   @Override
   public void copyToArray(Object[] array, int offset) {
-    final STreePage<T>[] pages = this.pages;
-    for (int x = 0, n = pages.length; x < n; x += 1) {
-      final STreePage<T> page = pages[x];
+    for (int x = 0, n = this.pages.length; x < n; x += 1) {
+      final STreePage<T> page = this.pages[x];
       page.copyToArray(array, offset);
       offset += page.size();
     }

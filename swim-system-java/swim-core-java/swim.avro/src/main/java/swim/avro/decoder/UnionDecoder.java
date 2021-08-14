@@ -38,6 +38,11 @@ final class UnionDecoder<T> extends Decoder<T> {
     this(avro, type, 0, 0);
   }
 
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return UnionDecoder.decode(input, this.avro, this.type, this.variant, this.shift);
+  }
+
   @SuppressWarnings("unchecked")
   static <T> Decoder<T> decode(InputBuffer input, AvroDecoder avro,
                                AvroUnionType<T> type, int variant, int shift) {
@@ -47,7 +52,7 @@ final class UnionDecoder<T> extends Decoder<T> {
         input = input.step();
         variant |= (b & 0x7f) << shift;
       } else {
-        return error(new DecoderException("variant overflow"));
+        return Decoder.error(new DecoderException("variant overflow"));
       }
       if ((b & 0x80) == 0) {
         variant = (variant >>> 1) ^ (variant << 31 >> 31);
@@ -55,26 +60,21 @@ final class UnionDecoder<T> extends Decoder<T> {
           final AvroType<T> variantType = (AvroType<T>) type.getVariant(variant);
           return avro.decodeType(variantType, input);
         } else {
-          return error(new DecoderException("unknown union variant: " + variant));
+          return Decoder.error(new DecoderException("unknown union variant: " + variant));
         }
       }
       shift += 7;
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new UnionDecoder<T>(avro, type, variant, shift);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroUnionType<T> type) {
-    return decode(input, avro, type, 0, 0);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.avro, this.type, this.variant, this.shift);
+    return UnionDecoder.decode(input, avro, type, 0, 0);
   }
 
 }

@@ -69,7 +69,7 @@ final class QTreeNodeCursor<K, S, V> implements Cursor<QTreeEntry<K, S, V>> {
         if (pageIndex < pages.length) {
           final QTreePage<K, S, V> page = pages[pageIndex];
           if (BitInterval.intersects(x, y, page.x(), page.y())) {
-            this.pageCursor = pageCursor(page);
+            this.pageCursor = this.pageCursor(page);
           } else {
             this.index += page.span();
           }
@@ -106,7 +106,7 @@ final class QTreeNodeCursor<K, S, V> implements Cursor<QTreeEntry<K, S, V>> {
         if (pageIndex < pages.length) {
           final QTreePage<K, S, V> page = pages[pageIndex];
           if (BitInterval.intersects(x, y, page.x(), page.y())) {
-            this.pageCursor = pageCursor(page);
+            this.pageCursor = this.pageCursor(page);
           } else {
             this.index += page.span();
           }
@@ -146,7 +146,7 @@ final class QTreeNodeCursor<K, S, V> implements Cursor<QTreeEntry<K, S, V>> {
         if (pageIndex < pages.length) {
           final QTreePage<K, S, V> page = pages[pageIndex];
           if (BitInterval.intersects(x, y, page.x(), page.y())) {
-            this.pageCursor = pageCursor(page);
+            this.pageCursor = this.pageCursor(page);
           } else {
             this.index += page.span();
           }
@@ -178,7 +178,7 @@ final class QTreeNodeCursor<K, S, V> implements Cursor<QTreeEntry<K, S, V>> {
           final long pageSpan = page.span();
           this.pageIndex = pageIndex + 1;
           if (pageSpan < count) {
-            this.pageCursor = pageCursor(page);
+            this.pageCursor = this.pageCursor(page);
             if (count > 0L) {
               this.index += count;
               this.pageCursor.skip(count);
@@ -223,7 +223,7 @@ final class QTreeNodeCursor<K, S, V> implements Cursor<QTreeEntry<K, S, V>> {
         if (pageIndex < pages.length) {
           final QTreePage<K, S, V> page = pages[pageIndex];
           if (BitInterval.intersects(x, y, page.x(), page.y())) {
-            this.pageCursor = pageCursor(page);
+            this.pageCursor = this.pageCursor(page);
           } else {
             this.index += page.span();
           }
@@ -268,7 +268,7 @@ final class QTreeNodeCursor<K, S, V> implements Cursor<QTreeEntry<K, S, V>> {
         if (pageIndex < pages.length) {
           final QTreePage<K, S, V> page = pages[pageIndex];
           if (BitInterval.intersects(x, y, page.x(), page.y())) {
-            this.pageCursor = pageCursor(page);
+            this.pageCursor = this.pageCursor(page);
           } else {
             this.index += page.span();
           }
@@ -298,7 +298,7 @@ final class QTreeNodeCursor<K, S, V> implements Cursor<QTreeEntry<K, S, V>> {
         if (pageIndex >= 0) {
           final QTreePage<K, S, V> page = pages[pageIndex];
           if (BitInterval.intersects(x, y, page.x(), page.y())) {
-            this.pageCursor = pageCursor(page);
+            this.pageCursor = this.pageCursor(page);
           } else {
             this.index -= page.span();
           }
@@ -344,7 +344,7 @@ final class QTreeNodeCursor<K, S, V> implements Cursor<QTreeEntry<K, S, V>> {
         if (pageIndex < pages.length) {
           final QTreePage<K, S, V> page = pages[pageIndex];
           if (BitInterval.intersects(x, y, page.x(), page.y())) {
-            this.pageCursor = pageCursor(page);
+            this.pageCursor = this.pageCursor(page);
           } else {
             this.index -= page.span();
           }

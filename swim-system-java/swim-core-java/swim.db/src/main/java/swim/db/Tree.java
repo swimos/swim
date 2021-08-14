@@ -26,15 +26,15 @@ public abstract class Tree {
   public abstract TreeContext treeContext();
 
   public StoreSettings settings() {
-    return treeContext().settings();
+    return this.treeContext().settings();
   }
 
   public TreeDelegate treeDelegate() {
-    return treeContext().treeDelegate();
+    return this.treeContext().treeDelegate();
   }
 
   public void setTreeDelegate(TreeDelegate treeDelegate) {
-    treeContext().setTreeDelegate(treeDelegate);
+    this.treeContext().setTreeDelegate(treeDelegate);
   }
 
   public abstract PageRef rootRef();
@@ -42,19 +42,19 @@ public abstract class Tree {
   public abstract Seed seed();
 
   public int stem() {
-    return seed().stem;
+    return this.seed().stem;
   }
 
   public int post() {
-    return rootRef().post();
+    return this.rootRef().post();
   }
 
   public long span() {
-    return rootRef().span();
+    return this.rootRef().span();
   }
 
   public Value fold() {
-    return rootRef().fold();
+    return this.rootRef().fold();
   }
 
   public abstract boolean isResident();

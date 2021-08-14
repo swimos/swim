@@ -22,26 +22,26 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class SecWebSocketVersionSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseSecWebSocketVersionHeaders() {
-    assertParses("Sec-WebSocket-Version: 13", SecWebSocketVersion.from(13));
-    assertParses("Sec-WebSocket-Version: 13,0", SecWebSocketVersion.from(13, 0));
-    assertParses("Sec-WebSocket-Version: 0, 13", SecWebSocketVersion.from(0, 13));
-    assertParses("Sec-WebSocket-Version: 13 , 25", SecWebSocketVersion.from(13, 25));
-    assertParses("Sec-WebSocket-Version: 13, 8, 7", SecWebSocketVersion.from(13, 8, 7));
+    assertParses("Sec-WebSocket-Version: 13", SecWebSocketVersion.create(13));
+    assertParses("Sec-WebSocket-Version: 13,0", SecWebSocketVersion.create(13, 0));
+    assertParses("Sec-WebSocket-Version: 0, 13", SecWebSocketVersion.create(0, 13));
+    assertParses("Sec-WebSocket-Version: 13 , 25", SecWebSocketVersion.create(13, 25));
+    assertParses("Sec-WebSocket-Version: 13, 8, 7", SecWebSocketVersion.create(13, 8, 7));
   }
 
   @Test
   public void writeSecWebSocketVersionHeaders() {
-    assertWrites(SecWebSocketVersion.from(13), "Sec-WebSocket-Version: 13");
-    assertWrites(SecWebSocketVersion.from(13, 0), "Sec-WebSocket-Version: 13, 0");
-    assertWrites(SecWebSocketVersion.from(0, 13), "Sec-WebSocket-Version: 0, 13");
-    assertWrites(SecWebSocketVersion.from(13, 25), "Sec-WebSocket-Version: 13, 25");
-    assertWrites(SecWebSocketVersion.from(13, 8, 7), "Sec-WebSocket-Version: 13, 8, 7");
+    assertWrites(SecWebSocketVersion.create(13), "Sec-WebSocket-Version: 13");
+    assertWrites(SecWebSocketVersion.create(13, 0), "Sec-WebSocket-Version: 13, 0");
+    assertWrites(SecWebSocketVersion.create(0, 13), "Sec-WebSocket-Version: 0, 13");
+    assertWrites(SecWebSocketVersion.create(13, 25), "Sec-WebSocket-Version: 13, 25");
+    assertWrites(SecWebSocketVersion.create(13, 8, 7), "Sec-WebSocket-Version: 13, 8, 7");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

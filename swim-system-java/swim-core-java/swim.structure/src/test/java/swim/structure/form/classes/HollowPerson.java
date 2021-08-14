@@ -19,13 +19,12 @@ import swim.util.Murmur3;
 @SuppressWarnings("checkstyle:VisibilityModifier")
 public class HollowPerson {
 
-  public static final String SECRET = "MYSTERY";
   public transient String first;
   protected String middle;
   String last;
 
   private HollowPerson() {
-    // stub
+    // internal
   }
 
   public HollowPerson(String first, String middle, String last) {
@@ -58,5 +57,7 @@ public class HollowPerson {
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(
         this.first.hashCode(), this.middle.hashCode()), this.last.hashCode()));
   }
+
+  public static final String SECRET = "MYSTERY";
 
 }

@@ -25,7 +25,6 @@ import swim.util.Murmur3;
 
 public class JsAgentDef implements AgentDef, Debug {
 
-  private static int hashSeed;
   final UriPath modulePath;
   final Value id;
   final Value props;
@@ -36,20 +35,12 @@ public class JsAgentDef implements AgentDef, Debug {
     this.props = props;
   }
 
-  public static JsAgentDef fromModulePath(UriPath modulePath) {
-    return new JsAgentDef(modulePath, Text.from(modulePath.toString()), Value.absent());
-  }
-
-  public static JsAgentDef fromModulePath(String modulePath) {
-    return new JsAgentDef(UriPath.parse(modulePath), Text.from(modulePath), Value.absent());
-  }
-
   public final UriPath modulePath() {
     return this.modulePath;
   }
 
   public JsAgentDef modulePath(UriPath modulePath) {
-    return copy(modulePath, this.id, this.props);
+    return this.copy(modulePath, this.id, this.props);
   }
 
   @Override
@@ -58,7 +49,7 @@ public class JsAgentDef implements AgentDef, Debug {
   }
 
   public JsAgentDef id(Value id) {
-    return copy(this.modulePath, id, this.props);
+    return this.copy(this.modulePath, id, this.props);
   }
 
   @Override
@@ -67,7 +58,7 @@ public class JsAgentDef implements AgentDef, Debug {
   }
 
   public JsAgentDef props(Value props) {
-    return copy(this.modulePath, this.id, props);
+    return this.copy(this.modulePath, this.id, props);
   }
 
   protected JsAgentDef copy(UriPath modulePath, Value id, Value props) {
@@ -86,30 +77,41 @@ public class JsAgentDef implements AgentDef, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(JsAgentDef.class);
+    if (JsAgentDef.hashSeed == 0) {
+      JsAgentDef.hashSeed = Murmur3.seed(JsAgentDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(JsAgentDef.hashSeed,
         Murmur3.hash(this.modulePath)), this.id.hashCode()), this.props.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("JsAgentDef").write('.').write("fromModulePath").write('(')
-        .debug(this.modulePath).write(')');
+                   .debug(this.modulePath).write(')');
     if (this.id.isDefined()) {
       output = output.write('.').write("id").write('(').debug(this.id).write(')');
     }
     if (this.props.isDefined()) {
       output = output.write('.').write("props").write('(').debug(this.props).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static JsAgentDef fromModulePath(UriPath modulePath) {
+    return new JsAgentDef(modulePath, Text.from(modulePath.toString()), Value.absent());
+  }
+
+  public static JsAgentDef fromModulePath(String modulePath) {
+    return new JsAgentDef(UriPath.parse(modulePath), Text.from(modulePath), Value.absent());
   }
 
 }

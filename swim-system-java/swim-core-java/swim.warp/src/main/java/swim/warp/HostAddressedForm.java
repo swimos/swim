@@ -21,7 +21,7 @@ import swim.structure.Value;
 
 abstract class HostAddressedForm<E extends HostAddressed> extends Form<E> {
 
-  abstract E from(Value body);
+  abstract E create(Value body);
 
   @Override
   public E unit() {
@@ -31,7 +31,7 @@ abstract class HostAddressedForm<E extends HostAddressed> extends Form<E> {
   @Override
   public Item mold(E envelope) {
     if (envelope != null) {
-      return Attr.of(tag()).concat(envelope.body());
+      return Attr.of(this.tag()).concat(envelope.body());
     } else {
       return Item.extant();
     }
@@ -40,9 +40,9 @@ abstract class HostAddressedForm<E extends HostAddressed> extends Form<E> {
   @Override
   public E cast(Item item) {
     final Value value = item.toValue();
-    if (tag().equals(value.tag())) {
+    if (this.tag().equals(value.tag())) {
       final Value body = value.body();
-      return from(body);
+      return this.create(body);
     }
     return null;
   }

@@ -29,11 +29,6 @@ import swim.io.IpSocket;
 
 public class HttpServerResponder<T> implements HttpResponderContext {
 
-  static final int RESPONDING = 1 << 0;
-  static final int RESPONDED = 1 << 1;
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HttpServerResponder<?>> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HttpServerResponder<?>>) (Class<?>) HttpServerResponder.class, "status");
   protected final HttpServerModem modem;
   protected final HttpResponder<T> responder;
   volatile HttpResponse<?> response;
@@ -42,6 +37,8 @@ public class HttpServerResponder<T> implements HttpResponderContext {
   public HttpServerResponder(HttpServerModem modem, HttpResponder<T> responder) {
     this.modem = modem;
     this.responder = responder;
+    this.response = null;
+    this.status = 0;
   }
 
   @Override
@@ -128,11 +125,11 @@ public class HttpServerResponder<T> implements HttpResponderContext {
   public void writeResponse(HttpResponse<?> response) {
     this.response = response;
     do {
-      final int oldStatus = STATUS.get(this);
-      if ((oldStatus & RESPONDED) == 0) {
-        final int newStatus = oldStatus | RESPONDED;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          if ((newStatus & RESPONDING) != 0) {
+      final int oldStatus = HttpServerResponder.STATUS.get(this);
+      if ((oldStatus & HttpServerResponder.RESPONDED) == 0) {
+        final int newStatus = oldStatus | HttpServerResponder.RESPONDED;
+        if (HttpServerResponder.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+          if ((newStatus & HttpServerResponder.RESPONDING) != 0) {
             this.modem.doWriteResponse(response);
           }
           break;
@@ -173,11 +170,11 @@ public class HttpServerResponder<T> implements HttpResponderContext {
 
   void doRespond() {
     do {
-      final int oldStatus = STATUS.get(this);
-      if ((oldStatus & RESPONDING) == 0) {
-        final int newStatus = oldStatus | RESPONDING;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          if ((newStatus & RESPONDED) != 0) {
+      final int oldStatus = HttpServerResponder.STATUS.get(this);
+      if ((oldStatus & HttpServerResponder.RESPONDING) == 0) {
+        final int newStatus = oldStatus | HttpServerResponder.RESPONDING;
+        if (HttpServerResponder.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+          if ((newStatus & HttpServerResponder.RESPONDED) != 0) {
             this.modem.doWriteResponse(this.response);
           }
           break;
@@ -215,5 +212,12 @@ public class HttpServerResponder<T> implements HttpResponderContext {
   void didFail(Throwable error) {
     this.responder.didFail(error);
   }
+
+  static final int RESPONDING = 1 << 0;
+  static final int RESPONDED = 1 << 1;
+
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HttpServerResponder<?>> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HttpServerResponder<?>>) (Class<?>) HttpServerResponder.class, "status");
 
 }

@@ -47,62 +47,62 @@ public abstract class AbstractMqttSocket<I, O> implements MqttSocket<I, O>, IpCo
 
   @Override
   public void doRead() {
-    // stub
+    // hook
   }
 
   @Override
   public void didRead(MqttPacket<? extends I> packet) {
-    // stub
+    // hook
   }
 
   @Override
   public void doWrite() {
-    // stub
+    // hook
   }
 
   @Override
   public void didWrite(MqttPacket<? extends O> packet) {
-    // stub
+    // hook
   }
 
   @Override
   public void willConnect() {
-    // stub
+    // hook
   }
 
   @Override
   public void didConnect() {
-    // stub
+    // hook
   }
 
   @Override
   public void willSecure() {
-    // stub
+    // hook
   }
 
   @Override
   public void didSecure() {
-    // stub
+    // hook
   }
 
   @Override
   public void willBecome(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didBecome(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didTimeout() {
-    // stub
+    // hook
   }
 
   @Override
   public void didDisconnect() {
-    // stub
+    // hook
   }
 
   @Override

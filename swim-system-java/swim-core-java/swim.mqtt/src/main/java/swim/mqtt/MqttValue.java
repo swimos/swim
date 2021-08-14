@@ -23,29 +23,10 @@ import swim.util.Murmur3;
 
 public final class MqttValue<T> extends MqttEntity<T> implements Debug {
 
-  private static int hashSeed;
-  private static MqttValue<Object> empty;
   final T value;
 
   MqttValue(T value) {
     this.value = value;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> MqttValue<T> empty() {
-    if (empty == null) {
-      empty = new MqttValue<Object>(null);
-    }
-    return (MqttValue<T>) empty;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> MqttValue<T> from(T value) {
-    if (value == null) {
-      return empty();
-    } else {
-      return new MqttValue<T>(value);
-    }
   }
 
   @Override
@@ -84,27 +65,50 @@ public final class MqttValue<T> extends MqttEntity<T> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttValue.class);
+    if (MqttValue.hashSeed == 0) {
+      MqttValue.hashSeed = Murmur3.seed(MqttValue.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, Murmur3.hash(this.value)));
+    return Murmur3.mash(Murmur3.mix(MqttValue.hashSeed, Murmur3.hash(this.value)));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("MqttValue").write('.');
     if (this.value != null) {
-      output = output.write("from").write('(').debug(this.value).write(')');
+      output = output.write("create").write('(').debug(this.value);
     } else {
-      output = output.write("empty").write('(').write(')');
+      output = output.write("empty").write('(');
     }
+    output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static MqttValue<Object> empty;
+
+  @SuppressWarnings("unchecked")
+  public static <T> MqttValue<T> empty() {
+    if (MqttValue.empty == null) {
+      MqttValue.empty = new MqttValue<Object>(null);
+    }
+    return (MqttValue<T>) MqttValue.empty;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> MqttValue<T> create(T value) {
+    if (value != null) {
+      return new MqttValue<T>(value);
+    } else {
+      return MqttValue.empty();
+    }
   }
 
 }

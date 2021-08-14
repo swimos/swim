@@ -42,7 +42,8 @@ final class BlockParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.keyParser, this.valueParser, this.step);
+    return BlockParser.parse(input, this.recon, this.builder, this.keyParser,
+                             this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -73,15 +74,15 @@ final class BlockParser<I, V> extends Parser<V> {
             input = input.step();
             step = 7;
           } else {
-            return error(Diagnostic.expected("block", input));
+            return Parser.error(Diagnostic.expected("block", input));
           }
         } else if (input.isError()) {
-          return error(input.trap());
+          return Parser.error(input.trap());
         } else if (input.isDone()) {
           if (builder != null) {
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           } else {
-            return done(recon.absent());
+            return Parser.done(recon.absent());
           }
         }
       }
@@ -118,7 +119,7 @@ final class BlockParser<I, V> extends Parser<V> {
           }
         } else if (input.isDone()) {
           builder.add(recon.item(keyParser.bind()));
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
       if (step == 4) {
@@ -129,7 +130,7 @@ final class BlockParser<I, V> extends Parser<V> {
           step = 5;
         } else if (input.isDone()) {
           builder.add(recon.slot(keyParser.bind()));
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
       if (step == 5) {
@@ -166,10 +167,10 @@ final class BlockParser<I, V> extends Parser<V> {
             input = input.step();
             step = 7;
           } else {
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           }
         } else if (input.isDone()) {
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
       if (step == 7) {
@@ -190,13 +191,13 @@ final class BlockParser<I, V> extends Parser<V> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new BlockParser<I, V>(recon, builder, keyParser, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
-    return parse(input, recon, null, null, null, 1);
+    return BlockParser.parse(input, recon, null, null, null, 1);
   }
 
 }

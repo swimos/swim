@@ -62,7 +62,7 @@ public class MapDataProxy implements MapDataBinding, MapDataContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapData(Class<T> dataClass) {
-    if (dataClass.isAssignableFrom(getClass())) {
+    if (dataClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.dataBinding.unwrapData(dataClass);
@@ -91,7 +91,7 @@ public class MapDataProxy implements MapDataBinding, MapDataContext {
 
   @Override
   public <K> MapData<K, Value> keyClass(Class<K> keyClass) {
-    return keyForm(Form.<K>forClass(keyClass));
+    return this.keyForm(Form.<K>forClass(keyClass));
   }
 
   @Override
@@ -106,7 +106,7 @@ public class MapDataProxy implements MapDataBinding, MapDataContext {
 
   @Override
   public <V> MapData<Value, V> valueClass(Class<V> valueClass) {
-    return valueForm(Form.<V>forClass(valueClass));
+    return this.valueForm(Form.<V>forClass(valueClass));
   }
 
   @Override

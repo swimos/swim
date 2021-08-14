@@ -36,9 +36,25 @@ final class Base10IntegerWriter extends Writer<Object, Object> {
     this(null, 0L, 0, 0);
   }
 
+  @Override
+  public Writer<Object, Object> feed(Object input) {
+    if (input instanceof Integer) {
+      return new Base10IntegerWriter(input, ((Integer) input).longValue());
+    } else if (input instanceof Long) {
+      return new Base10IntegerWriter(input, ((Long) input).longValue());
+    } else {
+      return new StringWriter(input, input);
+    }
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return Base10IntegerWriter.write(output, this.value, this.input, this.index, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, Object value, long input, int index, int step) {
     if (step == 0) {
-      return done();
+      return Writer.done();
     }
     if (step == 1) {
       if (input < 0L) {
@@ -54,7 +70,7 @@ final class Base10IntegerWriter extends Writer<Object, Object> {
       if (input > -10L && input < 10L) {
         if (output.isCont()) {
           output = output.write(Base10.encodeDigit(Math.abs((int) input)));
-          return done(value);
+          return Writer.done(value);
         }
       } else {
         int i = 18;
@@ -72,36 +88,20 @@ final class Base10IntegerWriter extends Writer<Object, Object> {
           i += 1;
         }
         if (i == 19) {
-          return done(value);
+          return Writer.done(value);
         }
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new Base10IntegerWriter(value, input, index, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, Object value, long input) {
-    return write(output, value, input, 0, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> feed(Object input) {
-    if (input instanceof Integer) {
-      return new Base10IntegerWriter(input, ((Integer) input).longValue());
-    } else if (input instanceof Long) {
-      return new Base10IntegerWriter(input, ((Long) input).longValue());
-    } else {
-      return new StringWriter(input, input);
-    }
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.value, this.input, this.index, this.step);
+    return Base10IntegerWriter.write(output, value, input, 0, 1);
   }
 
 }

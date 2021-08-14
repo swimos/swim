@@ -15,9 +15,9 @@
 package swim.codec;
 
 /**
- * Type that can output a human readable display string.  {@code Display}
+ * Type that can output a human readable display string. {@code Display}
  * implementations may use {@link Output#settings()} to tailor the format of
- * their display strings.  For example, display strings may be stylized when
+ * their display strings. For example, display strings may be stylized when
  * {@link OutputSettings#isStyled()} returns {@code true}.
  */
 public interface Display {
@@ -26,9 +26,10 @@ public interface Display {
    * Writes a human readable, display-formatted string representation of this
    * object to {@code output}.
    *
+   * @return the continuation of the {@code output}.
    * @throws OutputException if the {@code output} exits the <em>cont</em>
    *                         state before the full display string has been written.
    */
-  void display(Output<?> output);
+  <T> Output<T> display(Output<T> output);
 
 }

@@ -56,17 +56,17 @@ public class JavaPlaneFactory<P extends Plane> implements PlaneFactory<P> {
 
   @Override
   public P createPlane(PlaneContext planeContext) {
-    final P plane = constructPlane(planeContext);
-    reflectAgentRouteFields(planeContext, this.planeClass, plane);
+    final P plane = this.constructPlane(planeContext);
+    this.reflectAgentRouteFields(planeContext, this.planeClass, plane);
     return plane;
   }
 
   protected P constructPlane(PlaneContext planeContext) {
     try {
-      return constructPlaneWithContext(planeContext, this.planeClass.getDeclaredConstructor(PlaneContext.class));
+      return this.constructPlaneWithContext(planeContext, this.planeClass.getDeclaredConstructor(PlaneContext.class));
     } catch (NoSuchMethodException error) {
       try {
-        return constructPlaneWithNoArgs(planeContext, this.planeClass.getDeclaredConstructor());
+        return this.constructPlaneWithNoArgs(planeContext, this.planeClass.getDeclaredConstructor());
       } catch (NoSuchMethodException cause) {
         throw new PlaneException(cause);
       }
@@ -99,46 +99,46 @@ public class JavaPlaneFactory<P extends Plane> implements PlaneFactory<P> {
 
   protected void reflectAgentRouteFields(PlaneContext planeContext, Class<?> planeClass, P plane) {
     if (planeClass != null) {
-      reflectAgentRouteFields(planeContext, planeClass.getSuperclass(), plane);
+      this.reflectAgentRouteFields(planeContext, planeClass.getSuperclass(), plane);
       final Field[] fields = planeClass.getDeclaredFields();
       for (Field field : fields) {
         if (AgentRoute.class.isAssignableFrom(field.getType())) {
-          reflectAgentRouteField(planeContext, plane, field);
+          this.reflectAgentRouteField(planeContext, plane, field);
         }
       }
     }
   }
 
   protected void reflectAgentRouteField(PlaneContext planeContext, P plane, Field field) {
-    final SwimAgent swimAgent = field.getAnnotation(SwimAgent.class);
-    final SwimRoute swimRoute = field.getAnnotation(SwimRoute.class);
-    if (swimAgent != null || swimRoute != null) {
-      reflectAgentRouteFieldType(planeContext, plane, field, field.getGenericType());
+    final SwimAgent agentAnnotation = field.getAnnotation(SwimAgent.class);
+    final SwimRoute routeAnnotation = field.getAnnotation(SwimRoute.class);
+    if (agentAnnotation != null || routeAnnotation != null) {
+      this.reflectAgentRouteFieldType(planeContext, plane, field, field.getGenericType());
     }
   }
 
   void reflectAgentRouteFieldType(PlaneContext planeContext, P plane, Field field, Type type) {
     if (type instanceof ParameterizedType) {
-      reflectAgentRouteFieldTypeParameters(planeContext, plane, field, (ParameterizedType) type);
+      this.reflectAgentRouteFieldTypeParameters(planeContext, plane, field, (ParameterizedType) type);
     } else {
-      reflectOtherAgentRouteFieldType(planeContext, plane, field, type);
+      this.reflectOtherAgentRouteFieldType(planeContext, plane, field, type);
     }
   }
 
   void reflectAgentRouteFieldTypeParameters(PlaneContext planeContext, P plane, Field field, ParameterizedType type) {
     final Type rawType = type.getRawType();
     if (rawType instanceof Class<?>) {
-      reflectAgentRouteFieldTypeArguments(planeContext, plane, field, (Class<?>) rawType, type.getActualTypeArguments());
+      this.reflectAgentRouteFieldTypeArguments(planeContext, plane, field, (Class<?>) rawType, type.getActualTypeArguments());
     } else {
-      reflectOtherAgentRouteFieldType(planeContext, plane, field, type);
+      this.reflectOtherAgentRouteFieldType(planeContext, plane, field, type);
     }
   }
 
   void reflectAgentRouteFieldTypeArguments(PlaneContext planeContext, P plane, Field field, Class<?> type, Type[] arguments) {
     if (AgentRoute.class.equals(type)) {
-      reflectBaseAgentRouteFieldTypeArgumemnts(planeContext, plane, field, type, arguments);
+      this.reflectBaseAgentRouteFieldTypeArgumemnts(planeContext, plane, field, type, arguments);
     } else {
-      reflectOtherAgentRouteFieldType(planeContext, plane, field, type);
+      this.reflectOtherAgentRouteFieldType(planeContext, plane, field, type);
     }
   }
 
@@ -146,9 +146,9 @@ public class JavaPlaneFactory<P extends Plane> implements PlaneFactory<P> {
   void reflectBaseAgentRouteFieldTypeArgumemnts(PlaneContext planeContext, P plane, Field field, Class<?> type, Type[] arguments) {
     final Type agentType = arguments[0];
     if (agentType instanceof Class<?>) {
-      reflectBaseAgentRouteFieldReifiedType(planeContext, plane, field, type, (Class<? extends Agent>) agentType);
+      this.reflectBaseAgentRouteFieldReifiedType(planeContext, plane, field, type, (Class<? extends Agent>) agentType);
     } else {
-      reflectOtherAgentRouteFieldType(planeContext, plane, field, type);
+      this.reflectOtherAgentRouteFieldType(planeContext, plane, field, type);
     }
   }
 
@@ -165,24 +165,24 @@ public class JavaPlaneFactory<P extends Plane> implements PlaneFactory<P> {
         final AgentRoute<?> agentRoute = (AgentRoute<?>) object;
 
         String routeName = null;
-        SwimAgent swimAgent = field.getAnnotation(SwimAgent.class);
-        if (swimAgent == null) {
-          swimAgent = agentClass.getAnnotation(SwimAgent.class);
+        SwimAgent agentAnnotation = field.getAnnotation(SwimAgent.class);
+        if (agentAnnotation == null) {
+          agentAnnotation = agentClass.getAnnotation(SwimAgent.class);
         }
-        if (swimAgent != null) {
-          routeName = swimAgent.value();
+        if (agentAnnotation != null) {
+          routeName = agentAnnotation.value();
         }
         if (routeName == null || routeName.length() == 0) {
           routeName = field.getName();
         }
 
         UriPattern pattern = null;
-        SwimRoute swimRoute = field.getAnnotation(SwimRoute.class);
-        if (swimRoute == null) {
-          swimRoute = agentClass.getAnnotation(SwimRoute.class);
+        SwimRoute routeAnnotation = field.getAnnotation(SwimRoute.class);
+        if (routeAnnotation == null) {
+          routeAnnotation = agentClass.getAnnotation(SwimRoute.class);
         }
-        if (swimRoute != null) {
-          pattern = UriPattern.parse(swimRoute.value());
+        if (routeAnnotation != null) {
+          pattern = UriPattern.parse(routeAnnotation.value());
         }
 
         if (pattern != null) {
@@ -191,7 +191,7 @@ public class JavaPlaneFactory<P extends Plane> implements PlaneFactory<P> {
           throw new PlaneException("No URI pattern for route: " + routeName);
         }
       } else {
-        reflectOtherAgentRouteFieldType(planeContext, plane, field, type);
+        this.reflectOtherAgentRouteFieldType(planeContext, plane, field, type);
       }
     } catch (IllegalAccessException cause) {
       throw new PlaneException(cause);
@@ -206,18 +206,18 @@ public class JavaPlaneFactory<P extends Plane> implements PlaneFactory<P> {
         final AgentRoute<?> agentRoute = (AgentRoute<?>) object;
 
         String routeName = null;
-        final SwimAgent swimAgent = field.getAnnotation(SwimAgent.class);
-        if (swimAgent != null) {
-          routeName = swimAgent.value();
+        final SwimAgent agentAnnotation = field.getAnnotation(SwimAgent.class);
+        if (agentAnnotation != null) {
+          routeName = agentAnnotation.value();
         }
         if (routeName == null || routeName.length() == 0) {
           routeName = field.getName();
         }
 
         UriPattern pattern = null;
-        final SwimRoute swimRoute = field.getAnnotation(SwimRoute.class);
-        if (swimRoute != null) {
-          pattern = UriPattern.parse(swimRoute.value());
+        final SwimRoute routeAnnotation = field.getAnnotation(SwimRoute.class);
+        if (routeAnnotation != null) {
+          pattern = UriPattern.parse(routeAnnotation.value());
         }
 
         if (pattern != null) {

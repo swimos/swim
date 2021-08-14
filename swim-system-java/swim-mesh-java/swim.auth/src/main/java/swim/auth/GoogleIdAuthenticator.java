@@ -40,18 +40,6 @@ import swim.uri.UriAuthority;
 
 public class GoogleIdAuthenticator extends AbstractAuthenticator implements HttpInterface {
 
-  static final long PUBLIC_KEY_REFRESH_INTERVAL;
-
-  static {
-    long publicKeyRefreshInterval;
-    try {
-      publicKeyRefreshInterval = Long.parseLong(System.getProperty("swim.auth.google.public.key.refresh.interval"));
-    } catch (NumberFormatException error) {
-      publicKeyRefreshInterval = (long) (60 * 60 * 1000);
-    }
-    PUBLIC_KEY_REFRESH_INTERVAL = publicKeyRefreshInterval;
-  }
-
   protected final FingerTrieSeq<String> audiences;
   protected final Uri publicKeyUri;
   protected final HttpSettings httpSettings;
@@ -66,11 +54,12 @@ public class GoogleIdAuthenticator extends AbstractAuthenticator implements Http
     this.publicKeyUri = publicKeyUri;
     this.httpSettings = httpSettings;
     this.publicKeyDefs = FingerTrieSeq.empty();
+    this.publicKeyRefreshTimer = null;
   }
 
   public GoogleIdAuthenticator(GoogleIdAuthenticatorDef authenticatorDef) {
     this(authenticatorDef.audiences, authenticatorDef.emails,
-        authenticatorDef.publicKeyUri, authenticatorDef.httpSettings);
+         authenticatorDef.publicKeyUri, authenticatorDef.httpSettings);
   }
 
   public final FingerTrieSeq<String> audiences() {
@@ -82,11 +71,11 @@ public class GoogleIdAuthenticator extends AbstractAuthenticator implements Http
   }
 
   public void addEmail(String email) {
-    this.emails = emails.added(email);
+    this.emails = this.emails.added(email);
   }
 
   public void removeEmail(String email) {
-    this.emails = emails.removed(email);
+    this.emails = this.emails.removed(email);
   }
 
   public final Uri publicKeyUri() {
@@ -108,8 +97,8 @@ public class GoogleIdAuthenticator extends AbstractAuthenticator implements Http
       final GoogleIdToken idToken = GoogleIdToken.verify(compactJws, this.publicKeyDefs);
       if (idToken != null) {
         if (this.emails.isEmpty() || this.emails.contains(idToken.email())) {
-          return PolicyDirective.<Identity>allow(new Authenticated(
-              credentials.requestUri(), credentials.fromUri(), idToken.toValue()));
+          final Identity identity = new Authenticated(credentials.requestUri(), credentials.fromUri(), idToken.toValue());
+          return PolicyDirective.<Identity>allow(identity);
         }
       }
     }
@@ -131,18 +120,18 @@ public class GoogleIdAuthenticator extends AbstractAuthenticator implements Http
     if (port == 0) {
       port = 443;
     }
-    connectHttps(address, port, new GoogleIdAuthenticatorPublicKeyClient(this), this.httpSettings);
+    this.connectHttps(address, port, new GoogleIdAuthenticatorPublicKeyClient(this), this.httpSettings);
   }
 
   @Override
   public void didStart() {
-    refreshPublicKeys();
+    this.refreshPublicKeys();
     final TimerRef publicKeyRefreshTimer = this.publicKeyRefreshTimer;
     if (publicKeyRefreshTimer != null) {
       publicKeyRefreshTimer.cancel();
     }
-    this.publicKeyRefreshTimer = schedule().setTimer(PUBLIC_KEY_REFRESH_INTERVAL,
-        new GoogleIdAuthenticatorPublicKeyRefreshTimer(this));
+    this.publicKeyRefreshTimer = this.schedule().setTimer(GoogleIdAuthenticator.PUBLIC_KEY_REFRESH_INTERVAL,
+                                                          new GoogleIdAuthenticatorPublicKeyRefreshTimer(this));
   }
 
   @Override
@@ -152,6 +141,18 @@ public class GoogleIdAuthenticator extends AbstractAuthenticator implements Http
       publicKeyRefreshTimer.cancel();
       this.publicKeyRefreshTimer = null;
     }
+  }
+
+  static final long PUBLIC_KEY_REFRESH_INTERVAL;
+
+  static {
+    long publicKeyRefreshInterval;
+    try {
+      publicKeyRefreshInterval = Long.parseLong(System.getProperty("swim.auth.google.public.key.refresh.interval"));
+    } catch (NumberFormatException error) {
+      publicKeyRefreshInterval = (long) (60 * 60 * 1000);
+    }
+    PUBLIC_KEY_REFRESH_INTERVAL = publicKeyRefreshInterval;
   }
 
 }
@@ -183,7 +184,7 @@ final class GoogleIdAuthenticatorPublicKeyClient extends AbstractHttpClient {
   @Override
   public void didConnect() {
     super.didConnect();
-    doRequest(new GoogleIdAuthenticatorPublicKeyRequester(this.authenticator));
+    this.doRequest(new GoogleIdAuthenticatorPublicKeyRequester(this.authenticator));
   }
 
 }
@@ -199,9 +200,9 @@ final class GoogleIdAuthenticatorPublicKeyRequester extends AbstractHttpRequeste
   @Override
   public void doRequest() {
     final Uri publicKeyUri = this.authenticator.publicKeyUri;
-    final Uri requestUri = Uri.from(publicKeyUri.path());
-    final HttpRequest<?> request = HttpRequest.get(requestUri, Host.from(publicKeyUri.authority()));
-    writeRequest(request);
+    final Uri requestUri = Uri.create(publicKeyUri.path());
+    final HttpRequest<?> request = HttpRequest.get(requestUri, Host.create(publicKeyUri.authority()));
+    this.writeRequest(request);
   }
 
   @Override
@@ -216,7 +217,7 @@ final class GoogleIdAuthenticatorPublicKeyRequester extends AbstractHttpRequeste
       }
       this.authenticator.setPublicKeyDefs(publicKeyDefs);
     } finally {
-      close();
+      this.close();
     }
   }
 

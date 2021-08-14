@@ -52,6 +52,10 @@ import swim.collections.FingerTrieSeq;
 
 public final class AvroReflection {
 
+  private AvroReflection() {
+    // static
+  }
+
   private static NullReflection<?> nullType;
   private static BooleanReflection booleanType;
   private static ByteReflection byteType;
@@ -64,86 +68,82 @@ public final class AvroReflection {
   private static DataReflection dataType;
   private static StringReflection stringType;
 
-  private AvroReflection() {
-    // static
-  }
-
   @SuppressWarnings("unchecked")
   public static <T> AvroNullType<T> nullType() {
-    if (nullType == null) {
-      nullType = new NullReflection<Object>();
+    if (AvroReflection.nullType == null) {
+      AvroReflection.nullType = new NullReflection<Object>();
     }
-    return (AvroNullType<T>) nullType;
+    return (AvroNullType<T>) AvroReflection.nullType;
   }
 
   public static AvroBooleanType<Boolean> booleanType() {
-    if (booleanType == null) {
-      booleanType = new BooleanReflection();
+    if (AvroReflection.booleanType == null) {
+      AvroReflection.booleanType = new BooleanReflection();
     }
-    return booleanType;
+    return AvroReflection.booleanType;
   }
 
   public static AvroVarintType<Byte> byteType() {
-    if (byteType == null) {
-      byteType = new ByteReflection();
+    if (AvroReflection.byteType == null) {
+      AvroReflection.byteType = new ByteReflection();
     }
-    return byteType;
+    return AvroReflection.byteType;
   }
 
   public static AvroVarintType<Short> shortType() {
-    if (shortType == null) {
-      shortType = new ShortReflection();
+    if (AvroReflection.shortType == null) {
+      AvroReflection.shortType = new ShortReflection();
     }
-    return shortType;
+    return AvroReflection.shortType;
   }
 
   public static AvroIntType<Integer> intType() {
-    if (intType == null) {
-      intType = new IntReflection();
+    if (AvroReflection.intType == null) {
+      AvroReflection.intType = new IntReflection();
     }
-    return intType;
+    return AvroReflection.intType;
   }
 
   public static AvroLongType<Long> longType() {
-    if (longType == null) {
-      longType = new LongReflection();
+    if (AvroReflection.longType == null) {
+      AvroReflection.longType = new LongReflection();
     }
-    return longType;
+    return AvroReflection.longType;
   }
 
   public static AvroFloatType<Float> floatType() {
-    if (floatType == null) {
-      floatType = new FloatReflection();
+    if (AvroReflection.floatType == null) {
+      AvroReflection.floatType = new FloatReflection();
     }
-    return floatType;
+    return AvroReflection.floatType;
   }
 
   public static AvroDoubleType<Double> doubleType() {
-    if (doubleType == null) {
-      doubleType = new DoubleReflection();
+    if (AvroReflection.doubleType == null) {
+      AvroReflection.doubleType = new DoubleReflection();
     }
-    return doubleType;
+    return AvroReflection.doubleType;
   }
 
   public static AvroVarintType<Character> charType() {
-    if (charType == null) {
-      charType = new CharReflection();
+    if (AvroReflection.charType == null) {
+      AvroReflection.charType = new CharReflection();
     }
-    return charType;
+    return AvroReflection.charType;
   }
 
   public static AvroDataType<ByteBuffer> dataType() {
-    if (dataType == null) {
-      dataType = new DataReflection();
+    if (AvroReflection.dataType == null) {
+      AvroReflection.dataType = new DataReflection();
     }
-    return dataType;
+    return AvroReflection.dataType;
   }
 
   public static AvroStringType<String> stringType() {
-    if (stringType == null) {
-      stringType = new StringReflection();
+    if (AvroReflection.stringType == null) {
+      AvroReflection.stringType = new StringReflection();
     }
-    return stringType;
+    return AvroReflection.stringType;
   }
 
   @SuppressWarnings("unchecked")
@@ -158,7 +158,7 @@ public final class AvroReflection {
   }
 
   public static <T> AvroRecordType<T, T> recordType(String fullName, Class<?> recordClass) {
-    return recordType(AvroName.parse(fullName), recordClass);
+    return AvroReflection.recordType(AvroName.parse(fullName), recordClass);
   }
 
   public static <T extends Enum<T>> AvroEnumType<T> enumType(AvroName fullName, Class<T> enumClass) {
@@ -166,12 +166,12 @@ public final class AvroReflection {
   }
 
   public static <T extends Enum<T>> AvroEnumType<T> enumType(String fullName, Class<T> enumClass) {
-    return enumType(AvroName.parse(fullName), enumClass);
+    return AvroReflection.enumType(AvroName.parse(fullName), enumClass);
   }
 
   public static <T extends Enum<T>> AvroEnumType<T> enumType(Class<T> enumClass) {
     final AvroName fullName = AvroName.parse(enumClass.getName().replace("$", "_"));
-    return enumType(fullName, enumClass);
+    return AvroReflection.enumType(fullName, enumClass);
   }
 
   @SuppressWarnings("unchecked")
@@ -180,7 +180,7 @@ public final class AvroReflection {
   }
 
   public static <I, T> AvroArrayType<I, T> arrayType(Class<?> itemClass) {
-    return arrayType(itemClass, classType(itemClass));
+    return AvroReflection.arrayType(itemClass, classType(itemClass));
   }
 
   @SuppressWarnings("unchecked")
@@ -200,7 +200,7 @@ public final class AvroReflection {
   }
 
   public static <V> AvroMapType<String, V, Map<String, V>> mapType(AvroType<? extends V> valueType) {
-    return mapType(Map.class, valueType);
+    return AvroReflection.mapType(Map.class, valueType);
   }
 
   public static <T> AvroUnionType<T> unionType() {
@@ -212,7 +212,7 @@ public final class AvroReflection {
   }
 
   public static AvroFixedType<byte[]> fixedType(String fullName, int size) {
-    return fixedType(AvroName.parse(fullName), size);
+    return AvroReflection.fixedType(AvroName.parse(fullName), size);
   }
 
   public static <R, V> AvroFieldType<V, R> field(Field field, AvroType<? extends V> valueType) {
@@ -257,13 +257,13 @@ public final class AvroReflection {
   public static <T> AvroType<T> classType(Class<?> type) {
     if (type.isArray()) {
       final Class<?> componentType = type.getComponentType();
-      return arrayType(componentType, classType(componentType));
+      return AvroReflection.arrayType(componentType, classType(componentType));
     } else {
-      AvroType<T> classType = builtinType(type);
+      AvroType<T> classType = AvroReflection.builtinType(type);
       if (classType != null) {
         return classType;
       }
-      classType = reflectClass(type);
+      classType = AvroReflection.reflectClass(type);
       if (classType != null) {
         return classType;
       }
@@ -273,12 +273,13 @@ public final class AvroReflection {
 
   @SuppressWarnings("unchecked")
   static <T> AvroType<T> reflectClass(Class<?> type) {
-    if (!type.isInterface() && (type.getModifiers() & Modifier.ABSTRACT) == 0 && !isBuiltin(type)) {
+    if (!type.isInterface() && (type.getModifiers() & Modifier.ABSTRACT) == 0
+        && !AvroReflection.isBuiltin(type)) {
       final Field[] fields = type.getDeclaredFields();
       for (int i = 0, n = fields.length; i < n; i += 1) {
         final Field field = fields[i];
-        final AvroKind kind = field.getAnnotation(AvroKind.class);
-        if (kind != null) {
+        final AvroKind kindAnnotation = field.getAnnotation(AvroKind.class);
+        if (kindAnnotation != null) {
           if (!AvroType.class.isAssignableFrom(field.getType())) {
             throw new AvroException(field.toString());
           }
@@ -290,7 +291,7 @@ public final class AvroReflection {
           try {
             AvroType<T> classType = (AvroType<T>) field.get(null);
             if (classType == null) {
-              classType = reflectClassType(type);
+              classType = AvroReflection.reflectClassType(type);
               field.set(null, classType);
             }
             return classType;
@@ -303,8 +304,8 @@ public final class AvroReflection {
       final Method[] methods = type.getDeclaredMethods();
       for (int i = 0, n = methods.length; i < n; i += 1) {
         final Method method = methods[i];
-        final AvroKind kind = method.getAnnotation(AvroKind.class);
-        if (kind != null) {
+        final AvroKind kindAnnotation = method.getAnnotation(AvroKind.class);
+        if (kindAnnotation != null) {
           if (!AvroType.class.isAssignableFrom(method.getReturnType())) {
             throw new AvroException(method.toString());
           }
@@ -324,16 +325,17 @@ public final class AvroReflection {
         }
       }
 
-      return reflectClassType(type);
+      return AvroReflection.reflectClassType(type);
     }
     return null;
   }
 
   static <T> AvroRecordType<T, T> reflectClassType(Class<?> type) {
-    if (!type.isInterface() && (type.getModifiers() & Modifier.ABSTRACT) == 0 && !isBuiltin(type)) {
+    if (!type.isInterface() && (type.getModifiers() & Modifier.ABSTRACT) == 0
+        && !AvroReflection.isBuiltin(type)) {
       final AvroName fullName = AvroName.parse(type.getName().replace("$", "_"));
-      AvroRecordType<T, T> recordType = recordType(fullName, type);
-      recordType = reflectFields(recordType, type);
+      AvroRecordType<T, T> recordType = AvroReflection.recordType(fullName, type);
+      recordType = AvroReflection.reflectFields(recordType, type);
       return recordType;
     }
     return null;
@@ -347,7 +349,7 @@ public final class AvroReflection {
         componentType = ((TypeVariable) componentType).getBounds()[0];
       }
       if (componentType instanceof Class<?>) {
-        return (AvroType<T>) arrayType((Class<?>) componentType);
+        return (AvroType<T>) AvroReflection.arrayType((Class<?>) componentType);
       }
     }
     final Type[] typeArguments;
@@ -361,12 +363,12 @@ public final class AvroReflection {
     if (genericType instanceof Class<?>) {
       final Class<Object> type = (Class<Object>) genericType;
       if (type.isArray()) {
-        return (AvroType<T>) arrayType(type.getComponentType());
+        return (AvroType<T>) AvroReflection.arrayType(type.getComponentType());
       } else if (type.isAssignableFrom(Map.class) && typeArguments != null && typeArguments.length == 2 && typeArguments[0] == String.class) {
-        final AvroType<?> valueType = reflectGenericType(typeArguments[1]);
-        return (AvroType<T>) mapType(type, valueType);
+        final AvroType<?> valueType = AvroReflection.reflectGenericType(typeArguments[1]);
+        return (AvroType<T>) AvroReflection.mapType(type, valueType);
       } else {
-        return classType(type);
+        return AvroReflection.classType(type);
       }
     }
     return null;
@@ -374,10 +376,10 @@ public final class AvroReflection {
 
   static <T> AvroRecordType<T, T> reflectFields(AvroRecordType<T, T> recordType, Class<?> recordClass) {
     if (recordClass != null) {
-      recordType = reflectFields(recordType, recordClass.getSuperclass());
+      recordType = AvroReflection.reflectFields(recordType, recordClass.getSuperclass());
       final Field[] fields = recordClass.getDeclaredFields();
       for (int i = 0, n = fields.length; i < n; i += 1) {
-        recordType = reflectField(recordType, fields[i]);
+        recordType = AvroReflection.reflectField(recordType, fields[i]);
       }
     }
     return recordType;
@@ -391,12 +393,12 @@ public final class AvroReflection {
       }
 
       String name;
-      final AvroMember member = field.getAnnotation(AvroMember.class);
-      name = member != null ? member.value() : null;
+      final AvroMember memberAnnotation = field.getAnnotation(AvroMember.class);
+      name = memberAnnotation != null ? memberAnnotation.value() : null;
       if (name == null || name.length() == 0) {
         name = field.getName();
       }
-      final AvroType<?> valueType = reflectGenericType(field.getGenericType());
+      final AvroType<?> valueType = AvroReflection.reflectGenericType(field.getGenericType());
       if (valueType != null) {
         recordType = recordType.field(field(field, valueType));
       }

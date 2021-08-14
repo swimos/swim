@@ -1,3 +1,17 @@
+// Copyright 2015-2021 Swim inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package swim.io.http;
 
 import java.util.concurrent.CountDownLatch;
@@ -17,22 +31,17 @@ public class SecureHttpClientSpec {
 
   @Test
   public void testGithub() {
-    connectExternalServer("https://github.com/swimos");
+    this.connectExternalServer("https://github.com/swimos");
   }
 
   @Test
   public void testGoogleJwks() {
-    connectExternalServer("https://www.googleapis.com/oauth2/v3/certs");
+    this.connectExternalServer("https://www.googleapis.com/oauth2/v3/certs");
   }
 
   @Test
   public void testGoogleOpenId() {
-    connectExternalServer("https://accounts.google.com/.well-known/openid-configuration");
-  }
-
-  @Test
-  public void testSwimOS() {
-    connectExternalServer("https://www.swimos.org/");
+    this.connectExternalServer("https://accounts.google.com/.well-known/openid-configuration");
   }
 
   private void connectExternalServer(String url) {
@@ -45,9 +54,9 @@ public class SecureHttpClientSpec {
     final AbstractHttpRequester<String> requester = new AbstractHttpRequester<String>() {
       @Override
       public void doRequest() {
-        final Uri requestUri = Uri.from(uri.path());
-        final HttpRequest<?> request = HttpRequest.get(requestUri, Host.from(uri.authority()));
-        writeRequest(request);
+        final Uri requestUri = Uri.create(uri.path());
+        final HttpRequest<?> request = HttpRequest.get(requestUri, Host.create(uri.authority()));
+        this.writeRequest(request);
       }
 
       @Override
@@ -70,7 +79,7 @@ public class SecureHttpClientSpec {
       @Override
       public void didConnect() {
         super.didConnect();
-        doRequest(requester);
+        this.doRequest(requester);
       }
 
     };

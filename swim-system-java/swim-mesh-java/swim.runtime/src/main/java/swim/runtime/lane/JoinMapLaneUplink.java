@@ -55,7 +55,7 @@ public class JoinMapLaneUplink extends MapUplinkModem {
 
   @Override
   protected void willSync(SyncRequest request) {
-    syncDown(this.laneBinding.keyIterator());
+    this.syncDown(this.laneBinding.keyIterator());
     super.willSync(request);
   }
 

@@ -17,7 +17,6 @@ package swim.db;
 import swim.codec.Output;
 import swim.codec.Unicode;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.recon.Recon;
 import swim.structure.Num;
 import swim.structure.Record;
@@ -34,41 +33,6 @@ public final class UTreeLeaf extends UTreePage {
     this.pageRef = pageRef;
     this.version = version;
     this.value = value;
-  }
-
-  public static UTreeLeaf create(PageContext context, int stem, long version,
-                                 int zone, long base, Value value) {
-    final UTreePageRef pageRef = new UTreePageRef(context, stem, zone, zone, base);
-    final UTreeLeaf page = new UTreeLeaf(pageRef, version, value);
-    pageRef.page = page;
-    return page;
-  }
-
-  public static UTreeLeaf create(PageContext context, int stem, long version, Value value) {
-    return create(context, stem, version, 0, 0L, value);
-  }
-
-  public static UTreeLeaf empty(PageContext context, int stem, long version) {
-    return create(context, stem, version, 0, 0L, Value.absent());
-  }
-
-  public static UTreeLeaf fromValue(UTreePageRef pageRef, Value value) {
-    Throwable cause = null;
-    try {
-      final Value header = value.header("uleaf");
-      final long version = header.get("v").longValue();
-      final Value body = value.body();
-      return new UTreeLeaf(pageRef, version, body);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        cause = error;
-      } else {
-        throw error;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed uleaf: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), cause);
   }
 
   @Override
@@ -124,7 +88,7 @@ public final class UTreeLeaf extends UTreePage {
   @Override
   public UTreePage updated(Value newValue, long newVersion) {
     if (!newValue.equals(this.value)) {
-      return create(this.pageRef.context, this.pageRef.stem, newVersion, newValue);
+      return UTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, newValue);
     } else {
       return this;
     }
@@ -164,15 +128,14 @@ public final class UTreeLeaf extends UTreePage {
 
   @Override
   public Value toHeader() {
-    final Record header = Record.create(2)
-        .slot("stem", this.pageRef.stem)
-        .slot("v", this.version);
+    final Record header = Record.create(2).slot("stem", this.pageRef.stem)
+                                          .slot("v", this.version);
     return Record.create(1).attr("uleaf", header);
   }
 
   @Override
   public Value toValue() {
-    final Record record = (Record) toHeader();
+    final Record record = (Record) this.toHeader();
     record.add(this.value);
     return record;
   }
@@ -181,7 +144,7 @@ public final class UTreeLeaf extends UTreePage {
   public UTreeLeaf evacuated(int post, long version) {
     final int oldPost = this.pageRef.post;
     if (oldPost != 0 && oldPost < post) {
-      return create(this.pageRef.context, this.pageRef.stem, version, this.value);
+      return UTreeLeaf.create(this.pageRef.context, this.pageRef.stem, version, this.value);
     } else {
       return this;
     }
@@ -189,18 +152,18 @@ public final class UTreeLeaf extends UTreePage {
 
   @Override
   public UTreeLeaf committed(int zone, long base, long version) {
-    return create(this.pageRef.context, this.pageRef.stem, version, zone, base, this.value);
+    return UTreeLeaf.create(this.pageRef.context, this.pageRef.stem, version, zone, base, this.value);
   }
 
   @Override
   public UTreeLeaf uncommitted(long version) {
-    return create(this.pageRef.context, this.pageRef.stem, version, this.value);
+    return UTreeLeaf.create(this.pageRef.context, this.pageRef.stem, version, this.value);
   }
 
   @Override
   public void writePage(Output<?> output) {
-    Recon.write(toHeader(), output);
-    writePageContent(output);
+    Recon.write(this.toHeader(), output);
+    this.writePageContent(output);
     output.write('\n');
   }
 
@@ -212,16 +175,16 @@ public final class UTreeLeaf extends UTreePage {
 
   @Override
   public void writeDiff(Output<?> output) {
-    writePage(output);
+    this.writePage(output);
   }
 
   @Override
   public void loadTreeAsync(PageLoader pageLoader, Cont<Page> cont) {
     try {
       // Call continuation on fresh stack
-      this.pageRef.context.stage().execute(Conts.async(cont, this));
+      this.pageRef.context.stage().execute(Cont.async(cont, this));
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -241,10 +204,45 @@ public final class UTreeLeaf extends UTreePage {
 
   @Override
   public String toString() {
-    final Output<String> output = Unicode.stringOutput(pageSize() - 1); // ignore trailing '\n'
-    Recon.write(toHeader(), output);
-    writePageContent(output);
+    final Output<String> output = Unicode.stringOutput(this.pageSize() - 1); // ignore trailing '\n'
+    Recon.write(this.toHeader(), output);
+    this.writePageContent(output);
     return output.bind();
+  }
+
+  public static UTreeLeaf create(PageContext context, int stem, long version,
+                                 int zone, long base, Value value) {
+    final UTreePageRef pageRef = new UTreePageRef(context, stem, zone, zone, base);
+    final UTreeLeaf page = new UTreeLeaf(pageRef, version, value);
+    pageRef.page = page;
+    return page;
+  }
+
+  public static UTreeLeaf create(PageContext context, int stem, long version, Value value) {
+    return UTreeLeaf.create(context, stem, version, 0, 0L, value);
+  }
+
+  public static UTreeLeaf empty(PageContext context, int stem, long version) {
+    return UTreeLeaf.create(context, stem, version, 0, 0L, Value.absent());
+  }
+
+  public static UTreeLeaf fromValue(UTreePageRef pageRef, Value value) {
+    Throwable cause = null;
+    try {
+      final Value header = value.header("uleaf");
+      final long version = header.get("v").longValue();
+      final Value body = value.body();
+      return new UTreeLeaf(pageRef, version, body);
+    } catch (Throwable error) {
+      if (Cont.isNonFatal(error)) {
+        cause = error;
+      } else {
+        throw error;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed uleaf: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), cause);
   }
 
 }

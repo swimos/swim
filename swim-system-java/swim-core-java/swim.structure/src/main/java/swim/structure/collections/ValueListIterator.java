@@ -31,7 +31,7 @@ public class ValueListIterator<T> extends ValueIterator<T> implements ListIterat
 
   @Override
   public <T2> ValueListIterator<T2> valueClass(Class<T2> valueClass) {
-    return valueForm(Form.<T2>forClass(valueClass));
+    return this.valueForm(Form.<T2>forClass(valueClass));
   }
 
   @Override

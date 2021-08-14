@@ -18,19 +18,11 @@ import swim.collections.HashTrieMap;
 
 abstract class UriFragmentPattern extends UriQueryPattern {
 
-  static UriFragmentPattern compile(Uri pattern, UriFragment fragment) {
-    if (fragment.isDefined()) {
-      return new UriFragmentLiteral(fragment, UriTerminalPattern.compile(pattern));
-    } else {
-      return UriTerminalPattern.compile(pattern);
-    }
-  }
-
   abstract HashTrieMap<String, String> unapply(UriFragment fragment, HashTrieMap<String, String> args);
 
   @Override
   HashTrieMap<String, String> unapply(UriQuery query, UriFragment fragment, HashTrieMap<String, String> args) {
-    return unapply(fragment, args);
+    return this.unapply(fragment, args);
   }
 
   abstract boolean matches(UriFragment fragment);
@@ -38,9 +30,17 @@ abstract class UriFragmentPattern extends UriQueryPattern {
   @Override
   boolean matches(UriQuery query, UriFragment fragment) {
     if (!query.isDefined()) {
-      return matches(fragment);
+      return this.matches(fragment);
     } else {
       return false;
+    }
+  }
+
+  static UriFragmentPattern compile(Uri pattern, UriFragment fragment) {
+    if (fragment.isDefined()) {
+      return new UriFragmentLiteral(fragment, UriTerminalPattern.compile(pattern));
+    } else {
+      return UriTerminalPattern.compile(pattern);
     }
   }
 

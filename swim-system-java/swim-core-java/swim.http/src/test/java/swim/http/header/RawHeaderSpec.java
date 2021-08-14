@@ -22,22 +22,22 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class RawHeaderSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseRawHeaders() {
-    assertParses("Foo:", RawHeader.from("Foo", ""));
-    assertParses("Foo:Bar", RawHeader.from("Foo", "Bar"));
-    assertParses("Foo: ", RawHeader.from("Foo", ""));
-    assertParses("Foo: Bar", RawHeader.from("Foo", "Bar"));
+    assertParses("Foo:", RawHeader.create("Foo", ""));
+    assertParses("Foo:Bar", RawHeader.create("Foo", "Bar"));
+    assertParses("Foo: ", RawHeader.create("Foo", ""));
+    assertParses("Foo: Bar", RawHeader.create("Foo", "Bar"));
   }
 
   @Test
   public void writeRawHeaders() {
-    assertWrites(RawHeader.from("Foo", ""), "Foo:");
-    assertWrites(RawHeader.from("Foo", "Bar"), "Foo: Bar");
+    assertWrites(RawHeader.create("Foo", ""), "Foo:");
+    assertWrites(RawHeader.create("Foo", "Bar"), "Foo: Bar");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

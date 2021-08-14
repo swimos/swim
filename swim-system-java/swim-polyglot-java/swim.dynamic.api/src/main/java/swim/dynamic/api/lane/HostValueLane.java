@@ -24,6 +24,10 @@ import swim.dynamic.observable.HostObservableValue;
 
 public final class HostValueLane {
 
+  private HostValueLane() {
+    // static
+  }
+
   public static final HostObjectType<ValueLane<Object>> TYPE;
 
   static {
@@ -35,10 +39,6 @@ public final class HostValueLane {
     type.addMember(new HostValueLaneIsTransient());
     type.addMember(new HostValueLaneObserve());
     type.addMember(new HostValueLaneUnobserve());
-  }
-
-  private HostValueLane() {
-    // static
   }
 
 }

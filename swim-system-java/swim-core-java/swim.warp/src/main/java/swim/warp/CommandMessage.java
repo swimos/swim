@@ -21,9 +21,6 @@ import swim.uri.Uri;
 
 public final class CommandMessage extends LaneAddressed {
 
-  @Kind
-  public static final Form<CommandMessage> FORM = new CommandMessageForm();
-
   public CommandMessage(Uri nodeUri, Uri laneUri, Value body) {
     super(nodeUri, laneUri, body);
   }
@@ -47,7 +44,7 @@ public final class CommandMessage extends LaneAddressed {
 
   @Override
   public Form<CommandMessage> form() {
-    return FORM;
+    return CommandMessage.FORM;
   }
 
   @Override
@@ -65,6 +62,9 @@ public final class CommandMessage extends LaneAddressed {
     return new CommandMessage(this.nodeUri, this.laneUri, body);
   }
 
+  @Kind
+  public static final Form<CommandMessage> FORM = new CommandMessageForm();
+
 }
 
 final class CommandMessageForm extends LaneAddressedForm<CommandMessage> {
@@ -80,7 +80,7 @@ final class CommandMessageForm extends LaneAddressedForm<CommandMessage> {
   }
 
   @Override
-  public CommandMessage from(Uri nodeUri, Uri laneUri, Value body) {
+  public CommandMessage create(Uri nodeUri, Uri laneUri, Value body) {
     return new CommandMessage(nodeUri, laneUri, body);
   }
 

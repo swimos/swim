@@ -39,39 +39,39 @@ public abstract class WebRequest {
   public abstract HttpRequest<?> httpRequest();
 
   public HttpMethod httpMethod() {
-    return httpRequest().method();
+    return this.httpRequest().method();
   }
 
   public Uri httpUri() {
-    return httpRequest().uri();
+    return this.httpRequest().uri();
   }
 
   public UriPath httpUriPath() {
-    return httpUri().path();
+    return this.httpUri().path();
   }
 
   public UriQuery httpUriQuery() {
-    return httpUri().query();
+    return this.httpUri().query();
   }
 
   public HttpVersion httpVersion() {
-    return httpRequest().version();
+    return this.httpRequest().version();
   }
 
   public FingerTrieSeq<HttpHeader> httpHeaders() {
-    return httpRequest().headers();
+    return this.httpRequest().headers();
   }
 
   public HttpHeader getHttpHeader(String name) {
-    return httpRequest().getHeader(name);
+    return this.httpRequest().getHeader(name);
   }
 
   public <H extends HttpHeader> H getHttpHeader(Class<H> headerClass) {
-    return httpRequest().getHeader(headerClass);
+    return this.httpRequest().getHeader(headerClass);
   }
 
   public HttpEntity<?> httpEntity() {
-    return httpRequest().entity();
+    return this.httpRequest().entity();
   }
 
   public abstract UriPath routePath();
@@ -83,17 +83,17 @@ public abstract class WebRequest {
   }
 
   public WebResponse respond(HttpResponse<?> response) {
-    return accept(new StaticHttpResponder<>(response));
+    return this.accept(new StaticHttpResponder<>(response));
   }
 
   public WebResponse upgrade(WebSocket<?, ?> webSocket, WsResponse wsResponse, WsSettings wsSettings) {
-    return accept(new WsUpgradeResponder(webSocket, wsResponse, wsSettings));
+    return this.accept(new WsUpgradeResponder(webSocket, wsResponse, wsSettings));
   }
 
   public WebResponse upgrade(WarpSocket warpSocket, WsResponse wsResponse, WarpSettings warpSettings) {
     final WarpWebSocket webSocket = new WarpWebSocket(warpSocket, warpSettings);
     warpSocket.setWarpSocketContext(webSocket); // eagerly set
-    return accept(new WsUpgradeResponder(webSocket, wsResponse, warpSettings.wsSettings()));
+    return this.accept(new WsUpgradeResponder(webSocket, wsResponse, warpSettings.wsSettings()));
   }
 
   public WebResponse reject(HttpResponder<?> responder) {

@@ -42,6 +42,11 @@ final class MediaRangeParser extends Parser<MediaRange> {
     this(http, null, null, null, null, 1);
   }
 
+  @Override
+  public Parser<MediaRange> feed(Input input) {
+    return MediaRangeParser.parse(input, this.http, this.type, this.subtype, this.weight, this.params, this.step);
+  }
+
   static Parser<MediaRange> parse(Input input, HttpParser http, StringBuilder type, StringBuilder subtype,
                                   Parser<Float> weight, Parser<HashTrieMap<String, String>> params, int step) {
     int c = 0;
@@ -56,10 +61,10 @@ final class MediaRangeParser extends Parser<MediaRange> {
           type.appendCodePoint(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("media type", input));
+          return Parser.error(Diagnostic.expected("media type", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("media type", input));
+        return Parser.error(Diagnostic.expected("media type", input));
       }
     }
     if (step == 2) {
@@ -76,7 +81,7 @@ final class MediaRangeParser extends Parser<MediaRange> {
         input = input.step();
         step = 3;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected('/', input));
+        return Parser.error(Diagnostic.expected('/', input));
       }
     }
     if (step == 3) {
@@ -90,10 +95,10 @@ final class MediaRangeParser extends Parser<MediaRange> {
           subtype.appendCodePoint(c);
           step = 4;
         } else {
-          return error(Diagnostic.expected("media subtype", input));
+          return Parser.error(Diagnostic.expected("media subtype", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("media subtype", input));
+        return Parser.error(Diagnostic.expected("media subtype", input));
       }
     }
     if (step == 4) {
@@ -123,8 +128,8 @@ final class MediaRangeParser extends Parser<MediaRange> {
         input = input.step();
         step = 6;
       } else if (!input.isEmpty()) {
-        return done(http.mediaRange(type.toString(), subtype.toString(), 1f,
-            HashTrieMap.<String, String>empty()));
+        return Parser.done(http.mediaRange(type.toString(), subtype.toString(), 1f,
+                                           HashTrieMap.<String, String>empty()));
       }
     }
     if (step == 6) {
@@ -145,7 +150,7 @@ final class MediaRangeParser extends Parser<MediaRange> {
           step = 9;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     if (step == 7) {
@@ -159,7 +164,7 @@ final class MediaRangeParser extends Parser<MediaRange> {
           step = 9;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     if (step == 8) {
@@ -179,24 +184,19 @@ final class MediaRangeParser extends Parser<MediaRange> {
       if (params.isDone()) {
         final Float qvalue = weight != null ? weight.bind() : null;
         final float q = qvalue != null ? (float) qvalue : 1f;
-        return done(http.mediaRange(type.toString(), subtype.toString(), q, params.bind()));
+        return Parser.done(http.mediaRange(type.toString(), subtype.toString(), q, params.bind()));
       } else if (params.isError()) {
         return params.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new MediaRangeParser(http, type, subtype, weight, params, step);
   }
 
   static Parser<MediaRange> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<MediaRange> feed(Input input) {
-    return parse(input, this.http, this.type, this.subtype, this.weight, this.params, this.step);
+    return MediaRangeParser.parse(input, http, null, null, null, null, 1);
   }
 
 }

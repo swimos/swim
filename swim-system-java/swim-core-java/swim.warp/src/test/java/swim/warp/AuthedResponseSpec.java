@@ -17,8 +17,8 @@ package swim.warp;
 import org.testng.annotations.Test;
 import swim.structure.Attr;
 import swim.structure.Record;
-import static swim.warp.Assertions.assertParses;
-import static swim.warp.Assertions.assertWrites;
+import static swim.warp.WarpAssertions.assertParses;
+import static swim.warp.WarpAssertions.assertWrites;
 
 public class AuthedResponseSpec {
 

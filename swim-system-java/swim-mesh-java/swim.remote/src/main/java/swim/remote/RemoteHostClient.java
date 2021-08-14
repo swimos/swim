@@ -16,7 +16,7 @@ package swim.remote;
 
 import java.net.InetSocketAddress;
 import swim.collections.FingerTrieSeq;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.TimerFunction;
 import swim.concurrent.TimerRef;
 import swim.http.HttpRequest;
@@ -42,8 +42,6 @@ import swim.ws.WsRequest;
 
 public class RemoteHostClient extends RemoteHost {
 
-  static final double MAX_RECONNECT_TIMEOUT = 15000.0;
-  static final FingerTrieSeq<String> PROTOCOL_LIST = FingerTrieSeq.of("warp0", "swim-0.0");
   final IpInterface endpoint;
   final WarpSettings warpSettings;
   HttpClient client;
@@ -54,6 +52,9 @@ public class RemoteHostClient extends RemoteHost {
     super(Uri.empty(), baseUri);
     this.endpoint = endpoint;
     this.warpSettings = warpSettings;
+    this.client = null;
+    this.reconnectTimer = null;
+    this.reconnectTimeout = 0.0;
   }
 
   public RemoteHostClient(Uri baseUri, IpInterface endpoint) {
@@ -67,7 +68,7 @@ public class RemoteHostClient extends RemoteHost {
 
   public void connect() {
     final String scheme = this.baseUri.schemeName();
-    final boolean isSecure = "warps".equals(scheme) || "swims".equals(scheme);
+    final boolean isSecure = "warps".equals(scheme);
 
     final UriAuthority remoteAuthority = this.baseUri.authority();
     final String remoteAddress = remoteAuthority.host().address();
@@ -75,27 +76,27 @@ public class RemoteHostClient extends RemoteHost {
     final int requestPort = remotePort > 0 ? remotePort : isSecure ? 443 : 80;
 
     if (this.client == null) {
-      final Uri requestUri = Uri.from(UriScheme.from("http"), remoteAuthority, this.baseUri.path(), this.baseUri.query());
+      final Uri requestUri = Uri.create(UriScheme.create("http"), remoteAuthority, this.baseUri.path(), this.baseUri.query());
       final WarpSettings warpSettings = this.warpSettings;
       final WsSettings wsSettings = warpSettings.wsSettings();
-      final WsRequest wsRequest = wsSettings.handshakeRequest(requestUri, PROTOCOL_LIST);
+      final WsRequest wsRequest = wsSettings.handshakeRequest(requestUri, RemoteHostClient.PROTOCOL_LIST);
       final WarpWebSocket webSocket = new WarpWebSocket(this, warpSettings);
       this.client = new RemoteHostClientBinding(this, webSocket, wsRequest, warpSettings);
-      setWarpSocketContext(webSocket); // eagerly set
+      this.setWarpSocketContext(webSocket); // eagerly set
     }
 
     try {
       if (isSecure) {
-        connectHttps(new InetSocketAddress(remoteAddress, requestPort), this.client, this.warpSettings.httpSettings());
+        this.connectHttps(new InetSocketAddress(remoteAddress, requestPort), this.client, this.warpSettings.httpSettings());
       } else {
-        connectHttp(new InetSocketAddress(remoteAddress, requestPort), this.client, this.warpSettings.httpSettings());
+        this.connectHttp(new InetSocketAddress(remoteAddress, requestPort), this.client, this.warpSettings.httpSettings());
       }
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       cause.printStackTrace();
-      reconnect();
+      this.reconnect();
     }
   }
 
@@ -123,10 +124,9 @@ public class RemoteHostClient extends RemoteHost {
       final double jitter = 1000.0 * Math.random();
       this.reconnectTimeout = 500.0 + jitter;
     } else {
-      this.reconnectTimeout = Math.min(1.8 * this.reconnectTimeout, MAX_RECONNECT_TIMEOUT);
+      this.reconnectTimeout = Math.min(1.8 * this.reconnectTimeout, RemoteHostClient.MAX_RECONNECT_TIMEOUT);
     }
-    this.reconnectTimer = this.hostContext.schedule().setTimer(
-        (long) this.reconnectTimeout, new RemoteHostClientReconnectTimer(this));
+    this.reconnectTimer = this.hostContext.schedule().setTimer((long) this.reconnectTimeout, new RemoteHostClientReconnectTimer(this));
   }
 
   @Override
@@ -141,7 +141,7 @@ public class RemoteHostClient extends RemoteHost {
 
   @Override
   protected void willOpen() {
-    connect();
+    this.connect();
     super.willOpen();
   }
 
@@ -155,12 +155,12 @@ public class RemoteHostClient extends RemoteHost {
         warpSocketContext.close();
       }
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
     }
-    reconnect();
+    this.reconnect();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -178,18 +178,22 @@ public class RemoteHostClient extends RemoteHost {
         warpSocketContext.close();
       }
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
     }
-    reconnect();
+    this.reconnect();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
       throw (Error) failure;
     }
   }
+
+  static final double MAX_RECONNECT_TIMEOUT = 15000.0;
+
+  static final FingerTrieSeq<String> PROTOCOL_LIST = FingerTrieSeq.of("warp0");
 
 }
 
@@ -217,16 +221,16 @@ final class RemoteHostClientBinding extends AbstractWarpClient {
   @Override
   public void didConnect() {
     super.didConnect();
-    doRequest(upgrade(this.webSocket, this.wsRequest));
+    this.doRequest(this.upgrade(this.webSocket, this.wsRequest));
   }
 
   @Override
   public void didDisconnect() {
     Throwable failure = null;
     try {
-      webSocket.close();
+      this.webSocket.close();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
@@ -255,7 +259,7 @@ final class RemoteHostClientReconnectTimer implements TimerFunction {
     try {
       this.client.connect();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;

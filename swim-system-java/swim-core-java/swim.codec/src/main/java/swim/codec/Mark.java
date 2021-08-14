@@ -23,8 +23,6 @@ import swim.util.Murmur3;
  */
 public final class Mark extends Tag implements Comparable<Mark> {
 
-  private static int hashSeed;
-  private static Mark zero;
   final long offset;
   final int line;
   final int column;
@@ -35,35 +33,6 @@ public final class Mark extends Tag implements Comparable<Mark> {
     this.line = line;
     this.column = column;
     this.note = note;
-  }
-
-  /**
-   * Returns a {@code Mark} at byte offset {@code 0}, line {@code 1}, and
-   * column {@code 1}, with no attached note.
-   */
-  public static Mark zero() {
-    if (zero == null) {
-      zero = new Mark(0L, 1, 1, null);
-    }
-    return zero;
-  }
-
-  /**
-   * Returns a new {@code Mark} at the given zero-based byte {@code offset},
-   * one-based {@code line} number, and one-based {@code column} number,
-   * with the attached {@code note}.
-   */
-  public static Mark at(long offset, int line, int column, String note) {
-    return new Mark(offset, line, column, note);
-  }
-
-  /**
-   * Returns a new {@code Mark} at the given zero-based byte {@code offset},
-   * one-based {@code line} number, and one-based {@code column} number,
-   * with no attached note.
-   */
-  public static Mark at(long offset, int line, int column) {
-    return at(offset, line, column, null);
   }
 
   /**
@@ -133,16 +102,15 @@ public final class Mark extends Tag implements Comparable<Mark> {
   public Tag union(Tag other) {
     if (other instanceof Mark) {
       final Mark that = (Mark) other;
-      if (this.offset == that.offset && this.line == that.line
-          && this.column == that.column) {
+      if (this.offset == that.offset && this.line == that.line && this.column == that.column) {
         return this;
       } else {
         return Span.from(this, that);
       }
     } else if (other instanceof Span) {
       final Span that = (Span) other;
-      final Mark start = min(that.start);
-      final Mark end = max(that.end);
+      final Mark start = this.min(that.start);
+      final Mark end = this.max(that.end);
       if (start == that.start && end == that.end) {
         return that;
       } else {
@@ -184,43 +152,78 @@ public final class Mark extends Tag implements Comparable<Mark> {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Mark.class);
+    if (Mark.hashSeed == 0) {
+      Mark.hashSeed = Murmur3.seed(Mark.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Mark.hashSeed,
         Murmur3.hash(this.offset)), this.line), this.column), Murmur3.hash(this.note)));
   }
 
   @Override
-  public void display(Output<?> output) {
-    Format.displayInt(this.line, output);
+  public <T> Output<T> display(Output<T> output) {
+    output = Format.displayInt(this.line, output);
     output = output.write(':');
-    Format.displayInt(this.column, output);
+    output = Format.displayInt(this.column, output);
     if (this.note != null) {
       output = output.write(": ").write(this.note);
     }
+    return output;
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Mark").write('.').write("at").write('(');
-    Format.debugLong(this.offset, output);
+    output = Format.debugLong(this.offset, output);
     output = output.write(", ");
-    Format.debugInt(this.line, output);
+    output = Format.debugInt(this.line, output);
     output = output.write(", ");
-    Format.debugInt(this.column, output);
+    output = Format.debugInt(this.column, output);
     if (this.note != null) {
       output = output.write(", ");
-      Format.debugString(this.note, output);
+      output = Format.debugString(this.note, output);
     }
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.display(this);
+  }
+
+  private static Mark zero;
+
+  /**
+   * Returns a {@code Mark} at byte offset {@code 0}, line {@code 1}, and
+   * column {@code 1}, with no attached note.
+   */
+  public static Mark zero() {
+    if (Mark.zero == null) {
+      Mark.zero = new Mark(0L, 1, 1, null);
+    }
+    return Mark.zero;
+  }
+
+  /**
+   * Returns a new {@code Mark} at the given zero-based byte {@code offset},
+   * one-based {@code line} number, and one-based {@code column} number,
+   * with the attached {@code note}.
+   */
+  public static Mark at(long offset, int line, int column, String note) {
+    return new Mark(offset, line, column, note);
+  }
+
+  /**
+   * Returns a new {@code Mark} at the given zero-based byte {@code offset},
+   * one-based {@code line} number, and one-based {@code column} number,
+   * with no attached note.
+   */
+  public static Mark at(long offset, int line, int column) {
+    return new Mark(offset, line, column, null);
   }
 
 }

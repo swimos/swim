@@ -23,22 +23,22 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class AllowSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseAllowHeaders() {
-    assertParses("Allow: GET", Allow.from(HttpMethod.GET));
-    assertParses("Allow: GET,PUT", Allow.from(HttpMethod.GET, HttpMethod.PUT));
-    assertParses("Allow: GET, PUT", Allow.from(HttpMethod.GET, HttpMethod.PUT));
-    assertParses("Allow: GET , PUT", Allow.from(HttpMethod.GET, HttpMethod.PUT));
+    assertParses("Allow: GET", Allow.create(HttpMethod.GET));
+    assertParses("Allow: GET,PUT", Allow.create(HttpMethod.GET, HttpMethod.PUT));
+    assertParses("Allow: GET, PUT", Allow.create(HttpMethod.GET, HttpMethod.PUT));
+    assertParses("Allow: GET , PUT", Allow.create(HttpMethod.GET, HttpMethod.PUT));
   }
 
   @Test
   public void writeAllowHeaders() {
-    assertWrites(Allow.from(HttpMethod.GET), "Allow: GET");
-    assertWrites(Allow.from(HttpMethod.GET, HttpMethod.PUT), "Allow: GET, PUT");
+    assertWrites(Allow.create(HttpMethod.GET), "Allow: GET");
+    assertWrites(Allow.create(HttpMethod.GET, HttpMethod.PUT), "Allow: GET, PUT");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

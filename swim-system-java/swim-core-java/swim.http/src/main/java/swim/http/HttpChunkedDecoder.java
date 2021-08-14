@@ -46,6 +46,12 @@ final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
     this(http, message, content, null, null, 0, 1);
   }
 
+  @Override
+  public Decoder<HttpMessage<T>> feed(InputBuffer input) {
+    return HttpChunkedDecoder.decode(input, this.http, this.message, this.content,
+                                     this.header, this.part, this.offset, this.step);
+  }
+
   static <T> Decoder<HttpMessage<T>> decode(InputBuffer input, HttpParser http,
                                             HttpMessage<?> message, Decoder<T> content,
                                             HttpChunkHeader header, Parser<?> part,
@@ -62,7 +68,7 @@ final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
           part = null;
           step = 2;
         } else if (part.isError()) {
-          return error(part.trap());
+          return Decoder.error(part.trap());
         }
       }
       if (step == 2) { // chunk data
@@ -100,7 +106,7 @@ final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
             input = input.step();
             step = 4;
           } else {
-            return error(new DecoderException("carriage return"));
+            return Decoder.error(new DecoderException("carriage return"));
           }
         }
       }
@@ -111,7 +117,7 @@ final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
             step = 1;
             continue;
           } else {
-            return error(new DecoderException("line feed"));
+            return Decoder.error(new DecoderException("line feed"));
           }
         }
       }
@@ -133,10 +139,10 @@ final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
         } else {
           mediaType = null;
         }
-        final HttpValue<T> entity = HttpValue.from(content.bind(), mediaType);
-        return done(message.entity(entity));
+        final HttpValue<T> entity = HttpValue.create(content.bind(), mediaType);
+        return Decoder.done(message.entity(entity));
       } else if (part.isError()) {
-        return error(part.trap());
+        return Decoder.error(part.trap());
       }
     }
     return new HttpChunkedDecoder<T>(http, message, content, header, part, offset, step);
@@ -144,13 +150,7 @@ final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
 
   static <T> Decoder<HttpMessage<T>> decode(InputBuffer input, HttpParser http,
                                             HttpMessage<?> message, Decoder<T> content) {
-    return decode(input, http, message, content, null, null, 0, 1);
-  }
-
-  @Override
-  public Decoder<HttpMessage<T>> feed(InputBuffer input) {
-    return decode(input, this.http, this.message, this.content, this.header,
-        this.part, this.offset, this.step);
+    return HttpChunkedDecoder.decode(input, http, message, content, null, null, 0, 1);
   }
 
 }

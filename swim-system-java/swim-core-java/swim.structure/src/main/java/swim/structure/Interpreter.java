@@ -35,16 +35,6 @@ public class Interpreter {
     this(InterpreterSettings.standard(), null, 0);
   }
 
-  static int expand(int n) {
-    n = Math.max(32, n) - 1;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
-    return n + 1;
-  }
-
   public final InterpreterSettings settings() {
     return this.settings;
   }
@@ -117,27 +107,37 @@ public class Interpreter {
   }
 
   public void willOperate(Operator operator) {
-    // stub
+    // hook
   }
 
   public void didOperate(Operator operator, Item result) {
-    // stub
+    // hook
   }
 
   public void willSelect(Selector selector) {
-    // stub
+    // hook
   }
 
   public void didSelect(Selector selector, Object result) {
-    // stub
+    // hook
   }
 
   public void willTransform(Selector selector) {
-    // stub
+    // hook
   }
 
   public void didTransform(Selector selector, Item result) {
-    // stub
+    // hook
+  }
+
+  static int expand(int n) {
+    n = Math.max(32, n) - 1;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    return n + 1;
   }
 
 }

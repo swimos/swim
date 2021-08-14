@@ -102,7 +102,7 @@ final class PIOutput<I> extends Output<I> {
 
   @Override
   public I bind() {
-    return xml.pi(this.target, this.builder.toString());
+    return this.xml.pi(this.target, this.builder.toString());
   }
 
   @Override

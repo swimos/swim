@@ -37,7 +37,7 @@ public class ValueSortedMap<K, V> extends ValueMap<K, V> implements SortedMap<K,
 
   @Override
   public <K2> ValueSortedMap<K2, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   @Override
@@ -47,7 +47,7 @@ public class ValueSortedMap<K, V> extends ValueMap<K, V> implements SortedMap<K,
 
   @Override
   public <V2> ValueSortedMap<K, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override

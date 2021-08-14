@@ -41,7 +41,7 @@ public class ListDataView<V> extends ValueKeyedList<V> implements ListData<V>, L
   }
 
   public <V> ListDataView<V> valueClass(Class<V> valueClass) {
-    return valueForm(Form.<V>forClass(valueClass));
+    return this.valueForm(Form.<V>forClass(valueClass));
   }
 
   @Override
@@ -88,42 +88,42 @@ public class ListDataView<V> extends ValueKeyedList<V> implements ListData<V>, L
 
   @Override
   public void didChange() {
-    // stub
+    // hook
   }
 
   @Override
   public void didCommit() {
-    // stub
+    // hook
   }
 
   @Override
   public void didUpdate(long index, Value newValue, Value oldValue) {
-    // stub
+    // hook
   }
 
   @Override
   public void didInsert(long index, Value newValue) {
-    // stub
+    // hook
   }
 
   @Override
   public void didRemove(long index, Value oldValue) {
-    // stub
+    // hook
   }
 
   @Override
   public void didDrop(long lower) {
-    // stub
+    // hook
   }
 
   @Override
   public void didTake(long upper) {
-    // stub
+    // hook
   }
 
   @Override
   public void didClear() {
-    // stub
+    // hook
   }
 
 }

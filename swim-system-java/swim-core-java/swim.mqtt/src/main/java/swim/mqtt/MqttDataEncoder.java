@@ -35,6 +35,16 @@ final class MqttDataEncoder extends Encoder<Data, Data> {
     this(data, null, 1);
   }
 
+  @Override
+  public Encoder<Data, Data> feed(Data data) {
+    return new MqttDataEncoder(data, null, 1);
+  }
+
+  @Override
+  public Encoder<Data, Data> pull(OutputBuffer<?> output) {
+    return MqttDataEncoder.encode(output, this.data, this.encoder, this.step);
+  }
+
   static int sizeOf(Data data) {
     return 2 + data.size();
   }
@@ -43,7 +53,7 @@ final class MqttDataEncoder extends Encoder<Data, Data> {
                                     Encoder<?, ?> encoder, int step) {
     if (step == 1 && output.isCont()) {
       if (data.size() > 65535) {
-        return error(new MqttException("data too long (" + data.size() + " bytes)"));
+        return Encoder.error(new MqttException("data too long (" + data.size() + " bytes)"));
       }
       output = output.write(data.size() >>> 8);
       step = 2;
@@ -59,31 +69,21 @@ final class MqttDataEncoder extends Encoder<Data, Data> {
         encoder = encoder.pull(output);
       }
       if (encoder.isDone()) {
-        return done(data);
+        return Encoder.done(data);
       } else if (encoder.isError()) {
         return encoder.asError();
       }
     }
     if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new MqttDataEncoder(data, encoder, step);
   }
 
   static Encoder<Data, Data> encode(OutputBuffer<?> output, Data data) {
-    return encode(output, data, null, 1);
-  }
-
-  @Override
-  public Encoder<Data, Data> feed(Data data) {
-    return new MqttDataEncoder(data, null, 1);
-  }
-
-  @Override
-  public Encoder<Data, Data> pull(OutputBuffer<?> output) {
-    return encode(output, this.data, this.encoder, this.step);
+    return MqttDataEncoder.encode(output, data, null, 1);
   }
 
 }

@@ -24,73 +24,73 @@ public class MqttDecoder {
   public MqttConnect connect(int packetFlags, String protocolName, int protocolLevel,
                              int connectFlags, int keepAlive, String clientId, String willTopic,
                              Data willMessage, String username, Data password) {
-    return MqttConnect.from(packetFlags, protocolName, protocolLevel,
-        connectFlags, keepAlive, clientId, willTopic,
-        willMessage, username, password);
+    return MqttConnect.create(packetFlags, protocolName, protocolLevel,
+                              connectFlags, keepAlive, clientId, willTopic,
+                              willMessage, username, password);
   }
 
   public MqttConnAck connAck(int packetFlags, int connectFlags, int connectCode) {
-    return MqttConnAck.from(packetFlags, connectFlags, connectCode);
+    return MqttConnAck.create(packetFlags, connectFlags, connectCode);
   }
 
   public <T> MqttPublish<T> publish(int packetFlags, String topicName,
                                     int packetId, MqttEntity<T> payload) {
-    return MqttPublish.from(packetFlags, topicName, packetId, payload);
+    return MqttPublish.create(packetFlags, topicName, packetId, payload);
   }
 
   public MqttPubAck pubAck(int packetFlags, int packetId) {
-    return MqttPubAck.from(packetFlags, packetId);
+    return MqttPubAck.create(packetFlags, packetId);
   }
 
   public MqttPubRec pubRec(int packetFlags, int packetId) {
-    return MqttPubRec.from(packetFlags, packetId);
+    return MqttPubRec.create(packetFlags, packetId);
   }
 
   public MqttPubRel pubRel(int packetFlags, int packetId) {
-    return MqttPubRel.from(packetFlags, packetId);
+    return MqttPubRel.create(packetFlags, packetId);
   }
 
   public MqttPubComp pubComp(int packetFlags, int packetId) {
-    return MqttPubComp.from(packetFlags, packetId);
+    return MqttPubComp.create(packetFlags, packetId);
   }
 
   public MqttSubscribe subscribe(int packetFlags, int packetId,
                                  FingerTrieSeq<MqttSubscription> subscriptions) {
-    return MqttSubscribe.from(packetFlags, packetId, subscriptions);
+    return MqttSubscribe.create(packetFlags, packetId, subscriptions);
   }
 
   public MqttSubAck subAck(int packetFlags, int packetId,
                            FingerTrieSeq<MqttSubStatus> subscriptions) {
-    return MqttSubAck.from(packetFlags, packetId, subscriptions);
+    return MqttSubAck.create(packetFlags, packetId, subscriptions);
   }
 
   public MqttUnsubscribe unsubscribe(int packetFlags, int packetId,
                                      FingerTrieSeq<String> topicNames) {
-    return MqttUnsubscribe.from(packetFlags, packetId, topicNames);
+    return MqttUnsubscribe.create(packetFlags, packetId, topicNames);
   }
 
   public MqttUnsubAck unsubAck(int packetFlags, int packetId) {
-    return MqttUnsubAck.from(packetFlags, packetId);
+    return MqttUnsubAck.create(packetFlags, packetId);
   }
 
   public MqttPingReq pingReq(int packetFlags) {
-    return MqttPingReq.from(packetFlags);
+    return MqttPingReq.create(packetFlags);
   }
 
   public MqttPingResp pingResp(int packetFlags) {
-    return MqttPingResp.from(packetFlags);
+    return MqttPingResp.create(packetFlags);
   }
 
   public MqttDisconnect disconnect(int packetFlags) {
-    return MqttDisconnect.from(packetFlags);
+    return MqttDisconnect.create(packetFlags);
   }
 
   public MqttSubscription subscription(String topicName, int flags) {
-    return MqttSubscription.from(topicName, flags);
+    return MqttSubscription.create(topicName, flags);
   }
 
   public MqttSubStatus subStatus(int code) {
-    return MqttSubStatus.from(code);
+    return MqttSubStatus.create(code);
   }
 
   public <T> Decoder<MqttPacket<T>> packetDecoder(Decoder<T> content) {
@@ -102,54 +102,24 @@ public class MqttDecoder {
   }
 
   @SuppressWarnings("unchecked")
-  public <T> Decoder<MqttPacket<T>> decodePacketType(int packetType, Decoder<T> content,
-                                                     InputBuffer input) {
+  public <T> Decoder<MqttPacket<T>> decodePacketType(int packetType, Decoder<T> content, InputBuffer input) {
     final Decoder<?> decoder;
     switch (packetType) {
-      case 1:
-        decoder = decodeConnect(input);
-        break;
-      case 2:
-        decoder = decodeConnAck(input);
-        break;
-      case 3:
-        decoder = decodePublish(content, input);
-        break;
-      case 4:
-        decoder = decodePubAck(input);
-        break;
-      case 5:
-        decoder = decodePubRec(input);
-        break;
-      case 6:
-        decoder = decodePubRel(input);
-        break;
-      case 7:
-        decoder = decodePubComp(input);
-        break;
-      case 8:
-        decoder = decodeSubscribe(input);
-        break;
-      case 9:
-        decoder = decodeSubAck(input);
-        break;
-      case 10:
-        decoder = decodeUnsubscribe(input);
-        break;
-      case 11:
-        decoder = decodeUnsubAck(input);
-        break;
-      case 12:
-        decoder = decodePingReq(input);
-        break;
-      case 13:
-        decoder = decodePingResp(input);
-        break;
-      case 14:
-        decoder = decodeDisconnect(input);
-        break;
-      default:
-        return Decoder.error(new MqttException("reserved packet type: " + packetType));
+      case 1: decoder = this.decodeConnect(input); break;
+      case 2: decoder = this.decodeConnAck(input); break;
+      case 3: decoder = this.decodePublish(content, input); break;
+      case 4: decoder = this.decodePubAck(input); break;
+      case 5: decoder = this.decodePubRec(input); break;
+      case 6: decoder = this.decodePubRel(input); break;
+      case 7: decoder = this.decodePubComp(input); break;
+      case 8: decoder = this.decodeSubscribe(input); break;
+      case 9: decoder = this.decodeSubAck(input); break;
+      case 10: decoder = this.decodeUnsubscribe(input); break;
+      case 11: decoder = this.decodeUnsubAck(input); break;
+      case 12: decoder = this.decodePingReq(input); break;
+      case 13: decoder = this.decodePingResp(input); break;
+      case 14: decoder = this.decodeDisconnect(input); break;
+      default: return Decoder.error(new MqttException("reserved packet type: " + packetType));
     }
     return (Decoder<MqttPacket<T>>) decoder;
   }

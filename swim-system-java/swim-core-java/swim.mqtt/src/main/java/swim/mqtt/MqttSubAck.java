@@ -24,7 +24,6 @@ import swim.util.Murmur3;
 
 public final class MqttSubAck extends MqttPacket<Object> implements Debug {
 
-  private static int hashSeed;
   final int packetFlags;
   final int packetId;
   final FingerTrieSeq<MqttSubStatus> subscriptions;
@@ -33,23 +32,6 @@ public final class MqttSubAck extends MqttPacket<Object> implements Debug {
     this.packetFlags = packetFlags;
     this.packetId = packetId;
     this.subscriptions = subscriptions;
-  }
-
-  public static MqttSubAck from(int packetFlags, int packetId,
-                                FingerTrieSeq<MqttSubStatus> subscriptions) {
-    return new MqttSubAck(packetFlags, packetId, subscriptions);
-  }
-
-  public static MqttSubAck from(int packetId, FingerTrieSeq<MqttSubStatus> subscriptions) {
-    return new MqttSubAck(0, packetId, subscriptions);
-  }
-
-  public static MqttSubAck from(int packetId, MqttSubStatus... subscriptions) {
-    return new MqttSubAck(0, packetId, FingerTrieSeq.of(subscriptions));
-  }
-
-  public static MqttSubAck from(int packetId) {
-    return new MqttSubAck(0, packetId, FingerTrieSeq.<MqttSubStatus>empty());
   }
 
   @Override
@@ -117,30 +99,49 @@ public final class MqttSubAck extends MqttPacket<Object> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttSubAck.class);
+    if (MqttSubAck.hashSeed == 0) {
+      MqttSubAck.hashSeed = Murmur3.seed(MqttSubAck.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(MqttSubAck.hashSeed,
         this.packetFlags), this.packetId), this.subscriptions.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("MqttSubAck").write('.').write("from").write('(')
-        .debug(this.packetId).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MqttSubAck").write('.').write("create").write('(').debug(this.packetId).write(')');
     if (this.packetFlags != 0) {
       output = output.write('.').write("packetFlags").write('(').debug(this.packetFlags).write(')');
     }
-    for (int i = 0, n = subscriptions.size(); i < n; i += 1) {
+    for (int i = 0, n = this.subscriptions.size(); i < n; i += 1) {
       output = output.write('.').write("subscription").write('(').debug(this.subscriptions.get(i)).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static MqttSubAck create(int packetFlags, int packetId,
+                                  FingerTrieSeq<MqttSubStatus> subscriptions) {
+    return new MqttSubAck(packetFlags, packetId, subscriptions);
+  }
+
+  public static MqttSubAck create(int packetId, FingerTrieSeq<MqttSubStatus> subscriptions) {
+    return new MqttSubAck(0, packetId, subscriptions);
+  }
+
+  public static MqttSubAck create(int packetId, MqttSubStatus... subscriptions) {
+    return new MqttSubAck(0, packetId, FingerTrieSeq.of(subscriptions));
+  }
+
+  public static MqttSubAck create(int packetId) {
+    return new MqttSubAck(0, packetId, FingerTrieSeq.<MqttSubStatus>empty());
   }
 
 }

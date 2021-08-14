@@ -102,22 +102,22 @@ final class RecordIterator implements ListIterator<Item> {
 
   @Override
   public void set(Item newItem) {
-    if (direction == 0) {
+    if (this.direction == 0) {
       throw new IllegalStateException();
     }
-    if (direction > 0) {
-      this.record.set(index - 1, newItem);
+    if (this.direction > 0) {
+      this.record.set(this.index - 1, newItem);
     } else {
-      this.record.set(index, newItem);
+      this.record.set(this.index, newItem);
     }
   }
 
   @Override
   public void remove() {
-    if (direction == 0) {
+    if (this.direction == 0) {
       throw new IllegalStateException();
     }
-    if (direction > 0) {
+    if (this.direction > 0) {
       this.index -= 1;
     }
     this.record.remove(this.index);

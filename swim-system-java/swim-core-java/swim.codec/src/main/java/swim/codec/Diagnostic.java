@@ -14,6 +14,8 @@
 
 package swim.codec;
 
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.Objects;
 import swim.util.Severity;
 
@@ -37,532 +39,6 @@ public final class Diagnostic implements Display {
     this.message = message;
     this.note = note;
     this.cause = cause;
-  }
-
-  public static Diagnostic from(Input input, Tag tag, Severity severity,
-                                String message, String note, Diagnostic cause) {
-    input = input.clone();
-    tag = Objects.requireNonNull(tag);
-    severity = Objects.requireNonNull(severity);
-    return new Diagnostic(input, tag, severity, message, note, cause);
-  }
-
-  public static Diagnostic from(Input input, Tag tag, Severity severity,
-                                String message, String note) {
-    return from(input, tag, severity, message, note, null);
-  }
-
-  public static Diagnostic from(Input input, Tag tag, Severity severity,
-                                String message, Diagnostic cause) {
-    return from(input, tag, severity, message, null, cause);
-  }
-
-  public static Diagnostic from(Input input, Tag tag, Severity severity, String message) {
-    return from(input, tag, severity, message, null, null);
-  }
-
-  public static Diagnostic from(Input input, Tag tag, Severity severity, Diagnostic cause) {
-    return from(input, tag, severity, null, null, cause);
-  }
-
-  public static Diagnostic from(Input input, Tag tag, Severity severity) {
-    return from(input, tag, severity, null, null, null);
-  }
-
-  public static Diagnostic message(String message, Input input, Severity severity, String note, Diagnostic cause) {
-    final Mark mark = input.mark();
-    final Input source = input.clone().seek(null);
-    return from(source, mark, severity, message, note, cause);
-  }
-
-  public static Diagnostic message(String message, Input input, Severity severity, String note) {
-    return message(message, input, severity, note, null);
-  }
-
-  public static Diagnostic message(String message, Input input, Severity severity, Diagnostic cause) {
-    return message(message, input, severity, null, cause);
-  }
-
-  public static Diagnostic message(String message, Input input, Severity severity) {
-    return message(message, input, severity, null, null);
-  }
-
-  public static Diagnostic message(String message, Input input, String note, Diagnostic cause) {
-    return message(message, input, Severity.error(), note, cause);
-  }
-
-  public static Diagnostic message(String message, Input input, String note) {
-    return message(message, input, Severity.error(), note, null);
-  }
-
-  public static Diagnostic message(String message, Input input, Diagnostic cause) {
-    return message(message, input, Severity.error(), null, cause);
-  }
-
-  public static Diagnostic message(String message, Input input) {
-    return message(message, input, Severity.error(), null, null);
-  }
-
-  public static Diagnostic unexpected(Input input, Severity severity, String note, Diagnostic cause) {
-    final String message;
-    if (input.isCont()) {
-      final Output<String> output = Unicode.stringOutput().write("unexpected").write(' ');
-      Format.debugChar(input.head(), output);
-      message = output.bind();
-    } else {
-      message = "unexpected end of input";
-    }
-    final Mark mark = input.mark();
-    final Input source = input.clone().seek(null);
-    return from(source, mark, severity, message, note, cause);
-  }
-
-  public static Diagnostic unexpected(Input input, Severity severity, String note) {
-    return unexpected(input, severity, note, null);
-  }
-
-  public static Diagnostic unexpected(Input input, Severity severity, Diagnostic cause) {
-    return unexpected(input, severity, null, cause);
-  }
-
-  public static Diagnostic unexpected(Input input, Severity severity) {
-    return unexpected(input, severity, null, null);
-  }
-
-  public static Diagnostic unexpected(Input input, String note, Diagnostic cause) {
-    return unexpected(input, Severity.error(), note, cause);
-  }
-
-  public static Diagnostic unexpected(Input input, String note) {
-    return unexpected(input, Severity.error(), note, null);
-  }
-
-  public static Diagnostic unexpected(Input input, Diagnostic cause) {
-    return unexpected(input, Severity.error(), null, cause);
-  }
-
-  public static Diagnostic unexpected(Input input) {
-    return unexpected(input, Severity.error(), null, null);
-  }
-
-  public static Diagnostic expected(int expected, Input input, Severity severity, String note, Diagnostic cause) {
-    Output<String> output = Unicode.stringOutput().write("expected").write(' ');
-    Format.debugChar(expected, output);
-    output = output.write(", ").write("but found").write(' ');
-    if (input.isCont()) {
-      Format.debugChar(input.head(), output);
-    } else {
-      output = output.write("end of input");
-    }
-    final String message = output.bind();
-    final Mark mark = input.mark();
-    final Input source = input.clone().seek(null);
-    return from(source, mark, severity, message, note, cause);
-  }
-
-  public static Diagnostic expected(int expected, Input input, Severity severity, String note) {
-    return expected(expected, input, severity, note, null);
-  }
-
-  public static Diagnostic expected(int expected, Input input, Severity severity, Diagnostic cause) {
-    return expected(expected, input, severity, null, cause);
-  }
-
-  public static Diagnostic expected(int expected, Input input, Severity severity) {
-    return expected(expected, input, severity, null, null);
-  }
-
-  public static Diagnostic expected(int expected, Input input, String note, Diagnostic cause) {
-    return expected(expected, input, Severity.error(), note, cause);
-  }
-
-  public static Diagnostic expected(int expected, Input input, String note) {
-    return expected(expected, input, Severity.error(), note, null);
-  }
-
-  public static Diagnostic expected(int expected, Input input, Diagnostic cause) {
-    return expected(expected, input, Severity.error(), null, cause);
-  }
-
-  public static Diagnostic expected(int expected, Input input) {
-    return expected(expected, input, Severity.error(), null, null);
-  }
-
-  public static Diagnostic expected(String expected, Input input, Severity severity, String note, Diagnostic cause) {
-    Output<String> output = Unicode.stringOutput().write("expected").write(' ').write(expected)
-        .write(", ").write("but found").write(' ');
-    if (input.isCont()) {
-      Format.debugChar(input.head(), output);
-    } else {
-      output = output.write("end of input");
-    }
-    final String message = output.bind();
-    final Mark mark = input.mark();
-    final Input source = input.clone().seek(null);
-    return from(source, mark, severity, message, note, cause);
-  }
-
-  public static Diagnostic expected(String expected, Input input, Severity severity, String note) {
-    return expected(expected, input, severity, note, null);
-  }
-
-  public static Diagnostic expected(String expected, Input input, Severity severity, Diagnostic cause) {
-    return expected(expected, input, severity, null, cause);
-  }
-
-  public static Diagnostic expected(String expected, Input input, Severity severity) {
-    return expected(expected, input, severity, null, null);
-  }
-
-  public static Diagnostic expected(String expected, Input input, String note, Diagnostic cause) {
-    return expected(expected, input, Severity.error(), note, cause);
-  }
-
-  public static Diagnostic expected(String expected, Input input, String note) {
-    return expected(expected, input, Severity.error(), note, null);
-  }
-
-  public static Diagnostic expected(String expected, Input input, Diagnostic cause) {
-    return expected(expected, input, Severity.error(), null, cause);
-  }
-
-  public static Diagnostic expected(String expected, Input input) {
-    return expected(expected, input, Severity.error(), null, null);
-  }
-
-  static void displayDiagnostic(Input input, Mark start, Mark end, Severity severity,
-                                String message, String note, Diagnostic cause,
-                                int contextLines, int lineDigits, Output<?> output) {
-    do {
-      if (message != null) {
-        displayMessage(severity, message, output);
-        output = output.writeln();
-      }
-      displayAnchor(input, start, lineDigits, output);
-      output = output.writeln();
-      final Diagnostic next = displayContext(input, start, end, severity, note,
-          cause, contextLines, lineDigits, output);
-      if (next != null) {
-        output = output.writeln();
-        input = next.input.clone();
-        start = next.tag.start();
-        end = next.tag.end();
-        severity = next.severity;
-        message = next.message;
-        note = next.note;
-        cause = next.cause;
-      } else {
-        break;
-      }
-    } while (true);
-  }
-
-  static void displayMessage(Severity severity, String message, Output<?> output) {
-    formatSeverity(severity, output);
-    output = output.write(severity.label());
-    OutputStyle.reset(output);
-    OutputStyle.bold(output);
-    output = output.write(':');
-    if (message != null) {
-      output = output.write(' ').write(message);
-    }
-    OutputStyle.reset(output);
-  }
-
-  static void displayAnchor(Input input, Mark start, int lineDigits, Output<?> output) {
-    displayLineLeadArrow(lineDigits, output);
-    output = output.write(' ');
-    final Object id = input.id();
-    if (id != null) {
-      Format.display(id, output);
-    }
-    output = output.write(':');
-    Format.displayInt(start.line, output);
-    output = output.write(':');
-    Format.displayInt(start.column, output);
-    output = output.writeln();
-
-    displayLineLead(lineDigits, output);
-  }
-
-  static Diagnostic displayCause(Diagnostic cause, int contextLines, int lineDigits, Output<?> output) {
-    final Input input = cause.input.clone();
-    final Mark start = cause.tag.start();
-    final Mark end = cause.tag.end();
-    final Severity severity = cause.severity;
-    final String note = cause.note;
-    final Diagnostic next = cause.cause;
-    return displayContext(input, start, end, severity, note, next, contextLines, lineDigits, output);
-  }
-
-  static Diagnostic displayContext(Input input, Mark start, Mark end, Severity severity,
-                                   String note, Diagnostic cause, int contextLines,
-                                   int lineDigits, Output<?> output) {
-    Diagnostic next = cause;
-    final boolean sameCause = cause != null && cause.message == null
-        && Objects.equals(input.id(), cause.input.id());
-    final int causeOrder = sameCause ? (start.offset <= cause.tag.start().offset ? -1 : 1) : 0;
-    if (causeOrder == 1) {
-      next = displayCause(cause, contextLines, lineDigits, output);
-      output = output.writeln();
-      displayLineLeadEllipsis(lineDigits, output);
-      output = output.writeln();
-    }
-    displayLines(input, start, end, severity, contextLines, lineDigits, output);
-    if (note != null) {
-      displayNote(note, lineDigits, output);
-    }
-    if (causeOrder == -1) {
-      output = output.writeln();
-      displayLineLeadEllipsis(lineDigits, output);
-      output = output.writeln();
-      next = displayCause(cause, contextLines, lineDigits, output);
-    }
-    return next;
-  }
-
-  static void displayLines(Input input, Mark start, Mark end, Severity severity,
-                           int contextLines, int lineDigits, Output<?> output) {
-    final int startLine = start.line();
-    final int endLine = end.line();
-    int line = input.line();
-
-    while (line < startLine) {
-      consumeLineText(input, line);
-      line += 1;
-    }
-
-    if (endLine - startLine > 2 * contextLines + 2) {
-      while (line <= startLine + contextLines) {
-        displayLine(input, start, end, severity, line, lineDigits, output);
-        line += 1;
-      }
-      displayLineLeadEllipsis(lineDigits, output);
-      output = output.write(' ');
-      formatSeverity(severity, output);
-      output = output.write('|');
-      OutputStyle.reset(output);
-      output = output.writeln();
-      while (line < endLine - contextLines) {
-        consumeLineText(input, line);
-        line += 1;
-      }
-    }
-
-    while (line <= endLine) {
-      displayLine(input, start, end, severity, line, lineDigits, output);
-      line += 1;
-    }
-  }
-
-  static void displayNote(String note, int lineDigits, Output<?> output) {
-    output = output.writeln();
-    displayLineLead(lineDigits, output);
-    output = output.writeln();
-    displayLineComment("note", note, lineDigits, output);
-  }
-
-  static void displayLine(Input input, Mark start, Mark end, Severity severity,
-                          int line, int lineDigits, Output<?> output) {
-    if (start.line == line && end.line == line) {
-      displaySingleLine(input, start, end, severity, line, lineDigits, output);
-    } else if (start.line == line) {
-      displayStartLine(input, start, severity, line, lineDigits, output);
-    } else if (end.line == line) {
-      displayEndLine(input, end, severity, line, lineDigits, output);
-    } else {
-      displayMidLine(input, severity, line, lineDigits, output);
-    }
-  }
-
-  static void displaySingleLine(Input input, Mark start, Mark end, Severity severity,
-                                int line, int lineDigits, Output<?> output) {
-    displayLineLeadNumber(line, lineDigits, output);
-    output = output.write(' ');
-    for (int i = 1; i < input.column(); i += 1) {
-      output = output.write(' ');
-    }
-    displayLineText(input, line, output);
-
-    displayLineLead(lineDigits, output);
-    output = output.write(' ');
-    int i = 1;
-    while (i < start.column) {
-      output = output.write(' ');
-      i += 1;
-    }
-    formatSeverity(severity, output);
-    while (i <= end.column) {
-      output = output.write('^');
-      i += 1;
-    }
-    if (end.note != null) {
-      output = output.write(' ').write(end.note);
-    }
-    OutputStyle.reset(output);
-  }
-
-  static void displayStartLine(Input input, Mark start, Severity severity,
-                               int line, int lineDigits, Output<?> output) {
-    displayLineLeadNumber(line, lineDigits, output);
-    output = output.write(' ').write(' ').write(' ');
-    for (int i = 1; i < input.column(); i += 1) {
-      output = output.write(' ');
-    }
-    displayLineText(input, line, output);
-
-    displayLineLead(lineDigits, output);
-    output = output.write(' ').write(' ');
-    formatSeverity(severity, output);
-    output = output.write('_');
-    int i = 1;
-    while (i < start.column) {
-      output = output.write('_');
-      i += 1;
-    }
-    output = output.write('^');
-    if (start.note != null) {
-      output = output.write(' ').write(start.note);
-    }
-    OutputStyle.reset(output);
-    output = output.writeln();
-  }
-
-  static void displayEndLine(Input input, Mark end, Severity severity,
-                             int line, int lineDigits, Output<?> output) {
-    displayLineLeadNumber(line, lineDigits, output);
-    output = output.write(' ');
-    formatSeverity(severity, output);
-    output = output.write('|');
-    OutputStyle.reset(output);
-    output = output.write(' ');
-    displayLineText(input, line, output);
-
-    displayLineLead(lineDigits, output);
-    output = output.write(' ');
-    formatSeverity(severity, output);
-    output = output.write('|').write('_');
-    int i = 1;
-    while (i < end.column) {
-      output = output.write('_');
-      i += 1;
-    }
-    output = output.write('^');
-    if (end.note != null) {
-      output = output.write(' ').write(end.note);
-    }
-    OutputStyle.reset(output);
-  }
-
-  static void displayMidLine(Input input, Severity severity,
-                             int line, int lineDigits, Output<?> output) {
-    displayLineLeadNumber(line, lineDigits, output);
-    output = output.write(' ');
-    formatSeverity(severity, output);
-    output = output.write('|');
-    OutputStyle.reset(output);
-    output = output.write(' ');
-    displayLineText(input, line, output);
-  }
-
-  static void displayLineComment(String label, String comment,
-                                 int lineDigits, Output<?> output) {
-    displayLineLeadComment(lineDigits, output);
-    output = output.write(' ');
-    OutputStyle.bold(output);
-    output = output.write(label).write(':');
-    OutputStyle.reset(output);
-    if (comment != null) {
-      output = output.write(' ').write(comment);
-    }
-  }
-
-  static void displayLineLead(int lineDigits, Output<?> output) {
-    OutputStyle.blueBold(output);
-    final int padding = 1 + lineDigits;
-    for (int i = 0; i < padding; i += 1) {
-      output = output.write(' ');
-    }
-    output = output.write('|');
-    OutputStyle.reset(output);
-  }
-
-  static void displayLineLeadComment(int lineDigits, Output<?> output) {
-    OutputStyle.blueBold(output);
-    final int padding = 1 + lineDigits;
-    for (int i = 0; i < padding; i += 1) {
-      output = output.write(' ');
-    }
-    output = output.write('=');
-    OutputStyle.reset(output);
-  }
-
-  static void displayLineLeadArrow(int lineDigits, Output<?> output) {
-    for (int i = 0; i < lineDigits; i += 1) {
-      output = output.write(' ');
-    }
-    OutputStyle.blueBold(output);
-    output = output.write('-').write('-').write('>');
-    OutputStyle.reset(output);
-  }
-
-  static void displayLineLeadEllipsis(int lineDigits, Output<?> output) {
-    OutputStyle.blueBold(output);
-    for (int i = 0; i < lineDigits; i += 1) {
-      output = output.write('.');
-    }
-    OutputStyle.reset(output);
-    output = output.write(' ').write(' ');
-  }
-
-  static void displayLineLeadNumber(int line, int lineDigits, Output<?> output) {
-    final int padding = lineDigits - Base10.countDigits(line);
-    for (int i = 0; i < padding; i += 1) {
-      output = output.write(' ');
-    }
-    OutputStyle.blueBold(output);
-    Format.displayInt(line, output);
-    output = output.write(' ').write('|');
-    OutputStyle.reset(output);
-  }
-
-  static void displayLineText(Input input, int line, Output<?> output) {
-    while (input.isCont() && input.line() == line) {
-      output = output.write(input.head());
-      input = input.step();
-    }
-    if (input.line() == line) {
-      output = output.writeln();
-    }
-  }
-
-  static void consumeLineText(Input input, int line) {
-    while (input.isCont() && input.line() == line) {
-      input = input.step();
-    }
-  }
-
-  static void formatSeverity(Severity severity, Output<?> output) {
-    switch (severity.level()) {
-      case Severity.FATAL_LEVEL:
-      case Severity.ALERT_LEVEL:
-      case Severity.ERROR_LEVEL:
-        OutputStyle.redBold(output);
-        break;
-      case Severity.WARNING_LEVEL:
-        OutputStyle.yellowBold(output);
-        break;
-      case Severity.NOTE_LEVEL:
-        OutputStyle.greenBold(output);
-        break;
-      case Severity.INFO_LEVEL:
-        OutputStyle.cyanBold(output);
-        break;
-      case Severity.DEBUG_LEVEL:
-      case Severity.TRACE_LEVEL:
-      default:
-        OutputStyle.magentaBold(output);
-    }
   }
 
   /**
@@ -619,7 +95,7 @@ public final class Diagnostic implements Display {
   }
 
   @Override
-  public void display(Output<?> output) {
+  public <T> Output<T> display(Output<T> output) {
     final Input input = this.input.clone();
     final Mark start = this.tag.start();
     final Mark end = this.tag.end();
@@ -628,9 +104,363 @@ public final class Diagnostic implements Display {
     final String note = this.note;
     final Diagnostic cause = this.cause;
     final int contextLines = 2;
-    final int lineDigits = lineDigits();
-    displayDiagnostic(input, start, end, severity, message, note, cause,
-        contextLines, lineDigits, output);
+    final int lineDigits = this.lineDigits();
+    output = Diagnostic.display(input, start, end, severity, message, note, cause,
+                                contextLines, lineDigits, output);
+    return output;
+  }
+
+  static <T> Output<T> display(Input input, Mark start, Mark end, Severity severity,
+                               String message, String note, Diagnostic cause,
+                               int contextLines, int lineDigits, Output<T> output) {
+    do {
+      if (message != null) {
+        output = Diagnostic.displayMessage(severity, message, output);
+        output = output.writeln();
+      }
+      output = Diagnostic.displayAnchor(input, start, lineDigits, output);
+      output = output.writeln();
+      final Map.Entry<Diagnostic, Output<T>> cont = Diagnostic.displayContext(input, start, end, severity, note,
+                                                                              cause, contextLines, lineDigits, output);
+      final Diagnostic next = cont.getKey();
+      output = cont.getValue();
+      if (next != null) {
+        output = output.writeln();
+        input = next.input.clone();
+        start = next.tag.start();
+        end = next.tag.end();
+        severity = next.severity;
+        message = next.message;
+        note = next.note;
+        cause = next.cause;
+        continue;
+      }
+      break;
+    } while (true);
+    return output;
+  }
+
+  static <T> Output<T> displayMessage(Severity severity, String message, Output<T> output) {
+    output = Diagnostic.formatSeverity(severity, output);
+    output = output.write(severity.label());
+    output = OutputStyle.reset(output);
+    output = OutputStyle.bold(output);
+    output = output.write(':');
+    if (message != null) {
+      output = output.write(' ').write(message);
+    }
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  static <T> Output<T> displayAnchor(Input input, Mark start, int lineDigits, Output<T> output) {
+    output = Diagnostic.displayLineLeadArrow(lineDigits, output);
+    output = output.write(' ');
+    final Object id = input.id();
+    if (id != null) {
+      output = Format.display(id, output);
+    }
+    output = output.write(':');
+    output = Format.displayInt(start.line, output);
+    output = output.write(':');
+    output = Format.displayInt(start.column, output);
+    output = output.writeln();
+
+    output = Diagnostic.displayLineLead(lineDigits, output);
+    return output;
+  }
+
+  static <T> Map.Entry<Diagnostic, Output<T>> displayContext(Input input, Mark start, Mark end, Severity severity,
+                                                             String note, Diagnostic cause, int contextLines,
+                                                             int lineDigits, Output<T> output) {
+    Diagnostic next = cause;
+    final boolean sameCause = cause != null && cause.message == null
+                           && Objects.equals(input.id(), cause.input.id());
+    final int causeOrder = sameCause ? (start.offset <= cause.tag.start().offset ? -1 : 1) : 0;
+    if (causeOrder == 1) {
+      final Map.Entry<Diagnostic, Output<T>> cont = Diagnostic.displayContext(cause.input.clone(), cause.tag.start(), cause.tag.end(),
+                                                                              cause.severity, cause.note, cause.cause,
+                                                                              contextLines, lineDigits, output);
+      next = cont.getKey();
+      output = cont.getValue();
+      output = output.writeln();
+      output = Diagnostic.displayLineLeadEllipsis(lineDigits, output);
+      output = output.writeln();
+    }
+    output = Diagnostic.displayLines(input, start, end, severity, contextLines, lineDigits, output);
+    if (note != null) {
+      output = Diagnostic.displayNote(note, lineDigits, output);
+    }
+    if (causeOrder == -1) {
+      output = output.writeln();
+      output = Diagnostic.displayLineLeadEllipsis(lineDigits, output);
+      output = output.writeln();
+      final Map.Entry<Diagnostic, Output<T>> cont = Diagnostic.displayContext(cause.input.clone(), cause.tag.start(), cause.tag.end(),
+                                                                              cause.severity, cause.note, cause.cause,
+                                                                              contextLines, lineDigits, output);
+      next = cont.getKey();
+      output = cont.getValue();
+    }
+    return new AbstractMap.SimpleImmutableEntry<Diagnostic, Output<T>>(next, output);
+  }
+
+  static <T> Output<T> displayLines(Input input, Mark start, Mark end, Severity severity,
+                                    int contextLines, int lineDigits, Output<T> output) {
+    final int startLine = start.line();
+    final int endLine = end.line();
+    int line = input.line();
+
+    while (line < startLine) {
+      Diagnostic.consumeLineText(input, line);
+      line += 1;
+    }
+
+    if (endLine - startLine > 2 * contextLines + 2) {
+      while (line <= startLine + contextLines) {
+        output = Diagnostic.displayLine(input, start, end, severity, line, lineDigits, output);
+        line += 1;
+      }
+      output = Diagnostic.displayLineLeadEllipsis(lineDigits, output);
+      output = output.write(' ');
+      output = Diagnostic.formatSeverity(severity, output);
+      output = output.write('|');
+      output = OutputStyle.reset(output);
+      output = output.writeln();
+      while (line < endLine - contextLines) {
+        Diagnostic.consumeLineText(input, line);
+        line += 1;
+      }
+    }
+
+    while (line <= endLine) {
+      output = Diagnostic.displayLine(input, start, end, severity, line, lineDigits, output);
+      line += 1;
+    }
+    return output;
+  }
+
+  static <T> Output<T> displayNote(String note, int lineDigits, Output<T> output) {
+    output = output.writeln();
+    output = Diagnostic.displayLineLead(lineDigits, output);
+    output = output.writeln();
+    output = Diagnostic.displayLineComment("note", note, lineDigits, output);
+    return output;
+  }
+
+  static <T> Output<T> displayLine(Input input, Mark start, Mark end, Severity severity,
+                                   int line, int lineDigits, Output<T> output) {
+    if (start.line == line && end.line == line) {
+      output = Diagnostic.displaySingleLine(input, start, end, severity, line, lineDigits, output);
+    } else if (start.line == line) {
+      output = Diagnostic.displayStartLine(input, start, severity, line, lineDigits, output);
+    } else if (end.line == line) {
+      output = Diagnostic.displayEndLine(input, end, severity, line, lineDigits, output);
+    } else {
+      output = Diagnostic.displayMidLine(input, severity, line, lineDigits, output);
+    }
+    return output;
+  }
+
+  static <T> Output<T> displaySingleLine(Input input, Mark start, Mark end, Severity severity,
+                                         int line, int lineDigits, Output<T> output) {
+    output = Diagnostic.displayLineLeadNumber(line, lineDigits, output);
+    output = output.write(' ');
+    for (int i = 1; i < input.column(); i += 1) {
+      output = output.write(' ');
+    }
+    output = Diagnostic.displayLineText(input, line, output);
+
+    output = Diagnostic.displayLineLead(lineDigits, output);
+    output = output.write(' ');
+    int i = 1;
+    while (i < start.column) {
+      output = output.write(' ');
+      i += 1;
+    }
+    output = Diagnostic.formatSeverity(severity, output);
+    while (i <= end.column) {
+      output = output.write('^');
+      i += 1;
+    }
+    if (end.note != null) {
+      output = output.write(' ').write(end.note);
+    }
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  static <T> Output<T> displayStartLine(Input input, Mark start, Severity severity,
+                                        int line, int lineDigits, Output<T> output) {
+    output = Diagnostic.displayLineLeadNumber(line, lineDigits, output);
+    output = output.write(' ').write(' ').write(' ');
+    for (int i = 1; i < input.column(); i += 1) {
+      output = output.write(' ');
+    }
+    output = Diagnostic.displayLineText(input, line, output);
+
+    output = Diagnostic.displayLineLead(lineDigits, output);
+    output = output.write(' ').write(' ');
+    output = Diagnostic.formatSeverity(severity, output);
+    output = output.write('_');
+    int i = 1;
+    while (i < start.column) {
+      output = output.write('_');
+      i += 1;
+    }
+    output = output.write('^');
+    if (start.note != null) {
+      output = output.write(' ').write(start.note);
+    }
+    output = OutputStyle.reset(output);
+    output = output.writeln();
+    return output;
+  }
+
+  static <T> Output<T> displayEndLine(Input input, Mark end, Severity severity,
+                                      int line, int lineDigits, Output<T> output) {
+    output = Diagnostic.displayLineLeadNumber(line, lineDigits, output);
+    output = output.write(' ');
+    output = Diagnostic.formatSeverity(severity, output);
+    output = output.write('|');
+    output = OutputStyle.reset(output);
+    output = output.write(' ');
+    output = Diagnostic.displayLineText(input, line, output);
+
+    output = Diagnostic.displayLineLead(lineDigits, output);
+    output = output.write(' ');
+    output = Diagnostic.formatSeverity(severity, output);
+    output = output.write('|').write('_');
+    int i = 1;
+    while (i < end.column) {
+      output = output.write('_');
+      i += 1;
+    }
+    output = output.write('^');
+    if (end.note != null) {
+      output = output.write(' ').write(end.note);
+    }
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  static <T> Output<T> displayMidLine(Input input, Severity severity,
+                                      int line, int lineDigits, Output<T> output) {
+    output = Diagnostic.displayLineLeadNumber(line, lineDigits, output);
+    output = output.write(' ');
+    output = Diagnostic.formatSeverity(severity, output);
+    output = output.write('|');
+    output = OutputStyle.reset(output);
+    output = output.write(' ');
+    output = Diagnostic.displayLineText(input, line, output);
+    return output;
+  }
+
+  static <T> Output<T> displayLineComment(String label, String comment,
+                                          int lineDigits, Output<T> output) {
+    output = Diagnostic.displayLineLeadComment(lineDigits, output);
+    output = output.write(' ');
+    output = OutputStyle.bold(output);
+    output = output.write(label).write(':');
+    output = OutputStyle.reset(output);
+    if (comment != null) {
+      output = output.write(' ').write(comment);
+    }
+    return output;
+  }
+
+  static <T> Output<T> displayLineLead(int lineDigits, Output<T> output) {
+    output = OutputStyle.blueBold(output);
+    final int padding = 1 + lineDigits;
+    for (int i = 0; i < padding; i += 1) {
+      output = output.write(' ');
+    }
+    output = output.write('|');
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  static <T> Output<T> displayLineLeadComment(int lineDigits, Output<T> output) {
+    output = OutputStyle.blueBold(output);
+    final int padding = 1 + lineDigits;
+    for (int i = 0; i < padding; i += 1) {
+      output = output.write(' ');
+    }
+    output = output.write('=');
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  static <T> Output<T> displayLineLeadArrow(int lineDigits, Output<T> output) {
+    for (int i = 0; i < lineDigits; i += 1) {
+      output = output.write(' ');
+    }
+    output = OutputStyle.blueBold(output);
+    output = output.write('-').write('-').write('>');
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  static <T> Output<T> displayLineLeadEllipsis(int lineDigits, Output<T> output) {
+    output = OutputStyle.blueBold(output);
+    for (int i = 0; i < lineDigits; i += 1) {
+      output = output.write('.');
+    }
+    output = OutputStyle.reset(output);
+    output = output.write(' ').write(' ');
+    return output;
+  }
+
+  static <T> Output<T> displayLineLeadNumber(int line, int lineDigits, Output<T> output) {
+    final int padding = lineDigits - Base10.countDigits(line);
+    for (int i = 0; i < padding; i += 1) {
+      output = output.write(' ');
+    }
+    output = OutputStyle.blueBold(output);
+    output = Format.displayInt(line, output);
+    output = output.write(' ').write('|');
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  static <T> Output<T> displayLineText(Input input, int line, Output<T> output) {
+    while (input.isCont() && input.line() == line) {
+      output = output.write(input.head());
+      input = input.step();
+    }
+    if (input.line() == line) {
+      output = output.writeln();
+    }
+    return output;
+  }
+
+  static void consumeLineText(Input input, int line) {
+    while (input.isCont() && input.line() == line) {
+      input = input.step();
+    }
+  }
+
+  static <T> Output<T> formatSeverity(Severity severity, Output<T> output) {
+    switch (severity.level()) {
+      case Severity.FATAL_LEVEL:
+      case Severity.ALERT_LEVEL:
+      case Severity.ERROR_LEVEL:
+        output = OutputStyle.redBold(output);
+        break;
+      case Severity.WARNING_LEVEL:
+        output = OutputStyle.yellowBold(output);
+        break;
+      case Severity.NOTE_LEVEL:
+        output = OutputStyle.greenBold(output);
+        break;
+      case Severity.INFO_LEVEL:
+        output = OutputStyle.cyanBold(output);
+        break;
+      case Severity.DEBUG_LEVEL:
+      case Severity.TRACE_LEVEL:
+      default:
+        output = OutputStyle.magentaBold(output);
+    }
+    return output;
   }
 
   public String toString(OutputSettings settings) {
@@ -640,6 +470,197 @@ public final class Diagnostic implements Display {
   @Override
   public String toString() {
     return Format.display(this);
+  }
+
+  public static Diagnostic create(Input input, Tag tag, Severity severity,
+                                  String message, String note, Diagnostic cause) {
+    input = input.clone();
+    tag = Objects.requireNonNull(tag);
+    severity = Objects.requireNonNull(severity);
+    return new Diagnostic(input, tag, severity, message, note, cause);
+  }
+
+  public static Diagnostic create(Input input, Tag tag, Severity severity,
+                                  String message, String note) {
+    return Diagnostic.create(input, tag, severity, message, note, null);
+  }
+
+  public static Diagnostic create(Input input, Tag tag, Severity severity,
+                                  String message, Diagnostic cause) {
+    return Diagnostic.create(input, tag, severity, message, null, cause);
+  }
+
+  public static Diagnostic create(Input input, Tag tag, Severity severity, String message) {
+    return Diagnostic.create(input, tag, severity, message, null, null);
+  }
+
+  public static Diagnostic create(Input input, Tag tag, Severity severity, Diagnostic cause) {
+    return Diagnostic.create(input, tag, severity, null, null, cause);
+  }
+
+  public static Diagnostic create(Input input, Tag tag, Severity severity) {
+    return Diagnostic.create(input, tag, severity, null, null, null);
+  }
+
+  public static Diagnostic message(String message, Input input, Severity severity, String note, Diagnostic cause) {
+    final Mark mark = input.mark();
+    final Input source = input.clone().seek(null);
+    return Diagnostic.create(source, mark, severity, message, note, cause);
+  }
+
+  public static Diagnostic message(String message, Input input, Severity severity, String note) {
+    return Diagnostic.message(message, input, severity, note, null);
+  }
+
+  public static Diagnostic message(String message, Input input, Severity severity, Diagnostic cause) {
+    return Diagnostic.message(message, input, severity, null, cause);
+  }
+
+  public static Diagnostic message(String message, Input input, Severity severity) {
+    return Diagnostic.message(message, input, severity, null, null);
+  }
+
+  public static Diagnostic message(String message, Input input, String note, Diagnostic cause) {
+    return Diagnostic.message(message, input, Severity.error(), note, cause);
+  }
+
+  public static Diagnostic message(String message, Input input, String note) {
+    return Diagnostic.message(message, input, Severity.error(), note, null);
+  }
+
+  public static Diagnostic message(String message, Input input, Diagnostic cause) {
+    return Diagnostic.message(message, input, Severity.error(), null, cause);
+  }
+
+  public static Diagnostic message(String message, Input input) {
+    return Diagnostic.message(message, input, Severity.error(), null, null);
+  }
+
+  public static Diagnostic unexpected(Input input, Severity severity, String note, Diagnostic cause) {
+    final String message;
+    if (input.isCont()) {
+      Output<String> output = Unicode.stringOutput().write("unexpected").write(' ');
+      output = Format.debugChar(input.head(), output);
+      message = output.bind();
+    } else {
+      message = "unexpected end of input";
+    }
+    final Mark mark = input.mark();
+    final Input source = input.clone().seek(null);
+    return Diagnostic.create(source, mark, severity, message, note, cause);
+  }
+
+  public static Diagnostic unexpected(Input input, Severity severity, String note) {
+    return Diagnostic.unexpected(input, severity, note, null);
+  }
+
+  public static Diagnostic unexpected(Input input, Severity severity, Diagnostic cause) {
+    return Diagnostic.unexpected(input, severity, null, cause);
+  }
+
+  public static Diagnostic unexpected(Input input, Severity severity) {
+    return Diagnostic.unexpected(input, severity, null, null);
+  }
+
+  public static Diagnostic unexpected(Input input, String note, Diagnostic cause) {
+    return Diagnostic.unexpected(input, Severity.error(), note, cause);
+  }
+
+  public static Diagnostic unexpected(Input input, String note) {
+    return Diagnostic.unexpected(input, Severity.error(), note, null);
+  }
+
+  public static Diagnostic unexpected(Input input, Diagnostic cause) {
+    return Diagnostic.unexpected(input, Severity.error(), null, cause);
+  }
+
+  public static Diagnostic unexpected(Input input) {
+    return Diagnostic.unexpected(input, Severity.error(), null, null);
+  }
+
+  public static Diagnostic expected(int expected, Input input, Severity severity, String note, Diagnostic cause) {
+    Output<String> output = Unicode.stringOutput().write("expected").write(' ');
+    output = Format.debugChar(expected, output);
+    output = output.write(", ").write("but found").write(' ');
+    if (input.isCont()) {
+      output = Format.debugChar(input.head(), output);
+    } else {
+      output = output.write("end of input");
+    }
+    final String message = output.bind();
+    final Mark mark = input.mark();
+    final Input source = input.clone().seek(null);
+    return Diagnostic.create(source, mark, severity, message, note, cause);
+  }
+
+  public static Diagnostic expected(int expected, Input input, Severity severity, String note) {
+    return Diagnostic.expected(expected, input, severity, note, null);
+  }
+
+  public static Diagnostic expected(int expected, Input input, Severity severity, Diagnostic cause) {
+    return Diagnostic.expected(expected, input, severity, null, cause);
+  }
+
+  public static Diagnostic expected(int expected, Input input, Severity severity) {
+    return Diagnostic.expected(expected, input, severity, null, null);
+  }
+
+  public static Diagnostic expected(int expected, Input input, String note, Diagnostic cause) {
+    return Diagnostic.expected(expected, input, Severity.error(), note, cause);
+  }
+
+  public static Diagnostic expected(int expected, Input input, String note) {
+    return Diagnostic.expected(expected, input, Severity.error(), note, null);
+  }
+
+  public static Diagnostic expected(int expected, Input input, Diagnostic cause) {
+    return Diagnostic.expected(expected, input, Severity.error(), null, cause);
+  }
+
+  public static Diagnostic expected(int expected, Input input) {
+    return Diagnostic.expected(expected, input, Severity.error(), null, null);
+  }
+
+  public static Diagnostic expected(String expected, Input input, Severity severity, String note, Diagnostic cause) {
+    Output<String> output = Unicode.stringOutput().write("expected").write(' ').write(expected)
+                                                  .write(", ").write("but found").write(' ');
+    if (input.isCont()) {
+      output = Format.debugChar(input.head(), output);
+    } else {
+      output = output.write("end of input");
+    }
+    final String message = output.bind();
+    final Mark mark = input.mark();
+    final Input source = input.clone().seek(null);
+    return Diagnostic.create(source, mark, severity, message, note, cause);
+  }
+
+  public static Diagnostic expected(String expected, Input input, Severity severity, String note) {
+    return Diagnostic.expected(expected, input, severity, note, null);
+  }
+
+  public static Diagnostic expected(String expected, Input input, Severity severity, Diagnostic cause) {
+    return Diagnostic.expected(expected, input, severity, null, cause);
+  }
+
+  public static Diagnostic expected(String expected, Input input, Severity severity) {
+    return Diagnostic.expected(expected, input, severity, null, null);
+  }
+
+  public static Diagnostic expected(String expected, Input input, String note, Diagnostic cause) {
+    return Diagnostic.expected(expected, input, Severity.error(), note, cause);
+  }
+
+  public static Diagnostic expected(String expected, Input input, String note) {
+    return Diagnostic.expected(expected, input, Severity.error(), note, null);
+  }
+
+  public static Diagnostic expected(String expected, Input input, Diagnostic cause) {
+    return Diagnostic.expected(expected, input, Severity.error(), null, cause);
+  }
+
+  public static Diagnostic expected(String expected, Input input) {
+    return Diagnostic.expected(expected, input, Severity.error(), null, null);
   }
 
 }

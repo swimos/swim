@@ -34,7 +34,7 @@ public class WebServiceKernel extends KernelProxy {
   }
 
   public WebServiceKernel() {
-    this(KERNEL_PRIORITY);
+    this(WebServiceKernel.KERNEL_PRIORITY);
   }
 
   @Override
@@ -44,7 +44,7 @@ public class WebServiceKernel extends KernelProxy {
 
   @Override
   public ServiceDef defineService(Item serviceConfig) {
-    final ServiceDef serviceDef = defineWebService(serviceConfig);
+    final ServiceDef serviceDef = this.defineWebService(serviceConfig);
     return serviceDef != null ? serviceDef : super.defineService(serviceConfig);
   }
 
@@ -83,14 +83,14 @@ public class WebServiceKernel extends KernelProxy {
   @Override
   public ServiceFactory<?> createServiceFactory(ServiceDef serviceDef, ClassLoader classLoader) {
     if (serviceDef instanceof WebServiceDef) {
-      return createWebServiceFactory((WebServiceDef) serviceDef);
+      return this.createWebServiceFactory((WebServiceDef) serviceDef);
     } else {
       return super.createServiceFactory(serviceDef, classLoader);
     }
   }
 
   public WebServiceFactory createWebServiceFactory(WebServiceDef serviceDef) {
-    final WebRoute router = createWebRouter(serviceDef);
+    final WebRoute router = this.createWebRouter(serviceDef);
     final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
     return new WebServiceFactory(kernel, serviceDef, router);
   }
@@ -105,7 +105,7 @@ public class WebServiceKernel extends KernelProxy {
     final Value header = moduleConfig.getAttr("kernel");
     final String kernelClassName = header.get("class").stringValue(null);
     if (kernelClassName == null || WebServiceKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
+      final double kernelPriority = header.get("priority").doubleValue(WebServiceKernel.KERNEL_PRIORITY);
       return new WebServiceKernel(kernelPriority);
     }
     return null;

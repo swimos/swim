@@ -70,11 +70,6 @@ import swim.structure.Value;
 
 public class BootKernel extends KernelProxy implements IpStation {
 
-  static final AtomicReferenceFieldUpdater<BootKernel, Stage> STAGE =
-      AtomicReferenceFieldUpdater.newUpdater(BootKernel.class, Stage.class, "stage");
-  static final AtomicReferenceFieldUpdater<BootKernel, Station> STATION =
-      AtomicReferenceFieldUpdater.newUpdater(BootKernel.class, Station.class, "station");
-  private static final double KERNEL_PRIORITY = Double.NEGATIVE_INFINITY;
   final double kernelPriority;
   final Value moduleConfig;
   KernelShutdownHook shutdownHook;
@@ -84,6 +79,9 @@ public class BootKernel extends KernelProxy implements IpStation {
   public BootKernel(double kernelPriority, Value moduleConfig) {
     this.kernelPriority = kernelPriority;
     this.moduleConfig = moduleConfig;
+    this.shutdownHook = null;
+    this.stage = null;
+    this.station = null;
   }
 
   public BootKernel(double kernelPriority) {
@@ -91,17 +89,7 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   public BootKernel() {
-    this(KERNEL_PRIORITY, Value.absent());
-  }
-
-  public static BootKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || BootKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new BootKernel(kernelPriority, moduleConfig);
-    }
-    return null;
+    this(BootKernel.KERNEL_PRIORITY, Value.absent());
   }
 
   @Override
@@ -110,7 +98,7 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   protected Stage createStage() {
-    final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+    final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
     StageDef stageDef = null;
     for (Item item : this.moduleConfig) {
       final StageDef newStageDef = kernel.defineStage(item);
@@ -130,7 +118,7 @@ public class BootKernel extends KernelProxy implements IpStation {
   }
 
   protected Station createStation() {
-    final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+    final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
     TransportSettings transportSettings = null;
     for (Item item : this.moduleConfig) {
       final TransportSettings newTransportSettings = TransportSettings.form().cast(item);
@@ -153,7 +141,7 @@ public class BootKernel extends KernelProxy implements IpStation {
     do {
       stage = super.stage();
       if (stage == null) {
-        final Stage oldStage = this.stage;
+        final Stage oldStage = BootKernel.STAGE.get(this);
         if (oldStage != null) {
           stage = oldStage;
           if (newStage != null) {
@@ -165,12 +153,12 @@ public class BootKernel extends KernelProxy implements IpStation {
           }
         } else {
           if (newStage == null) {
-            newStage = createStage();
+            newStage = this.createStage();
             if (newStage instanceof MainStage) {
               ((MainStage) newStage).start();
             }
           }
-          if (STAGE.compareAndSet(this, oldStage, newStage)) {
+          if (BootKernel.STAGE.compareAndSet(this, oldStage, newStage)) {
             stage = newStage;
           } else {
             continue;
@@ -189,7 +177,7 @@ public class BootKernel extends KernelProxy implements IpStation {
     do {
       station = super.station();
       if (station == null) {
-        final Station oldStation = this.station;
+        final Station oldStation = BootKernel.STATION.get(this);
         if (oldStation != null) {
           station = oldStation;
           if (newStation != null) {
@@ -199,10 +187,10 @@ public class BootKernel extends KernelProxy implements IpStation {
           }
         } else {
           if (newStation == null) {
-            newStation = createStation();
+            newStation = this.createStation();
             newStation.start();
           }
-          if (STATION.compareAndSet(this, oldStation, newStation)) {
+          if (BootKernel.STATION.compareAndSet(this, oldStation, newStation)) {
             station = newStation;
           } else {
             continue;
@@ -223,7 +211,7 @@ public class BootKernel extends KernelProxy implements IpStation {
   @Override
   public Schedule createSchedule(ScheduleDef scheduleDef, Stage stage) {
     if (scheduleDef instanceof ClockDef) {
-      return createClock((ClockDef) scheduleDef, stage);
+      return this.createClock((ClockDef) scheduleDef, stage);
     } else {
       return super.createSchedule(scheduleDef, stage);
     }
@@ -246,7 +234,7 @@ public class BootKernel extends KernelProxy implements IpStation {
   @Override
   public Stage createStage(StageDef stageDef) {
     if (stageDef instanceof TheaterDef) {
-      return createTheater((TheaterDef) stageDef);
+      return this.createTheater((TheaterDef) stageDef);
     } else {
       return super.createStage(stageDef);
     }
@@ -259,13 +247,12 @@ public class BootKernel extends KernelProxy implements IpStation {
   @Override
   public Stage createStage(CellAddress cellAddress) {
     Stage stage = super.createStage(cellAddress);
-    if (stage == null
-        && (cellAddress instanceof EdgeAddress
-            || cellAddress instanceof StoreAddress
-            || cellAddress instanceof AuthenticatorAddress)
+    if (stage == null && (cellAddress instanceof EdgeAddress
+                       || cellAddress instanceof StoreAddress
+                       || cellAddress instanceof AuthenticatorAddress)
     ) {
       // Provide default boot stage to edge and store cells.
-      stage = stage();
+      stage = this.stage();
       if (stage instanceof MainStage) {
         stage = new SideStage(stage); // isolate stage lifecycle
       }
@@ -371,19 +358,19 @@ public class BootKernel extends KernelProxy implements IpStation {
     if (lane == null) {
       final String laneType = laneDef.laneType();
       if ("command".equals(laneType)) {
-        lane = createCommandLane(node, laneDef);
+        lane = this.createCommandLane(node, laneDef);
       } else if ("list".equals(laneType)) {
-        lane = createListLane(node, laneDef);
+        lane = this.createListLane(node, laneDef);
       } else if ("map".equals(laneType)) {
-        lane = createMapLane(node, laneDef);
+        lane = this.createMapLane(node, laneDef);
       } else if ("geospatial".equals(laneType)) {
-        lane = createGeospatialLane(node, laneDef);
+        lane = this.createGeospatialLane(node, laneDef);
       } else if ("supply".equals(laneType)) {
-        lane = createSupplyLane(node, laneDef);
+        lane = this.createSupplyLane(node, laneDef);
       } else if ("value".equals(laneType)) {
-        lane = createValueLane(node, laneDef);
+        lane = this.createValueLane(node, laneDef);
       } else if ("http".equals(laneType)) {
-        lane = createHttpLane(node, laneDef);
+        lane = this.createHttpLane(node, laneDef);
       }
     }
     return lane;
@@ -419,18 +406,18 @@ public class BootKernel extends KernelProxy implements IpStation {
 
   @Override
   public void willStart() {
-    this.shutdownHook = new KernelShutdownHook(kernelWrapper());
+    this.shutdownHook = new KernelShutdownHook(this.kernelWrapper());
     Runtime.getRuntime().addShutdownHook(this.shutdownHook);
   }
 
   @Override
   public void didStop() {
-    final Station station = STATION.getAndSet(this, null);
+    final Station station = BootKernel.STATION.getAndSet(this, null);
     if (station != null) {
       station.stop();
     }
 
-    final Stage stage = STAGE.getAndSet(this, null);
+    final Stage stage = BootKernel.STAGE.getAndSet(this, null);
     if (stage instanceof MainStage) {
       ((MainStage) stage).stop();
     }
@@ -444,7 +431,7 @@ public class BootKernel extends KernelProxy implements IpStation {
 
   @Override
   public void run() {
-    start();
+    this.start();
     final KernelContext kernelContext = this.kernelContext;
     if (kernelContext != null) {
       kernelContext.run();
@@ -522,6 +509,23 @@ public class BootKernel extends KernelProxy implements IpStation {
     } else if (message != null) {
       System.err.println(message);
     }
+  }
+
+  static final AtomicReferenceFieldUpdater<BootKernel, Stage> STAGE =
+      AtomicReferenceFieldUpdater.newUpdater(BootKernel.class, Stage.class, "stage");
+  static final AtomicReferenceFieldUpdater<BootKernel, Station> STATION =
+      AtomicReferenceFieldUpdater.newUpdater(BootKernel.class, Station.class, "station");
+
+  private static final double KERNEL_PRIORITY = Double.NEGATIVE_INFINITY;
+
+  public static BootKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || BootKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(BootKernel.KERNEL_PRIORITY);
+      return new BootKernel(kernelPriority, moduleConfig);
+    }
+    return null;
   }
 
 }

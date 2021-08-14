@@ -33,15 +33,6 @@ public class MetaTree {
     this.updated = updated;
   }
 
-  public static MetaTree fromValue(Value name, Value value) {
-    final String tag = value.tag();
-    final TreeType type = TreeType.fromTag(tag);
-    final int stem = value.get("stem").intValue(0);
-    final long created = value.get("created").longValue(0L);
-    final long updated = value.get("updated").longValue(0L);
-    return new MetaTree(name, type, stem, created, updated);
-  }
-
   public final Value name() {
     return this.name;
   }
@@ -63,12 +54,20 @@ public class MetaTree {
   }
 
   public Value toValue() {
-    return Record.create(5)
-        .slot("name", this.name)
-        .slot("type", this.type.tag())
-        .slot("stem", this.stem)
-        .slot("created", this.created)
-        .slot("updated", this.updated);
+    return Record.create(5).slot("name", this.name)
+                           .slot("type", this.type.tag())
+                           .slot("stem", this.stem)
+                           .slot("created", this.created)
+                           .slot("updated", this.updated);
+  }
+
+  public static MetaTree fromValue(Value name, Value value) {
+    final String tag = value.tag();
+    final TreeType type = TreeType.fromTag(tag);
+    final int stem = value.get("stem").intValue(0);
+    final long created = value.get("created").longValue(0L);
+    final long updated = value.get("updated").longValue(0L);
+    return new MetaTree(name, type, stem, created, updated);
   }
 
 }

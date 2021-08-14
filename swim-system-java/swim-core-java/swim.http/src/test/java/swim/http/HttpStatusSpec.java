@@ -19,98 +19,94 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpStatusSpec {
 
-  public void assertParses(String string, HttpStatus status) {
-    HttpAssertions.assertParses(Http.standardParser().statusParser(), string, status);
-  }
-
   @Test
   public void parseStatuses() {
-    assertParses("100 Continue", HttpStatus.from(100, "Continue"));
-    assertParses("101 Switching Protocols", HttpStatus.from(101, "Switching Protocols"));
-    assertParses("200 OK", HttpStatus.from(200, "OK"));
-    assertParses("201 Created", HttpStatus.from(201, "Created"));
-    assertParses("202 Accepted", HttpStatus.from(202, "Accepted"));
-    assertParses("203 Non-Authoritative Information", HttpStatus.from(203, "Non-Authoritative Information"));
-    assertParses("204 No Content", HttpStatus.from(204, "No Content"));
-    assertParses("205 Reset Content", HttpStatus.from(205, "Reset Content"));
-    assertParses("206 Partial Content", HttpStatus.from(206, "Partial Content"));
-    assertParses("300 Multiple Choices", HttpStatus.from(300, "Multiple Choices"));
-    assertParses("301 Moved Permanently", HttpStatus.from(301, "Moved Permanently"));
-    assertParses("302 Found", HttpStatus.from(302, "Found"));
-    assertParses("303 See Other", HttpStatus.from(303, "See Other"));
-    assertParses("304 Not Modified", HttpStatus.from(304, "Not Modified"));
-    assertParses("305 Use Proxy", HttpStatus.from(305, "Use Proxy"));
-    assertParses("307 Temporary Redirect", HttpStatus.from(307, "Temporary Redirect"));
-    assertParses("400 Bad Request", HttpStatus.from(400, "Bad Request"));
-    assertParses("401 Unauthorized", HttpStatus.from(401, "Unauthorized"));
-    assertParses("402 Payment Required", HttpStatus.from(402, "Payment Required"));
-    assertParses("403 Forbidden", HttpStatus.from(403, "Forbidden"));
-    assertParses("404 Not Found", HttpStatus.from(404, "Not Found"));
-    assertParses("405 Method Not Allowed", HttpStatus.from(405, "Method Not Allowed"));
-    assertParses("406 Not Acceptable", HttpStatus.from(406, "Not Acceptable"));
-    assertParses("407 Proxy Authentication Required", HttpStatus.from(407, "Proxy Authentication Required"));
-    assertParses("408 Request Timeout", HttpStatus.from(408, "Request Timeout"));
-    assertParses("409 Conflict", HttpStatus.from(409, "Conflict"));
-    assertParses("410 Gone", HttpStatus.from(410, "Gone"));
-    assertParses("411 Length Required", HttpStatus.from(411, "Length Required"));
-    assertParses("412 Precondition Failed", HttpStatus.from(412, "Precondition Failed"));
-    assertParses("413 Payload Too Large", HttpStatus.from(413, "Payload Too Large"));
-    assertParses("414 URI Too Long", HttpStatus.from(414, "URI Too Long"));
-    assertParses("415 Unsupported Media Type", HttpStatus.from(415, "Unsupported Media Type"));
-    assertParses("416 Range Not Satisfiable", HttpStatus.from(416, "Range Not Satisfiable"));
-    assertParses("417 Expectation Failed", HttpStatus.from(417, "Expectation Failed"));
-    assertParses("426 Upgrade Required", HttpStatus.from(426, "Upgrade Required"));
-    assertParses("500 Internal Server Error", HttpStatus.from(500, "Internal Server Error"));
-    assertParses("501 Not Implemented", HttpStatus.from(501, "Not Implemented"));
-    assertParses("502 Bad Gateway", HttpStatus.from(502, "Bad Gateway"));
-    assertParses("503 Service Unavailable", HttpStatus.from(503, "Service Unavailable"));
-    assertParses("504 Gateway Timeout", HttpStatus.from(504, "Gateway Timeout"));
-    assertParses("505 HTTP Version Not Supported", HttpStatus.from(505, "HTTP Version Not Supported"));
+    assertParses("100 Continue", HttpStatus.create(100, "Continue"));
+    assertParses("101 Switching Protocols", HttpStatus.create(101, "Switching Protocols"));
+    assertParses("200 OK", HttpStatus.create(200, "OK"));
+    assertParses("201 Created", HttpStatus.create(201, "Created"));
+    assertParses("202 Accepted", HttpStatus.create(202, "Accepted"));
+    assertParses("203 Non-Authoritative Information", HttpStatus.create(203, "Non-Authoritative Information"));
+    assertParses("204 No Content", HttpStatus.create(204, "No Content"));
+    assertParses("205 Reset Content", HttpStatus.create(205, "Reset Content"));
+    assertParses("206 Partial Content", HttpStatus.create(206, "Partial Content"));
+    assertParses("300 Multiple Choices", HttpStatus.create(300, "Multiple Choices"));
+    assertParses("301 Moved Permanently", HttpStatus.create(301, "Moved Permanently"));
+    assertParses("302 Found", HttpStatus.create(302, "Found"));
+    assertParses("303 See Other", HttpStatus.create(303, "See Other"));
+    assertParses("304 Not Modified", HttpStatus.create(304, "Not Modified"));
+    assertParses("305 Use Proxy", HttpStatus.create(305, "Use Proxy"));
+    assertParses("307 Temporary Redirect", HttpStatus.create(307, "Temporary Redirect"));
+    assertParses("400 Bad Request", HttpStatus.create(400, "Bad Request"));
+    assertParses("401 Unauthorized", HttpStatus.create(401, "Unauthorized"));
+    assertParses("402 Payment Required", HttpStatus.create(402, "Payment Required"));
+    assertParses("403 Forbidden", HttpStatus.create(403, "Forbidden"));
+    assertParses("404 Not Found", HttpStatus.create(404, "Not Found"));
+    assertParses("405 Method Not Allowed", HttpStatus.create(405, "Method Not Allowed"));
+    assertParses("406 Not Acceptable", HttpStatus.create(406, "Not Acceptable"));
+    assertParses("407 Proxy Authentication Required", HttpStatus.create(407, "Proxy Authentication Required"));
+    assertParses("408 Request Timeout", HttpStatus.create(408, "Request Timeout"));
+    assertParses("409 Conflict", HttpStatus.create(409, "Conflict"));
+    assertParses("410 Gone", HttpStatus.create(410, "Gone"));
+    assertParses("411 Length Required", HttpStatus.create(411, "Length Required"));
+    assertParses("412 Precondition Failed", HttpStatus.create(412, "Precondition Failed"));
+    assertParses("413 Payload Too Large", HttpStatus.create(413, "Payload Too Large"));
+    assertParses("414 URI Too Long", HttpStatus.create(414, "URI Too Long"));
+    assertParses("415 Unsupported Media Type", HttpStatus.create(415, "Unsupported Media Type"));
+    assertParses("416 Range Not Satisfiable", HttpStatus.create(416, "Range Not Satisfiable"));
+    assertParses("417 Expectation Failed", HttpStatus.create(417, "Expectation Failed"));
+    assertParses("426 Upgrade Required", HttpStatus.create(426, "Upgrade Required"));
+    assertParses("500 Internal Server Error", HttpStatus.create(500, "Internal Server Error"));
+    assertParses("501 Not Implemented", HttpStatus.create(501, "Not Implemented"));
+    assertParses("502 Bad Gateway", HttpStatus.create(502, "Bad Gateway"));
+    assertParses("503 Service Unavailable", HttpStatus.create(503, "Service Unavailable"));
+    assertParses("504 Gateway Timeout", HttpStatus.create(504, "Gateway Timeout"));
+    assertParses("505 HTTP Version Not Supported", HttpStatus.create(505, "HTTP Version Not Supported"));
   }
 
   @Test
   public void writeStatuses() {
-    assertWrites(HttpStatus.from(100, "Continue"), "100 Continue");
-    assertWrites(HttpStatus.from(101, "Switching Protocols"), "101 Switching Protocols");
-    assertWrites(HttpStatus.from(200, "OK"), "200 OK");
-    assertWrites(HttpStatus.from(201, "Created"), "201 Created");
-    assertWrites(HttpStatus.from(202, "Accepted"), "202 Accepted");
-    assertWrites(HttpStatus.from(203, "Non-Authoritative Information"), "203 Non-Authoritative Information");
-    assertWrites(HttpStatus.from(204, "No Content"), "204 No Content");
-    assertWrites(HttpStatus.from(205, "Reset Content"), "205 Reset Content");
-    assertWrites(HttpStatus.from(206, "Partial Content"), "206 Partial Content");
-    assertWrites(HttpStatus.from(300, "Multiple Choices"), "300 Multiple Choices");
-    assertWrites(HttpStatus.from(301, "Moved Permanently"), "301 Moved Permanently");
-    assertWrites(HttpStatus.from(302, "Found"), "302 Found");
-    assertWrites(HttpStatus.from(303, "See Other"), "303 See Other");
-    assertWrites(HttpStatus.from(304, "Not Modified"), "304 Not Modified");
-    assertWrites(HttpStatus.from(305, "Use Proxy"), "305 Use Proxy");
-    assertWrites(HttpStatus.from(307, "Temporary Redirect"), "307 Temporary Redirect");
-    assertWrites(HttpStatus.from(400, "Bad Request"), "400 Bad Request");
-    assertWrites(HttpStatus.from(401, "Unauthorized"), "401 Unauthorized");
-    assertWrites(HttpStatus.from(402, "Payment Required"), "402 Payment Required");
-    assertWrites(HttpStatus.from(403, "Forbidden"), "403 Forbidden");
-    assertWrites(HttpStatus.from(404, "Not Found"), "404 Not Found");
-    assertWrites(HttpStatus.from(405, "Method Not Allowed"), "405 Method Not Allowed");
-    assertWrites(HttpStatus.from(406, "Not Acceptable"), "406 Not Acceptable");
-    assertWrites(HttpStatus.from(407, "Proxy Authentication Required"), "407 Proxy Authentication Required");
-    assertWrites(HttpStatus.from(408, "Request Timeout"), "408 Request Timeout");
-    assertWrites(HttpStatus.from(409, "Conflict"), "409 Conflict");
-    assertWrites(HttpStatus.from(410, "Gone"), "410 Gone");
-    assertWrites(HttpStatus.from(411, "Length Required"), "411 Length Required");
-    assertWrites(HttpStatus.from(412, "Precondition Failed"), "412 Precondition Failed");
-    assertWrites(HttpStatus.from(413, "Payload Too Large"), "413 Payload Too Large");
-    assertWrites(HttpStatus.from(414, "URI Too Long"), "414 URI Too Long");
-    assertWrites(HttpStatus.from(415, "Unsupported Media Type"), "415 Unsupported Media Type");
-    assertWrites(HttpStatus.from(416, "Range Not Satisfiable"), "416 Range Not Satisfiable");
-    assertWrites(HttpStatus.from(417, "Expectation Failed"), "417 Expectation Failed");
-    assertWrites(HttpStatus.from(426, "Upgrade Required"), "426 Upgrade Required");
-    assertWrites(HttpStatus.from(500, "Internal Server Error"), "500 Internal Server Error");
-    assertWrites(HttpStatus.from(501, "Not Implemented"), "501 Not Implemented");
-    assertWrites(HttpStatus.from(502, "Bad Gateway"), "502 Bad Gateway");
-    assertWrites(HttpStatus.from(503, "Service Unavailable"), "503 Service Unavailable");
-    assertWrites(HttpStatus.from(504, "Gateway Timeout"), "504 Gateway Timeout");
-    assertWrites(HttpStatus.from(505, "HTTP Version Not Supported"), "505 HTTP Version Not Supported");
+    assertWrites(HttpStatus.create(100, "Continue"), "100 Continue");
+    assertWrites(HttpStatus.create(101, "Switching Protocols"), "101 Switching Protocols");
+    assertWrites(HttpStatus.create(200, "OK"), "200 OK");
+    assertWrites(HttpStatus.create(201, "Created"), "201 Created");
+    assertWrites(HttpStatus.create(202, "Accepted"), "202 Accepted");
+    assertWrites(HttpStatus.create(203, "Non-Authoritative Information"), "203 Non-Authoritative Information");
+    assertWrites(HttpStatus.create(204, "No Content"), "204 No Content");
+    assertWrites(HttpStatus.create(205, "Reset Content"), "205 Reset Content");
+    assertWrites(HttpStatus.create(206, "Partial Content"), "206 Partial Content");
+    assertWrites(HttpStatus.create(300, "Multiple Choices"), "300 Multiple Choices");
+    assertWrites(HttpStatus.create(301, "Moved Permanently"), "301 Moved Permanently");
+    assertWrites(HttpStatus.create(302, "Found"), "302 Found");
+    assertWrites(HttpStatus.create(303, "See Other"), "303 See Other");
+    assertWrites(HttpStatus.create(304, "Not Modified"), "304 Not Modified");
+    assertWrites(HttpStatus.create(305, "Use Proxy"), "305 Use Proxy");
+    assertWrites(HttpStatus.create(307, "Temporary Redirect"), "307 Temporary Redirect");
+    assertWrites(HttpStatus.create(400, "Bad Request"), "400 Bad Request");
+    assertWrites(HttpStatus.create(401, "Unauthorized"), "401 Unauthorized");
+    assertWrites(HttpStatus.create(402, "Payment Required"), "402 Payment Required");
+    assertWrites(HttpStatus.create(403, "Forbidden"), "403 Forbidden");
+    assertWrites(HttpStatus.create(404, "Not Found"), "404 Not Found");
+    assertWrites(HttpStatus.create(405, "Method Not Allowed"), "405 Method Not Allowed");
+    assertWrites(HttpStatus.create(406, "Not Acceptable"), "406 Not Acceptable");
+    assertWrites(HttpStatus.create(407, "Proxy Authentication Required"), "407 Proxy Authentication Required");
+    assertWrites(HttpStatus.create(408, "Request Timeout"), "408 Request Timeout");
+    assertWrites(HttpStatus.create(409, "Conflict"), "409 Conflict");
+    assertWrites(HttpStatus.create(410, "Gone"), "410 Gone");
+    assertWrites(HttpStatus.create(411, "Length Required"), "411 Length Required");
+    assertWrites(HttpStatus.create(412, "Precondition Failed"), "412 Precondition Failed");
+    assertWrites(HttpStatus.create(413, "Payload Too Large"), "413 Payload Too Large");
+    assertWrites(HttpStatus.create(414, "URI Too Long"), "414 URI Too Long");
+    assertWrites(HttpStatus.create(415, "Unsupported Media Type"), "415 Unsupported Media Type");
+    assertWrites(HttpStatus.create(416, "Range Not Satisfiable"), "416 Range Not Satisfiable");
+    assertWrites(HttpStatus.create(417, "Expectation Failed"), "417 Expectation Failed");
+    assertWrites(HttpStatus.create(426, "Upgrade Required"), "426 Upgrade Required");
+    assertWrites(HttpStatus.create(500, "Internal Server Error"), "500 Internal Server Error");
+    assertWrites(HttpStatus.create(501, "Not Implemented"), "501 Not Implemented");
+    assertWrites(HttpStatus.create(502, "Bad Gateway"), "502 Bad Gateway");
+    assertWrites(HttpStatus.create(503, "Service Unavailable"), "503 Service Unavailable");
+    assertWrites(HttpStatus.create(504, "Gateway Timeout"), "504 Gateway Timeout");
+    assertWrites(HttpStatus.create(505, "HTTP Version Not Supported"), "505 HTTP Version Not Supported");
   }
 
   @Test
@@ -201,6 +197,10 @@ public class HttpStatusSpec {
     assertWrites(HttpStatus.SERVICE_UNAVAILABLE, "503 Service Unavailable");
     assertWrites(HttpStatus.GATEWAY_TIMEOUT, "504 Gateway Timeout");
     assertWrites(HttpStatus.HTTP_VERSION_NOT_SUPPORTED, "505 HTTP Version Not Supported");
+  }
+
+  public static void assertParses(String string, HttpStatus status) {
+    HttpAssertions.assertParses(Http.standardParser().statusParser(), string, status);
   }
 
 }

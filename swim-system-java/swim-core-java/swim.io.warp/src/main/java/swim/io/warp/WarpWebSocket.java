@@ -20,7 +20,7 @@ import java.security.cert.Certificate;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import swim.concurrent.ConcurrentTrancheQueue;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.DropException;
 import swim.concurrent.PullContext;
 import swim.concurrent.PullRequest;
@@ -53,7 +53,9 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
   public WarpWebSocket(WarpSocket socket, WarpSettings warpSettings) {
     this.socket = socket;
     this.warpSettings = warpSettings;
-    this.supply = new ConcurrentTrancheQueue<PullRequest<Envelope>>(TRANCHES);
+    this.supply = new ConcurrentTrancheQueue<PullRequest<Envelope>>(WarpWebSocket.TRANCHES);
+    this.context = null;
+    this.status = 0L;
   }
 
   @Override
@@ -95,19 +97,19 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
   @Override
   public void doWrite() {
     this.socket.doWrite();
-    generateDemand();
+    this.generateDemand();
   }
 
   @Override
   public void didWrite(WsFrame<? extends Envelope> frame) {
     if (frame instanceof WsData<?>) {
       do {
-        final long oldStatus = this.status;
-        final long oldBuffer = (oldStatus & BUFFER_MASK) >>> BUFFER_SHIFT;
+        final long oldStatus = WarpWebSocket.STATUS.get(this);
+        final long oldBuffer = (oldStatus & WarpWebSocket.BUFFER_MASK) >>> WarpWebSocket.BUFFER_SHIFT;
         final long newBuffer = oldBuffer - 1L;
         if (newBuffer >= 0L) {
-          final long newStatus = oldStatus & ~BUFFER_MASK | newBuffer << BUFFER_SHIFT;
-          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+          final long newStatus = oldStatus & ~WarpWebSocket.BUFFER_MASK | newBuffer << WarpWebSocket.BUFFER_SHIFT;
+          if (WarpWebSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
             break;
           }
         } else {
@@ -118,19 +120,19 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
     } else if (frame instanceof WsControl<?, ?>) {
       this.socket.didWrite((WsControl<?, ?>) frame);
     }
-    generateDemand();
+    this.generateDemand();
   }
 
   @Override
   public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
     do {
-      final long oldStatus = this.status;
-      final long newStatus = oldStatus | UPGRADED;
+      final long oldStatus = WarpWebSocket.STATUS.get(this);
+      final long newStatus = oldStatus | WarpWebSocket.UPGRADED;
       if (oldStatus != newStatus) {
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if (WarpWebSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.socket.didUpgrade(httpRequest, httpResponse);
           this.context.read(Envelope.decoder());
-          generateDemand();
+          this.generateDemand();
           break;
         }
       } else {
@@ -177,10 +179,10 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
   @Override
   public void didDisconnect() {
     do {
-      final long oldStatus = this.status;
-      final long newStatus = oldStatus & ~(UPGRADED | CLOSING);
+      final long oldStatus = WarpWebSocket.STATUS.get(this);
+      final long newStatus = oldStatus & ~(WarpWebSocket.UPGRADED | WarpWebSocket.CLOSING);
       if (oldStatus != newStatus) {
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if (WarpWebSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           break;
         }
       } else {
@@ -191,12 +193,12 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
     try {
       this.socket.didDisconnect();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
     }
-    close();
+    this.close();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -210,12 +212,12 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
     try {
       this.socket.didFail(error);
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
     }
-    close();
+    this.close();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -310,13 +312,13 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
   @Override
   public void feed(PullRequest<Envelope> pullRequest) {
     do {
-      final long oldStatus = this.status;
-      final long oldSupply = oldStatus & SUPPLY_MASK;
+      final long oldStatus = WarpWebSocket.STATUS.get(this);
+      final long oldSupply = oldStatus & WarpWebSocket.SUPPLY_MASK;
       final long newSupply = oldSupply + 1L;
-      if (newSupply <= SUPPLY_MAX) {
+      if (newSupply <= WarpWebSocket.SUPPLY_MAX) {
         if (pullRequest.stay(this, (int) oldSupply)) {
-          final long newStatus = oldStatus & ~SUPPLY_MASK | newSupply;
-          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+          final long newStatus = oldStatus & ~WarpWebSocket.SUPPLY_MASK | newSupply;
+          if (WarpWebSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
             break;
           }
         } else {
@@ -329,33 +331,33 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
       }
     } while (true);
     this.supply.add(pullRequest, pullRequest.prio());
-    generateDemand();
+    this.generateDemand();
   }
 
   @Override
   public void feed(Envelope envelope, float prio) {
-    feed(new PushRequest<Envelope>(envelope, prio));
+    this.feed(new PushRequest<Envelope>(envelope, prio));
   }
 
   @Override
   public void feed(Envelope envelope) {
-    feed(envelope, 0.0f);
+    this.feed(envelope, 0.0f);
   }
 
   @Override
   public void push(Envelope envelope) {
     do {
-      final long oldStatus = this.status;
-      final long oldDemand = (oldStatus & DEMAND_MASK) >>> DEMAND_SHIFT;
-      final long oldBuffer = (oldStatus & BUFFER_MASK) >>> BUFFER_SHIFT;
+      final long oldStatus = WarpWebSocket.STATUS.get(this);
+      final long oldDemand = (oldStatus & WarpWebSocket.DEMAND_MASK) >>> WarpWebSocket.DEMAND_SHIFT;
+      final long oldBuffer = (oldStatus & WarpWebSocket.BUFFER_MASK) >>> WarpWebSocket.BUFFER_SHIFT;
       final long newDemand = oldDemand - 1L;
       final long newBuffer = oldBuffer + 1L;
       if (newDemand >= 0L) {
-        if (newBuffer <= BUFFER_MAX) {
-          final long newStatus = oldStatus & ~(DEMAND_MASK | BUFFER_MASK)
-              | newDemand << DEMAND_SHIFT
-              | newBuffer << BUFFER_SHIFT;
-          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if (newBuffer <= WarpWebSocket.BUFFER_MAX) {
+          final long newStatus = oldStatus & ~(WarpWebSocket.DEMAND_MASK | WarpWebSocket.BUFFER_MASK)
+                                           | newDemand << WarpWebSocket.DEMAND_SHIFT
+                                           | newBuffer << WarpWebSocket.BUFFER_SHIFT;
+          if (WarpWebSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
             break;
           }
         } else {
@@ -365,18 +367,18 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
         throw new WarpException("overdemand");
       }
     } while (true);
-    this.context.write(WsText.from(envelope, envelope.reconEncoder()));
+    this.context.write(WsText.create(envelope, envelope.reconEncoder()));
   }
 
   @Override
   public void skip() {
     do {
-      final long oldStatus = this.status;
-      final long oldDemand = (oldStatus & DEMAND_MASK) >>> DEMAND_SHIFT;
+      final long oldStatus = WarpWebSocket.STATUS.get(this);
+      final long oldDemand = (oldStatus & WarpWebSocket.DEMAND_MASK) >>> WarpWebSocket.DEMAND_SHIFT;
       final long newDemand = oldDemand - 1L;
       if (newDemand >= 0L) {
-        final long newStatus = oldStatus & ~DEMAND_MASK | newDemand << DEMAND_SHIFT;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        final long newStatus = oldStatus & ~WarpWebSocket.DEMAND_MASK | newDemand << WarpWebSocket.DEMAND_SHIFT;
+        if (WarpWebSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           break;
         }
       } else {
@@ -390,25 +392,25 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
     do {
       PullRequest<Envelope> pullRequest = null;
       do {
-        final long oldStatus = this.status;
-        if ((oldStatus & UPGRADED) == 0) {
+        final long oldStatus = WarpWebSocket.STATUS.get(this);
+        if ((oldStatus & WarpWebSocket.UPGRADED) == 0) {
           return;
         }
-        final long oldSupply = oldStatus & SUPPLY_MASK;
-        final long oldDemand = (oldStatus & DEMAND_MASK) >>> DEMAND_SHIFT;
-        final long oldBuffer = (oldStatus & BUFFER_MASK) >>> BUFFER_SHIFT;
-        if (pullRequest == null && oldSupply > 0L && oldDemand + oldBuffer < TARGET_DEMAND) {
+        final long oldSupply = oldStatus & WarpWebSocket.SUPPLY_MASK;
+        final long oldDemand = (oldStatus & WarpWebSocket.DEMAND_MASK) >>> WarpWebSocket.DEMAND_SHIFT;
+        final long oldBuffer = (oldStatus & WarpWebSocket.BUFFER_MASK) >>> WarpWebSocket.BUFFER_SHIFT;
+        if (pullRequest == null && oldSupply > 0L && oldDemand + oldBuffer < WarpWebSocket.TARGET_DEMAND) {
           pullRequest = this.supply.poll();
         }
         if (pullRequest != null) {
           final long newDemand = oldDemand + 1L;
           final long newSupply = oldSupply - 1L;
           if (newSupply >= 0L) {
-            if (newDemand <= DEMAND_MAX) {
-              final long newStatus = oldStatus & ~(SUPPLY_MASK | DEMAND_MASK) | newSupply | newDemand << DEMAND_SHIFT;
-              if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+            if (newDemand <= WarpWebSocket.DEMAND_MAX) {
+              final long newStatus = oldStatus & ~(WarpWebSocket.SUPPLY_MASK | WarpWebSocket.DEMAND_MASK) | newSupply | newDemand << WarpWebSocket.DEMAND_SHIFT;
+              if (WarpWebSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
                 pullRequest.pull(this);
-                if (newDemand < TARGET_DEMAND) {
+                if (newDemand < WarpWebSocket.TARGET_DEMAND) {
                   continue demand;
                 }
                 break;
@@ -430,10 +432,10 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
   public void write(WsControl<?, ? extends Envelope> frame) {
     if (frame instanceof WsClose<?, ?>) {
       do {
-        final long oldStatus = this.status;
-        if ((oldStatus & (UPGRADED | CLOSING)) == UPGRADED) {
-          final long newStatus = oldStatus | CLOSING;
-          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        final long oldStatus = WarpWebSocket.STATUS.get(this);
+        if ((oldStatus & (WarpWebSocket.UPGRADED | WarpWebSocket.CLOSING)) == WarpWebSocket.UPGRADED) {
+          final long newStatus = oldStatus | WarpWebSocket.CLOSING;
+          if (WarpWebSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
             this.context.write(frame);
             break;
           }
@@ -466,7 +468,7 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
           try {
             pullRequest.drop(reason);
           } catch (Throwable cause) {
-            if (!Conts.isNonFatal(cause)) {
+            if (!Cont.isNonFatal(cause)) {
               throw cause;
             }
             failure = cause;
@@ -476,7 +478,7 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
         break;
       } while (true);
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;

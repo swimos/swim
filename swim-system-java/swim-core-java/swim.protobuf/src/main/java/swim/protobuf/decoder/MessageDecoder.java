@@ -53,8 +53,8 @@ final class MessageDecoder<T, M> extends Decoder<T> {
 
   @Override
   public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.protobuf, this.type, this.size, this.message,
-                  this.fieldType, this.valueDecoder, this.tag, this.shift, this.step);
+    return MessageDecoder.decode(input, this.protobuf, this.type, this.size, this.message,
+                                 this.fieldType, this.valueDecoder, this.tag, this.shift, this.step);
   }
 
   @SuppressWarnings("unchecked")
@@ -69,7 +69,7 @@ final class MessageDecoder<T, M> extends Decoder<T> {
           input = input.step();
           size |= (long) (b & 0x7f) << shift;
         } else {
-          return error(new DecoderException("varint overflow"));
+          return Decoder.error(new DecoderException("varint overflow"));
         }
         if ((b & 0x80) == 0) {
           shift = 0;
@@ -100,7 +100,7 @@ final class MessageDecoder<T, M> extends Decoder<T> {
             if (message == null) {
               message = type.create();
             }
-            return done(type.cast(message));
+            return Decoder.done(type.cast(message));
           }
           while (input.isCont()) {
             final int b = input.head();
@@ -108,7 +108,7 @@ final class MessageDecoder<T, M> extends Decoder<T> {
               input = input.step();
               tag |= (long) (b & 0x7f) << shift;
             } else {
-              return error(new DecoderException("varint overflow"));
+              return Decoder.error(new DecoderException("varint overflow"));
             }
             if ((b & 0x80) == 0) {
               shift = 0;
@@ -119,13 +119,13 @@ final class MessageDecoder<T, M> extends Decoder<T> {
                 if (wireType.isSized() && fieldType.valueType().wireType().isPrimitive()) {
                   fieldType = fieldType.packedType();
                   if (fieldType == null) {
-                    return error(new DecoderException("unsupported packed field: " + fieldNumber));
+                    return Decoder.error(new DecoderException("unsupported packed field: " + fieldNumber));
                   }
                 }
                 step = 3;
                 break;
               } else {
-                return error(new DecoderException("unknown field: " + fieldNumber));
+                return Decoder.error(new DecoderException("unknown field: " + fieldNumber));
               }
             } else {
               shift += 7;
@@ -159,9 +159,9 @@ final class MessageDecoder<T, M> extends Decoder<T> {
       size -= input.index() - inputStart;
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new MessageDecoder<T, M>(protobuf, type, size, message, fieldType,
                                     valueDecoder, tag, shift, step);
@@ -169,7 +169,7 @@ final class MessageDecoder<T, M> extends Decoder<T> {
 
   static <T, M> Decoder<T> decode(InputBuffer input, ProtobufDecoder protobuf,
                                   ProtobufMessageType<T, M> type, long size) {
-    return decode(input, protobuf, type, size, null, null, null, 0L, 0, size >= 0 ? 1 : 2);
+    return MessageDecoder.decode(input, protobuf, type, size, null, null, null, 0L, 0, size >= 0 ? 1 : 2);
   }
 
 }

@@ -28,6 +28,64 @@ import static swim.deflate.DeflateUtil.readResource;
 
 public class DeflateSpec {
 
+  @Test
+  public void deflateFixed() {
+    assertDeflates("Hello",
+                   byteArray(0xf2, 0x48, 0xcd, 0xc9, 0xc9, 0x07, 0x00, 0x00, 0x00, 0xff, 0xff),
+                   Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
+  }
+
+  @Test
+  public void deflateLencode() {
+    assertDeflates("HelloHelloHello",
+                   byteArray(0xf2, 0x48, 0xcd, 0xc9, 0xc9, 0xf7, 0x80, 0x13, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff),
+                   Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
+  }
+
+  @Test
+  public void deflateLorem() {
+    //writeDeflatedFile(readResource("/lorem.txt"),
+    //                  "lorem.txt.deflate",
+    //                  Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
+    assertDeflates(readResource("/lorem.txt", true),
+                   readResource("/lorem.txt.deflate", false),
+                   Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
+  }
+
+  @Test
+  public void deflateLoremIncrementally() {
+    assertDeflates(readResource("/lorem.txt", true),
+                   readResource("/lorem.txt.deflate", false),
+                   Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH, 128);
+  }
+
+  @Test
+  public void deflateImage() {
+    //writeDeflatedFile(readResource("/image.tiff"),
+    //                  "image.tiff.deflate",
+    //                  Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
+    assertDeflates(readResource("/image.tiff", false),
+                   readResource("/image.tiff.deflate", false),
+                   Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
+  }
+
+  @Test
+  public void deflateImageIncrementally() {
+    assertDeflates(readResource("/image.tiff", false),
+                   readResource("/image.tiff.deflate", false),
+                   Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH, 1024);
+  }
+
+  @Test
+  public void gzipImage() {
+    //writeDeflatedFile(readResource("/image.tiff"),
+    //                  "image.tiff.gz",
+    //                  Deflate.Z_WRAP_GZIP, Deflate.MAX_WBITS, Z_FINISH);
+    assertDeflates(readResource("/image.tiff", false),
+                   readResource("/image.tiff.gz", false),
+                   Deflate.Z_WRAP_GZIP, Deflate.MAX_WBITS, Deflate.Z_FINISH);
+  }
+
   static void assertDeflates(byte[] inflated, byte[] deflated, int wrap, int windowBits, int flush, int bufferSize) {
     final byte[] actual = new byte[deflated.length];
     Encoder<?, byte[]> deflater = new Deflate<>(Binary.byteArrayWriter(inflated), wrap, Deflate.Z_DEFAULT_COMPRESSION, windowBits).flush(flush);
@@ -85,64 +143,6 @@ public class DeflateSpec {
     } catch (IOException cause) {
       throw new TestException(cause);
     }
-  }
-
-  @Test
-  public void deflateFixed() {
-    assertDeflates("Hello",
-        byteArray(0xf2, 0x48, 0xcd, 0xc9, 0xc9, 0x07, 0x00, 0x00, 0x00, 0xff, 0xff),
-        Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
-  }
-
-  @Test
-  public void deflateLencode() {
-    assertDeflates("HelloHelloHello",
-        byteArray(0xf2, 0x48, 0xcd, 0xc9, 0xc9, 0xf7, 0x80, 0x13, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff),
-        Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
-  }
-
-  @Test
-  public void deflateLorem() {
-    //writeDeflatedFile(readResource("/lorem.txt"),
-    //                  "lorem.txt.deflate",
-    //                  Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
-    assertDeflates(readResource("/lorem.txt", true),
-        readResource("/lorem.txt.deflate", false),
-        Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
-  }
-
-  @Test
-  public void deflateLoremIncrementally() {
-    assertDeflates(readResource("/lorem.txt", true),
-        readResource("/lorem.txt.deflate", false),
-        Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH, 128);
-  }
-
-  @Test
-  public void deflateImage() {
-    //writeDeflatedFile(readResource("/image.tiff"),
-    //                  "image.tiff.deflate",
-    //                  Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
-    assertDeflates(readResource("/image.tiff", false),
-        readResource("/image.tiff.deflate", false),
-        Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH);
-  }
-
-  @Test
-  public void deflateImageIncrementally() {
-    assertDeflates(readResource("/image.tiff", false),
-        readResource("/image.tiff.deflate", false),
-        Deflate.Z_NO_WRAP, Deflate.MAX_WBITS, Deflate.Z_SYNC_FLUSH, 1024);
-  }
-
-  @Test
-  public void gzipImage() {
-    //writeDeflatedFile(readResource("/image.tiff"),
-    //                  "image.tiff.gz",
-    //                  Deflate.Z_WRAP_GZIP, Deflate.MAX_WBITS, Z_FINISH);
-    assertDeflates(readResource("/image.tiff", false),
-        readResource("/image.tiff.gz", false),
-        Deflate.Z_WRAP_GZIP, Deflate.MAX_WBITS, Deflate.Z_FINISH);
   }
 
 }

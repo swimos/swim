@@ -16,13 +16,13 @@ package swim.concurrent;
 
 /**
  * Function to invoke as a sequential process on a concurrent execution {@link
- * Stage}.  Use {@link Stage#task(TaskFunction)} to bind a {@code TaskFunction}
+ * Stage}. Use {@link Stage#task(TaskFunction)} to bind a {@code TaskFunction}
  * to a {@code Stage}, and invoke {@link TaskRef#cue()} to schedule the
  * concurrent execution of the sequential task.
  *
  * <h3>Blocking</h3>
  * {@code TaskFunction} implementations should not perform long running or
- * blocking operations.  If a blocking operation needs to be performed,
+ * blocking operations. If a blocking operation needs to be performed,
  * implement a {@link Task} that returns {@code true} from {@link
  * Task#taskWillBlock() taskWillBlock()} to avoid thread starvation of the
  * execution {@code Stage}.
@@ -30,11 +30,11 @@ package swim.concurrent;
  * @see Task
  * @see Stage
  */
-//@FunctionalInterface
+@FunctionalInterface
 public interface TaskFunction {
 
   /**
-   * Executes this sequential process.  Only one thread at a time will execute
+   * Executes this sequential process. Only one thread at a time will execute
    * {@code runTask} for this {@code TaskFunction}.
    */
   void runTask();

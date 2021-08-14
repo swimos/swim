@@ -36,7 +36,7 @@ import swim.util.Builder;
 public abstract class Value extends Item {
 
   Value() {
-    // stub
+    // sealed
   }
 
   /**
@@ -91,7 +91,7 @@ public abstract class Value extends Item {
    * member is not an {@code Attr}.
    * <p>
    * Used to concisely get the name of the discriminating attribute of a
-   * structure.  The {@code tag} can be used to discern the nominal type of a
+   * structure. The {@code tag} can be used to discern the nominal type of a
    * polymorphic structure, similar to an XML element tag.
    */
   @Override
@@ -155,7 +155,7 @@ public abstract class Value extends Item {
    * <p>
    * Used to conditionally get the value of the head {@code Attr} of a
    * structure, if and only if the key string of the head {@code Attr} is equal
-   * to the {@code tag}.  Can be used to check if a structure might conform to
+   * to the {@code tag}. Can be used to check if a structure might conform to
    * a nominal type named {@code tag}, while simultaneously getting the value
    * of the {@code tag} attribute.
    */
@@ -201,7 +201,7 @@ public abstract class Value extends Item {
 
   /**
    * Returns the {@link Record#flattened() flattened} {@link #tail() tail}
-   * of this {@code Value}.  Used to recursively deconstruct a structure,
+   * of this {@code Value}. Used to recursively deconstruct a structure,
    * terminating with its last {@code Value}, rather than a unary {@code
    * Record} containing its last value, if the structure ends with a {@code
    * Value} member.
@@ -250,7 +250,7 @@ public abstract class Value extends Item {
    * given {@code key}; otherwise returns {@code false} if this {@code Value}
    * is not a {@code Record}, or if this {@code Value} is a {@code Record}, but
    * has no {@code Field} member with a {@code Text} key whose string value
-   * equals the given {@code key}.  Equivalent to {@link #containsKey(Value)},
+   * equals the given {@code key}. Equivalent to {@link #containsKey(Value)},
    * but avoids boxing the {@code key} string into a {@code Text} value.
    */
   @Override
@@ -288,7 +288,7 @@ public abstract class Value extends Item {
    * key}; returns {@link Absent} if this {@code Value} is not a {@link Record},
    * or if this {@code Value} is a {@code Record}, but has no {@code Field}
    * member with a {@code Text} key whose string value equals the given {@code
-   * key}.  Equivalent to {@link #get(Value)}, but avoids boxing the {@code
+   * key}. Equivalent to {@link #get(Value)}, but avoids boxing the {@code
    * key} string into a {@code Text} value.
    */
   @Override
@@ -314,7 +314,7 @@ public abstract class Value extends Item {
    * key}; returns {@link Absent} if this {@code Value} is not a {@link Record},
    * or if this {@code Value} is a {@code Record}, but has no {@code Attr}
    * member with a {@code Text} key whose string value equals the given {@code
-   * key}.  Equivalent to {@link #getAttr(Text)}, but avoids boxing the {@code
+   * key}. Equivalent to {@link #getAttr(Text)}, but avoids boxing the {@code
    * key} string into a {@code Text} value.
    */
   @Override
@@ -340,7 +340,7 @@ public abstract class Value extends Item {
    * key}; returns {@link Absent} if this {@code Value} is not a {@link Record},
    * or if this {@code Value} is a {@code Record}, but has no {@code Slot}
    * member with a {@code Text} key whose string value equals the given {@code
-   * key}.  Equivalent to {@link #getSlot(Value)}, but avoids boxing the {@code
+   * key}. Equivalent to {@link #getSlot(Value)}, but avoids boxing the {@code
    * key} string into a {@code Text} value.
    */
   @Override
@@ -400,7 +400,7 @@ public abstract class Value extends Item {
   @Override
   public Item conditional(Item thenTerm, Item elseTerm) {
     if (thenTerm instanceof Value && elseTerm instanceof Value) {
-      return conditional((Value) thenTerm, (Value) elseTerm);
+      return this.conditional((Value) thenTerm, (Value) elseTerm);
     }
     return thenTerm;
   }
@@ -412,7 +412,7 @@ public abstract class Value extends Item {
   @Override
   public Item or(Item that) {
     if (that instanceof Value) {
-      return or((Value) that);
+      return this.or((Value) that);
     }
     return this;
   }
@@ -424,7 +424,7 @@ public abstract class Value extends Item {
   @Override
   public Item and(Item that) {
     if (that instanceof Value) {
-      return and((Value) that);
+      return this.and((Value) that);
     }
     return that;
   }
@@ -436,14 +436,14 @@ public abstract class Value extends Item {
   @Override
   public Item bitwiseOr(Item that) {
     if (that instanceof Value) {
-      return bitwiseOr((Value) that);
+      return this.bitwiseOr((Value) that);
     } else if (that instanceof Slot) {
-      final Value newValue = bitwiseOr(((Slot) that).value);
+      final Value newValue = this.bitwiseOr(((Slot) that).value);
       if (newValue.isDefined()) {
         return new Slot(((Slot) that).key, newValue);
       }
     } else if (that instanceof Attr) {
-      final Value newValue = bitwiseOr(((Attr) that).value);
+      final Value newValue = this.bitwiseOr(((Attr) that).value);
       if (newValue.isDefined()) {
         return new Attr(((Attr) that).key, newValue);
       }
@@ -461,14 +461,14 @@ public abstract class Value extends Item {
   @Override
   public Item bitwiseXor(Item that) {
     if (that instanceof Value) {
-      return bitwiseXor((Value) that);
+      return this.bitwiseXor((Value) that);
     } else if (that instanceof Slot) {
-      final Value newValue = bitwiseXor(((Slot) that).value);
+      final Value newValue = this.bitwiseXor(((Slot) that).value);
       if (newValue.isDefined()) {
         return new Slot(((Slot) that).key, newValue);
       }
     } else if (that instanceof Attr) {
-      final Value newValue = bitwiseXor(((Attr) that).value);
+      final Value newValue = this.bitwiseXor(((Attr) that).value);
       if (newValue.isDefined()) {
         return new Attr(((Attr) that).key, newValue);
       }
@@ -486,14 +486,14 @@ public abstract class Value extends Item {
   @Override
   public Item bitwiseAnd(Item that) {
     if (that instanceof Value) {
-      return bitwiseAnd((Value) that);
+      return this.bitwiseAnd((Value) that);
     } else if (that instanceof Slot) {
-      final Value newValue = bitwiseAnd(((Slot) that).value);
+      final Value newValue = this.bitwiseAnd(((Slot) that).value);
       if (newValue.isDefined()) {
         return new Slot(((Slot) that).key, newValue);
       }
     } else if (that instanceof Attr) {
-      final Value newValue = bitwiseAnd(((Attr) that).value);
+      final Value newValue = this.bitwiseAnd(((Attr) that).value);
       if (newValue.isDefined()) {
         return new Attr(((Attr) that).key, newValue);
       }
@@ -511,7 +511,7 @@ public abstract class Value extends Item {
   @Override
   public Item lt(Item that) {
     if (that instanceof Value) {
-      return lt((Value) that);
+      return this.lt((Value) that);
     }
     return super.lt(that);
   }
@@ -526,7 +526,7 @@ public abstract class Value extends Item {
   @Override
   public Item le(Item that) {
     if (that instanceof Value) {
-      return le((Value) that);
+      return this.le((Value) that);
     }
     return super.le(that);
   }
@@ -541,7 +541,7 @@ public abstract class Value extends Item {
   @Override
   public Item eq(Item that) {
     if (that instanceof Value) {
-      return eq((Value) that);
+      return this.eq((Value) that);
     }
     return super.eq(that);
   }
@@ -556,7 +556,7 @@ public abstract class Value extends Item {
   @Override
   public Item ne(Item that) {
     if (that instanceof Value) {
-      return ne((Value) that);
+      return this.ne((Value) that);
     }
     return super.ne(that);
   }
@@ -571,7 +571,7 @@ public abstract class Value extends Item {
   @Override
   public Item ge(Item that) {
     if (that instanceof Value) {
-      return ge((Value) that);
+      return this.ge((Value) that);
     }
     return super.ge(that);
   }
@@ -586,7 +586,7 @@ public abstract class Value extends Item {
   @Override
   public Item gt(Item that) {
     if (that instanceof Value) {
-      return gt((Value) that);
+      return this.gt((Value) that);
     }
     return super.gt(that);
   }
@@ -601,14 +601,14 @@ public abstract class Value extends Item {
   @Override
   public Item plus(Item that) {
     if (that instanceof Value) {
-      return plus((Value) that);
+      return this.plus((Value) that);
     } else if (that instanceof Slot) {
-      final Value newValue = plus(((Slot) that).value);
+      final Value newValue = this.plus(((Slot) that).value);
       if (newValue.isDefined()) {
         return new Slot(((Slot) that).key, newValue);
       }
     } else if (that instanceof Attr) {
-      final Value newValue = plus(((Attr) that).value);
+      final Value newValue = this.plus(((Attr) that).value);
       if (newValue.isDefined()) {
         return new Attr(((Attr) that).key, newValue);
       }
@@ -626,14 +626,14 @@ public abstract class Value extends Item {
   @Override
   public Item minus(Item that) {
     if (that instanceof Value) {
-      return minus((Value) that);
+      return this.minus((Value) that);
     } else if (that instanceof Slot) {
-      final Value newValue = minus(((Slot) that).value);
+      final Value newValue = this.minus(((Slot) that).value);
       if (newValue.isDefined()) {
         return new Slot(((Slot) that).key, newValue);
       }
     } else if (that instanceof Attr) {
-      final Value newValue = minus(((Attr) that).value);
+      final Value newValue = this.minus(((Attr) that).value);
       if (newValue.isDefined()) {
         return new Attr(((Attr) that).key, newValue);
       }
@@ -651,14 +651,14 @@ public abstract class Value extends Item {
   @Override
   public Item times(Item that) {
     if (that instanceof Value) {
-      return times((Value) that);
+      return this.times((Value) that);
     } else if (that instanceof Slot) {
-      final Value newValue = times(((Slot) that).value);
+      final Value newValue = this.times(((Slot) that).value);
       if (newValue.isDefined()) {
         return new Slot(((Slot) that).key, newValue);
       }
     } else if (that instanceof Attr) {
-      final Value newValue = times(((Attr) that).value);
+      final Value newValue = this.times(((Attr) that).value);
       if (newValue.isDefined()) {
         return new Attr(((Attr) that).key, newValue);
       }
@@ -676,14 +676,14 @@ public abstract class Value extends Item {
   @Override
   public Item divide(Item that) {
     if (that instanceof Value) {
-      return divide((Value) that);
+      return this.divide((Value) that);
     } else if (that instanceof Slot) {
-      final Value newValue = divide(((Slot) that).value);
+      final Value newValue = this.divide(((Slot) that).value);
       if (newValue.isDefined()) {
         return new Slot(((Slot) that).key, newValue);
       }
     } else if (that instanceof Attr) {
-      final Value newValue = divide(((Attr) that).value);
+      final Value newValue = this.divide(((Attr) that).value);
       if (newValue.isDefined()) {
         return new Attr(((Attr) that).key, newValue);
       }
@@ -701,14 +701,14 @@ public abstract class Value extends Item {
   @Override
   public Item modulo(Item that) {
     if (that instanceof Value) {
-      return modulo((Value) that);
+      return this.modulo((Value) that);
     } else if (that instanceof Slot) {
-      final Value newValue = modulo(((Slot) that).value);
+      final Value newValue = this.modulo(((Slot) that).value);
       if (newValue.isDefined()) {
         return new Slot(((Slot) that).key, newValue);
       }
     } else if (that instanceof Attr) {
-      final Value newValue = modulo(((Attr) that).value);
+      final Value newValue = this.modulo(((Attr) that).value);
       if (newValue.isDefined()) {
         return new Attr(((Attr) that).key, newValue);
       }

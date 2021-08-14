@@ -18,12 +18,10 @@ import java.io.File;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.concurrent.AbstractTask;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 
 final class FileStoreCompactor extends AbstractTask {
 
-  static final AtomicReferenceFieldUpdater<FileStoreCompactor, Compact> COMPACT =
-      AtomicReferenceFieldUpdater.newUpdater(FileStoreCompactor.class, Compact.class, "compact");
   final FileStore store;
   volatile Compact compact;
 
@@ -42,7 +40,7 @@ final class FileStoreCompactor extends AbstractTask {
     do {
       final Compact oldCompact = this.compact;
       final Compact newCompact = oldCompact != null ? oldCompact.merged(compact) : compact;
-      if (COMPACT.compareAndSet(this, oldCompact, newCompact)) {
+      if (FileStoreCompactor.COMPACT.compareAndSet(this, oldCompact, newCompact)) {
         if (oldCompact == null) {
           do {
             final int oldStatus = this.store.status;
@@ -67,20 +65,20 @@ final class FileStoreCompactor extends AbstractTask {
   public void runTask() {
     final FileStore store = this.store;
     Database database = null;
+    Compact compacting = FileStoreCompactor.COMPACT.getAndSet(this, null);
     try {
       database = store.openDatabase();
-      Compact compact = COMPACT.getAndSet(this, null);
-      if (compact == null) {
+      if (compacting == null) {
         return;
       }
 
-      compact = database.databaseWillCompact(compact);
-      if (!compact.isShifted() && store.zoneFiles().size() == 1) {
-        compact = compact.isShifted(true); // Always shift if single zone.
+      compacting = database.databaseWillCompact(compacting);
+      if (!compacting.isShifted() && store.zoneFiles().size() == 1) {
+        compacting = compacting.isShifted(true); // Always shift if single zone.
       }
-      database.commit(compact.commit()); // Shift zone and commit before compacting.
-      if (compact.isShifted()) {
-        compact = compact.isShifted(false); // Don't shift zone during subsequent commits.
+      database.commit(compacting.commit()); // Shift zone and commit before compacting.
+      if (compacting.isShifted()) {
+        compacting = compacting.isShifted(false); // Don't shift zone during subsequent commits.
       }
 
       final int post = store.zone.id;
@@ -92,9 +90,9 @@ final class FileStoreCompactor extends AbstractTask {
           Database.POST.set(database, post); // Set evacuation goal post.
 
           database.evacuate(post);
-          database.commit(compact.commit());
+          database.commit(compacting.commit());
 
-          final int deleteDelay = compact.deleteDelay;
+          final int deleteDelay = compacting.deleteDelay;
           if (deleteDelay > 0) {
             Thread.sleep((long) deleteDelay);
           }
@@ -113,24 +111,24 @@ final class FileStoreCompactor extends AbstractTask {
           }
         }
       }
-      database.databaseDidCompact(compact);
-      compact.bind(store);
+      database.databaseDidCompact(compacting);
+      compacting.bind(store);
     } catch (InterruptedException cause) {
       try {
         if (database != null) {
           database.databaseCompactDidFail(cause);
         }
       } finally {
-        compact.trap(cause);
+        compacting.trap(cause);
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         try {
           if (database != null) {
             database.databaseCompactDidFail(cause);
           }
         } finally {
-          compact.trap(cause);
+          compacting.trap(cause);
         }
       } else {
         throw cause;
@@ -145,5 +143,8 @@ final class FileStoreCompactor extends AbstractTask {
       } while (true);
     }
   }
+
+  static final AtomicReferenceFieldUpdater<FileStoreCompactor, Compact> COMPACT =
+      AtomicReferenceFieldUpdater.newUpdater(FileStoreCompactor.class, Compact.class, "compact");
 
 }

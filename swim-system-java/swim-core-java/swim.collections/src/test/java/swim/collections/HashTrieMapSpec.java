@@ -39,7 +39,7 @@ public class HashTrieMapSpec {
 
   @Test
   public void testUnary() {
-    final HashTrieMap<String, Integer> xs = HashTrieMap.of("one", 1);
+    final HashTrieMap<String, Integer> xs = HashTrieMap.<String, Integer>empty().updated("one", 1);
     assertFalse(xs.isEmpty());
     assertEquals(xs.next(null).getKey(), "one");
     assertEquals(xs.next(null).getValue().intValue(), 1);
@@ -57,7 +57,7 @@ public class HashTrieMapSpec {
   public void testComposeMaps() {
     for (int k = 4; k <= 20; k += 4) {
       final int n = 1 << k;
-      testCompose(n);
+      this.testCompose(n);
     }
   }
 
@@ -90,13 +90,13 @@ public class HashTrieMapSpec {
   @Test
   public void testDecomposeSmallMaps() {
     for (int n = 4; n <= 1024; n *= 2) {
-      testDecompose(n);
+      this.testDecompose(n);
     }
   }
 
   @Test(groups = {"slow"})
   public void testDecomposeLargeMaps() {
-    testDecompose(1 << 15);
+    this.testDecompose(1 << 15);
   }
 
   private void testDecompose(int n) {

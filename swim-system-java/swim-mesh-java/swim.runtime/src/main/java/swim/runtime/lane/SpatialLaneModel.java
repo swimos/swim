@@ -21,9 +21,9 @@ import swim.api.Link;
 import swim.api.data.SpatialData;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.math.Z2Form;
+import swim.runtime.LaneModel;
 import swim.runtime.LaneRelay;
 import swim.runtime.LaneView;
 import swim.runtime.Push;
@@ -37,9 +37,6 @@ import swim.warp.CommandMessage;
 
 public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>, SpatialLaneUplink<S>> {
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
   protected final Z2Form<S> shapeForm;
   protected int flags;
   protected SpatialData<Value, S, Value> data;
@@ -47,6 +44,7 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
   SpatialLaneModel(Z2Form<S> shapeForm, int flags) {
     this.shapeForm = shapeForm;
     this.flags = flags;
+    this.data = null;
   }
 
   public SpatialLaneModel(Z2Form<S> shapeForm) {
@@ -60,7 +58,7 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
 
   @Override
   protected SpatialLaneUplink<S> createWarpUplink(WarpBinding link) {
-    return new SpatialLaneUplink<S>(this, link, createUplinkAddress(link));
+    return new SpatialLaneUplink<S>(this, link, this.createUplinkAddress(link));
   }
 
   @Override
@@ -72,7 +70,7 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
       final Value header = payload.header("update");
       final Value key = header.get("key");
       final Value shape = header.get("shape");
-      final S shapeObject = shapeForm.cast(shape);
+      final S shapeObject = this.shapeForm.cast(shape);
       final Value value = payload.body();
       new SpatialLaneRelayUpdate<S>(this, message, push.cont(), key, shapeObject, value).run();
     } else if ("move".equals(tag)) {
@@ -80,15 +78,15 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
       final Value key = header.get("key");
       final Value oldShape = header.get("from");
       final Value newShape = header.get("to");
-      final S oldShapeObject = shapeForm.cast(oldShape);
-      final S newShapeObject = shapeForm.cast(newShape);
+      final S oldShapeObject = this.shapeForm.cast(oldShape);
+      final S newShapeObject = this.shapeForm.cast(newShape);
       final Value value = payload.body();
       new SpatialLaneRelayMove<S>(this, message, push.cont(), key, oldShapeObject, newShapeObject, value).run();
     } else if ("remove".equals(tag)) {
       final Value header = payload.header("remove");
       final Value key = header.get("key");
       final Value shape = header.get("shape");
-      final S shapeObject = shapeForm.cast(shape);
+      final S shapeObject = this.shapeForm.cast(shape);
       new SpatialLaneRelayRemove<S>(this, message, push.cont(), key, shapeObject).run();
     } else if ("clear".equals(tag)) {
       new SpatialLaneRelayClear<S>(this, message, push.cont()).run();
@@ -97,14 +95,15 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
     }
   }
 
+  @SuppressWarnings("unchecked")
   protected void cueDownKey(Value key) {
     FingerTrieSeq<SpatialLaneUplink<S>> uplinks;
     do {
-      uplinks = this.uplinks;
+      uplinks = (FingerTrieSeq<SpatialLaneUplink<S>>) LaneModel.UPLINKS.get(this);
       for (int i = 0, n = uplinks.size(); i < n; i += 1) {
         uplinks.get(i).cueDownKey(key);
       }
-    } while (uplinks != this.uplinks);
+    } while (uplinks != LaneModel.UPLINKS.get(this));
   }
 
   @Override
@@ -113,7 +112,7 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
   }
 
   public final boolean isResident() {
-    return (this.flags & RESIDENT) != 0;
+    return (this.flags & SpatialLaneModel.RESIDENT) != 0;
   }
 
   public SpatialLaneModel<S> isResident(boolean isResident) {
@@ -121,11 +120,11 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
       this.data.isResident(isResident);
     }
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= SpatialLaneModel.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~SpatialLaneModel.RESIDENT;
     }
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof SpatialLaneView<?, ?, ?>) {
       ((SpatialLaneView<?, ?, ?>) views).didSetResident(isResident);
     } else if (views instanceof LaneView[]) {
@@ -138,7 +137,7 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
   }
 
   public final boolean isTransient() {
-    return (this.flags & TRANSIENT) != 0;
+    return (this.flags & SpatialLaneModel.TRANSIENT) != 0;
   }
 
   public SpatialLaneModel<S> isTransient(boolean isTransient) {
@@ -146,11 +145,11 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
       this.data.isTransient(isTransient);
     }
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= SpatialLaneModel.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~SpatialLaneModel.TRANSIENT;
     }
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof SpatialLaneView<?, ?, ?>) {
       ((SpatialLaneView<?, ?, ?>) views).didSetTransient(isTransient);
     } else if (views instanceof LaneView[]) {
@@ -176,9 +175,9 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
     final Form<V> valueForm = view.valueForm;
     final Value key = keyForm.mold(keyObject).toValue();
     final Value newValue = valueForm.mold(newObject).toValue();
-    final SpatialLaneRelayUpdate<S> relay = new SpatialLaneRelayUpdate<S>(this, stage(), key, shapeObject, newValue);
+    final SpatialLaneRelayUpdate<S> relay = new SpatialLaneRelayUpdate<S>(this, this.stage(), key, shapeObject, newValue);
     relay.keyForm = (Form<Object>) keyForm;
-    relay.shapeForm = (Z2Form<Object>) shapeForm;
+    relay.shapeForm = (Z2Form<Object>) this.shapeForm;
     relay.valueForm = (Form<Object>) valueForm;
     relay.keyObject = keyObject;
     relay.oldObject = newObject;
@@ -200,10 +199,9 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
     final Form<V> valueForm = view.valueForm;
     final Value key = keyForm.mold(keyObject).toValue();
     final Value newValue = valueForm.mold(newObject).toValue();
-    final SpatialLaneRelayMove<S> relay =
-        new SpatialLaneRelayMove<S>(this, stage(), key, oldShapeObject, newShapeObject, newValue);
+    final SpatialLaneRelayMove<S> relay = new SpatialLaneRelayMove<S>(this, this.stage(), key, oldShapeObject, newShapeObject, newValue);
     relay.keyForm = (Form<Object>) keyForm;
-    relay.shapeForm = (Z2Form<Object>) shapeForm;
+    relay.shapeForm = (Z2Form<Object>) this.shapeForm;
     relay.valueForm = (Form<Object>) valueForm;
     relay.keyObject = keyObject;
     relay.oldObject = newObject;
@@ -223,9 +221,9 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
     final Form<K> keyForm = view.keyForm;
     final Form<V> valueForm = view.valueForm;
     final Value key = keyForm.mold(keyObject).toValue();
-    final SpatialLaneRelayRemove<S> relay = new SpatialLaneRelayRemove<S>(this, stage(), key, shapeObject);
+    final SpatialLaneRelayRemove<S> relay = new SpatialLaneRelayRemove<S>(this, this.stage(), key, shapeObject);
     relay.keyForm = (Form<Object>) keyForm;
-    relay.shapeForm = (Z2Form<Object>) shapeForm;
+    relay.shapeForm = (Z2Form<Object>) this.shapeForm;
     relay.valueForm = (Form<Object>) valueForm;
     relay.keyObject = keyObject;
     relay.run();
@@ -239,7 +237,7 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
   }
 
   public void clear(SpatialLaneView<?, S, ?> view) {
-    final SpatialLaneRelayClear<S> relay = new SpatialLaneRelayClear<S>(this, stage());
+    final SpatialLaneRelayClear<S> relay = new SpatialLaneRelayClear<S>(this, this.stage());
     relay.run();
   }
 
@@ -260,16 +258,19 @@ public class SpatialLaneModel<S> extends WarpLaneModel<SpatialLaneView<?, S, ?>,
   }
 
   protected void openStore() {
-    this.data = this.laneContext.store().spatialData(laneUri().toString(), shapeForm)
-        .isTransient(isTransient())
-        .isResident(isResident());
+    this.data = this.laneContext.store().spatialData(this.laneUri().toString(), this.shapeForm)
+                                        .isTransient(this.isTransient())
+                                        .isResident(this.isResident());
   }
 
   @Override
   protected void willLoad() {
-    openStore();
+    this.openStore();
     super.willLoad();
   }
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
 
 }
 
@@ -322,7 +323,7 @@ final class SpatialLaneRelayUpdate<S> extends LaneRelay<SpatialLaneModel<S>, Spa
   @Override
   protected void beginPhase(int phase) {
     if (phase == 2) {
-      this.oldValue = model.data.put(key, shapeObject, newValue);
+      this.oldValue = this.model.data.put(this.key, this.shapeObject, this.newValue);
       if (this.valueForm != null) {
         this.oldObject = this.valueForm.cast(this.oldValue);
         if (this.oldObject == null) {
@@ -392,11 +393,9 @@ final class SpatialLaneRelayUpdate<S> extends LaneRelay<SpatialLaneModel<S>, Spa
         }
       }
       if (preemptive) {
-        ((SpatialLaneView<Object, S, Object>) view)
-            .laneDidUpdate(this.keyObject, this.shapeObject, this.newObject, this.oldObject);
+        ((SpatialLaneView<Object, S, Object>) view).laneDidUpdate(this.keyObject, this.shapeObject, this.newObject, this.oldObject);
       }
-      return ((SpatialLaneView<Object, S, Object>) view)
-          .dispatchDidUpdate(this.link, this.keyObject, this.shapeObject, this.newObject, this.oldObject, preemptive);
+      return ((SpatialLaneView<Object, S, Object>) view).dispatchDidUpdate(this.link, this.keyObject, this.shapeObject, this.newObject, this.oldObject, preemptive);
     } else if (phase == 3) {
       if (preemptive) {
         view.laneDidCommand(this.message);
@@ -414,7 +413,7 @@ final class SpatialLaneRelayUpdate<S> extends LaneRelay<SpatialLaneModel<S>, Spa
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -481,7 +480,7 @@ final class SpatialLaneRelayMove<S> extends LaneRelay<SpatialLaneModel<S>, Spati
   @Override
   protected void beginPhase(int phase) {
     if (phase == 2) {
-      this.oldValue = model.data.move(key, oldShapeObject, newShapeObject, newValue);
+      this.oldValue = model.data.move(this.key, this.oldShapeObject, this.newShapeObject, this.newValue);
       if (this.valueForm != null) {
         this.oldObject = this.valueForm.cast(this.oldValue);
         if (this.oldObject == null) {
@@ -517,11 +516,9 @@ final class SpatialLaneRelayMove<S> extends LaneRelay<SpatialLaneModel<S>, Spati
         }
       }
       if (preemptive) {
-        this.newObject = ((SpatialLaneView<Object, S, Object>) view)
-            .laneWillMove(this.keyObject, this.newShapeObject, this.oldObject, this.oldShapeObject);
+        this.newObject = ((SpatialLaneView<Object, S, Object>) view).laneWillMove(this.keyObject, this.newShapeObject, this.oldObject, this.oldShapeObject);
       }
-      final Map.Entry<Boolean, Object> result = ((SpatialLaneView<Object, S, Object>) view)
-          .dispatchWillMove(this.link, this.keyObject, this.newShapeObject, this.oldObject, this.oldShapeObject, preemptive);
+      final Map.Entry<Boolean, Object> result = ((SpatialLaneView<Object, S, Object>) view).dispatchWillMove(this.link, this.keyObject, this.newShapeObject, this.oldObject, this.oldShapeObject, preemptive);
       this.newObject = result.getValue();
       if (this.oldObject != this.newObject) {
         this.oldObject = this.newObject;
@@ -551,12 +548,9 @@ final class SpatialLaneRelayMove<S> extends LaneRelay<SpatialLaneModel<S>, Spati
         }
       }
       if (preemptive) {
-        ((SpatialLaneView<Object, S, Object>) view)
-            .laneDidMove(this.keyObject, this.newShapeObject, this.newObject, this.oldShapeObject, this.oldObject);
+        ((SpatialLaneView<Object, S, Object>) view).laneDidMove(this.keyObject, this.newShapeObject, this.newObject, this.oldShapeObject, this.oldObject);
       }
-      return ((SpatialLaneView<Object, S, Object>) view)
-          .dispatchDidMove(this.link, this.keyObject, this.newShapeObject, this.newObject, this.oldShapeObject,
-              this.oldObject, preemptive);
+      return ((SpatialLaneView<Object, S, Object>) view).dispatchDidMove(this.link, this.keyObject, this.newShapeObject, this.newObject, this.oldShapeObject, this.oldObject, preemptive);
     } else if (phase == 3) {
       if (preemptive) {
         view.laneDidCommand(this.message);
@@ -569,14 +563,15 @@ final class SpatialLaneRelayMove<S> extends LaneRelay<SpatialLaneModel<S>, Spati
 
   @Override
   protected void done() {
-    final Record header = Record.create(3).slot("key", key).slot("from", shapeForm.mold(this.oldShapeObject).toValue())
-        .slot("to", shapeForm.mold(this.newShapeObject).toValue());
+    final Record header = Record.create(3).slot("key", this.key)
+                                          .slot("from", this.shapeForm.mold(this.oldShapeObject).toValue())
+                                          .slot("to", this.shapeForm.mold(this.newShapeObject).toValue());
     this.model.sendDown(Record.create(1).attr("move", header));
     if (this.cont != null) {
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -631,7 +626,7 @@ final class SpatialLaneRelayRemove<S> extends LaneRelay<SpatialLaneModel<S>, Spa
   @Override
   protected void beginPhase(int phase) {
     if (phase == 2) {
-      this.oldValue = model.data.remove(key, shapeObject);
+      this.oldValue = model.data.remove(this.key, this.shapeObject);
       if (this.valueForm != null) {
         this.oldObject = this.valueForm.cast(this.oldValue);
         if (this.oldObject == null) {
@@ -669,8 +664,7 @@ final class SpatialLaneRelayRemove<S> extends LaneRelay<SpatialLaneModel<S>, Spa
       if (preemptive) {
         ((SpatialLaneView<Object, S, Object>) view).laneWillRemove(this.keyObject, this.shapeObject);
       }
-      return ((SpatialLaneView<Object, S, Object>) view)
-          .dispatchWillRemove(this.link, this.keyObject, this.shapeObject, preemptive);
+      return ((SpatialLaneView<Object, S, Object>) view).dispatchWillRemove(this.link, this.keyObject, this.shapeObject, preemptive);
     } else if (phase == 2) {
       final Form<Object> keyForm = (Form<Object>) view.keyForm;
       if (this.keyForm != keyForm && keyForm != null) {
@@ -691,8 +685,7 @@ final class SpatialLaneRelayRemove<S> extends LaneRelay<SpatialLaneModel<S>, Spa
       if (preemptive) {
         ((SpatialLaneView<Object, S, Object>) view).laneDidRemove(this.keyObject, this.shapeObject);
       }
-      return ((SpatialLaneView<Object, S, Object>) view)
-          .dispatchDidRemove(this.link, this.keyObject, this.shapeObject, this.oldObject, preemptive);
+      return ((SpatialLaneView<Object, S, Object>) view).dispatchDidRemove(this.link, this.keyObject, this.shapeObject, this.oldObject, preemptive);
     } else if (phase == 3) {
       if (preemptive) {
         view.laneDidCommand(this.message);
@@ -705,13 +698,13 @@ final class SpatialLaneRelayRemove<S> extends LaneRelay<SpatialLaneModel<S>, Spa
 
   @Override
   protected void done() {
-    final Record header = Record.create(2).slot("key", key).slot("shape", shapeForm.mold(this.shapeObject).toValue());
+    final Record header = Record.create(2).slot("key", this.key).slot("shape", this.shapeForm.mold(this.shapeObject).toValue());
     this.model.sendDown(Record.create(1).attr("move", header));
     if (this.cont != null) {
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -791,7 +784,7 @@ final class SpatialLaneRelayClear<S> extends LaneRelay<SpatialLaneModel<S>, Spat
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;

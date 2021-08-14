@@ -93,12 +93,12 @@ public class ClientRuntimeSpec {
     try {
       client.start();
       client.downlink()
-          .hostUri("swim://traffic.swim.services")
-          .nodeUri("city/PaloAlto_CA_US")
-          .laneUri("intersections")
-          .keepSynced(true)
-          .observe(new IntersectionsController())
-          .open();
+            .hostUri("warp://traffic.swim.services")
+            .nodeUri("city/PaloAlto_CA_US")
+            .laneUri("intersections")
+            .keepSynced(true)
+            .observe(new IntersectionsController())
+            .open();
       didSync.await();
     } finally {
       client.stop();

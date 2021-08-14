@@ -23,10 +23,38 @@ import swim.structure.Value;
  */
 public final class Xml {
 
-  private static XmlParser<Item, Value> structureParser;
-
   private Xml() {
     // static
+  }
+
+  private static XmlParser<Item, Value> structureParser;
+
+  public static XmlParser<Item, Value> structureParser() {
+    if (Xml.structureParser == null) {
+      Xml.structureParser = new XmlStructureParser();
+    }
+    return Xml.structureParser;
+  }
+
+  //private static XmlWriter<Item, Value> structureWriter;
+
+  //public static XmlWriter<Item, Value> structureWriter() {
+  //  if (Xml.structureWriter == null) {
+  //    Xml.structureWriter = new XmlStructureWriter();
+  //  }
+  //  return Xml.structureWriter;
+  //}
+
+  public static Value parse(String xml) {
+    return Xml.structureParser().parseDocumentString(xml);
+  }
+
+  public static Value parseFragment(String xml) {
+    return Xml.structureParser().parseFragmentString(xml);
+  }
+
+  public static Parser<Value> parser() {
+    return Xml.structureParser().documentParser();
   }
 
   static boolean isSpace(int c) {
@@ -38,7 +66,7 @@ public final class Xml {
   }
 
   static boolean isWhitespace(int c) {
-    return isSpace(c) || isNewline(c);
+    return Xml.isSpace(c) || Xml.isNewline(c);
   }
 
   static boolean isChar(int c) {
@@ -106,33 +134,6 @@ public final class Xml {
         || c >= 'A' && c <= 'Z'
         || c == '_'
         || c >= 'a' && c <= 'z';
-  }
-  //private static XmlWriter<Item, Value> structureWriter;
-
-  public static XmlParser<Item, Value> structureParser() {
-    if (structureParser == null) {
-      structureParser = new XmlStructureParser();
-    }
-    return structureParser;
-  }
-
-  //public static XmlWriter<Item, Value> structureWriter() {
-  //  if (structureWriter == null) {
-  //    structureWriter = new XmlStructureWriter();
-  //  }
-  //  return structureWriter;
-  //}
-
-  public static Value parse(String xml) {
-    return structureParser().parseDocumentString(xml);
-  }
-
-  public static Value parseFragment(String xml) {
-    return structureParser().parseFragmentString(xml);
-  }
-
-  public static Parser<Value> parser() {
-    return structureParser().documentParser();
   }
 
 }

@@ -39,8 +39,14 @@ final class UpgradeProtocolWriter extends Writer<Object, Object> {
     this(http, name, version, null, 1);
   }
 
-  static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name, String version,
-                                      Writer<?, ?> part, int step) {
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return UpgradeProtocolWriter.write(output, this.http, this.name,
+                                       this.version, this.part, this.step);
+  }
+
+  static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name,
+                                      String version, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
         part = http.writeToken(name, output);
@@ -50,7 +56,7 @@ final class UpgradeProtocolWriter extends Writer<Object, Object> {
       if (part.isDone()) {
         part = null;
         if (version.isEmpty()) {
-          return done();
+          return Writer.done();
         } else {
           step = 2;
         }
@@ -69,26 +75,22 @@ final class UpgradeProtocolWriter extends Writer<Object, Object> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new UpgradeProtocolWriter(http, name, version, part, step);
   }
 
-  static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name, String version) {
-    return write(output, http, name, version, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.name, this.version, this.part, this.step);
+  static Writer<Object, Object> write(Output<?> output, HttpWriter http,
+                                      String name, String version) {
+    return UpgradeProtocolWriter.write(output, http, name, version, null, 1);
   }
 
 }

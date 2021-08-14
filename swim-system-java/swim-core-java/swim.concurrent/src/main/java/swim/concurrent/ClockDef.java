@@ -26,9 +26,6 @@ import swim.util.Murmur3;
 
 public class ClockDef implements ScheduleDef, Debug {
 
-  private static int hashSeed;
-  private static ClockDef standard;
-  private static Form<ClockDef> clockForm;
   final int tickMillis;
   final int tickCount;
 
@@ -37,27 +34,12 @@ public class ClockDef implements ScheduleDef, Debug {
     this.tickCount = tickCount;
   }
 
-  public static ClockDef standard() {
-    if (standard == null) {
-      standard = new ClockDef(Clock.TICK_MILLIS, Clock.TICK_COUNT);
-    }
-    return standard;
-  }
-
-  @Kind
-  public static Form<ClockDef> clockForm() {
-    if (clockForm == null) {
-      clockForm = new ClockForm(standard());
-    }
-    return clockForm;
-  }
-
   public final int tickMillis() {
     return this.tickMillis;
   }
 
   public ClockDef tickMillis(int tickMillis) {
-    return copy(tickMillis, this.tickCount);
+    return this.copy(tickMillis, this.tickCount);
   }
 
   public final int tickCount() {
@@ -65,7 +47,7 @@ public class ClockDef implements ScheduleDef, Debug {
   }
 
   public ClockDef tickCount(int tickCount) {
-    return copy(this.tickMillis, tickCount);
+    return this.copy(this.tickMillis, tickCount);
   }
 
   protected ClockDef copy(int tickMillis, int tickCount) {
@@ -84,29 +66,51 @@ public class ClockDef implements ScheduleDef, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ClockDef.class);
+    if (ClockDef.hashSeed == 0) {
+      ClockDef.hashSeed = Murmur3.seed(ClockDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(ClockDef.hashSeed,
         this.tickMillis), this.tickCount));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("ClockDef").write('.').write("standard").write('(').write(')');
     if (this.tickMillis != Clock.TICK_MILLIS) {
-      output = output.write('.').write("tickMillis").write('(').debug(tickMillis).write(')');
+      output = output.write('.').write("tickMillis").write('(').debug(this.tickMillis).write(')');
     }
     if (this.tickCount != Clock.TICK_COUNT) {
-      output = output.write('.').write("tickCount").write('(').debug(tickCount).write(')');
+      output = output.write('.').write("tickCount").write('(').debug(this.tickCount).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static ClockDef standard;
+
+  public static ClockDef standard() {
+    if (ClockDef.standard == null) {
+      ClockDef.standard = new ClockDef(Clock.TICK_MILLIS, Clock.TICK_COUNT);
+    }
+    return ClockDef.standard;
+  }
+
+  private static Form<ClockDef> clockForm;
+
+  @Kind
+  public static Form<ClockDef> clockForm() {
+    if (ClockDef.clockForm == null) {
+      ClockDef.clockForm = new ClockForm(ClockDef.standard());
+    }
+    return ClockDef.clockForm;
   }
 
 }
@@ -142,7 +146,7 @@ final class ClockForm extends Form<ClockDef> {
   @Override
   public Item mold(ClockDef clockDef) {
     if (clockDef != null) {
-      final Record record = Record.create(3).attr(tag());
+      final Record record = Record.create(3).attr(this.tag());
       record.slot("tickMillis", clockDef.tickMillis);
       record.slot("tickCount", clockDef.tickCount);
       return record;
@@ -154,7 +158,7 @@ final class ClockForm extends Form<ClockDef> {
   @Override
   public ClockDef cast(Item item) {
     final Value value = item.toValue();
-    final Value header = value.getAttr(tag());
+    final Value header = value.getAttr(this.tag());
     if (header.isDefined()) {
       final int tickMillis = value.get("tickMillis").intValue(Clock.TICK_MILLIS);
       final int tickCount = value.get("tickCount").intValue(Clock.TICK_COUNT);

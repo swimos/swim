@@ -31,6 +31,10 @@ import swim.dynamic.api.warp.function.GuestWillUplink;
 
 public final class HostWarpLane {
 
+  private HostWarpLane() {
+    // static
+  }
+
   public static final HostObjectType<WarpLane> TYPE;
 
   static {
@@ -45,10 +49,6 @@ public final class HostWarpLane {
     type.addMember(new HostWarpLaneDidEnter());
     type.addMember(new HostWarpLaneWillLeave());
     type.addMember(new HostWarpLaneDidLeave());
-  }
-
-  private HostWarpLane() {
-    // static
   }
 
 }

@@ -26,9 +26,9 @@ public abstract class Operator extends Expression {
   @Override
   public int compareTo(Item other) {
     if (other instanceof Operator) {
-      return compareTo((Operator) other);
+      return this.compareTo((Operator) other);
     }
-    return Integer.compare(typeOrder(), other.typeOrder());
+    return Integer.compare(this.typeOrder(), other.typeOrder());
   }
 
   protected abstract int compareTo(Operator that);

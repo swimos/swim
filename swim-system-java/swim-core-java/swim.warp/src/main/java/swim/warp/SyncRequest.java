@@ -21,9 +21,6 @@ import swim.uri.Uri;
 
 public final class SyncRequest extends LinkAddressed {
 
-  @Kind
-  public static final Form<SyncRequest> FORM = new SyncRequestForm();
-
   public SyncRequest(Uri nodeUri, Uri laneUri, float prio, float rate, Value body) {
     super(nodeUri, laneUri, prio, rate, body);
   }
@@ -63,7 +60,7 @@ public final class SyncRequest extends LinkAddressed {
 
   @Override
   public Form<SyncRequest> form() {
-    return FORM;
+    return SyncRequest.FORM;
   }
 
   @Override
@@ -81,6 +78,9 @@ public final class SyncRequest extends LinkAddressed {
     return new SyncRequest(this.nodeUri, this.laneUri, this.prio, this.rate, body);
   }
 
+  @Kind
+  public static final Form<SyncRequest> FORM = new SyncRequestForm();
+
 }
 
 final class SyncRequestForm extends LinkAddressedForm<SyncRequest> {
@@ -96,7 +96,7 @@ final class SyncRequestForm extends LinkAddressedForm<SyncRequest> {
   }
 
   @Override
-  public SyncRequest from(Uri nodeUri, Uri laneUri, float prio, float rate, Value body) {
+  public SyncRequest create(Uri nodeUri, Uri laneUri, float prio, float rate, Value body) {
     return new SyncRequest(nodeUri, laneUri, prio, rate, body);
   }
 

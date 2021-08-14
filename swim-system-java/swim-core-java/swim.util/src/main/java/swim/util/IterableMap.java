@@ -68,11 +68,11 @@ public interface IterableMap<K, V> extends Iterable<Map.Entry<K, V>>, Map<K, V> 
   Cursor<Entry<K, V>> iterator();
 
   default Cursor<K> keyIterator() {
-    return new CursorKeys<K>(iterator());
+    return new CursorKeys<K>(this.iterator());
   }
 
   default Cursor<V> valueIterator() {
-    return new CursorValues<V>(iterator());
+    return new CursorValues<V>(this.iterator());
   }
 
 }

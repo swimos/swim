@@ -23,49 +23,10 @@ import swim.util.Murmur3;
 
 public class UriPort implements Comparable<UriPort>, Debug, Display {
 
-  private static int hashSeed;
-  private static UriPort undefined;
-  private static ThreadLocal<HashGenCacheSet<UriPort>> cache = new ThreadLocal<>();
   protected final int number;
 
   protected UriPort(int number) {
     this.number = number;
-  }
-
-  public static UriPort undefined() {
-    if (undefined == null) {
-      undefined = new UriPort(0);
-    }
-    return undefined;
-  }
-
-  public static UriPort from(int number) {
-    if (number > 0) {
-      return cache().put(new UriPort(number));
-    } else if (number == 0) {
-      return undefined();
-    } else {
-      throw new IllegalArgumentException(Integer.toString(number));
-    }
-  }
-
-  public static UriPort parse(String string) {
-    return Uri.standardParser().parsePortString(string);
-  }
-
-  static HashGenCacheSet<UriPort> cache() {
-    HashGenCacheSet<UriPort> cache = UriPort.cache.get();
-    if (cache == null) {
-      int cacheSize;
-      try {
-        cacheSize = Integer.parseInt(System.getProperty("swim.uri.port.cache.size"));
-      } catch (NumberFormatException e) {
-        cacheSize = 16;
-      }
-      cache = new HashGenCacheSet<UriPort>(cacheSize);
-      UriPort.cache.set(cache);
-    }
-    return cache;
   }
 
   public final boolean isDefined() {
@@ -91,34 +52,77 @@ public class UriPort implements Comparable<UriPort>, Debug, Display {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(UriPort.class);
+    if (UriPort.hashSeed == 0) {
+      UriPort.hashSeed = Murmur3.seed(UriPort.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.number));
+    return Murmur3.mash(Murmur3.mix(UriPort.hashSeed, this.number));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("UriPort").write('.');
-    if (isDefined()) {
-      output = output.write("from").write('(');
-      Format.displayInt(this.number, output);
+    if (this.isDefined()) {
+      output = output.write("create").write('(');
+      output = Format.displayInt(this.number, output);
       output = output.write(')');
     } else {
       output = output.write("undefined").write('(').write(')');
     }
+    return output;
   }
 
   @Override
-  public void display(Output<?> output) {
-    Format.displayInt(this.number, output);
+  public <T> Output<T> display(Output<T> output) {
+    return Format.displayInt(this.number, output);
   }
 
   @Override
   public String toString() {
     return Integer.toString(this.number);
+  }
+
+  private static UriPort undefined;
+
+  public static UriPort undefined() {
+    if (UriPort.undefined == null) {
+      UriPort.undefined = new UriPort(0);
+    }
+    return UriPort.undefined;
+  }
+
+  public static UriPort create(int number) {
+    if (number > 0) {
+      return UriPort.cache().put(new UriPort(number));
+    } else if (number == 0) {
+      return UriPort.undefined();
+    } else {
+      throw new IllegalArgumentException(Integer.toString(number));
+    }
+  }
+
+  public static UriPort parse(String string) {
+    return Uri.standardParser().parsePortString(string);
+  }
+
+  private static ThreadLocal<HashGenCacheSet<UriPort>> cache = new ThreadLocal<>();
+
+  static HashGenCacheSet<UriPort> cache() {
+    HashGenCacheSet<UriPort> cache = UriPort.cache.get();
+    if (cache == null) {
+      int cacheSize;
+      try {
+        cacheSize = Integer.parseInt(System.getProperty("swim.uri.port.cache.size"));
+      } catch (NumberFormatException e) {
+        cacheSize = 16;
+      }
+      cache = new HashGenCacheSet<UriPort>(cacheSize);
+      UriPort.cache.set(cache);
+    }
+    return cache;
   }
 
 }

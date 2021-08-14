@@ -29,26 +29,6 @@ import static org.testng.Assert.assertThrows;
 
 public class JsonParserSpec {
 
-  public static void assertParses(String json, Value expected) {
-    Assertions.assertParses(Json.structureParser().valueParser(), json, expected);
-    Assertions.assertParses(Json.structureParser().valueParser(), " " + json + " ", expected);
-  }
-
-  public static void assertParsesObject(String json, Value expected) {
-    assertParses(json, expected);
-    Assertions.assertParses(Json.structureParser().documentParser(), json, expected);
-    Assertions.assertParses(Json.structureParser().documentParser(), " " + json + " ", expected);
-  }
-
-  public static void assertParseFails(final String json) {
-    assertThrows(ParserException.class, new ThrowingRunnable() {
-      @Override
-      public void run() throws Throwable {
-        Json.parse(json);
-      }
-    });
-  }
-
   @Test
   public void parseEmptyObjects() {
     assertParsesObject("{}", Record.empty());
@@ -325,9 +305,9 @@ public class JsonParserSpec {
   @Test
   public void parseNonEmptyObjects() {
     assertParsesObject("{\"object\":{},\"array\":[],\"string\":\"\",\"number\":0,\"true\":true,\"false\":false,\"null\":null}",
-        Record.of(Slot.of("object", Record.empty()), Slot.of("array", Record.empty()),
-            Slot.of("string", ""), Slot.of("number", 0), Slot.of("true", Bool.from(true)),
-            Slot.of("false", Bool.from(false)), Slot.of("null")));
+                       Record.of(Slot.of("object", Record.empty()), Slot.of("array", Record.empty()),
+                                 Slot.of("string", ""), Slot.of("number", 0), Slot.of("true", Bool.from(true)),
+                                 Slot.of("false", Bool.from(false)), Slot.of("null")));
   }
 
   @Test
@@ -344,8 +324,8 @@ public class JsonParserSpec {
   @Test
   public void parseNonEmptyArrays() {
     assertParses("[{},[],\"\",0,true,false,null]",
-        Record.of(Record.empty(), Record.empty(), "", 0, Bool.from(true),
-            Bool.from(false), Value.extant()));
+                 Record.of(Record.empty(), Record.empty(), "", 0, Bool.from(true),
+                           Bool.from(false), Value.extant()));
   }
 
   @Test
@@ -441,6 +421,26 @@ public class JsonParserSpec {
   public void parseTrailingValuesFails() {
     assertParseFails("{}{}");
     assertParseFails("1 2");
+  }
+
+  public static void assertParses(String json, Value expected) {
+    JsonAssertions.assertParses(Json.structureParser().valueParser(), json, expected);
+    JsonAssertions.assertParses(Json.structureParser().valueParser(), " " + json + " ", expected);
+  }
+
+  public static void assertParsesObject(String json, Value expected) {
+    assertParses(json, expected);
+    JsonAssertions.assertParses(Json.structureParser().documentParser(), json, expected);
+    JsonAssertions.assertParses(Json.structureParser().documentParser(), " " + json + " ", expected);
+  }
+
+  public static void assertParseFails(final String json) {
+    assertThrows(ParserException.class, new ThrowingRunnable() {
+      @Override
+      public void run() throws Throwable {
+        Json.parse(json);
+      }
+    });
   }
 
 }

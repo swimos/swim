@@ -47,7 +47,7 @@ public class ValueDataView<V> implements ValueData<V>, ValueDataContext {
   }
 
   public <V2> ValueDataView<V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override
@@ -100,17 +100,17 @@ public class ValueDataView<V> implements ValueData<V>, ValueDataContext {
 
   @Override
   public void didChange() {
-    // stub
+    // hook
   }
 
   @Override
   public void didCommit() {
-    // stub
+    // hook
   }
 
   @Override
   public void didSet(Value newValue, Value oldValue) {
-    // stub
+    // hook
   }
 
 }

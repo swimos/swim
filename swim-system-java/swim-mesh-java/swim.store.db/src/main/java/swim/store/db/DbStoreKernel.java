@@ -30,7 +30,6 @@ import swim.structure.Value;
 
 public class DbStoreKernel extends KernelProxy {
 
-  private static final double KERNEL_PRIORITY = -0.75;
   final double kernelPriority;
 
   public DbStoreKernel(double kernelPriority) {
@@ -38,17 +37,7 @@ public class DbStoreKernel extends KernelProxy {
   }
 
   public DbStoreKernel() {
-    this(KERNEL_PRIORITY);
-  }
-
-  public static DbStoreKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || DbStoreKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new DbStoreKernel(kernelPriority);
-    }
-    return null;
+    this(DbStoreKernel.KERNEL_PRIORITY);
   }
 
   @Override
@@ -58,7 +47,7 @@ public class DbStoreKernel extends KernelProxy {
 
   @Override
   public StoreDef defineStore(Item storeConfig) {
-    final StoreDef storeDef = defineDbStore(storeConfig);
+    final StoreDef storeDef = this.defineDbStore(storeConfig);
     return storeDef != null ? storeDef : super.defineStore(storeConfig);
   }
 
@@ -82,7 +71,7 @@ public class DbStoreKernel extends KernelProxy {
   @Override
   public StoreBinding createStore(StoreDef storeDef, ClassLoader classLoader) {
     if (storeDef instanceof DbStoreDef) {
-      return createDbStore((DbStoreDef) storeDef);
+      return this.createDbStore((DbStoreDef) storeDef);
     } else {
       return super.createStore(storeDef, classLoader);
     }
@@ -95,7 +84,7 @@ public class DbStoreKernel extends KernelProxy {
     final StoreContext storeContext = new StoreContext(storeSettings);
     final StoreAddress storeAddress = new StoreAddress(storeName);
 
-    final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+    final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
     final Stage stage = kernel.createStage(storeAddress);
     try {
       final FileStore fileStore = new FileStore(storeContext, storePath, stage).open();
@@ -107,6 +96,18 @@ public class DbStoreKernel extends KernelProxy {
       }
       throw new StoreException(cause);
     }
+  }
+
+  private static final double KERNEL_PRIORITY = -0.75;
+
+  public static DbStoreKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || DbStoreKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(DbStoreKernel.KERNEL_PRIORITY);
+      return new DbStoreKernel(kernelPriority);
+    }
+    return null;
   }
 
 }

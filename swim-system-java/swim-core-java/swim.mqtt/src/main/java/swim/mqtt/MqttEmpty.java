@@ -48,8 +48,9 @@ final class MqttEmpty extends MqttEntity<Object> implements Debug {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("MqttEntity").write('.').write("empty").write('(').write(')');
+    return output;
   }
 
   @Override

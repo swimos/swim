@@ -49,7 +49,7 @@ public class WarpSettings implements Debug {
   }
 
   public WarpSettings httpSettings(HttpSettings httpSettings) {
-    return wsSettings(this.wsSettings.httpSettings(httpSettings));
+    return this.wsSettings(this.wsSettings.httpSettings(httpSettings));
   }
 
   public final IpSettings ipSettings() {
@@ -57,7 +57,7 @@ public class WarpSettings implements Debug {
   }
 
   public WarpSettings ipSettings(IpSettings ipSettings) {
-    return wsSettings(this.wsSettings.ipSettings(ipSettings));
+    return this.wsSettings(this.wsSettings.ipSettings(ipSettings));
   }
 
   public final TlsSettings tlsSettings() {
@@ -65,7 +65,7 @@ public class WarpSettings implements Debug {
   }
 
   public WarpSettings tlsSettings(TlsSettings tlsSettings) {
-    return wsSettings(this.wsSettings.tlsSettings(tlsSettings));
+    return this.wsSettings(this.wsSettings.tlsSettings(tlsSettings));
   }
 
   public final TcpSettings tcpSettings() {
@@ -73,11 +73,11 @@ public class WarpSettings implements Debug {
   }
 
   public WarpSettings tcpSettings(TcpSettings tcpSettings) {
-    return wsSettings(this.wsSettings.tcpSettings(tcpSettings));
+    return this.wsSettings(this.wsSettings.tcpSettings(tcpSettings));
   }
 
   public Value toValue() {
-    return form().mold(this).toValue();
+    return WarpSettings.form().mold(this).toValue();
   }
 
   @Override
@@ -91,18 +91,21 @@ public class WarpSettings implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(WarpSettings.class);
+    if (WarpSettings.hashSeed == 0) {
+      WarpSettings.hashSeed = Murmur3.seed(WarpSettings.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.wsSettings.hashCode()));
+    return Murmur3.mash(Murmur3.mix(WarpSettings.hashSeed, this.wsSettings.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.write("WarpSettings").write('.').write("standard").write('(').write(')')
-        .write('.').write("wsSettings").write('(').debug(this.wsSettings).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("WarpSettings").write('.').write("standard").write('(').write(')')
+                   .write('.').write("wsSettings").write('(').debug(this.wsSettings).write(')');
+    return output;
   }
 
   @Override
@@ -110,27 +113,27 @@ public class WarpSettings implements Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
   private static WarpSettings standard;
-  private static Form<WarpSettings> form;
 
   public static WarpSettings standard() {
-    if (standard == null) {
-      standard = new WarpSettings(WsSettings.standard());
+    if (WarpSettings.standard == null) {
+      WarpSettings.standard = new WarpSettings(WsSettings.standard());
     }
-    return standard;
+    return WarpSettings.standard;
   }
 
-  public static WarpSettings from(WsSettings wsSettings) {
+  private static Form<WarpSettings> form;
+
+  public static WarpSettings create(WsSettings wsSettings) {
     return new WarpSettings(wsSettings);
   }
 
   @Kind
   public static Form<WarpSettings> form() {
-    if (form == null) {
-      form = new WarpSettingsForm();
+    if (WarpSettings.form == null) {
+      WarpSettings.form = new WarpSettingsForm();
     }
-    return form;
+    return WarpSettings.form;
   }
 
 }

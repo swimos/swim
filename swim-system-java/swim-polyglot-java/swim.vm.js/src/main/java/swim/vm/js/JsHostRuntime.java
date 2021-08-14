@@ -59,7 +59,7 @@ public class JsHostRuntime extends JavaHostRuntime implements JsRuntime {
   }
 
   public void addHostModule(String moduleId, HostLibrary hostLibrary) {
-    addHostModule(UriPath.parse(moduleId), hostLibrary);
+    this.addHostModule(UriPath.parse(moduleId), hostLibrary);
   }
 
 }

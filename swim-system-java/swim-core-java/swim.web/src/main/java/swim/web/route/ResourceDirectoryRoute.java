@@ -49,7 +49,7 @@ public final class ResourceDirectoryRoute implements WebRoute {
       try {
         final HttpBody<Object> body = HttpBody.fromResource(this.classLoader, path.toString());
         if (body != null) {
-          final HttpResponse<Object> response = HttpResponse.from(HttpStatus.OK).content(body);
+          final HttpResponse<Object> response = HttpResponse.create(HttpStatus.OK).content(body);
           return request.respond(response);
         }
       } catch (IOException error) {

@@ -29,7 +29,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 import swim.structure.Value;
@@ -38,15 +38,13 @@ public class DemandLaneView<V> extends WarpLaneView implements DemandLane<V> {
 
   protected final AgentContext agentContext;
   protected Form<V> valueForm;
-
   protected DemandLaneModel laneBinding;
-  protected volatile OnCue<V> onCue;
 
   public DemandLaneView(AgentContext agentContext, Form<V> valueForm, Object observers) {
     super(observers);
     this.agentContext = agentContext;
     this.valueForm = valueForm;
-    this.onCue = onCue;
+    this.laneBinding = null;
   }
 
   public DemandLaneView(AgentContext agentContext, Form<V> valueForm) {
@@ -79,12 +77,13 @@ public class DemandLaneView<V> extends WarpLaneView implements DemandLane<V> {
 
   @Override
   public <V2> DemandLaneView<V2> valueForm(Form<V2> valueForm) {
-    return new DemandLaneView<V2>(this.agentContext, valueForm, typesafeObservers(this.observers));
+    return new DemandLaneView<V2>(this.agentContext, valueForm,
+                                  this.typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> DemandLaneView<V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   public void setValueForm(Form<V> valueForm) {
@@ -115,47 +114,47 @@ public class DemandLaneView<V> extends WarpLaneView implements DemandLane<V> {
 
   @Override
   public DemandLaneView<V> onCue(OnCue<V> onCue) {
-    return observe(onCue);
+    return this.observe(onCue);
   }
 
   @Override
   public DemandLaneView<V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public DemandLaneView<V> didCommand(DidCommand didCommand) {
-    return observe(didCommand);
+    return this.observe(didCommand);
   }
 
   @Override
   public DemandLaneView<V> willUplink(WillUplink willUplink) {
-    return observe(willUplink);
+    return this.observe(willUplink);
   }
 
   @Override
   public DemandLaneView<V> didUplink(DidUplink didUplink) {
-    return observe(didUplink);
+    return this.observe(didUplink);
   }
 
   @Override
   public DemandLaneView<V> willEnter(WillEnter willEnter) {
-    return observe(willEnter);
+    return this.observe(willEnter);
   }
 
   @Override
   public DemandLaneView<V> didEnter(DidEnter didEnter) {
-    return observe(didEnter);
+    return this.observe(didEnter);
   }
 
   @Override
   public DemandLaneView<V> willLeave(WillLeave willLeave) {
-    return observe(willLeave);
+    return this.observe(willLeave);
   }
 
   @Override
   public DemandLaneView<V> didLeave(DidLeave didLeave) {
-    return observe(didLeave);
+    return this.observe(didLeave);
   }
 
   @SuppressWarnings("unchecked")
@@ -173,8 +172,8 @@ public class DemandLaneView<V> extends WarpLaneView implements DemandLane<V> {
             return value;
           }
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            laneDidFail(error);
+          if (Cont.isNonFatal(error)) {
+            this.laneDidFail(error);
           }
           throw error;
         }
@@ -189,8 +188,8 @@ public class DemandLaneView<V> extends WarpLaneView implements DemandLane<V> {
                 return value;
               }
             } catch (Throwable error) {
-              if (Conts.isNonFatal(error)) {
-                laneDidFail(error);
+              if (Cont.isNonFatal(error)) {
+                this.laneDidFail(error);
               }
               throw error;
             }
@@ -205,7 +204,7 @@ public class DemandLaneView<V> extends WarpLaneView implements DemandLane<V> {
   }
 
   Value nextDownCue(WarpUplink uplink) {
-    final V object = dispatchOnCue(uplink);
+    final V object = this.dispatchOnCue(uplink);
     if (object != null) {
       return this.valueForm.mold(object).toValue();
     } else {

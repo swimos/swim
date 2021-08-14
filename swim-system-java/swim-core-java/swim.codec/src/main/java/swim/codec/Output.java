@@ -15,7 +15,7 @@
 package swim.codec;
 
 /**
- * Non-blocking token stream writer.  {@code Output} enables incremental,
+ * Non-blocking token stream writer. {@code Output} enables incremental,
  * interruptible writing of network protocols and data formats.
  *
  * <h3>Output tokens</h3>
@@ -25,7 +25,7 @@ package swim.codec;
  *
  * <h3>Output states</h3>
  * <p>{@code Output} is always in one of four states: <em>cont</em>inue,
- * <em>full</em>, <em>done</em>, or <em>error</em>.  The <em>cont</em> state
+ * <em>full</em>, <em>done</em>, or <em>error</em>. The <em>cont</em> state
  * indicates that the stream is ready to write a single token; the <em>full</em>
  * state indicates that the stream is unable to write additional tokens at this
  * time, but that the stream may logically resume at some point in the future;
@@ -40,142 +40,33 @@ package swim.codec;
  * <h3>Output results</h3>
  * <p>An {@code Output} yields a value of type {@code T}, obtained via the
  * {@link #bind()} method, representing some implementation defined result of
- * writing the output.  For example, an {@code Output<String>} implementation
+ * writing the output. For example, an {@code Output<String>} implementation
  * may–but is not required to–yield a {@code String} containing all code points
  * written to the output.</p>
  *
  * <h3>Non-blocking behavior</h3>
- * <p>{@code Output} writers never block.  An {@code Output} that would
+ * <p>{@code Output} writers never block. An {@code Output} that would
  * otherwise block writing additional output instead enters the <em>full</em>
  * state, signaling the output generator to back off producing the output, but
- * to remain prepared to produce additional output in the future.  An {@code
+ * to remain prepared to produce additional output in the future. An {@code
  * Output} enters the <em>done</em> state when it encounters the final enf of
  * its output, signaling to the output generator to stop producing.</p>
  *
  * <h3>Output settings</h3>
  * <p>An output generator may alter the tokens it produces based on its {@code
- * Output}'s {@link #settings() settings}.  Uses include pretty printing and
- * styling generated output.  {@link OutputSettings} subclasses can provide
+ * Output}'s {@link #settings() settings}. Uses include pretty printing and
+ * styling generated output. {@link OutputSettings} subclasses can provide
  * additional parameters understood by specialized output producers.</p>
  *
  * <h3>Cloning</h3>
  * <p>An {@code Output} may be {@link #clone() cloned} to branch the token
- * stream in an implementation specified manner.  Not all {@code Output}
+ * stream in an implementation specified manner. Not all {@code Output}
  * implementations support cloning.</p>
  *
  * @see OutputSettings
  * @see Writer
  */
 public abstract class Output<T> {
-
-  private static Output<Object> full;
-  private static Output<Object> done;
-
-  /**
-   * Returns an {@code Output} in the <em>full</em> state, that binds a {@code
-   * null} result.
-   */
-  @SuppressWarnings("unchecked")
-  public static <T> Output<T> full() {
-    if (full == null) {
-      full = new OutputFull<Object>(null, OutputSettings.standard());
-    }
-    return (Output<T>) full;
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>full</em> state, with the given
-   * {@code settings}.
-   */
-  public static <T> Output<T> full(OutputSettings settings) {
-    if (settings == OutputSettings.standard()) {
-      return full();
-    }
-    return new OutputFull<T>(null, settings);
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>full</em> state, that binds the given
-   * {@code value}.
-   */
-  public static <T> Output<T> full(T value) {
-    if (value == null) {
-      return full();
-    }
-    return new OutputFull<T>(value, OutputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>full</em> state, that binds the given
-   * {@code value}, with the given {@code settings}.
-   */
-  public static <T> Output<T> full(T value, OutputSettings settings) {
-    if (value == null && settings == OutputSettings.standard()) {
-      return full();
-    }
-    return new OutputFull<T>(value, settings);
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>done</em> state, that binds a {@code
-   * null} result.
-   */
-  @SuppressWarnings("unchecked")
-  public static <T> Output<T> done() {
-    if (done == null) {
-      done = new OutputDone<Object>(null, OutputSettings.standard());
-    }
-    return (Output<T>) done;
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>done</em> state, with the given {@code
-   * settings}.
-   */
-  public static <T> Output<T> done(OutputSettings settings) {
-    if (settings == OutputSettings.standard()) {
-      return done();
-    }
-    return new OutputDone<T>(null, settings);
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>done</em> state, that binds the given
-   * {@code value}.
-   */
-  public static <T> Output<T> done(T value) {
-    if (value == null) {
-      return done();
-    }
-    return new OutputDone<T>(value, OutputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>done</em> state, that binds the given
-   * {@code value}, with the given {@code settings}.
-   */
-  public static <T> Output<T> done(T value, OutputSettings settings) {
-    if (value == null && settings == OutputSettings.standard()) {
-      return done();
-    }
-    return new OutputDone<T>(value, settings);
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>error</em> state, with the given
-   * output {@code error}.
-   */
-  public static <T> Output<T> error(Throwable error) {
-    return new OutputError<T>(error, OutputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code Output} in the <em>error</em> state, with the given
-   * output {@code error} and {@code settings}.
-   */
-  public static <T> Output<T> error(Throwable error, OutputSettings settings) {
-    return new OutputError<T>(error, settings);
-  }
 
   /**
    * Returns {@code true} when the next {@link #write(int)} will succeed.
@@ -185,7 +76,7 @@ public abstract class Output<T> {
 
   /**
    * Returns {@code true} when an immediate {@code write} will fail,
-   * but writes may succeed at some point in the future.  i.e. this
+   * but writes may succeed at some point in the future. i.e. this
    * {@code Output} is in the <em>full</em> state.
    */
   public abstract boolean isFull();
@@ -198,8 +89,8 @@ public abstract class Output<T> {
 
   /**
    * Returns {@code true} when an immediate {@code write} will fail due to an
-   * error with the token stream.  i.e. this {@code Output} is in the
-   * <em>error</em> state.  When {@code true}, {@link #trap()} will return the
+   * error with the token stream. i.e. this {@code Output} is in the
+   * <em>error</em> state. When {@code true}, {@link #trap()} will return the
    * output error.
    */
   public abstract boolean isError();
@@ -213,7 +104,7 @@ public abstract class Output<T> {
   /**
    * Returns a partial {@code Output} equivalent to this {@code Output}, if
    * {@code isPart} is {@code true}; returns a final {@code Output} equivalent
-   * to this {@code Output} if {@code isPart} is {@code false}.  The caller's
+   * to this {@code Output} if {@code isPart} is {@code false}. The caller's
    * reference to {@code this} {@code Output} should be replaced by the
    * returned {@code Output}.
    */
@@ -221,18 +112,18 @@ public abstract class Output<T> {
 
   /**
    * Writes a single {@code token} to the stream, if this {@code Output} is in
-   * the <em>cont</em> state.  Returns an {@code Output} in the <em>error</em>
-   * state if this {@code Output} is not in the <em>cont</em> state.  The
+   * the <em>cont</em> state. Returns an {@code Output} in the <em>error</em>
+   * state if this {@code Output} is not in the <em>cont</em> state. The
    * caller's reference to {@code this} {@code Output} should be replaced by
    * the returned {@code Output}.
    */
   public abstract Output<T> write(int token);
 
   /**
-   * Writes the code points of the given {@code string}.  Assumes this is a
-   * Unicode {@code Output} with sufficient capacity.  Returns an {@code
+   * Writes the code points of the given {@code string}. Assumes this is a
+   * Unicode {@code Output} with sufficient capacity. Returns an {@code
    * Output} in the <em>error</em> state if this {@code Output} exits the
-   * <em>cont</em> state before the full {@code string} has been writtem.  The
+   * <em>cont</em> state before the full {@code string} has been writtem. The
    * caller's reference to {@code this} {@code Output} should be replaced by
    * the returned {@code Output}.
    */
@@ -248,54 +139,52 @@ public abstract class Output<T> {
   /**
    * Writes the code points of the given {@code string}, followed by the code
    * points of the {@code settings}' {@link OutputSettings#lineSeparator()
-   * line separator}.  Assumes this is a Unicode {@code Output} with sufficient
-   * capacity.  Returns an {@code Output} in the <em>error</em> state if this
+   * line separator}. Assumes this is a Unicode {@code Output} with sufficient
+   * capacity. Returns an {@code Output} in the <em>error</em> state if this
    * {@code Output} exits the <em>cont</em> state before the full {@code
-   * string} and line separator has been written.  The caller's reference to
+   * string} and line separator has been written. The caller's reference to
    * {@code this} {@code Output} should be replaced by the returned {@code
    * Output}.
    */
   public Output<T> writeln(String string) {
-    return write(string).writeln();
+    return this.write(string).writeln();
   }
 
   /**
    * Writes the code points of the {@code settings}'
-   * {@link OutputSettings#lineSeparator() line separator}.  Assumes this is a
-   * Unicode {@code Output} with sufficient capacity.  Returns an {@code
+   * {@link OutputSettings#lineSeparator() line separator}. Assumes this is a
+   * Unicode {@code Output} with sufficient capacity. Returns an {@code
    * Output} in the <em>error</em> state if this {@code Output} exits the
-   * <em>cont</em> state before the full line separator has been written.  The
+   * <em>cont</em> state before the full line separator has been written. The
    * caller's reference to {@code this} {@code Output} should be replaced by
    * the returned {@code Output}.
    */
   public Output<T> writeln() {
-    return write(settings().lineSeparator());
+    return this.write(this.settings().lineSeparator());
   }
 
   /**
    * Writes the code points of the human-readable {@link Display} string
-   * of the given {@code object}.  Assumes this is a Unicode {@code Output}
-   * with sufficient capacity.  Returns an {@code Output} in the <em>error</em>
+   * of the given {@code object}. Assumes this is a Unicode {@code Output}
+   * with sufficient capacity. Returns an {@code Output} in the <em>error</em>
    * state if this {@code Output} exits the <em>contt</em> state before the
-   * full display string has been written.  The caller's reference to {@code
+   * full display string has been written. The caller's reference to {@code
    * this} {@code Output} should be replaced by the returned {@code Output}.
    */
   public Output<T> display(Object object) {
-    Format.display(object, this);
-    return this;
+    return Format.display(object, this);
   }
 
   /**
    * Writes the code points of the developer-readable {@link Debug} string
-   * of the given {@code object}.  Assumes this is a Unicode {@code Output}
-   * with sufficient capacity.  Returns an {@code Output} in the <em>error</em>
+   * of the given {@code object}. Assumes this is a Unicode {@code Output}
+   * with sufficient capacity. Returns an {@code Output} in the <em>error</em>
    * state if this {@code Output} exits the <em>contt</em> state before the
-   * full debug string has been written.  The caller's reference to {@code
+   * full debug string has been written. The caller's reference to {@code
    * this} {@code Output} should be replaced by the returned {@code Output}.
    */
   public Output<T> debug(Object object) {
-    Format.debug(object, this);
-    return this;
+    return Format.debug(object, this);
   }
 
   /**
@@ -307,7 +196,7 @@ public abstract class Output<T> {
 
   /**
    * Returns an {@code Output} equivalent to this {@code Output}, but whose
-   * behavior may be altered by the given out-of-band {@code condition}.  The
+   * behavior may be altered by the given out-of-band {@code condition}. The
    * caller's reference to {@code this} {@code Output} should be replaced by
    * the returned {@code Output}.
    */
@@ -321,7 +210,7 @@ public abstract class Output<T> {
   public abstract T bind();
 
   /**
-   * Returns the output error.  Only guaranteed to return an error when in the
+   * Returns the output error. Only guaranteed to return an error when in the
    * <em>error</em> state.
    *
    * @throws OutputException if this {@code Output} is not in the
@@ -353,6 +242,116 @@ public abstract class Output<T> {
   @Override
   public Output<T> clone() {
     throw new UnsupportedOperationException();
+  }
+
+  private static Output<Object> full;
+
+  /**
+   * Returns an {@code Output} in the <em>full</em> state, that binds a {@code
+   * null} result.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> Output<T> full() {
+    if (Output.full == null) {
+      Output.full = new OutputFull<Object>(null, OutputSettings.standard());
+    }
+    return (Output<T>) Output.full;
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>full</em> state, with the given
+   * {@code settings}.
+   */
+  public static <T> Output<T> full(OutputSettings settings) {
+    if (settings == OutputSettings.standard()) {
+      return Output.full();
+    }
+    return new OutputFull<T>(null, settings);
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>full</em> state, that binds the given
+   * {@code value}.
+   */
+  public static <T> Output<T> full(T value) {
+    if (value == null) {
+      return Output.full();
+    }
+    return new OutputFull<T>(value, OutputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>full</em> state, that binds the given
+   * {@code value}, with the given {@code settings}.
+   */
+  public static <T> Output<T> full(T value, OutputSettings settings) {
+    if (value == null && settings == OutputSettings.standard()) {
+      return Output.full();
+    }
+    return new OutputFull<T>(value, settings);
+  }
+
+  private static Output<Object> done;
+
+  /**
+   * Returns an {@code Output} in the <em>done</em> state, that binds a {@code
+   * null} result.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> Output<T> done() {
+    if (Output.done == null) {
+      Output.done = new OutputDone<Object>(null, OutputSettings.standard());
+    }
+    return (Output<T>) Output.done;
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>done</em> state, with the given {@code
+   * settings}.
+   */
+  public static <T> Output<T> done(OutputSettings settings) {
+    if (settings == OutputSettings.standard()) {
+      return Output.done();
+    }
+    return new OutputDone<T>(null, settings);
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>done</em> state, that binds the given
+   * {@code value}.
+   */
+  public static <T> Output<T> done(T value) {
+    if (value == null) {
+      return Output.done();
+    }
+    return new OutputDone<T>(value, OutputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>done</em> state, that binds the given
+   * {@code value}, with the given {@code settings}.
+   */
+  public static <T> Output<T> done(T value, OutputSettings settings) {
+    if (value == null && settings == OutputSettings.standard()) {
+      return Output.done();
+    }
+    return new OutputDone<T>(value, settings);
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>error</em> state, with the given
+   * output {@code error}.
+   */
+  public static <T> Output<T> error(Throwable error) {
+    return new OutputError<T>(error, OutputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code Output} in the <em>error</em> state, with the given
+   * output {@code error} and {@code settings}.
+   */
+  public static <T> Output<T> error(Throwable error, OutputSettings settings) {
+    return new OutputError<T>(error, settings);
   }
 
 }

@@ -37,7 +37,8 @@ final class BitwiseXorOperatorParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.lhsParser, this.rhsParser, this.step);
+    return BitwiseXorOperatorParser.parse(input, this.recon, this.builder, this.lhsParser,
+                                          this.rhsParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -87,7 +88,7 @@ final class BitwiseXorOperatorParser<I, V> extends Parser<V> {
         if (rhsParser.isDone()) {
           final V lhs = lhsParser.bind();
           final V rhs = rhsParser.bind();
-          lhsParser = done(recon.bitwiseXor(lhs, rhs));
+          lhsParser = Parser.done(recon.bitwiseXor(lhs, rhs));
           rhsParser = null;
           step = 2;
           continue;
@@ -98,13 +99,13 @@ final class BitwiseXorOperatorParser<I, V> extends Parser<V> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new BitwiseXorOperatorParser<I, V>(recon, builder, lhsParser, rhsParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, null, 1);
+    return BitwiseXorOperatorParser.parse(input, recon, builder, null, null, 1);
   }
 
 }

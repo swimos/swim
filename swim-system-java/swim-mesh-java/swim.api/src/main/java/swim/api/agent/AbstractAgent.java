@@ -46,7 +46,7 @@ import swim.api.lane.ValueLane;
 import swim.api.ref.HostRef;
 import swim.api.ref.LaneRef;
 import swim.api.ref.NodeRef;
-import swim.api.ref.SwimRef;
+import swim.api.ref.WarpRef;
 import swim.api.store.Store;
 import swim.api.ws.WsDownlink;
 import swim.api.ws.WsLane;
@@ -64,13 +64,13 @@ import swim.util.Log;
 import swim.warp.CommandMessage;
 
 /**
- * Abstract base class for <em>all</em> {@link Agent Agents}.  This class
+ * Abstract base class for <em>all</em> {@link Agent Agents}. This class
  * provides skeletal {@code Agent} lifecycle callback implementations,
  * contextual {@code Lane} and {@code Store} creation mechanisms, URI-based
  * addressability, logging, and scheduling, primarily via delegation to its
  * internal, immutable {@link AgentContext}.
  */
-public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Store, Log {
+public class AbstractAgent implements Agent, WarpRef, LaneFactory, Schedule, Store, Log {
 
   /**
    * Internal, immutable context that provides contextual {@code Lane} and
@@ -185,7 +185,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
   /**
    * A {@link swim.structure.Record} that maps every dynamic property in
    * {@link #nodeUri()}, as defined by {@link AgentRoute#pattern()}, to its
-   * value.  An empty result indicates that {@code nodeUri} contains no
+   * value. An empty result indicates that {@code nodeUri} contains no
    * dynamic components.
    */
   public final Value props() {
@@ -307,7 +307,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
    * link callback.
    */
   public boolean isSecure() {
-    final Link link = link();
+    final Link link = this.link();
     return link != null && link.isSecure();
   }
 
@@ -317,7 +317,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
    * executing a link callback.
    */
   public String securityProtocol() {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       return link.securityProtocol();
     } else {
@@ -331,7 +331,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
    * currently executing a link callback.
    */
   public String cipherSuite() {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       return link.cipherSuite();
     } else {
@@ -344,7 +344,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
    * null if not currently executing a link callback.
    */
   public InetSocketAddress localAddress() {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       return link.localAddress();
     } else {
@@ -358,7 +358,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
    * currently executing a link callback.
    */
   public Identity localIdentity() {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       return link.localIdentity();
     } else {
@@ -372,7 +372,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
    * principal, or if not currently executing a link callback.
    */
   public Principal localPrincipal() {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       return link.localPrincipal();
     } else {
@@ -387,7 +387,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
    * link callback.
    */
   public Collection<Certificate> localCertificates() {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       return link.localCertificates();
     } else {
@@ -400,7 +400,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
    * null if not currently executing a link callback.
    */
   public InetSocketAddress remoteAddress() {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       return link.remoteAddress();
     } else {
@@ -414,7 +414,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
    * currently executing a link callback.
    */
   public Identity remoteIdentity() {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       return link.remoteIdentity();
     } else {
@@ -428,7 +428,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
    * principal, or if not currently executing a link callback.
    */
   public Principal remotePrincipal() {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       return link.remotePrincipal();
     } else {
@@ -443,7 +443,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
    * link callback.
    */
   public Collection<Certificate> remoteCertificates() {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       return link.remoteCertificates();
     } else {
@@ -728,7 +728,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
 
   @Override
   public void trace(Object message) {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       link.trace(message);
     } else {
@@ -738,7 +738,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
 
   @Override
   public void debug(Object message) {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       link.debug(message);
     } else {
@@ -748,7 +748,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
 
   @Override
   public void info(Object message) {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       link.info(message);
     } else {
@@ -758,7 +758,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
 
   @Override
   public void warn(Object message) {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       link.warn(message);
     } else {
@@ -768,7 +768,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
 
   @Override
   public void error(Object message) {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       link.error(message);
     } else {
@@ -778,7 +778,7 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
 
   @Override
   public void fail(Object message) {
-    final Link link = link();
+    final Link link = this.link();
     if (link != null) {
       link.fail(message);
     } else {
@@ -788,12 +788,12 @@ public class AbstractAgent implements Agent, SwimRef, LaneFactory, Schedule, Sto
 
   @Override
   public final TimerRef timer(TimerFunction timer) {
-    return schedule().timer(timer);
+    return this.schedule().timer(timer);
   }
 
   @Override
   public final TimerRef setTimer(long millis, TimerFunction timer) {
-    return schedule().setTimer(millis, timer);
+    return this.schedule().setTimer(millis, timer);
   }
 
   @Override

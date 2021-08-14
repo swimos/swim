@@ -42,7 +42,9 @@ public class SpatialDataModel<S> implements SpatialDataBinding<S>, QTreeDelegate
   public SpatialDataModel(Value name, QTreeMap<S> tree) {
     this.name = name;
     this.tree = tree;
-    tree.setTreeDelegate(this);
+    this.dataContext = null;
+    this.storeBinding = null;
+    this.tree.setTreeDelegate(this);
   }
 
   @Override
@@ -68,7 +70,7 @@ public class SpatialDataModel<S> implements SpatialDataBinding<S>, QTreeDelegate
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapData(Class<T> dataClass) {
-    if (dataClass.isAssignableFrom(getClass())) {
+    if (dataClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -84,7 +86,7 @@ public class SpatialDataModel<S> implements SpatialDataBinding<S>, QTreeDelegate
   }
 
   public final Store store() {
-    return database().store();
+    return this.database().store();
   }
 
   public final Value treeName() {
@@ -108,7 +110,7 @@ public class SpatialDataModel<S> implements SpatialDataBinding<S>, QTreeDelegate
 
   @Override
   public <K2> SpatialData<K2, S, Value> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   @Override
@@ -137,7 +139,7 @@ public class SpatialDataModel<S> implements SpatialDataBinding<S>, QTreeDelegate
 
   @Override
   public <V2> SpatialData<Value, S, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override
@@ -253,22 +255,22 @@ public class SpatialDataModel<S> implements SpatialDataBinding<S>, QTreeDelegate
 
   @Override
   public void treeDidLoadPage(Page page) {
-    // nop
+    // hook
   }
 
   @Override
   public void treeDidChange(Tree newTree, Tree oldTree) {
-    // nop
+    // hook
   }
 
   @Override
   public void treeDidCommit(Tree newTree, Tree oldTree) {
-    // nop
+    // hook
   }
 
   @Override
   public void treeDidClear(Tree newTree, Tree oldTree) {
-    // nop
+    // hook
   }
 
   @Override

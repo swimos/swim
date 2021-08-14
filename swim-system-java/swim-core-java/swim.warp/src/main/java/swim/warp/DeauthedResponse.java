@@ -20,9 +20,6 @@ import swim.structure.Value;
 
 public final class DeauthedResponse extends HostAddressed {
 
-  @Kind
-  public static final Form<DeauthedResponse> FORM = new DeauthedResponseForm();
-
   public DeauthedResponse(Value body) {
     super(body);
   }
@@ -38,13 +35,16 @@ public final class DeauthedResponse extends HostAddressed {
 
   @Override
   public Form<DeauthedResponse> form() {
-    return FORM;
+    return DeauthedResponse.FORM;
   }
 
   @Override
   public DeauthedResponse body(Value body) {
     return new DeauthedResponse(body);
   }
+
+  @Kind
+  public static final Form<DeauthedResponse> FORM = new DeauthedResponseForm();
 
 }
 
@@ -61,7 +61,7 @@ final class DeauthedResponseForm extends HostAddressedForm<DeauthedResponse> {
   }
 
   @Override
-  public DeauthedResponse from(Value body) {
+  public DeauthedResponse create(Value body) {
     return new DeauthedResponse(body);
   }
 

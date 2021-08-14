@@ -23,7 +23,6 @@ import swim.structure.Value;
 
 public class MemStoreKernel extends KernelProxy {
 
-  private static final double KERNEL_PRIORITY = -1.0;
   final double kernelPriority;
 
   public MemStoreKernel(double kernelPriority) {
@@ -31,17 +30,7 @@ public class MemStoreKernel extends KernelProxy {
   }
 
   public MemStoreKernel() {
-    this(KERNEL_PRIORITY);
-  }
-
-  public static MemStoreKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || MemStoreKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new MemStoreKernel(kernelPriority);
-    }
-    return null;
+    this(MemStoreKernel.KERNEL_PRIORITY);
   }
 
   @Override
@@ -66,6 +55,18 @@ public class MemStoreKernel extends KernelProxy {
       store = new MemStore();
     }
     return store;
+  }
+
+  private static final double KERNEL_PRIORITY = -1.0;
+
+  public static MemStoreKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || MemStoreKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(MemStoreKernel.KERNEL_PRIORITY);
+      return new MemStoreKernel(kernelPriority);
+    }
+    return null;
   }
 
 }

@@ -19,8 +19,6 @@ package swim.concurrent;
  */
 public class TimerException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public TimerException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -36,5 +34,7 @@ public class TimerException extends RuntimeException {
   public TimerException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

@@ -21,14 +21,13 @@ import swim.codec.Binary;
 import swim.codec.Output;
 import swim.codec.Unicode;
 import swim.codec.Utf8;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.recon.Recon;
 import swim.structure.Record;
 import swim.structure.Value;
 
 public class Germ {
 
-  static final int BLOCK_SIZE = 4 * 1024;
   final int stem;
   final long version;
   final long created;
@@ -41,30 +40,6 @@ public class Germ {
     this.created = created;
     this.updated = updated;
     this.seedRefValue = seedRefValue.commit();
-  }
-
-  public static Germ fromValue(Value value) {
-    Throwable error = null;
-    try {
-      final Value header = value.header("swimdb");
-      if (header != null) {
-        final int stem = header.get("stem").intValue();
-        final long version = header.get("version").longValue();
-        final long created = header.get("created").longValue();
-        final long updated = header.get("updated").longValue();
-        final Value seedRefValue = value.get("seed");
-        return new Germ(stem, version, created, updated, seedRefValue);
-      }
-    } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        error = cause;
-      } else {
-        throw cause;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed germ: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), error);
   }
 
   public int stem() {
@@ -92,11 +67,10 @@ public class Germ {
   }
 
   public Value toValue() {
-    final Record header = Record.create(4)
-        .slot("stem", this.stem)
-        .slot("version", this.version)
-        .slot("created", this.created)
-        .slot("updated", this.updated);
+    final Record header = Record.create(4).slot("stem", this.stem)
+                                          .slot("version", this.version)
+                                          .slot("created", this.created)
+                                          .slot("updated", this.updated);
     final Record record = Record.create(2).attr("swimdb", header);
     if (this.seedRefValue.isDefined()) {
       record.slot("seed", this.seedRefValue);
@@ -105,10 +79,10 @@ public class Germ {
   }
 
   public void writeValue(Output<?> output) {
-    final Value value = toValue();
+    final Value value = this.toValue();
     Recon.write(value, output);
     int i = Recon.sizeOf(value);
-    while (i < BLOCK_SIZE) {
+    while (i < Germ.BLOCK_SIZE) {
       if (i % 1024 == 1023) {
         output.write('\n');
       } else {
@@ -119,7 +93,7 @@ public class Germ {
   }
 
   public void writeValue(WritableByteChannel channel) {
-    final ByteBuffer buffer = toByteBuffer();
+    final ByteBuffer buffer = this.toByteBuffer();
     int k;
     try {
       do {
@@ -134,14 +108,40 @@ public class Germ {
   }
 
   public ByteBuffer toByteBuffer() {
-    final Output<ByteBuffer> output = Utf8.decodedOutput(Binary.outputBuffer(new byte[BLOCK_SIZE]));
-    writeValue(output);
+    final Output<ByteBuffer> output = Utf8.decodedOutput(Binary.outputBuffer(new byte[Germ.BLOCK_SIZE]));
+    this.writeValue(output);
     return output.bind();
   }
 
   @Override
   public String toString() {
-    return Recon.toString(toValue());
+    return Recon.toString(this.toValue());
+  }
+
+  static final int BLOCK_SIZE = 4 * 1024;
+
+  public static Germ fromValue(Value value) {
+    Throwable error = null;
+    try {
+      final Value header = value.header("swimdb");
+      if (header != null) {
+        final int stem = header.get("stem").intValue();
+        final long version = header.get("version").longValue();
+        final long created = header.get("created").longValue();
+        final long updated = header.get("updated").longValue();
+        final Value seedRefValue = value.get("seed");
+        return new Germ(stem, version, created, updated, seedRefValue);
+      }
+    } catch (Throwable cause) {
+      if (Cont.isNonFatal(cause)) {
+        error = cause;
+      } else {
+        throw cause;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed germ: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), error);
   }
 
 }

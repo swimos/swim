@@ -24,6 +24,10 @@ import swim.structure.Item;
 
 public final class HostItem {
 
+  private HostItem() {
+    // static
+  }
+
   public static final HostObjectType<Item> TYPE;
 
   static {
@@ -38,10 +42,6 @@ public final class HostItem {
     type.addMember(new HostItemBooleanValue());
     type.addStaticMember(new HostItemAbsent());
     type.addStaticMember(new HostItemExtant());
-  }
-
-  private HostItem() {
-    // static
   }
 
 }

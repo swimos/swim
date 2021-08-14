@@ -20,17 +20,8 @@ import swim.codec.Output;
 
 public class Z implements VectorModule<Long, Long>, OrderedRing<Long>, Debug {
 
-  private static Z ring;
-
   protected Z() {
-    // stub
-  }
-
-  public static Z ring() {
-    if (ring == null) {
-      ring = new Z();
-    }
-    return ring;
+    // singleton
   }
 
   @Override
@@ -94,13 +85,23 @@ public class Z implements VectorModule<Long, Long>, OrderedRing<Long>, Debug {
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.write('Z').write('.').write("ring").write('(').write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write('Z').write('.').write("ring").write('(').write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static Z ring;
+
+  public static Z ring() {
+    if (Z.ring == null) {
+      Z.ring = new Z();
+    }
+    return Z.ring;
   }
 
 }

@@ -28,7 +28,7 @@ public class JsPlaneSpec {
     jsKernel.setRootPath(UriPath.parse(System.getProperty("project.dir")));
     final Kernel kernel = ServerLoader.loadServerStack().injectKernel(jsKernel);
 
-    final ActorSpaceDef spaceDef = ActorSpaceDef.fromPlaneDef(JsPlaneDef.from("plane", "./src/test/js/TestPlane"));
+    final ActorSpaceDef spaceDef = ActorSpaceDef.fromPlaneDef(JsPlaneDef.create("plane", "./src/test/js/TestPlane"));
     final JsPlane plane = (JsPlane) kernel.openSpace(spaceDef).getPlane("plane");
 
     try {

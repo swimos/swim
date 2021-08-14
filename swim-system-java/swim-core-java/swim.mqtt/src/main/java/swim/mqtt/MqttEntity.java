@@ -16,20 +16,20 @@ package swim.mqtt;
 
 public abstract class MqttEntity<T> extends MqttPart {
 
-  private static MqttEntity<Object> empty;
-
-  @SuppressWarnings("unchecked")
-  public static <T> MqttEntity<T> empty() {
-    if (empty == null) {
-      empty = new MqttEmpty();
-    }
-    return (MqttEntity<T>) empty;
-  }
-
   public abstract boolean isDefined();
 
   public abstract T get();
 
   public abstract int mqttSize();
+
+  private static MqttEntity<Object> empty;
+
+  @SuppressWarnings("unchecked")
+  public static <T> MqttEntity<T> empty() {
+    if (MqttEntity.empty == null) {
+      MqttEntity.empty = new MqttEmpty();
+    }
+    return (MqttEntity<T>) MqttEntity.empty;
+  }
 
 }

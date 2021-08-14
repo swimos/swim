@@ -16,8 +16,6 @@ package swim.api.store;
 
 public class StoreException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public StoreException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class StoreException extends RuntimeException {
   public StoreException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

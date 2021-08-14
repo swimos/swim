@@ -16,8 +16,6 @@ package swim.api;
 
 public class LaneException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public LaneException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class LaneException extends RuntimeException {
   public LaneException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

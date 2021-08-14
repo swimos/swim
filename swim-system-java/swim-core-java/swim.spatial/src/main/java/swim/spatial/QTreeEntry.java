@@ -51,7 +51,7 @@ public class QTreeEntry<K, S, V> implements SpatialMap.Entry<K, S, V> {
   }
 
   public final long xBase() {
-    return this.x << xRank();
+    return this.x << this.xRank();
   }
 
   public final long y() {
@@ -63,7 +63,7 @@ public class QTreeEntry<K, S, V> implements SpatialMap.Entry<K, S, V> {
   }
 
   public final long yBase() {
-    return this.y << yRank();
+    return this.y << this.yRank();
   }
 
   @Override
@@ -96,7 +96,7 @@ public class QTreeEntry<K, S, V> implements SpatialMap.Entry<K, S, V> {
   @Override
   public int hashCode() {
     return (this.key == null ? 0 : this.key.hashCode())
-        ^ (this.value == null ? 0 : this.value.hashCode());
+         ^ (this.value == null ? 0 : this.value.hashCode());
   }
 
   @Override

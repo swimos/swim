@@ -20,48 +20,48 @@ import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttUnsubscribeSpec {
 
-  public static void assertDecodes(Data data, MqttUnsubscribe packet) {
-    MqttAssertions.assertDecodesPacket(data, packet);
-  }
-
   @Test
   public void decodeUnsubscribePacketsWithPacketId() {
-    assertDecodes(Data.fromBase16("A2027E96"), MqttUnsubscribe.from(0x7E96));
+    assertDecodes(Data.fromBase16("A2027E96"), MqttUnsubscribe.create(0x7E96));
   }
 
   @Test
   public void encodeUnsubscribePacketsWithPacketId() {
-    assertEncodes(MqttUnsubscribe.from(0x7E96), Data.fromBase16("A2027E96"));
+    assertEncodes(MqttUnsubscribe.create(0x7E96), Data.fromBase16("A2027E96"));
   }
 
   @Test
   public void decodeUnsubscribePacketsWithSingleTopicName() {
     assertDecodes(Data.fromBase16("A2080000000474657374"),
-        MqttUnsubscribe.from(0).topicName("test"));
+                  MqttUnsubscribe.create(0).topicName("test"));
   }
 
   @Test
   public void encodeUnsubscribePacketsWithSingleTopicName() {
-    assertEncodes(MqttUnsubscribe.from(0).topicName("test"),
-        Data.fromBase16("A2080000000474657374"));
+    assertEncodes(MqttUnsubscribe.create(0).topicName("test"),
+                  Data.fromBase16("A2080000000474657374"));
   }
 
   @Test
   public void decodeUnsubscribePacketsWithMultipleTopicNames() {
     assertDecodes(Data.fromBase16("A21200000004746573740003666F6F0003626172"),
-        MqttUnsubscribe.from(0)
-            .topicName("test")
-            .topicName("foo")
-            .topicName("bar"));
+                  MqttUnsubscribe.create(0)
+                                 .topicName("test")
+                                 .topicName("foo")
+                                 .topicName("bar"));
   }
 
   @Test
   public void encodeUnsubscribePacketsWithMultipleTopicNames() {
-    assertEncodes(MqttUnsubscribe.from(0)
-            .topicName("test")
-            .topicName("foo")
-            .topicName("bar"),
-        Data.fromBase16("A21200000004746573740003666F6F0003626172"));
+    assertEncodes(MqttUnsubscribe.create(0)
+                                 .topicName("test")
+                                 .topicName("foo")
+                                 .topicName("bar"),
+                  Data.fromBase16("A21200000004746573740003666F6F0003626172"));
+  }
+
+  public static void assertDecodes(Data data, MqttUnsubscribe packet) {
+    MqttAssertions.assertDecodesPacket(data, packet);
   }
 
 }

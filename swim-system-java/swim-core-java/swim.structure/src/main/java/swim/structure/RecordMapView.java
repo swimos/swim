@@ -99,7 +99,7 @@ final class RecordMapView extends Record {
 
   @Override
   public String tag() {
-    if (size() > 0) {
+    if (this.size() > 0) {
       final Item item = this.record.array[this.lower];
       if (item instanceof Attr) {
         return ((Attr) item).key.value;
@@ -153,7 +153,7 @@ final class RecordMapView extends Record {
 
   @Override
   public Record tail() {
-    if (size() > 0) {
+    if (this.size() > 0) {
       return new RecordMapView(this.record, this.lower + 1, this.upper);
     } else {
       return Record.empty();
@@ -162,7 +162,7 @@ final class RecordMapView extends Record {
 
   @Override
   public Value body() {
-    final int n = size();
+    final int n = this.size();
     if (n > 2) {
       return new RecordMapView(this.record, this.lower + 1, this.upper).branch();
     } else if (n == 2) {
@@ -226,7 +226,7 @@ final class RecordMapView extends Record {
 
   @Override
   public Item get(int index) {
-    if (index < 0 || index >= size()) {
+    if (index < 0 || index >= this.size()) {
       throw new IndexOutOfBoundsException(Integer.toString(index));
     }
     return this.record.array[this.lower + index];
@@ -234,7 +234,7 @@ final class RecordMapView extends Record {
 
   @Override
   public Item getItem(int index) {
-    if (index >= 0 && index < size()) {
+    if (index >= 0 && index < this.size()) {
       return this.record.array[this.lower + index];
     } else {
       return Item.absent();
@@ -243,22 +243,23 @@ final class RecordMapView extends Record {
 
   @Override
   public Item setItem(int index, Item newItem) {
-    if ((this.record.flags & IMMUTABLE) != 0) {
+    final int flags = RecordMap.FLAGS.get(this.record);
+    if ((flags & RecordMap.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
-    } else if (index < 0 || index >= size()) {
+    } else if (index < 0 || index >= this.size()) {
       throw new IndexOutOfBoundsException(Integer.toString(index));
     }
-    if ((this.record.flags & ALIASED) != 0) {
-      return setItemAliased(index, newItem);
+    if ((flags & RecordMap.ALIASED) != 0) {
+      return this.setItemAliased(index, newItem);
     } else {
-      return setItemMutable(index, newItem);
+      return this.setItemMutable(index, newItem);
     }
   }
 
   private Item setItemAliased(int index, Item newItem) {
     final int n = this.record.itemCount;
     final Item[] oldArray = this.record.array;
-    final Item[] newArray = new Item[expand(n)];
+    final Item[] newArray = new Item[RecordMap.expand(n)];
     System.arraycopy(oldArray, 0, newArray, 0, n);
     final Item oldItem = oldArray[this.lower + index];
     newArray[this.lower + index] = newItem;
@@ -271,7 +272,13 @@ final class RecordMapView extends Record {
     } else if (oldItem instanceof Field) {
       this.record.fieldCount -= 1;
     }
-    FLAGS.set(this.record, this.record.flags & ~ALIASED);
+    do {
+      final int oldFlags = RecordMap.FLAGS.get(this.record);
+      final int newFlags = oldFlags & ~RecordMap.ALIASED;
+      if (RecordMap.FLAGS.compareAndSet(this.record, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
     return oldItem;
   }
 
@@ -293,28 +300,29 @@ final class RecordMapView extends Record {
 
   @Override
   public boolean add(Item newItem) {
-    add(size(), newItem);
+    this.add(this.size(), newItem);
     return true;
   }
 
   @Override
   public void add(int index, Item newItem) {
-    if ((this.record.flags & IMMUTABLE) != 0) {
+    final int flags = RecordMap.FLAGS.get(this.record);
+    if ((flags & RecordMap.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
-    } else if (index < 0 || index > size()) {
+    } else if (index < 0 || index > this.size()) {
       throw new IndexOutOfBoundsException(Integer.toString(index));
     }
-    if ((this.record.flags & ALIASED) != 0) {
-      addAliased(index, newItem);
+    if ((flags & RecordMap.ALIASED) != 0) {
+      this.addAliased(index, newItem);
     } else {
-      addMutable(index, newItem);
+      this.addMutable(index, newItem);
     }
   }
 
   private void addAliased(int index, Item newItem) {
     final int n = this.record.itemCount;
     final Item[] oldArray = this.record.array;
-    final Item[] newArray = new Item[expand(n + 1)];
+    final Item[] newArray = new Item[RecordMap.expand(n + 1)];
     System.arraycopy(oldArray, 0, newArray, 0, this.lower + index);
     System.arraycopy(oldArray, this.lower + index, newArray, this.lower + index + 1, n - (this.lower + index));
     newArray[this.lower + index] = newItem;
@@ -324,7 +332,13 @@ final class RecordMapView extends Record {
     if (newItem instanceof Field) {
       this.record.fieldCount += 1;
     }
-    FLAGS.set(this.record, this.record.flags & ~ALIASED);
+    do {
+      final int oldFlags = RecordMap.FLAGS.get(this.record);
+      final int newFlags = oldFlags & ~RecordMap.ALIASED;
+      if (RecordMap.FLAGS.compareAndSet(this.record, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
     this.upper += 1;
   }
 
@@ -333,7 +347,7 @@ final class RecordMapView extends Record {
     final Item[] oldArray = this.record.array;
     final Item[] newArray;
     if (n + 1 > oldArray.length) {
-      newArray = new Item[expand(n + 1)];
+      newArray = new Item[RecordMap.expand(n + 1)];
       System.arraycopy(oldArray, 0, newArray, 0, this.lower + index);
     } else {
       newArray = oldArray;
@@ -351,27 +365,29 @@ final class RecordMapView extends Record {
 
   @Override
   public boolean addAll(Collection<? extends Item> newItems) {
-    if ((this.record.flags & IMMUTABLE) != 0) {
+    final int flags = RecordMap.FLAGS.get(this.record);
+    if ((flags & RecordMap.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
     }
-    if ((this.record.flags & ALIASED) != 0) {
-      return addAllAliased(size(), newItems);
+    if ((flags & RecordMap.ALIASED) != 0) {
+      return this.addAllAliased(this.size(), newItems);
     } else {
-      return addAllMutable(size(), newItems);
+      return this.addAllMutable(this.size(), newItems);
     }
   }
 
   @Override
   public boolean addAll(int index, Collection<? extends Item> newItems) {
-    if ((this.record.flags & IMMUTABLE) != 0) {
+    final int flags = RecordMap.FLAGS.get(this.record);
+    if ((flags & RecordMap.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
-    } else if (index < 0 || index > size()) {
+    } else if (index < 0 || index > this.size()) {
       throw new IndexOutOfBoundsException(Integer.toString(index));
     }
-    if ((this.record.flags & ALIASED) != 0) {
-      return addAllAliased(index, newItems);
+    if ((flags & RecordMap.ALIASED) != 0) {
+      return this.addAllAliased(index, newItems);
     } else {
-      return addAllMutable(index, newItems);
+      return this.addAllMutable(index, newItems);
     }
   }
 
@@ -383,7 +399,7 @@ final class RecordMapView extends Record {
     final int m = this.record.itemCount;
     int n = this.record.fieldCount;
     final Item[] oldArray = this.record.array;
-    final Item[] newArray = new Item[expand(m + k)];
+    final Item[] newArray = new Item[RecordMap.expand(m + k)];
     if (oldArray != null) {
       System.arraycopy(oldArray, 0, newArray, 0, this.lower + index);
       System.arraycopy(oldArray, this.lower + index, newArray, this.lower + index + k, m - (this.lower + index));
@@ -399,7 +415,13 @@ final class RecordMapView extends Record {
     this.record.table = null;
     this.record.itemCount = m + k;
     this.record.fieldCount = n;
-    FLAGS.set(this.record, this.record.flags & ~ALIASED);
+    do {
+      final int oldFlags = RecordMap.FLAGS.get(this.record);
+      final int newFlags = oldFlags & ~RecordMap.ALIASED;
+      if (RecordMap.FLAGS.compareAndSet(this.record, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
     this.upper += k;
     return true;
   }
@@ -414,7 +436,7 @@ final class RecordMapView extends Record {
     final Item[] oldArray = this.record.array;
     final Item[] newArray;
     if (oldArray == null || m + k > oldArray.length) {
-      newArray = new Item[expand(m + k)];
+      newArray = new Item[RecordMap.expand(m + k)];
       if (oldArray != null) {
         System.arraycopy(oldArray, 0, newArray, 0, this.lower + index);
       }
@@ -441,22 +463,23 @@ final class RecordMapView extends Record {
 
   @Override
   public Item remove(int index) {
-    if ((this.record.flags & IMMUTABLE) != 0) {
+    final int flags = RecordMap.FLAGS.get(this.record);
+    if ((flags & RecordMap.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
-    } else if (index < 0 || index >= size()) {
+    } else if (index < 0 || index >= this.size()) {
       throw new IndexOutOfBoundsException(Integer.toString(index));
     }
-    if ((this.record.flags & ALIASED) != 0) {
-      return removeAliased(index);
+    if ((flags & RecordMap.ALIASED) != 0) {
+      return this.removeAliased(index);
     } else {
-      return removeMutable(index);
+      return this.removeMutable(index);
     }
   }
 
   private Item removeAliased(int index) {
     final int n = this.record.itemCount;
     final Item[] oldArray = this.record.array;
-    final Item[] newArray = new Item[expand(n - 1)];
+    final Item[] newArray = new Item[RecordMap.expand(n - 1)];
     final Item oldItem = oldArray[index];
     System.arraycopy(oldArray, 0, newArray, 0, this.lower + index);
     System.arraycopy(oldArray, this.lower + index + 1, newArray, this.lower + index, n - (this.lower + index) - 1);
@@ -466,7 +489,13 @@ final class RecordMapView extends Record {
     if (oldItem instanceof Field) {
       this.record.fieldCount -= 1;
     }
-    FLAGS.set(this.record, this.record.flags & ~ALIASED);
+    do {
+      final int oldFlags = RecordMap.FLAGS.get(this.record);
+      final int newFlags = oldFlags & ~RecordMap.ALIASED;
+      if (RecordMap.FLAGS.compareAndSet(this.record, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
     this.upper -= 1;
     return oldItem;
   }
@@ -489,12 +518,12 @@ final class RecordMapView extends Record {
   @Override
   public boolean remove(Object object) {
     final Item item = Item.fromObject(object);
-    if ((this.record.flags & IMMUTABLE) != 0) {
+    if ((RecordMap.FLAGS.get(this.record) & RecordMap.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
     }
-    final int index = indexOf(item);
+    final int index = this.indexOf(item);
     if (index >= 0) {
-      remove(index);
+      this.remove(index);
       return true;
     } else {
       return false;
@@ -503,13 +532,14 @@ final class RecordMapView extends Record {
 
   @Override
   public boolean removeAll(Collection<?> items) {
-    if ((this.record.flags & IMMUTABLE) != 0) {
+    final int flags = RecordMap.FLAGS.get(this.record);
+    if ((flags & RecordMap.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
     }
-    if ((this.record.flags & ALIASED) != 0) {
-      return removeAllAliased(items);
+    if ((flags & RecordMap.ALIASED) != 0) {
+      return this.removeAllAliased(items);
     } else {
-      return removeAllMutable(items);
+      return this.removeAllMutable(items);
     }
   }
 
@@ -517,7 +547,7 @@ final class RecordMapView extends Record {
     final int m = this.record.itemCount;
     int n = this.record.fieldCount;
     final Item[] oldArray = this.record.array;
-    final Item[] newArray = new Item[expand(m)];
+    final Item[] newArray = new Item[RecordMap.expand(m)];
     int i = this.lower;
     int j = i;
     final int k = this.upper;
@@ -543,7 +573,13 @@ final class RecordMapView extends Record {
       this.record.table = null;
       this.record.itemCount = j;
       this.record.fieldCount = n;
-      FLAGS.set(this.record, this.record.flags & ~ALIASED);
+      do {
+        final int oldFlags = RecordMap.FLAGS.get(this.record);
+        final int newFlags = oldFlags & ~RecordMap.ALIASED;
+        if (RecordMap.FLAGS.compareAndSet(this.record, oldFlags, newFlags)) {
+          break;
+        }
+      } while (true);
       return true;
     } else {
       return false;
@@ -589,13 +625,14 @@ final class RecordMapView extends Record {
 
   @Override
   public boolean retainAll(Collection<?> items) {
-    if ((this.record.flags & IMMUTABLE) != 0) {
+    final int flags = RecordMap.FLAGS.get(this.record);
+    if ((flags & RecordMap.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
     }
-    if ((this.record.flags & ALIASED) != 0) {
-      return retainAllAliased(items);
+    if ((flags & RecordMap.ALIASED) != 0) {
+      return this.retainAllAliased(items);
     } else {
-      return retainAllMutable(items);
+      return this.retainAllMutable(items);
     }
   }
 
@@ -603,7 +640,7 @@ final class RecordMapView extends Record {
     final int m = this.record.itemCount;
     int n = this.record.fieldCount;
     final Item[] oldArray = this.record.array;
-    final Item[] newArray = new Item[expand(m)];
+    final Item[] newArray = new Item[RecordMap.expand(m)];
     int i = this.lower;
     int j = i;
     final int k = this.upper;
@@ -629,7 +666,13 @@ final class RecordMapView extends Record {
       this.record.table = null;
       this.record.itemCount = j;
       this.record.fieldCount = n;
-      FLAGS.set(this.record, this.record.flags & ~ALIASED);
+      do {
+        final int oldFlags = RecordMap.FLAGS.get(this.record);
+        final int newFlags = oldFlags & ~RecordMap.ALIASED;
+        if (RecordMap.FLAGS.compareAndSet(this.record, oldFlags, newFlags)) {
+          break;
+        }
+      } while (true);
       return true;
     } else {
       return false;
@@ -675,22 +718,23 @@ final class RecordMapView extends Record {
 
   @Override
   public void clear() {
-    if ((this.record.flags & IMMUTABLE) != 0) {
+    final int flags = RecordMap.FLAGS.get(this.record);
+    if ((flags & RecordMap.IMMUTABLE) != 0) {
       throw new UnsupportedOperationException("immutable");
     }
-    if ((this.record.flags & ALIASED) != 0) {
-      clearAliased();
+    if ((flags & RecordMap.ALIASED) != 0) {
+      this.clearAliased();
     } else {
-      clearMutable();
+      this.clearMutable();
     }
   }
 
   private void clearAliased() {
     final int m = this.record.itemCount;
     int n = this.record.fieldCount;
-    final int l = m - size();
+    final int l = m - this.size();
     final Item[] oldArray = this.record.array;
-    final Item[] newArray = new Item[expand(l)];
+    final Item[] newArray = new Item[RecordMap.expand(l)];
     System.arraycopy(oldArray, 0, newArray, 0, this.lower);
     int i = this.lower;
     while (i < n) {
@@ -710,7 +754,13 @@ final class RecordMapView extends Record {
     this.record.table = null;
     this.record.itemCount = l;
     this.record.fieldCount = n;
-    FLAGS.set(this.record, this.record.flags & ~ALIASED);
+    do {
+      final int oldFlags = RecordMap.FLAGS.get(this.record);
+      final int newFlags = oldFlags & ~RecordMap.ALIASED;
+      if (RecordMap.FLAGS.compareAndSet(this.record, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
     this.upper = this.lower;
   }
 
@@ -747,25 +797,31 @@ final class RecordMapView extends Record {
 
   @Override
   public boolean isAliased() {
-    return (this.record.flags & ALIASED) != 0;
+    return (RecordMap.FLAGS.get(this.record) & RecordMap.ALIASED) != 0;
   }
 
   @Override
   public boolean isMutable() {
-    return (this.record.flags & IMMUTABLE) == 0;
+    return (RecordMap.FLAGS.get(this.record) & RecordMap.IMMUTABLE) == 0;
   }
 
   @Override
   public void alias() {
-    FLAGS.set(this.record, this.record.flags | ALIASED);
+    do {
+      final int oldFlags = RecordMap.FLAGS.get(this.record);
+      final int newFlags = oldFlags | RecordMap.ALIASED;
+      if (RecordMap.FLAGS.compareAndSet(this.record, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public Record branch() {
-    final int m = size();
+    final int m = this.size();
     int n = 0;
     final Item[] oldArray = this.record.array;
-    final Item[] newArray = new Item[expand(m)];
+    final Item[] newArray = new Item[RecordMap.expand(m)];
     int i = this.lower;
     int j = 0;
     while (j < m) {
@@ -788,7 +844,7 @@ final class RecordMapView extends Record {
 
   @Override
   public Item[] toArray() {
-    final int n = size();
+    final int n = this.size();
     final Item[] array = new Item[n];
     System.arraycopy(this.record.array, this.lower, array, 0, n);
     return array;
@@ -797,7 +853,7 @@ final class RecordMapView extends Record {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T[] toArray(T[] array) {
-    final int n = size();
+    final int n = this.size();
     if (array.length < n) {
       array = (T[]) Array.newInstance(array.getClass().getComponentType(), n);
     }
@@ -810,7 +866,7 @@ final class RecordMapView extends Record {
 
   @Override
   public Record subList(int lower, int upper) {
-    if (lower < 0 || upper > size() || lower > upper) {
+    if (lower < 0 || upper > this.size() || lower > upper) {
       throw new IndexOutOfBoundsException(lower + ", " + upper);
     }
     return new RecordMapView(this.record, this.lower + lower, this.lower + upper);

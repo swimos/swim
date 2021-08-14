@@ -59,41 +59,41 @@ public class AbstractPolicy implements Policy, PlanePolicy, AgentRoutePolicy, Ag
 
   @Override
   public PolicyDirective<Object> canConnect(Uri requestUri) {
-    return allow();
+    return this.allow();
   }
 
   @Override
   public PolicyDirective<LinkRequest> canLink(LinkRequest request, Identity identity) {
-    return authorize(request, identity);
+    return this.authorize(request, identity);
   }
 
   @Override
   public PolicyDirective<SyncRequest> canSync(SyncRequest request, Identity identity) {
-    return authorize(request, identity);
+    return this.authorize(request, identity);
   }
 
   @Override
   public PolicyDirective<EventMessage> canUplink(EventMessage message, Identity identity) {
-    return authorize(message, identity);
+    return this.authorize(message, identity);
   }
 
   @Override
   public PolicyDirective<CommandMessage> canDownlink(CommandMessage message, Identity identity) {
-    return authorize(message, identity);
+    return this.authorize(message, identity);
   }
 
   @Override
   public PolicyDirective<HttpMessage<?>> canRequest(HttpRequest<?> request) {
-    return allow();
+    return this.allow();
   }
 
   @Override
   public PolicyDirective<HttpResponse<?>> canRespond(HttpRequest<?> request, HttpResponse<?> response) {
-    return allow();
+    return this.allow();
   }
 
   protected <T> PolicyDirective<T> authorize(Envelope envelope, Identity identity) {
-    return allow();
+    return this.allow();
   }
 
   public <T> PolicyDirective<T> allow(T value) {

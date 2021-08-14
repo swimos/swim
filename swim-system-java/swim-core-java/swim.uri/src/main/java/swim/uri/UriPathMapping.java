@@ -21,7 +21,6 @@ import swim.util.Murmur3;
 
 final class UriPathMapping<T> extends UriPathMapper<T> {
 
-  private static int hashSeed;
   final HashTrieMap<String, UriPathMapper<T>> table;
   final UriPathMapper<T> wildcard;
   final UriQueryMapper<T> terminal;
@@ -108,7 +107,7 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
   @Override
   UriPathMapper<T> merged(UriPathMapper<T> that) {
     if (that instanceof UriPathMapping<?>) {
-      return merged((UriPathMapping<T>) that);
+      return this.merged((UriPathMapping<T>) that);
     } else {
       return that;
     }
@@ -152,7 +151,7 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
         }
       }
     } else {
-      final UriQueryMapper<T> oldTerminal = terminal;
+      final UriQueryMapper<T> oldTerminal = this.terminal;
       if (oldTerminal != null) {
         final UriQueryMapper<T> newTerminal = oldTerminal.removed(query, fragment);
         if (oldTerminal != newTerminal) {
@@ -196,7 +195,7 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
   @Override
   UriPathMapper<T> unmerged(UriPathMapper<T> that) {
     if (that instanceof UriPathMapping<?>) {
-      return unmerged((UriPathMapping<T>) that);
+      return this.unmerged((UriPathMapping<T>) that);
     } else {
       return this;
     }
@@ -242,13 +241,15 @@ final class UriPathMapping<T> extends UriPathMapper<T> {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(UriPathMapping.class);
+    if (UriPathMapping.hashSeed == 0) {
+      UriPathMapping.hashSeed = Murmur3.seed(UriPathMapping.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
-        this.table.hashCode()), this.wildcard.hashCode()), terminal.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(UriPathMapping.hashSeed,
+        this.table.hashCode()), this.wildcard.hashCode()), this.terminal.hashCode()));
   }
 
 }

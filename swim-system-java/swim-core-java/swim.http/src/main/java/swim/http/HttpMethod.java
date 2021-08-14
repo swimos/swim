@@ -22,45 +22,10 @@ import swim.util.Murmur3;
 
 public final class HttpMethod extends HttpPart implements Debug {
 
-  public static final HttpMethod GET = new HttpMethod("GET");
-  public static final HttpMethod HEAD = new HttpMethod("HEAD");
-  public static final HttpMethod POST = new HttpMethod("POST");
-  public static final HttpMethod PUT = new HttpMethod("PUT");
-  public static final HttpMethod DELETE = new HttpMethod("DELETE");
-  public static final HttpMethod CONNECT = new HttpMethod("CONNECT");
-  public static final HttpMethod OPTIONS = new HttpMethod("OPTIONS");
-  public static final HttpMethod TRACE = new HttpMethod("TRACE");
-  private static int hashSeed;
   final String name;
 
   HttpMethod(String name) {
     this.name = name;
-  }
-
-  public static HttpMethod from(String name) {
-    if (name.equals("GET")) {
-      return GET;
-    } else if (name.equals("HEAD")) {
-      return HEAD;
-    } else if (name.equals("POST")) {
-      return POST;
-    } else if (name.equals("PUT")) {
-      return PUT;
-    } else if (name.equals("DELETE")) {
-      return DELETE;
-    } else if (name.equals("CONNECT")) {
-      return CONNECT;
-    } else if (name.equals("OPTIONS")) {
-      return OPTIONS;
-    } else if (name.equals("TRACE")) {
-      return TRACE;
-    } else {
-      return new HttpMethod(name);
-    }
-  }
-
-  public static HttpMethod parseHttp(String string) {
-    return Http.standardParser().parseMethodString(string);
   }
 
   public String name() {
@@ -88,29 +53,67 @@ public final class HttpMethod extends HttpPart implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(HttpMethod.class);
+    if (HttpMethod.hashSeed == 0) {
+      HttpMethod.hashSeed = Murmur3.seed(HttpMethod.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.name.hashCode()));
+    return Murmur3.mash(Murmur3.mix(HttpMethod.hashSeed, this.name.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("HttpMethod").write('.');
-    if (this.name.equals("GET") || this.name.equals("HEAD") || this.name.equals("POST")
-        || this.name.equals("PUT") || this.name.equals("DELETE") || this.name.equals("CONNECT")
-        || this.name.equals("OPTIONS") || this.name.equals("TRACE")) {
-      output = output.write(name);
+    if ("GET".equals(this.name) || "HEAD".equals(this.name) || "POST".equals(this.name)
+        || "PUT".equals(this.name) || "DELETE".equals(this.name) || "CONNECT".equals(this.name)
+        || "OPTIONS".equals(this.name) || "TRACE".equals(this.name)) {
+      output = output.write(this.name);
     } else {
-      output = output.write("from").write('(').debug(this.name).write(')');
+      output = output.write("create").write('(').debug(this.name).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static final HttpMethod GET = new HttpMethod("GET");
+  public static final HttpMethod HEAD = new HttpMethod("HEAD");
+  public static final HttpMethod POST = new HttpMethod("POST");
+  public static final HttpMethod PUT = new HttpMethod("PUT");
+  public static final HttpMethod DELETE = new HttpMethod("DELETE");
+  public static final HttpMethod CONNECT = new HttpMethod("CONNECT");
+  public static final HttpMethod OPTIONS = new HttpMethod("OPTIONS");
+  public static final HttpMethod TRACE = new HttpMethod("TRACE");
+
+  public static HttpMethod create(String name) {
+    if ("GET".equals(name)) {
+      return HttpMethod.GET;
+    } else if ("HEAD".equals(name)) {
+      return HttpMethod.HEAD;
+    } else if ("POST".equals(name)) {
+      return HttpMethod.POST;
+    } else if ("PUT".equals(name)) {
+      return HttpMethod.PUT;
+    } else if ("DELETE".equals(name)) {
+      return HttpMethod.DELETE;
+    } else if ("CONNECT".equals(name)) {
+      return HttpMethod.CONNECT;
+    } else if ("OPTIONS".equals(name)) {
+      return HttpMethod.OPTIONS;
+    } else if ("TRACE".equals(name)) {
+      return HttpMethod.TRACE;
+    } else {
+      return new HttpMethod(name);
+    }
+  }
+
+  public static HttpMethod parseHttp(String string) {
+    return Http.standardParser().parseMethodString(string);
   }
 
 }

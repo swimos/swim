@@ -32,7 +32,7 @@ public final class AuthenticatorAddress implements CellAddress, Debug {
   }
 
   public AuthenticatorAddress authenticatorName(String authenticatorName) {
-    return copy(authenticatorName);
+    return this.copy(authenticatorName);
   }
 
   AuthenticatorAddress copy(String authenticatorName) {
@@ -50,18 +50,21 @@ public final class AuthenticatorAddress implements CellAddress, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.hash(AuthenticatorAddress.class);
+    if (AuthenticatorAddress.hashSeed == 0) {
+      AuthenticatorAddress.hashSeed = Murmur3.hash(AuthenticatorAddress.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.authenticatorName.hashCode()));
+    return Murmur3.mash(Murmur3.mix(AuthenticatorAddress.hashSeed, this.authenticatorName.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("AuthenticatorAddress").write('.').write("from").write('(')
-        .debug(this.authenticatorName).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("AuthenticatorAddress").write('.').write("create").write('(')
+                   .debug(this.authenticatorName).write(')');
+    return output;
   }
 
   @Override
@@ -69,9 +72,7 @@ public final class AuthenticatorAddress implements CellAddress, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static AuthenticatorAddress from(String authenticatorName) {
+  public static AuthenticatorAddress create(String authenticatorName) {
     return new AuthenticatorAddress(authenticatorName);
   }
 

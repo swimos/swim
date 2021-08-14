@@ -49,15 +49,15 @@ public class JsPlaneFactory implements PlaneFactory<JsPlane> {
 
   protected Context createPlaneJsContext(PlaneContext planeContext) {
     return Context.newBuilder("js")
-        .engine(this.jsKernel.jsEngine())
-        // TODO: .in(...)
-        // TODO: .out(...)
-        // TODO: .err(...)
-        // TODO: .logHandler(...)
-        // TODO: .fileSystem(...)
-        // TODO: .processHandler(...)
-        // TODO: .serverTransport(...)
-        .build();
+                  .engine(this.jsKernel.jsEngine())
+                  // TODO: .in(...)
+                  // TODO: .out(...)
+                  // TODO: .err(...)
+                  // TODO: .logHandler(...)
+                  // TODO: .fileSystem(...)
+                  // TODO: .processHandler(...)
+                  // TODO: .serverTransport(...)
+                  .build();
   }
 
   protected JsBridge createPlaneJsBridge(PlaneContext planeContext, Context jsContext) {
@@ -69,7 +69,7 @@ public class JsPlaneFactory implements PlaneFactory<JsPlane> {
   }
 
   protected JsModule requirePlaneModule(PlaneContext planeContext, JsModuleSystem moduleSystem) {
-    return moduleSystem.requireModule(basePath(), this.planeDef.modulePath());
+    return moduleSystem.requireModule(this.basePath(), this.planeDef.modulePath());
   }
 
   protected Value createGuestPlane(PlaneContext planeContext, JsBridge jsBridge, JsModule planeModule) {
@@ -89,11 +89,11 @@ public class JsPlaneFactory implements PlaneFactory<JsPlane> {
 
   @Override
   public JsPlane createPlane(PlaneContext planeContext) {
-    final Context jsContext = createPlaneJsContext(planeContext);
-    final JsBridge jsBridge = createPlaneJsBridge(planeContext, jsContext);
-    final JsModuleSystem moduleSystem = createPlaneModuleSystem(planeContext, jsContext, jsBridge);
-    final JsModule module = requirePlaneModule(planeContext, moduleSystem);
-    final Value guest = createGuestPlane(planeContext, jsBridge, module);
+    final Context jsContext = this.createPlaneJsContext(planeContext);
+    final JsBridge jsBridge = this.createPlaneJsBridge(planeContext, jsContext);
+    final JsModuleSystem moduleSystem = this.createPlaneModuleSystem(planeContext, jsContext, jsBridge);
+    final JsModule module = this.requirePlaneModule(planeContext, moduleSystem);
+    final Value guest = this.createGuestPlane(planeContext, jsBridge, module);
     return new JsPlane(planeContext, jsBridge, module, guest);
   }
 

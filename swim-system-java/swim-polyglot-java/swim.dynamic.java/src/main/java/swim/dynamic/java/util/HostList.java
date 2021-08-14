@@ -22,6 +22,10 @@ import swim.dynamic.JavaHostObjectType;
 
 public final class HostList {
 
+  private HostList() {
+    // static
+  }
+
   public static final HostObjectType<List<Object>> TYPE;
 
   static {
@@ -29,10 +33,6 @@ public final class HostList {
     TYPE = type;
     type.inheritType(HostCollection.TYPE);
     type.addMember(new HostListlength());
-  }
-
-  private HostList() {
-    // static
   }
 
 }

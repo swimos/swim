@@ -22,25 +22,12 @@ import swim.util.Murmur3;
 
 public final class ChunkExtension extends HttpPart implements Debug {
 
-  private static int hashSeed;
   final String name;
   final String value;
 
   ChunkExtension(String name, String value) {
     this.name = name;
     this.value = value;
-  }
-
-  public static ChunkExtension from(String name, String value) {
-    return new ChunkExtension(name, value);
-  }
-
-  public static ChunkExtension from(String name) {
-    return new ChunkExtension(name, "");
-  }
-
-  public static ChunkExtension parseHttp(String string) {
-    return Http.standardParser().parseChunkExtensionString(string);
   }
 
   public String name() {
@@ -72,24 +59,39 @@ public final class ChunkExtension extends HttpPart implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ChunkExtension.class);
+    if (ChunkExtension.hashSeed == 0) {
+      ChunkExtension.hashSeed = Murmur3.seed(ChunkExtension.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(ChunkExtension.hashSeed,
         this.name.hashCode()), this.value.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("ChunkExtension").write('.').write("from").write('(')
-        .debug(this.name).write(", ").write(this.value).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("ChunkExtension").write('.').write("create").write('(')
+                   .debug(this.name).write(", ").write(this.value).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static ChunkExtension create(String name, String value) {
+    return new ChunkExtension(name, value);
+  }
+
+  public static ChunkExtension create(String name) {
+    return new ChunkExtension(name, "");
+  }
+
+  public static ChunkExtension parseHttp(String string) {
+    return Http.standardParser().parseChunkExtensionString(string);
   }
 
 }

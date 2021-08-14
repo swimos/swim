@@ -68,7 +68,7 @@ public class EdgeTableMesh implements MeshContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapMesh(Class<T> meshClass) {
-    if (meshClass.isAssignableFrom(getClass())) {
+    if (meshClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -78,7 +78,7 @@ public class EdgeTableMesh implements MeshContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T bottomMesh(Class<T> meshClass) {
-    if (meshClass.isAssignableFrom(getClass())) {
+    if (meshClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -287,57 +287,57 @@ public class EdgeTableMesh implements MeshContext {
 
   @Override
   public void willOpen() {
-    // nop
+    // hook
   }
 
   @Override
   public void didOpen() {
-    // nop
+    // hook
   }
 
   @Override
   public void willLoad() {
-    // nop
+    // hook
   }
 
   @Override
   public void didLoad() {
-    // nop
+    // hook
   }
 
   @Override
   public void willStart() {
-    // nop
+    // hook
   }
 
   @Override
   public void didStart() {
-    // nop
+    // hook
   }
 
   @Override
   public void willStop() {
-    // nop
+    // hook
   }
 
   @Override
   public void didStop() {
-    // nop
+    // hook
   }
 
   @Override
   public void willUnload() {
-    // nop
+    // hook
   }
 
   @Override
   public void didUnload() {
-    // nop
+    // hook
   }
 
   @Override
   public void willClose() {
-    // nop
+    // hook
   }
 
 }

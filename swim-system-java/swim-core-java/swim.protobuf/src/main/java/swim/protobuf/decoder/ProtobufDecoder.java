@@ -33,9 +33,9 @@ public class ProtobufDecoder {
 
   public <T> Decoder<T> decodeType(ProtobufType<T> type, InputBuffer input) {
     if (type instanceof ProtobufPrimitiveType<?>) {
-      return decodePrimitive((ProtobufPrimitiveType<T>) type, input);
+      return this.decodePrimitive((ProtobufPrimitiveType<T>) type, input);
     } else if (type instanceof ProtobufComplexType<?>) {
-      return decodeComplex((ProtobufComplexType<T>) type, input);
+      return this.decodeComplex((ProtobufComplexType<T>) type, input);
     } else {
       return Decoder.error(new DecoderException("unsupported protobuf type: " + type));
     }
@@ -43,13 +43,13 @@ public class ProtobufDecoder {
 
   public <T> Decoder<T> decodePrimitive(ProtobufPrimitiveType<T> type, InputBuffer input) {
     if (type instanceof ProtobufVarintType<?>) {
-      return decodeVarint((ProtobufVarintType<T>) type, input);
+      return this.decodeVarint((ProtobufVarintType<T>) type, input);
     } else if (type instanceof ProtobufZigZagType<?>) {
-      return decodeZigZag((ProtobufZigZagType<T>) type, input);
+      return this.decodeZigZag((ProtobufZigZagType<T>) type, input);
     } else if (type instanceof ProtobufFixed32Type<?>) {
-      return decodeFixed32((ProtobufFixed32Type<T>) type, input);
+      return this.decodeFixed32((ProtobufFixed32Type<T>) type, input);
     } else if (type instanceof ProtobufFixed64Type<?>) {
-      return decodeFixed64((ProtobufFixed64Type<T>) type, input);
+      return this.decodeFixed64((ProtobufFixed64Type<T>) type, input);
     } else {
       return Decoder.error(new DecoderException("unsupported protobuf type: " + type));
     }
@@ -57,13 +57,13 @@ public class ProtobufDecoder {
 
   public <T> Decoder<T> decodeComplex(ProtobufComplexType<T> type, InputBuffer input) {
     if (type instanceof ProtobufDataType<?>) {
-      return decodeData((ProtobufDataType<T>) type, input);
+      return this.decodeData((ProtobufDataType<T>) type, input);
     } else if (type instanceof ProtobufStringType<?>) {
-      return decodeString((ProtobufStringType<T>) type, input);
+      return this.decodeString((ProtobufStringType<T>) type, input);
     } else if (type instanceof ProtobufMessageType<?, ?>) {
-      return decodeMessage((ProtobufMessageType<T, ?>) type, input);
+      return this.decodeMessage((ProtobufMessageType<T, ?>) type, input);
     } else if (type instanceof ProtobufRepeatedType<?, ?>) {
-      return decodeRepeated((ProtobufRepeatedType<?, T>) type, input);
+      return this.decodeRepeated((ProtobufRepeatedType<?, T>) type, input);
     } else {
       return Decoder.error(new DecoderException("unsupported protobuf type: " + type));
     }
@@ -107,9 +107,9 @@ public class ProtobufDecoder {
 
   public <T> Decoder<T> typeDecoder(ProtobufType<T> type) {
     if (type instanceof ProtobufPrimitiveType<?>) {
-      return primitiveDecoder((ProtobufPrimitiveType<T>) type);
+      return this.primitiveDecoder((ProtobufPrimitiveType<T>) type);
     } else if (type instanceof ProtobufComplexType<?>) {
-      return complexDecoder((ProtobufComplexType<T>) type);
+      return this.complexDecoder((ProtobufComplexType<T>) type);
     } else {
       return Decoder.error(new DecoderException("unsupported protobuf type: " + type));
     }
@@ -117,13 +117,13 @@ public class ProtobufDecoder {
 
   public <T> Decoder<T> primitiveDecoder(ProtobufPrimitiveType<T> type) {
     if (type instanceof ProtobufVarintType<?>) {
-      return varintDecoder((ProtobufVarintType<T>) type);
+      return this.varintDecoder((ProtobufVarintType<T>) type);
     } else if (type instanceof ProtobufZigZagType<?>) {
-      return zigZagDecoder((ProtobufZigZagType<T>) type);
+      return this.zigZagDecoder((ProtobufZigZagType<T>) type);
     } else if (type instanceof ProtobufFixed32Type<?>) {
-      return fixed32Decoder((ProtobufFixed32Type<T>) type);
+      return this.fixed32Decoder((ProtobufFixed32Type<T>) type);
     } else if (type instanceof ProtobufFixed64Type<?>) {
-      return fixed64Decoder((ProtobufFixed64Type<T>) type);
+      return this.fixed64Decoder((ProtobufFixed64Type<T>) type);
     } else {
       return Decoder.error(new DecoderException("unsupported protobuf type: " + type));
     }
@@ -131,13 +131,13 @@ public class ProtobufDecoder {
 
   public <T> Decoder<T> complexDecoder(ProtobufComplexType<T> type) {
     if (type instanceof ProtobufDataType<?>) {
-      return dataDecoder((ProtobufDataType<T>) type);
+      return this.dataDecoder((ProtobufDataType<T>) type);
     } else if (type instanceof ProtobufStringType<?>) {
-      return stringDecoder((ProtobufStringType<T>) type);
+      return this.stringDecoder((ProtobufStringType<T>) type);
     } else if (type instanceof ProtobufMessageType<?, ?>) {
-      return messageDecoder((ProtobufMessageType<T, ?>) type);
+      return this.messageDecoder((ProtobufMessageType<T, ?>) type);
     } else if (type instanceof ProtobufRepeatedType<?, ?>) {
-      return repeatedDecoder((ProtobufRepeatedType<?, T>) type);
+      return this.repeatedDecoder((ProtobufRepeatedType<?, T>) type);
     } else {
       return Decoder.error(new DecoderException("unsupported protobuf type: " + type));
     }

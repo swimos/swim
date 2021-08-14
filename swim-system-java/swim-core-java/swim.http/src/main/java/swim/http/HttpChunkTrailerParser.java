@@ -39,6 +39,11 @@ final class HttpChunkTrailerParser extends Parser<HttpChunkTrailer> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<HttpChunkTrailer> feed(Input input) {
+    return HttpChunkTrailerParser.parse(input, this.http, this.header, this.headers, this.step);
+  }
+
   static Parser<HttpChunkTrailer> parse(Input input, HttpParser http, Parser<? extends HttpHeader> header,
                                         Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers, int step) {
     int c = 0;
@@ -49,15 +54,15 @@ final class HttpChunkTrailerParser extends Parser<HttpChunkTrailer> {
           if (Http.isTokenChar(c)) {
             step = 2;
           } else if (Http.isSpace(c)) {
-            return error(Diagnostic.message("unsupported header line extension", input));
+            return Parser.error(Diagnostic.message("unsupported header line extension", input));
           } else if (c == '\r') {
             input = input.step();
             step = 5;
           } else {
-            return error(Diagnostic.expected("chunk trailer", input));
+            return Parser.error(Diagnostic.expected("chunk trailer", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("chunk trailer", input));
+          return Parser.error(Diagnostic.expected("chunk trailer", input));
         }
       }
       if (step == 2) {
@@ -79,10 +84,10 @@ final class HttpChunkTrailerParser extends Parser<HttpChunkTrailer> {
             input = input.step();
             step = 4;
           } else {
-            return error(Diagnostic.expected("carriage return", input));
+            return Parser.error(Diagnostic.expected("carriage return", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("carriage return", input));
+          return Parser.error(Diagnostic.expected("carriage return", input));
         }
       }
       if (step == 4) {
@@ -98,10 +103,10 @@ final class HttpChunkTrailerParser extends Parser<HttpChunkTrailer> {
             step = 1;
             continue;
           } else {
-            return error(Diagnostic.expected("line feed", input));
+            return Parser.error(Diagnostic.expected("line feed", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("line feed", input));
+          return Parser.error(Diagnostic.expected("line feed", input));
         }
       }
       break;
@@ -112,30 +117,25 @@ final class HttpChunkTrailerParser extends Parser<HttpChunkTrailer> {
         if (c == '\n') {
           input = input.step();
           if (headers == null) {
-            return done(http.chunkTrailer(FingerTrieSeq.<HttpHeader>empty()));
+            return Parser.done(http.chunkTrailer(FingerTrieSeq.<HttpHeader>empty()));
           } else {
-            return done(http.chunkTrailer(headers.bind()));
+            return Parser.done(http.chunkTrailer(headers.bind()));
           }
         } else {
-          return error(Diagnostic.expected("line feed", input));
+          return Parser.error(Diagnostic.expected("line feed", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("line feed", input));
+        return Parser.error(Diagnostic.expected("line feed", input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new HttpChunkTrailerParser(http, header, headers, step);
   }
 
   static Parser<HttpChunkTrailer> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<HttpChunkTrailer> feed(Input input) {
-    return parse(input, this.http, this.header, this.headers, this.step);
+    return HttpChunkTrailerParser.parse(input, http, null, null, 1);
   }
 
 }

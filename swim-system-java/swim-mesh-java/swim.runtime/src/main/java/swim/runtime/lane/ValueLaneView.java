@@ -30,7 +30,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
 import swim.runtime.warp.WarpLaneView;
@@ -41,13 +41,11 @@ import swim.util.Cursor;
 
 public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
   protected final AgentContext agentContext;
   protected Form<V> valueForm;
-  protected int flags;
   protected ValueLaneModel laneBinding;
+  protected int flags;
+
   protected Outlet<? extends V> input;
   protected Inlet<? super V>[] outputs; // TODO: unify with observers
   protected int version;
@@ -56,6 +54,7 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
     super(observers);
     this.agentContext = agentContext;
     this.valueForm = valueForm;
+    this.laneBinding = null;
     this.flags = flags;
 
     this.input = null;
@@ -94,12 +93,12 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
   @Override
   public <V2> ValueLaneView<V2> valueForm(Form<V2> valueForm) {
     return new ValueLaneView<V2>(this.agentContext, valueForm, this.flags,
-        typesafeObservers(this.observers));
+                                 this.typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> ValueLaneView<V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   public void setValueForm(Form<V> valueForm) {
@@ -113,12 +112,12 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
 
   @Override
   public final boolean isResident() {
-    return (this.flags & RESIDENT) != 0;
+    return (this.flags & ValueLaneView.RESIDENT) != 0;
   }
 
   @Override
   public ValueLaneView<V> isResident(boolean isResident) {
-    didSetResident(isResident);
+    this.didSetResident(isResident);
 
     // note: marked final given access of concurrently accessed volatile objects
     final ValueLaneModel laneBinding = this.laneBinding;
@@ -132,20 +131,20 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
 
   void didSetResident(boolean isResident) {
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= ValueLaneView.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~ValueLaneView.RESIDENT;
     }
   }
 
   @Override
   public final boolean isTransient() {
-    return (this.flags & TRANSIENT) != 0;
+    return (this.flags & ValueLaneView.TRANSIENT) != 0;
   }
 
   @Override
   public ValueLaneView<V> isTransient(boolean isTransient) {
-    didSetTransient(isTransient);
+    this.didSetTransient(isTransient);
 
     // note: marked final given access of concurrently accessed volatile objects
     final ValueLaneModel laneBinding = this.laneBinding;
@@ -159,9 +158,9 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
 
   void didSetTransient(boolean isTransient) {
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= ValueLaneView.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~ValueLaneView.TRANSIENT;
     }
   }
 
@@ -184,52 +183,52 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
 
   @Override
   public ValueLaneView<V> willSet(WillSet<V> willSet) {
-    return observe(willSet);
+    return this.observe(willSet);
   }
 
   @Override
   public ValueLaneView<V> didSet(DidSet<V> didSet) {
-    return observe(didSet);
+    return this.observe(didSet);
   }
 
   @Override
   public ValueLaneView<V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public ValueLaneView<V> didCommand(DidCommand didCommand) {
-    return observe(didCommand);
+    return this.observe(didCommand);
   }
 
   @Override
   public ValueLaneView<V> willUplink(WillUplink willUplink) {
-    return observe(willUplink);
+    return this.observe(willUplink);
   }
 
   @Override
   public ValueLaneView<V> didUplink(DidUplink didUplink) {
-    return observe(didUplink);
+    return this.observe(didUplink);
   }
 
   @Override
   public ValueLaneView<V> willEnter(WillEnter willEnter) {
-    return observe(willEnter);
+    return this.observe(willEnter);
   }
 
   @Override
   public ValueLaneView<V> didEnter(DidEnter didEnter) {
-    return observe(didEnter);
+    return this.observe(didEnter);
   }
 
   @Override
   public ValueLaneView<V> willLeave(WillLeave willLeave) {
-    return observe(willLeave);
+    return this.observe(willLeave);
   }
 
   @Override
   public ValueLaneView<V> didLeave(DidLeave didLeave) {
-    return observe(didLeave);
+    return this.observe(didLeave);
   }
 
   @SuppressWarnings("unchecked")
@@ -246,8 +245,8 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
           try {
             newValue = ((WillSet<V>) observers).willSet(newValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -263,8 +262,8 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
               try {
                 newValue = ((WillSet<V>) observer).willSet(newValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -295,8 +294,8 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
           try {
             ((DidSet<V>) observers).didSet(newValue, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -312,8 +311,8 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
               try {
                 ((DidSet<V>) observer).didSet(newValue, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -335,8 +334,8 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
   }
 
   public void laneDidSet(V newValue, V oldValue) {
-    decohere();
-    recohere(0); // TODO: debounce and track version
+    this.decohere();
+    this.recohere(0); // TODO: debounce and track version
   }
 
   @Override
@@ -452,50 +451,50 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
 
   @Override
   public void decohereOutput() {
-    decohere();
+    this.decohere();
   }
 
   @Override
   public void decohereInput() {
-    decohere();
+    this.decohere();
   }
 
   public void decohere() {
     if (this.version >= 0) {
-      willDecohere();
+      this.willDecohere();
       this.version = -1;
-      onDecohere();
+      this.onDecohere();
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         this.outputs[i].decohereOutput();
       }
-      didDecohere();
+      this.didDecohere();
     }
   }
 
   @Override
   public void recohereOutput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   @Override
   public void recohereInput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   public void recohere(int version) {
     if (this.version < 0) {
-      willRecohere(version);
+      this.willRecohere(version);
       this.version = version;
       if (this.input != null) {
         this.input.recohereInput(version);
       }
-      onRecohere(version);
+      this.onRecohere(version);
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         this.outputs[i].recohereOutput(version);
       }
-      didRecohere(version);
+      this.didRecohere(version);
     }
   }
 
@@ -518,12 +517,15 @@ public class ValueLaneView<V> extends WarpLaneView implements ValueLane<V> {
   protected void onRecohere(int version) {
     if (this.input != null) {
       final V value = this.input.get();
-      set(value);
+      this.set(value);
     }
   }
 
   protected void didRecohere(int version) {
     // hook
   }
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
 
 }

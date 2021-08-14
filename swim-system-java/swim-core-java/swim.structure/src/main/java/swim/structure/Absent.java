@@ -21,7 +21,7 @@ import swim.util.Murmur3;
 public final class Absent extends Value {
 
   private Absent() {
-    // stub
+    // singleton
   }
 
   /**
@@ -175,7 +175,7 @@ public final class Absent extends Value {
 
   @Override
   public int compareTo(Item other) {
-    return Integer.compare(typeOrder(), other.typeOrder());
+    return Integer.compare(this.typeOrder(), other.typeOrder());
   }
 
   @Override
@@ -183,24 +183,26 @@ public final class Absent extends Value {
     return this == other;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Absent.class);
+    if (Absent.hashSeed == 0) {
+      Absent.hashSeed = Murmur3.seed(Absent.class);
     }
-    return hashSeed;
+    return Absent.hashSeed;
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Value").write('.').write("absent").write('(').write(')');
-  }
-
-  public static Absent absent() {
-    return VALUE;
+    return output;
   }
 
   private static final Absent VALUE = new Absent();
-  private static int hashSeed;
+
+  public static Absent absent() {
+    return Absent.VALUE;
+  }
 
 }

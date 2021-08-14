@@ -41,15 +41,17 @@ public class DatabaseSpec {
     };
     final Database database = new Database(store);
     final Map<String, Integer> map = database.openBTreeMap("test")
-        .keyForm(Form.forString())
-        .valueForm(Form.forInteger());
+                                             .keyForm(Form.forString())
+                                             .valueForm(Form.forInteger());
 
     final int zone = 1;
     final long created = System.currentTimeMillis();
-    testOutputDir.mkdirs();
-    final File testFile = new File(testOutputDir, "commit-1.swimdb");
+    this.testOutputDir.mkdirs();
+    final File testFile = new File(this.testOutputDir, "commit-1.swimdb");
     final FileChannel channel = FileChannel.open(testFile.toPath(),
-        StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                                                 StandardOpenOption.WRITE,
+                                                 StandardOpenOption.CREATE,
+                                                 StandardOpenOption.TRUNCATE_EXISTING);
     channel.position(2 * Germ.BLOCK_SIZE);
 
     map.put("a", 1);

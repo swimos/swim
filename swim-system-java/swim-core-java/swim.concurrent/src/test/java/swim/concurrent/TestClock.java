@@ -65,7 +65,7 @@ class TestClock extends Clock {
   }
 
   void await(CountDownLatch latch) {
-    await(latch, 1000);
+    this.await(latch, 1000);
   }
 
 }

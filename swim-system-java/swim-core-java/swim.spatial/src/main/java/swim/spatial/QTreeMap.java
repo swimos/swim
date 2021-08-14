@@ -25,10 +25,6 @@ import swim.util.Murmur3;
 
 public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialMap<K, S, V>, Comparator<QTreeEntry<K, S, V>>, Cloneable, Debug {
 
-  @SuppressWarnings("rawtypes")
-  static final AtomicReferenceFieldUpdater<QTreeMap, QTreePage> ROOT =
-      AtomicReferenceFieldUpdater.newUpdater(QTreeMap.class, QTreePage.class, "root");
-  private static int hashSeed;
   final Z2Form<S> shapeForm;
   volatile QTreePage<K, S, V> root;
 
@@ -41,23 +37,25 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
     this(shapeForm, QTreePage.<K, S, V>empty());
   }
 
-  @SuppressWarnings("rawtypes")
-  public static <K, S, V> QTreeMap<K, S, V> empty(Z2Form<S> shapeForm) {
-    return new QTreeMap<K, S, V>(shapeForm);
-  }
-
   public Z2Form<S> shapeForm() {
     return this.shapeForm;
   }
 
+  @SuppressWarnings("unchecked")
+  final QTreePage<K, S, V> root() {
+    return (QTreePage<K, S, V>) QTreeMap.ROOT.get(this);
+  }
+
   @Override
   public boolean isEmpty() {
-    return this.root.isEmpty();
+    final QTreePage<K, S, V> root = this.root();
+    return root.isEmpty();
   }
 
   @Override
   public int size() {
-    return (int) this.root.span();
+    final QTreePage<K, S, V> root = this.root();
+    return (int) root.span();
   }
 
   @Override
@@ -65,12 +63,14 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
     final Z2Form<S> shapeForm = this.shapeForm;
     final long x = BitInterval.span(shapeForm.getXMin(shape), shapeForm.getXMax(shape));
     final long y = BitInterval.span(shapeForm.getYMin(shape), shapeForm.getYMax(shape));
-    return this.root.containsKey(key, x, y, this);
+    final QTreePage<K, S, V> root = this.root();
+    return root.containsKey(key, x, y, this);
   }
 
   @Override
   public boolean containsKey(Object key) {
-    final Cursor<QTreeEntry<K, S, V>> cursor = this.root.cursor();
+    final QTreePage<K, S, V> root = this.root();
+    final Cursor<QTreeEntry<K, S, V>> cursor = root.cursor();
     while (cursor.hasNext()) {
       if (key.equals(cursor.next().key)) {
         return true;
@@ -81,7 +81,8 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
 
   @Override
   public boolean containsValue(Object value) {
-    final Cursor<QTreeEntry<K, S, V>> cursor = this.root.cursor();
+    final QTreePage<K, S, V> root = this.root();
+    final Cursor<QTreeEntry<K, S, V>> cursor = root.cursor();
     while (cursor.hasNext()) {
       if (value.equals(cursor.next().value)) {
         return true;
@@ -95,12 +96,14 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
     final Z2Form<S> shapeForm = this.shapeForm;
     final long x = BitInterval.span(shapeForm.getXMin(shape), shapeForm.getXMax(shape));
     final long y = BitInterval.span(shapeForm.getYMin(shape), shapeForm.getYMax(shape));
-    return this.root.get(key, x, y, this);
+    final QTreePage<K, S, V> root = this.root();
+    return root.get(key, x, y, this);
   }
 
   @Override
   public V get(Object key) {
-    final Cursor<QTreeEntry<K, S, V>> cursor = this.root.cursor();
+    final QTreePage<K, S, V> root = this.root();
+    final Cursor<QTreeEntry<K, S, V>> cursor = root.cursor();
     while (cursor.hasNext()) {
       final QTreeEntry<K, S, V> slot = cursor.next();
       if (key.equals(slot.key)) {
@@ -116,11 +119,11 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
     final long x = BitInterval.span(shapeForm.getXMin(shape), shapeForm.getXMax(shape));
     final long y = BitInterval.span(shapeForm.getYMin(shape), shapeForm.getYMax(shape));
     do {
-      final QTreePage<K, S, V> oldRoot = this.root;
+      final QTreePage<K, S, V> oldRoot = this.root();
       final QTreePage<K, S, V> newRoot = oldRoot.updated(key, shape, x, y, newValue, this)
-          .balanced(this);
+                                                .balanced(this);
       if (oldRoot != newRoot) {
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (QTreeMap.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           return oldRoot.get(key, x, y, this);
         }
       } else {
@@ -137,13 +140,13 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
     final long newX = BitInterval.span(shapeForm.getXMin(newShape), shapeForm.getXMax(newShape));
     final long newY = BitInterval.span(shapeForm.getYMin(newShape), shapeForm.getYMax(newShape));
     do {
-      final QTreePage<K, S, V> oldRoot = this.root;
+      final QTreePage<K, S, V> oldRoot = this.root();
       final QTreePage<K, S, V> newRoot = oldRoot.removed(key, oldX, oldY, this)
-          .balanced(this)
-          .updated(key, newShape, newX, newY, newValue, this)
-          .balanced(this);
+                                                .balanced(this)
+                                                .updated(key, newShape, newX, newY, newValue, this)
+                                                .balanced(this);
       if (oldRoot != newRoot) {
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (QTreeMap.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           return oldRoot.get(key, oldX, oldY, this);
         }
       } else {
@@ -158,11 +161,11 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
     final long x = BitInterval.span(shapeForm.getXMin(shape), shapeForm.getXMax(shape));
     final long y = BitInterval.span(shapeForm.getYMin(shape), shapeForm.getYMax(shape));
     do {
-      final QTreePage<K, S, V> oldRoot = this.root;
+      final QTreePage<K, S, V> oldRoot = this.root();
       final QTreePage<K, S, V> newRoot = oldRoot.removed(key, x, y, this)
-          .balanced(this);
+                                                .balanced(this);
       if (oldRoot != newRoot) {
-        if (ROOT.compareAndSet(this, oldRoot, newRoot)) {
+        if (QTreeMap.ROOT.compareAndSet(this, oldRoot, newRoot)) {
           return oldRoot.get(key, x, y, this);
         }
       } else {
@@ -173,20 +176,20 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
 
   @Override
   public void clear() {
-    this.root = QTreePage.empty();
+    QTreeMap.ROOT.set(this, QTreePage.empty());
   }
 
   public QTreeMap<K, S, V> updated(K key, S shape, V newValue) {
     final Z2Form<S> shapeForm = this.shapeForm;
     final long x = BitInterval.span(shapeForm.getXMin(shape), shapeForm.getXMax(shape));
     final long y = BitInterval.span(shapeForm.getYMin(shape), shapeForm.getYMax(shape));
-    final QTreePage<K, S, V> oldRoot = this.root;
+    final QTreePage<K, S, V> oldRoot = this.root();
     QTreePage<K, S, V> newRoot = oldRoot.updated(key, shape, x, y, newValue, this);
     if (oldRoot != newRoot) {
       if (newRoot.span() > oldRoot.span()) {
         newRoot = newRoot.balanced(this);
       }
-      return copy(newRoot);
+      return this.copy(newRoot);
     } else {
       return this;
     }
@@ -196,47 +199,52 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
     final Z2Form<S> shapeForm = this.shapeForm;
     final long x = BitInterval.span(shapeForm.getXMin(shape), shapeForm.getXMax(shape));
     final long y = BitInterval.span(shapeForm.getYMin(shape), shapeForm.getYMax(shape));
-    final QTreePage<K, S, V> oldRoot = this.root;
+    final QTreePage<K, S, V> oldRoot = this.root();
     QTreePage<K, S, V> newRoot = oldRoot.removed(key, x, y, this);
     if (oldRoot != newRoot) {
       newRoot = newRoot.balanced(this);
-      return copy(newRoot);
+      return this.copy(newRoot);
     } else {
       return this;
     }
   }
 
   @Override
-  public Cursor<Entry<K, S, V>> iterator(S shape) {
+  public Cursor<SpatialMap.Entry<K, S, V>> iterator(S shape) {
     final Z2Form<S> shapeForm = this.shapeForm;
     final long x = BitInterval.span(shapeForm.getXMin(shape), shapeForm.getXMax(shape));
     final long y = BitInterval.span(shapeForm.getYMin(shape), shapeForm.getYMax(shape));
-    return new QTreeShapeCursor<K, S, V>(this.root.cursor(x, y), shapeForm, shape);
+    final QTreePage<K, S, V> root = this.root();
+    return new QTreeShapeCursor<K, S, V>(root.cursor(x, y), shapeForm, shape);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public Cursor<Entry<K, S, V>> iterator() {
-    return (Cursor<Entry<K, S, V>>) (Cursor<?>) this.root.cursor();
+  public Cursor<SpatialMap.Entry<K, S, V>> iterator() {
+    final QTreePage<K, S, V> root = this.root();
+    return (Cursor<SpatialMap.Entry<K, S, V>>) (Cursor<?>) root.cursor();
   }
 
   @Override
   public Cursor<K> keyIterator() {
-    return Cursor.keys(this.root.cursor());
+    final QTreePage<K, S, V> root = this.root();
+    return Cursor.keys(root.cursor());
   }
 
   @Override
   public Cursor<V> valueIterator() {
-    return Cursor.values(this.root.cursor());
+    final QTreePage<K, S, V> root = this.root();
+    return Cursor.values(root.cursor());
   }
 
   public SpatialMap<K, S, V> snapshot() {
-    return new QTree<K, S, V>(this.shapeForm, this.root);
+    final QTreePage<K, S, V> root = this.root();
+    return new QTree<K, S, V>(this.shapeForm, root);
   }
 
   @Override
   public QTreeMap<K, S, V> clone() {
-    return copy(this.root);
+    return this.copy(this.root);
   }
 
   protected QTreeMap<K, S, V> copy(QTreePage<K, S, V> root) {
@@ -250,11 +258,16 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
       return true;
     } else if (other instanceof QTreeMap<?, ?, ?>) {
       final QTreeMap<K, S, V> that = (QTreeMap<K, S, V>) other;
-      if (size() == that.size()) {
-        final Cursor<Entry<K, S, V>> those = that.iterator();
+      final QTreePage<K, S, V> root = this.root();
+      final Z2Form<S> shapeForm = this.shapeForm;
+      if (root.span() == (long) that.size()) {
+        final Cursor<SpatialMap.Entry<K, S, V>> those = that.iterator();
         while (those.hasNext()) {
-          final Entry<K, S, V> entry = those.next();
-          final V value = get(entry.getKey());
+          final SpatialMap.Entry<K, S, V> entry = those.next();
+          final S shape = entry.getShape();
+          final long x = BitInterval.span(shapeForm.getXMin(shape), shapeForm.getXMax(shape));
+          final long y = BitInterval.span(shapeForm.getYMin(shape), shapeForm.getYMax(shape));
+          final V value = root.get(entry.getKey(), x, y, this);
           final V v = entry.getValue();
           if (value == null ? v != null : !value.equals(v)) {
             return false;
@@ -266,17 +279,19 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(QTree.class);
+    if (QTreeMap.hashSeed == 0) {
+      QTreeMap.hashSeed = Murmur3.seed(QTree.class);
     }
     int a = 0;
     int b = 0;
     int c = 1;
-    final Cursor<Entry<K, S, V>> these = iterator();
+    final Cursor<SpatialMap.Entry<K, S, V>> these = this.iterator();
     while (these.hasNext()) {
-      final Entry<K, S, V> entry = these.next();
+      final SpatialMap.Entry<K, S, V> entry = these.next();
       final int h = Murmur3.mix(Murmur3.hash(entry.getKey()), Murmur3.hash(entry.getValue()));
       a ^= h;
       b += h;
@@ -284,24 +299,34 @@ public class QTreeMap<K, S, V> extends QTreeContext<K, S, V> implements SpatialM
         c *= h;
       }
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed, a), b), c));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(QTreeMap.hashSeed, a), b), c));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("QTree").write('.').write("empty").write('(')
-        .debug(this.shapeForm).write(')');
-    for (Entry<K, S, V> entry : this) {
+                   .debug(this.shapeForm).write(')');
+    for (SpatialMap.Entry<K, S, V> entry : this) {
       output = output.write('.').write("updated").write('(')
-          .debug(entry.getKey()).write(", ")
-          .debug(entry.getShape()).write(", ")
-          .debug(entry.getValue()).write(')');
+                     .debug(entry.getKey()).write(", ")
+                     .debug(entry.getShape()).write(", ")
+                     .debug(entry.getValue()).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  @SuppressWarnings("rawtypes")
+  static final AtomicReferenceFieldUpdater<QTreeMap, QTreePage> ROOT =
+      AtomicReferenceFieldUpdater.newUpdater(QTreeMap.class, QTreePage.class, "root");
+
+  @SuppressWarnings("rawtypes")
+  public static <K, S, V> QTreeMap<K, S, V> empty(Z2Form<S> shapeForm) {
+    return new QTreeMap<K, S, V>(shapeForm);
   }
 
 }

@@ -65,9 +65,9 @@ public abstract class IpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
+      this.bind(endpoint, service);
       serverBind.await();
-      connect(endpoint, client);
+      this.connect(endpoint, client);
       serverConnect.await();
       clientConnect.await();
     } catch (InterruptedException cause) {
@@ -96,7 +96,7 @@ public abstract class IpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      connect(endpoint, client);
+      this.connect(endpoint, client);
       clientDisconnect.await();
     } catch (InterruptedException cause) {
       throw new TestException(cause);
@@ -159,8 +159,8 @@ public abstract class IpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       clientConnect.await();
       clientDisconnect.await();
       serverConnect.await();
@@ -229,8 +229,8 @@ public abstract class IpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       serverConnect.await();
       serverDisconnect.await();
       clientConnect.await();
@@ -308,8 +308,8 @@ public abstract class IpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       serverWrite.await();
       clientRead.await();
     } catch (InterruptedException cause) {
@@ -385,8 +385,8 @@ public abstract class IpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       connect.await();
       serverWrite.await();
       endpoint.stop();
@@ -467,8 +467,8 @@ public abstract class IpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       final long ta = System.currentTimeMillis();
       connect.await();
       Thread.sleep(1000);

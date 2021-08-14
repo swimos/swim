@@ -34,6 +34,11 @@ final class ExpectParser extends Parser<Expect> {
     this(null, 1);
   }
 
+  @Override
+  public Parser<Expect> feed(Input input) {
+    return ExpectParser.parse(input, this.value, this.step);
+  }
+
   static Parser<Expect> parse(Input input, Output<String> value, int step) {
     int c = 0;
     do {
@@ -54,7 +59,7 @@ final class ExpectParser extends Parser<Expect> {
           input = input.step();
           step = 2;
         } else if (!input.isEmpty()) {
-          return done(Expect.from(value.bind()));
+          return Parser.done(Expect.create(value.bind()));
         }
       }
       if (step == 2) {
@@ -73,24 +78,19 @@ final class ExpectParser extends Parser<Expect> {
           step = 1;
           continue;
         } else if (!input.isEmpty()) {
-          return done(Expect.from(value.bind()));
+          return Parser.done(Expect.create(value.bind()));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ExpectParser(value, step);
   }
 
   static Parser<Expect> parse(Input input) {
-    return parse(input, null, 1);
-  }
-
-  @Override
-  public Parser<Expect> feed(Input input) {
-    return parse(input, this.value, this.step);
+    return ExpectParser.parse(input, null, 1);
   }
 
 }

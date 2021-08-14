@@ -48,17 +48,17 @@ public abstract class AbstractHttpClient implements HttpClient, IpContext, FlowC
 
   @Override
   public void willRequest(HttpRequest<?> request) {
-    // stub
+    // hook
   }
 
   @Override
   public void didRequest(HttpRequest<?> request) {
-    // stub
+    // hook
   }
 
   @Override
   public void willRespond(HttpResponse<?> response) {
-    // stub
+    // hook
   }
 
   @Override
@@ -66,53 +66,53 @@ public abstract class AbstractHttpClient implements HttpClient, IpContext, FlowC
     final Connection connection = response.getHeader(Connection.class);
     if (connection != null) {
       if (connection.contains("close")) {
-        close();
+        this.close();
         return;
       } else if (connection.contains("Upgrade")) {
         return;
       }
     }
-    context.readResponse();
+    this.context.readResponse();
   }
 
   @Override
   public void willConnect() {
-    // stub
+    // hook
   }
 
   @Override
   public void didConnect() {
-    context.readResponse();
+    this.context.readResponse();
   }
 
   @Override
   public void willSecure() {
-    // stub
+    // hook
   }
 
   @Override
   public void didSecure() {
-    // stub
+    // hook
   }
 
   @Override
   public void willBecome(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didBecome(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didTimeout() {
-    // stub
+    // hook
   }
 
   @Override
   public void didDisconnect() {
-    // stub
+    // hook
   }
 
   @Override

@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 
 class TcpService implements Transport, IpServiceContext {
 
@@ -124,7 +124,7 @@ class TcpService implements Transport, IpServiceContext {
       this.service.didAccept(socket);
       transport.didConnect();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       socket.didFail(cause);
@@ -165,12 +165,12 @@ class TcpService implements Transport, IpServiceContext {
 
   @Override
   public void didTimeout() {
-    // stub
+    // hook
   }
 
   @Override
   public void didClose() {
-    didUnbind();
+    this.didUnbind();
   }
 
   @Override

@@ -34,34 +34,10 @@ import swim.util.Murmur3;
 
 public final class SecWebSocketKey extends HttpHeader {
 
-  private static int hashSeed;
   final byte[] key;
 
   SecWebSocketKey(byte[] key) {
     this.key = key;
-  }
-
-  public static SecWebSocketKey from(byte[] key) {
-    return new SecWebSocketKey(key);
-  }
-
-  public static SecWebSocketKey from(String keyString) {
-    final Input input = Unicode.stringInput(keyString);
-    Parser<byte[]> parser = Base64.standard().parseByteArray(input);
-    if (input.isCont() && !parser.isError()) {
-      parser = Parser.error(Diagnostic.unexpected(input));
-    }
-    return new SecWebSocketKey(parser.bind());
-  }
-
-  public static SecWebSocketKey generate() {
-    final byte[] key = new byte[16];
-    ThreadLocalRandom.current().nextBytes(key);
-    return new SecWebSocketKey(key);
-  }
-
-  public static Parser<SecWebSocketKey> parseHttpValue(Input input, HttpParser http) {
-    return SecWebSocketKeyParser.parse(input);
   }
 
   @Override
@@ -109,19 +85,45 @@ public final class SecWebSocketKey extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(SecWebSocketKey.class);
+    if (SecWebSocketKey.hashSeed == 0) {
+      SecWebSocketKey.hashSeed = Murmur3.seed(SecWebSocketKey.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, Arrays.hashCode(this.key)));
+    return Murmur3.mash(Murmur3.mix(SecWebSocketKey.hashSeed, Arrays.hashCode(this.key)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("SecWebSocketKey").write('.').write("from").write('(').write('"');
-    Base64.standard().writeByteArray(this.key, output);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("SecWebSocketKey").write('.').write("create").write('(').write('"');
+    Base64.standard().writeByteArray(this.key, output).bind();
     output = output.write('"').write(')');
+    return output;
+  }
+
+  public static SecWebSocketKey create(byte[] key) {
+    return new SecWebSocketKey(key);
+  }
+
+  public static SecWebSocketKey create(String keyString) {
+    final Input input = Unicode.stringInput(keyString);
+    Parser<byte[]> parser = Base64.standard().parseByteArray(input);
+    if (input.isCont() && !parser.isError()) {
+      parser = Parser.error(Diagnostic.unexpected(input));
+    }
+    return new SecWebSocketKey(parser.bind());
+  }
+
+  public static SecWebSocketKey generate() {
+    final byte[] key = new byte[16];
+    ThreadLocalRandom.current().nextBytes(key);
+    return new SecWebSocketKey(key);
+  }
+
+  public static Parser<SecWebSocketKey> parseHttpValue(Input input, HttpParser http) {
+    return SecWebSocketKeyParser.parse(input);
   }
 
 }

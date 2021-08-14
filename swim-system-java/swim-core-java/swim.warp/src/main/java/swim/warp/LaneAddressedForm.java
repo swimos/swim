@@ -23,7 +23,7 @@ import swim.uri.Uri;
 
 abstract class LaneAddressedForm<E extends LaneAddressed> extends Form<E> {
 
-  abstract E from(Uri nodeUri, Uri lane, Value body);
+  abstract E create(Uri nodeUri, Uri lane, Value body);
 
   @Override
   public E unit() {
@@ -33,10 +33,9 @@ abstract class LaneAddressedForm<E extends LaneAddressed> extends Form<E> {
   @Override
   public Item mold(E envelope) {
     if (envelope != null) {
-      final Record headers = Record.create(2)
-          .slot("node", envelope.nodeUri.toString())
-          .slot("lane", envelope.laneUri.toString());
-      return Attr.of(tag(), headers).concat(envelope.body());
+      final Record headers = Record.create(2).slot("node", envelope.nodeUri.toString())
+                                             .slot("lane", envelope.laneUri.toString());
+      return Attr.of(this.tag(), headers).concat(envelope.body());
     } else {
       return Item.extant();
     }
@@ -45,7 +44,7 @@ abstract class LaneAddressedForm<E extends LaneAddressed> extends Form<E> {
   @Override
   public E cast(Item item) {
     final Value value = item.toValue();
-    final Record headers = value.headers(tag());
+    final Record headers = value.headers(this.tag());
     Uri nodeUri = null;
     Uri laneUri = null;
     for (int i = 0, n = headers.size(); i < n; i += 1) {
@@ -67,7 +66,7 @@ abstract class LaneAddressedForm<E extends LaneAddressed> extends Form<E> {
     }
     if (nodeUri != null && laneUri != null) {
       final Value body = value.body();
-      return from(nodeUri, laneUri, body);
+      return this.create(nodeUri, laneUri, body);
     }
     return null;
   }

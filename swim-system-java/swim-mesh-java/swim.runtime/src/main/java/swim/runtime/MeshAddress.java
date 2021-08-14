@@ -43,12 +43,12 @@ public final class MeshAddress implements EdgeAddressed, MeshAddressed, Debug {
 
   @Override
   public MeshAddress meshUri(Uri meshUri) {
-    return copy(this.edgeName, meshUri);
+    return this.copy(this.edgeName, meshUri);
   }
 
   @Override
   public MeshAddress meshUri(String meshUri) {
-    return meshUri(Uri.parse(meshUri));
+    return this.meshUri(Uri.parse(meshUri));
   }
 
   MeshAddress copy(String edgeName, Uri meshUri) {
@@ -71,19 +71,22 @@ public final class MeshAddress implements EdgeAddressed, MeshAddressed, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.hash(MeshAddress.class);
+    if (MeshAddress.hashSeed == 0) {
+      MeshAddress.hashSeed = Murmur3.hash(MeshAddress.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(MeshAddress.hashSeed,
         this.edgeName.hashCode()), this.meshUri.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("MeshAddress").write('.').write("from").write('(')
-        .debug(this.edgeName).write(", ").debug(this.meshUri.toString()).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MeshAddress").write('.').write("create").write('(')
+                   .debug(this.edgeName).write(", ").debug(this.meshUri.toString()).write(')');
+    return output;
   }
 
   @Override
@@ -91,13 +94,11 @@ public final class MeshAddress implements EdgeAddressed, MeshAddressed, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static MeshAddress from(String edgeName, Uri meshUri) {
+  public static MeshAddress create(String edgeName, Uri meshUri) {
     return new MeshAddress(edgeName, meshUri);
   }
 
-  public static MeshAddress from(String edgeName, String meshUri) {
+  public static MeshAddress create(String edgeName, String meshUri) {
     return new MeshAddress(edgeName, Uri.parse(meshUri));
   }
 

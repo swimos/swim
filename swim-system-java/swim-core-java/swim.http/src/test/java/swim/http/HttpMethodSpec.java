@@ -19,10 +19,6 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpMethodSpec {
 
-  public void assertParses(String string, HttpMethod method) {
-    HttpAssertions.assertParses(Http.standardParser().methodParser(), string, method);
-  }
-
   @Test
   public void parseMethods() {
     assertParses("GET", HttpMethod.GET);
@@ -45,6 +41,10 @@ public class HttpMethodSpec {
     assertWrites(HttpMethod.CONNECT, "CONNECT");
     assertWrites(HttpMethod.OPTIONS, "OPTIONS");
     assertWrites(HttpMethod.TRACE, "TRACE");
+  }
+
+  public static void assertParses(String string, HttpMethod method) {
+    HttpAssertions.assertParses(Http.standardParser().methodParser(), string, method);
   }
 
 }

@@ -22,44 +22,12 @@ import swim.util.Murmur3;
 
 public class UriUser implements Debug, Display {
 
-  private static int hashSeed;
-  private static UriUser undefined;
   protected final String username;
   protected final String password;
 
   protected UriUser(String username, String password) {
     this.username = username;
     this.password = password;
-  }
-
-  public static UriUser undefined() {
-    if (undefined == null) {
-      undefined = new UriUser(null, null);
-    }
-    return undefined;
-  }
-
-  public static UriUser from(String username) {
-    if (username != null) {
-      return new UriUser(username, null);
-    } else {
-      return undefined();
-    }
-  }
-
-  public static UriUser from(String username, String password) {
-    if (username != null || password != null) {
-      if (username == null) {
-        username = "";
-      }
-      return new UriUser(username, password);
-    } else {
-      return undefined();
-    }
-  }
-
-  public static UriUser parse(String string) {
-    return Uri.standardParser().parseUserString(string);
   }
 
   public boolean isDefined() {
@@ -72,7 +40,7 @@ public class UriUser implements Debug, Display {
 
   public UriUser username(String username) {
     if (username != this.username) {
-      return copy(username, this.password);
+      return this.copy(username, this.password);
     } else {
       return this;
     }
@@ -84,14 +52,14 @@ public class UriUser implements Debug, Display {
 
   public UriUser password(String password) {
     if (password != this.password) {
-      return copy(this.username, password);
+      return this.copy(this.username, password);
     } else {
       return this;
     }
   }
 
   protected UriUser copy(String username, String password) {
-    return UriUser.from(username, password);
+    return UriUser.create(username, password);
   }
 
   @Override
@@ -106,39 +74,76 @@ public class UriUser implements Debug, Display {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(UriUser.class);
+    if (UriUser.hashSeed == 0) {
+      UriUser.hashSeed = Murmur3.seed(UriUser.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(UriUser.hashSeed,
         Murmur3.hash(this.username)), Murmur3.hash(this.password)));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("UriUser").write('.');
-    if (isDefined()) {
-      output = output.write("parse").write('(').write('"').display(this).write('"').write(')');
+    if (this.isDefined()) {
+      output = output.write("parse").write('(').write('"').display(this).write('"');
     } else {
-      output = output.write("undefined").write('(').write(')');
+      output = output.write("undefined").write('(');
     }
+    output = output.write(')');
+    return output;
   }
 
   @Override
-  public void display(Output<?> output) {
+  public <T> Output<T> display(Output<T> output) {
     if (this.username != null) {
-      Uri.writeUser(this.username, output);
+      output = Uri.writeUser(this.username, output);
       if (this.password != null) {
         output = output.write(':');
-        Uri.writeUser(this.password, output);
+        output = Uri.writeUser(this.password, output);
       }
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.display(this);
+  }
+
+  private static UriUser undefined;
+
+  public static UriUser undefined() {
+    if (UriUser.undefined == null) {
+      UriUser.undefined = new UriUser(null, null);
+    }
+    return UriUser.undefined;
+  }
+
+  public static UriUser create(String username) {
+    if (username != null) {
+      return new UriUser(username, null);
+    } else {
+      return UriUser.undefined();
+    }
+  }
+
+  public static UriUser create(String username, String password) {
+    if (username != null || password != null) {
+      if (username == null) {
+        username = "";
+      }
+      return new UriUser(username, password);
+    } else {
+      return UriUser.undefined();
+    }
+  }
+
+  public static UriUser parse(String string) {
+    return Uri.standardParser().parseUserString(string);
   }
 
 }

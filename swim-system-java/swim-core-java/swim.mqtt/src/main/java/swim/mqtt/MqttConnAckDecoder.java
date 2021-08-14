@@ -41,6 +41,12 @@ final class MqttConnAckDecoder extends Decoder<MqttConnAck> {
     this(mqtt, 0, 0, 0, 0, 1);
   }
 
+  @Override
+  public Decoder<MqttConnAck> feed(InputBuffer input) {
+    return MqttConnAckDecoder.decode(input, this.mqtt, this.packetFlags, this.connectFlags,
+                                     this.connectCode, this.remaining, this.step);
+  }
+
   static Decoder<MqttConnAck> decode(InputBuffer input, MqttDecoder mqtt,
                                      int packetFlags, int connectFlags,
                                      int connectCode, int remaining, int step) {
@@ -59,7 +65,7 @@ final class MqttConnAckDecoder extends Decoder<MqttConnAck> {
       } else if (step < 5) {
         step += 1;
       } else {
-        return error(new MqttException("packet length too long"));
+        return Decoder.error(new MqttException("packet length too long"));
       }
     }
     if (step == 6 && remaining > 0 && input.isCont()) {
@@ -75,25 +81,18 @@ final class MqttConnAckDecoder extends Decoder<MqttConnAck> {
       step = 8;
     }
     if (step == 8 && remaining == 0) {
-      return done(mqtt.connAck(packetFlags, connectFlags, connectCode));
+      return Decoder.done(mqtt.connAck(packetFlags, connectFlags, connectCode));
     }
     if (remaining < 0) {
-      return error(new MqttException("packet length too short"));
+      return Decoder.error(new MqttException("packet length too short"));
     } else if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     }
-    return new MqttConnAckDecoder(mqtt, packetFlags, connectFlags, connectCode,
-        remaining, step);
+    return new MqttConnAckDecoder(mqtt, packetFlags, connectFlags, connectCode, remaining, step);
   }
 
   static Decoder<MqttConnAck> decode(InputBuffer input, MqttDecoder mqtt) {
-    return decode(input, mqtt, 0, 0, 0, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttConnAck> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.connectFlags,
-        this.connectCode, this.remaining, this.step);
+    return MqttConnAckDecoder.decode(input, mqtt, 0, 0, 0, 0, 1);
   }
 
 }

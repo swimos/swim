@@ -42,7 +42,11 @@ public enum ClientAuth implements Debug {
    */
   NEED;
 
-  private static Form<ClientAuth> form = new ClientAuthForm();
+  @Override
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("ClientAuth").write('.').write(this.name());
+    return output;
+  }
 
   /**
    * Returns the {@code ClientAuth} with the given case-insensitive {@code
@@ -53,30 +57,27 @@ public enum ClientAuth implements Debug {
    */
   public static ClientAuth from(String name) {
     if ("none".equalsIgnoreCase(name)) {
-      return NONE;
+      return ClientAuth.NONE;
     } else if ("want".equalsIgnoreCase(name)) {
-      return WANT;
+      return ClientAuth.WANT;
     } else if ("need".equalsIgnoreCase(name)) {
-      return NEED;
+      return ClientAuth.NEED;
     } else {
       throw new IllegalArgumentException(name);
     }
   }
+
+  private static Form<ClientAuth> form = new ClientAuthForm();
 
   /**
    * Returns the structural {@code Form} of {@code ClientAuth}.
    */
   @Kind
   public static Form<ClientAuth> form() {
-    if (form == null) {
-      form = new ClientAuthForm();
+    if (ClientAuth.form == null) {
+      ClientAuth.form = new ClientAuthForm();
     }
-    return form;
-  }
-
-  @Override
-  public void debug(Output<?> output) {
-    output = output.write("ClientAuth").write('.').write(name());
+    return ClientAuth.form;
   }
 
 }
@@ -97,14 +98,10 @@ final class ClientAuthForm extends Form<ClientAuth> {
   public Item mold(ClientAuth clientAuth) {
     if (clientAuth != null) {
       switch (clientAuth) {
-        case NONE:
-          return Text.from("none");
-        case WANT:
-          return Text.from("want");
-        case NEED:
-          return Text.from("need");
-        default:
-          return Item.absent();
+        case NONE: return Text.from("none");
+        case WANT: return Text.from("want");
+        case NEED: return Text.from("need");
+        default: return Item.absent();
       }
     } else {
       return Item.extant();

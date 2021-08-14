@@ -35,6 +35,11 @@ final class WsStatusEncoder extends Encoder<Object, WsStatus> {
     this(status, null, 1);
   }
 
+  @Override
+  public Encoder<Object, WsStatus> pull(OutputBuffer<?> output) {
+    return WsStatusEncoder.encode(output, this.status, this.part, this.step);
+  }
+
   static Encoder<Object, WsStatus> encode(OutputBuffer<?> output, WsStatus status,
                                           Encoder<?, ?> part, int step) {
     if (step == 1 && output.isCont()) {
@@ -52,26 +57,21 @@ final class WsStatusEncoder extends Encoder<Object, WsStatus> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done(status);
+        return Encoder.done(status);
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new WsStatusEncoder(status, part, step);
   }
 
   static Encoder<Object, WsStatus> encode(OutputBuffer<?> output, WsStatus status) {
-    return encode(output, status, null, 1);
-  }
-
-  @Override
-  public Encoder<Object, WsStatus> pull(OutputBuffer<?> output) {
-    return encode(output, this.status, this.part, this.step);
+    return WsStatusEncoder.encode(output, status, null, 1);
   }
 
 }

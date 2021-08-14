@@ -31,6 +31,10 @@ import swim.observable.ObservableSpatialMap;
 
 public final class HostObservableSpatialMap {
 
+  private HostObservableSpatialMap() {
+    // static
+  }
+
   public static final HostObjectType<ObservableSpatialMap<Object, Object, Object>> TYPE;
 
   static {
@@ -45,10 +49,6 @@ public final class HostObservableSpatialMap {
     type.addMember(new HostObservableSpatialMapDidRemove());
     type.addMember(new HostObservableSpatialMapWillClear());
     type.addMember(new HostObservableSpatialMapDidClear());
-  }
-
-  private HostObservableSpatialMap() {
-    // static
   }
 
 }

@@ -64,7 +64,7 @@ public class JavaHostRuntime implements HostRuntime {
     if (!this.hostLibraries.containsKey(libraryName)) {
       this.hostLibraries = this.hostLibraries.updated(libraryName, hostLibrary);
       for (HostPackage hostPackage : hostLibrary.hostPackages()) {
-        addHostPackage(hostPackage);
+        this.addHostPackage(hostPackage);
       }
     }
   }
@@ -74,7 +74,7 @@ public class JavaHostRuntime implements HostRuntime {
     if (!this.hostPackages.containsKey(packageName)) {
       this.hostPackages = this.hostPackages.updated(packageName, hostPackage);
       for (HostType<?> hostType : hostPackage.hostTypes()) {
-        addHostType(hostType);
+        this.addHostType(hostType);
       }
     }
   }

@@ -24,25 +24,12 @@ import swim.util.Murmur3;
 
 public final class WsText<T> extends WsData<T> implements Debug {
 
-  private static int hashSeed;
   final T value;
   final Encoder<?, ?> content;
 
   WsText(T value, Encoder<?, ?> content) {
     this.value = value;
     this.content = content;
-  }
-
-  public static <T> WsText<T> from(T value, Encoder<?, ?> content) {
-    return new WsText<T>(value, content);
-  }
-
-  public static <T> WsText<T> from(Encoder<?, ?> content) {
-    return new WsText<T>(null, content);
-  }
-
-  public static WsText<String> from(String value) {
-    return new WsText<String>(value, Utf8.stringWriter(value));
   }
 
   @Override
@@ -86,26 +73,41 @@ public final class WsText<T> extends WsData<T> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(WsText.class);
+    if (WsText.hashSeed == 0) {
+      WsText.hashSeed = Murmur3.seed(WsText.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, Murmur3.hash(this.value)));
+    return Murmur3.mash(Murmur3.mix(WsText.hashSeed, Murmur3.hash(this.value)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("WsText").write('.').write("from").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("WsText").write('.').write("create").write('(');
     if (this.value != null) {
       output = output.debug(this.value).write(", ");
     }
     output = output.debug(this.content).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static <T> WsText<T> create(T value, Encoder<?, ?> content) {
+    return new WsText<T>(value, content);
+  }
+
+  public static <T> WsText<T> create(Encoder<?, ?> content) {
+    return new WsText<T>(null, content);
+  }
+
+  public static WsText<String> create(String value) {
+    return new WsText<String>(value, Utf8.stringWriter(value));
   }
 
 }

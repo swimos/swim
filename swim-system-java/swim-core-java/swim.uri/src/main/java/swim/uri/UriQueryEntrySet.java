@@ -28,63 +28,6 @@ final class UriQueryEntrySet implements Set<Map.Entry<String, String>> {
     this.query = query;
   }
 
-  private static boolean contains(UriQuery query, Map.Entry<?, ?> entry) {
-    while (!query.isEmpty()) {
-      if ((query.key() == null ? entry.getKey() == null : query.key().equals(entry.getKey()))
-          && (query.value() == null ? entry.getValue() == null : query.value().equals(entry.getValue()))) {
-        return true;
-      }
-      query = query.tail();
-    }
-    return false;
-  }
-
-  private static void toArray(UriQuery query, Object[] array) {
-    int i = 0;
-    while (!query.isEmpty()) {
-      array[i] = query.head();
-      query = query.tail();
-      i += 1;
-    }
-  }
-
-  static boolean equals(UriQuery query, Set<?> that) {
-    while (!query.isEmpty()) {
-      if (!that.contains(query.head())) {
-        return false;
-      }
-      query = query.tail();
-    }
-    return true;
-  }
-
-  static int hashCode(UriQuery query) {
-    int code = 0;
-    while (!query.isEmpty()) {
-      final String key = query.key();
-      final String value = query.value();
-      code += (key == null ? 0 : key.hashCode())
-          ^ (value == null ? 0 : value.hashCode());
-      query = query.tail();
-    }
-    return code;
-  }
-
-  private static String toString(UriQuery query) {
-    final StringBuilder s = new StringBuilder();
-    s.append('[');
-    if (!query.isEmpty()) {
-      s.append(query.head().toString());
-      query = query.tail();
-      while (!query.isEmpty()) {
-        s.append(", ").append(query.head().toString());
-        query = query.tail();
-      }
-    }
-    s.append(']');
-    return s.toString();
-  }
-
   @Override
   public boolean isEmpty() {
     return this.query.isEmpty();
@@ -103,10 +46,21 @@ final class UriQueryEntrySet implements Set<Map.Entry<String, String>> {
     return false;
   }
 
+  private static boolean contains(UriQuery query, Map.Entry<?, ?> entry) {
+    while (!query.isEmpty()) {
+      if ((query.key() == null ? entry.getKey() == null : query.key().equals(entry.getKey()))
+          && (query.value() == null ? entry.getValue() == null : query.value().equals(entry.getValue()))) {
+        return true;
+      }
+      query = query.tail();
+    }
+    return false;
+  }
+
   @Override
   public boolean containsAll(Collection<?> entries) {
     for (Object entry : entries) {
-      if (!contains(entry)) {
+      if (!this.contains(entry)) {
         return false;
       }
     }
@@ -150,7 +104,7 @@ final class UriQueryEntrySet implements Set<Map.Entry<String, String>> {
 
   @Override
   public Object[] toArray() {
-    final Object[] array = new Object[size()];
+    final Object[] array = new Object[this.size()];
     UriQueryEntrySet.toArray(this.query, array);
     return array;
   }
@@ -158,7 +112,7 @@ final class UriQueryEntrySet implements Set<Map.Entry<String, String>> {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T[] toArray(T[] array) {
-    final int n = size();
+    final int n = this.size();
     if (array.length < n) {
       array = (T[]) Array.newInstance(array.getClass().getComponentType(), n);
     }
@@ -169,17 +123,36 @@ final class UriQueryEntrySet implements Set<Map.Entry<String, String>> {
     return array;
   }
 
+  private static void toArray(UriQuery query, Object[] array) {
+    int i = 0;
+    while (!query.isEmpty()) {
+      array[i] = query.head();
+      query = query.tail();
+      i += 1;
+    }
+  }
+
   @Override
   public boolean equals(Object other) {
     if (this == other) {
       return true;
     } else if (other instanceof Set<?>) {
       final Set<?> that = (Set<?>) other;
-      if (size() == that.size()) {
+      if (this.size() == that.size()) {
         return UriQueryEntrySet.equals(this.query, that);
       }
     }
     return false;
+  }
+
+  static boolean equals(UriQuery query, Set<?> that) {
+    while (!query.isEmpty()) {
+      if (!that.contains(query.head())) {
+        return false;
+      }
+      query = query.tail();
+    }
+    return true;
   }
 
   @Override
@@ -187,9 +160,36 @@ final class UriQueryEntrySet implements Set<Map.Entry<String, String>> {
     return UriQueryEntrySet.hashCode(this.query);
   }
 
+  static int hashCode(UriQuery query) {
+    int code = 0;
+    while (!query.isEmpty()) {
+      final String key = query.key();
+      final String value = query.value();
+      code += (key == null ? 0 : key.hashCode())
+            ^ (value == null ? 0 : value.hashCode());
+      query = query.tail();
+    }
+    return code;
+  }
+
   @Override
   public String toString() {
     return UriQueryEntrySet.toString(this.query);
+  }
+
+  private static String toString(UriQuery query) {
+    final StringBuilder s = new StringBuilder();
+    s.append('[');
+    if (!query.isEmpty()) {
+      s.append(query.head().toString());
+      query = query.tail();
+      while (!query.isEmpty()) {
+        s.append(", ").append(query.head().toString());
+        query = query.tail();
+      }
+    }
+    s.append(']');
+    return s.toString();
   }
 
 }

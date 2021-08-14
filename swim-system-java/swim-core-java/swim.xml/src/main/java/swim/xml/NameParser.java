@@ -31,6 +31,11 @@ final class NameParser extends Parser<String> {
     this.step = step;
   }
 
+  @Override
+  public Parser<String> feed(Input input) {
+    return NameParser.parse(input, this.xml, this.output, this.step);
+  }
+
   static Parser<String> parse(Input input, XmlParser<?, ?> xml, Output<String> output, int step) {
     int c = 0;
     if (step == 1) {
@@ -44,10 +49,10 @@ final class NameParser extends Parser<String> {
           output = output.write(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("name", input));
+          return Parser.error(Diagnostic.expected("name", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("name", input));
+        return Parser.error(Diagnostic.expected("name", input));
       }
     }
     if (step == 2) {
@@ -61,26 +66,21 @@ final class NameParser extends Parser<String> {
         }
       }
       if (!input.isEmpty()) {
-        return done(xml.name(output.bind()));
+        return Parser.done(xml.name(output.bind()));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new NameParser(xml, output, step);
   }
 
   static Parser<String> parse(Input input, XmlParser<?, ?> xml, Output<String> output) {
-    return parse(input, xml, output, 1);
+    return NameParser.parse(input, xml, output, 1);
   }
 
   static Parser<String> parse(Input input, XmlParser<?, ?> xml) {
-    return parse(input, xml, null, 1);
-  }
-
-  @Override
-  public Parser<String> feed(Input input) {
-    return parse(input, this.xml, this.output, this.step);
+    return NameParser.parse(input, xml, null, 1);
   }
 
 }

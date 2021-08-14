@@ -75,7 +75,7 @@ public interface OrderedMap<K, V> extends IterableMap<K, V>, SortedMap<K, V> {
   @Override
   default void putAll(Map<? extends K, ? extends V> map) {
     for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
-      put(entry.getKey(), entry.getValue());
+      this.put(entry.getKey(), entry.getValue());
     }
   }
 

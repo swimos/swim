@@ -22,14 +22,6 @@ import swim.structure.Item;
 
 final class WGS84 extends Z2Form<R2Shape> implements R2ToZ2Operator {
 
-  static long transformLng(double lng) {
-    return (long) (((Math.min(Math.max(-180.0, lng), 180.0) + 180.0) / 360.0) * (double) 0x7fffffffffffffffL);
-  }
-
-  static long transformLat(double lat) {
-    return (long) (((Math.min(Math.max(-90.0, lat), 90.0) + 90.0) / 180.0) * (double) 0x7fffffffffffffffL);
-  }
-
   @Override
   public Class<?> type() {
     return R2Shape.class;
@@ -37,22 +29,22 @@ final class WGS84 extends Z2Form<R2Shape> implements R2ToZ2Operator {
 
   @Override
   public long getXMin(R2Shape shape) {
-    return transformLng(shape.xMin());
+    return WGS84.transformLng(shape.xMin());
   }
 
   @Override
   public long getYMin(R2Shape shape) {
-    return transformLat(shape.yMin());
+    return WGS84.transformLat(shape.yMin());
   }
 
   @Override
   public long getXMax(R2Shape shape) {
-    return transformLng(shape.xMax());
+    return WGS84.transformLng(shape.xMax());
   }
 
   @Override
   public long getYMax(R2Shape shape) {
-    return transformLat(shape.yMax());
+    return WGS84.transformLat(shape.yMax());
   }
 
   @Override
@@ -77,17 +69,25 @@ final class WGS84 extends Z2Form<R2Shape> implements R2ToZ2Operator {
 
   @Override
   public long transformX(double lng, double lat) {
-    return transformLng(lng);
+    return WGS84.transformLng(lng);
   }
 
   @Override
   public long transformY(double lng, double lat) {
-    return transformLat(lat);
+    return WGS84.transformLat(lat);
   }
 
   @Override
   public Z2ToR2Operator inverse() {
     return GeoProjection.wgs84Inverse();
+  }
+
+  static long transformLng(double lng) {
+    return (long) (((Math.min(Math.max(-180.0, lng), 180.0) + 180.0) / 360.0) * (double) 0x7fffffffffffffffL);
+  }
+
+  static long transformLat(double lat) {
+    return (long) (((Math.min(Math.max(-90.0, lat), 90.0) + 90.0) / 180.0) * (double) 0x7fffffffffffffffL);
   }
 
 }

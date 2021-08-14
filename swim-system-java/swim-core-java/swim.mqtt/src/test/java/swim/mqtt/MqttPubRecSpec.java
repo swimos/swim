@@ -20,20 +20,20 @@ import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttPubRecSpec {
 
-  public static void assertDecodes(Data data, MqttPubRec packet) {
-    MqttAssertions.assertDecodesPacket(data, packet);
-  }
-
   @Test
   public void decodePubRecPackets() {
-    assertDecodes(Data.fromBase16("50020000"), MqttPubRec.from(0x0000));
-    assertDecodes(Data.fromBase16("50027E96"), MqttPubRec.from(0x7E96));
+    assertDecodes(Data.fromBase16("50020000"), MqttPubRec.create(0x0000));
+    assertDecodes(Data.fromBase16("50027E96"), MqttPubRec.create(0x7E96));
   }
 
   @Test
   public void encodePubRecPackets() {
-    assertEncodes(MqttPubRec.from(0x0000), Data.fromBase16("50020000"));
-    assertEncodes(MqttPubRec.from(0x7E96), Data.fromBase16("50027E96"));
+    assertEncodes(MqttPubRec.create(0x0000), Data.fromBase16("50020000"));
+    assertEncodes(MqttPubRec.create(0x7E96), Data.fromBase16("50027E96"));
+  }
+
+  public static void assertDecodes(Data data, MqttPubRec packet) {
+    MqttAssertions.assertDecodesPacket(data, packet);
   }
 
 }

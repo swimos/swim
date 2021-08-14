@@ -31,29 +31,6 @@ public enum ProtobufWireType {
     this.code = code;
   }
 
-  public static ProtobufWireType from(int code) {
-    switch (code) {
-      case 0:
-        return VARINT;
-      case 1:
-        return FIXED64;
-      case 2:
-        return SIZED;
-      case 3:
-        return START_GROUP;
-      case 4:
-        return END_GROUP;
-      case 5:
-        return FIXED32;
-      case 6:
-        return RESERVED6;
-      case 7:
-        return RESERVED7;
-      default:
-        throw new IllegalArgumentException(Integer.toString(code));
-    }
-  }
-
   public boolean isPrimitive() {
     return this.code == 0 || this.code == 1 || this.code == 5;
   }
@@ -89,6 +66,29 @@ public enum ProtobufWireType {
   @Override
   public String toString() {
     return new StringBuilder("ProtobufWireType").append('.').append(super.toString()).toString();
+  }
+
+  public static ProtobufWireType from(int code) {
+    switch (code) {
+      case 0:
+        return VARINT;
+      case 1:
+        return FIXED64;
+      case 2:
+        return SIZED;
+      case 3:
+        return START_GROUP;
+      case 4:
+        return END_GROUP;
+      case 5:
+        return FIXED32;
+      case 6:
+        return RESERVED6;
+      case 7:
+        return RESERVED7;
+      default:
+        throw new IllegalArgumentException(Integer.toString(code));
+    }
   }
 
 }

@@ -41,7 +41,7 @@ public class RemoteKernel extends KernelProxy {
   }
 
   public RemoteKernel() {
-    this(KERNEL_PRIORITY);
+    this(RemoteKernel.KERNEL_PRIORITY);
   }
 
   @Override
@@ -50,16 +50,16 @@ public class RemoteKernel extends KernelProxy {
   }
 
   public HttpSettings httpSettings() {
-    return HttpSettings.from(ipSettings());
+    return HttpSettings.create(this.ipSettings());
   }
 
   public WsSettings wsSettings() {
-    return WsSettings.from(httpSettings());
+    return WsSettings.create(this.httpSettings());
   }
 
   public final WarpSettings warpSettings() {
     if (this.warpSettings == null) {
-      this.warpSettings = WarpSettings.from(wsSettings());
+      this.warpSettings = WarpSettings.create(this.wsSettings());
     }
     return this.warpSettings;
   }
@@ -67,8 +67,8 @@ public class RemoteKernel extends KernelProxy {
   @Override
   public HostBinding createHost(HostAddress hostAddress) {
     if (hostAddress.hostUri().host().isDefined() && !"swim".equals(hostAddress.partKey().stringValue(null))) {
-      final IpInterface endpoint = kernelWrapper().unwrapKernel(IpInterface.class);
-      return new RemoteHostClient(hostAddress.hostUri(), endpoint, warpSettings());
+      final IpInterface endpoint = this.kernelWrapper().unwrapKernel(IpInterface.class);
+      return new RemoteHostClient(hostAddress.hostUri(), endpoint, this.warpSettings());
     }
     return super.createHost(hostAddress);
   }
@@ -77,8 +77,8 @@ public class RemoteKernel extends KernelProxy {
   public HostBinding createHost(PartBinding part, HostDef hostDef) {
     final Uri hostUri = hostDef.hostUri();
     if (hostUri != null && hostUri.host().isDefined() && !"swim".equals(part.partKey().stringValue(null))) {
-      final IpInterface endpoint = kernelWrapper().unwrapKernel(IpInterface.class);
-      return new RemoteHostClient(hostUri, endpoint, warpSettings());
+      final IpInterface endpoint = this.kernelWrapper().unwrapKernel(IpInterface.class);
+      return new RemoteHostClient(hostUri, endpoint, this.warpSettings());
     }
     return super.createHost(part, hostDef);
   }
@@ -90,7 +90,7 @@ public class RemoteKernel extends KernelProxy {
     final String kernelClassName = header.get("class").stringValue(null);
     if (kernelClassName == null || RemoteKernel.class.getName().equals(kernelClassName)) {
       Thread.dumpStack();
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
+      final double kernelPriority = header.get("priority").doubleValue(RemoteKernel.KERNEL_PRIORITY);
       final WarpSettings warpSettings = WarpSettings.form().cast(moduleConfig);
       return new RemoteKernel(kernelPriority, warpSettings);
     }

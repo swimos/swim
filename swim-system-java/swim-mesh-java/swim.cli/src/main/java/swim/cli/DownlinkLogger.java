@@ -48,15 +48,15 @@ public class DownlinkLogger implements OnEvent<Value>, DidSync, DidUnlink, DidCl
   @Override
   public void onEvent(Value value) {
     if ("json".equals(this.format)) {
-      log(Json.toString(value));
+      this.log(Json.toString(value));
     } else {
-      log(Recon.toString(value));
+      this.log(Recon.toString(value));
     }
   }
 
   @Override
   public void didSync() {
-    // stub
+    // hook
   }
 
   @Override

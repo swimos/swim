@@ -38,8 +38,13 @@ final class HttpCharsetWriter extends Writer<Object, Object> {
     this(http, name, weight, null, 1);
   }
 
-  static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name, float weight,
-                                      Writer<?, ?> part, int step) {
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return HttpCharsetWriter.write(output, this.http, this.name, this.weight, this.part, this.step);
+  }
+
+  static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name,
+                                      float weight, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
         part = http.writeToken(name, output);
@@ -49,7 +54,7 @@ final class HttpCharsetWriter extends Writer<Object, Object> {
       if (part.isDone()) {
         part = null;
         if (weight == 1f) {
-          return done();
+          return Writer.done();
         } else {
           step = 2;
         }
@@ -64,26 +69,21 @@ final class HttpCharsetWriter extends Writer<Object, Object> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new HttpCharsetWriter(http, name, weight, part, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name, float weight) {
-    return write(output, http, name, weight, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.name, this.weight, this.part, this.step);
+    return HttpCharsetWriter.write(output, http, name, weight, null, 1);
   }
 
 }

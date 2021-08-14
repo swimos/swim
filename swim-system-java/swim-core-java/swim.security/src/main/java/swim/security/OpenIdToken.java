@@ -37,34 +37,6 @@ public class OpenIdToken extends JsonWebToken {
     super();
   }
 
-  public static OpenIdToken from(Value value) {
-    return new OpenIdToken(value);
-  }
-
-  public static OpenIdToken parse(String json) {
-    return new OpenIdToken(Json.parse(json));
-  }
-
-  public static OpenIdToken verify(JsonWebSignature jws, Iterable<PublicKeyDef> publicKeyDefs) {
-    final Value payload = jws.payload();
-    final OpenIdToken idToken = new OpenIdToken(payload);
-    // TODO: check payload
-    for (PublicKeyDef publicKeyDef : publicKeyDefs) {
-      if (jws.verifySignature(publicKeyDef.publicKey())) {
-        return idToken;
-      }
-    }
-    return null;
-  }
-
-  public static OpenIdToken verify(String compactJws, Iterable<PublicKeyDef> publicKeyDefs) {
-    final JsonWebSignature jws = JsonWebSignature.parse(compactJws);
-    if (jws != null) {
-      return verify(jws, publicKeyDefs);
-    }
-    return null;
-  }
-
   @Override
   public OpenIdToken issuer(String issuer) {
     return (OpenIdToken) super.issuer(issuer);
@@ -110,7 +82,7 @@ public class OpenIdToken extends JsonWebToken {
   }
 
   public OpenIdToken authTime(long authTime) {
-    return copy(this.value.updatedSlot("auth_time", authTime));
+    return this.copy(this.value.updatedSlot("auth_time", authTime));
   }
 
   public String nonce() {
@@ -118,7 +90,7 @@ public class OpenIdToken extends JsonWebToken {
   }
 
   public OpenIdToken nonce(String nonce) {
-    return copy(this.value.updatedSlot("nonce", nonce));
+    return this.copy(this.value.updatedSlot("nonce", nonce));
   }
 
   public Data accessTokenHash() {
@@ -142,7 +114,7 @@ public class OpenIdToken extends JsonWebToken {
   public OpenIdToken accessTokenHash(Data accessTokenHash) {
     final Output<String> atHash = Unicode.stringOutput();
     Base64.urlUnpadded().writeByteBuffer(accessTokenHash.asByteBuffer(), atHash);
-    return copy(this.value.updatedSlot("at_hash", atHash.bind()));
+    return this.copy(this.value.updatedSlot("at_hash", atHash.bind()));
   }
 
   public String authenticationContextClass() {
@@ -150,7 +122,7 @@ public class OpenIdToken extends JsonWebToken {
   }
 
   public OpenIdToken authenticationContextClass(String authenticationContextClass) {
-    return copy(this.value.updatedSlot("acr", authenticationContextClass));
+    return this.copy(this.value.updatedSlot("acr", authenticationContextClass));
   }
 
   public FingerTrieSeq<String> authenticationMethods() {
@@ -165,7 +137,7 @@ public class OpenIdToken extends JsonWebToken {
   }
 
   public OpenIdToken authenticationMethods(String... authenticationMethods) {
-    return copy(this.value.updatedSlot("amr", Record.of((Object[]) authenticationMethods)));
+    return this.copy(this.value.updatedSlot("amr", Record.of((Object[]) authenticationMethods)));
   }
 
   public String authorizedParty() {
@@ -173,12 +145,40 @@ public class OpenIdToken extends JsonWebToken {
   }
 
   public OpenIdToken authorizedParty(String authorizedParty) {
-    return copy(this.value.updatedSlot("azp", authorizedParty));
+    return this.copy(this.value.updatedSlot("azp", authorizedParty));
   }
 
   @Override
   protected OpenIdToken copy(Value value) {
     return new OpenIdToken(value);
+  }
+
+  public static OpenIdToken from(Value value) {
+    return new OpenIdToken(value);
+  }
+
+  public static OpenIdToken parse(String json) {
+    return new OpenIdToken(Json.parse(json));
+  }
+
+  public static OpenIdToken verify(JsonWebSignature jws, Iterable<PublicKeyDef> publicKeyDefs) {
+    final Value payload = jws.payload();
+    final OpenIdToken idToken = new OpenIdToken(payload);
+    // TODO: check payload
+    for (PublicKeyDef publicKeyDef : publicKeyDefs) {
+      if (jws.verifySignature(publicKeyDef.publicKey())) {
+        return idToken;
+      }
+    }
+    return null;
+  }
+
+  public static OpenIdToken verify(String compactJws, Iterable<PublicKeyDef> publicKeyDefs) {
+    final JsonWebSignature jws = JsonWebSignature.parse(compactJws);
+    if (jws != null) {
+      return OpenIdToken.verify(jws, publicKeyDefs);
+    }
+    return null;
   }
 
 }

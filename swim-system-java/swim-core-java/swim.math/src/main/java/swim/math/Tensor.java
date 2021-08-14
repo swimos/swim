@@ -25,7 +25,6 @@ import swim.util.Murmur3;
 
 public class Tensor implements Debug {
 
-  private static int hashSeed;
   public final TensorDims dims;
   public final Object array;
   public final int offset;
@@ -60,6 +59,42 @@ public class Tensor implements Debug {
     this.offset = 0;
   }
 
+  public final TensorDims dimensions() {
+    return this.dims;
+  }
+
+  public final Precision precision() {
+    if (this.array instanceof double[]) {
+      return Precision.f64();
+    } else if (this.array instanceof float[]) {
+      return Precision.f32();
+    } else {
+      throw new AssertionError();
+    }
+  }
+
+  public final double getDouble(int... coords) {
+    final Object us = this.array;
+    if (us instanceof double[]) {
+      return ((double[]) us)[Tensor.getOffset(this.dims, coords, 0)];
+    } else if (us instanceof float[]) {
+      return (double) ((float[]) us)[Tensor.getOffset(this.dims, coords, 0)];
+    } else {
+      throw new AssertionError();
+    }
+  }
+
+  public final float getFloat(int... coords) {
+    final Object us = this.array;
+    if (us instanceof float[]) {
+      return ((float[]) us)[Tensor.getOffset(this.dims, coords, 0)];
+    } else if (us instanceof double[]) {
+      return (float) ((double[]) us)[Tensor.getOffset(this.dims, coords, 0)];
+    } else {
+      throw new AssertionError();
+    }
+  }
+
   protected static int getOffset(TensorDims dim, int[] coords, int offset) {
     int i = 0;
     do {
@@ -74,12 +109,16 @@ public class Tensor implements Debug {
     return offset;
   }
 
+  public final Tensor plus(Tensor that) {
+    return Tensor.add(this, that);
+  }
+
   public static Tensor add(Tensor u, Tensor v) {
-    return add(u, v, u.dims, u.precision().max(v.precision()));
+    return Tensor.add(u, v, u.dims, u.precision().max(v.precision()));
   }
 
   public static void add(Tensor u, Tensor v, MutableTensor w) {
-    add(u.dims, u.array, u.offset, v.dims, v.array, v.offset, w.dims, w.array, w.offset);
+    Tensor.add(u.dims, u.array, u.offset, v.dims, v.array, v.offset, w.dims, w.array, w.offset);
   }
 
   public static Tensor add(Tensor u, Tensor v, TensorDims wd, Precision wp) {
@@ -91,7 +130,7 @@ public class Tensor implements Debug {
     } else {
       throw new AssertionError();
     }
-    add(u.dims, u.array, u.offset, v.dims, v.array, v.offset, wd, ws, 0);
+    Tensor.add(u.dims, u.array, u.offset, v.dims, v.array, v.offset, wd, ws, 0);
     return new Tensor(wd, ws, 0);
   }
 
@@ -101,17 +140,17 @@ public class Tensor implements Debug {
     if (us instanceof double[]) {
       if (vs instanceof double[]) {
         if (ws instanceof double[]) {
-          add(ud, (double[]) us, ui, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.add(ud, (double[]) us, ui, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          add(ud, (double[]) us, ui, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.add(ud, (double[]) us, ui, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
       } else if (vs instanceof float[]) {
         if (ws instanceof double[]) {
-          add(ud, (double[]) us, ui, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.add(ud, (double[]) us, ui, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          add(ud, (double[]) us, ui, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.add(ud, (double[]) us, ui, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
@@ -121,17 +160,17 @@ public class Tensor implements Debug {
     } else if (us instanceof float[]) {
       if (vs instanceof double[]) {
         if (ws instanceof double[]) {
-          add(ud, (float[]) us, ui, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.add(ud, (float[]) us, ui, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          add(ud, (float[]) us, ui, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.add(ud, (float[]) us, ui, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
       } else if (vs instanceof float[]) {
         if (ws instanceof double[]) {
-          add(ud, (float[]) us, ui, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.add(ud, (float[]) us, ui, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          add(ud, (float[]) us, ui, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.add(ud, (float[]) us, ui, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
@@ -155,7 +194,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -185,7 +224,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -215,7 +254,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -245,7 +284,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -275,7 +314,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -305,7 +344,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -335,7 +374,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -365,7 +404,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.add(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -383,12 +422,16 @@ public class Tensor implements Debug {
     }
   }
 
+  public final Tensor opposite() {
+    return Tensor.opposite(this);
+  }
+
   public static Tensor opposite(Tensor u) {
-    return opposite(u, u.dims, u.precision());
+    return Tensor.opposite(u, u.dims, u.precision());
   }
 
   public static void opposite(Tensor u, MutableTensor w) {
-    opposite(u.dims, u.array, u.offset, w.dims, w.array, w.offset);
+    Tensor.opposite(u.dims, u.array, u.offset, w.dims, w.array, w.offset);
   }
 
   public static Tensor opposite(Tensor u, TensorDims wd, Precision wp) {
@@ -400,7 +443,7 @@ public class Tensor implements Debug {
     } else {
       throw new AssertionError();
     }
-    opposite(u.dims, u.array, u.offset, wd, ws, 0);
+    Tensor.opposite(u.dims, u.array, u.offset, wd, ws, 0);
     return new Tensor(wd, ws, 0);
   }
 
@@ -408,17 +451,17 @@ public class Tensor implements Debug {
                               TensorDims wd, Object ws, int wi) {
     if (us instanceof double[]) {
       if (ws instanceof double[]) {
-        opposite(ud, (double[]) us, ui, wd, (double[]) ws, wi);
+        Tensor.opposite(ud, (double[]) us, ui, wd, (double[]) ws, wi);
       } else if (ws instanceof float[]) {
-        opposite(ud, (double[]) us, ui, wd, (float[]) ws, wi);
+        Tensor.opposite(ud, (double[]) us, ui, wd, (float[]) ws, wi);
       } else {
         throw new AssertionError();
       }
     } else if (us instanceof float[]) {
       if (ws instanceof double[]) {
-        opposite(ud, (float[]) us, ui, wd, (double[]) ws, wi);
+        Tensor.opposite(ud, (float[]) us, ui, wd, (double[]) ws, wi);
       } else if (ws instanceof float[]) {
-        opposite(ud, (float[]) us, ui, wd, (float[]) ws, wi);
+        Tensor.opposite(ud, (float[]) us, ui, wd, (float[]) ws, wi);
       } else {
         throw new AssertionError();
       }
@@ -438,7 +481,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        opposite(ud.next, us, ui, wd.next, ws, wi);
+        Tensor.opposite(ud.next, us, ui, wd.next, ws, wi);
         ui += ud.stride;
         wi += wd.stride;
       }
@@ -465,7 +508,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        opposite(ud.next, us, ui, wd.next, ws, wi);
+        Tensor.opposite(ud.next, us, ui, wd.next, ws, wi);
         ui += ud.stride;
         wi += wd.stride;
       }
@@ -492,7 +535,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        opposite(ud.next, us, ui, wd.next, ws, wi);
+        Tensor.opposite(ud.next, us, ui, wd.next, ws, wi);
         ui += ud.stride;
         wi += wd.stride;
       }
@@ -519,7 +562,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        opposite(ud.next, us, ui, wd.next, ws, wi);
+        Tensor.opposite(ud.next, us, ui, wd.next, ws, wi);
         ui += ud.stride;
         wi += wd.stride;
       }
@@ -535,12 +578,16 @@ public class Tensor implements Debug {
     }
   }
 
+  public final Tensor minus(Tensor that) {
+    return Tensor.subtract(this, that);
+  }
+
   public static Tensor subtract(Tensor u, Tensor v) {
-    return subtract(u, v, u.dims, u.precision().max(v.precision()));
+    return Tensor.subtract(u, v, u.dims, u.precision().max(v.precision()));
   }
 
   public static void subtract(Tensor u, Tensor v, MutableTensor w) {
-    subtract(u.dims, u.array, u.offset, v.dims, v.array, v.offset, w.dims, w.array, w.offset);
+    Tensor.subtract(u.dims, u.array, u.offset, v.dims, v.array, v.offset, w.dims, w.array, w.offset);
   }
 
   public static Tensor subtract(Tensor u, Tensor v, TensorDims wd, Precision wp) {
@@ -552,7 +599,7 @@ public class Tensor implements Debug {
     } else {
       throw new AssertionError();
     }
-    subtract(u.dims, u.array, u.offset, v.dims, v.array, v.offset, wd, ws, 0);
+    Tensor.subtract(u.dims, u.array, u.offset, v.dims, v.array, v.offset, wd, ws, 0);
     return new Tensor(wd, ws, 0);
   }
 
@@ -562,17 +609,17 @@ public class Tensor implements Debug {
     if (us instanceof double[]) {
       if (vs instanceof double[]) {
         if (ws instanceof double[]) {
-          subtract(ud, (double[]) us, ui, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.subtract(ud, (double[]) us, ui, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          subtract(ud, (double[]) us, ui, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.subtract(ud, (double[]) us, ui, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
       } else if (vs instanceof float[]) {
         if (ws instanceof double[]) {
-          subtract(ud, (double[]) us, ui, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.subtract(ud, (double[]) us, ui, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          subtract(ud, (double[]) us, ui, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.subtract(ud, (double[]) us, ui, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
@@ -582,17 +629,17 @@ public class Tensor implements Debug {
     } else if (us instanceof float[]) {
       if (vs instanceof double[]) {
         if (ws instanceof double[]) {
-          subtract(ud, (float[]) us, ui, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.subtract(ud, (float[]) us, ui, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          subtract(ud, (float[]) us, ui, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.subtract(ud, (float[]) us, ui, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
       } else if (vs instanceof float[]) {
         if (ws instanceof double[]) {
-          subtract(ud, (float[]) us, ui, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.subtract(ud, (float[]) us, ui, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          subtract(ud, (float[]) us, ui, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.subtract(ud, (float[]) us, ui, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
@@ -616,7 +663,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -646,7 +693,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -676,7 +723,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -706,7 +753,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -736,7 +783,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -766,7 +813,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -796,7 +843,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -826,7 +873,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.subtract(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -844,12 +891,16 @@ public class Tensor implements Debug {
     }
   }
 
+  public final Tensor times(double scalar) {
+    return Tensor.multiply(scalar, this);
+  }
+
   public static Tensor multiply(double a, Tensor u) {
-    return multiply(a, u, u.dims, u.precision());
+    return Tensor.multiply(a, u, u.dims, u.precision());
   }
 
   public static void multiply(double a, Tensor u, MutableTensor w) {
-    multiply(a, u.dims, u.array, u.offset, w.dims, w.array, w.offset);
+    Tensor.multiply(a, u.dims, u.array, u.offset, w.dims, w.array, w.offset);
   }
 
   public static Tensor multiply(double a, Tensor u, TensorDims wd, Precision wp) {
@@ -861,7 +912,7 @@ public class Tensor implements Debug {
     } else {
       throw new AssertionError();
     }
-    multiply(a, u.dims, u.array, u.offset, wd, ws, 0);
+    Tensor.multiply(a, u.dims, u.array, u.offset, wd, ws, 0);
     return new Tensor(wd, ws, 0);
   }
 
@@ -869,17 +920,17 @@ public class Tensor implements Debug {
                               TensorDims wd, Object ws, int wi) {
     if (us instanceof double[]) {
       if (ws instanceof double[]) {
-        multiply(a, ud, (double[]) us, ui, wd, (double[]) ws, wi);
+        Tensor.multiply(a, ud, (double[]) us, ui, wd, (double[]) ws, wi);
       } else if (ws instanceof float[]) {
-        multiply(a, ud, (double[]) us, ui, wd, (float[]) ws, wi);
+        Tensor.multiply(a, ud, (double[]) us, ui, wd, (float[]) ws, wi);
       } else {
         throw new AssertionError();
       }
     } else if (us instanceof float[]) {
       if (ws instanceof double[]) {
-        multiply(a, ud, (float[]) us, ui, wd, (double[]) ws, wi);
+        Tensor.multiply(a, ud, (float[]) us, ui, wd, (double[]) ws, wi);
       } else if (ws instanceof float[]) {
-        multiply(a, ud, (float[]) us, ui, wd, (float[]) ws, wi);
+        Tensor.multiply(a, ud, (float[]) us, ui, wd, (float[]) ws, wi);
       } else {
         throw new AssertionError();
       }
@@ -899,7 +950,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        multiply(a, ud.next, us, ui, wd.next, ws, wi);
+        Tensor.multiply(a, ud.next, us, ui, wd.next, ws, wi);
         ui += ud.stride;
         wi += wd.stride;
       }
@@ -926,7 +977,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        multiply(a, ud.next, us, ui, wd.next, ws, wi);
+        Tensor.multiply(a, ud.next, us, ui, wd.next, ws, wi);
         ui += ud.stride;
         wi += wd.stride;
       }
@@ -953,7 +1004,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        multiply(a, ud.next, us, ui, wd.next, ws, wi);
+        Tensor.multiply(a, ud.next, us, ui, wd.next, ws, wi);
         ui += ud.stride;
         wi += wd.stride;
       }
@@ -980,7 +1031,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        multiply(a, ud.next, us, ui, wd.next, ws, wi);
+        Tensor.multiply(a, ud.next, us, ui, wd.next, ws, wi);
         ui += ud.stride;
         wi += wd.stride;
       }
@@ -996,12 +1047,16 @@ public class Tensor implements Debug {
     }
   }
 
+  public final Tensor times(Tensor that) {
+    return Tensor.multiply(this, that);
+  }
+
   public static Tensor multiply(Tensor u, Tensor v) {
-    return multiply(u, v, u.dims, u.precision().max(v.precision()));
+    return Tensor.multiply(u, v, u.dims, u.precision().max(v.precision()));
   }
 
   public static void multiply(Tensor u, Tensor v, MutableTensor w) {
-    multiply(u.dims, u.array, u.offset, v.dims, v.array, v.offset, w.dims, w.array, w.offset);
+    Tensor.multiply(u.dims, u.array, u.offset, v.dims, v.array, v.offset, w.dims, w.array, w.offset);
   }
 
   public static Tensor multiply(Tensor u, Tensor v, TensorDims wd, Precision wp) {
@@ -1013,7 +1068,7 @@ public class Tensor implements Debug {
     } else {
       throw new AssertionError();
     }
-    multiply(u.dims, u.array, u.offset, v.dims, v.array, v.offset, wd, ws, 0);
+    Tensor.multiply(u.dims, u.array, u.offset, v.dims, v.array, v.offset, wd, ws, 0);
     return new Tensor(wd, ws, 0);
   }
 
@@ -1023,17 +1078,17 @@ public class Tensor implements Debug {
     if (us instanceof double[]) {
       if (vs instanceof double[]) {
         if (ws instanceof double[]) {
-          multiply(ud, (double[]) us, ui, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.multiply(ud, (double[]) us, ui, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          multiply(ud, (double[]) us, ui, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.multiply(ud, (double[]) us, ui, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
       } else if (vs instanceof float[]) {
         if (ws instanceof double[]) {
-          multiply(ud, (double[]) us, ui, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.multiply(ud, (double[]) us, ui, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          multiply(ud, (double[]) us, ui, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.multiply(ud, (double[]) us, ui, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
@@ -1043,17 +1098,17 @@ public class Tensor implements Debug {
     } else if (us instanceof float[]) {
       if (vs instanceof double[]) {
         if (ws instanceof double[]) {
-          multiply(ud, (float[]) us, ui, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.multiply(ud, (float[]) us, ui, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          multiply(ud, (float[]) us, ui, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.multiply(ud, (float[]) us, ui, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
       } else if (vs instanceof float[]) {
         if (ws instanceof double[]) {
-          multiply(ud, (float[]) us, ui, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.multiply(ud, (float[]) us, ui, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          multiply(ud, (float[]) us, ui, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.multiply(ud, (float[]) us, ui, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
@@ -1077,7 +1132,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -1107,7 +1162,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -1137,7 +1192,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -1167,7 +1222,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -1197,7 +1252,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -1227,7 +1282,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -1257,7 +1312,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -1287,7 +1342,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.multiply(ud.next, us, ui, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += wd.stride;
@@ -1305,16 +1360,20 @@ public class Tensor implements Debug {
     }
   }
 
+  public final Tensor timesMatrix(Tensor that) {
+    return Tensor.multiplyMatrix(this, that);
+  }
+
   public static Tensor multiplyMatrix(Tensor u, Tensor v) {
-    return multiplyMatrix(u, v, u.dims, u.precision().max(v.precision()));
+    return Tensor.multiplyMatrix(u, v, u.dims, u.precision().max(v.precision()));
   }
 
   public static Tensor multiplyMatrix(Tensor u, Tensor v, TensorDims wd, Precision wp) {
-    return multiplyMatrix(u, false, v, false, wd, wp, false);
+    return Tensor.multiplyMatrix(u, false, v, false, wd, wp, false);
   }
 
   public static void multiplyMatrix(Tensor u, boolean ut, Tensor v, boolean vt, MutableTensor w, boolean wt) {
-    multiplyMatrix(u.dims, u.array, u.offset, ut, v.dims, v.array, v.offset, vt, w.dims, w.array, w.offset, wt);
+    Tensor.multiplyMatrix(u.dims, u.array, u.offset, ut, v.dims, v.array, v.offset, vt, w.dims, w.array, w.offset, wt);
   }
 
   public static Tensor multiplyMatrix(Tensor u, boolean ut, Tensor v, boolean vt, TensorDims wd, Precision wp, boolean wt) {
@@ -1326,7 +1385,7 @@ public class Tensor implements Debug {
     } else {
       throw new AssertionError();
     }
-    multiplyMatrix(u.dims, u.array, u.offset, ut, v.dims, v.array, v.offset, vt, wd, ws, 0, wt);
+    Tensor.multiplyMatrix(u.dims, u.array, u.offset, ut, v.dims, v.array, v.offset, vt, wd, ws, 0, wt);
     return new Tensor(wd, ws, 0);
   }
 
@@ -1336,17 +1395,17 @@ public class Tensor implements Debug {
     if (us instanceof double[]) {
       if (vs instanceof double[]) {
         if (ws instanceof double[]) {
-          multiplyMatrix(ud, (double[]) us, ui, ut, vd, (double[]) vs, vi, vt, wd, (double[]) ws, wi, wt);
+          Tensor.multiplyMatrix(ud, (double[]) us, ui, ut, vd, (double[]) vs, vi, vt, wd, (double[]) ws, wi, wt);
         } else if (ws instanceof float[]) {
-          multiplyMatrix(ud, (double[]) us, ui, ut, vd, (double[]) vs, vi, vt, wd, (float[]) ws, wi, wt);
+          Tensor.multiplyMatrix(ud, (double[]) us, ui, ut, vd, (double[]) vs, vi, vt, wd, (float[]) ws, wi, wt);
         } else {
           throw new AssertionError();
         }
       } else if (vs instanceof float[]) {
         if (ws instanceof double[]) {
-          multiplyMatrix(ud, (double[]) us, ui, ut, vd, (float[]) vs, vi, vt, wd, (double[]) ws, wi, wt);
+          Tensor.multiplyMatrix(ud, (double[]) us, ui, ut, vd, (float[]) vs, vi, vt, wd, (double[]) ws, wi, wt);
         } else if (ws instanceof float[]) {
-          multiplyMatrix(ud, (double[]) us, ui, ut, vd, (float[]) vs, vi, vt, wd, (float[]) ws, wi, wt);
+          Tensor.multiplyMatrix(ud, (double[]) us, ui, ut, vd, (float[]) vs, vi, vt, wd, (float[]) ws, wi, wt);
         } else {
           throw new AssertionError();
         }
@@ -1356,17 +1415,17 @@ public class Tensor implements Debug {
     } else if (us instanceof float[]) {
       if (vs instanceof double[]) {
         if (ws instanceof double[]) {
-          multiplyMatrix(ud, (float[]) us, ui, ut, vd, (double[]) vs, vi, vt, wd, (double[]) ws, wi, wt);
+          Tensor.multiplyMatrix(ud, (float[]) us, ui, ut, vd, (double[]) vs, vi, vt, wd, (double[]) ws, wi, wt);
         } else if (ws instanceof float[]) {
-          multiplyMatrix(ud, (float[]) us, ui, ut, vd, (double[]) vs, vi, vt, wd, (float[]) ws, wi, wt);
+          Tensor.multiplyMatrix(ud, (float[]) us, ui, ut, vd, (double[]) vs, vi, vt, wd, (float[]) ws, wi, wt);
         } else {
           throw new AssertionError();
         }
       } else if (vs instanceof float[]) {
         if (ws instanceof double[]) {
-          multiplyMatrix(ud, (float[]) us, ui, ut, vd, (float[]) vs, vi, vt, wd, (double[]) ws, wi, wt);
+          Tensor.multiplyMatrix(ud, (float[]) us, ui, ut, vd, (float[]) vs, vi, vt, wd, (double[]) ws, wi, wt);
         } else if (ws instanceof float[]) {
-          multiplyMatrix(ud, (float[]) us, ui, ut, vd, (float[]) vs, vi, vt, wd, (float[]) ws, wi, wt);
+          Tensor.multiplyMatrix(ud, (float[]) us, ui, ut, vd, (float[]) vs, vi, vt, wd, (float[]) ws, wi, wt);
         } else {
           throw new AssertionError();
         }
@@ -1699,11 +1758,11 @@ public class Tensor implements Debug {
   }
 
   public static Tensor combine(double a, Tensor u, double b, Tensor v) {
-    return combine(a, u, b, v, u.dims, u.precision().max(v.precision()));
+    return Tensor.combine(a, u, b, v, u.dims, u.precision().max(v.precision()));
   }
 
   public static void combine(double a, Tensor u, double b, Tensor v, MutableTensor w) {
-    combine(a, u.dims, u.array, u.offset, b, v.dims, v.array, v.offset, w.dims, w.array, w.offset);
+    Tensor.combine(a, u.dims, u.array, u.offset, b, v.dims, v.array, v.offset, w.dims, w.array, w.offset);
   }
 
   public static Tensor combine(double a, Tensor u, double b, Tensor v, TensorDims wd, Precision wp) {
@@ -1715,7 +1774,7 @@ public class Tensor implements Debug {
     } else {
       throw new AssertionError();
     }
-    combine(a, u.dims, u.array, u.offset, b, v.dims, v.array, v.offset, wd, ws, 0);
+    Tensor.combine(a, u.dims, u.array, u.offset, b, v.dims, v.array, v.offset, wd, ws, 0);
     return new Tensor(wd, ws, 0);
   }
 
@@ -1725,17 +1784,17 @@ public class Tensor implements Debug {
     if (us instanceof double[]) {
       if (vs instanceof double[]) {
         if (ws instanceof double[]) {
-          combine(a, ud, (double[]) us, ui, b, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.combine(a, ud, (double[]) us, ui, b, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          combine(a, ud, (double[]) us, ui, b, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.combine(a, ud, (double[]) us, ui, b, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
       } else if (vs instanceof float[]) {
         if (ws instanceof double[]) {
-          combine(a, ud, (double[]) us, ui, b, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.combine(a, ud, (double[]) us, ui, b, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          combine(a, ud, (double[]) us, ui, b, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.combine(a, ud, (double[]) us, ui, b, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
@@ -1745,17 +1804,17 @@ public class Tensor implements Debug {
     } else if (us instanceof float[]) {
       if (vs instanceof double[]) {
         if (ws instanceof double[]) {
-          combine(a, ud, (float[]) us, ui, b, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.combine(a, ud, (float[]) us, ui, b, vd, (double[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          combine(a, ud, (float[]) us, ui, b, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.combine(a, ud, (float[]) us, ui, b, vd, (double[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
       } else if (vs instanceof float[]) {
         if (ws instanceof double[]) {
-          combine(a, ud, (float[]) us, ui, b, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
+          Tensor.combine(a, ud, (float[]) us, ui, b, vd, (float[]) vs, vi, wd, (double[]) ws, wi);
         } else if (ws instanceof float[]) {
-          combine(a, ud, (float[]) us, ui, b, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
+          Tensor.combine(a, ud, (float[]) us, ui, b, vd, (float[]) vs, vi, wd, (float[]) ws, wi);
         } else {
           throw new AssertionError();
         }
@@ -1779,7 +1838,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += ud.stride;
@@ -1809,7 +1868,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += ud.stride;
@@ -1839,7 +1898,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += ud.stride;
@@ -1869,7 +1928,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += ud.stride;
@@ -1899,7 +1958,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += ud.stride;
@@ -1929,7 +1988,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += ud.stride;
@@ -1959,7 +2018,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += ud.stride;
@@ -1989,7 +2048,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
+        Tensor.combine(a, ud.next, us, ui, b, vd.next, vs, vi, wd.next, ws, wi);
         ui += ud.stride;
         vi += vd.stride;
         wi += ud.stride;
@@ -2007,6 +2066,43 @@ public class Tensor implements Debug {
     }
   }
 
+  public final double[] getDoubleArray() {
+    if (this.array instanceof double[]) {
+      return (double[]) this.array;
+    } else {
+      return null;
+    }
+  }
+
+  public final float[] getFloatArray() {
+    if (this.array instanceof float[]) {
+      return (float[]) this.array;
+    } else {
+      return null;
+    }
+  }
+
+  public final int getArrayOffset() {
+    return this.offset;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof Tensor) {
+      final Tensor that = (Tensor) other;
+      final Object us = this.array;
+      final Object vs = that.array;
+      if (us instanceof double[] && vs instanceof double[]) {
+        return Tensor.equals(this.dims, (double[]) us, this.offset, that.dims, (double[]) vs, that.offset);
+      } else if (us instanceof float[] && vs instanceof float[]) {
+        return Tensor.equals(this.dims, (float[]) us, this.offset, that.dims, (float[]) vs, that.offset);
+      }
+    }
+    return false;
+  }
+
   static boolean equals(TensorDims ud, double[] us, int ui,
                         TensorDims vd, double[] vs, int vi) {
     if (ud.size != vd.size) {
@@ -2018,7 +2114,7 @@ public class Tensor implements Debug {
         return false;
       }
       while (ui < un) {
-        if (!equals(ud.next, us, ui, vd.next, vs, vi)) {
+        if (!Tensor.equals(ud.next, us, ui, vd.next, vs, vi)) {
           return false;
         }
         ui += ud.stride;
@@ -2050,7 +2146,7 @@ public class Tensor implements Debug {
         return false;
       }
       while (ui < un) {
-        if (!equals(ud.next, us, ui, vd.next, vs, vi)) {
+        if (!Tensor.equals(ud.next, us, ui, vd.next, vs, vi)) {
           return false;
         }
         ui += ud.stride;
@@ -2071,11 +2167,30 @@ public class Tensor implements Debug {
     return true;
   }
 
+  private static int hashSeed;
+
+  @Override
+  public int hashCode() {
+    if (Tensor.hashSeed == 0) {
+      Tensor.hashSeed = Murmur3.seed(Tensor.class);
+    }
+    int code = Tensor.hashSeed;
+    final Object us = this.array;
+    if (us instanceof double[]) {
+      code = Tensor.hash(code, this.dims, (double[]) us, this.offset);
+    } else if (us instanceof float[]) {
+      code = Tensor.hash(code, this.dims, (float[]) us, this.offset);
+    } else {
+      throw new AssertionError();
+    }
+    return Murmur3.mash(code);
+  }
+
   static int hash(int code, TensorDims ud, double[] us, int ui) {
     final int limit = ui + ud.size * ud.stride;
     if (ud.next != null) {
       while (ui < limit) {
-        hash(code, ud.next, us, ui);
+        Tensor.hash(code, ud.next, us, ui);
         ui += ud.stride;
       }
     } else {
@@ -2091,7 +2206,7 @@ public class Tensor implements Debug {
     final int limit = ui + ud.size * ud.stride;
     if (ud.next != null) {
       while (ui < limit) {
-        hash(code, ud.next, us, ui);
+        Tensor.hash(code, ud.next, us, ui);
         ui += ud.stride;
       }
     } else {
@@ -2103,16 +2218,39 @@ public class Tensor implements Debug {
     return code;
   }
 
-  static void debug(Output<?> output, double[] us) {
-    for (int i = 0, n = us.length; i < n; i += 1) {
-      output = output.write(", ").debug(us[i]);
+  @Override
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Tensor").write('.').write("of").write('(')
+                   .debug(this.dims).write(", ").debug(this.offset);
+    final Object us = this.array;
+    if (us instanceof double[]) {
+      output = Tensor.debug(output, (double[]) us);
+    } else if (us instanceof float[]) {
+      output = Tensor.debug(output, (float[]) us);
+    } else {
+      throw new AssertionError();
     }
+    output = output.write(')');
+    return output;
   }
 
-  static void debug(Output<?> output, float[] us) {
+  static <T> Output<T> debug(Output<T> output, double[] us) {
     for (int i = 0, n = us.length; i < n; i += 1) {
       output = output.write(", ").debug(us[i]);
     }
+    return output;
+  }
+
+  static <T> Output<T> debug(Output<T> output, float[] us) {
+    for (int i = 0, n = us.length; i < n; i += 1) {
+      output = output.write(", ").debug(us[i]);
+    }
+    return output;
+  }
+
+  @Override
+  public String toString() {
+    return Format.debug(this);
   }
 
   public static Tensor zero(TensorDims dims) {
@@ -2157,9 +2295,9 @@ public class Tensor implements Debug {
   public static Item mold(String tag, Tensor u) {
     final Object us = u.array;
     if (us instanceof double[]) {
-      return mold(tag, u.dims, (double[]) us, u.offset);
+      return Tensor.mold(tag, u.dims, (double[]) us, u.offset);
     } else if (us instanceof float[]) {
-      return mold(tag, u.dims, (float[]) us, u.offset);
+      return Tensor.mold(tag, u.dims, (float[]) us, u.offset);
     } else {
       throw new AssertionError();
     }
@@ -2170,7 +2308,7 @@ public class Tensor implements Debug {
     final Record header = Record.create(ud.size);
     if (ud.next != null) {
       while (ui < un) {
-        header.item(mold(tag, ud.next, us, ui));
+        header.item(Tensor.mold(tag, ud.next, us, ui));
         ui += ud.stride;
       }
     } else {
@@ -2187,7 +2325,7 @@ public class Tensor implements Debug {
     final Record header = Record.create(ud.size);
     if (ud.next != null) {
       while (ui < un) {
-        header.item(mold(tag, ud.next, us, ui));
+        header.item(Tensor.mold(tag, ud.next, us, ui));
         ui += ud.stride;
       }
     } else {
@@ -2202,11 +2340,11 @@ public class Tensor implements Debug {
   public static Tensor cast(String tag, Item item, TensorDims wd, Precision wp) {
     if (wp.isDouble()) {
       final double[] ws = new double[wd.size * wd.stride];
-      cast(tag, item, wd, ws, 0);
+      Tensor.cast(tag, item, wd, ws, 0);
       return new Tensor(wd, ws);
     } else if (wp.isSingle()) {
       final float[] ws = new float[wd.size * wd.stride];
-      cast(tag, item, wd, ws, 0);
+      Tensor.cast(tag, item, wd, ws, 0);
       return new Tensor(wd, ws);
     } else {
       throw new AssertionError();
@@ -2220,7 +2358,7 @@ public class Tensor implements Debug {
     }
     if (wd.next != null) {
       for (int i = 0; i < wd.size; i += 1) {
-        cast(tag, header.getItem(i), wd.next, ws, wi);
+        Tensor.cast(tag, header.getItem(i), wd.next, ws, wi);
         wi += wd.stride;
       }
     } else {
@@ -2238,7 +2376,7 @@ public class Tensor implements Debug {
     }
     if (wd.next != null) {
       for (int i = 0; i < wd.size; i += 1) {
-        cast(tag, header.getItem(i), wd.next, ws, wi);
+        Tensor.cast(tag, header.getItem(i), wd.next, ws, wi);
         wi += wd.stride;
       }
     } else {
@@ -2261,7 +2399,7 @@ public class Tensor implements Debug {
       }
       wn = wi + wd.size * wd.stride;
       while (wi < wn) {
-        copy(ud.next, us, ui, wd.next, ws, wi);
+        Tensor.copy(ud.next, us, ui, wd.next, ws, wi);
         ui += ud.stride;
         wi += wd.stride;
       }
@@ -2293,7 +2431,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        copy(ud.next, us, ui, wd.next, ws, wi);
+        Tensor.copy(ud.next, us, ui, wd.next, ws, wi);
         ui += ud.stride;
         wi += wd.stride;
       }
@@ -2320,7 +2458,7 @@ public class Tensor implements Debug {
         throw new DimensionException();
       }
       while (wi < wn) {
-        copy(ud.next, us, ui, wd.next, ws, wi);
+        Tensor.copy(ud.next, us, ui, wd.next, ws, wi);
         ui += ud.stride;
         wi += wd.stride;
       }
@@ -2348,7 +2486,7 @@ public class Tensor implements Debug {
       }
       wn = wi + wd.size * wd.stride;
       while (wi < wn) {
-        copy(ud.next, us, ui, wd.next, ws, wi);
+        Tensor.copy(ud.next, us, ui, wd.next, ws, wi);
         ui += ud.stride;
         wi += wd.stride;
       }
@@ -2367,140 +2505,6 @@ public class Tensor implements Debug {
         }
       }
     }
-  }
-
-  public final TensorDims dimensions() {
-    return this.dims;
-  }
-
-  public final Precision precision() {
-    if (this.array instanceof double[]) {
-      return Precision.f64();
-    } else if (this.array instanceof float[]) {
-      return Precision.f32();
-    } else {
-      throw new AssertionError();
-    }
-  }
-
-  public final double getDouble(int... coords) {
-    final Object us = this.array;
-    if (us instanceof double[]) {
-      return ((double[]) us)[getOffset(dims, coords, 0)];
-    } else if (us instanceof float[]) {
-      return (double) ((float[]) us)[getOffset(dims, coords, 0)];
-    } else {
-      throw new AssertionError();
-    }
-  }
-
-  public final float getFloat(int... coords) {
-    final Object us = this.array;
-    if (us instanceof float[]) {
-      return ((float[]) us)[getOffset(dims, coords, 0)];
-    } else if (us instanceof double[]) {
-      return (float) ((double[]) us)[getOffset(dims, coords, 0)];
-    } else {
-      throw new AssertionError();
-    }
-  }
-
-  public final Tensor plus(Tensor that) {
-    return add(this, that);
-  }
-
-  public final Tensor opposite() {
-    return opposite(this);
-  }
-
-  public final Tensor minus(Tensor that) {
-    return subtract(this, that);
-  }
-
-  public final Tensor times(double scalar) {
-    return multiply(scalar, this);
-  }
-
-  public final Tensor times(Tensor that) {
-    return multiply(this, that);
-  }
-
-  public final Tensor timesMatrix(Tensor that) {
-    return multiplyMatrix(this, that);
-  }
-
-  public final double[] getDoubleArray() {
-    if (array instanceof double[]) {
-      return (double[]) this.array;
-    } else {
-      return null;
-    }
-  }
-
-  public final float[] getFloatArray() {
-    if (array instanceof float[]) {
-      return (float[]) this.array;
-    } else {
-      return null;
-    }
-  }
-
-  public final int getArrayOffset() {
-    return this.offset;
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    } else if (other instanceof Tensor) {
-      final Tensor that = (Tensor) other;
-      final Object us = this.array;
-      final Object vs = that.array;
-      if (us instanceof double[] && vs instanceof double[]) {
-        return equals(dims, (double[]) us, this.offset, that.dims, (double[]) vs, that.offset);
-      } else if (us instanceof float[] && vs instanceof float[]) {
-        return equals(dims, (float[]) us, this.offset, that.dims, (float[]) vs, that.offset);
-      }
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Tensor.class);
-    }
-    int code = hashSeed;
-    final Object us = this.array;
-    if (us instanceof double[]) {
-      code = hash(code, this.dims, (double[]) us, this.offset);
-    } else if (us instanceof float[]) {
-      code = hash(code, this.dims, (float[]) us, this.offset);
-    } else {
-      throw new AssertionError();
-    }
-    return Murmur3.mash(code);
-  }
-
-  @Override
-  public void debug(Output<?> output) {
-    output = output.write("Tensor").write('.').write("of").write('(')
-        .debug(this.dims).write(", ").debug(this.offset);
-    final Object us = this.array;
-    if (us instanceof double[]) {
-      debug(output, (double[]) us);
-    } else if (us instanceof float[]) {
-      debug(output, (float[]) us);
-    } else {
-      throw new AssertionError();
-    }
-    output = output.write(')');
-  }
-
-  @Override
-  public String toString() {
-    return Format.debug(this);
   }
 
 }

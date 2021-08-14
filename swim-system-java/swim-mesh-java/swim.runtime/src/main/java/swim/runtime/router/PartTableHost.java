@@ -65,7 +65,7 @@ public class PartTableHost implements HostContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapHost(Class<T> hostClass) {
-    if (hostClass.isAssignableFrom(getClass())) {
+    if (hostClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -75,7 +75,7 @@ public class PartTableHost implements HostContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T bottomHost(Class<T> hostClass) {
-    if (hostClass.isAssignableFrom(getClass())) {
+    if (hostClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -264,32 +264,32 @@ public class PartTableHost implements HostContext {
 
   @Override
   public void willOpen() {
-    // nop
+    // hook
   }
 
   @Override
   public void didOpen() {
-    // nop
+    // hook
   }
 
   @Override
   public void willLoad() {
-    // nop
+    // hook
   }
 
   @Override
   public void didLoad() {
-    // nop
+    // hook
   }
 
   @Override
   public void willStart() {
-    // nop
+    // hook
   }
 
   @Override
   public void didStart() {
-    // nop
+    // hook
   }
 
   @Override
@@ -304,27 +304,27 @@ public class PartTableHost implements HostContext {
 
   @Override
   public void willStop() {
-    // nop
+    // hook
   }
 
   @Override
   public void didStop() {
-    // nop
+    // hook
   }
 
   @Override
   public void willUnload() {
-    // nop
+    // hook
   }
 
   @Override
   public void didUnload() {
-    // nop
+    // hook
   }
 
   @Override
   public void willClose() {
-    // nop
+    // hook
   }
 
 }

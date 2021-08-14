@@ -30,8 +30,7 @@ final class UriHostAddressParser extends Parser<UriHost> {
   final int x;
   final int step;
 
-  UriHostAddressParser(UriParser uri, Output<String> output,
-                       int c1, int x, int step) {
+  UriHostAddressParser(UriParser uri, Output<String> output, int c1, int x, int step) {
     this.uri = uri;
     this.output = output;
     this.c1 = c1;
@@ -41,6 +40,11 @@ final class UriHostAddressParser extends Parser<UriHost> {
 
   UriHostAddressParser(UriParser uri) {
     this(uri, null, 0, 0, 1);
+  }
+
+  @Override
+  public Parser<UriHost> feed(Input input) {
+    return UriHostAddressParser.parse(input, this.uri, this.output, this.c1, this.x, this.step);
   }
 
   static Parser<UriHost> parse(Input input, UriParser uri, Output<String> output,
@@ -67,7 +71,7 @@ final class UriHostAddressParser extends Parser<UriHost> {
           x = 0;
           step += 1;
         } else if (!Uri.isHostChar(c) && c != '%' && step == 4 && x <= 255) {
-          return done(uri.hostIPv4(output.bind()));
+          return Parser.done(uri.hostIPv4(output.bind()));
         } else {
           x = 0;
           step = 5;
@@ -75,9 +79,9 @@ final class UriHostAddressParser extends Parser<UriHost> {
         }
       } else if (!input.isEmpty()) {
         if (step == 4 && x <= 255) {
-          return done(uri.hostIPv4(output.bind()));
+          return Parser.done(uri.hostIPv4(output.bind()));
         } else {
-          return done(uri.hostName(output.bind()));
+          return Parser.done(uri.hostName(output.bind()));
         }
       } else {
         break;
@@ -98,7 +102,7 @@ final class UriHostAddressParser extends Parser<UriHost> {
           input = input.step();
           step = 6;
         } else if (!input.isEmpty()) {
-          return done(uri.hostName(output.bind()));
+          return Parser.done(uri.hostName(output.bind()));
         }
       }
       if (step == 6) {
@@ -109,10 +113,10 @@ final class UriHostAddressParser extends Parser<UriHost> {
             c1 = c;
             step = 7;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       if (step == 7) {
@@ -125,27 +129,22 @@ final class UriHostAddressParser extends Parser<UriHost> {
             step = 5;
             continue;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new UriHostAddressParser(uri, output, c1, x, step);
   }
 
   static Parser<UriHost> parse(Input input, UriParser uri) {
-    return parse(input, uri, null, 0, 0, 1);
-  }
-
-  @Override
-  public Parser<UriHost> feed(Input input) {
-    return parse(input, this.uri, this.output, this.c1, this.x, this.step);
+    return UriHostAddressParser.parse(input, uri, null, 0, 0, 1);
   }
 
 }

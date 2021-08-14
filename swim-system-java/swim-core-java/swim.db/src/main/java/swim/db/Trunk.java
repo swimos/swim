@@ -20,9 +20,6 @@ import swim.structure.Value;
 
 public class Trunk<T extends Tree> extends TreeContext {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<Trunk<?>, Tree> TREE =
-      AtomicReferenceFieldUpdater.newUpdater((Class<Trunk<?>>) (Class<?>) Trunk.class, Tree.class, "tree");
   final Database database;
   final Value name;
   volatile T tree;
@@ -59,7 +56,7 @@ public class Trunk<T extends Tree> extends TreeContext {
   }
 
   public boolean updateTree(T oldTree, T newTree, long newVersion) {
-    if (this.database.version == newVersion && TREE.compareAndSet(this, oldTree, newTree)) {
+    if (this.database.version == newVersion && Trunk.TREE.compareAndSet(this, oldTree, newTree)) {
       this.database.databaseDidUpdateTrunk(this, newTree, oldTree, newVersion);
       return this.database.version == newVersion; // Re-check version after CAS.
     }
@@ -99,7 +96,7 @@ public class Trunk<T extends Tree> extends TreeContext {
 
   @Override
   public PageLoader openPageLoader(boolean isResident) {
-    return this.database.store.openPageLoader(treeDelegate, isResident);
+    return this.database.store.openPageLoader(this.treeDelegate, isResident);
   }
 
   @Override
@@ -235,5 +232,9 @@ public class Trunk<T extends Tree> extends TreeContext {
       ((UTreeDelegate) treeDelegate).utreeDidUpdate(newTree, oldTree, newValue, oldValue);
     }
   }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<Trunk<?>, Tree> TREE =
+      AtomicReferenceFieldUpdater.newUpdater((Class<Trunk<?>>) (Class<?>) Trunk.class, Tree.class, "tree");
 
 }

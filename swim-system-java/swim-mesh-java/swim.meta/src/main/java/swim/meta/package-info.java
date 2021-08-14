@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /**
- * Swim meta runtime.
+ * Swim reflection runtime.
  */
 
 package swim.meta;

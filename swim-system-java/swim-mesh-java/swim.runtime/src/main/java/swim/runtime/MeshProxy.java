@@ -36,6 +36,7 @@ public class MeshProxy implements MeshBinding, MeshContext {
 
   public MeshProxy(MeshBinding meshBinding) {
     this.meshBinding = meshBinding;
+    this.meshContext = null;
   }
 
   @Override
@@ -71,7 +72,7 @@ public class MeshProxy implements MeshBinding, MeshContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapMesh(Class<T> meshClass) {
-    if (meshClass.isAssignableFrom(getClass())) {
+    if (meshClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.meshContext.unwrapMesh(meshClass);
@@ -82,7 +83,7 @@ public class MeshProxy implements MeshBinding, MeshContext {
   @Override
   public <T> T bottomMesh(Class<T> meshClass) {
     T mesh = this.meshContext.bottomMesh(meshClass);
-    if (mesh == null && meshClass.isAssignableFrom(getClass())) {
+    if (mesh == null && meshClass.isAssignableFrom(this.getClass())) {
       mesh = (T) this;
     }
     return mesh;

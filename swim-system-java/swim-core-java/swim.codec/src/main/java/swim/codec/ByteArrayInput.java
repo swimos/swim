@@ -83,7 +83,7 @@ final class ByteArrayInput extends InputBuffer {
       return this;
     } else {
       final Throwable error = new InputException("invalid index");
-      return InputBuffer.error(error, this.id, mark(), this.settings);
+      return InputBuffer.error(error, this.id, this.mark(), this.settings);
     }
   }
 
@@ -99,7 +99,7 @@ final class ByteArrayInput extends InputBuffer {
       return this;
     } else {
       final Throwable error = new InputException("invalid limit");
-      return InputBuffer.error(error, this.id, mark(), this.settings);
+      return InputBuffer.error(error, this.id, this.mark(), this.settings);
     }
   }
 
@@ -163,7 +163,7 @@ final class ByteArrayInput extends InputBuffer {
       return this;
     } else {
       final Throwable error = new InputException("invalid step");
-      return InputBuffer.error(error, this.id, mark(), this.settings);
+      return InputBuffer.error(error, this.id, this.mark(), this.settings);
     }
   }
 
@@ -176,7 +176,7 @@ final class ByteArrayInput extends InputBuffer {
       return this;
     } else {
       final Throwable error = new InputException("invalid step");
-      return InputBuffer.error(error, this.id, mark(), this.settings);
+      return InputBuffer.error(error, this.id, this.mark(), this.settings);
     }
   }
 
@@ -190,7 +190,7 @@ final class ByteArrayInput extends InputBuffer {
         return this;
       } else {
         final Throwable error = new InputException("invalid seek to " + mark);
-        return InputBuffer.error(error, this.id, mark(), this.settings);
+        return InputBuffer.error(error, this.id, this.mark(), this.settings);
       }
     } else {
       this.offset -= (long) this.index;
@@ -250,7 +250,7 @@ final class ByteArrayInput extends InputBuffer {
   @Override
   public InputBuffer clone() {
     return new ByteArrayInput(this.array, this.index, this.limit, this.id,
-        this.offset, this.settings, this.isPart);
+                              this.offset, this.settings, this.isPart);
   }
 
 }

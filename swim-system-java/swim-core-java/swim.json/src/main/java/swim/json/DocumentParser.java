@@ -14,7 +14,7 @@ final class DocumentParser<I, V> extends Parser<V> {
   final int step;
 
   DocumentParser(JsonParser<I, V> json, Builder<I, V> builder,
-                        Parser<V> keyParser, Parser<V> valueParser, int step) {
+                 Parser<V> keyParser, Parser<V> valueParser, int step) {
     this.json = json;
     this.builder = builder;
     this.keyParser = keyParser;
@@ -24,6 +24,12 @@ final class DocumentParser<I, V> extends Parser<V> {
 
   DocumentParser(JsonParser<I, V> json) {
     this(json, null, null, null, 1);
+  }
+
+  @Override
+  public Parser<V> feed(Input input) {
+    return DocumentParser.parse(input, this.json, this.builder,
+                                this.keyParser, this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, JsonParser<I, V> json, Builder<I, V> builder,
@@ -43,17 +49,17 @@ final class DocumentParser<I, V> extends Parser<V> {
           input = input.step();
           step = 2;
         } else {
-          return error(Diagnostic.expected('{', input));
+          return Parser.error(Diagnostic.expected('{', input));
         }
       } else if (input.isError()) {
-        return error(input.trap());
+        return Parser.error(input.trap());
       } else if (input.isDone()) {
         // or return error?
-        //return error(Diagnostic.expected('{', input));
+        //return Parser.error(Diagnostic.expected('{', input));
         if (builder == null) {
           builder = json.documentBuilder();
         }
-        return done(builder.bind());
+        return Parser.done(builder.bind());
       }
     }
     if (step == 2) {
@@ -71,12 +77,12 @@ final class DocumentParser<I, V> extends Parser<V> {
         }
         if (c == '}') {
           input = input.step();
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         } else {
           step = 3;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('}', input));
+        return Parser.error(Diagnostic.expected('}', input));
       }
     }
     while (step >= 3 && !input.isEmpty()) {
@@ -109,10 +115,10 @@ final class DocumentParser<I, V> extends Parser<V> {
             input = input.step();
             step = 5;
           } else {
-            return error(Diagnostic.expected(':', input));
+            return Parser.error(Diagnostic.expected(':', input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected(':', input));
+          return Parser.error(Diagnostic.expected(':', input));
         } else {
           break;
         }
@@ -124,7 +130,7 @@ final class DocumentParser<I, V> extends Parser<V> {
         if (input.isCont()) {
           step = 6;
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("value", input));
+          return Parser.error(Diagnostic.expected("value", input));
         } else {
           break;
         }
@@ -164,10 +170,10 @@ final class DocumentParser<I, V> extends Parser<V> {
             input = input.step();
             step = 8;
           } else {
-            return error(Diagnostic.expected("',' or '}'", input));
+            return Parser.error(Diagnostic.expected("',' or '}'", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected('}', input));
+          return Parser.error(Diagnostic.expected('}', input));
         } else {
           break;
         }
@@ -178,28 +184,23 @@ final class DocumentParser<I, V> extends Parser<V> {
           if (Json.isWhitespace(c)) {
             input = input.step();
           } else {
-            return error(Diagnostic.unexpected(input, "trailing characters after closing '}'"));
+            return Parser.error(Diagnostic.unexpected(input, "trailing characters after closing '}'"));
           }
         }
-        return done(builder.bind());
+        return Parser.done(builder.bind());
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new DocumentParser<I, V>(json, builder, keyParser, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, JsonParser<I, V> json) {
-    return parse(input, json, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.json, this.builder, this.keyParser, this.valueParser, this.step);
+    return DocumentParser.parse(input, json, null, null, null, 1);
   }
 
 }

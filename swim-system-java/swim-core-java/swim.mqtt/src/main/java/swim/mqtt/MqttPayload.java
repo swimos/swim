@@ -26,8 +26,6 @@ import swim.util.Murmur3;
 
 public final class MqttPayload<T> extends MqttEntity<T> implements Debug {
 
-  private static int hashSeed;
-  private static MqttPayload<Object> empty;
   final T value;
   final Encoder<?, ?> content;
   final int length;
@@ -36,33 +34,6 @@ public final class MqttPayload<T> extends MqttEntity<T> implements Debug {
     this.value = value;
     this.content = content;
     this.length = length;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> MqttPayload<T> empty() {
-    if (empty == null) {
-      empty = new MqttPayload<Object>(null, Encoder.done(), 0);
-    }
-    return (MqttPayload<T>) empty;
-  }
-
-  public static <T> MqttPayload<T> from(T value, Encoder<?, ?> content, int length) {
-    return new MqttPayload<T>(value, content, length);
-  }
-
-  public static <T> MqttPayload<T> from(Encoder<?, ?> content, int length) {
-    return new MqttPayload<T>(null, content, length);
-  }
-
-  public static <T> MqttPayload<T> from(ByteBuffer data) {
-    return new MqttPayload<T>(null, Binary.byteBufferWriter(data), data.remaining());
-  }
-
-  public static MqttPayload<String> from(String content) {
-    Output<ByteBuffer> output = Utf8.encodedOutput(Binary.byteBufferOutput(content.length()));
-    output = output.write(content);
-    final ByteBuffer data = output.bind();
-    return new MqttPayload<String>(content, Binary.byteBufferWriter(data), data.remaining());
   }
 
   public boolean isDefined() {
@@ -99,32 +70,65 @@ public final class MqttPayload<T> extends MqttEntity<T> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttPayload.class);
+    if (MqttPayload.hashSeed == 0) {
+      MqttPayload.hashSeed = Murmur3.seed(MqttPayload.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(MqttPayload.hashSeed,
         Murmur3.hash(this.value)), this.content.hashCode()), this.length));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("MqttPayload").write('.');
     if (this.value == null && this.content.isDone() && this.length == 0) {
-      output = output.write("empty").write('(').write(')');
+      output = output.write("empty").write('(');
     } else {
-      output = output.write("from").write('(');
+      output = output.write("create").write('(');
       if (this.value != null) {
-        output.debug(this.value).write(", ");
+        output = output.debug(this.value).write(", ");
       }
-      output.debug(this.content).write(", ").debug(this.length).write(')');
+      output = output.debug(this.content).write(", ").debug(this.length);
     }
+    output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static MqttPayload<Object> empty;
+
+  @SuppressWarnings("unchecked")
+  public static <T> MqttPayload<T> empty() {
+    if (MqttPayload.empty == null) {
+      MqttPayload.empty = new MqttPayload<Object>(null, Encoder.done(), 0);
+    }
+    return (MqttPayload<T>) MqttPayload.empty;
+  }
+
+  public static <T> MqttPayload<T> create(T value, Encoder<?, ?> content, int length) {
+    return new MqttPayload<T>(value, content, length);
+  }
+
+  public static <T> MqttPayload<T> create(Encoder<?, ?> content, int length) {
+    return new MqttPayload<T>(null, content, length);
+  }
+
+  public static <T> MqttPayload<T> create(ByteBuffer data) {
+    return new MqttPayload<T>(null, Binary.byteBufferWriter(data), data.remaining());
+  }
+
+  public static MqttPayload<String> create(String content) {
+    Output<ByteBuffer> output = Utf8.encodedOutput(Binary.byteBufferOutput(content.length()));
+    output = output.write(content);
+    final ByteBuffer data = output.bind();
+    return new MqttPayload<String>(content, Binary.byteBufferWriter(data), data.remaining());
   }
 
 }

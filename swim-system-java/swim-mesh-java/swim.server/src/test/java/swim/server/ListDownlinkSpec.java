@@ -55,17 +55,17 @@ public class ListDownlinkSpec {
 
   @BeforeMethod
   public void setTestPlane() {
-    kernel = ServerLoader.loadServerStack();
-    plane = kernel.openSpace(ActorSpaceDef.fromName("test")).openPlane("test", TestListPlane.class);
+    this.kernel = ServerLoader.loadServerStack();
+    this.plane = this.kernel.openSpace(ActorSpaceDef.fromName("test")).openPlane("test", TestListPlane.class);
 
-    kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
-    kernel.start();
+    this.kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
+    this.kernel.start();
   }
 
   @AfterMethod
   public void stop() {
-    if (kernel != null && kernel.isStarted()) {
-      kernel.stop();
+    if (this.kernel != null && this.kernel.isStarted()) {
+      this.kernel.stop();
     }
   }
 
@@ -113,8 +113,8 @@ public class ListDownlinkSpec {
 
     }
 
-    final ListDownlink<String> listLink = getDownlink(new ListLinkController());
-    final ListDownlink<String> readOnlyListLink = getDownlink(new ReadOnlyListLinkController());
+    final ListDownlink<String> listLink = this.getDownlink(new ListLinkController());
+    final ListDownlink<String> readOnlyListLink = this.getDownlink(new ReadOnlyListLinkController());
 
     listLink.add(0, "a");
     listLink.add(1, "b");
@@ -137,7 +137,7 @@ public class ListDownlinkSpec {
 
   private ListDownlink<String> getDownlink(Object observer) {
     final CountDownLatch didSyncLatch = new CountDownLatch(1);
-    final ListDownlink<String> listLink = plane.downlinkList()
+    final ListDownlink<String> listLink = this.plane.downlinkList()
         .valueClass(String.class)
         .hostUri("warp://localhost:53556")
         .nodeUri("/list/todo")
@@ -215,8 +215,8 @@ public class ListDownlinkSpec {
 
     }
 
-    final ListDownlink<String> listLink = getDownlink(new ListLinkController());
-    final ListDownlink<String> readOnlyListLink = getDownlink(new ReadOnlyListLinkController());
+    final ListDownlink<String> listLink = this.getDownlink(new ListLinkController());
+    final ListDownlink<String> readOnlyListLink = this.getDownlink(new ReadOnlyListLinkController());
 
     listLink.add(0, "a");
     listLink.add(1, "b");
@@ -291,8 +291,8 @@ public class ListDownlinkSpec {
 
     }
 
-    final ListDownlink<String> listLink = getDownlink(new ListLinkController());
-    final ListDownlink<String> readOnlyListLink = getDownlink(new ReadOnlyListLinkController());
+    final ListDownlink<String> listLink = this.getDownlink(new ListLinkController());
+    final ListDownlink<String> readOnlyListLink = this.getDownlink(new ReadOnlyListLinkController());
 
     listLink.add(0, "a");
     listLink.add(1, "b");
@@ -368,8 +368,8 @@ public class ListDownlinkSpec {
 
     }
 
-    final ListDownlink<String> listLink = getDownlink(new ListLinkController());
-    final ListDownlink<String> readOnlyListLink = getDownlink(new ReadOnlyListLinkController());
+    final ListDownlink<String> listLink = this.getDownlink(new ListLinkController());
+    final ListDownlink<String> readOnlyListLink = this.getDownlink(new ReadOnlyListLinkController());
 
     listLink.add(0, "a");
     listLink.add(1, "b");
@@ -442,10 +442,10 @@ public class ListDownlinkSpec {
 
     }
 
-    final ListDownlink<String> listLink = getDownlink(new ListLinkController());
+    final ListDownlink<String> listLink = this.getDownlink(new ListLinkController());
     listLink.observe(new ListLinkController()).open();
 
-    final ListDownlink<String> readOnlyListLink = getDownlink(new ReadOnlyListLinkController());
+    final ListDownlink<String> readOnlyListLink = this.getDownlink(new ReadOnlyListLinkController());
 
     for (int i = 0; i < total; i++) {
       listLink.add(i, Integer.toString(i));
@@ -521,9 +521,9 @@ public class ListDownlinkSpec {
 
     }
 
-    final ListDownlink<String> listLink = getDownlink(new ListLinkController());
+    final ListDownlink<String> listLink = this.getDownlink(new ListLinkController());
     listLink.observe(new ListLinkController()).open();
-    final ListDownlink<String> readOnlyListLink = getDownlink(new ReadOnlyListLinkController());
+    final ListDownlink<String> readOnlyListLink = this.getDownlink(new ReadOnlyListLinkController());
 
     for (int i = 0; i < total; i++) {
       listLink.add(i, Integer.toString(i));
@@ -601,10 +601,10 @@ public class ListDownlinkSpec {
 
     }
 
-    final ListDownlink<String> listLink = getDownlink(new ListLinkController());
+    final ListDownlink<String> listLink = this.getDownlink(new ListLinkController());
     listLink.observe(new ListLinkController()).open();
 
-    final ListDownlink<String> readOnlyListLink = getDownlink(new ReadOnlyListLinkController());
+    final ListDownlink<String> readOnlyListLink = this.getDownlink(new ReadOnlyListLinkController());
 
     for (int i = 0; i < total; i++) {
       listLink.add(i, Integer.toString(i));
@@ -630,8 +630,7 @@ public class ListDownlinkSpec {
   static class TestListLaneAgent extends AbstractAgent {
 
     @SwimLane("list")
-    ListLane<String> testList = listLane()
-        .valueClass(String.class);
+    ListLane<String> testList = listLane().valueClass(String.class);
 
   }
 

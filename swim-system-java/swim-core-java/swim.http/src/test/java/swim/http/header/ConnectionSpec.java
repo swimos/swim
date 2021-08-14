@@ -22,24 +22,24 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class ConnectionSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseConnectionHeaders() {
     assertParses("Connection: close", Connection.close());
     assertParses("Connection: Upgrade", Connection.upgrade());
-    assertParses("Connection: Upgrade,HTTP2-Settings", Connection.from("Upgrade", "HTTP2-Settings"));
-    assertParses("Connection: Upgrade, HTTP2-Settings", Connection.from("Upgrade", "HTTP2-Settings"));
-    assertParses("Connection: Upgrade , HTTP2-Settings", Connection.from("Upgrade", "HTTP2-Settings"));
+    assertParses("Connection: Upgrade,HTTP2-Settings", Connection.create("Upgrade", "HTTP2-Settings"));
+    assertParses("Connection: Upgrade, HTTP2-Settings", Connection.create("Upgrade", "HTTP2-Settings"));
+    assertParses("Connection: Upgrade , HTTP2-Settings", Connection.create("Upgrade", "HTTP2-Settings"));
   }
 
   @Test
   public void writeConnectionHeaders() {
     assertWrites(Connection.close(), "Connection: close");
     assertWrites(Connection.upgrade(), "Connection: Upgrade");
-    assertWrites(Connection.from("Upgrade", "HTTP2-Settings"), "Connection: Upgrade, HTTP2-Settings");
+    assertWrites(Connection.create("Upgrade", "HTTP2-Settings"), "Connection: Upgrade, HTTP2-Settings");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

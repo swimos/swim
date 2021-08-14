@@ -41,6 +41,11 @@ final class ServerParser extends Parser<Server> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<Server> feed(Input input) {
+    return ServerParser.parse(input, this.http, this.product, this.products, this.step);
+  }
+
   static Parser<Server> parse(Input input, HttpParser http, Parser<Product> product,
                               Builder<Product, FingerTrieSeq<Product>> products, int step) {
     int c = 0;
@@ -74,7 +79,7 @@ final class ServerParser extends Parser<Server> {
         if (input.isCont() && Http.isTokenChar(c)) {
           step = 3;
         } else if (!input.isEmpty()) {
-          return done(Server.from(products.bind()));
+          return Parser.done(Server.create(products.bind()));
         }
       }
       if (step == 3) {
@@ -95,18 +100,13 @@ final class ServerParser extends Parser<Server> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ServerParser(http, product, products, step);
   }
 
   static Parser<Server> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<Server> feed(Input input) {
-    return parse(input, this.http, this.product, this.products, this.step);
+    return ServerParser.parse(input, http, null, null, 1);
   }
 
 }

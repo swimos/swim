@@ -25,57 +25,6 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 public class Clock implements Schedule {
 
   /**
-   * Default number of milliseconds between clock ticks, used by the no-arg
-   * {@link #Clock()} constructor.  Defaults to the value of the {@code
-   * swim.clock.tick.millis} system property, if defined; otherwise defaults to
-   * {@code 100} milliseconds.
-   */
-  public static final int TICK_MILLIS;
-  /**
-   * Default number of ticks per clock revolution, used by the no-arg {@link
-   * #Clock()} constructor.  Defaults to the value of the {@code
-   * swim.clock.tick.count} system property, if defined; otherwise defaults to
-   * {@code 512} clock ticks per revolution.
-   */
-  public static final int TICK_COUNT;
-  /**
-   * Atomic {@link #status} bit flag indicating that the clock has started, and
-   * is currently running.
-   */
-  static final int STARTED = 1 << 0;
-  /**
-   * Atomic {@link #status} bit flag indicating that the clock had previously
-   * started, but is now permanently stopped.
-   */
-  static final int STOPPED = 1 << 1;
-  /**
-   * Atomic {@link #status} field updater, used to linearize clock startup and
-   * shutdown.
-   */
-  static final AtomicIntegerFieldUpdater<Clock> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(Clock.class, "status");
-
-  static {
-    // Initializes the default number of milliseconds between clock ticks.
-    int tickMillis;
-    try {
-      tickMillis = Integer.parseInt(System.getProperty("swim.clock.tick.millis"));
-    } catch (NumberFormatException e) {
-      tickMillis = 100;
-    }
-    TICK_MILLIS = tickMillis;
-
-    // Initialize the default number of ticks per clock revolution.
-    int tickCount;
-    try {
-      tickCount = Integer.parseInt(System.getProperty("swim.clock.tick.count"));
-    } catch (NumberFormatException e) {
-      tickCount = 512;
-    }
-    TICK_COUNT = tickCount;
-  }
-
-  /**
    * Immutable array of {@link #tickCount} timer buckets, each containing a
    * lock-free queue of timer events to execute for a particular modulus of
    * clock ticks.
@@ -151,6 +100,10 @@ public class Clock implements Schedule {
 
     // Initialize--but don't start--the clock thread.
     this.thread = new ClockThread(this);
+
+    // Initialize clock status.
+    this.startTime = 0L;
+    this.status = 0;
   }
 
   /**
@@ -167,7 +120,7 @@ public class Clock implements Schedule {
    * ticks per revolution.
    */
   public Clock() {
-    this(TICK_MILLIS, TICK_COUNT);
+    this(Clock.TICK_MILLIS, Clock.TICK_COUNT);
   }
 
   /**
@@ -186,15 +139,15 @@ public class Clock implements Schedule {
    */
   public final void start() {
     do {
-      final int oldStatus = STATUS.get(this);
-      if ((oldStatus & STOPPED) == 0) {
+      final int oldStatus = Clock.STATUS.get(this);
+      if ((oldStatus & Clock.STOPPED) == 0) {
         // Clock hasn't yet stopped; make sure it has started.
-        if ((oldStatus & STARTED) == 0) {
-          final int newStatus = oldStatus | STARTED;
+        if ((oldStatus & Clock.STARTED) == 0) {
+          final int newStatus = oldStatus | Clock.STARTED;
           // Try to set the STARTED flag; linearization point for clock startup.
-          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+          if (Clock.STATUS.compareAndSet(this, oldStatus, newStatus)) {
             // Initiate clock thread startup.
-            willStart();
+            this.willStart();
             this.thread.start();
             break;
           }
@@ -224,23 +177,23 @@ public class Clock implements Schedule {
 
   /**
    * Ensures that this {@code Clock} has been permanently stopped, shutting
-   * down the clock thread, if it's currently running.  Upon return, this
+   * down the clock thread, if it's currently running. Upon return, this
    * {@code Clock} is guaranteed to be in the <em>stopped</em> state.
    */
   public final void stop() {
     // Clock hasn't been started
-    if ((STATUS.get(this) & STARTED) == 0) {
+    if ((Clock.STATUS.get(this) & Clock.STARTED) == 0) {
       return;
     }
 
     boolean interrupted = false;
     do {
-      final int oldStatus = STATUS.get(this);
-      if ((oldStatus & STOPPED) == 0) {
+      final int oldStatus = Clock.STATUS.get(this);
+      if ((oldStatus & Clock.STOPPED) == 0) {
         // Clock hasn't yet stopped; try to stop it.
         final int newStatus = oldStatus | STOPPED;
         // Try to set the STOPPED flag; linearization point for clock shutdown.
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if (Clock.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           // Loop while the clock thread is still running.
           while (this.thread.isAlive()) {
             // Interrupt the clock thread so it will wakeup and die.
@@ -276,7 +229,7 @@ public class Clock implements Schedule {
   @Override
   public TimerRef timer(TimerFunction timer) {
     // Ensure that the clock has started.
-    start();
+    this.start();
 
     // Create the context that binds the timer to this clock.
     final ClockTimer context = new ClockTimer(this, timer);
@@ -295,7 +248,7 @@ public class Clock implements Schedule {
     }
 
     // Ensure that the clock has started.
-    start();
+    this.start();
 
     // Create the context that binds the timer to this clock.
     final ClockTimer context = new ClockTimer(this, timer);
@@ -304,7 +257,7 @@ public class Clock implements Schedule {
     }
 
     // Schedule the timer for execution.
-    schedule(millis, context);
+    this.schedule(millis, context);
 
     // Return the timer context.
     return context;
@@ -316,7 +269,7 @@ public class Clock implements Schedule {
    */
   final void schedule(long millis, ClockTimer context) {
     // Invoke timer scheduling introspection callbacks.
-    timerWillSchedule(context.timer, millis);
+    this.timerWillSchedule(context.timer, millis);
     if (context.timer instanceof Timer) {
       ((Timer) context.timer).timerWillSchedule(millis);
     }
@@ -324,7 +277,7 @@ public class Clock implements Schedule {
     // Convert the timeout to nanoseconds.
     final long nanos = millis * 1000000L;
     // Compute the deadline for the timer in nanoseconds since clock start.
-    final long deadline = Math.max(0L, nanoTime() + nanos - this.startTime);
+    final long deadline = Math.max(0L, this.nanoTime() + nanos - this.startTime);
     // Divide the deadline by the tick interval to get the tick sequence number
     // at which to fire the timer, rounding up to the next tick.
     long targetTick = (deadline + (this.tickNanos - 1L)) / this.tickNanos;
@@ -403,45 +356,45 @@ public class Clock implements Schedule {
    * Lifecycle callback invoked before the clock thread starts.
    */
   protected void willStart() {
-    // stub
+    // hook
   }
 
   /**
    * Lifecycle callback invoked after the clock thread starts.
    */
   protected void didStart() {
-    // stub
+    // hook
   }
 
   /**
-   * Introspection callback invoked after each tick of the clock.  {@code tick}
+   * Introspection callback invoked after each tick of the clock. {@code tick}
    * is the sequence number of the tick that was executed; {@code waitedMillis}
    * is the number of milliseconds the clock thread slept before executing the
-   * tick.  If {@code waitedMillis} is negative, then the clock thread didn't
+   * tick. If {@code waitedMillis} is negative, then the clock thread didn't
    * start executing the tick until {@code -waitedMillis} milliseconds after
    * the scheduled tick deadline.
    */
   protected void didTick(long tick, long waitedMillis) {
-    // stub
+    // hook
   }
 
   /**
    * Lifecycle callback invoked before the clock thread stops.
    */
   protected void willStop() {
-    // stub
+    // hook
   }
 
   /**
    * Lifecycle callback invoked after the clock thread stops.
    */
   protected void didStop() {
-    // stub
+    // hook
   }
 
   /**
    * Lifecycle callback invoked if the timer thread throws a fatal {@code
-   * error}.  The clock thread will stop after invoking {@code didFail}.
+   * error}. The clock thread will stop after invoking {@code didFail}.
    */
   protected void didFail(Throwable error) {
     error.printStackTrace();
@@ -452,7 +405,7 @@ public class Clock implements Schedule {
    * execution with a delay of {@code millis} milliseconds.
    */
   protected void timerWillSchedule(TimerFunction timer, long millis) {
-    // stub
+    // hook
   }
 
   /**
@@ -461,14 +414,14 @@ public class Clock implements Schedule {
    * rescheduling an already scheduled timer.
    */
   protected void timerDidCancel(TimerFunction timer) {
-    // stub
+    // hook
   }
 
   /**
    * Introspection callback invoked before a {@code timer} is executed.
    */
   protected void timerWillRun(TimerFunction timer) {
-    // stub
+    // hook
   }
 
   /**
@@ -484,7 +437,7 @@ public class Clock implements Schedule {
    * Introspection callback invoked after a {@code timer} executes nominally.
    */
   protected void timerDidRun(TimerFunction timer) {
-    // stub
+    // hook
   }
 
   /**
@@ -492,13 +445,13 @@ public class Clock implements Schedule {
    * throwing an {@code error}.
    */
   protected void timerDidFail(TimerFunction timer, Throwable error) {
-    // stub
+    // hook
   }
 
   /**
    * Returns the current time, in nanoseconds, with arbitrary origin.
-   * Used by the clock thread to determine the current time.  Defaults
-   * to {@link System#nanoTime()}.  Can be overridden to substitute an
+   * Used by the clock thread to determine the current time. Defaults
+   * to {@link System#nanoTime()}. Can be overridden to substitute an
    * alternative time source.
    */
   protected long nanoTime() {
@@ -507,12 +460,64 @@ public class Clock implements Schedule {
 
   /**
    * Parks the current thread for the specified number of {@code millis}.
-   * Used by the clock thread to wait for the next clock tick.  Defaults
-   * to {@link Thread#sleep(long)}.  Can be overridden to substitute an
+   * Used by the clock thread to wait for the next clock tick. Defaults
+   * to {@link Thread#sleep(long)}. Can be overridden to substitute an
    * alternative wait mechanism.
    */
   protected void sleep(long millis) throws InterruptedException {
     Thread.sleep(millis);
+  }
+
+  /**
+   * Default number of milliseconds between clock ticks, used by the no-arg
+   * {@link #Clock()} constructor. Defaults to the value of the {@code
+   * swim.clock.tick.millis} system property, if defined; otherwise defaults to
+   * {@code 100} milliseconds.
+   */
+  public static final int TICK_MILLIS;
+  /**
+   * Default number of ticks per clock revolution, used by the no-arg {@link
+   * #Clock()} constructor. Defaults to the value of the {@code
+   * swim.clock.tick.count} system property, if defined; otherwise defaults to
+   * {@code 512} clock ticks per revolution.
+   */
+  public static final int TICK_COUNT;
+  /**
+   * Atomic {@link #status} bit flag indicating that the clock has started, and
+   * is currently running.
+   */
+  static final int STARTED = 1 << 0;
+  /**
+   * Atomic {@link #status} bit flag indicating that the clock had previously
+   * started, but is now permanently stopped.
+   */
+  static final int STOPPED = 1 << 1;
+
+  /**
+   * Atomic {@link #status} field updater, used to linearize clock startup and
+   * shutdown.
+   */
+  static final AtomicIntegerFieldUpdater<Clock> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(Clock.class, "status");
+
+  static {
+    // Initializes the default number of milliseconds between clock ticks.
+    int tickMillis;
+    try {
+      tickMillis = Integer.parseInt(System.getProperty("swim.clock.tick.millis"));
+    } catch (NumberFormatException e) {
+      tickMillis = 100;
+    }
+    TICK_MILLIS = tickMillis;
+
+    // Initialize the default number of ticks per clock revolution.
+    int tickCount;
+    try {
+      tickCount = Integer.parseInt(System.getProperty("swim.clock.tick.count"));
+    } catch (NumberFormatException e) {
+      tickCount = 512;
+    }
+    TICK_COUNT = tickCount;
   }
 
 }
@@ -523,12 +528,6 @@ public class Clock implements Schedule {
  */
 final class ClockTimer implements TimerContext {
 
-  /**
-   * Atomic {@link #event} field updater, used to linearize cancellation and
-   * rescheduling of the {@code timer}.
-   */
-  static final AtomicReferenceFieldUpdater<ClockTimer, ClockEvent> EVENT =
-      AtomicReferenceFieldUpdater.newUpdater(ClockTimer.class, ClockEvent.class, "event");
   /**
    * {@code Clock} to which the {@code timer} is bound.
    */
@@ -551,6 +550,7 @@ final class ClockTimer implements TimerContext {
   ClockTimer(Clock clock, TimerFunction timer) {
     this.clock = clock;
     this.timer = timer;
+    this.event = null;
   }
 
   @Override
@@ -560,7 +560,7 @@ final class ClockTimer implements TimerContext {
 
   @Override
   public boolean isScheduled() {
-    final ClockEvent event = EVENT.get(this);
+    final ClockEvent event = ClockTimer.EVENT.get(this);
     return event != null && event.isScheduled();
   }
 
@@ -575,7 +575,7 @@ final class ClockTimer implements TimerContext {
   @Override
   public boolean cancel() {
     // Atomically get the current timer event, and replace it with null.
-    final ClockEvent event = EVENT.getAndSet(this, null);
+    final ClockEvent event = ClockTimer.EVENT.getAndSet(this, null);
     // Check if the timer has a previously scheduled event.
     if (event != null) {
       // Remove the timer from the previously scheduled timer event;
@@ -587,12 +587,19 @@ final class ClockTimer implements TimerContext {
         if (timer instanceof Timer) {
           ((Timer) timer).timerDidCancel();
         }
-        clock.timerDidCancel(timer);
+        this.clock.timerDidCancel(timer);
         return true;
       }
     }
     return false;
   }
+
+  /**
+   * Atomic {@link #event} field updater, used to linearize cancellation and
+   * rescheduling of the {@code timer}.
+   */
+  static final AtomicReferenceFieldUpdater<ClockTimer, ClockEvent> EVENT =
+      AtomicReferenceFieldUpdater.newUpdater(ClockTimer.class, ClockEvent.class, "event");
 
 }
 
@@ -603,13 +610,8 @@ final class ClockTimer implements TimerContext {
 final class ClockQueue {
 
   /**
-   * Atomic {@link #foot} field updater, used to optimize event insertion.
-   */
-  static final AtomicReferenceFieldUpdater<ClockQueue, ClockEvent> FOOT =
-      AtomicReferenceFieldUpdater.newUpdater(ClockQueue.class, ClockEvent.class, "foot");
-  /**
    * First {@code ClockEvent} in the queue, from which all live events in the
-   * queue are reachable; always non-{@code null}.  Only the clock thread is
+   * queue are reachable; always non-{@code null}. Only the clock thread is
    * permitted to advance the head of the queue.
    */
   volatile ClockEvent head;
@@ -625,8 +627,14 @@ final class ClockQueue {
    */
   ClockQueue(long insertTick) {
     this.head = new ClockEvent(insertTick, insertTick, null, null);
-    this.foot = head;
+    this.foot = this.head;
   }
+
+  /**
+   * Atomic {@link #foot} field updater, used to optimize event insertion.
+   */
+  static final AtomicReferenceFieldUpdater<ClockQueue, ClockEvent> FOOT =
+      AtomicReferenceFieldUpdater.newUpdater(ClockQueue.class, ClockEvent.class, "foot");
 
 }
 
@@ -636,23 +644,13 @@ final class ClockQueue {
 final class ClockEvent implements Runnable {
 
   /**
-   * Atomic {@link #timer} field updater, used to linearize event cancellation.
-   */
-  static final AtomicReferenceFieldUpdater<ClockEvent, TimerFunction> TIMER =
-      AtomicReferenceFieldUpdater.newUpdater(ClockEvent.class, TimerFunction.class, "timer");
-  /**
-   * Atomic {@link #next} field updater, used to linearize event scheduling.
-   */
-  static final AtomicReferenceFieldUpdater<ClockEvent, ClockEvent> NEXT =
-      AtomicReferenceFieldUpdater.newUpdater(ClockEvent.class, ClockEvent.class, "next");
-  /**
    * {@code ClockTimer} on behalf of whom this {@code ClockEvent} is scheduled,
    * or {@code null} if this is a placeholder event.
    */
   final ClockTimer context;
   /**
    * Tick sequence number of the next tick that the clock thread will execute
-   * at the time this {@code ClockEvent} was inserted into the queue.  {@code
+   * at the time this {@code ClockEvent} was inserted into the queue. {@code
    * insertTick} is non-decreasing over successive queued events, and the
    * {@code insertTick} of the last event in the queue always represents the
    * very next tick that the clock thread will execute.
@@ -683,6 +681,7 @@ final class ClockEvent implements Runnable {
     this.targetTick = targetTick;
     this.context = context;
     this.timer = timer;
+    this.next = null;
   }
 
   /**
@@ -690,7 +689,7 @@ final class ClockEvent implements Runnable {
    * that this {@code ClockEvent} is scheduled for execution.
    */
   boolean isScheduled() {
-    return TIMER.get(this) != null;
+    return ClockEvent.TIMER.get(this) != null;
   }
 
   /**
@@ -700,7 +699,7 @@ final class ClockEvent implements Runnable {
   TimerFunction cancel() {
     // Atomically get the scheduled timer, and replace it with null;
     // linearization point for timer execution and cancellation.
-    return TIMER.getAndSet(this, null);
+    return ClockEvent.TIMER.getAndSet(this, null);
   }
 
   /**
@@ -711,6 +710,17 @@ final class ClockEvent implements Runnable {
     this.context.timer.runTimer();
   }
 
+  /**
+   * Atomic {@link #timer} field updater, used to linearize event cancellation.
+   */
+  static final AtomicReferenceFieldUpdater<ClockEvent, TimerFunction> TIMER =
+      AtomicReferenceFieldUpdater.newUpdater(ClockEvent.class, TimerFunction.class, "timer");
+  /**
+   * Atomic {@link #next} field updater, used to linearize event scheduling.
+   */
+  static final AtomicReferenceFieldUpdater<ClockEvent, ClockEvent> NEXT =
+      AtomicReferenceFieldUpdater.newUpdater(ClockEvent.class, ClockEvent.class, "next");
+
 }
 
 /**
@@ -718,11 +728,6 @@ final class ClockEvent implements Runnable {
  */
 final class ClockThread extends Thread {
 
-  /**
-   * Total number of clock threads that have ever been instantiated.  Used to
-   * uniquely name clock threads.
-   */
-  static final AtomicInteger THREAD_COUNT = new AtomicInteger(0);
   /**
    * {@code Clock} whose events this {@code ClockThread} fires.
    */
@@ -736,14 +741,15 @@ final class ClockThread extends Thread {
    * Constructs a new {@code ClockThread} that fires events for {@code clock}.
    */
   ClockThread(Clock clock) {
-    setName("SwimClock" + THREAD_COUNT.getAndIncrement());
+    setName("SwimClock" + ClockThread.THREAD_COUNT.getAndIncrement());
     setDaemon(true);
     this.clock = clock;
+    this.tick = 0L;
   }
 
   /**
    * Parks the clock thread until the {@code clock} time has reached the
-   * elapsed time of the taregt {@code tick}.  Returns the total number of
+   * elapsed time of the taregt {@code tick}. Returns the total number of
    * milliseconds waited; the returned wait time can be negative if it's
    * taking longer than the clock's tick interval to execute timers.
    * Returns {@code Long.MIN_VALUE} if the clock was stopped while waiting
@@ -827,7 +833,7 @@ final class ClockThread extends Thread {
             clock.runTimer(timer, next);
             clock.timerDidRun(timer);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
+            if (Cont.isNonFatal(error)) {
               // The timer failed with a non-fatal error.
               clock.timerDidFail(timer, error);
             } else {
@@ -900,7 +906,7 @@ final class ClockThread extends Thread {
         // Check if we had a nominal wakeup.
         if (waitedMillis != Long.MIN_VALUE) {
           // Execute the clock tick.
-          executeTick(clock, tick);
+          ClockThread.executeTick(clock, tick);
           // Invoke the clock tick introspection callback, with a measure of the
           // clock latency.
           clock.didTick(tick, waitedMillis);
@@ -911,7 +917,7 @@ final class ClockThread extends Thread {
 
       clock.willStop();
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
+      if (Cont.isNonFatal(error)) {
         // Report internal clock error.
         clock.didFail(error);
       } else {
@@ -926,5 +932,11 @@ final class ClockThread extends Thread {
       clock.didStop();
     }
   }
+
+  /**
+   * Total number of clock threads that have ever been instantiated. Used to
+   * uniquely name clock threads.
+   */
+  static final AtomicInteger THREAD_COUNT = new AtomicInteger(0);
 
 }

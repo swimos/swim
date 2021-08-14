@@ -26,6 +26,11 @@ final class StringParser extends Parser<String> {
     this(null);
   }
 
+  @Override
+  public Parser<String> feed(Input input) {
+    return StringParser.parse(input, this.builder);
+  }
+
   static Parser<String> parse(Input input, StringBuilder builder) {
     if (builder == null) {
       builder = new StringBuilder();
@@ -35,20 +40,15 @@ final class StringParser extends Parser<String> {
       input = input.step();
     }
     if (input.isDone()) {
-      return done(builder.toString());
+      return Parser.done(builder.toString());
     } else if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new StringParser(builder);
   }
 
   static Parser<String> parse(Input input) {
-    return parse(input, null);
-  }
-
-  @Override
-  public Parser<String> feed(Input input) {
-    return parse(input, this.builder);
+    return StringParser.parse(input, null);
   }
 
 }

@@ -42,6 +42,12 @@ final class DocumentParser<I, V> extends Parser<V> {
     this(xml, null, null, null, null, 1);
   }
 
+  @Override
+  public Parser<V> feed(Input input) {
+    return DocumentParser.parse(input, this.xml, this.builder, this.targetParser,
+                                this.miscParser, this.tagParser, this.step);
+  }
+
   static <I, V> Parser<V> parse(Input input, XmlParser<I, V> xml, Builder<I, V> builder,
                                 Parser<String> targetParser, Parser<I> miscParser,
                                 Parser<V> tagParser, int step) {
@@ -61,15 +67,15 @@ final class DocumentParser<I, V> extends Parser<V> {
             input = input.step();
             step = 2;
           } else {
-            return error(Diagnostic.expected('<', input));
+            return Parser.error(Diagnostic.expected('<', input));
           }
         } else if (input.isError()) {
-          return error(input.trap());
+          return Parser.error(input.trap());
         } else if (input.isDone()) {
           if (builder == null) {
             builder = xml.documentBuilder();
           }
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
       if (step == 2) {
@@ -88,10 +94,10 @@ final class DocumentParser<I, V> extends Parser<V> {
             tagParser = xml.parseTagStartRest(input, builder);
             step = 6;
           } else {
-            return error(Diagnostic.unexpected(input));
+            return Parser.error(Diagnostic.unexpected(input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 3) {
@@ -125,7 +131,7 @@ final class DocumentParser<I, V> extends Parser<V> {
             step = 5;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 5) {
@@ -162,23 +168,17 @@ final class DocumentParser<I, V> extends Parser<V> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new DocumentParser<I, V>(xml, builder, targetParser, miscParser, tagParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, XmlParser<I, V> xml, Builder<I, V> builder) {
-    return parse(input, xml, builder, null, null, null, 1);
+    return DocumentParser.parse(input, xml, builder, null, null, null, 1);
   }
 
   static <I, V> Parser<V> parse(Input input, XmlParser<I, V> xml) {
-    return parse(input, xml, null, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.xml, this.builder, this.targetParser, this.miscParser,
-        this.tagParser, this.step);
+    return DocumentParser.parse(input, xml, null, null, null, null, 1);
   }
 
 }

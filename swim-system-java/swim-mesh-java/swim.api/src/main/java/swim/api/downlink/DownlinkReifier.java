@@ -14,7 +14,7 @@
 
 package swim.api.downlink;
 
-import swim.api.ref.SwimRef;
+import swim.api.ref.WarpRef;
 import swim.dataflow.RecordModel;
 import swim.dataflow.Reifier;
 import swim.structure.Field;
@@ -24,24 +24,24 @@ import swim.structure.Value;
 
 final class DownlinkReifier extends Reifier {
 
-  final SwimRef swim;
+  final WarpRef warp;
 
-  DownlinkReifier(SwimRef swim) {
-    this.swim = swim;
+  DownlinkReifier(WarpRef warp) {
+    this.warp = warp;
   }
 
   @Override
   public Item reify(Item item) {
     if (item instanceof Field) {
-      return reifyField((Field) item);
+      return this.reifyField((Field) item);
     } else {
-      return reifyValue((Value) item);
+      return this.reifyValue((Value) item);
     }
   }
 
   public Field reifyField(Field field) {
     final Value oldValue = field.value();
-    final Value newValue = reifyValue(oldValue);
+    final Value newValue = this.reifyValue(oldValue);
     if (oldValue != newValue) {
       return field.updatedValue(newValue);
     } else {
@@ -59,7 +59,7 @@ final class DownlinkReifier extends Reifier {
 
   public Record reifyModel(RecordModel model) {
     if ("link".equals(model.tag())) {
-      final DownlinkStreamlet streamlet = new DownlinkStreamlet(this.swim, model);
+      final DownlinkStreamlet streamlet = new DownlinkStreamlet(this.warp, model);
       streamlet.compile();
       return streamlet;
     }

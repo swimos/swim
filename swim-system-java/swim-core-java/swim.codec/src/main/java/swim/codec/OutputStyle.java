@@ -26,247 +26,247 @@ public final class OutputStyle {
    * Writes the ASCII reset escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void reset(Output<?> output) {
+  public static <T> Output<T> reset(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('0').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII bold (increased intensity) escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void bold(Output<?> output) {
+  public static <T> Output<T> bold(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('1').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII faint (decreased intensity) escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void faint(Output<?> output) {
+  public static <T> Output<T> faint(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('2').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII black foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void black(Output<?> output) {
+  public static <T> Output<T> black(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('0').write(';').write('3').write('0').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII red foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void red(Output<?> output) {
+  public static <T> Output<T> red(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('0').write(';').write('3').write('1').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII green foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void green(Output<?> output) {
+  public static <T> Output<T> green(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('0').write(';').write('3').write('2').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII yellow foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void yellow(Output<?> output) {
+  public static <T> Output<T> yellow(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('0').write(';').write('3').write('3').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII blue foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void blue(Output<?> output) {
+  public static <T> Output<T> blue(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('0').write(';').write('3').write('4').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII magenta foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void magenta(Output<?> output) {
+  public static <T> Output<T> magenta(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('0').write(';').write('3').write('5').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII cyan foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void cyan(Output<?> output) {
+  public static <T> Output<T> cyan(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('0').write(';').write('3').write('6').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII gray foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void gray(Output<?> output) {
+  public static <T> Output<T> gray(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('0').write(';').write('3').write('7').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII bold black foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void blackBold(Output<?> output) {
+  public static <T> Output<T> blackBold(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('1').write(';').write('3').write('0').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII bold red foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void redBold(Output<?> output) {
+  public static <T> Output<T> redBold(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('1').write(';').write('3').write('1').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII bold green foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void greenBold(Output<?> output) {
+  public static <T> Output<T> greenBold(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('1').write(';').write('3').write('2').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII bold yellow foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void yellowBold(Output<?> output) {
+  public static <T> Output<T> yellowBold(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('1').write(';').write('3').write('3').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII bold blue foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void blueBold(Output<?> output) {
+  public static <T> Output<T> blueBold(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('1').write(';').write('3').write('4').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII bold magenta foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void magentaBold(Output<?> output) {
+  public static <T> Output<T> magentaBold(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('1').write(';').write('3').write('5').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII bold cyan foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void cyanBold(Output<?> output) {
+  public static <T> Output<T> cyanBold(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('1').write(';').write('3').write('6').write('m');
     }
+    return output;
   }
 
   /**
    * Writes the ASCII bold gray foreground color escape code to {@code output},
    * if {@link OutputSettings#isStyled output.settings().isStyled()} is {@code true}.
    *
-   * @throws OutputException if {@code output} exits the <em>cont</em> state
-   *                         before the full escape code has been written.
+   * @return the continuation of the {@code output}.
    */
-  public static void grayBold(Output<?> output) {
+  public static <T> Output<T> grayBold(Output<T> output) {
     if (output.settings().isStyled()) {
       output = output.write(27).write('[').write('1').write(';').write('3').write('7').write('m');
     }
+    return output;
   }
 
 }

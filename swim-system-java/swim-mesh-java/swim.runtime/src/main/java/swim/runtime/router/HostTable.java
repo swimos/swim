@@ -29,7 +29,7 @@ import swim.api.lane.function.OnSyncKeys;
 import swim.api.policy.Policy;
 import swim.api.warp.WarpUplink;
 import swim.collections.FingerTrieSeq;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.runtime.AbstractTierBinding;
@@ -71,6 +71,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   protected HostContext hostContext;
   volatile UriMapper<NodeBinding> nodes;
   volatile int flags;
+
   volatile int nodeOpenDelta;
   volatile long nodeOpenCount;
   volatile int nodeCloseDelta;
@@ -106,6 +107,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   volatile int uplinkCommandRate;
   volatile long uplinkCommandCount;
   volatile long lastReportTime;
+
   HostPulse pulse;
   AgentNode metaNode;
   DemandMapLane<Uri, NodeInfo> metaNodes;
@@ -118,7 +120,56 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   SupplyLane<LogEntry> metaFailLog;
 
   public HostTable() {
+    this.hostContext = null;
     this.nodes = UriMapper.empty();
+    this.flags = 0;
+
+    this.nodeOpenDelta = 0;
+    this.nodeOpenCount = 0L;
+    this.nodeCloseDelta = 0;
+    this.nodeCloseCount = 0L;
+    this.agentOpenDelta = 0;
+    this.agentOpenCount = 0L;
+    this.agentCloseDelta = 0;
+    this.agentCloseCount = 0L;
+    this.agentExecDelta = 0L;
+    this.agentExecRate = 0L;
+    this.agentExecTime = 0L;
+    this.timerEventDelta = 0;
+    this.timerEventRate = 0;
+    this.timerEventCount = 0L;
+    this.downlinkOpenDelta = 0;
+    this.downlinkOpenCount = 0L;
+    this.downlinkCloseDelta = 0;
+    this.downlinkCloseCount = 0L;
+    this.downlinkEventDelta = 0;
+    this.downlinkEventRate = 0;
+    this.downlinkEventCount = 0L;
+    this.downlinkCommandDelta = 0;
+    this.downlinkCommandRate = 0;
+    this.downlinkCommandCount = 0L;
+    this.uplinkOpenDelta = 0;
+    this.uplinkOpenCount = 0L;
+    this.uplinkCloseDelta = 0;
+    this.uplinkCloseCount = 0L;
+    this.uplinkEventDelta = 0;
+    this.uplinkEventRate = 0;
+    this.uplinkEventCount = 0L;
+    this.uplinkCommandDelta = 0;
+    this.uplinkCommandRate = 0;
+    this.uplinkCommandCount = 0L;
+    this.lastReportTime = 0L;
+
+    this.pulse = null;
+    this.metaNode = null;
+    this.metaNodes = null;
+    this.metaPulse = null;
+    this.metaTraceLog = null;
+    this.metaDebugLog = null;
+    this.metaInfoLog = null;
+    this.metaWarnLog = null;
+    this.metaErrorLog = null;
+    this.metaFailLog = null;
   }
 
   @Override
@@ -149,7 +200,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapHost(Class<T> hostClass) {
-    if (hostClass.isAssignableFrom(getClass())) {
+    if (hostClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.hostContext.unwrapHost(hostClass);
@@ -160,7 +211,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   @Override
   public <T> T bottomHost(Class<T> hostClass) {
     T host = this.hostContext.bottomHost(hostClass);
-    if (host == null && hostClass.isAssignableFrom(getClass())) {
+    if (host == null && hostClass.isAssignableFrom(this.getClass())) {
       host = (T) this;
     }
     return host;
@@ -232,247 +283,237 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
 
   @Override
   public boolean isPrimary() {
-    return (this.flags & PRIMARY) != 0;
+    return (HostTable.FLAGS.get(this) & HostTable.PRIMARY) != 0;
   }
 
   @Override
   public void setPrimary(boolean isPrimary) {
-    int oldFlags;
-    int newFlags;
     do {
-      oldFlags = this.flags;
-      newFlags = oldFlags | PRIMARY;
-    } while (oldFlags != newFlags && !FLAGS.compareAndSet(this, oldFlags, newFlags));
+      final int oldFlags = HostTable.FLAGS.get(this);
+      final int newFlags = oldFlags | HostTable.PRIMARY;
+      if (HostTable.FLAGS.compareAndSet(this, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public boolean isReplica() {
-    return (this.flags & REPLICA) != 0;
+    return (HostTable.FLAGS.get(this) & HostTable.REPLICA) != 0;
   }
 
   @Override
   public void setReplica(boolean isReplica) {
-    int oldFlags;
-    int newFlags;
     do {
-      oldFlags = this.flags;
-      newFlags = oldFlags | REPLICA;
-    } while (oldFlags != newFlags && !FLAGS.compareAndSet(this, oldFlags, newFlags));
+      final int oldFlags = HostTable.FLAGS.get(this);
+      final int newFlags = oldFlags | HostTable.REPLICA;
+      if (HostTable.FLAGS.compareAndSet(this, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public boolean isMaster() {
-    return (this.flags & MASTER) != 0;
+    return (HostTable.FLAGS.get(this) & HostTable.MASTER) != 0;
   }
 
   @Override
   public boolean isSlave() {
-    return (this.flags & SLAVE) != 0;
+    return (HostTable.FLAGS.get(this) & HostTable.SLAVE) != 0;
   }
 
   @Override
   public void didBecomeMaster() {
-    int oldFlags;
-    int newFlags;
     do {
-      oldFlags = this.flags;
-      newFlags = oldFlags & ~SLAVE | MASTER;
-    } while (oldFlags != newFlags && !FLAGS.compareAndSet(this, oldFlags, newFlags));
+      final int oldFlags = HostTable.FLAGS.get(this);
+      final int newFlags = oldFlags & ~HostTable.SLAVE | HostTable.MASTER;
+      if (HostTable.FLAGS.compareAndSet(this, oldFlags, newFlags)) {
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public void didBecomeSlave() {
-    int oldFlags;
-    int newFlags;
     do {
-      oldFlags = this.flags;
-      newFlags = oldFlags & ~MASTER | SLAVE;
-    } while (oldFlags != newFlags && !FLAGS.compareAndSet(this, oldFlags, newFlags));
-    if (oldFlags != newFlags) {
-      closeNodes();
-    }
+      final int oldFlags = HostTable.FLAGS.get(this);
+      final int newFlags = oldFlags & ~HostTable.MASTER | HostTable.SLAVE;
+      if (HostTable.FLAGS.compareAndSet(this, oldFlags, newFlags)) {
+        if (oldFlags != newFlags) {
+          this.closeNodes();
+        }
+      }
+    } while (true);
   }
 
   @Override
   public void openMetaHost(HostBinding host, NodeBinding metaHost) {
     if (metaHost instanceof AgentNode) {
       this.metaNode = (AgentNode) metaHost;
-      openMetaLanes(host, (AgentNode) metaHost);
+      this.openMetaLanes(host, (AgentNode) metaHost);
     }
     this.hostContext.openMetaHost(host, metaHost);
   }
 
   protected void openMetaLanes(HostBinding host, AgentNode metaHost) {
-    openReflectLanes(host, metaHost);
-    openLogLanes(host, metaHost);
+    this.openReflectLanes(host, metaHost);
+    this.openLogLanes(host, metaHost);
   }
 
   protected void openReflectLanes(HostBinding host, AgentNode metaHost) {
     this.metaNodes = metaHost.demandMapLane()
-        .keyForm(Uri.form())
-        .valueForm(NodeInfo.form())
-        .observe(new HostTableNodesController(host));
-    metaHost.openLane(NODES_URI, this.metaNodes);
+                             .keyForm(Uri.form())
+                             .valueForm(NodeInfo.form())
+                             .observe(new HostTableNodesController(host));
+    metaHost.openLane(HostTable.NODES_URI, this.metaNodes);
 
-    this.metaPulse = metaNode.demandLane()
-        .valueForm(HostPulse.form())
-        .observe(new HostTablePulseController(this));
-    metaNode.openLane(HostPulse.PULSE_URI, this.metaPulse);
+    this.metaPulse = this.metaNode.demandLane()
+                                  .valueForm(HostPulse.form())
+                                  .observe(new HostTablePulseController(this));
+    this.metaNode.openLane(HostPulse.PULSE_URI, this.metaPulse);
   }
 
   protected void openLogLanes(HostBinding host, AgentNode metaHost) {
-    this.metaTraceLog = metaHost.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaTraceLog = metaHost.supplyLane().valueForm(LogEntry.form());
     metaHost.openLane(LogEntry.TRACE_LOG_URI, this.metaTraceLog);
 
-    this.metaDebugLog = metaHost.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaDebugLog = metaHost.supplyLane().valueForm(LogEntry.form());
     metaHost.openLane(LogEntry.DEBUG_LOG_URI, this.metaDebugLog);
 
-    this.metaInfoLog = metaHost.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaInfoLog = metaHost.supplyLane().valueForm(LogEntry.form());
     metaHost.openLane(LogEntry.INFO_LOG_URI, this.metaInfoLog);
 
-    this.metaWarnLog = metaHost.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaWarnLog = metaHost.supplyLane().valueForm(LogEntry.form());
     metaHost.openLane(LogEntry.WARN_LOG_URI, this.metaWarnLog);
 
-    this.metaErrorLog = metaHost.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaErrorLog = metaHost.supplyLane().valueForm(LogEntry.form());
     metaHost.openLane(LogEntry.ERROR_LOG_URI, this.metaErrorLog);
 
-    this.metaFailLog = metaHost.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaFailLog = metaHost.supplyLane().valueForm(LogEntry.form());
     metaHost.openLane(LogEntry.FAIL_LOG_URI, this.metaFailLog);
   }
 
   @Override
   public UriMapper<NodeBinding> nodes() {
-    return this.nodes;
+    return HostTable.NODES.get(this);
   }
 
   @Override
   public NodeBinding getNode(Uri nodeUri) {
-    return this.nodes.get(nodeUri);
+    return HostTable.NODES.get(this).get(nodeUri);
   }
 
   @Override
   public NodeBinding openNode(Uri nodeUri) {
-    UriMapper<NodeBinding> oldNodes;
-    UriMapper<NodeBinding> newNodes;
     NodeBinding nodeBinding = null;
     do {
-      oldNodes = this.nodes;
+      final UriMapper<NodeBinding> oldNodes = HostTable.NODES.get(this);
       final NodeBinding node = oldNodes.get(nodeUri);
       if (node != null) {
         if (nodeBinding != null) {
           // Lost creation race.
           nodeBinding.close();
         }
-        newNodes = oldNodes;
         if (node.isStarted()) {
           nodeBinding = node;
         } else {
           nodeBinding = null;
         }
         break;
-      } else if (nodeBinding == null) {
-        final NodeAddress nodeAddress = cellAddress().nodeUri(nodeUri);
-        nodeBinding = this.hostContext.createNode(nodeAddress);
-        if (nodeBinding != null) {
-          nodeBinding = this.hostContext.injectNode(nodeAddress, nodeBinding);
-          final NodeContext nodeContext = createNodeContext(nodeAddress, nodeBinding);
-          nodeBinding.setNodeContext(nodeContext);
-          nodeBinding = nodeBinding.nodeWrapper();
-          nodeBinding.openLanes(nodeBinding);
-          nodeBinding.openAgents(nodeBinding);
-          newNodes = oldNodes.updated(nodeUri, nodeBinding);
-        } else {
-          newNodes = oldNodes;
+      } else {
+        if (nodeBinding == null) {
+          final NodeAddress nodeAddress = this.cellAddress().nodeUri(nodeUri);
+          nodeBinding = this.hostContext.createNode(nodeAddress);
+          if (nodeBinding != null) {
+            nodeBinding = this.hostContext.injectNode(nodeAddress, nodeBinding);
+            final NodeContext nodeContext = this.createNodeContext(nodeAddress, nodeBinding);
+            nodeBinding.setNodeContext(nodeContext);
+            nodeBinding = nodeBinding.nodeWrapper();
+            nodeBinding.openLanes(nodeBinding);
+            nodeBinding.openAgents(nodeBinding);
+          } else {
+            break;
+          }
+        }
+        final UriMapper<NodeBinding> newNodes = oldNodes.updated(nodeUri, nodeBinding);
+        if (HostTable.NODES.compareAndSet(this, oldNodes, newNodes)) {
+          this.activate(nodeBinding);
+          this.didOpenNode(nodeBinding);
           break;
         }
-      } else {
-        newNodes = oldNodes.updated(nodeUri, nodeBinding);
       }
-    } while (nodeBinding == null || (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes)));
-
-    if (oldNodes != newNodes) {
-      activate(nodeBinding);
-      didOpenNode(nodeBinding);
-    }
+    } while (true);
     return nodeBinding;
   }
 
   @Override
   public NodeBinding openNode(Uri nodeUri, NodeBinding node) {
-    UriMapper<NodeBinding> oldNodes;
-    UriMapper<NodeBinding> newNodes;
     NodeBinding nodeBinding = null;
     do {
-      oldNodes = this.nodes;
+      final UriMapper<NodeBinding> oldNodes = HostTable.NODES.get(this);
       if (oldNodes.containsKey(nodeUri)) {
         nodeBinding = null;
-        newNodes = oldNodes;
         break;
       } else {
         if (nodeBinding == null) {
-          final NodeAddress nodeAddress = cellAddress().nodeUri(nodeUri);
+          final NodeAddress nodeAddress = this.cellAddress().nodeUri(nodeUri);
           nodeBinding = this.hostContext.injectNode(nodeAddress, node);
-          final NodeContext nodeContext = createNodeContext(nodeAddress, nodeBinding);
+          final NodeContext nodeContext = this.createNodeContext(nodeAddress, nodeBinding);
           nodeBinding.setNodeContext(nodeContext);
           nodeBinding = nodeBinding.nodeWrapper();
           nodeBinding.openLanes(nodeBinding);
           nodeBinding.openAgents(nodeBinding);
         }
-        newNodes = oldNodes.updated(nodeUri, nodeBinding);
+        final UriMapper<NodeBinding> newNodes = oldNodes.updated(nodeUri, nodeBinding);
+        if (HostTable.NODES.compareAndSet(this, oldNodes, newNodes)) {
+          this.activate(nodeBinding);
+          this.didOpenNode(nodeBinding);
+          break;
+        }
       }
-    } while (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes));
-    if (nodeBinding != null) {
-      activate(nodeBinding);
-      didOpenNode(nodeBinding);
-    }
+    } while (true);
     return nodeBinding;
   }
 
   public void closeNode(Uri nodeUri) {
-    UriMapper<NodeBinding> oldNodes;
-    UriMapper<NodeBinding> newNodes;
-    NodeBinding nodeBinding = null;
     do {
-      oldNodes = this.nodes;
-      final NodeBinding node = oldNodes.get(nodeUri);
-      if (node != null) {
-        nodeBinding = node;
-        newNodes = oldNodes.removed(nodeUri);
+      final UriMapper<NodeBinding> oldNodes = HostTable.NODES.get(this);
+      final NodeBinding nodeBinding = oldNodes.get(nodeUri);
+      if (nodeBinding != null) {
+        final UriMapper<NodeBinding> newNodes = oldNodes.removed(nodeUri);
+        if (HostTable.NODES.compareAndSet(this, oldNodes, newNodes)) {
+          nodeBinding.didClose();
+          this.didCloseNode(nodeBinding);
+          break;
+        }
       } else {
-        nodeBinding = null;
-        newNodes = oldNodes;
         break;
       }
-    } while (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes));
-    if (nodeBinding != null) {
-      nodeBinding.didClose();
-      didCloseNode(nodeBinding);
-    }
+    } while (true);
   }
 
   public void closeNodes() {
-    UriMapper<NodeBinding> oldNodes;
-    final UriMapper<NodeBinding> newNodes = UriMapper.empty();
     do {
-      oldNodes = this.nodes;
-    } while (oldNodes != newNodes && !NODES.compareAndSet(this, oldNodes, newNodes));
-    if (!oldNodes.isEmpty()) {
-      final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
-      for (NodeBinding nodeBinding : oldNodes.values()) {
-        nodeBinding.close();
-        nodeBinding.didClose();
-        if (metaNodes != null) {
-          metaNodes.cue(nodeBinding.nodeUri());
+      final UriMapper<NodeBinding> oldNodes = HostTable.NODES.get(this);
+      if (!oldNodes.isEmpty()) {
+        final UriMapper<NodeBinding> newNodes = UriMapper.empty();
+        if (HostTable.NODES.compareAndSet(this, oldNodes, newNodes)) {
+          final DemandMapLane<Uri, NodeInfo> metaNodes = this.metaNodes;
+          for (NodeBinding nodeBinding : oldNodes.values()) {
+            nodeBinding.close();
+            nodeBinding.didClose();
+            if (metaNodes != null) {
+              metaNodes.cue(nodeBinding.nodeUri());
+            }
+          }
+          this.flushMetrics();
+          break;
         }
+      } else {
+        break;
       }
-      flushMetrics();
-    }
+    } while (true);
   }
 
   protected void didOpenNode(NodeBinding node) {
@@ -480,10 +521,10 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     if (metaNodes != null) {
       final Uri nodeUri = node.nodeUri();
       metaNodes.cue(nodeUri);
-      cueAncestorNodes(nodeUri);
+      this.cueAncestorNodes(nodeUri);
     }
-    NODE_OPEN_DELTA.incrementAndGet(this);
-    flushMetrics();
+    HostTable.NODE_OPEN_DELTA.incrementAndGet(this);
+    this.flushMetrics();
   }
 
   protected void didCloseNode(NodeBinding node) {
@@ -491,10 +532,10 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
     if (metaNodes != null) {
       final Uri nodeUri = node.nodeUri();
       metaNodes.remove(nodeUri);
-      cueAncestorNodes(nodeUri);
+      this.cueAncestorNodes(nodeUri);
     }
-    NODE_CLOSE_DELTA.incrementAndGet(this);
-    flushMetrics();
+    HostTable.NODE_CLOSE_DELTA.incrementAndGet(this);
+    this.flushMetrics();
   }
 
   protected void cueAncestorNodes(Uri nodeUri) {
@@ -565,7 +606,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
 
   @Override
   public void openUplink(LinkBinding link) {
-    NodeBinding nodeBinding = openNode(link.nodeUri());
+    NodeBinding nodeBinding = this.openNode(link.nodeUri());
     if (nodeBinding != null) {
       nodeBinding = nodeBinding.bottomNode(NodeBinding.class);
     }
@@ -579,7 +620,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   @Override
   public void pushUp(Push<?> push) {
     final Uri nodeUri = push.nodeUri();
-    NodeBinding nodeBinding = openNode(nodeUri);
+    NodeBinding nodeBinding = this.openNode(nodeUri);
     if (nodeBinding != null) {
       nodeBinding = nodeBinding.bottomNode(NodeBinding.class);
     }
@@ -647,7 +688,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   @Override
   protected void willOpen() {
     super.willOpen();
-    final Iterator<NodeBinding> nodesIterator = this.nodes.valueIterator();
+    final Iterator<NodeBinding> nodesIterator = HostTable.NODES.get(this).valueIterator();
     while (nodesIterator.hasNext()) {
       nodesIterator.next().open();
     }
@@ -656,7 +697,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   @Override
   protected void willLoad() {
     super.willLoad();
-    final Iterator<NodeBinding> nodesIterator = this.nodes.valueIterator();
+    final Iterator<NodeBinding> nodesIterator = HostTable.NODES.get(this).valueIterator();
     while (nodesIterator.hasNext()) {
       nodesIterator.next().load();
     }
@@ -665,7 +706,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   @Override
   protected void willStart() {
     super.willStart();
-    final Iterator<NodeBinding> nodesIterator = this.nodes.valueIterator();
+    final Iterator<NodeBinding> nodesIterator = HostTable.NODES.get(this).valueIterator();
     while (nodesIterator.hasNext()) {
       nodesIterator.next().start();
     }
@@ -674,7 +715,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   @Override
   protected void willStop() {
     super.willStop();
-    final Iterator<NodeBinding> nodesIterator = this.nodes.valueIterator();
+    final Iterator<NodeBinding> nodesIterator = HostTable.NODES.get(this).valueIterator();
     while (nodesIterator.hasNext()) {
       nodesIterator.next().stop();
     }
@@ -683,7 +724,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   @Override
   protected void willUnload() {
     super.willUnload();
-    final Iterator<NodeBinding> nodesIterator = this.nodes.valueIterator();
+    final Iterator<NodeBinding> nodesIterator = HostTable.NODES.get(this).valueIterator();
     while (nodesIterator.hasNext()) {
       nodesIterator.next().unload();
     }
@@ -692,7 +733,7 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   @Override
   protected void willClose() {
     super.willClose();
-    final Iterator<NodeBinding> nodesIterator = this.nodes.valueIterator();
+    final Iterator<NodeBinding> nodesIterator = HostTable.NODES.get(this).valueIterator();
     while (nodesIterator.hasNext()) {
       nodesIterator.next().close();
     }
@@ -713,13 +754,13 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
       this.metaErrorLog = null;
       this.metaFailLog = null;
     }
-    flushMetrics();
+    this.flushMetrics();
   }
 
   @Override
   public void didFail(Throwable error) {
-    if (Conts.isNonFatal(error)) {
-      fail(error);
+    if (Cont.isNonFatal(error)) {
+      this.fail(error);
     } else {
       error.printStackTrace();
     }
@@ -728,58 +769,58 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   @Override
   public void reportDown(Metric metric) {
     if (metric instanceof NodeProfile) {
-      accumulateNodeProfile((NodeProfile) metric);
+      this.accumulateNodeProfile((NodeProfile) metric);
     } else if (metric instanceof WarpDownlinkProfile) {
-      accumulateWarpDownlinkProfile((WarpDownlinkProfile) metric);
+      this.accumulateWarpDownlinkProfile((WarpDownlinkProfile) metric);
     } else {
       this.hostContext.reportDown(metric);
     }
   }
 
   protected void accumulateNodeProfile(NodeProfile profile) {
-    AGENT_OPEN_DELTA.addAndGet(this, profile.agentOpenDelta());
-    AGENT_CLOSE_DELTA.addAndGet(this, profile.agentCloseDelta());
-    AGENT_EXEC_DELTA.addAndGet(this, profile.agentExecDelta());
-    AGENT_EXEC_RATE.addAndGet(this, profile.agentExecRate());
-    TIMER_EVENT_DELTA.addAndGet(this, profile.timerEventDelta());
-    TIMER_EVENT_RATE.addAndGet(this, profile.timerEventRate());
-    DOWNLINK_OPEN_DELTA.addAndGet(this, profile.downlinkOpenDelta());
-    DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.downlinkCloseDelta());
-    DOWNLINK_EVENT_DELTA.addAndGet(this, profile.downlinkEventDelta());
-    DOWNLINK_EVENT_RATE.addAndGet(this, profile.downlinkEventRate());
-    DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.downlinkCommandDelta());
-    DOWNLINK_COMMAND_RATE.addAndGet(this, profile.downlinkCommandRate());
-    UPLINK_OPEN_DELTA.addAndGet(this, profile.uplinkOpenDelta());
-    UPLINK_CLOSE_DELTA.addAndGet(this, profile.uplinkCloseDelta());
-    UPLINK_EVENT_DELTA.addAndGet(this, profile.uplinkEventDelta());
-    UPLINK_EVENT_RATE.addAndGet(this, profile.uplinkEventRate());
-    UPLINK_COMMAND_DELTA.addAndGet(this, profile.uplinkCommandDelta());
-    UPLINK_COMMAND_RATE.addAndGet(this, profile.uplinkCommandRate());
-    didUpdateMetrics();
+    HostTable.AGENT_OPEN_DELTA.addAndGet(this, profile.agentOpenDelta());
+    HostTable.AGENT_CLOSE_DELTA.addAndGet(this, profile.agentCloseDelta());
+    HostTable.AGENT_EXEC_DELTA.addAndGet(this, profile.agentExecDelta());
+    HostTable.AGENT_EXEC_RATE.addAndGet(this, profile.agentExecRate());
+    HostTable.TIMER_EVENT_DELTA.addAndGet(this, profile.timerEventDelta());
+    HostTable.TIMER_EVENT_RATE.addAndGet(this, profile.timerEventRate());
+    HostTable.DOWNLINK_OPEN_DELTA.addAndGet(this, profile.downlinkOpenDelta());
+    HostTable.DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.downlinkCloseDelta());
+    HostTable.DOWNLINK_EVENT_DELTA.addAndGet(this, profile.downlinkEventDelta());
+    HostTable.DOWNLINK_EVENT_RATE.addAndGet(this, profile.downlinkEventRate());
+    HostTable.DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.downlinkCommandDelta());
+    HostTable.DOWNLINK_COMMAND_RATE.addAndGet(this, profile.downlinkCommandRate());
+    HostTable.UPLINK_OPEN_DELTA.addAndGet(this, profile.uplinkOpenDelta());
+    HostTable.UPLINK_CLOSE_DELTA.addAndGet(this, profile.uplinkCloseDelta());
+    HostTable.UPLINK_EVENT_DELTA.addAndGet(this, profile.uplinkEventDelta());
+    HostTable.UPLINK_EVENT_RATE.addAndGet(this, profile.uplinkEventRate());
+    HostTable.UPLINK_COMMAND_DELTA.addAndGet(this, profile.uplinkCommandDelta());
+    HostTable.UPLINK_COMMAND_RATE.addAndGet(this, profile.uplinkCommandRate());
+    this.didUpdateMetrics();
   }
 
   protected void accumulateWarpDownlinkProfile(WarpDownlinkProfile profile) {
-    DOWNLINK_OPEN_DELTA.addAndGet(this, profile.openDelta());
-    DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.closeDelta());
-    DOWNLINK_EVENT_DELTA.addAndGet(this, profile.eventDelta());
-    DOWNLINK_EVENT_RATE.addAndGet(this, profile.eventRate());
-    DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.commandDelta());
-    DOWNLINK_COMMAND_RATE.addAndGet(this, profile.commandRate());
-    didUpdateMetrics();
+    HostTable.DOWNLINK_OPEN_DELTA.addAndGet(this, profile.openDelta());
+    HostTable.DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.closeDelta());
+    HostTable.DOWNLINK_EVENT_DELTA.addAndGet(this, profile.eventDelta());
+    HostTable.DOWNLINK_EVENT_RATE.addAndGet(this, profile.eventRate());
+    HostTable.DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.commandDelta());
+    HostTable.DOWNLINK_COMMAND_RATE.addAndGet(this, profile.commandRate());
+    this.didUpdateMetrics();
   }
 
   protected void didUpdateMetrics() {
     do {
       final long newReportTime = System.currentTimeMillis();
-      final long oldReportTime = this.lastReportTime;
+      final long oldReportTime = HostTable.LAST_REPORT_TIME.get(this);
       final long dt = newReportTime - oldReportTime;
       if (dt >= Metric.REPORT_INTERVAL) {
-        if (LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
+        if (HostTable.LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
           try {
-            reportMetrics(dt);
+            this.reportMetrics(dt);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              didFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.didFail(error);
             } else {
               throw error;
             }
@@ -794,13 +835,13 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
 
   protected void flushMetrics() {
     final long newReportTime = System.currentTimeMillis();
-    final long oldReportTime = LAST_REPORT_TIME.getAndSet(this, newReportTime);
+    final long oldReportTime = HostTable.LAST_REPORT_TIME.getAndSet(this, newReportTime);
     final long dt = newReportTime - oldReportTime;
     try {
-      reportMetrics(dt);
+      this.reportMetrics(dt);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
+      if (Cont.isNonFatal(error)) {
+        this.didFail(error);
       } else {
         throw error;
       }
@@ -808,76 +849,76 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   }
 
   protected void reportMetrics(long dt) {
-    final HostProfile profile = collectProfile(dt);
+    final HostProfile profile = this.collectProfile(dt);
     this.hostContext.reportDown(profile);
   }
 
   protected HostProfile collectProfile(long dt) {
-    final int nodeOpenDelta = NODE_OPEN_DELTA.getAndSet(this, 0);
-    final long nodeOpenCount = NODE_OPEN_COUNT.addAndGet(this, (long) nodeOpenDelta);
-    final int nodeCloseDelta = NODE_CLOSE_DELTA.getAndSet(this, 0);
-    final long nodeCloseCount = NODE_CLOSE_COUNT.addAndGet(this, (long) nodeCloseDelta);
+    final int nodeOpenDelta = HostTable.NODE_OPEN_DELTA.getAndSet(this, 0);
+    final long nodeOpenCount = HostTable.NODE_OPEN_COUNT.addAndGet(this, (long) nodeOpenDelta);
+    final int nodeCloseDelta = HostTable.NODE_CLOSE_DELTA.getAndSet(this, 0);
+    final long nodeCloseCount = HostTable.NODE_CLOSE_COUNT.addAndGet(this, (long) nodeCloseDelta);
 
-    final int agentOpenDelta = AGENT_OPEN_DELTA.getAndSet(this, 0);
-    final long agentOpenCount = AGENT_OPEN_COUNT.addAndGet(this, (long) agentOpenDelta);
-    final int agentCloseDelta = AGENT_CLOSE_DELTA.getAndSet(this, 0);
-    final long agentCloseCount = AGENT_CLOSE_COUNT.addAndGet(this, (long) agentCloseDelta);
-    final long agentExecDelta = AGENT_EXEC_DELTA.getAndSet(this, 0L);
-    final long agentExecRate = AGENT_EXEC_RATE.getAndSet(this, 0L);
-    final long agentExecTime = AGENT_EXEC_TIME.addAndGet(this, agentExecDelta);
+    final int agentOpenDelta = HostTable.AGENT_OPEN_DELTA.getAndSet(this, 0);
+    final long agentOpenCount = HostTable.AGENT_OPEN_COUNT.addAndGet(this, (long) agentOpenDelta);
+    final int agentCloseDelta = HostTable.AGENT_CLOSE_DELTA.getAndSet(this, 0);
+    final long agentCloseCount = HostTable.AGENT_CLOSE_COUNT.addAndGet(this, (long) agentCloseDelta);
+    final long agentExecDelta = HostTable.AGENT_EXEC_DELTA.getAndSet(this, 0L);
+    final long agentExecRate = HostTable.AGENT_EXEC_RATE.getAndSet(this, 0L);
+    final long agentExecTime = HostTable.AGENT_EXEC_TIME.addAndGet(this, agentExecDelta);
 
-    final int timerEventDelta = TIMER_EVENT_DELTA.getAndSet(this, 0);
-    final int timerEventRate = TIMER_EVENT_RATE.getAndSet(this, 0);
-    final long timerEventCount = TIMER_EVENT_COUNT.addAndGet(this, (long) timerEventDelta);
+    final int timerEventDelta = HostTable.TIMER_EVENT_DELTA.getAndSet(this, 0);
+    final int timerEventRate = HostTable.TIMER_EVENT_RATE.getAndSet(this, 0);
+    final long timerEventCount = HostTable.TIMER_EVENT_COUNT.addAndGet(this, (long) timerEventDelta);
 
-    final int downlinkOpenDelta = DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
-    final long downlinkOpenCount = DOWNLINK_OPEN_COUNT.addAndGet(this, (long) downlinkOpenDelta);
-    final int downlinkCloseDelta = DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
-    final long downlinkCloseCount = DOWNLINK_CLOSE_COUNT.addAndGet(this, (long) downlinkCloseDelta);
-    final int downlinkEventDelta = DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
-    final int downlinkEventRate = DOWNLINK_EVENT_RATE.getAndSet(this, 0);
-    final long downlinkEventCount = DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
-    final int downlinkCommandDelta = DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
-    final int downlinkCommandRate = DOWNLINK_COMMAND_RATE.getAndSet(this, 0);
-    final long downlinkCommandCount = DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
+    final int downlinkOpenDelta = HostTable.DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long downlinkOpenCount = HostTable.DOWNLINK_OPEN_COUNT.addAndGet(this, (long) downlinkOpenDelta);
+    final int downlinkCloseDelta = HostTable.DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long downlinkCloseCount = HostTable.DOWNLINK_CLOSE_COUNT.addAndGet(this, (long) downlinkCloseDelta);
+    final int downlinkEventDelta = HostTable.DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int downlinkEventRate = HostTable.DOWNLINK_EVENT_RATE.getAndSet(this, 0);
+    final long downlinkEventCount = HostTable.DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
+    final int downlinkCommandDelta = HostTable.DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int downlinkCommandRate = HostTable.DOWNLINK_COMMAND_RATE.getAndSet(this, 0);
+    final long downlinkCommandCount = HostTable.DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
 
-    final int uplinkOpenDelta = UPLINK_OPEN_DELTA.getAndSet(this, 0);
-    final long uplinkOpenCount = UPLINK_OPEN_COUNT.addAndGet(this, (long) uplinkOpenDelta);
-    final int uplinkCloseDelta = UPLINK_CLOSE_DELTA.getAndSet(this, 0);
-    final long uplinkCloseCount = UPLINK_CLOSE_COUNT.addAndGet(this, (long) uplinkCloseDelta);
-    final int uplinkEventDelta = UPLINK_EVENT_DELTA.getAndSet(this, 0);
-    final int uplinkEventRate = UPLINK_EVENT_RATE.getAndSet(this, 0);
-    final long uplinkEventCount = UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
-    final int uplinkCommandDelta = UPLINK_COMMAND_DELTA.getAndSet(this, 0);
-    final int uplinkCommandRate = UPLINK_COMMAND_RATE.getAndSet(this, 0);
-    final long uplinkCommandCount = UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
+    final int uplinkOpenDelta = HostTable.UPLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long uplinkOpenCount = HostTable.UPLINK_OPEN_COUNT.addAndGet(this, (long) uplinkOpenDelta);
+    final int uplinkCloseDelta = HostTable.UPLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long uplinkCloseCount = HostTable.UPLINK_CLOSE_COUNT.addAndGet(this, (long) uplinkCloseDelta);
+    final int uplinkEventDelta = HostTable.UPLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int uplinkEventRate = HostTable.UPLINK_EVENT_RATE.getAndSet(this, 0);
+    final long uplinkEventCount = HostTable.UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
+    final int uplinkCommandDelta = HostTable.UPLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int uplinkCommandRate = HostTable.UPLINK_COMMAND_RATE.getAndSet(this, 0);
+    final long uplinkCommandCount = HostTable.UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
 
     final long nodeCount = nodeOpenCount - nodeCloseCount;
     final long agentCount = agentOpenCount - agentCloseCount;
     final AgentPulse agentPulse = new AgentPulse(agentCount, agentExecRate, agentExecTime, timerEventRate, timerEventCount);
     final long downlinkCount = downlinkOpenCount - downlinkCloseCount;
     final WarpDownlinkPulse downlinkPulse = new WarpDownlinkPulse(downlinkCount, downlinkEventRate, downlinkEventCount,
-        downlinkCommandRate, downlinkCommandCount);
+                                                                  downlinkCommandRate, downlinkCommandCount);
     final long uplinkCount = uplinkOpenCount - uplinkCloseCount;
     final WarpUplinkPulse uplinkPulse = new WarpUplinkPulse(uplinkCount, uplinkEventRate, uplinkEventCount,
-        uplinkCommandRate, uplinkCommandCount);
+                                                            uplinkCommandRate, uplinkCommandCount);
     this.pulse = new HostPulse(nodeCount, agentPulse, downlinkPulse, uplinkPulse);
     final DemandLane<HostPulse> metaPulse = this.metaPulse;
     if (metaPulse != null) {
       metaPulse.cue();
     }
 
-    return new HostProfile(cellAddress(),
-        nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
-        agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
-        agentExecDelta, agentExecRate, agentExecTime,
-        timerEventDelta, timerEventRate, timerEventCount,
-        downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
-        downlinkEventDelta, downlinkEventRate, downlinkEventCount,
-        downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
-        uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
-        uplinkEventDelta, uplinkEventRate, uplinkEventCount,
-        uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
+    return new HostProfile(this.cellAddress(),
+                           nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
+                           agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
+                           agentExecDelta, agentExecRate, agentExecTime,
+                           timerEventDelta, timerEventRate, timerEventCount,
+                           downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
+                           downlinkEventDelta, downlinkEventRate, downlinkEventCount,
+                           downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
+                           uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
+                           uplinkEventDelta, uplinkEventRate, uplinkEventCount,
+                           uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
   }
 
   static final int PRIMARY = 1 << 0;
@@ -890,8 +931,10 @@ public class HostTable extends AbstractTierBinding implements HostBinding {
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<HostTable, UriMapper<NodeBinding>> NODES =
       AtomicReferenceFieldUpdater.newUpdater(HostTable.class, (Class<UriMapper<NodeBinding>>) (Class<?>) UriMapper.class, "nodes");
+
   static final AtomicIntegerFieldUpdater<HostTable> FLAGS =
       AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "flags");
+
   static final AtomicIntegerFieldUpdater<HostTable> NODE_OPEN_DELTA =
       AtomicIntegerFieldUpdater.newUpdater(HostTable.class, "nodeOpenDelta");
   static final AtomicLongFieldUpdater<HostTable> NODE_OPEN_COUNT =
@@ -982,7 +1025,7 @@ final class HostTableNodesController implements OnCueKey<Uri, NodeInfo>, OnSyncK
       if (nodeUri.toString().contains(laneQuery)) {
         nodeBinding = this.host.getNode(nodeUri);
         if (nodeBinding != null) {
-          return NodeInfo.from(nodeBinding);
+          return NodeInfo.create(nodeBinding);
         }
       }
     } else if (laneFragment.isDefined()) {
@@ -992,7 +1035,7 @@ final class HostTableNodesController implements OnCueKey<Uri, NodeInfo>, OnSyncK
         final Uri directoryUri = nodeUri.appendedSlash();
         final UriMapper<NodeBinding> directory = this.host.nodes().getSuffix(directoryUri);
         if (nodeBinding != null) {
-          return NodeInfo.from(nodeBinding, directory.childCount());
+          return NodeInfo.create(nodeBinding, directory.childCount());
         } else if (!directory.isEmpty()) {
           return new NodeInfo(nodeUri, 0L, FingerTrieSeq.empty(), directory.childCount()); // synthetic directory node
         }
@@ -1000,7 +1043,7 @@ final class HostTableNodesController implements OnCueKey<Uri, NodeInfo>, OnSyncK
     } else {
       nodeBinding = this.host.getNode(nodeUri);
       if (nodeBinding != null) {
-        return NodeInfo.from(nodeBinding);
+        return NodeInfo.create(nodeBinding);
       }
     }
     return null;
@@ -1049,12 +1092,12 @@ final class HostTableNodesQueryIterator implements Iterator<Uri> {
 
   @Override
   public boolean hasNext() {
-    return nextNodeUri() != null;
+    return this.nextNodeUri() != null;
   }
 
   @Override
   public Uri next() {
-    final Uri nextNodeUri = nextNodeUri();
+    final Uri nextNodeUri = this.nextNodeUri();
     this.nextNodeUri = null;
     return nextNodeUri;
   }

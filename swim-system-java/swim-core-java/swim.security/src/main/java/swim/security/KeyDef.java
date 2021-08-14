@@ -24,7 +24,9 @@ import swim.structure.Value;
 
 public abstract class KeyDef {
 
-  private static Form<KeyDef> keyForm;
+  public abstract Key key();
+
+  public abstract Value toValue();
 
   public static KeyDef from(Key key) {
     if (key instanceof PublicKey) {
@@ -35,17 +37,15 @@ public abstract class KeyDef {
     throw new IllegalArgumentException(key.toString());
   }
 
+  private static Form<KeyDef> keyForm;
+
   @Kind
   public static Form<KeyDef> keyForm() {
-    if (keyForm == null) {
-      keyForm = new KeyForm();
+    if (KeyDef.keyForm == null) {
+      KeyDef.keyForm = new KeyForm();
     }
-    return keyForm;
+    return KeyDef.keyForm;
   }
-
-  public abstract Key key();
-
-  public abstract Value toValue();
 
 }
 

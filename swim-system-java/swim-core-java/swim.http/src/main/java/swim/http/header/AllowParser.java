@@ -42,6 +42,11 @@ final class AllowParser extends Parser<Allow> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<Allow> feed(Input input) {
+    return AllowParser.parse(input, this.http, this.method, this.methods, this.step);
+  }
+
   static Parser<Allow> parse(Input input, HttpParser http, Parser<HttpMethod> method,
                              Builder<HttpMethod, FingerTrieSeq<HttpMethod>> methods, int step) {
     int c = 0;
@@ -76,7 +81,7 @@ final class AllowParser extends Parser<Allow> {
           input = input.step();
           step = 3;
         } else if (!input.isEmpty()) {
-          return done(Allow.from(methods.bind()));
+          return Parser.done(Allow.create(methods.bind()));
         }
       }
       if (step == 3) {
@@ -91,7 +96,7 @@ final class AllowParser extends Parser<Allow> {
         if (input.isCont()) {
           step = 4;
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
@@ -112,18 +117,13 @@ final class AllowParser extends Parser<Allow> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new AllowParser(http, method, methods, step);
   }
 
   static Parser<Allow> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<Allow> feed(Input input) {
-    return parse(input, this.http, this.method, this.methods, this.step);
+    return AllowParser.parse(input, http, null, null, 1);
   }
 
 }

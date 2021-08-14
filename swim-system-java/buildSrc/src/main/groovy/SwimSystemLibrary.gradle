@@ -16,7 +16,7 @@ ext.compilerArgs = ['-Xlint:all', '-Xlint:-requires-automatic']
 repositories {
   mavenCentral()
   maven {
-    url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
   }
 }
 
@@ -75,7 +75,7 @@ checkstyle {
     maxWarnings = 0
   }
 
-  configFile = new File(gradle.swimSystemDir, 'checkstyle.xml')
+  configFile = new File(gradle.swimRuntimeDir, 'checkstyle.xml')
   toolVersion "8.41.1"
 
   checkstyleMain {

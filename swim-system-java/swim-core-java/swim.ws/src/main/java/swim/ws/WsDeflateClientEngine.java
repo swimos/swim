@@ -56,7 +56,7 @@ final class WsDeflateClientEngine extends WsEngine {
     return this;
   }
 
-  static WsDeflateClientEngine from(WebSocketExtension extension, WsEngineSettings settings) {
+  static WsDeflateClientEngine create(WebSocketExtension extension, WsEngineSettings settings) {
     boolean clientNoContextTakeover = false;
     int serverMaxWindowBits = 15;
     int clientMaxWindowBits = 15;

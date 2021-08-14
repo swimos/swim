@@ -44,7 +44,6 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
   Uri nodeUri;
   final Uri laneUri;
   final HttpRequest<?> request;
-
   HttpContext linkContext;
   HttpResponderContext httpResponderContext;
 
@@ -54,6 +53,8 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
     this.nodeUri = nodeUri;
     this.laneUri = laneUri;
     this.request = request;
+    this.linkContext = null;
+    this.httpResponderContext = null;
   }
 
   @Override
@@ -94,7 +95,7 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapLink(Class<T> linkClass) {
-    if (linkClass.isAssignableFrom(getClass())) {
+    if (linkClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.linkContext.unwrapLink(linkClass);
@@ -105,7 +106,7 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
   @Override
   public <T> T bottomLink(Class<T> linkClass) {
     T link = this.linkContext.bottomLink(linkClass);
-    if (link == null && linkClass.isAssignableFrom(getClass())) {
+    if (link == null && linkClass.isAssignableFrom(this.getClass())) {
       link = (T) this;
     }
     return link;
@@ -148,9 +149,9 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
 
   @Override
   public LinkAddress cellAddressDown() {
-    final CellContext cellContext = cellContext();
+    final CellContext cellContext = this.cellContext();
     final CellAddress cellAddress = cellContext != null ? cellContext.cellAddress() : null;
-    return new DownlinkAddress(cellAddress, linkKey());
+    return new DownlinkAddress(cellAddress, this.linkKey());
   }
 
   @Override
@@ -321,13 +322,13 @@ public class HttpLaneResponder implements HttpBinding, HttpResponder<Object> {
 
   @Override
   public void didFailUp(Throwable error) {
-    didFail(error);
+    this.didFail(error);
   }
 
   @Override
   public void didFail(Throwable error) {
     this.linkContext.closeUp();
-    closeDown();
+    this.closeDown();
   }
 
   @Override

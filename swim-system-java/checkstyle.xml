@@ -82,6 +82,11 @@
     <module name="ModifierOrder"/>
     <module name="RedundantModifier"/>
 
+    <!-- Checks for this usage -->
+    <module name="RequireThis">
+      <property name="validateOnlyOverlapping" value="false"/>
+    </module>
+
     <!-- Checks for blocks -->
     <module name="AvoidNestedBlocks"/>
     <module name="EmptyBlock">

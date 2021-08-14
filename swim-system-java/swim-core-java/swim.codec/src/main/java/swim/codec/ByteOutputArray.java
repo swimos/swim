@@ -22,12 +22,12 @@ final class ByteOutputArray extends ByteOutput<byte[]> {
 
   @Override
   public byte[] bind() {
-    return toByteArray();
+    return this.toByteArray();
   }
 
   @Override
   public Output<byte[]> clone() {
-    return new ByteOutputArray(cloneArray(), this.size, this.settings);
+    return new ByteOutputArray(this.cloneArray(), this.size, this.settings);
   }
 
 }

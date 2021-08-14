@@ -46,10 +46,6 @@ import swim.uri.UriPattern;
 
 public class ActorKernel extends KernelProxy {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<ActorKernel, HashTrieMap<String, ActorSpace>> SPACES =
-      AtomicReferenceFieldUpdater.newUpdater(ActorKernel.class, (Class<HashTrieMap<String, ActorSpace>>) (Class<?>) HashTrieMap.class, "spaces");
-  private static final double KERNEL_PRIORITY = 1.0;
   final double kernelPriority;
   volatile HashTrieMap<String, ActorSpace> spaces;
 
@@ -59,17 +55,7 @@ public class ActorKernel extends KernelProxy {
   }
 
   public ActorKernel() {
-    this(KERNEL_PRIORITY);
-  }
-
-  public static ActorKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || ActorKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new ActorKernel(kernelPriority);
-    }
-    return null;
+    this(ActorKernel.KERNEL_PRIORITY);
   }
 
   @Override
@@ -79,7 +65,7 @@ public class ActorKernel extends KernelProxy {
 
   @Override
   public SpaceDef defineSpace(Item spaceConfig) {
-    final SpaceDef spaceDef = defineActorSpace(spaceConfig);
+    final SpaceDef spaceDef = this.defineActorSpace(spaceConfig);
     return spaceDef != null ? spaceDef : super.defineSpace(spaceConfig);
   }
 
@@ -89,7 +75,7 @@ public class ActorKernel extends KernelProxy {
     if (header.isDefined()) {
       final String fabricProvider = header.get("provider").stringValue(null);
       if (fabricProvider == null || ActorKernel.class.getName().equals(fabricProvider)) {
-        final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+        final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
         final String spaceName = spaceConfig.key().stringValue(null);
         FingerTrieSeq<PlaneDef> planeDefs = FingerTrieSeq.empty();
         HashTrieMap<String, AuthenticatorDef> authenticatorDefs = HashTrieMap.empty();
@@ -161,8 +147,8 @@ public class ActorKernel extends KernelProxy {
           }
         }
         return new ActorSpaceDef(spaceName, planeDefs, authenticatorDefs, meshDefs,
-            partDefs, hostDefs, nodeDefs, laneDefs,
-            logDef, policyDef, stageDef, storeDef);
+                                 partDefs, hostDefs, nodeDefs, laneDefs,
+                                 logDef, policyDef, stageDef, storeDef);
       }
     }
     return null;
@@ -171,7 +157,7 @@ public class ActorKernel extends KernelProxy {
   @Override
   public Space openSpace(SpaceDef spaceDef) {
     if (spaceDef instanceof ActorSpaceDef) {
-      return openActorSpace((ActorSpaceDef) spaceDef);
+      return this.openActorSpace((ActorSpaceDef) spaceDef);
     } else {
       return super.openSpace(spaceDef);
     }
@@ -181,15 +167,15 @@ public class ActorKernel extends KernelProxy {
     final String spaceName = spaceDef.spaceName;
     ActorSpace space = null;
     do {
-      final HashTrieMap<String, ActorSpace> oldSpaces = this.spaces;
+      final HashTrieMap<String, ActorSpace> oldSpaces = ActorKernel.SPACES.get(this);
       final ActorSpace oldSpace = oldSpaces.get(spaceName);
       if (oldSpace == null) {
         if (space == null) {
-          space = createActorSpace(spaceName, spaceDef);
+          space = this.createActorSpace(spaceName, spaceDef);
         }
         final HashTrieMap<String, ActorSpace> newSpaces = oldSpaces.updated(spaceName, space);
-        if (SPACES.compareAndSet(this, oldSpaces, newSpaces)) {
-          if (isStarted()) {
+        if (ActorKernel.SPACES.compareAndSet(this, oldSpaces, newSpaces)) {
+          if (this.isStarted()) {
             space.start();
           }
           break;
@@ -203,24 +189,24 @@ public class ActorKernel extends KernelProxy {
   }
 
   protected ActorSpace createActorSpace(String spaceName, ActorSpaceDef spaceDef) {
-    final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+    final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
     final EdgeAddress edgeAddress = new EdgeAddress(spaceName);
     final ActorSpace space = new ActorSpace(edgeAddress, spaceDef, kernel);
-    createAuthenticators(space, spaceDef);
-    createPlanes(space, spaceDef);
+    this.createAuthenticators(space, spaceDef);
+    this.createPlanes(space, spaceDef);
     return space;
   }
 
   protected void createAuthenticators(ActorSpace space, ActorSpaceDef spaceDef) {
     for (AuthenticatorDef authenticatorDef : spaceDef.authenticatorDefs()) {
       if (space.getAuthenticator(authenticatorDef.authenticatorName()) == null) {
-        createAuthenticator(space, authenticatorDef);
+        this.createAuthenticator(space, authenticatorDef);
       }
     }
   }
 
   protected void createAuthenticator(ActorSpace space, AuthenticatorDef authenticatorDef) {
-    final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+    final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
     Authenticator authenticator = kernel.createAuthenticator(authenticatorDef, null);
     if (authenticator != null) {
       authenticator = kernel.injectAuthenticator(authenticator);
@@ -233,13 +219,13 @@ public class ActorKernel extends KernelProxy {
   protected void createPlanes(ActorSpace space, ActorSpaceDef spaceDef) {
     for (PlaneDef planeDef : spaceDef.planeDefs()) {
       if (space.getPlane(planeDef.planeName()) == null) {
-        createPlane(space, planeDef);
+        this.createPlane(space, planeDef);
       }
     }
   }
 
   protected void createPlane(ActorSpace space, PlaneDef planeDef) {
-    final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+    final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
     final PlaneFactory<?> planeFactory = kernel.createPlaneFactory(planeDef, null);
     if (planeFactory != null) {
       space.openPlane(planeDef.planeName(), planeFactory);
@@ -250,7 +236,7 @@ public class ActorKernel extends KernelProxy {
 
   @Override
   public Space getSpace(String spaceName) {
-    Space space = getActorSpace(spaceName);
+    Space space = this.getActorSpace(spaceName);
     if (space == null) {
       space = super.getSpace(spaceName);
     }
@@ -258,12 +244,12 @@ public class ActorKernel extends KernelProxy {
   }
 
   public ActorSpace getActorSpace(String spaceName) {
-    return this.spaces.get(spaceName);
+    return ActorKernel.SPACES.get(this).get(spaceName);
   }
 
   @Override
   public MeshDef defineMesh(Item meshConfig) {
-    final MeshDef meshDef = defineActorMesh(meshConfig);
+    final MeshDef meshDef = this.defineActorMesh(meshConfig);
     return meshDef != null ? meshDef : super.defineMesh(meshConfig);
   }
 
@@ -273,7 +259,7 @@ public class ActorKernel extends KernelProxy {
     if (header.isDefined()) {
       final String fabricProvider = header.get("provider").stringValue(null);
       if (fabricProvider == null || ActorKernel.class.getName().equals(fabricProvider)) {
-        final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+        final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
         Uri meshUri = Uri.empty();
         HashTrieMap<Value, PartDef> partDefs = HashTrieMap.empty();
         UriMapper<HostDef> hostDefs = UriMapper.empty();
@@ -331,7 +317,7 @@ public class ActorKernel extends KernelProxy {
           }
         }
         return new ActorMeshDef(meshUri, partDefs, hostDefs, nodeDefs, laneDefs,
-            logDef, policyDef, stageDef, storeDef);
+                                logDef, policyDef, stageDef, storeDef);
       }
     }
     return null;
@@ -339,7 +325,7 @@ public class ActorKernel extends KernelProxy {
 
   @Override
   public PartDef definePart(Item partConfig) {
-    final PartDef partDef = defineActorPart(partConfig);
+    final PartDef partDef = this.defineActorPart(partConfig);
     return partDef != null ? partDef : super.definePart(partConfig);
   }
 
@@ -349,7 +335,7 @@ public class ActorKernel extends KernelProxy {
     if (header.isDefined()) {
       final String fabricProvider = header.get("provider").stringValue(null);
       if (fabricProvider == null || ActorKernel.class.getName().equals(fabricProvider)) {
-        final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+        final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
         Value partKey = Value.extant();
         PartPredicate predicate = PartPredicate.any();
         boolean isGateway = false;
@@ -411,7 +397,7 @@ public class ActorKernel extends KernelProxy {
           }
         }
         return new ActorPartDef(partKey, predicate, isGateway, hostDefs, nodeDefs,
-            laneDefs, logDef, policyDef, stageDef, storeDef);
+                                laneDefs, logDef, policyDef, stageDef, storeDef);
       }
     }
     return null;
@@ -419,7 +405,7 @@ public class ActorKernel extends KernelProxy {
 
   @Override
   public HostDef defineHost(Item hostConfig) {
-    final HostDef hostDef = defineActorHost(hostConfig);
+    final HostDef hostDef = this.defineActorHost(hostConfig);
     return hostDef != null ? hostDef : super.defineHost(hostConfig);
   }
 
@@ -429,7 +415,7 @@ public class ActorKernel extends KernelProxy {
     if (header.isDefined()) {
       final String fabricProvider = header.get("provider").stringValue(null);
       if (fabricProvider == null || ActorKernel.class.getName().equals(fabricProvider)) {
-        final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+        final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
         UriPattern hostPattern = UriPattern.empty();
         boolean isPrimary = false;
         boolean isReplica = false;
@@ -485,7 +471,7 @@ public class ActorKernel extends KernelProxy {
           }
         }
         return new ActorHostDef(hostPattern, isPrimary, isReplica, nodeDefs,
-            laneDefs, logDef, policyDef, stageDef, storeDef);
+                                laneDefs, logDef, policyDef, stageDef, storeDef);
       }
     }
     return null;
@@ -493,7 +479,7 @@ public class ActorKernel extends KernelProxy {
 
   @Override
   public NodeDef defineNode(Item nodeConfig) {
-    final NodeDef nodeDef = defineActorNode(nodeConfig);
+    final NodeDef nodeDef = this.defineActorNode(nodeConfig);
     return nodeDef != null ? nodeDef : super.defineNode(nodeConfig);
   }
 
@@ -503,7 +489,7 @@ public class ActorKernel extends KernelProxy {
     if (header.isDefined()) {
       final String fabricProvider = header.get("provider").stringValue(null);
       if (fabricProvider == null || ActorKernel.class.getName().equals(fabricProvider)) {
-        final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+        final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
         UriPattern nodePattern = null;
         FingerTrieSeq<AgentDef> agentDefs = FingerTrieSeq.empty();
         UriMapper<LaneDef> laneDefs = UriMapper.empty();
@@ -550,7 +536,7 @@ public class ActorKernel extends KernelProxy {
         }
         if (nodePattern != null) {
           return new ActorNodeDef(nodePattern, agentDefs, laneDefs,
-              logDef, policyDef, stageDef, storeDef);
+                                  logDef, policyDef, stageDef, storeDef);
         }
       }
     }
@@ -559,7 +545,7 @@ public class ActorKernel extends KernelProxy {
 
   @Override
   public LaneDef defineLane(Item laneConfig) {
-    final LaneDef laneDef = defineActorLane(laneConfig);
+    final LaneDef laneDef = this.defineActorLane(laneConfig);
     return laneDef != null ? laneDef : super.defineLane(laneConfig);
   }
 
@@ -569,7 +555,7 @@ public class ActorKernel extends KernelProxy {
     if (header.isDefined()) {
       final String fabricProvider = header.get("provider").stringValue(null);
       if (fabricProvider == null || ActorKernel.class.getName().equals(fabricProvider)) {
-        final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+        final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
         final String laneType = header.get("type").stringValue(null);
         UriPattern lanePattern = null;
         LogDef logDef = null;
@@ -613,16 +599,32 @@ public class ActorKernel extends KernelProxy {
 
   @Override
   public void didStart() {
-    for (ActorSpace space : this.spaces.values()) {
+    for (ActorSpace space : ActorKernel.SPACES.get(this).values()) {
       space.start();
     }
   }
 
   @Override
   public void willStop() {
-    for (ActorSpace space : this.spaces.values()) {
+    for (ActorSpace space : ActorKernel.SPACES.get(this).values()) {
       space.stop();
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<ActorKernel, HashTrieMap<String, ActorSpace>> SPACES =
+      AtomicReferenceFieldUpdater.newUpdater(ActorKernel.class, (Class<HashTrieMap<String, ActorSpace>>) (Class<?>) HashTrieMap.class, "spaces");
+
+  private static final double KERNEL_PRIORITY = 1.0;
+
+  public static ActorKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || ActorKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(ActorKernel.KERNEL_PRIORITY);
+      return new ActorKernel(kernelPriority);
+    }
+    return null;
   }
 
 }

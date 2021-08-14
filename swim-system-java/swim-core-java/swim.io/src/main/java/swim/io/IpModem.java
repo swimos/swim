@@ -22,7 +22,7 @@ import swim.codec.Encoder;
  * for a non-blocking NIO network channel.
  * <p>
  * An {@code IpModem} interfaces with the underlying asynchronous networking
- * system via an {@link IpModemContext}.  The modem context invokes I/O
+ * system via an {@link IpModemContext}. The modem context invokes I/O
  * callbacks on the {@code IpModem} when the underlying network socket is
  * ready to perform I/O operations permitted by the socket context's {@link
  * FlowControl}.
@@ -42,8 +42,8 @@ public interface IpModem<I, O> {
 
   /**
    * Returns the number of idle milliseconds after which this {@code IpModem}
-   * should be closed due to inactivity.  Returns {@code -1} if a default idle
-   * timeout should be used.  Returns {@code 0} if the underlying network
+   * should be closed due to inactivity. Returns {@code -1} if a default idle
+   * timeout should be used. Returns {@code 0} if the underlying network
    * socket should not time out.
    */
   long idleTimeout();
@@ -51,11 +51,11 @@ public interface IpModem<I, O> {
   /**
    * I/O callback invoked by the modem context asking this {@code IpModem} to
    * provide an input {@link Decoder} by invoking the modem context's {@link
-   * IpModemContext#read(Decoder) read} method.  The modem context will
+   * IpModemContext#read(Decoder) read} method. The modem context will
    * asynchronously feed input data to the provided read {@code Decoder} until
-   * it transitions out of the <em>cont</em> state.  The read flow control of
+   * it transitions out of the <em>cont</em> state. The read flow control of
    * the underlying network socket is automatically managed by the modem
-   * context using the state of the read {@code Decoder}.  May be invoked
+   * context using the state of the read {@code Decoder}. May be invoked
    * concurrently to other I/O callbacks, but never concurrently with other
    * {@code doRead} or {@code didRead} calls.
    */
@@ -64,7 +64,7 @@ public interface IpModem<I, O> {
   /**
    * I/O callback invoked by the modem context with the completed value of the
    * current read {@code Decoder} after it has transitioned to the
-   * <em>done</em> state.  May be invoked concurrently to other I/O callbacks,
+   * <em>done</em> state. May be invoked concurrently to other I/O callbacks,
    * but never concurrently with other {@code doRead} or {@code didRead} calls.
    */
   void didRead(I input);
@@ -72,11 +72,11 @@ public interface IpModem<I, O> {
   /**
    * I/O callback invoked by the modem context asking this {@code IpModem} to
    * provide an output {@link Encoder} by invoking the modem context's {@link
-   * IpModemContext#write(Encoder) write} method.  The modem context will
+   * IpModemContext#write(Encoder) write} method. The modem context will
    * asynchronously pull output data from the provided write {@code Encoder}
-   * until it transitions out of the <em>cont</em> state.  The write flow
+   * until it transitions out of the <em>cont</em> state. The write flow
    * control of the underlying network socket is automatically managed by the
-   * modem context using the state of the write {@code Encoder}.  May be
+   * modem context using the state of the write {@code Encoder}. May be
    * invoked concurrently to other I/O callbacks, but never concurrently with
    * other {@code doWrite} or {@code didWrite} calls.
    */
@@ -85,7 +85,7 @@ public interface IpModem<I, O> {
   /**
    * I/O callback invoked by the modem context with the completed value of the
    * current write {@code Encoder} after it has transitioned to the
-   * <em>done</em> state.  May be invoked concurrently to other I/O callbacks,
+   * <em>done</em> state. May be invoked concurrently to other I/O callbacks,
    * but never concurrently with other {@code dodWrite} or {@code didWrite}
    * calls.
    */
@@ -131,7 +131,7 @@ public interface IpModem<I, O> {
 
   /**
    * Lifecycle callback invoked by the modem context after the underlying
-   * network connection has timed out.  The modem will automatically be closed.
+   * network connection has timed out. The modem will automatically be closed.
    */
   void didTimeout();
 
@@ -143,7 +143,7 @@ public interface IpModem<I, O> {
 
   /**
    * Lifecycle callback invoked by the modem context when the underlying
-   * network socket fails by throwing an {@code error}.  The modem will
+   * network socket fails by throwing an {@code error}. The modem will
    * automatically be closed.
    */
   void didFail(Throwable error);

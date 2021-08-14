@@ -28,14 +28,13 @@ import swim.util.Murmur3;
 /**
  * A {@link Selector} that, when {@link #evaluate evaluated} against some {@link
  * Interpreter}, yields all of the "values" of the top {@code Item} in the
- * interpreter's frame stack.  Every {@code Item} that is not a {@code Record}
+ * interpreter's frame stack. Every {@code Item} that is not a {@code Record}
  * has exactly one "value" whose definition is consistent with {@link
- * Item#toValue}.  The "values" of a {@code Record} are defined as the set of
+ * Item#toValue}. The "values" of a {@code Record} are defined as the set of
  * every such "value" for every (top-level) {@code Item} in the {@code Record}.
  */
 public class ValuesSelector extends Selector {
 
-  private static int hashSeed;
   final Selector then;
 
   public ValuesSelector(Selector then) {
@@ -182,9 +181,9 @@ public class ValuesSelector extends Selector {
   @Override
   protected int compareTo(Selector that) {
     if (that instanceof ValuesSelector) {
-      return compareTo((ValuesSelector) that);
+      return this.compareTo((ValuesSelector) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(ValuesSelector that) {
@@ -197,23 +196,26 @@ public class ValuesSelector extends Selector {
       return true;
     } else if (other instanceof ValuesSelector) {
       final ValuesSelector that = (ValuesSelector) other;
-      return then.equals(that.then);
+      return this.then.equals(that.then);
     }
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ValuesSelector.class);
+    if (ValuesSelector.hashSeed == 0) {
+      ValuesSelector.hashSeed = Murmur3.seed(ValuesSelector.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.then.hashCode()));
+    return Murmur3.mash(Murmur3.mix(ValuesSelector.hashSeed, this.then.hashCode()));
   }
 
   @Override
-  public void debugThen(Output<?> output) {
+  public <T> Output<T> debugThen(Output<T> output) {
     output = output.write('.').write("values").write('(').write(')');
-    this.then.debugThen(output);
+    output = this.then.debugThen(output);
+    return output;
   }
 
 }

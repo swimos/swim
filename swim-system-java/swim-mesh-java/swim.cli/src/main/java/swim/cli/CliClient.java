@@ -14,7 +14,7 @@
 
 package swim.cli;
 
-import swim.api.ref.SwimRef;
+import swim.api.ref.WarpRef;
 import swim.api.warp.WarpDownlink;
 import swim.args.Arg;
 import swim.args.Cmd;
@@ -23,14 +23,14 @@ import swim.uri.Uri;
 
 public class CliClient {
 
-  protected final SwimRef swim;
+  protected final WarpRef warp;
 
-  public CliClient(SwimRef swim) {
-    this.swim = swim;
+  public CliClient(WarpRef warp) {
+    this.warp = warp;
   }
 
-  public final SwimRef swim() {
-    return this.swim;
+  public final WarpRef warp() {
+    return this.warp;
   }
 
   public String name() {
@@ -38,95 +38,95 @@ public class CliClient {
   }
 
   public Cmd mainCmd() {
-    return Cmd.of(name())
-        .cmd(linkCmd())
-        .cmd(syncCmd())
-        .cmd(getCmd())
-        .cmd(reflectCmd())
-        .helpCmd();
+    return Cmd.create(this.name())
+              .cmd(this.linkCmd())
+              .cmd(this.syncCmd())
+              .cmd(this.getCmd())
+              .cmd(this.reflectCmd())
+              .helpCmd();
   }
 
   public Cmd linkCmd() {
-    return Cmd.of("link")
-        .desc("stream changes to a lane of a remote node")
-        .opt(Opt.of("host").flag('h').arg("hostUri").desc("remote host to link"))
-        .opt(Opt.of("node").flag('n').arg("nodeUri").desc("remote node to link"))
-        .opt(Opt.of("lane").flag('l').arg("laneUri").desc("lane to link"))
-        .opt(Opt.of("format").flag('f').arg("json|recon").desc("event output format"))
-        .helpCmd()
-        .exec(this::runLinkCmd);
+    return Cmd.create("link")
+              .desc("stream changes to a lane create a remote node")
+              .opt(Opt.create("host").flag('h').arg("hostUri").desc("remote host to link"))
+              .opt(Opt.create("node").flag('n').arg("nodeUri").desc("remote node to link"))
+              .opt(Opt.create("lane").flag('l').arg("laneUri").desc("lane to link"))
+              .opt(Opt.create("format").flag('f').arg("json|recon").desc("event output format"))
+              .helpCmd()
+              .exec(this::runLinkCmd);
   }
 
   public Cmd syncCmd() {
-    return Cmd.of("sync")
-        .desc("stream the current state and changes to a lane of a remote node")
-        .opt(Opt.of("host").flag('h').arg("hostUri").desc("remote host to link"))
-        .opt(Opt.of("node").flag('n').arg("nodeUri").desc("remote node to link"))
-        .opt(Opt.of("lane").flag('l').arg("laneUri").desc("lane to link"))
-        .opt(Opt.of("format").flag('f').arg("json|recon").desc("event output format"))
-        .helpCmd()
-        .exec(this::runSyncCmd);
+    return Cmd.create("sync")
+              .desc("stream the current state and changes to a lane create a remote node")
+              .opt(Opt.create("host").flag('h').arg("hostUri").desc("remote host to link"))
+              .opt(Opt.create("node").flag('n').arg("nodeUri").desc("remote node to link"))
+              .opt(Opt.create("lane").flag('l').arg("laneUri").desc("lane to link"))
+              .opt(Opt.create("format").flag('f').arg("json|recon").desc("event output format"))
+              .helpCmd()
+              .exec(this::runSyncCmd);
   }
 
   public Cmd getCmd() {
-    return Cmd.of("get")
-        .desc("fetch the current state of a lane of a remote node")
-        .opt(Opt.of("host").flag('h').arg("hostUri").desc("remote host to link"))
-        .opt(Opt.of("node").flag('n').arg("nodeUri").desc("remote node to link"))
-        .opt(Opt.of("lane").flag('l').arg("laneUri").desc("lane to link"))
-        .opt(Opt.of("format").flag('f').arg("json|recon").desc("event output format"))
-        .helpCmd()
-        .exec(this::runGetCmd);
+    return Cmd.create("get")
+              .desc("fetch the current state create a lane create a remote node")
+              .opt(Opt.create("host").flag('h').arg("hostUri").desc("remote host to link"))
+              .opt(Opt.create("node").flag('n').arg("nodeUri").desc("remote node to link"))
+              .opt(Opt.create("lane").flag('l').arg("laneUri").desc("lane to link"))
+              .opt(Opt.create("format").flag('f').arg("json|recon").desc("event output format"))
+              .helpCmd()
+              .exec(this::runGetCmd);
   }
 
   public Cmd reflectCmd() {
-    return Cmd.of("reflect")
-        .desc("stream introspection metadata")
-        .opt(Opt.of("edge").flag('e').arg("edgeUri").desc("endpoint to introspect"))
-        .opt(Opt.of("mesh").flag('m').arg(Arg.of("meshUri").optional(true)).desc("introspect default or specified mesh"))
-        .opt(Opt.of("part").flag('p').arg(Arg.of("partKey").optional(true)).desc("introspect default or specified partition"))
-        .opt(Opt.of("host").flag('h').arg(Arg.of("hostUri").optional(true)).desc("introspect default or specified host"))
-        .opt(Opt.of("node").flag('n').arg("nodeUri").desc("introspect specified node"))
-        .opt(Opt.of("lane").flag('l').arg("laneUri").desc("introspect specified lane"))
-        .opt(Opt.of("link").flag('k').desc("introspect link behavior"))
-        .opt(Opt.of("router").flag('r').desc("introspect router behavior"))
-        .opt(Opt.of("data").desc("introspect data behavior"))
-        .opt(Opt.of("system").desc("introspect system behavior"))
-        .opt(Opt.of("process").desc("introspect process behavior"))
-        .opt(Opt.of("stats").flag('s').desc("stream introspection statistics"))
-        .opt(Opt.of("format").flag('f').arg("json|recon").desc("event output format"))
-        .cmd(reflectLogCmd())
-        .helpCmd()
-        .exec(this::runReflectCmd);
+    return Cmd.create("reflect")
+              .desc("stream introspection metadata")
+              .opt(Opt.create("edge").flag('e').arg("edgeUri").desc("endpoint to introspect"))
+              .opt(Opt.create("mesh").flag('m').arg(Arg.create("meshUri").optional(true)).desc("introspect default or specified mesh"))
+              .opt(Opt.create("part").flag('p').arg(Arg.create("partKey").optional(true)).desc("introspect default or specified partition"))
+              .opt(Opt.create("host").flag('h').arg(Arg.create("hostUri").optional(true)).desc("introspect default or specified host"))
+              .opt(Opt.create("node").flag('n').arg("nodeUri").desc("introspect specified node"))
+              .opt(Opt.create("lane").flag('l').arg("laneUri").desc("introspect specified lane"))
+              .opt(Opt.create("link").flag('k').desc("introspect link behavior"))
+              .opt(Opt.create("router").flag('r').desc("introspect router behavior"))
+              .opt(Opt.create("data").desc("introspect data behavior"))
+              .opt(Opt.create("system").desc("introspect system behavior"))
+              .opt(Opt.create("process").desc("introspect process behavior"))
+              .opt(Opt.create("stats").flag('s').desc("stream introspection statistics"))
+              .opt(Opt.create("format").flag('f').arg("json|recon").desc("event output format"))
+              .cmd(this.reflectLogCmd())
+              .helpCmd()
+              .exec(this::runReflectCmd);
   }
 
   public Cmd reflectLogCmd() {
-    return Cmd.of("log")
-        .desc("stream log events")
-        .opt(Opt.of("trace").flag('t').desc("stream trace log messages"))
-        .opt(Opt.of("debug").flag('d').desc("stream debug log messages"))
-        .opt(Opt.of("info").flag('i').desc("stream info log messages"))
-        .opt(Opt.of("warn").flag('w').desc("stream warning log messages"))
-        .opt(Opt.of("error").flag('e').desc("stream error log messages"))
-        .helpCmd()
-        .exec(this::runReflectLogCmd);
+    return Cmd.create("log")
+              .desc("stream log events")
+              .opt(Opt.create("trace").flag('t').desc("stream trace log messages"))
+              .opt(Opt.create("debug").flag('d').desc("stream debug log messages"))
+              .opt(Opt.create("info").flag('i').desc("stream info log messages"))
+              .opt(Opt.create("warn").flag('w').desc("stream warning log messages"))
+              .opt(Opt.create("error").flag('e').desc("stream error log messages"))
+              .helpCmd()
+              .exec(this::runReflectLogCmd);
   }
 
   public void runLinkCmd(Cmd cmd) {
-    final WarpDownlink downlink = downlink(cmd).keepSynced(false);
-    final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+    final WarpDownlink downlink = this.downlink(cmd).keepSynced(false);
+    final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
     downlinkLogger.open();
   }
 
   public void runSyncCmd(Cmd cmd) {
-    final WarpDownlink downlink = downlink(cmd).keepSynced(true);
-    final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+    final WarpDownlink downlink = this.downlink(cmd).keepSynced(true);
+    final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
     downlinkLogger.open();
   }
 
   public void runGetCmd(Cmd cmd) {
-    final WarpDownlink downlink = downlink(cmd).keepSynced(true);
-    final DownlinkGetter downlinkGetter = downlinkGetter(downlink, cmd);
+    final WarpDownlink downlink = this.downlink(cmd).keepSynced(true);
+    final DownlinkGetter downlinkGetter = this.downlinkGetter(downlink, cmd);
     downlinkGetter.open();
   }
 
@@ -148,29 +148,29 @@ public class CliClient {
         }
         if (laneUri != null) {
           metaNodeUri = metaNodeUri.appendedPath("lane", laneUri);
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("linkStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("linkStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else {
           if (cmd.getOpt("link").isDefined()) {
-            final WarpDownlink downlink = this.swim.downlink()
-                .hostUri(edgeUri)
-                .nodeUri(metaNodeUri)
-                .laneUri("linkStats")
-                .keepSynced(true);
-            final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+            final WarpDownlink downlink = this.warp.downlink()
+                                                   .hostUri(edgeUri)
+                                                   .nodeUri(metaNodeUri)
+                                                   .laneUri("linkStats")
+                                                   .keepSynced(true);
+            final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
             downlinkLogger.open();
           } else {
-            final WarpDownlink downlink = this.swim.downlink()
-                .hostUri(edgeUri)
-                .nodeUri(metaNodeUri)
-                .laneUri("routerStats")
-                .keepSynced(true);
-            final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+            final WarpDownlink downlink = this.warp.downlink()
+                                                   .hostUri(edgeUri)
+                                                   .nodeUri(metaNodeUri)
+                                                   .laneUri("routerStats")
+                                                   .keepSynced(true);
+            final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
             downlinkLogger.open();
           }
         }
@@ -188,52 +188,52 @@ public class CliClient {
           }
         }
         if (cmd.getOpt("process").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("processStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("processStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("system").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("systemStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("systemStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("data").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("dataStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("dataStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("router").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("routerStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("routerStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("link").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("linkStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("linkStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("hostStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("hostStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         }
       } else if (meshUri != null) {
@@ -242,94 +242,94 @@ public class CliClient {
           metaNodeUri = metaNodeUri.appendedPath(meshUri);
         }
         if (cmd.getOpt("process").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("processStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("processStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("system").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("systemStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("systemStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("data").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("dataStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("dataStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("router").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("routerStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("routerStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("link").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("linkStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("linkStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri(metaNodeUri)
-              .laneUri("meshStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri(metaNodeUri)
+                                                 .laneUri("meshStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         }
       } else {
         if (cmd.getOpt("process").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri("swim:meta:edge")
-              .laneUri("processStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri("swim:meta:edge")
+                                                 .laneUri("processStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("system").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri("swim:meta:edge")
-              .laneUri("systemStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri("swim:meta:edge")
+                                                 .laneUri("systemStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("data").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri("swim:meta:edge")
-              .laneUri("dataStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri("swim:meta:edge")
+                                                 .laneUri("dataStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else if (cmd.getOpt("link").isDefined()) {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri("swim:meta:edge")
-              .laneUri("linkStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri("swim:meta:edge")
+                                                 .laneUri("linkStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         } else {
-          final WarpDownlink downlink = this.swim.downlink()
-              .hostUri(edgeUri)
-              .nodeUri("swim:meta:edge")
-              .laneUri("routerStats")
-              .keepSynced(true);
-          final DownlinkLogger downlinkLogger = downlinkLogger(downlink, cmd);
+          final WarpDownlink downlink = this.warp.downlink()
+                                                 .hostUri(edgeUri)
+                                                 .nodeUri("swim:meta:edge")
+                                                 .laneUri("routerStats")
+                                                 .keepSynced(true);
+          final DownlinkLogger downlinkLogger = this.downlinkLogger(downlink, cmd);
           downlinkLogger.open();
         }
       }
@@ -341,10 +341,10 @@ public class CliClient {
   }
 
   protected WarpDownlink downlink(Cmd cmd) {
-    return this.swim.downlink()
-        .hostUri(cmd.getOpt("host").getValue())
-        .nodeUri(cmd.getOpt("node").getValue())
-        .laneUri(cmd.getOpt("lane").getValue());
+    return this.warp.downlink()
+                    .hostUri(cmd.getOpt("host").getValue())
+                    .nodeUri(cmd.getOpt("node").getValue())
+                    .laneUri(cmd.getOpt("lane").getValue());
   }
 
   protected DownlinkLogger downlinkLogger(WarpDownlink downlink, Cmd cmd) {

@@ -31,9 +31,6 @@ import swim.store.StoreBinding;
 
 public abstract class Scope implements CellContext {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<Scope, HashTrieSet<LinkBinding>> LINKS =
-      AtomicReferenceFieldUpdater.newUpdater(Scope.class, (Class<HashTrieSet<LinkBinding>>) (Class<?>) HashTrieSet.class, "links");
   protected final CellContext cellContext;
   protected final Stage stage;
   volatile HashTrieSet<LinkBinding> links;
@@ -85,12 +82,13 @@ public abstract class Scope implements CellContext {
   public LinkBinding bindDownlink(Downlink downlink) {
     final LinkBinding link = this.cellContext.bindDownlink(downlink);
     link.setCellContext(this);
-    HashTrieSet<LinkBinding> oldLinks;
-    HashTrieSet<LinkBinding> newLinks;
     do {
-      oldLinks = this.links;
-      newLinks = oldLinks.added(link);
-    } while (oldLinks != newLinks && !LINKS.compareAndSet(this, oldLinks, newLinks));
+      final HashTrieSet<LinkBinding> oldLinks = Scope.LINKS.get(this);
+      final HashTrieSet<LinkBinding> newLinks = oldLinks.added(link);
+      if (Scope.LINKS.compareAndSet(this, oldLinks, newLinks)) {
+        break;
+      }
+    } while (true);
     return link;
   }
 
@@ -98,22 +96,24 @@ public abstract class Scope implements CellContext {
   public void openDownlink(LinkBinding link) {
     this.cellContext.openDownlink(link);
     link.setCellContext(this);
-    HashTrieSet<LinkBinding> oldLinks;
-    HashTrieSet<LinkBinding> newLinks;
     do {
-      oldLinks = this.links;
-      newLinks = oldLinks.added(link);
-    } while (oldLinks != newLinks && !LINKS.compareAndSet(this, oldLinks, newLinks));
+      final HashTrieSet<LinkBinding> oldLinks = Scope.LINKS.get(this);
+      final HashTrieSet<LinkBinding> newLinks = oldLinks.added(link);
+      if (Scope.LINKS.compareAndSet(this, oldLinks, newLinks)) {
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public void closeDownlink(LinkBinding link) {
-    HashTrieSet<LinkBinding> oldLinks;
-    HashTrieSet<LinkBinding> newLinks;
     do {
-      oldLinks = this.links;
-      newLinks = oldLinks.removed(link);
-    } while (oldLinks != newLinks && !LINKS.compareAndSet(this, oldLinks, newLinks));
+      final HashTrieSet<LinkBinding> oldLinks = Scope.LINKS.get(this);
+      final HashTrieSet<LinkBinding> newLinks = oldLinks.removed(link);
+      if (Scope.LINKS.compareAndSet(this, oldLinks, newLinks)) {
+        break;
+      }
+    } while (true);
   }
 
   @Override
@@ -162,15 +162,20 @@ public abstract class Scope implements CellContext {
   }
 
   public void close() {
-    HashTrieSet<LinkBinding> oldLinks;
-    final HashTrieSet<LinkBinding> newLinks = HashTrieSet.empty();
     do {
-      oldLinks = this.links;
-    } while (oldLinks != newLinks && !LINKS.compareAndSet(this, oldLinks, newLinks));
-    final Iterator<LinkBinding> linksIterator = oldLinks.iterator();
-    while (linksIterator.hasNext()) {
-      linksIterator.next().closeDown();
-    }
+      final HashTrieSet<LinkBinding> oldLinks = Scope.LINKS.get(this);
+      final HashTrieSet<LinkBinding> newLinks = HashTrieSet.empty();
+      if (Scope.LINKS.compareAndSet(this, oldLinks, newLinks)) {
+        final Iterator<LinkBinding> linksIterator = oldLinks.iterator();
+        while (linksIterator.hasNext()) {
+          linksIterator.next().closeDown();
+        }
+      }
+    } while (true);
   }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<Scope, HashTrieSet<LinkBinding>> LINKS =
+      AtomicReferenceFieldUpdater.newUpdater(Scope.class, (Class<HashTrieSet<LinkBinding>>) (Class<?>) HashTrieSet.class, "links");
 
 }

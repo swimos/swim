@@ -25,6 +25,10 @@ import swim.dynamic.api.warp.HostWarpLane;
 
 public final class HostDemandMapLane {
 
+  private HostDemandMapLane() {
+    // static
+  }
+
   public static final HostObjectType<DemandMapLane<Object, Object>> TYPE;
 
   static {
@@ -37,10 +41,6 @@ public final class HostDemandMapLane {
     type.addMember(new HostDemandMapLaneOnSync());
     type.addMember(new HostDemandMapLaneCue());
     type.addMember(new HostDemandMapLaneRemove());
-  }
-
-  private HostDemandMapLane() {
-    // static
   }
 
 }

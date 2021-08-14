@@ -51,12 +51,12 @@ public final class LaneAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public LaneAddress meshUri(Uri meshUri) {
-    return copy(this.edgeName, meshUri, this.partKey, this.hostUri, this.nodeUri, this.laneUri);
+    return this.copy(this.edgeName, meshUri, this.partKey, this.hostUri, this.nodeUri, this.laneUri);
   }
 
   @Override
   public LaneAddress meshUri(String meshUri) {
-    return meshUri(Uri.parse(meshUri));
+    return this.meshUri(Uri.parse(meshUri));
   }
 
   @Override
@@ -66,7 +66,7 @@ public final class LaneAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public LaneAddress partKey(Value partKey) {
-    return copy(this.edgeName, this.meshUri, partKey, this.hostUri, this.nodeUri, this.laneUri);
+    return this.copy(this.edgeName, this.meshUri, partKey, this.hostUri, this.nodeUri, this.laneUri);
   }
 
   @Override
@@ -76,12 +76,12 @@ public final class LaneAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public LaneAddress hostUri(Uri hostUri) {
-    return copy(this.edgeName, this.meshUri, this.partKey, hostUri, this.nodeUri, this.laneUri);
+    return this.copy(this.edgeName, this.meshUri, this.partKey, hostUri, this.nodeUri, this.laneUri);
   }
 
   @Override
   public LaneAddress hostUri(String hostUri) {
-    return hostUri(Uri.parse(hostUri));
+    return this.hostUri(Uri.parse(hostUri));
   }
 
   @Override
@@ -91,12 +91,12 @@ public final class LaneAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public LaneAddress nodeUri(Uri nodeUri) {
-    return copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, nodeUri, this.laneUri);
+    return this.copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, nodeUri, this.laneUri);
   }
 
   @Override
   public LaneAddress nodeUri(String nodeUri) {
-    return nodeUri(Uri.parse(nodeUri));
+    return this.nodeUri(Uri.parse(nodeUri));
   }
 
   @Override
@@ -106,12 +106,12 @@ public final class LaneAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public LaneAddress laneUri(Uri laneUri) {
-    return copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, this.nodeUri, laneUri);
+    return this.copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, this.nodeUri, laneUri);
   }
 
   @Override
   public LaneAddress laneUri(String laneUri) {
-    return laneUri(Uri.parse(laneUri));
+    return this.laneUri(Uri.parse(laneUri));
   }
 
   LaneAddress copy(String edgeName, Uri meshUri, Value partKey, Uri hostUri, Uri nodeUri, Uri laneUri) {
@@ -136,22 +136,25 @@ public final class LaneAddress implements EdgeAddressed, MeshAddressed, PartAddr
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.hash(LaneAddress.class);
+    if (LaneAddress.hashSeed == 0) {
+      LaneAddress.hashSeed = Murmur3.hash(LaneAddress.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(LaneAddress.hashSeed,
         this.edgeName.hashCode()), this.meshUri.hashCode()), this.partKey.hashCode()),
         this.hostUri.hashCode()), this.nodeUri.hashCode()), this.laneUri.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("LaneAddress").write('.').write("from").write('(')
-        .debug(this.edgeName).write(", ").debug(this.meshUri.toString()).write(", ")
-        .debug(this.partKey).write(", ").debug(this.hostUri.toString()).write(", ")
-        .debug(this.nodeUri).write(", ").debug(this.laneUri.toString()).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("LaneAddress").write('.').write("create").write('(')
+                   .debug(this.edgeName).write(", ").debug(this.meshUri.toString()).write(", ")
+                   .debug(this.partKey).write(", ").debug(this.hostUri.toString()).write(", ")
+                   .debug(this.nodeUri).write(", ").debug(this.laneUri.toString()).write(')');
+    return output;
   }
 
   @Override
@@ -159,15 +162,13 @@ public final class LaneAddress implements EdgeAddressed, MeshAddressed, PartAddr
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static LaneAddress from(String edgeName, Uri meshUri, Value partKey,
-                                 Uri hostUri, Uri nodeUri, Uri laneUri) {
+  public static LaneAddress create(String edgeName, Uri meshUri, Value partKey,
+                                   Uri hostUri, Uri nodeUri, Uri laneUri) {
     return new LaneAddress(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri);
   }
 
-  public static LaneAddress from(String edgeName, String meshUri, Value partKey,
-                                 String hostUri, String nodeUri, String laneUri) {
+  public static LaneAddress create(String edgeName, String meshUri, Value partKey,
+                                   String hostUri, String nodeUri, String laneUri) {
     return new LaneAddress(edgeName, Uri.parse(meshUri), partKey, Uri.parse(hostUri),
                            Uri.parse(nodeUri), Uri.parse(laneUri));
   }

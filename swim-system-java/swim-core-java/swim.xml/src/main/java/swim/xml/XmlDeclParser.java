@@ -36,6 +36,12 @@ final class XmlDeclParser<I, V> extends Parser<I> {
     this.step = step;
   }
 
+  @Override
+  public Parser<I> feed(Input input) {
+    return XmlDeclParser.parse(input, this.xml, this.attributes,
+                               this.nameParser, this.valueParser, this.step);
+  }
+
   static <I, V> Parser<I> parse(Input input, XmlParser<I, V> xml, Builder<I, V> attributes,
                                 Parser<String> nameParser, Parser<V> valueParser, int step) {
     int c = 0;
@@ -46,10 +52,10 @@ final class XmlDeclParser<I, V> extends Parser<I> {
           step += 1;
           continue;
         } else {
-          return error(Diagnostic.expected("<?xml".charAt(step - 1), input));
+          return Parser.error(Diagnostic.expected("<?xml".charAt(step - 1), input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("<?xml".charAt(step - 1), input));
+        return Parser.error(Diagnostic.expected("<?xml".charAt(step - 1), input));
       }
       break;
     }
@@ -64,7 +70,7 @@ final class XmlDeclParser<I, V> extends Parser<I> {
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 7) {
@@ -84,7 +90,7 @@ final class XmlDeclParser<I, V> extends Parser<I> {
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 8) {
@@ -115,10 +121,10 @@ final class XmlDeclParser<I, V> extends Parser<I> {
             input = input.step();
             step = 10;
           } else {
-            return error(Diagnostic.expected('=', input));
+            return Parser.error(Diagnostic.expected('=', input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected('=', input));
+          return Parser.error(Diagnostic.expected('=', input));
         }
       }
       if (step == 10) {
@@ -134,10 +140,10 @@ final class XmlDeclParser<I, V> extends Parser<I> {
           if (c == '"' || c == '\'') {
             step = 11;
           } else {
-            return error(Diagnostic.expected("attribute value", input));
+            return Parser.error(Diagnostic.expected("attribute value", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("attribute value", input));
+          return Parser.error(Diagnostic.expected("attribute value", input));
         }
       }
       if (step == 11) {
@@ -174,10 +180,10 @@ final class XmlDeclParser<I, V> extends Parser<I> {
           input = input.step();
           step = 13;
         } else {
-          return error(Diagnostic.expected('?', input));
+          return Parser.error(Diagnostic.expected('?', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('?', input));
+        return Parser.error(Diagnostic.expected('?', input));
       }
     }
     if (step == 13) {
@@ -186,34 +192,29 @@ final class XmlDeclParser<I, V> extends Parser<I> {
         if (c == '>') {
           input = input.step();
           if (attributes == null) {
-            return done(xml.xml(xml.attributes()));
+            return Parser.done(xml.xml(xml.attributes()));
           } else {
-            return done(xml.xml(attributes.bind()));
+            return Parser.done(xml.xml(attributes.bind()));
           }
         } else {
-          return error(Diagnostic.expected('>', input));
+          return Parser.error(Diagnostic.expected('>', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('>', input));
+        return Parser.error(Diagnostic.expected('>', input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new XmlDeclParser<I, V>(xml, attributes, nameParser, valueParser, step);
   }
 
   static <I, V> Parser<I> parse(Input input, XmlParser<I, V> xml) {
-    return parse(input, xml, null, null, null, 1);
+    return XmlDeclParser.parse(input, xml, null, null, null, 1);
   }
 
   static <I, V> Parser<I> parseRest(Input input, XmlParser<I, V> xml) {
-    return parse(input, xml, null, null, null, 6);
-  }
-
-  @Override
-  public Parser<I> feed(Input input) {
-    return parse(input, this.xml, this.attributes, this.nameParser, this.valueParser, this.step);
+    return XmlDeclParser.parse(input, xml, null, null, null, 6);
   }
 
 }

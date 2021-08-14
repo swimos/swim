@@ -20,14 +20,6 @@ import swim.structure.Value;
 
 public class PageContext {
 
-  public static boolean pageShouldSplit(Page page, int pageSplitSize) {
-    return page.pageSize() > pageSplitSize;
-  }
-
-  public static boolean pageShouldMerge(Page page, int pageSplitSize) {
-    return page.pageSize() < pageSplitSize >>> 1;
-  }
-
   public StoreSettings settings() {
     return StoreSettings.standard();
   }
@@ -37,11 +29,11 @@ public class PageContext {
   }
 
   public boolean pageShouldSplit(Page page) {
-    return pageShouldSplit(page, settings().pageSplitSize);
+    return PageContext.pageShouldSplit(page, this.settings().pageSplitSize);
   }
 
   public boolean pageShouldMerge(Page page) {
-    return pageShouldMerge(page, settings().pageSplitSize);
+    return PageContext.pageShouldMerge(page, this.settings().pageSplitSize);
   }
 
   public PageLoader openPageLoader(boolean isResident) {
@@ -54,6 +46,14 @@ public class PageContext {
 
   public Value reduce(Record record) {
     return Value.absent();
+  }
+
+  public static boolean pageShouldSplit(Page page, int pageSplitSize) {
+    return page.pageSize() > pageSplitSize;
+  }
+
+  public static boolean pageShouldMerge(Page page, int pageSplitSize) {
+    return page.pageSize() < pageSplitSize >>> 1;
   }
 
 }

@@ -23,7 +23,6 @@ import swim.structure.Value;
 
 public class WarpUplinkInfo extends UplinkInfo implements WarpInfo {
 
-  private static Form<WarpUplinkInfo> warpUplinkForm;
   protected final Value linkKey;
   protected final boolean connected;
   protected final boolean remote;
@@ -34,19 +33,6 @@ public class WarpUplinkInfo extends UplinkInfo implements WarpInfo {
     this.connected = connected;
     this.remote = remote;
     this.secure = secure;
-  }
-
-  public static WarpUplinkInfo from(WarpContext warpContext) {
-    return new WarpUplinkInfo(warpContext.linkKey(), warpContext.isConnectedUp(),
-        warpContext.isRemoteUp(), warpContext.isSecureUp());
-  }
-
-  @Kind
-  public static Form<WarpUplinkInfo> warpUplinkForm() {
-    if (warpUplinkForm == null) {
-      warpUplinkForm = new WarpUplinkInfoForm();
-    }
-    return warpUplinkForm;
   }
 
   public final Value linkKey() {
@@ -67,7 +53,22 @@ public class WarpUplinkInfo extends UplinkInfo implements WarpInfo {
 
   @Override
   public Value toValue() {
-    return warpUplinkForm().mold(this).toValue();
+    return WarpUplinkInfo.warpUplinkForm().mold(this).toValue();
+  }
+
+  public static WarpUplinkInfo create(WarpContext warpContext) {
+    return new WarpUplinkInfo(warpContext.linkKey(), warpContext.isConnectedUp(),
+                              warpContext.isRemoteUp(), warpContext.isSecureUp());
+  }
+
+  private static Form<WarpUplinkInfo> warpUplinkForm;
+
+  @Kind
+  public static Form<WarpUplinkInfo> warpUplinkForm() {
+    if (WarpUplinkInfo.warpUplinkForm == null) {
+      WarpUplinkInfo.warpUplinkForm = new WarpUplinkInfoForm();
+    }
+    return WarpUplinkInfo.warpUplinkForm;
   }
 
 }

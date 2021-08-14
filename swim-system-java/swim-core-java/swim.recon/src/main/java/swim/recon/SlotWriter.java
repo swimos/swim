@@ -36,7 +36,7 @@ final class SlotWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.key, this.value, this.part, this.step);
+    return SlotWriter.write(output, this.recon, this.key, this.value, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, V key, V value) {
@@ -67,7 +67,7 @@ final class SlotWriter<I, V> extends Writer<Object, Object> {
     if (step == 2 && output.isCont()) {
       output = output.write(':');
       if (recon.isExtant(recon.item(value))) {
-        return done();
+        return Writer.done();
       } else {
         step = 3;
       }
@@ -79,22 +79,21 @@ final class SlotWriter<I, V> extends Writer<Object, Object> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new SlotWriter<I, V>(recon, key, value, part, step);
   }
 
-  static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon,
-                                             V key, V value) {
-    return write(output, recon, key, value, null, 1);
+  static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon, V key, V value) {
+    return SlotWriter.write(output, recon, key, value, null, 1);
   }
 
 }

@@ -94,18 +94,17 @@ public class WebServer extends AbstractWarpServer {
     if (policy != null) {
       final PolicyDirective<?> directive = policy.canConnect(requestUri);
       if (directive.isDenied()) {
-        return new StaticHttpResponder<Object>(HttpResponse.from(HttpStatus.UNAUTHORIZED)
-            .content(HttpBody.empty()));
+        return new StaticHttpResponder<Object>(HttpResponse.create(HttpStatus.UNAUTHORIZED).content(HttpBody.empty()));
       }
     }
 
     // Route WARP upgrades.
     // TODO: Refactor into WarpSpaceRoute.
-    final WsRequest wsRequest = WsRequest.from(httpRequest);
+    final WsRequest wsRequest = WsRequest.create(httpRequest);
     if (wsRequest != null) {
       final WsResponse wsResponse = wsRequest.accept(this.wsSettings);
       if (wsResponse != null) {
-        return warpWebSocketResponder(wsRequest, wsResponse);
+        return this.warpWebSocketResponder(wsRequest, wsResponse);
       }
     }
 
@@ -113,9 +112,8 @@ public class WebServer extends AbstractWarpServer {
     // TODO: Refactor into HttpLaneRoute.
     try {
       final Uri laneUri = Uri.parse(requestUri.query().get("lane"));
-      final Uri nodeUri = Uri.from(requestUri.path());
-      final HttpLaneResponder httpBinding = new HttpLaneResponder(
-          Uri.empty(), Uri.empty(), nodeUri, laneUri, httpRequest);
+      final Uri nodeUri = Uri.create(requestUri.path());
+      final HttpLaneResponder httpBinding = new HttpLaneResponder(Uri.empty(), Uri.empty(), nodeUri, laneUri, httpRequest);
       final EdgeBinding edge = ((EdgeContext) space).edgeWrapper();
       edge.openUplink(httpBinding);
       return httpBinding;
@@ -134,19 +132,19 @@ public class WebServer extends AbstractWarpServer {
   }
 
   protected HttpResponder<?> warpWebSocketResponder(WsRequest wsRequest, WsResponse wsResponse) {
-    final RemoteHost host = openHost(wsRequest.httpRequest().uri());
-    return upgrade(host, wsResponse);
+    final RemoteHost host = this.openHost(wsRequest.httpRequest().uri());
+    return this.upgrade(host, wsResponse);
   }
 
   protected RemoteHost openHost(Uri requestUri) {
-    final Uri baseUri = Uri.from(UriScheme.from("warp"),
-        UriAuthority.from(UriHost.inetAddress(context.localAddress().getAddress()),
-            UriPort.from(context.localAddress().getPort())),
-        requestUri.path(), requestUri.query(), requestUri.fragment());
+    final Uri baseUri = Uri.create(UriScheme.create("warp"),
+                                   UriAuthority.create(UriHost.inetAddress(context.localAddress().getAddress()),
+                                                       UriPort.create(context.localAddress().getPort())),
+                                   requestUri.path(), requestUri.query(), requestUri.fragment());
 
-    final Uri remoteUri = Uri.from(UriScheme.from("warp"),
-        UriAuthority.from(UriHost.inetAddress(context.remoteAddress().getAddress()),
-            UriPort.from(context.remoteAddress().getPort())), UriPath.slash());
+    final Uri remoteUri = Uri.create(UriScheme.create("warp"),
+                                     UriAuthority.create(UriHost.inetAddress(context.remoteAddress().getAddress()),
+                                                         UriPort.create(context.remoteAddress().getPort())), UriPath.slash());
 
     final String spaceName = this.serviceDef.spaceName;
     final Space space = this.kernel.getSpace(spaceName);

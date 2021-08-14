@@ -41,6 +41,12 @@ final class BodyParser<T, R, C> extends Parser<T> {
     this(csv, header, null, null, 1);
   }
 
+  @Override
+  public Parser<T> feed(Input input) {
+    return BodyParser.parse(input, this.csv, this.header, this.tableBuilder,
+                            this.rowParser, this.step);
+  }
+
   static <T, R, C> Parser<T> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header,
                                    Builder<R, T> tableBuilder, Parser<R> rowParser, int step) {
     int c = 0;
@@ -52,7 +58,7 @@ final class BodyParser<T, R, C> extends Parser<T> {
           if (tableBuilder == null) {
             tableBuilder = header.tableBuilder();
           }
-          return done(tableBuilder.bind());
+          return Parser.done(tableBuilder.bind());
         }
       }
       if (step == 2) {
@@ -84,7 +90,7 @@ final class BodyParser<T, R, C> extends Parser<T> {
             step = 1;
             continue;
           } else {
-            return error(Diagnostic.expected("carriage return or line feed", input));
+            return Parser.error(Diagnostic.expected("carriage return or line feed", input));
           }
         } else if (input.isDone()) {
           step = 1;
@@ -104,18 +110,13 @@ final class BodyParser<T, R, C> extends Parser<T> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new BodyParser<T, R, C>(csv, header, tableBuilder, rowParser, step);
   }
 
   static <T, R, C> Parser<T> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header) {
-    return parse(input, csv, header, null, null, 1);
-  }
-
-  @Override
-  public Parser<T> feed(Input input) {
-    return parse(input, this.csv, this.header, this.tableBuilder, this.rowParser, this.step);
+    return BodyParser.parse(input, csv, header, null, null, 1);
   }
 
 }

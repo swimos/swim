@@ -23,7 +23,6 @@ import swim.util.Murmur3;
 
 public class JsPlaneDef implements PlaneDef, Debug {
 
-  private static int hashSeed;
   final String planeName;
   final UriPath modulePath;
 
@@ -32,29 +31,13 @@ public class JsPlaneDef implements PlaneDef, Debug {
     this.modulePath = modulePath;
   }
 
-  public static JsPlaneDef from(String planeName, UriPath modulePath) {
-    return new JsPlaneDef(planeName, modulePath);
-  }
-
-  public static JsPlaneDef from(String planeName, String modulePath) {
-    return new JsPlaneDef(planeName, UriPath.parse(modulePath));
-  }
-
-  public static JsPlaneDef fromModulePath(UriPath modulePath) {
-    return new JsPlaneDef(modulePath.toString(), modulePath);
-  }
-
-  public static JsPlaneDef fromModulePath(String modulePath) {
-    return new JsPlaneDef(modulePath, UriPath.parse(modulePath));
-  }
-
   @Override
   public final String planeName() {
     return this.planeName;
   }
 
   public JsPlaneDef planeName(String planeName) {
-    return copy(planeName, this.modulePath);
+    return this.copy(planeName, this.modulePath);
   }
 
   public final UriPath modulePath() {
@@ -62,7 +45,7 @@ public class JsPlaneDef implements PlaneDef, Debug {
   }
 
   public JsPlaneDef modulePath(UriPath modulePath) {
-    return copy(this.planeName, modulePath);
+    return this.copy(this.planeName, modulePath);
   }
 
   protected JsPlaneDef copy(String planeName, UriPath modulePath) {
@@ -81,24 +64,43 @@ public class JsPlaneDef implements PlaneDef, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(JsPlaneDef.class);
+    if (JsPlaneDef.hashSeed == 0) {
+      JsPlaneDef.hashSeed = Murmur3.seed(JsPlaneDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(JsPlaneDef.hashSeed,
         Murmur3.hash(this.planeName)), Murmur3.hash(this.modulePath)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("JsPlaneDef").write('.').write("from").write('(')
-        .debug(this.planeName).write(", ").debug(this.modulePath).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("JsPlaneDef").write('.').write("create").write('(')
+                   .debug(this.planeName).write(", ").debug(this.modulePath).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static JsPlaneDef create(String planeName, UriPath modulePath) {
+    return new JsPlaneDef(planeName, modulePath);
+  }
+
+  public static JsPlaneDef create(String planeName, String modulePath) {
+    return new JsPlaneDef(planeName, UriPath.parse(modulePath));
+  }
+
+  public static JsPlaneDef fromModulePath(UriPath modulePath) {
+    return new JsPlaneDef(modulePath.toString(), modulePath);
+  }
+
+  public static JsPlaneDef fromModulePath(String modulePath) {
+    return new JsPlaneDef(modulePath, UriPath.parse(modulePath));
   }
 
 }

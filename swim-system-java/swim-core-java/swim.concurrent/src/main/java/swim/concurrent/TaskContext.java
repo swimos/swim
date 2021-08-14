@@ -17,7 +17,7 @@ package swim.concurrent;
 /**
  * Internal context that binds a {@link Task} to an execution {@link Stage}.
  * A {@code TaskContext} is used by a {@code Task} to re-cue itself for
- * execution, to spawn child tasks, and to set timers.  {@code TaskContext} is
+ * execution, to spawn child tasks, and to set timers. {@code TaskContext} is
  * thread safe.
  *
  * @see Task
@@ -36,12 +36,12 @@ public interface TaskContext extends TaskRef {
   boolean isCued();
 
   /**
-   * Schedules the task to execute as a sequential process.  Returns {@code
+   * Schedules the task to execute as a sequential process. Returns {@code
    * true} if this operation caused the scheduling of the task; returns {@code
-   * false} if the task was already scheduled to execute.  {@link
+   * false} if the task was already scheduled to execute. {@link
    * Task#runTask()} will be concurrently invoked exactly once for each time
    * {@code cue()} returns {@code true}, minus the number of times {@code
-   * cancel()} returns {@code true}.  The task becomes uncued prior to the the
+   * cancel()} returns {@code true}. The task becomes uncued prior to the the
    * invocation of {@code runTask()}, enabling the task to re-cue itself while
    * running.
    */
@@ -49,7 +49,7 @@ public interface TaskContext extends TaskRef {
   boolean cue();
 
   /**
-   * Cancels the task to prevent it from executing.  Returns {@code true} if
+   * Cancels the task to prevent it from executing. Returns {@code true} if
    * this operation caused the cancellation of the task; returns {@code false}
    * if the task was not scheduled to execute.
    */

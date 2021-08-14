@@ -25,6 +25,11 @@ final class UriHostParser extends Parser<UriHost> {
     this.uri = uri;
   }
 
+  @Override
+  public Parser<UriHost> feed(Input input) {
+    return UriHostParser.parse(input, this.uri);
+  }
+
   static Parser<UriHost> parse(Input input, UriParser uri) {
     if (input.isCont()) {
       final int c = input.head();
@@ -34,16 +39,11 @@ final class UriHostParser extends Parser<UriHost> {
         return uri.parseHostAddress(input);
       }
     } else if (input.isDone()) {
-      return done(uri.hostName(""));
+      return Parser.done(uri.hostName(""));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new UriHostParser(uri);
-  }
-
-  @Override
-  public Parser<UriHost> feed(Input input) {
-    return parse(input, this.uri);
   }
 
 }

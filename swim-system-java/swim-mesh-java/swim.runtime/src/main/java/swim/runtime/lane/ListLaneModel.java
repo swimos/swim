@@ -22,8 +22,8 @@ import swim.api.Link;
 import swim.api.data.ListData;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Stage;
+import swim.runtime.LaneModel;
 import swim.runtime.LaneRelay;
 import swim.runtime.LaneView;
 import swim.runtime.Push;
@@ -36,14 +36,12 @@ import swim.warp.CommandMessage;
 
 public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink> {
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
   protected int flags;
   protected ListData<Value> data;
 
   ListLaneModel(int flags) {
     this.flags = flags;
+    this.data = null;
   }
 
   public ListLaneModel() {
@@ -57,7 +55,7 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
 
   @Override
   protected ListLaneUplink createWarpUplink(WarpBinding link) {
-    return new ListLaneUplink(this, link, createUplinkAddress(link));
+    return new ListLaneUplink(this, link, this.createUplinkAddress(link));
   }
 
   @Override
@@ -123,11 +121,12 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
     }
   }
 
+  @SuppressWarnings("unchecked")
   protected void sendDown(ListLinkDelta delta) {
     FingerTrieSeq<ListLaneUplink> uplinks;
     FingerTrieSeq<Value> closedLinks = FingerTrieSeq.empty();
     do {
-      uplinks = this.uplinks;
+      uplinks = (FingerTrieSeq<ListLaneUplink>) LaneModel.UPLINKS.get(this);
       for (int i = 0, n = uplinks.size(); i < n; i += 1) {
         final ListLaneUplink uplink = uplinks.get(i);
         if (uplink.isConnected()) {
@@ -136,15 +135,15 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
           closedLinks = closedLinks.appended(uplink.linkKey());
         }
       }
-    } while (uplinks != this.uplinks);
+    } while (uplinks != LaneModel.UPLINKS.get(this));
 
     for (Value linkKey : closedLinks) {
-      closeUplink(linkKey);
+      this.closeUplink(linkKey);
     }
   }
 
   public final boolean isResident() {
-    return (this.flags & RESIDENT) != 0;
+    return (this.flags & ListLaneModel.RESIDENT) != 0;
   }
 
   public ListLaneModel isResident(boolean isResident) {
@@ -152,11 +151,11 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
       this.data.isResident(isResident);
     }
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= ListLaneModel.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~ListLaneModel.RESIDENT;
     }
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof ListLaneView<?>) {
       ((ListLaneView<?>) views).didSetResident(isResident);
     } else if (views instanceof LaneView[]) {
@@ -169,7 +168,7 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
   }
 
   public final boolean isTransient() {
-    return (this.flags & TRANSIENT) != 0;
+    return (this.flags & ListLaneModel.TRANSIENT) != 0;
   }
 
   public ListLaneModel isTransient(boolean isTransient) {
@@ -177,11 +176,11 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
       this.data.isTransient(isTransient);
     }
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= ListLaneModel.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~ListLaneModel.TRANSIENT;
     }
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof ListLaneView<?>) {
       ((ListLaneView<?>) views).didSetTransient(isTransient);
     } else if (views instanceof LaneView[]) {
@@ -195,14 +194,14 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
 
   @SuppressWarnings("unchecked")
   public <V> boolean add(ListLaneView<V> view, int index, V newObject) {
-    return add(view, index, newObject, null);
+    return this.add(view, index, newObject, null);
   }
 
   @SuppressWarnings("unchecked")
   public <V> boolean add(ListLaneView<V> view, int index, V newObject, Object key) {
     final Form<V> valueForm = view.valueForm;
     final Value newValue = valueForm.mold(newObject).toValue();
-    final ListLaneRelayUpdate relay = new ListLaneRelayUpdate(this, stage(), index, newValue, key);
+    final ListLaneRelayUpdate relay = new ListLaneRelayUpdate(this, this.stage(), index, newValue, key);
     relay.valueForm = (Form<Object>) valueForm;
     relay.oldObject = newObject;
     relay.newObject = newObject;
@@ -212,14 +211,14 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
 
   @SuppressWarnings("unchecked")
   public <V> V set(ListLaneView<V> view, int index, V newObject) {
-    return set(view, index, newObject, null);
+    return this.set(view, index, newObject, null);
   }
 
   @SuppressWarnings("unchecked")
   public <V> V set(ListLaneView<V> view, int index, V newObject, Object key) {
     final Form<V> valueForm = view.valueForm;
     final Value newValue = valueForm.mold(newObject).toValue();
-    final ListLaneRelayUpdate relay = new ListLaneRelayUpdate(this, stage(), index, newValue, key);
+    final ListLaneRelayUpdate relay = new ListLaneRelayUpdate(this, this.stage(), index, newValue, key);
     relay.valueForm = (Form<Object>) valueForm;
     relay.oldObject = newObject;
     relay.newObject = newObject;
@@ -234,17 +233,17 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
   }
 
   public void move(int fromIndex, int toIndex) {
-    move(fromIndex, toIndex, null);
+    this.move(fromIndex, toIndex, null);
   }
 
   public void move(int fromIndex, int toIndex, Object key) {
-    final ListLaneRelayMove relay = new ListLaneRelayMove(this, stage(), fromIndex, toIndex, key);
+    final ListLaneRelayMove relay = new ListLaneRelayMove(this, this.stage(), fromIndex, toIndex, key);
     relay.run();
   }
 
   @SuppressWarnings("unchecked")
   public <V> V remove(ListLaneView<V> view, int index) {
-    return remove(view, index, null);
+    return this.remove(view, index, null);
   }
 
   @SuppressWarnings("unchecked")
@@ -253,7 +252,7 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
     final Map.Entry<Object, Value> entry = this.data.getEntry(index, key);
     if (entry != null) {
       final Object actualKey = key == null ? entry.getKey() : key;
-      final ListLaneRelayRemove relay = new ListLaneRelayRemove(this, stage(), index, actualKey);
+      final ListLaneRelayRemove relay = new ListLaneRelayRemove(this, this.stage(), index, actualKey);
       relay.valueForm = (Form<Object>) valueForm;
       relay.run();
       if (relay.valueForm != valueForm && valueForm != null) {
@@ -270,20 +269,20 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
 
   public void drop(ListLaneView<?> view, int lower) {
     if (lower > 0) {
-      final ListLaneRelayDrop relay = new ListLaneRelayDrop(this, stage(), lower);
+      final ListLaneRelayDrop relay = new ListLaneRelayDrop(this, this.stage(), lower);
       relay.run();
     }
   }
 
   public void take(ListLaneView<?> view, int upper) {
     if (upper > 0) {
-      final ListLaneRelayTake relay = new ListLaneRelayTake(this, stage(), upper);
+      final ListLaneRelayTake relay = new ListLaneRelayTake(this, this.stage(), upper);
       relay.run();
     }
   }
 
   public void clear(ListLaneView<?> view) {
-    final ListLaneRelayClear relay = new ListLaneRelayClear(this, stage());
+    final ListLaneRelayClear relay = new ListLaneRelayClear(this, this.stage());
     relay.run();
   }
 
@@ -292,16 +291,19 @@ public class ListLaneModel extends WarpLaneModel<ListLaneView<?>, ListLaneUplink
   }
 
   protected void openStore() {
-    this.data = this.laneContext.store().listData(laneUri().toString())
-        .isTransient(isTransient())
-        .isResident(isResident());
+    this.data = this.laneContext.store().listData(this.laneUri().toString())
+                                        .isTransient(this.isTransient())
+                                        .isResident(this.isResident());
   }
 
   @Override
   protected void willLoad() {
-    openStore();
+    this.openStore();
     super.willLoad();
   }
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
 
 }
 
@@ -442,7 +444,7 @@ final class ListLaneRelayUpdate extends LaneRelay<ListLaneModel, ListLaneView<?>
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -554,7 +556,7 @@ final class ListLaneRelayMove extends LaneRelay<ListLaneModel, ListLaneView<?>> 
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -669,7 +671,7 @@ final class ListLaneRelayRemove extends LaneRelay<ListLaneModel, ListLaneView<?>
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -752,7 +754,7 @@ final class ListLaneRelayDrop extends LaneRelay<ListLaneModel, ListLaneView<?>> 
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -835,7 +837,7 @@ final class ListLaneRelayTake extends LaneRelay<ListLaneModel, ListLaneView<?>> 
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -910,7 +912,7 @@ final class ListLaneRelayClear extends LaneRelay<ListLaneModel, ListLaneView<?>>
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;

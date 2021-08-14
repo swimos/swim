@@ -33,6 +33,11 @@ final class UriPortParser extends Parser<UriPort> {
     this(uri, 0);
   }
 
+  @Override
+  public Parser<UriPort> feed(Input input) {
+    return UriPortParser.parse(input, this.uri, this.number);
+  }
+
   static Parser<UriPort> parse(Input input, UriParser uri, int number) {
     int c = 0;
     while (input.isCont()) {
@@ -41,25 +46,20 @@ final class UriPortParser extends Parser<UriPort> {
         input = input.step();
         number = 10 * number + Base10.decodeDigit(c);
         if (number < 0) {
-          return error(Diagnostic.message("port overflow", input));
+          return Parser.error(Diagnostic.message("port overflow", input));
         }
       } else {
         break;
       }
     }
     if (!input.isEmpty()) {
-      return done(uri.port(number));
+      return Parser.done(uri.port(number));
     }
     return new UriPortParser(uri, number);
   }
 
   static Parser<UriPort> parse(Input input, UriParser uri) {
-    return parse(input, uri, 0);
-  }
-
-  @Override
-  public Parser<UriPort> feed(Input input) {
-    return parse(input, this.uri, this.number);
+    return UriPortParser.parse(input, uri, 0);
   }
 
 }

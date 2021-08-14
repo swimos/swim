@@ -47,7 +47,7 @@ public class JsBridge extends VmBridge implements JsModuleResolver, JsModuleLoad
   }
 
   public final JsRuntime jsRuntime() {
-    return (JsRuntime) hostRuntime();
+    return (JsRuntime) this.hostRuntime();
   }
 
   public final Context jsContext() {
@@ -55,26 +55,28 @@ public class JsBridge extends VmBridge implements JsModuleResolver, JsModuleLoad
   }
 
   public JsModuleResolver moduleResolver() {
-    return jsRuntime().moduleResolver();
+    return this.jsRuntime().moduleResolver();
   }
 
   public HostLibrary getHostModule(UriPath moduleId) {
-    return jsRuntime().getHostModule(moduleId);
+    return this.jsRuntime().getHostModule(moduleId);
   }
 
   public Map<UriPath, HostLibrary> hostModules() {
-    return jsRuntime().hostModules();
+    return this.jsRuntime().hostModules();
   }
 
   @Override
   public <T> Object hostTypedValueToGuestProxy(HostType<? super T> hostType, T hostValue) {
+    final Object guestProxy;
     if (hostType instanceof HostObjectType<?>) {
-      return new JsHostObject<T>(this, (HostObjectType<? super T>) hostType, hostValue);
+      guestProxy = new JsHostObject<T>(this, (HostObjectType<? super T>) hostType, hostValue);
     } else if (hostType instanceof HostArrayType<?>) {
-      return new VmHostArray<T>(this, (HostArrayType<? super T>) hostType, hostValue);
+      guestProxy = new VmHostArray<T>(this, (HostArrayType<? super T>) hostType, hostValue);
     } else {
       throw new UnsupportedOperationException();
     }
+    return guestProxy;
   }
 
   @Override
@@ -88,20 +90,22 @@ public class JsBridge extends VmBridge implements JsModuleResolver, JsModuleLoad
   }
 
   protected Object createGuestType(HostType<?> hostType) {
+    final Object guestType;
     if (hostType instanceof HostClassType<?>) {
-      return new JsHostClass(this, (HostClassType<?>) hostType);
+      guestType = new JsHostClass(this, (HostClassType<?>) hostType);
     } else if (hostType != null) {
-      return new JsHostType(this, hostType);
+      guestType = new JsHostType(this, hostType);
     } else {
       throw new NullPointerException();
     }
+    return guestType;
   }
 
   public Object hostTypeToGuestType(HostType<?> hostType) {
     HashTrieMap<HostType<?>, Object> guestTypes = this.guestTypes;
     Object guestType = guestTypes.get(hostType);
     if (guestType == null) {
-      guestType = createGuestType(hostType);
+      guestType = this.createGuestType(hostType);
       guestTypes = guestTypes.updated(hostType, guestType);
       this.guestTypes = guestTypes;
     }
@@ -109,19 +113,22 @@ public class JsBridge extends VmBridge implements JsModuleResolver, JsModuleLoad
   }
 
   protected Object createGuestPrototype(HostType<?> hostType) {
+    final Object guestPrototype;
     if (hostType instanceof HostClassType<?>) {
-      return new JsHostPrototype(this, (HostClassType<?>) hostType);
+      guestPrototype = new JsHostPrototype(this, (HostClassType<?>) hostType);
+    } else {
+      guestPrototype = null;
     }
-    return null;
+    return guestPrototype;
   }
 
   public Object hostTypeToGuestPrototype(HostType<?> hostType) {
     HashTrieMap<HostType<?>, Object> guestPrototypes = this.guestPrototypes;
     Object guestPrototype = guestPrototypes.get(hostType);
     if (guestPrototype == null) {
-      guestPrototype = createGuestPrototype(hostType);
+      guestPrototype = this.createGuestPrototype(hostType);
       if (guestPrototype == null) {
-        guestPrototype = guestObjectPrototype();
+        guestPrototype = this.guestObjectPrototype();
       } else {
         guestPrototypes = guestPrototypes.updated(hostType, guestPrototype);
         this.guestPrototypes = guestPrototypes;
@@ -150,31 +157,31 @@ public class JsBridge extends VmBridge implements JsModuleResolver, JsModuleLoad
 
   @Override
   public UriPath resolveModulePath(UriPath basePath, UriPath modulePath) {
-    if (getHostModule(modulePath) != null) {
+    if (this.getHostModule(modulePath) != null) {
       return modulePath;
     } else {
-      return moduleResolver().resolveModulePath(basePath, modulePath);
+      return this.moduleResolver().resolveModulePath(basePath, modulePath);
     }
   }
 
   @Override
   public Source loadModuleSource(UriPath moduleId) {
-    return moduleResolver().loadModuleSource(moduleId);
+    return this.moduleResolver().loadModuleSource(moduleId);
   }
 
   @Override
   public JsModule loadModule(JsModuleSystem moduleSystem, UriPath moduleId) {
-    JsModule module = loadHostModule(moduleSystem, moduleId);
+    JsModule module = this.loadHostModule(moduleSystem, moduleId);
     if (module == null) {
-      module = loadGuestModule(moduleSystem, moduleId);
+      module = this.loadGuestModule(moduleSystem, moduleId);
     }
     return module;
   }
 
   protected JsModule loadHostModule(JsModuleSystem moduleSystem, UriPath moduleId) {
-    final HostLibrary hostLibrary = getHostModule(moduleId);
+    final HostLibrary hostLibrary = this.getHostModule(moduleId);
     if (hostLibrary != null) {
-      return createHostModule(moduleSystem, moduleId, hostLibrary);
+      return this.createHostModule(moduleSystem, moduleId, hostLibrary);
     }
     return null;
   }
@@ -184,9 +191,9 @@ public class JsBridge extends VmBridge implements JsModuleResolver, JsModuleLoad
   }
 
   protected JsModule loadGuestModule(JsModuleSystem moduleSystem, UriPath moduleId) {
-    final Source moduleSource = loadModuleSource(moduleId);
+    final Source moduleSource = this.loadModuleSource(moduleId);
     if (moduleSource != null) {
-      return createGuestModule(moduleSystem, moduleId, moduleSource);
+      return this.createGuestModule(moduleSystem, moduleId, moduleSource);
     }
     return null;
   }
@@ -202,19 +209,19 @@ public class JsBridge extends VmBridge implements JsModuleResolver, JsModuleLoad
 
   public JsModule eval(UriPath moduleId, Source moduleSource) {
     final JsModuleSystem moduleSystem = new JsModuleSystem(this.jsContext, this);
-    final JsModule module = createGuestModule(moduleSystem, moduleId, moduleSource);
-    evalModule(module);
+    final JsModule module = this.createGuestModule(moduleSystem, moduleId, moduleSource);
+    this.evalModule(module);
     return module;
   }
 
   public JsModule eval(UriPath moduleId, CharSequence source) {
     final Source moduleSource = Source.newBuilder("js", source, moduleId.toString()).buildLiteral();
-    return eval(moduleId, moduleSource);
+    return this.eval(moduleId, moduleSource);
   }
 
   public JsModule eval(String moduleId, CharSequence source) {
     final Source moduleSource = Source.newBuilder("js", source, moduleId).buildLiteral();
-    return eval(UriPath.parse(moduleId), moduleSource);
+    return this.eval(UriPath.parse(moduleId), moduleSource);
   }
 
 }

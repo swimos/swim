@@ -16,22 +16,18 @@ package swim.uri;
 
 abstract class UriTerminalMapper<T> extends UriFragmentMapper<T> {
 
-  static <T> UriTerminalMapper<T> compile(Uri pattern, T value) {
-    return new UriConstantMapping<T>(pattern, value);
-  }
-
   abstract UriMapper<T> getSuffix();
 
   @Override
   UriMapper<T> getSuffix(UriFragment fragment) {
-    return getSuffix();
+    return this.getSuffix();
   }
 
   abstract T get();
 
   @Override
   T get(UriFragment fragment) {
-    return get();
+    return this.get();
   }
 
   UriTerminalMapper<T> merged(UriTerminalMapper<T> that) {
@@ -45,7 +41,7 @@ abstract class UriTerminalMapper<T> extends UriFragmentMapper<T> {
   @Override
   UriFragmentMapper<T> merged(UriFragmentMapper<T> that) {
     if (that instanceof UriTerminalMapper<?>) {
-      return merged((UriTerminalMapper<T>) that);
+      return this.merged((UriTerminalMapper<T>) that);
     } else {
       return that;
     }
@@ -53,26 +49,30 @@ abstract class UriTerminalMapper<T> extends UriFragmentMapper<T> {
 
   @SuppressWarnings("unchecked")
   public UriTerminalMapper<T> removed() {
-    return (UriTerminalMapper<T>) empty();
+    return (UriTerminalMapper<T>) UriMapper.empty();
   }
 
   @Override
   UriFragmentMapper<T> removed(UriFragment fragment) {
-    return removed();
+    return this.removed();
   }
 
   @SuppressWarnings("unchecked")
   UriTerminalMapper<T> unmerged(UriTerminalMapper<T> that) {
-    return (UriTerminalMapper<T>) empty();
+    return (UriTerminalMapper<T>) UriMapper.empty();
   }
 
   @Override
   UriFragmentMapper<T> unmerged(UriFragmentMapper<T> that) {
     if (that instanceof UriTerminalMapper<?>) {
-      return unmerged((UriTerminalMapper<T>) that);
+      return this.unmerged((UriTerminalMapper<T>) that);
     } else {
       return this;
     }
+  }
+
+  static <T> UriTerminalMapper<T> compile(Uri pattern, T value) {
+    return new UriConstantMapping<T>(pattern, value);
   }
 
 }

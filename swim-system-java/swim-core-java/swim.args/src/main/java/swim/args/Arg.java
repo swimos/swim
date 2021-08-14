@@ -21,7 +21,6 @@ import swim.util.Murmur3;
 
 public class Arg implements Cloneable, Debug {
 
-  private static int hashSeed;
   final String name;
   String value;
   boolean optional;
@@ -30,18 +29,6 @@ public class Arg implements Cloneable, Debug {
     this.name = name;
     this.value = value;
     this.optional = optional;
-  }
-
-  public static Arg of(String name, String value, boolean optional) {
-    return new Arg(name, value, optional);
-  }
-
-  public static Arg of(String name, String value) {
-    return new Arg(name, value, false);
-  }
-
-  public static Arg of(String name) {
-    return new Arg(name, null, false);
   }
 
   public String name() {
@@ -83,18 +70,20 @@ public class Arg implements Cloneable, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Arg.class);
+    if (Arg.hashSeed == 0) {
+      Arg.hashSeed = Murmur3.seed(Arg.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Arg.hashSeed,
         this.name.hashCode()), Murmur3.hash(this.value)), Murmur3.hash(this.optional)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("Arg").write('.').write("of").write('(').debug(this.name);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Arg").write('.').write("create").write('(').debug(this.name);
     if (this.value != null) {
       output = output.write(", ").debug(this.value);
     }
@@ -102,6 +91,7 @@ public class Arg implements Cloneable, Debug {
     if (this.optional) {
       output = output.write('.').write("optional").write('(').write("true").write(')');
     }
+    return output;
   }
 
   @Override
@@ -112,6 +102,18 @@ public class Arg implements Cloneable, Debug {
   @Override
   public Arg clone() {
     return new Arg(this.name, this.value, this.optional);
+  }
+
+  public static Arg create(String name, String value, boolean optional) {
+    return new Arg(name, value, optional);
+  }
+
+  public static Arg create(String name, String value) {
+    return new Arg(name, value, false);
+  }
+
+  public static Arg create(String name) {
+    return new Arg(name, null, false);
   }
 
 }

@@ -38,6 +38,11 @@ final class SecWebSocketVersionParser extends Parser<SecWebSocketVersion> {
     this(0, null, 1);
   }
 
+  @Override
+  public Parser<SecWebSocketVersion> feed(Input input) {
+    return SecWebSocketVersionParser.parse(input, this.version, this.versions, this.step);
+  }
+
   static Parser<SecWebSocketVersion> parse(Input input, int version,
                                            Builder<Integer, FingerTrieSeq<Integer>> versions, int step) {
     int c = 0;
@@ -57,10 +62,10 @@ final class SecWebSocketVersionParser extends Parser<SecWebSocketVersion> {
           version = Base10.decodeDigit(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("websocket version", input));
+          return Parser.error(Diagnostic.expected("websocket version", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("websocket version", input));
+        return Parser.error(Diagnostic.expected("websocket version", input));
       }
     }
     if (step == 2) {
@@ -70,7 +75,7 @@ final class SecWebSocketVersionParser extends Parser<SecWebSocketVersion> {
           input = input.step();
           version = 10 * version + Base10.decodeDigit(c);
           if (version < 0) {
-            return error(Diagnostic.message("websocket version overflow", input));
+            return Parser.error(Diagnostic.message("websocket version overflow", input));
           }
         } else {
           break;
@@ -99,7 +104,7 @@ final class SecWebSocketVersionParser extends Parser<SecWebSocketVersion> {
           input = input.step();
           step = 4;
         } else if (!input.isEmpty()) {
-          return done(SecWebSocketVersion.from(versions.bind()));
+          return Parser.done(SecWebSocketVersion.create(versions.bind()));
         }
       }
       if (step == 4) {
@@ -114,7 +119,7 @@ final class SecWebSocketVersionParser extends Parser<SecWebSocketVersion> {
         if (input.isCont()) {
           step = 5;
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 5) {
@@ -131,10 +136,10 @@ final class SecWebSocketVersionParser extends Parser<SecWebSocketVersion> {
             version = Base10.decodeDigit(c);
             step = 6;
           } else {
-            return error(Diagnostic.expected("websocket version", input));
+            return Parser.error(Diagnostic.expected("websocket version", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("websocket version", input));
+          return Parser.error(Diagnostic.expected("websocket version", input));
         }
       }
       if (step == 6) {
@@ -144,7 +149,7 @@ final class SecWebSocketVersionParser extends Parser<SecWebSocketVersion> {
             input = input.step();
             version = 10 * version + Base10.decodeDigit(c);
             if (version < 0) {
-              return error(Diagnostic.message("websocket version overflow", input));
+              return Parser.error(Diagnostic.message("websocket version overflow", input));
             }
           } else {
             break;
@@ -160,18 +165,13 @@ final class SecWebSocketVersionParser extends Parser<SecWebSocketVersion> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new SecWebSocketVersionParser(version, versions, step);
   }
 
   static Parser<SecWebSocketVersion> parse(Input input) {
-    return parse(input, 0, null, 1);
-  }
-
-  @Override
-  public Parser<SecWebSocketVersion> feed(Input input) {
-    return parse(input, this.version, this.versions, this.step);
+    return SecWebSocketVersionParser.parse(input, 0, null, 1);
   }
 
 }

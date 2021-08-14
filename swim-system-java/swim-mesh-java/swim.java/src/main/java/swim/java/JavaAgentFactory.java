@@ -68,11 +68,72 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
   }
 
   public JavaAgentFactory(JavaAgentDef agentDef, Class<? extends A> agentClass) {
-    this(agentDef, agentClass, reflectConstructor(agentClass));
+    this(agentDef, agentClass, JavaAgentFactory.reflectConstructor(agentClass));
   }
 
   public JavaAgentFactory(Class<? extends A> agentClass) {
-    this(null, agentClass, reflectConstructor(agentClass));
+    this(null, agentClass, JavaAgentFactory.reflectConstructor(agentClass));
+  }
+
+  public final JavaAgentDef agentDef() {
+    return this.agentDef;
+  }
+
+  public final Class<? extends A> agentClass() {
+    return this.agentClass;
+  }
+
+  @Override
+  public A createAgent(AgentContext agentContext) {
+    final A agent = this.constructAgent(agentContext);
+    JavaAgentFactory.reflectLaneFields(this.agentClass, agentContext, agent);
+    return agent;
+  }
+
+  @Override
+  public Value id(Uri nodeUri) {
+    final JavaAgentDef agentDef = this.agentDef;
+    if (agentDef != null) {
+      return this.agentDef.id();
+    } else {
+      return Text.from(this.agentClass.getName());
+    }
+  }
+
+  protected A constructAgent(AgentContext agentContext) {
+    final Constructor<? extends A> constructor = this.constructor;
+    final int parameterCount = constructor.getParameterCount();
+    if (parameterCount == 0) {
+      return this.constructAgentWithNoArgs(agentContext, constructor);
+    } else if (parameterCount == 1) {
+      return this.constructAgentWithContext(agentContext, constructor);
+    } else {
+      throw new AgentException(constructor.toString());
+    }
+  }
+
+  A constructAgentWithNoArgs(AgentContext agentContext, Constructor<? extends A> constructor) {
+    SwimContext.setAgentContext(agentContext);
+    try {
+      constructor.setAccessible(true);
+      return constructor.newInstance();
+    } catch (ReflectiveOperationException cause) {
+      throw new AgentException(cause);
+    } finally {
+      SwimContext.clear();
+    }
+  }
+
+  A constructAgentWithContext(AgentContext agentContext, Constructor<? extends A> constructor) {
+    SwimContext.setAgentContext(agentContext);
+    try {
+      constructor.setAccessible(true);
+      return constructor.newInstance(agentContext);
+    } catch (ReflectiveOperationException cause) {
+      throw new AgentException(cause);
+    } finally {
+      SwimContext.clear();
+    }
   }
 
   static <A extends Agent> Constructor<? extends A> reflectConstructor(Class<? extends A> agentClass) {
@@ -89,65 +150,65 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
 
   static void reflectLaneFields(Class<?> agentClass, AgentContext agentContext, Agent agent) {
     if (agentClass != null) {
-      reflectLaneFields(agentClass.getSuperclass(), agentContext, agent);
+      JavaAgentFactory.reflectLaneFields(agentClass.getSuperclass(), agentContext, agent);
       final Field[] fields = agentClass.getDeclaredFields();
       for (Field field : fields) {
         if (Lane.class.isAssignableFrom(field.getType())) {
-          reflectLaneField(field, agentContext, agent);
+          JavaAgentFactory.reflectLaneField(field, agentContext, agent);
         }
       }
     }
   }
 
   static void reflectLaneField(Field field, AgentContext agentContext, Agent agent) {
-    final SwimLane swimLane = field.getAnnotation(SwimLane.class);
-    if (swimLane != null) {
+    final SwimLane laneAnnotation = field.getAnnotation(SwimLane.class);
+    if (laneAnnotation != null) {
       final Lane lane = reflectLaneType(agent, field, field.getGenericType());
-      final Uri laneUri = Uri.parse(swimLane.value());
+      final Uri laneUri = Uri.parse(laneAnnotation.value());
       agentContext.openLane(laneUri, lane);
     }
   }
 
   static Lane reflectLaneType(Agent agent, Field field, Type type) {
     if (type instanceof ParameterizedType) {
-      return reflectParameterizedLaneType(agent, field, (ParameterizedType) type);
+      return JavaAgentFactory.reflectParameterizedLaneType(agent, field, (ParameterizedType) type);
     }
-    return reflectOtherLaneType(agent, field, type);
+    return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
   }
 
   static Lane reflectParameterizedLaneType(Agent agent, Field field, ParameterizedType type) {
     final Type rawType = type.getRawType();
     if (rawType instanceof Class<?>) {
-      return reflectLaneTypeArguments(agent, field, (Class<?>) rawType, type.getActualTypeArguments());
+      return JavaAgentFactory.reflectLaneTypeArguments(agent, field, (Class<?>) rawType, type.getActualTypeArguments());
     }
-    return reflectOtherLaneType(agent, field, type);
+    return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
   }
 
   static Lane reflectLaneTypeArguments(Agent agent, Field field, Class<?> type, Type[] arguments) {
     if (CommandLane.class.equals(type)) {
-      return reflectCommandLaneType(agent, field, type, arguments);
+      return JavaAgentFactory.reflectCommandLaneType(agent, field, type, arguments);
     } else if (DemandLane.class.equals(type)) {
-      return reflectDemandLaneType(agent, field, type, arguments);
+      return JavaAgentFactory.reflectDemandLaneType(agent, field, type, arguments);
     } else if (DemandMapLane.class.equals(type)) {
-      return reflectDemandMapLaneType(agent, field, type, arguments);
+      return JavaAgentFactory.reflectDemandMapLaneType(agent, field, type, arguments);
     } else if (JoinMapLane.class.equals(type)) {
-      return reflectJoinMapLaneType(agent, field, type, arguments);
+      return JavaAgentFactory.reflectJoinMapLaneType(agent, field, type, arguments);
     } else if (JoinValueLane.class.equals(type)) {
-      return reflectJoinValueLaneType(agent, field, type, arguments);
+      return JavaAgentFactory.reflectJoinValueLaneType(agent, field, type, arguments);
     } else if (ListLane.class.equals(type)) {
-      return reflectListLaneType(agent, field, type, arguments);
+      return JavaAgentFactory.reflectListLaneType(agent, field, type, arguments);
     } else if (MapLane.class.equals(type)) {
-      return reflectMapLaneType(agent, field, type, arguments);
+      return JavaAgentFactory.reflectMapLaneType(agent, field, type, arguments);
     } else if (SpatialLane.class.equals(type)) {
-      return reflectSpatialLaneType(agent, field, type, arguments);
+      return JavaAgentFactory.reflectSpatialLaneType(agent, field, type, arguments);
     } else if (SupplyLane.class.equals(type)) {
-      return reflectSupplyLaneType(agent, field, type, arguments);
+      return JavaAgentFactory.reflectSupplyLaneType(agent, field, type, arguments);
     } else if (ValueLane.class.equals(type)) {
-      return reflectValueLaneType(agent, field, type, arguments);
+      return JavaAgentFactory.reflectValueLaneType(agent, field, type, arguments);
     } else if (HttpLane.class.equals(type)) {
-      return reflectHttpLaneType(agent, field, type, arguments);
+      return JavaAgentFactory.reflectHttpLaneType(agent, field, type, arguments);
     }
-    return reflectOtherLaneType(agent, field, type);
+    return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
   }
 
   @SuppressWarnings("unchecked")
@@ -169,7 +230,7 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
         }
         return lane;
       }
-      return reflectOtherLaneType(agent, field, type);
+      return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
     } catch (IllegalAccessException cause) {
       throw new AgentException(cause);
     }
@@ -194,7 +255,7 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
         }
         return lane;
       }
-      return reflectOtherLaneType(agent, field, type);
+      return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
     } catch (IllegalAccessException cause) {
       throw new AgentException(cause);
     }
@@ -225,7 +286,7 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
         }
         return lane;
       }
-      return reflectOtherLaneType(agent, field, type);
+      return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
     } catch (IllegalAccessException cause) {
       throw new AgentException(cause);
     }
@@ -260,17 +321,17 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
           valueForm = Form.forClass((Class<?>) valueType);
           lane.setValueForm(valueForm);
         }
-        final SwimResident swimResident = field.getAnnotation(SwimResident.class);
-        if (swimResident != null) {
-          lane.isResident(swimResident.value());
+        final SwimResident residentAnnotation = field.getAnnotation(SwimResident.class);
+        if (residentAnnotation != null) {
+          lane.isResident(residentAnnotation.value());
         }
-        final SwimTransient swimTransient = field.getAnnotation(SwimTransient.class);
-        if (swimTransient != null) {
-          lane.isTransient(swimTransient.value());
+        final SwimTransient transientAnnotation = field.getAnnotation(SwimTransient.class);
+        if (transientAnnotation != null) {
+          lane.isTransient(transientAnnotation.value());
         }
         return lane;
       }
-      return reflectOtherLaneType(agent, field, type);
+      return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
     } catch (IllegalAccessException cause) {
       throw new AgentException(cause);
     }
@@ -299,17 +360,17 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
           valueForm = Form.forClass((Class<?>) valueType);
           lane.setValueForm(valueForm);
         }
-        final SwimResident swimResident = field.getAnnotation(SwimResident.class);
-        if (swimResident != null) {
-          lane.isResident(swimResident.value());
+        final SwimResident residentAnnotation = field.getAnnotation(SwimResident.class);
+        if (residentAnnotation != null) {
+          lane.isResident(residentAnnotation.value());
         }
-        final SwimTransient swimTransient = field.getAnnotation(SwimTransient.class);
-        if (swimTransient != null) {
-          lane.isTransient(swimTransient.value());
+        final SwimTransient transientAnnotation = field.getAnnotation(SwimTransient.class);
+        if (transientAnnotation != null) {
+          lane.isTransient(transientAnnotation.value());
         }
         return lane;
       }
-      return reflectOtherLaneType(agent, field, type);
+      return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
     } catch (IllegalAccessException cause) {
       throw new AgentException(cause);
     }
@@ -332,17 +393,17 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
           valueForm = Form.forClass((Class<?>) valueType);
           lane.setValueForm(valueForm);
         }
-        final SwimResident swimResident = field.getAnnotation(SwimResident.class);
-        if (swimResident != null) {
-          lane.isResident(swimResident.value());
+        final SwimResident residentAnnotation = field.getAnnotation(SwimResident.class);
+        if (residentAnnotation != null) {
+          lane.isResident(residentAnnotation.value());
         }
-        final SwimTransient swimTransient = field.getAnnotation(SwimTransient.class);
-        if (swimTransient != null) {
-          lane.isTransient(swimTransient.value());
+        final SwimTransient transientAnnotation = field.getAnnotation(SwimTransient.class);
+        if (transientAnnotation != null) {
+          lane.isTransient(transientAnnotation.value());
         }
         return lane;
       }
-      return reflectOtherLaneType(agent, field, type);
+      return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
     } catch (IllegalAccessException cause) {
       throw new AgentException(cause);
     }
@@ -371,17 +432,17 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
           valueForm = Form.forClass((Class<?>) valueType);
           lane.setValueForm(valueForm);
         }
-        final SwimResident swimResident = field.getAnnotation(SwimResident.class);
-        if (swimResident != null) {
-          lane.isResident(swimResident.value());
+        final SwimResident residentAnnotation = field.getAnnotation(SwimResident.class);
+        if (residentAnnotation != null) {
+          lane.isResident(residentAnnotation.value());
         }
-        final SwimTransient swimTransient = field.getAnnotation(SwimTransient.class);
-        if (swimTransient != null) {
-          lane.isTransient(swimTransient.value());
+        final SwimTransient transientAnnotation = field.getAnnotation(SwimTransient.class);
+        if (transientAnnotation != null) {
+          lane.isTransient(transientAnnotation.value());
         }
         return lane;
       }
-      return reflectOtherLaneType(agent, field, type);
+      return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
     } catch (IllegalAccessException cause) {
       throw new AgentException(cause);
     }
@@ -410,17 +471,17 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
           valueForm = Form.forClass((Class<?>) valueType);
           lane.setValueForm(valueForm);
         }
-        final SwimResident swimResident = field.getAnnotation(SwimResident.class);
-        if (swimResident != null) {
-          lane.isResident(swimResident.value());
+        final SwimResident residentAnnotation = field.getAnnotation(SwimResident.class);
+        if (residentAnnotation != null) {
+          lane.isResident(residentAnnotation.value());
         }
-        final SwimTransient swimTransient = field.getAnnotation(SwimTransient.class);
-        if (swimTransient != null) {
-          lane.isTransient(swimTransient.value());
+        final SwimTransient transientAnnotation = field.getAnnotation(SwimTransient.class);
+        if (transientAnnotation != null) {
+          lane.isTransient(transientAnnotation.value());
         }
         return lane;
       }
-      return reflectOtherLaneType(agent, field, type);
+      return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
     } catch (IllegalAccessException cause) {
       throw new AgentException(cause);
     }
@@ -445,7 +506,7 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
         }
         return lane;
       }
-      return reflectOtherLaneType(agent, field, type);
+      return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
     } catch (IllegalAccessException cause) {
       throw new AgentException(cause);
     }
@@ -468,17 +529,17 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
           valueForm = Form.forClass((Class<?>) valueType);
           lane.setValueForm(valueForm);
         }
-        final SwimResident swimResident = field.getAnnotation(SwimResident.class);
-        if (swimResident != null) {
-          lane.isResident(swimResident.value());
+        final SwimResident residentAnnotation = field.getAnnotation(SwimResident.class);
+        if (residentAnnotation != null) {
+          lane.isResident(residentAnnotation.value());
         }
-        final SwimTransient swimTransient = field.getAnnotation(SwimTransient.class);
-        if (swimTransient != null) {
-          lane.isTransient(swimTransient.value());
+        final SwimTransient transientAnnotation = field.getAnnotation(SwimTransient.class);
+        if (transientAnnotation != null) {
+          lane.isTransient(transientAnnotation.value());
         }
         return lane;
       }
-      return reflectOtherLaneType(agent, field, type);
+      return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
     } catch (IllegalAccessException cause) {
       throw new AgentException(cause);
     }
@@ -498,7 +559,7 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
         // TODO: infer request decoder
         return lane;
       }
-      return reflectOtherLaneType(agent, field, type);
+      return JavaAgentFactory.reflectOtherLaneType(agent, field, type);
     } catch (IllegalAccessException cause) {
       throw new AgentException(cause);
     }
@@ -515,67 +576,6 @@ public class JavaAgentFactory<A extends Agent> extends AbstractAgentRoute<A> {
       }
     } catch (IllegalAccessException cause) {
       throw new AgentException(cause);
-    }
-  }
-
-  public final JavaAgentDef agentDef() {
-    return this.agentDef;
-  }
-
-  public final Class<? extends A> agentClass() {
-    return this.agentClass;
-  }
-
-  @Override
-  public A createAgent(AgentContext agentContext) {
-    final A agent = constructAgent(agentContext);
-    reflectLaneFields(this.agentClass, agentContext, agent);
-    return agent;
-  }
-
-  @Override
-  public Value id(Uri nodeUri) {
-    final JavaAgentDef agentDef = this.agentDef;
-    if (agentDef != null) {
-      return this.agentDef.id();
-    } else {
-      return Text.from(this.agentClass.getName());
-    }
-  }
-
-  protected A constructAgent(AgentContext agentContext) {
-    final Constructor<? extends A> constructor = this.constructor;
-    final int parameterCount = constructor.getParameterCount();
-    if (parameterCount == 0) {
-      return constructAgentWithNoArgs(agentContext, constructor);
-    } else if (parameterCount == 1) {
-      return constructAgentWithContext(agentContext, constructor);
-    } else {
-      throw new AgentException(constructor.toString());
-    }
-  }
-
-  A constructAgentWithNoArgs(AgentContext agentContext, Constructor<? extends A> constructor) {
-    SwimContext.setAgentContext(agentContext);
-    try {
-      constructor.setAccessible(true);
-      return constructor.newInstance();
-    } catch (ReflectiveOperationException cause) {
-      throw new AgentException(cause);
-    } finally {
-      SwimContext.clear();
-    }
-  }
-
-  A constructAgentWithContext(AgentContext agentContext, Constructor<? extends A> constructor) {
-    SwimContext.setAgentContext(agentContext);
-    try {
-      constructor.setAccessible(true);
-      return constructor.newInstance(agentContext);
-    } catch (ReflectiveOperationException cause) {
-      throw new AgentException(cause);
-    } finally {
-      SwimContext.clear();
     }
   }
 

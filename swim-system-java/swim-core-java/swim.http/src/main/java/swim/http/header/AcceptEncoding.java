@@ -28,31 +28,10 @@ import swim.util.Murmur3;
 
 public final class AcceptEncoding extends HttpHeader {
 
-  private static int hashSeed;
   final FingerTrieSeq<ContentCoding> codings;
 
   AcceptEncoding(FingerTrieSeq<ContentCoding> codings) {
     this.codings = codings;
-  }
-
-  public static AcceptEncoding from(FingerTrieSeq<ContentCoding> codings) {
-    return new AcceptEncoding(codings);
-  }
-
-  public static AcceptEncoding from(ContentCoding... codings) {
-    return new AcceptEncoding(FingerTrieSeq.of(codings));
-  }
-
-  public static AcceptEncoding from(String... codingStrings) {
-    final Builder<ContentCoding, FingerTrieSeq<ContentCoding>> codings = FingerTrieSeq.builder();
-    for (int i = 0, n = codingStrings.length; i < n; i += 1) {
-      codings.add(ContentCoding.parse(codingStrings[i]));
-    }
-    return new AcceptEncoding(codings.bind());
-  }
-
-  public static Parser<AcceptEncoding> parseHttpValue(Input input, HttpParser http) {
-    return AcceptEncodingParser.parse(input, http);
   }
 
   @Override
@@ -90,25 +69,48 @@ public final class AcceptEncoding extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(AcceptEncoding.class);
+    if (AcceptEncoding.hashSeed == 0) {
+      AcceptEncoding.hashSeed = Murmur3.seed(AcceptEncoding.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.codings.hashCode()));
+    return Murmur3.mash(Murmur3.mix(AcceptEncoding.hashSeed, this.codings.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("AcceptEncoding").write('.').write("from").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("AcceptEncoding").write('.').write("create").write('(');
     final int n = this.codings.size();
     if (n > 0) {
-      output.debug(this.codings.head());
+      output = output.debug(this.codings.head());
       for (int i = 1; i < n; i += 1) {
         output = output.write(", ").debug(this.codings.get(i));
       }
     }
     output = output.write(')');
+    return output;
+  }
+
+  public static AcceptEncoding create(FingerTrieSeq<ContentCoding> codings) {
+    return new AcceptEncoding(codings);
+  }
+
+  public static AcceptEncoding create(ContentCoding... codings) {
+    return new AcceptEncoding(FingerTrieSeq.of(codings));
+  }
+
+  public static AcceptEncoding create(String... codingStrings) {
+    final Builder<ContentCoding, FingerTrieSeq<ContentCoding>> codings = FingerTrieSeq.builder();
+    for (int i = 0, n = codingStrings.length; i < n; i += 1) {
+      codings.add(ContentCoding.parse(codingStrings[i]));
+    }
+    return new AcceptEncoding(codings.bind());
+  }
+
+  public static Parser<AcceptEncoding> parseHttpValue(Input input, HttpParser http) {
+    return AcceptEncodingParser.parse(input, http);
   }
 
 }

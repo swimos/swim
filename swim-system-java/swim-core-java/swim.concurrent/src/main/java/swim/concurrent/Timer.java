@@ -16,7 +16,7 @@ package swim.concurrent;
 
 /**
  * Stateful {@link TimerFunction} to invoke at a scheduled time, with lifecycle
- * callbacks, and a {@link TimerContext} for self-management.  Use {@link
+ * callbacks, and a {@link TimerContext} for self-management. Use {@link
  * Schedule#setTimer(long, TimerFunction)} to schedule a new {@code Timer} for
  * execution.
  *
@@ -26,13 +26,13 @@ package swim.concurrent;
 public interface Timer extends TimerFunction {
 
   /**
-   * Returns the context used to manage this {@code Timer}.  Returns {@code
+   * Returns the context used to manage this {@code Timer}. Returns {@code
    * null} if this {@code Timer} is not bound to a {@link Schedule}.
    */
   TimerContext timerContext();
 
   /**
-   * Sets the context used to manage this {@code Timer}.  A {@code
+   * Sets the context used to manage this {@code Timer}. A {@code
    * TimerContext} is assigned when binding this {@code Timer} to a {@link
    * Schedule}.
    */

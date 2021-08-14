@@ -26,9 +26,6 @@ import swim.util.Murmur3;
 
 public class StoreSettings implements Debug {
 
-  private static int hashSeed;
-  private static StoreSettings standard;
-  private static Form<StoreSettings> form;
   protected final int pageSplitSize;
   protected final int pageCacheSize;
   protected final int autoCommitInterval;
@@ -84,8 +81,413 @@ public class StoreSettings implements Debug {
     this.treeLoadTimeout = treeLoadTimeout;
   }
 
+  public final int pageSplitSize() {
+    return this.pageSplitSize;
+  }
+
+  public StoreSettings pageSplitSize(int pageSplitSize) {
+    return this.copy(pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int pageCacheSize() {
+    return this.pageCacheSize;
+  }
+
+  public StoreSettings pageCacheSize(int pageCacheSize) {
+    return this.copy(this.pageSplitSize, pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int autoCommitInterval() {
+    return this.autoCommitInterval;
+  }
+
+  public StoreSettings autoCommitInterval(int autoCommitInterval) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final long autoCommitSize() {
+    return this.autoCommitSize;
+  }
+
+  public StoreSettings autoCommitSize(long autoCommitSize) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final long minCompactSize() {
+    return this.minCompactSize;
+  }
+
+  public StoreSettings minCompactSize(long minCompactSize) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final long maxZoneSize() {
+    return this.maxZoneSize;
+  }
+
+  public StoreSettings maxZoneSize(long maxZoneSize) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final double minZoneFill() {
+    return this.minZoneFill;
+  }
+
+  public StoreSettings minZoneFill(double minZoneFill) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final double minTreeFill() {
+    return this.minTreeFill;
+  }
+
+  public StoreSettings minTreeFill(double minTreeFill) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int maxRetries() {
+    return this.maxRetries;
+  }
+
+  public StoreSettings maxRetries(int maxRetries) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int deleteDelay() {
+    return this.deleteDelay;
+  }
+
+  public StoreSettings deleteDelay(int deleteDelay) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int storeOpenTimeout() {
+    return this.storeOpenTimeout;
+  }
+
+  public StoreSettings storeOpenTimeout(int storeOpenTimeout) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int storeCloseTimeout() {
+    return this.storeCloseTimeout;
+  }
+
+  public StoreSettings storeCloseTimeout(int storeCloseTimeout) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int zoneOpenTimeout() {
+    return this.zoneOpenTimeout;
+  }
+
+  public StoreSettings zoneOpenTimeout(int zoneOpenTimeout) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int zoneCloseTimeout() {
+    return this.zoneCloseTimeout;
+  }
+
+  public StoreSettings zoneCloseTimeout(int zoneCloseTimeout) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int databaseOpenTimeout() {
+    return this.databaseOpenTimeout;
+  }
+
+  public StoreSettings databaseOpenTimeout(int databaseOpenTimeout) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int databaseCloseTimeout() {
+    return this.databaseCloseTimeout;
+  }
+
+  public StoreSettings databaseCloseTimeout(int databaseCloseTimeout) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int databaseCommitTimeout() {
+    return this.databaseCommitTimeout;
+  }
+
+  public StoreSettings databaseCommitTimeout(int databaseCommitTimeout) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int databaseCompactTimeout() {
+    return this.databaseCompactTimeout;
+  }
+
+  public StoreSettings databaseCompactTimeout(int databaseCompactTimeout) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, databaseCompactTimeout,
+                     this.pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int pageLoadTimeout() {
+    return this.pageLoadTimeout;
+  }
+
+  public StoreSettings pageLoadTimeout(int pageLoadTimeout) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     pageLoadTimeout, this.treeLoadTimeout);
+  }
+
+  public final int treeLoadTimeout() {
+    return this.treeLoadTimeout;
+  }
+
+  public StoreSettings treeLoadTimeout(int treeLoadTimeout) {
+    return this.copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
+                     this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
+                     this.minZoneFill, this.minTreeFill, this.maxRetries,
+                     this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
+                     this.zoneOpenTimeout, this.zoneCloseTimeout,
+                     this.databaseOpenTimeout, this.databaseCloseTimeout,
+                     this.databaseCommitTimeout, this.databaseCompactTimeout,
+                     this.pageLoadTimeout, treeLoadTimeout);
+  }
+
+  protected StoreSettings copy(int pageSplitSize, int pageCacheSize, int autoCommitInterval,
+                               long autoCommitSize, long minCompactSize, long maxZoneSize,
+                               double minZoneFill, double minTreeFill, int maxRetries,
+                               int deleteDelay, int storeOpenTimeout, int storeCloseTimeout,
+                               int zoneOpenTimeout, int zoneCloseTimeout,
+                               int databaseOpenTimeout, int databaseCloseTimeout,
+                               int databaseCommitTimeout, int databaseCompactTimeout,
+                               int pageLoadTimeout, int treeLoadTimeout) {
+    return new StoreSettings(pageSplitSize, pageCacheSize, autoCommitInterval,
+                             autoCommitSize, minCompactSize, maxZoneSize,
+                             minZoneFill, minTreeFill, maxRetries,
+                             deleteDelay, storeOpenTimeout, storeCloseTimeout,
+                             zoneOpenTimeout, zoneCloseTimeout,
+                             databaseOpenTimeout, databaseCloseTimeout,
+                             databaseCommitTimeout, databaseCompactTimeout,
+                             pageLoadTimeout, treeLoadTimeout);
+  }
+
+  protected boolean canEqual(Object other) {
+    return other instanceof StoreSettings;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof StoreSettings) {
+      final StoreSettings that = (StoreSettings) other;
+      return that.canEqual(this) && this.pageSplitSize == that.pageSplitSize
+          && this.pageCacheSize == that.pageCacheSize
+          && this.autoCommitInterval == that.autoCommitInterval
+          && this.autoCommitSize == that.autoCommitSize
+          && this.minCompactSize == that.minCompactSize
+          && this.maxZoneSize == that.maxZoneSize
+          && this.minZoneFill == that.minZoneFill
+          && this.minTreeFill == that.minTreeFill
+          && this.maxRetries == that.maxRetries
+          && this.deleteDelay == that.deleteDelay
+          && this.storeOpenTimeout == that.storeOpenTimeout
+          && this.storeCloseTimeout == that.storeCloseTimeout
+          && this.zoneOpenTimeout == that.zoneOpenTimeout
+          && this.zoneCloseTimeout == that.zoneCloseTimeout
+          && this.databaseOpenTimeout == that.databaseOpenTimeout
+          && this.databaseCloseTimeout == that.databaseCloseTimeout
+          && this.databaseCommitTimeout == that.databaseCommitTimeout
+          && this.databaseCompactTimeout == that.databaseCompactTimeout
+          && this.pageLoadTimeout == that.pageLoadTimeout
+          && this.treeLoadTimeout == that.treeLoadTimeout;
+    }
+    return false;
+  }
+
+  private static int hashSeed;
+
+  @Override
+  public int hashCode() {
+    if (StoreSettings.hashSeed == 0) {
+      StoreSettings.hashSeed = Murmur3.seed(StoreSettings.class);
+    }
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        StoreSettings.hashSeed, this.pageSplitSize), this.pageCacheSize), this.autoCommitInterval),
+        Murmur3.hash(this.autoCommitSize)), Murmur3.hash(this.minCompactSize)),
+        Murmur3.hash(this.maxZoneSize)), Murmur3.hash(this.minZoneFill)),
+        Murmur3.hash(this.minTreeFill)), this.maxRetries), this.deleteDelay),
+        this.storeOpenTimeout), this.storeCloseTimeout), this.zoneOpenTimeout),
+        this.zoneCloseTimeout), this.databaseOpenTimeout), this.databaseCloseTimeout),
+        this.databaseCommitTimeout), this.databaseCompactTimeout),
+        this.pageLoadTimeout), this.treeLoadTimeout));
+  }
+
+  @Override
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("StoreSettings").write('.').write("standard").write('(').write(')')
+                   .write('.').write("pageSplitSize").write('(').debug(this.pageSplitSize).write(')')
+                   .write('.').write("pageCacheSize").write('(').debug(this.pageCacheSize).write(')')
+                   .write('.').write("autoCommitInterval").write('(').debug(this.autoCommitInterval).write(')')
+                   .write('.').write("autoCommitSize").write('(').debug(this.autoCommitSize).write(')')
+                   .write('.').write("minCompactSize").write('(').debug(this.minCompactSize).write(')')
+                   .write('.').write("maxZoneSize").write('(').debug(this.maxZoneSize).write(')')
+                   .write('.').write("minZoneFill").write('(').debug(this.minZoneFill).write(')')
+                   .write('.').write("minTreeFill").write('(').debug(this.minTreeFill).write(')')
+                   .write('.').write("maxRetries").write('(').debug(this.maxRetries).write(')')
+                   .write('.').write("deleteDelay").write('(').debug(this.deleteDelay).write(')')
+                   .write('.').write("storeOpenTimeout").write('(').debug(this.storeOpenTimeout).write(')')
+                   .write('.').write("storeCloseTimeout").write('(').debug(this.storeCloseTimeout).write(')')
+                   .write('.').write("zoneOpenTimeout").write('(').debug(this.zoneOpenTimeout).write(')')
+                   .write('.').write("zoneCloseTimeout").write('(').debug(this.zoneCloseTimeout).write(')')
+                   .write('.').write("databaseOpenTimeout").write('(').debug(this.databaseOpenTimeout).write(')')
+                   .write('.').write("databaseCloseTimeout").write('(').debug(this.databaseCloseTimeout).write(')')
+                   .write('.').write("databaseCommitTimeout").write('(').debug(this.databaseCommitTimeout).write(')')
+                   .write('.').write("databaseCompactTimeout").write('(').debug(this.databaseCompactTimeout).write(')')
+                   .write('.').write("pageLoadTimeout").write('(').debug(this.pageLoadTimeout).write(')')
+                   .write('.').write("treeLoadTimeout").write('(').debug(this.treeLoadTimeout).write(')');
+    return output;
+  }
+
+  @Override
+  public String toString() {
+    return Format.debug(this);
+  }
+
+  private static StoreSettings standard;
+
   public static StoreSettings standard() {
-    if (standard == null) {
+    if (StoreSettings.standard == null) {
       int pageSplitSize;
       try {
         pageSplitSize = Integer.parseInt(System.getProperty("swim.db.page.split.size"));
@@ -226,424 +628,26 @@ public class StoreSettings implements Debug {
         treeLoadTimeout = 30 * 1000;
       }
 
-      standard = new StoreSettings(pageSplitSize, pageCacheSize, autoCommitInterval,
-          autoCommitSize, minCompactSize, maxZoneSize,
-          minZoneFill, minTreeFill, maxRetries,
-          deleteDelay, storeOpenTimeout, storeCloseTimeout,
-          zoneOpenTimeout, zoneCloseTimeout,
-          databaseOpenTimeout, databaseCloseTimeout,
-          databaseCommitTimeout, databaseCompactTimeout,
-          pageLoadTimeout, treeLoadTimeout);
+      StoreSettings.standard = new StoreSettings(pageSplitSize, pageCacheSize, autoCommitInterval,
+                                                 autoCommitSize, minCompactSize, maxZoneSize,
+                                                 minZoneFill, minTreeFill, maxRetries,
+                                                 deleteDelay, storeOpenTimeout, storeCloseTimeout,
+                                                 zoneOpenTimeout, zoneCloseTimeout,
+                                                 databaseOpenTimeout, databaseCloseTimeout,
+                                                 databaseCommitTimeout, databaseCompactTimeout,
+                                                 pageLoadTimeout, treeLoadTimeout);
     }
-    return standard;
+    return StoreSettings.standard;
   }
+
+  private static Form<StoreSettings> form;
 
   @Kind
   public static Form<StoreSettings> form() {
-    if (form == null) {
-      form = new StoreSettingsForm();
+    if (StoreSettings.form == null) {
+      StoreSettings.form = new StoreSettingsForm();
     }
-    return form;
-  }
-
-  public final int pageSplitSize() {
-    return this.pageSplitSize;
-  }
-
-  public StoreSettings pageSplitSize(int pageSplitSize) {
-    return copy(pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int pageCacheSize() {
-    return this.pageCacheSize;
-  }
-
-  public StoreSettings pageCacheSize(int pageCacheSize) {
-    return copy(this.pageSplitSize, pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int autoCommitInterval() {
-    return this.autoCommitInterval;
-  }
-
-  public StoreSettings autoCommitInterval(int autoCommitInterval) {
-    return copy(this.pageSplitSize, this.pageCacheSize, autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final long autoCommitSize() {
-    return this.autoCommitSize;
-  }
-
-  public StoreSettings autoCommitSize(long autoCommitSize) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final long minCompactSize() {
-    return this.minCompactSize;
-  }
-
-  public StoreSettings minCompactSize(long minCompactSize) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final long maxZoneSize() {
-    return this.maxZoneSize;
-  }
-
-  public StoreSettings maxZoneSize(long maxZoneSize) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final double minZoneFill() {
-    return this.minZoneFill;
-  }
-
-  public StoreSettings minZoneFill(double minZoneFill) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final double minTreeFill() {
-    return this.minTreeFill;
-  }
-
-  public StoreSettings minTreeFill(double minTreeFill) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int maxRetries() {
-    return this.maxRetries;
-  }
-
-  public StoreSettings maxRetries(int maxRetries) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int deleteDelay() {
-    return this.deleteDelay;
-  }
-
-  public StoreSettings deleteDelay(int deleteDelay) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int storeOpenTimeout() {
-    return this.storeOpenTimeout;
-  }
-
-  public StoreSettings storeOpenTimeout(int storeOpenTimeout) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int storeCloseTimeout() {
-    return this.storeCloseTimeout;
-  }
-
-  public StoreSettings storeCloseTimeout(int storeCloseTimeout) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int zoneOpenTimeout() {
-    return this.zoneOpenTimeout;
-  }
-
-  public StoreSettings zoneOpenTimeout(int zoneOpenTimeout) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int zoneCloseTimeout() {
-    return this.zoneCloseTimeout;
-  }
-
-  public StoreSettings zoneCloseTimeout(int zoneCloseTimeout) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int databaseOpenTimeout() {
-    return this.databaseOpenTimeout;
-  }
-
-  public StoreSettings databaseOpenTimeout(int databaseOpenTimeout) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int databaseCloseTimeout() {
-    return this.databaseCloseTimeout;
-  }
-
-  public StoreSettings databaseCloseTimeout(int databaseCloseTimeout) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int databaseCommitTimeout() {
-    return this.databaseCommitTimeout;
-  }
-
-  public StoreSettings databaseCommitTimeout(int databaseCommitTimeout) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int databaseCompactTimeout() {
-    return this.databaseCompactTimeout;
-  }
-
-  public StoreSettings databaseCompactTimeout(int databaseCompactTimeout) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, databaseCompactTimeout,
-        this.pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int pageLoadTimeout() {
-    return this.pageLoadTimeout;
-  }
-
-  public StoreSettings pageLoadTimeout(int pageLoadTimeout) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        pageLoadTimeout, this.treeLoadTimeout);
-  }
-
-  public final int treeLoadTimeout() {
-    return this.treeLoadTimeout;
-  }
-
-  public StoreSettings treeLoadTimeout(int treeLoadTimeout) {
-    return copy(this.pageSplitSize, this.pageCacheSize, this.autoCommitInterval,
-        this.autoCommitSize, this.minCompactSize, this.maxZoneSize,
-        this.minZoneFill, this.minTreeFill, this.maxRetries,
-        this.deleteDelay, this.storeOpenTimeout, this.storeCloseTimeout,
-        this.zoneOpenTimeout, this.zoneCloseTimeout,
-        this.databaseOpenTimeout, this.databaseCloseTimeout,
-        this.databaseCommitTimeout, this.databaseCompactTimeout,
-        this.pageLoadTimeout, treeLoadTimeout);
-  }
-
-  protected StoreSettings copy(int pageSplitSize, int pageCacheSize, int autoCommitInterval,
-                               long autoCommitSize, long minCompactSize, long maxZoneSize,
-                               double minZoneFill, double minTreeFill, int maxRetries,
-                               int deleteDelay, int storeOpenTimeout, int storeCloseTimeout,
-                               int zoneOpenTimeout, int zoneCloseTimeout,
-                               int databaseOpenTimeout, int databaseCloseTimeout,
-                               int databaseCommitTimeout, int databaseCompactTimeout,
-                               int pageLoadTimeout, int treeLoadTimeout) {
-    return new StoreSettings(pageSplitSize, pageCacheSize, autoCommitInterval,
-        autoCommitSize, minCompactSize, maxZoneSize,
-        minZoneFill, minTreeFill, maxRetries,
-        deleteDelay, storeOpenTimeout, storeCloseTimeout,
-        zoneOpenTimeout, zoneCloseTimeout,
-        databaseOpenTimeout, databaseCloseTimeout,
-        databaseCommitTimeout, databaseCompactTimeout,
-        pageLoadTimeout, treeLoadTimeout);
-  }
-
-  protected boolean canEqual(Object other) {
-    return other instanceof StoreSettings;
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    } else if (other instanceof StoreSettings) {
-      final StoreSettings that = (StoreSettings) other;
-      return that.canEqual(this) && this.pageSplitSize == that.pageSplitSize
-          && this.pageCacheSize == that.pageCacheSize
-          && this.autoCommitInterval == that.autoCommitInterval
-          && this.autoCommitSize == that.autoCommitSize
-          && this.minCompactSize == that.minCompactSize
-          && this.maxZoneSize == that.maxZoneSize
-          && this.minZoneFill == that.minZoneFill
-          && this.minTreeFill == that.minTreeFill
-          && this.maxRetries == that.maxRetries
-          && this.deleteDelay == that.deleteDelay
-          && this.storeOpenTimeout == that.storeOpenTimeout
-          && this.storeCloseTimeout == that.storeCloseTimeout
-          && this.zoneOpenTimeout == that.zoneOpenTimeout
-          && this.zoneCloseTimeout == that.zoneCloseTimeout
-          && this.databaseOpenTimeout == that.databaseOpenTimeout
-          && this.databaseCloseTimeout == that.databaseCloseTimeout
-          && this.databaseCommitTimeout == that.databaseCommitTimeout
-          && this.databaseCompactTimeout == that.databaseCompactTimeout
-          && this.pageLoadTimeout == that.pageLoadTimeout
-          && this.treeLoadTimeout == that.treeLoadTimeout;
-    }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(StoreSettings.class);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-            Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-                hashSeed, this.pageSplitSize), this.pageCacheSize), this.autoCommitInterval),
-                Murmur3.hash(this.autoCommitSize)), Murmur3.hash(this.minCompactSize)),
-                Murmur3.hash(this.maxZoneSize)), Murmur3.hash(this.minZoneFill)),
-            Murmur3.hash(this.minTreeFill)), this.maxRetries), this.deleteDelay),
-            this.storeOpenTimeout), this.storeCloseTimeout), this.zoneOpenTimeout),
-            this.zoneCloseTimeout), this.databaseOpenTimeout), this.databaseCloseTimeout),
-        this.databaseCommitTimeout), this.databaseCompactTimeout),
-        this.pageLoadTimeout), this.treeLoadTimeout));
-  }
-
-  @Override
-  public void debug(Output<?> output) {
-    output.write("StoreSettings").write('.').write("standard").write('(').write(')')
-        .write('.').write("pageSplitSize").write('(').debug(this.pageSplitSize).write(')')
-        .write('.').write("pageCacheSize").write('(').debug(this.pageCacheSize).write(')')
-        .write('.').write("autoCommitInterval").write('(').debug(this.autoCommitInterval).write(')')
-        .write('.').write("autoCommitSize").write('(').debug(this.autoCommitSize).write(')')
-        .write('.').write("minCompactSize").write('(').debug(this.minCompactSize).write(')')
-        .write('.').write("maxZoneSize").write('(').debug(this.maxZoneSize).write(')')
-        .write('.').write("minZoneFill").write('(').debug(this.minZoneFill).write(')')
-        .write('.').write("minTreeFill").write('(').debug(this.minTreeFill).write(')')
-        .write('.').write("maxRetries").write('(').debug(this.maxRetries).write(')')
-        .write('.').write("deleteDelay").write('(').debug(this.deleteDelay).write(')')
-        .write('.').write("storeOpenTimeout").write('(').debug(this.storeOpenTimeout).write(')')
-        .write('.').write("storeCloseTimeout").write('(').debug(this.storeCloseTimeout).write(')')
-        .write('.').write("zoneOpenTimeout").write('(').debug(this.zoneOpenTimeout).write(')')
-        .write('.').write("zoneCloseTimeout").write('(').debug(this.zoneCloseTimeout).write(')')
-        .write('.').write("databaseOpenTimeout").write('(').debug(this.databaseOpenTimeout).write(')')
-        .write('.').write("databaseCloseTimeout").write('(').debug(this.databaseCloseTimeout).write(')')
-        .write('.').write("databaseCommitTimeout").write('(').debug(this.databaseCommitTimeout).write(')')
-        .write('.').write("databaseCompactTimeout").write('(').debug(this.databaseCompactTimeout).write(')')
-        .write('.').write("pageLoadTimeout").write('(').debug(this.pageLoadTimeout).write(')')
-        .write('.').write("treeLoadTimeout").write('(').debug(this.treeLoadTimeout).write(')');
-  }
-
-  @Override
-  public String toString() {
-    return Format.debug(this);
+    return StoreSettings.form;
   }
 
 }
@@ -669,7 +673,7 @@ final class StoreSettingsForm extends Form<StoreSettings> {
   public Item mold(StoreSettings settings) {
     if (settings != null) {
       final StoreSettings standard = StoreSettings.standard();
-      final Record record = Record.create(20).attr(tag());
+      final Record record = Record.create(20).attr(this.tag());
 
       if (settings.pageSplitSize != standard.pageSplitSize) {
         record.slot("pageSplitSize", settings.pageSplitSize);
@@ -745,7 +749,7 @@ final class StoreSettingsForm extends Form<StoreSettings> {
   @Override
   public StoreSettings cast(Item item) {
     final Value value = item.toValue();
-    if (value.getAttr(tag()).isDefined()) {
+    if (value.getAttr(this.tag()).isDefined()) {
       final StoreSettings standard = StoreSettings.standard();
       final int pageSplitSize = value.get("pageSplitSize").intValue(standard.pageSplitSize);
       final int pageCacheSize = value.get("pageCacheSize").intValue(standard.pageCacheSize);
@@ -768,13 +772,13 @@ final class StoreSettingsForm extends Form<StoreSettings> {
       final int pageLoadTimeout = value.get("pageLoadTimeout").intValue(standard.pageLoadTimeout);
       final int treeLoadTimeout = value.get("treeLoadTimeout").intValue(standard.treeLoadTimeout);
       return new StoreSettings(pageSplitSize, pageCacheSize, autoCommitInterval,
-          autoCommitSize, minCompactSize, maxZoneSize,
-          minZoneFill, minTreeFill, maxRetries,
-          deleteDelay, storeOpenTimeout, storeCloseTimeout,
-          zoneOpenTimeout, zoneCloseTimeout,
-          databaseOpenTimeout, databaseCloseTimeout,
-          databaseCommitTimeout, databaseCompactTimeout,
-          pageLoadTimeout, treeLoadTimeout);
+                               autoCommitSize, minCompactSize, maxZoneSize,
+                               minZoneFill, minTreeFill, maxRetries,
+                               deleteDelay, storeOpenTimeout, storeCloseTimeout,
+                               zoneOpenTimeout, zoneCloseTimeout,
+                               databaseOpenTimeout, databaseCloseTimeout,
+                               databaseCommitTimeout, databaseCompactTimeout,
+                               pageLoadTimeout, treeLoadTimeout);
     }
     return null;
   }

@@ -33,6 +33,11 @@ public abstract class ActorCell implements CellBinding, CellContext {
   Log log;
   Policy policy;
 
+  public ActorCell() {
+    this.log = null;
+    this.policy = null;
+  }
+
   public abstract CellBinding cellBinding();
 
   public abstract CellContext cellContext();
@@ -42,33 +47,33 @@ public abstract class ActorCell implements CellBinding, CellContext {
 
   @Override
   public String edgeName() {
-    return cellContext().edgeName();
+    return this.cellContext().edgeName();
   }
 
   @Override
   public Uri meshUri() {
-    return cellContext().meshUri();
+    return this.cellContext().meshUri();
   }
 
   @Override
   public Policy policy() {
     final Policy policy = this.policy;
-    return policy != null ? policy : cellContext().policy();
+    return policy != null ? policy : this.cellContext().policy();
   }
 
   @Override
   public Schedule schedule() {
-    return cellContext().schedule();
+    return this.cellContext().schedule();
   }
 
   @Override
   public Stage stage() {
-    return cellContext().stage();
+    return this.cellContext().stage();
   }
 
   @Override
   public StoreBinding store() {
-    return cellContext().store();
+    return this.cellContext().store();
   }
 
   protected Log openLog() {
@@ -89,37 +94,37 @@ public abstract class ActorCell implements CellBinding, CellContext {
 
   @Override
   public LinkBinding bindDownlink(Downlink downlink) {
-    return cellContext().bindDownlink(downlink);
+    return this.cellContext().bindDownlink(downlink);
   }
 
   @Override
   public void openDownlink(LinkBinding link) {
-    cellContext().openDownlink(link);
+    this.cellContext().openDownlink(link);
   }
 
   @Override
   public void closeDownlink(LinkBinding link) {
-    cellContext().closeDownlink(link);
+    this.cellContext().closeDownlink(link);
   }
 
   @Override
   public void pushDown(Push<?> push) {
-    cellContext().pushDown(push);
+    this.cellContext().pushDown(push);
   }
 
   @Override
   public void reportDown(Metric metric) {
-    cellContext().reportDown(metric);
+    this.cellContext().reportDown(metric);
   }
 
   @Override
   public void openUplink(LinkBinding link) {
-    cellBinding().openUplink(link);
+    this.cellBinding().openUplink(link);
   }
 
   @Override
   public void pushUp(Push<?> push) {
-    cellBinding().pushUp(push);
+    this.cellBinding().pushUp(push);
   }
 
   @Override
@@ -128,7 +133,7 @@ public abstract class ActorCell implements CellBinding, CellContext {
     if (log != null) {
       log.trace(message);
     } else {
-      cellContext().trace(message);
+      this.cellContext().trace(message);
     }
   }
 
@@ -138,7 +143,7 @@ public abstract class ActorCell implements CellBinding, CellContext {
     if (log != null) {
       log.debug(message);
     } else {
-      cellContext().debug(message);
+      this.cellContext().debug(message);
     }
   }
 
@@ -148,7 +153,7 @@ public abstract class ActorCell implements CellBinding, CellContext {
     if (log != null) {
       log.info(message);
     } else {
-      cellContext().info(message);
+      this.cellContext().info(message);
     }
   }
 
@@ -158,7 +163,7 @@ public abstract class ActorCell implements CellBinding, CellContext {
     if (log != null) {
       log.warn(message);
     } else {
-      cellContext().warn(message);
+      this.cellContext().warn(message);
     }
   }
 
@@ -168,7 +173,7 @@ public abstract class ActorCell implements CellBinding, CellContext {
     if (log != null) {
       log.error(message);
     } else {
-      cellContext().error(message);
+      this.cellContext().error(message);
     }
   }
 
@@ -178,7 +183,7 @@ public abstract class ActorCell implements CellBinding, CellContext {
     if (log != null) {
       log.fail(message);
     } else {
-      cellContext().fail(message);
+      this.cellContext().fail(message);
     }
   }
 

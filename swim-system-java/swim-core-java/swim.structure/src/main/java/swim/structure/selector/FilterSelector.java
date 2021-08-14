@@ -24,7 +24,7 @@ import swim.util.Murmur3;
 /**
  * A {@link Selector} that, when {@link #evaluate evaluated}, yields each {@code
  * Item} in {@code interpreter} such that {@code evaluating} {@code predicate}
- * against this {@code Item} would select at least one defined result.  This is
+ * against this {@code Item} would select at least one defined result. This is
  * fundamentally different from returning the result itself; for
  * example,
  * <p>
@@ -37,13 +37,12 @@ import swim.util.Murmur3;
  * swim.structure.Extant} which, crucially, is never null. {@link #forSelected
  * forSelected} still takes the form "if (condition) then subselect"; here,
  * "condition" is true only if {@code predicate.forSelected(interpreter,this)}
- * is not null.  Thus, the responsibility to ensure that {@code this.selected}
+ * is not null. Thus, the responsibility to ensure that {@code this.selected}
  * is invoked only if {@code predicate} would select something in {@code
  * Interpreter} is in {@code predicate.forSelected}--exactly as it should be.
  */
 public final class FilterSelector extends Selector implements Selectee<Item> {
 
-  private static int hashSeed;
   final Selector predicate;
   final Selector then;
 
@@ -67,7 +66,7 @@ public final class FilterSelector extends Selector implements Selectee<Item> {
     interpreter.willSelect(this);
     if (interpreter.scopeDepth() != 0) {
       // If the filter matches the selection scope:
-      if (filterSelected(interpreter)) {
+      if (this.filterSelected(interpreter)) {
         // Then subselect the selection scope.
         selected = this.then.forSelected(interpreter, callback);
       }
@@ -82,7 +81,7 @@ public final class FilterSelector extends Selector implements Selectee<Item> {
     interpreter.willTransform(this);
     if (interpreter.scopeDepth() != 0) {
       // If the filter matches the selection scope:
-      if (filterSelected(interpreter)) {
+      if (this.filterSelected(interpreter)) {
         // Then transform the selection scope.
         result = this.then.mapSelected(interpreter, transform);
       } else {
@@ -114,7 +113,7 @@ public final class FilterSelector extends Selector implements Selectee<Item> {
 
   /**
    * Always returns {@link swim.structure.Extant}, which, crucially, is never
-   * null.  See {@link FilterSelector} for an explanation.
+   * null. See {@link FilterSelector} for an explanation.
    */
   @Override
   public Item selected(Interpreter interpreter) {
@@ -139,9 +138,9 @@ public final class FilterSelector extends Selector implements Selectee<Item> {
   @Override
   protected int compareTo(Selector that) {
     if (that instanceof FilterSelector) {
-      return compareTo((FilterSelector) that);
+      return this.compareTo((FilterSelector) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(FilterSelector that) {
@@ -163,19 +162,22 @@ public final class FilterSelector extends Selector implements Selectee<Item> {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(FilterSelector.class);
+    if (FilterSelector.hashSeed == 0) {
+      FilterSelector.hashSeed = Murmur3.seed(FilterSelector.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(FilterSelector.hashSeed,
         this.predicate.hashCode()), this.then.hashCode()));
   }
 
   @Override
-  public void debugThen(Output<?> output) {
+  public <T> Output<T> debugThen(Output<T> output) {
     output = output.write('.').write("filter").write('(').debug(this.predicate).write(')');
-    this.then.debugThen(output);
+    output = this.then.debugThen(output);
+    return output;
   }
 
 }

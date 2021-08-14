@@ -34,15 +34,15 @@ public interface IpStation extends IpInterface {
   @Override
   default IpServiceRef bindTcp(InetSocketAddress localAddress, IpService service, IpSettings ipSettings) {
     try {
-      final Station station = station();
+      final Station station = this.station();
       final ServerSocketChannel serverChannel = ServerSocketChannel.open();
       serverChannel.configureBlocking(false);
       serverChannel.socket().setReuseAddress(true);
-      serverChannel.socket().bind(localAddress, station().transportSettings.backlog);
+      serverChannel.socket().bind(localAddress, station.transportSettings.backlog);
 
-      final TcpService context = new TcpService(station(), localAddress, serverChannel, service, ipSettings);
+      final TcpService context = new TcpService(station, localAddress, serverChannel, service, ipSettings);
       service.setIpServiceContext(context);
-      station().transport(context, FlowControl.ACCEPT);
+      station.transport(context, FlowControl.ACCEPT);
       context.didBind();
       return context;
     } catch (IOException | UnresolvedAddressException error) {
@@ -53,7 +53,7 @@ public interface IpStation extends IpInterface {
   @Override
   default IpServiceRef bindTls(InetSocketAddress localAddress, IpService service, IpSettings ipSettings) {
     try {
-      final Station station = station();
+      final Station station = this.station();
       final ServerSocketChannel serverChannel = ServerSocketChannel.open();
       serverChannel.configureBlocking(false);
       serverChannel.socket().setReuseAddress(true);
@@ -72,7 +72,7 @@ public interface IpStation extends IpInterface {
   @Override
   default IpSocketRef connectTcp(InetSocketAddress remoteAddress, IpSocket socket, IpSettings ipSettings) {
     try {
-      final Station station = station();
+      final Station station = this.station();
       final SocketChannel channel = SocketChannel.open();
       channel.configureBlocking(false);
       ipSettings.configure(channel.socket());
@@ -97,7 +97,7 @@ public interface IpStation extends IpInterface {
   @Override
   default IpSocketRef connectTls(InetSocketAddress remoteAddress, IpSocket socket, IpSettings ipSettings) {
     try {
-      final Station station = station();
+      final Station station = this.station();
       final SocketChannel channel = SocketChannel.open();
       channel.configureBlocking(false);
       ipSettings.configure(channel.socket());
@@ -112,15 +112,9 @@ public interface IpStation extends IpInterface {
       sslParameters.setServerNames(serverNames);
       sslEngine.setSSLParameters(sslParameters);
       switch (tlsSettings.clientAuth()) {
-        case NEED:
-          sslEngine.setNeedClientAuth(true);
-          break;
-        case WANT:
-          sslEngine.setWantClientAuth(true);
-          break;
-        case NONE:
-          sslEngine.setWantClientAuth(false);
-          break;
+        case NEED: sslEngine.setNeedClientAuth(true); break;
+        case WANT: sslEngine.setWantClientAuth(true); break;
+        case NONE: sslEngine.setWantClientAuth(false); break;
         default:
       }
       final Collection<String> cipherSuites = tlsSettings.cipherSuites();

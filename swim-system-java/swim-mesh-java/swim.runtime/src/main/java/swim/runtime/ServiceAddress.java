@@ -32,7 +32,7 @@ public final class ServiceAddress implements CellAddress, Debug {
   }
 
   public ServiceAddress serviceName(String serviceName) {
-    return copy(serviceName);
+    return this.copy(serviceName);
   }
 
   ServiceAddress copy(String serviceName) {
@@ -50,18 +50,21 @@ public final class ServiceAddress implements CellAddress, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.hash(ServiceAddress.class);
+    if (ServiceAddress.hashSeed == 0) {
+      ServiceAddress.hashSeed = Murmur3.hash(ServiceAddress.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.serviceName.hashCode()));
+    return Murmur3.mash(Murmur3.mix(ServiceAddress.hashSeed, this.serviceName.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("ServiceAddress").write('.').write("from").write('(')
-        .debug(this.serviceName).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("ServiceAddress").write('.').write("create").write('(')
+                   .debug(this.serviceName).write(')');
+    return output;
   }
 
   @Override
@@ -69,9 +72,7 @@ public final class ServiceAddress implements CellAddress, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static ServiceAddress from(String serviceName) {
+  public static ServiceAddress create(String serviceName) {
     return new ServiceAddress(serviceName);
   }
 

@@ -36,6 +36,11 @@ final class HostParser extends Parser<Host> {
     this(null, null, 1);
   }
 
+  @Override
+  public Parser<Host> feed(Input input) {
+    return HostParser.parse(input, this.host, this.port, this.step);
+  }
+
   static Parser<Host> parse(Input input, Parser<UriHost> host, Parser<UriPort> port, int step) {
     if (step == 1) {
       if (host == null) {
@@ -54,7 +59,7 @@ final class HostParser extends Parser<Host> {
         input = input.step();
         step = 3;
       } else if (!input.isEmpty()) {
-        return done(Host.from(host.bind()));
+        return Parser.done(Host.create(host.bind()));
       }
     }
     if (step == 3) {
@@ -64,24 +69,19 @@ final class HostParser extends Parser<Host> {
         port = port.feed(input);
       }
       if (port.isDone()) {
-        return done(Host.from(host.bind(), port.bind()));
+        return Parser.done(Host.create(host.bind(), port.bind()));
       } else if (port.isError()) {
         return port.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new HostParser(host, port, step);
   }
 
   static Parser<Host> parse(Input input) {
-    return parse(input, null, null, 1);
-  }
-
-  @Override
-  public Parser<Host> feed(Input input) {
-    return parse(input, this.host, this.port, this.step);
+    return HostParser.parse(input, null, null, 1);
   }
 
 }

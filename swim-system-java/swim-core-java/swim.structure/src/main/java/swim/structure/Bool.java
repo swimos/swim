@@ -89,9 +89,9 @@ public final class Bool extends Value {
   @Override
   public int compareTo(Item other) {
     if (other instanceof Bool) {
-      return compareTo((Bool) other);
+      return this.compareTo((Bool) other);
     }
-    return Integer.compare(typeOrder(), other.typeOrder());
+    return Integer.compare(this.typeOrder(), other.typeOrder());
   }
 
   int compareTo(Bool that) {
@@ -115,21 +115,23 @@ public final class Bool extends Value {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Bool").write('.').write("from")
-        .write('(').write(this.value ? "true" : "false").write(')');
+                   .write('(').write(this.value ? "true" : "false").write(')');
+    return output;
   }
 
   @Override
-  public void display(Output<?> output) {
+  public <T> Output<T> display(Output<T> output) {
     output = output.write(this.value ? "true" : "false");
-  }
-
-  public static Bool from(boolean value) {
-    return value ? TRUE : FALSE;
+    return output;
   }
 
   private static final Bool TRUE = new Bool(true);
   private static final Bool FALSE = new Bool(false);
+
+  public static Bool from(boolean value) {
+    return value ? Bool.TRUE : Bool.FALSE;
+  }
 
 }

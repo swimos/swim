@@ -16,7 +16,7 @@ package swim.io;
 
 /**
  * I/O transport context that manages asynchronous I/O operations for a
- * non-blocking NIO channel.  A {@code TransportContext} is implicitly bound to
+ * non-blocking NIO channel. A {@code TransportContext} is implicitly bound to
  * a {@link Transport}, providing the {@code Transport} with the ability to
  * modify its {@link FlowControl} state, and to close the transport.
  */

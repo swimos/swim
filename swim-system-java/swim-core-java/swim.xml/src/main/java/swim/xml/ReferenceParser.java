@@ -38,6 +38,11 @@ final class ReferenceParser extends Parser<Object> {
     this.step = step;
   }
 
+  @Override
+  public Parser<Object> feed(Input input) {
+    return ReferenceParser.parse(input, this.xml, this.output, this.nameParser, this.code, this.step);
+  }
+
   static Parser<Object> parse(Input input, XmlParser<?, ?> xml, Output<?> output,
                               Parser<String> nameParser, int code, int step) {
     int c = 0;
@@ -48,10 +53,10 @@ final class ReferenceParser extends Parser<Object> {
           input = input.step();
           step = 2;
         } else {
-          return error(Diagnostic.expected('&', input));
+          return Parser.error(Diagnostic.expected('&', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('&', input));
+        return Parser.error(Diagnostic.expected('&', input));
       }
     }
     if (step == 2) {
@@ -64,7 +69,7 @@ final class ReferenceParser extends Parser<Object> {
           step = 3;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     if (step == 3) {
@@ -86,15 +91,15 @@ final class ReferenceParser extends Parser<Object> {
           input = input.step();
           final boolean expanded = xml.expandEntityRef(nameParser.bind(), output);
           if (expanded) {
-            return done();
+            return Parser.done();
           } else {
-            return error(Diagnostic.message("unrecognized entity: " + nameParser.bind(), input));
+            return Parser.error(Diagnostic.message("unrecognized entity: " + nameParser.bind(), input));
           }
         } else {
-          return error(Diagnostic.expected(';', input));
+          return Parser.error(Diagnostic.expected(';', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected(';', input));
+        return Parser.error(Diagnostic.expected(';', input));
       }
     }
     if (step == 5) {
@@ -107,7 +112,7 @@ final class ReferenceParser extends Parser<Object> {
           step = 8;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.unexpected(input));
+        return Parser.error(Diagnostic.unexpected(input));
       }
     }
     if (step == 6) {
@@ -118,10 +123,10 @@ final class ReferenceParser extends Parser<Object> {
           code = Base16.decodeDigit(c);
           step = 7;
         } else {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("hex digit", input));
+        return Parser.error(Diagnostic.expected("hex digit", input));
       }
     }
     if (step == 7) {
@@ -136,7 +141,7 @@ final class ReferenceParser extends Parser<Object> {
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         } else {
           break;
         }
@@ -150,10 +155,10 @@ final class ReferenceParser extends Parser<Object> {
           code = Base10.decodeDigit(c);
           step = 9;
         } else {
-          return error(Diagnostic.expected("digit", input));
+          return Parser.error(Diagnostic.expected("digit", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("digit", input));
+        return Parser.error(Diagnostic.expected("digit", input));
       }
     }
     if (step == 9) {
@@ -168,7 +173,7 @@ final class ReferenceParser extends Parser<Object> {
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         } else {
           break;
         }
@@ -182,29 +187,24 @@ final class ReferenceParser extends Parser<Object> {
           if (Xml.isChar(code)) {
             output = output.write(code);
           } else {
-            return error(Diagnostic.message("illegal character reference: " + code, input));
+            return Parser.error(Diagnostic.message("illegal character reference: " + code, input));
           }
-          return done();
+          return Parser.done();
         } else {
-          return error(Diagnostic.expected(';', input));
+          return Parser.error(Diagnostic.expected(';', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected(';', input));
+        return Parser.error(Diagnostic.expected(';', input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ReferenceParser(xml, output, nameParser, code, step);
   }
 
   static Parser<Object> parse(Input input, XmlParser<?, ?> xml, Output<?> output) {
-    return parse(input, xml, output, null, 0, 1);
-  }
-
-  @Override
-  public Parser<Object> feed(Input input) {
-    return parse(input, this.xml, this.output, this.nameParser, this.code, this.step);
+    return ReferenceParser.parse(input, xml, output, null, 0, 1);
   }
 
 }

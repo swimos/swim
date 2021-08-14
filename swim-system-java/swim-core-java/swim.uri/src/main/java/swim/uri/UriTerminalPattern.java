@@ -18,15 +18,11 @@ import swim.collections.HashTrieMap;
 
 abstract class UriTerminalPattern extends UriFragmentPattern {
 
-  static UriTerminalPattern compile(Uri pattern) {
-    return new UriConstantPattern(pattern);
-  }
-
   abstract HashTrieMap<String, String> unapply(HashTrieMap<String, String> args);
 
   @Override
   HashTrieMap<String, String> unapply(UriFragment fragment, HashTrieMap<String, String> args) {
-    return unapply(args);
+    return this.unapply(args);
   }
 
   abstract boolean matches();
@@ -34,10 +30,14 @@ abstract class UriTerminalPattern extends UriFragmentPattern {
   @Override
   boolean matches(UriFragment fragment) {
     if (!fragment.isDefined()) {
-      return matches();
+      return this.matches();
     } else {
       return false;
     }
+  }
+
+  static UriTerminalPattern compile(Uri pattern) {
+    return new UriConstantPattern(pattern);
   }
 
 }

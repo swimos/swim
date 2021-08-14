@@ -63,7 +63,7 @@ public class HostScope extends Scope implements HostRef {
 
   @Override
   public NodeRef nodeRef(String nodeUri) {
-    return nodeRef(Uri.parse(nodeUri));
+    return this.nodeRef(Uri.parse(nodeUri));
   }
 
   @Override
@@ -73,13 +73,14 @@ public class HostScope extends Scope implements HostRef {
 
   @Override
   public LaneRef laneRef(String nodeUri, String laneUri) {
-    return laneRef(Uri.parse(nodeUri), Uri.parse(laneUri));
+    return this.laneRef(Uri.parse(nodeUri), Uri.parse(laneUri));
   }
 
   @Override
   public EventDownlink<Value> downlink() {
     return new EventDownlinkView<Value>(this, stage, this.meshUri, this.hostUri,
-        Uri.empty(), Uri.empty(), 0.0f, 0.0f, Value.absent(), Form.forValue());
+                                        Uri.empty(), Uri.empty(), 0.0f, 0.0f,
+                                        Value.absent(), Form.forValue());
   }
 
   @Override
@@ -90,13 +91,15 @@ public class HostScope extends Scope implements HostRef {
   @Override
   public MapDownlink<Value, Value> downlinkMap() {
     return new MapDownlinkView<Value, Value>(this, stage, this.meshUri, this.hostUri,
-        Uri.empty(), Uri.empty(), 0.0f, 0.0f, Value.absent(), Form.forValue(), Form.forValue());
+                                             Uri.empty(), Uri.empty(), 0.0f, 0.0f,
+                                             Value.absent(), Form.forValue(), Form.forValue());
   }
 
   @Override
   public ValueDownlink<Value> downlinkValue() {
     return new ValueDownlinkView<Value>(this, stage, this.meshUri, this.hostUri,
-        Uri.empty(), Uri.empty(), 0.0f, 0.0f, Value.absent(), Form.forValue());
+                                        Uri.empty(), Uri.empty(), 0.0f, 0.0f,
+                                        Value.absent(), Form.forValue());
   }
 
   @Override
@@ -117,42 +120,42 @@ public class HostScope extends Scope implements HostRef {
       meshUri = hostUri;
     }
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
-    pushDown(new Push<CommandMessage>(meshUri, hostUri, nodeUri, laneUri, prio, null, message, cont));
+    this.pushDown(new Push<CommandMessage>(meshUri, hostUri, nodeUri, laneUri, prio, null, message, cont));
   }
 
   @Override
   public void command(String nodeUri, String laneUri, float prio, Value body, Cont<CommandMessage> cont) {
-    command(Uri.parse(nodeUri), Uri.parse(laneUri), prio, body, cont);
+    this.command(Uri.parse(nodeUri), Uri.parse(laneUri), prio, body, cont);
   }
 
   @Override
   public void command(Uri nodeUri, Uri laneUri, Value body, Cont<CommandMessage> cont) {
-    command(nodeUri, laneUri, 0.0f, body, cont);
+    this.command(nodeUri, laneUri, 0.0f, body, cont);
   }
 
   @Override
   public void command(String nodeUri, String laneUri, Value body, Cont<CommandMessage> cont) {
-    command(Uri.parse(nodeUri), Uri.parse(laneUri), body, cont);
+    this.command(Uri.parse(nodeUri), Uri.parse(laneUri), body, cont);
   }
 
   @Override
   public void command(Uri nodeUri, Uri laneUri, float prio, Value body) {
-    command(nodeUri, laneUri, prio, body, null);
+    this.command(nodeUri, laneUri, prio, body, null);
   }
 
   @Override
   public void command(String nodeUri, String laneUri, float prio, Value body) {
-    command(Uri.parse(nodeUri), Uri.parse(laneUri), prio, body, null);
+    this.command(Uri.parse(nodeUri), Uri.parse(laneUri), prio, body, null);
   }
 
   @Override
   public void command(Uri nodeUri, Uri laneUri, Value body) {
-    command(nodeUri, laneUri, 0.0f, body, null);
+    this.command(nodeUri, laneUri, 0.0f, body, null);
   }
 
   @Override
   public void command(String nodeUri, String laneUri, Value body) {
-    command(Uri.parse(nodeUri), Uri.parse(laneUri), body, null);
+    this.command(Uri.parse(nodeUri), Uri.parse(laneUri), body, null);
   }
 
 }

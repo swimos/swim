@@ -21,7 +21,7 @@ public abstract class WatchValueOperator<I> extends AbstractInlet<I> {
   @Override
   protected void onRecohereOutput(int version) {
     if (this.input != null) {
-      evaluate(this.input.get());
+      this.evaluate(this.input.get());
     }
   }
 

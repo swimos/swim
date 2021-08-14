@@ -22,13 +22,13 @@ public abstract class MqttPart {
   public abstract Encoder<?, ?> mqttEncoder(MqttEncoder mqtt);
 
   public Encoder<?, ?> mqttEncoder() {
-    return mqttEncoder(Mqtt.standardEncoder());
+    return this.mqttEncoder(Mqtt.standardEncoder());
   }
 
   public abstract Encoder<?, ?> encodeMqtt(OutputBuffer<?> output, MqttEncoder mqtt);
 
   public Encoder<?, ?> encodeMqtt(OutputBuffer<?> output) {
-    return encodeMqtt(output, Mqtt.standardEncoder());
+    return this.encodeMqtt(output, Mqtt.standardEncoder());
   }
 
 }

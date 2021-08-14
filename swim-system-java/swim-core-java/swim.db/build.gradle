@@ -15,6 +15,6 @@ dependencies {
   api project(':swim-recon')
   api project(':swim-math')
   api project(':swim-spatial')
-  api project(':swim-uri')
   api project(':swim-concurrent')
+  api project(':swim-uri')
 }

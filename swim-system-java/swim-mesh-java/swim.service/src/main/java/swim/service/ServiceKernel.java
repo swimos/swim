@@ -26,10 +26,6 @@ import swim.structure.Value;
 
 public class ServiceKernel extends KernelProxy {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<ServiceKernel, HashTrieMap<String, Service>> SERVICES =
-      AtomicReferenceFieldUpdater.newUpdater(ServiceKernel.class, (Class<HashTrieMap<String, Service>>) (Class<?>) HashTrieMap.class, "services");
-  private static final double KERNEL_PRIORITY = 0.5;
   final double kernelPriority;
   volatile HashTrieMap<String, Service> services;
 
@@ -39,17 +35,7 @@ public class ServiceKernel extends KernelProxy {
   }
 
   public ServiceKernel() {
-    this(KERNEL_PRIORITY);
-  }
-
-  public static ServiceKernel fromValue(Value moduleConfig) {
-    final Value header = moduleConfig.getAttr("kernel");
-    final String kernelClassName = header.get("class").stringValue(null);
-    if (kernelClassName == null || ServiceKernel.class.getName().equals(kernelClassName)) {
-      final double kernelPriority = header.get("priority").doubleValue(KERNEL_PRIORITY);
-      return new ServiceKernel(kernelPriority);
-    }
-    return null;
+    this(ServiceKernel.KERNEL_PRIORITY);
   }
 
   @Override
@@ -58,7 +44,7 @@ public class ServiceKernel extends KernelProxy {
   }
 
   protected ServiceContext createServiceContext(String serviceName) {
-    final KernelContext kernel = kernelWrapper().unwrapKernel(KernelContext.class);
+    final KernelContext kernel = this.kernelWrapper().unwrapKernel(KernelContext.class);
     return new ServicePort(serviceName, kernel);
   }
 
@@ -77,19 +63,19 @@ public class ServiceKernel extends KernelProxy {
     ServiceContext serviceContext = null;
     S service = null;
     do {
-      final HashTrieMap<String, Service> oldServices = this.services;
+      final HashTrieMap<String, Service> oldServices = ServiceKernel.SERVICES.get(this);
       final Service oldService = oldServices.get(serviceName);
       if (oldService == null) {
         if (service == null) {
-          serviceContext = createServiceContext(serviceName);
-          service = createService(serviceContext, serviceFactory);
-          service = (S) kernelWrapper().unwrapKernel(KernelContext.class).injectService(service);
+          serviceContext = this.createServiceContext(serviceName);
+          service = this.createService(serviceContext, serviceFactory);
+          service = (S) this.kernelWrapper().unwrapKernel(KernelContext.class).injectService(service);
           if (serviceContext instanceof ServicePort) {
             ((ServicePort) serviceContext).setService(service);
           }
         }
         final HashTrieMap<String, Service> newServices = oldServices.updated(serviceName, service);
-        if (SERVICES.compareAndSet(this, oldServices, newServices)) {
+        if (ServiceKernel.SERVICES.compareAndSet(this, oldServices, newServices)) {
           if (serviceContext instanceof ServicePort && isStarted()) {
             ((ServicePort) serviceContext).start();
           }
@@ -106,12 +92,12 @@ public class ServiceKernel extends KernelProxy {
 
   @Override
   public Service getService(String serviceName) {
-    return this.services.get(serviceName);
+    return ServiceKernel.SERVICES.get(this).get(serviceName);
   }
 
   @Override
   public void didStart() {
-    for (Service service : this.services.values()) {
+    for (Service service : ServiceKernel.SERVICES.get(this).values()) {
       final ServiceContext serviceContext = service.serviceContext();
       if (serviceContext instanceof ServicePort) {
         ((ServicePort) serviceContext).start();
@@ -121,12 +107,28 @@ public class ServiceKernel extends KernelProxy {
 
   @Override
   public void willStop() {
-    for (Service service : this.services.values()) {
+    for (Service service : ServiceKernel.SERVICES.get(this).values()) {
       final ServiceContext serviceContext = service.serviceContext();
       if (serviceContext instanceof ServicePort) {
         ((ServicePort) serviceContext).stop();
       }
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<ServiceKernel, HashTrieMap<String, Service>> SERVICES =
+      AtomicReferenceFieldUpdater.newUpdater(ServiceKernel.class, (Class<HashTrieMap<String, Service>>) (Class<?>) HashTrieMap.class, "services");
+
+  private static final double KERNEL_PRIORITY = 0.5;
+
+  public static ServiceKernel fromValue(Value moduleConfig) {
+    final Value header = moduleConfig.getAttr("kernel");
+    final String kernelClassName = header.get("class").stringValue(null);
+    if (kernelClassName == null || ServiceKernel.class.getName().equals(kernelClassName)) {
+      final double kernelPriority = header.get("priority").doubleValue(ServiceKernel.KERNEL_PRIORITY);
+      return new ServiceKernel(kernelPriority);
+    }
+    return null;
   }
 
 }

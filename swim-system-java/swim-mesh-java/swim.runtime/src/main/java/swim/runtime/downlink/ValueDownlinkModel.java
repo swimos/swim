@@ -17,8 +17,8 @@ package swim.runtime.downlink;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Stage;
+import swim.runtime.DownlinkModel;
 import swim.runtime.DownlinkRelay;
 import swim.runtime.DownlinkView;
 import swim.runtime.Push;
@@ -31,30 +31,27 @@ import swim.warp.EventMessage;
 
 public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>> {
 
-  protected static final int STATEFUL = 1 << 0;
-  static final AtomicReferenceFieldUpdater<ValueDownlinkModel, Value> STATE =
-      AtomicReferenceFieldUpdater.newUpdater(ValueDownlinkModel.class, Value.class, "state");
-  protected int flags;
   protected volatile Value state;
+  protected int flags;
 
   public ValueDownlinkModel(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
                             float prio, float rate, Value body) {
     super(meshUri, hostUri, nodeUri, laneUri, prio, rate, body);
-    this.flags = 0;
     this.state = Value.absent();
+    this.flags = 0;
   }
 
   public final boolean isStateful() {
-    return (this.flags & STATEFUL) != 0;
+    return (this.flags & ValueDownlinkModel.STATEFUL) != 0;
   }
 
   public ValueDownlinkModel isStateful(boolean isStateful) {
     if (isStateful) {
-      this.flags |= STATEFUL;
+      this.flags |= ValueDownlinkModel.STATEFUL;
     } else {
-      this.flags &= ~STATEFUL;
+      this.flags &= ~ValueDownlinkModel.STATEFUL;
     }
-    final Object views = this.views;
+    final Object views = DownlinkModel.VIEWS.get(this);
     if (views instanceof DownlinkView) {
       ((ValueDownlinkView<?>) views).didSetStateful(isStateful);
     } else if (views instanceof DownlinkView[]) {
@@ -79,7 +76,7 @@ public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>
     final Uri nodeUri = nodeUri();
     final Uri laneUri = laneUri();
     final float prio = prio();
-    final Value body = this.state;
+    final Value body = ValueDownlinkModel.STATE.get(this);
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
     return new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
                                     prio, null, message, null);
@@ -88,13 +85,13 @@ public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>
   @Override
   protected void didAddDownlink(ValueDownlinkView<?> view) {
     super.didAddDownlink(view);
-    if (this.views instanceof DownlinkView) {
-      isStateful(((ValueDownlinkView<?>) view).isStateful());
+    if (DownlinkModel.VIEWS.get(this) instanceof DownlinkView) {
+      this.isStateful(((ValueDownlinkView<?>) view).isStateful());
     }
   }
 
   public Value get() {
-    return this.state;
+    return ValueDownlinkModel.STATE.get(this);
   }
 
   @SuppressWarnings("unchecked")
@@ -134,7 +131,13 @@ public class ValueDownlinkModel extends DemandDownlinkModem<ValueDownlinkView<?>
   }
 
   protected void didSet(Value newValue, Value oldValue) {
+    // hook
   }
+
+  protected static final int STATEFUL = 1 << 0;
+
+  static final AtomicReferenceFieldUpdater<ValueDownlinkModel, Value> STATE =
+      AtomicReferenceFieldUpdater.newUpdater(ValueDownlinkModel.class, Value.class, "state");
 
 }
 
@@ -179,7 +182,7 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
     } else if (phase == 2) {
       if (this.model.isStateful()) {
         do {
-          this.oldValue = this.model.state;
+          this.oldValue = ValueDownlinkModel.STATE.get(this.model);
         } while (this.oldValue != this.newValue && !ValueDownlinkModel.STATE.compareAndSet(this.model, this.oldValue, this.newValue));
       }
       this.model.didSet(this.newValue, this.oldValue);
@@ -203,7 +206,7 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
         if (this.oldObject == null) {
           this.oldObject = valueForm.unit();
         }
-        newObject = valueForm.cast(newValue);
+        this.newObject = valueForm.cast(this.newValue);
       }
       if (preemptive) {
         this.newObject = ((ValueDownlinkView<Object>) view).downlinkWillSet(this.newObject);
@@ -255,7 +258,7 @@ final class ValueDownlinkRelaySet extends DownlinkRelay<ValueDownlinkModel, Valu
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;

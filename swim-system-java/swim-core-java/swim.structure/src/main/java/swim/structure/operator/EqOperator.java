@@ -26,10 +26,8 @@ import swim.util.Murmur3;
  */
 public final class EqOperator extends BinaryOperator {
 
-  private static int hashSeed;
-
-  public EqOperator(Item operand1, Item operand2) {
-    super(operand1, operand2);
+  public EqOperator(Item lhs, Item rhs) {
+    super(lhs, rhs);
   }
 
   @Override
@@ -45,18 +43,18 @@ public final class EqOperator extends BinaryOperator {
   @Override
   public Item evaluate(Interpreter interpreter) {
     interpreter.willOperate(this);
-    final Item argument1 = this.operand1.evaluate(interpreter);
-    final Item argument2 = this.operand2.evaluate(interpreter);
-    final Item result = argument1.eq(argument2);
+    final Item lhs = this.lhs.evaluate(interpreter);
+    final Item rhs = this.rhs.evaluate(interpreter);
+    final Item result = lhs.eq(rhs);
     interpreter.didOperate(this, result);
     return result;
   }
 
   @Override
   public Item substitute(Interpreter interpreter) {
-    final Item argument1 = this.operand1.substitute(interpreter);
-    final Item argument2 = this.operand2.substitute(interpreter);
-    return argument1.eq(argument2);
+    final Item lhs = this.lhs.substitute(interpreter);
+    final Item rhs = this.rhs.substitute(interpreter);
+    return lhs.eq(rhs);
   }
 
   @Override
@@ -67,15 +65,15 @@ public final class EqOperator extends BinaryOperator {
   @Override
   protected int compareTo(Operator that) {
     if (that instanceof EqOperator) {
-      return compareTo((EqOperator) that);
+      return this.compareTo((EqOperator) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(EqOperator that) {
-    int order = this.operand1.compareTo(that.operand1);
+    int order = this.lhs.compareTo(that.lhs);
     if (order == 0) {
-      order = this.operand2.compareTo(that.operand2);
+      order = this.rhs.compareTo(that.rhs);
     }
     return order;
   }
@@ -86,23 +84,26 @@ public final class EqOperator extends BinaryOperator {
       return true;
     } else if (other instanceof EqOperator) {
       final EqOperator that = (EqOperator) other;
-      return this.operand1.equals(that.operand1) && this.operand2.equals(that.operand2);
+      return this.lhs.equals(that.lhs) && this.rhs.equals(that.rhs);
     }
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(EqOperator.class);
+    if (EqOperator.hashSeed == 0) {
+      EqOperator.hashSeed = Murmur3.seed(EqOperator.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
-        this.operand1.hashCode()), this.operand2.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(EqOperator.hashSeed,
+        this.lhs.hashCode()), this.rhs.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.debug(this.operand1).write('.').write("eq").write('(').debug(this.operand2).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.debug(this.lhs).write('.').write("eq").write('(').debug(this.rhs).write(')');
+    return output;
   }
 
 }

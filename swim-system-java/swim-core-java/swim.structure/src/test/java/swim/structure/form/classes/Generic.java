@@ -42,7 +42,7 @@ public class Generic<T> {
 
   @Override
   public int hashCode() {
-    return Murmur3.hash(value);
+    return Murmur3.hash(this.value);
   }
 
   @Override

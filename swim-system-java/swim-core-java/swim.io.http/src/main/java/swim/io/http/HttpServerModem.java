@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.codec.Decoder;
 import swim.codec.Utf8;
 import swim.collections.FingerTrieSeq;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.http.Http;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
@@ -34,12 +34,6 @@ import swim.io.IpSocket;
 
 public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>, HttpServerContext {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<HttpServerModem, HttpServerResponder<?>> REQUESTING =
-      AtomicReferenceFieldUpdater.newUpdater(HttpServerModem.class, (Class<HttpServerResponder<?>>) (Class<?>) HttpServerResponder.class, "requesting");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<HttpServerModem, FingerTrieSeq<HttpServerResponder<?>>> RESPONDERS =
-      AtomicReferenceFieldUpdater.newUpdater(HttpServerModem.class, (Class<FingerTrieSeq<HttpServerResponder<?>>>) (Class<?>) FingerTrieSeq.class, "responders");
   protected final HttpServer server;
   protected final HttpSettings httpSettings;
   protected IpModemContext<HttpRequest<?>, HttpResponse<?>> context;
@@ -75,10 +69,10 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
 
   @Override
   public void didRead(HttpRequest<?> request) {
-    if (REQUESTING.get(this) == null) {
-      willRequest(request);
+    if (HttpServerModem.REQUESTING.get(this) == null) {
+      this.willRequest(request);
     } else {
-      didRequest(request);
+      this.didRequest(request);
     }
   }
 
@@ -89,7 +83,7 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
 
   @Override
   public void didWrite(HttpResponse<?> response) {
-    didRespond(response);
+    this.didRespond(response);
   }
 
   @Override
@@ -125,11 +119,11 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
   @Override
   public void didTimeout() {
     Throwable failure = null;
-    for (HttpServerResponder<?> responderContext : RESPONDERS.get(this)) {
+    for (HttpServerResponder<?> responderContext : HttpServerModem.RESPONDERS.get(this)) {
       try {
         responderContext.didTimeout();
       } catch (Throwable cause) {
-        if (!Conts.isNonFatal(cause)) {
+        if (!Cont.isNonFatal(cause)) {
           throw cause;
         }
         failure = cause;
@@ -147,15 +141,15 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
   public void didDisconnect() {
     Throwable failure = null;
     do {
-      final FingerTrieSeq<HttpServerResponder<?>> oldResponders = RESPONDERS.get(this);
+      final FingerTrieSeq<HttpServerResponder<?>> oldResponders = HttpServerModem.RESPONDERS.get(this);
       final FingerTrieSeq<HttpServerResponder<?>> newResponders = FingerTrieSeq.empty();
       if (oldResponders != newResponders) {
-        if (RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
+        if (HttpServerModem.RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
           for (HttpServerResponder<?> responderContext : oldResponders) {
             try {
               responderContext.didDisconnect();
             } catch (Throwable cause) {
-              if (!Conts.isNonFatal(cause)) {
+              if (!Cont.isNonFatal(cause)) {
                 throw cause;
               }
               failure = cause;
@@ -170,12 +164,12 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
     try {
       this.server.didDisconnect();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
     }
-    close();
+    this.close();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -187,15 +181,15 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
   public void didFail(Throwable error) {
     Throwable failure = null;
     do {
-      final FingerTrieSeq<HttpServerResponder<?>> oldResponders = RESPONDERS.get(this);
+      final FingerTrieSeq<HttpServerResponder<?>> oldResponders = HttpServerModem.RESPONDERS.get(this);
       final FingerTrieSeq<HttpServerResponder<?>> newResponders = FingerTrieSeq.empty();
       if (oldResponders != newResponders) {
-        if (RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
+        if (HttpServerModem.RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
           for (HttpServerResponder<?> responderContext : oldResponders) {
             try {
               responderContext.didFail(error);
             } catch (Throwable cause) {
-              if (!Conts.isNonFatal(cause)) {
+              if (!Cont.isNonFatal(cause)) {
                 throw cause;
               }
               failure = cause;
@@ -208,14 +202,14 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
       }
     } while (true);
     try {
-      server.didFail(error);
+      this.server.didFail(error);
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
     }
-    close();
+    this.close();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -307,7 +301,7 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
 
   @Override
   public void readRequest() {
-    doReadRequestMessage();
+    this.doReadRequestMessage();
   }
 
   @Override
@@ -328,7 +322,7 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
     if (entityDecoder.isCont()) {
       this.context.read(entityDecoder);
     } else {
-      didRead(entityDecoder.bind());
+      this.didRead(entityDecoder.bind());
     }
   }
 
@@ -337,13 +331,13 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
     final HttpResponder<?> responder = this.server.doRequest(request);
     final HttpServerResponder<?> responderContext = new HttpServerResponder<Object>(this, (HttpResponder<Object>) responder);
     responder.setHttpResponderContext(responderContext);
-    if (!REQUESTING.compareAndSet(this, null, responderContext)) {
+    if (!HttpServerModem.REQUESTING.compareAndSet(this, null, responderContext)) {
       throw new AssertionError();
     }
     do {
-      final FingerTrieSeq<HttpServerResponder<?>> oldResponders = RESPONDERS.get(this);
+      final FingerTrieSeq<HttpServerResponder<?>> oldResponders = HttpServerModem.RESPONDERS.get(this);
       final FingerTrieSeq<HttpServerResponder<?>> newResponders = oldResponders.appended(responderContext);
-      if (RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
+      if (HttpServerModem.RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
         this.server.willRequest(request);
         responderContext.willRequest(request);
         if (oldResponders.isEmpty()) {
@@ -355,27 +349,27 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
   }
 
   void didRequest(HttpRequest<?> request) {
-    final HttpServerResponder<?> responderContext = REQUESTING.getAndSet(this, null);
+    final HttpServerResponder<?> responderContext = HttpServerModem.REQUESTING.getAndSet(this, null);
     responderContext.didRequest(request);
     this.server.didRequest(request);
     responderContext.doRespond(request);
   }
 
   void doWriteResponse(HttpResponse<?> response) {
-    willRespond(response);
+    this.willRespond(response);
     this.context.write(response.httpEncoder());
   }
 
   void willRespond(HttpResponse<?> response) {
     this.server.willRespond(response);
-    RESPONDERS.get(this).head().willRespond(response);
+    HttpServerModem.RESPONDERS.get(this).head().willRespond(response);
   }
 
   void didRespond(HttpResponse<?> response) {
     do {
-      final FingerTrieSeq<HttpServerResponder<?>> oldResponders = RESPONDERS.get(this);
+      final FingerTrieSeq<HttpServerResponder<?>> oldResponders = HttpServerModem.RESPONDERS.get(this);
       final FingerTrieSeq<HttpServerResponder<?>> newResponders = oldResponders.tail();
-      if (RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
+      if (HttpServerModem.RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
         final HttpServerResponder<?> responderContext = oldResponders.head();
         responderContext.didRespond(response);
         this.server.didRespond(response);
@@ -386,5 +380,12 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
       }
     } while (true);
   }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<HttpServerModem, HttpServerResponder<?>> REQUESTING =
+      AtomicReferenceFieldUpdater.newUpdater(HttpServerModem.class, (Class<HttpServerResponder<?>>) (Class<?>) HttpServerResponder.class, "requesting");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<HttpServerModem, FingerTrieSeq<HttpServerResponder<?>>> RESPONDERS =
+      AtomicReferenceFieldUpdater.newUpdater(HttpServerModem.class, (Class<FingerTrieSeq<HttpServerResponder<?>>>) (Class<?>) FingerTrieSeq.class, "responders");
 
 }

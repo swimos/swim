@@ -42,6 +42,11 @@ final class SecWebSocketExtensionsParser extends Parser<SecWebSocketExtensions> 
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<SecWebSocketExtensions> feed(Input input) {
+    return SecWebSocketExtensionsParser.parse(input, this.http, this.extension, this.extensions, this.step);
+  }
+
   static Parser<SecWebSocketExtensions> parse(Input input, HttpParser http, Parser<WebSocketExtension> extension,
                                               Builder<WebSocketExtension, FingerTrieSeq<WebSocketExtension>> extensions, int step) {
     int c = 0;
@@ -76,7 +81,7 @@ final class SecWebSocketExtensionsParser extends Parser<SecWebSocketExtensions> 
           input = input.step();
           step = 3;
         } else if (!input.isEmpty()) {
-          return done(SecWebSocketExtensions.from(extensions.bind()));
+          return Parser.done(SecWebSocketExtensions.create(extensions.bind()));
         }
       }
       if (step == 3) {
@@ -91,7 +96,7 @@ final class SecWebSocketExtensionsParser extends Parser<SecWebSocketExtensions> 
         if (input.isCont()) {
           step = 4;
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
@@ -112,18 +117,13 @@ final class SecWebSocketExtensionsParser extends Parser<SecWebSocketExtensions> 
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new SecWebSocketExtensionsParser(http, extension, extensions, step);
   }
 
   static Parser<SecWebSocketExtensions> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<SecWebSocketExtensions> feed(Input input) {
-    return parse(input, this.http, this.extension, this.extensions, this.step);
+    return SecWebSocketExtensionsParser.parse(input, http, null, null, 1);
   }
 
 }

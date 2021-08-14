@@ -17,7 +17,6 @@ package swim.db;
 import swim.codec.Output;
 import swim.codec.Unicode;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.recon.Recon;
 import swim.spatial.BitInterval;
 import swim.structure.Num;
@@ -37,81 +36,6 @@ public final class QTreeLeaf extends QTreePage {
     this.pageRef = pageRef;
     this.version = version;
     this.slots = slots;
-  }
-
-  public static QTreeLeaf create(PageContext context, int stem, long version, int zone,
-                                 long base, long x, long y, Value fold, Slot[] slots) {
-    final QTreePageRef pageRef = new QTreePageRef(context, PageType.LEAF, stem, zone,
-        zone, base, slots.length, x, y, fold);
-    final QTreeLeaf page = new QTreeLeaf(pageRef, version, slots);
-    pageRef.page = page;
-    return page;
-  }
-
-  public static QTreeLeaf create(PageContext context, int stem, long version,
-                                 long x, long y, Value fold, Slot[] slots) {
-    return create(context, stem, version, 0, 0L, x, y, fold, slots);
-  }
-
-  public static QTreeLeaf create(PageContext context, int stem, long version,
-                                 Value fold, Slot[] slots) {
-    int xRank = 0;
-    int yRank = 0;
-    long xBase = 0L;
-    long yBase = 0L;
-    long xMask = -1L;
-    long yMask = -1L;
-    for (int i = 0, n = slots.length; i < n; i += 1) {
-      final Value tile = slots[i].toValue().header("tile");
-      final long xt = tile.getItem(0).longValue();
-      final long yt = tile.getItem(1).longValue();
-      final int xtRank = Long.numberOfLeadingZeros(~xt);
-      final int ytRank = Long.numberOfLeadingZeros(~yt);
-      final long xtBase = xt << xtRank;
-      final long ytBase = yt << ytRank;
-      xRank = Math.max(xRank, xtRank);
-      yRank = Math.max(yRank, ytRank);
-      xBase |= xtBase;
-      yBase |= ytBase;
-      xMask &= xtBase;
-      yMask &= ytBase;
-    }
-    xMask ^= xBase;
-    yMask ^= yBase;
-    xRank = Math.max(xRank, 64 - Long.numberOfLeadingZeros(xMask));
-    yRank = Math.max(yRank, 64 - Long.numberOfLeadingZeros(yMask));
-    xMask = ~((1L << xRank) - 1L);
-    yMask = ~((1L << yRank) - 1L);
-    xBase &= xMask;
-    yBase &= yMask;
-    final long x = BitInterval.from(xRank, xBase);
-    final long y = BitInterval.from(yRank, yBase);
-    return create(context, stem, version, 0, 0L, x, y, fold, slots);
-  }
-
-  public static QTreeLeaf empty(PageContext context, int stem, long version) {
-    return create(context, stem, version, 0, 0L, -1L, -1L, Value.absent(), EMPTY_SLOTS);
-  }
-
-  public static QTreeLeaf fromValue(QTreePageRef pageRef, Value value) {
-    Throwable cause = null;
-    try {
-      final Value header = value.header("qleaf");
-      final long version = header.get("v").longValue();
-      final Record tail = value.tail();
-      final Slot[] slots = new Slot[tail.size()];
-      tail.toArray(slots);
-      return new QTreeLeaf(pageRef, version, slots);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        cause = error;
-      } else {
-        throw error;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed qleaf: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), cause);
   }
 
   @Override
@@ -188,16 +112,16 @@ public final class QTreeLeaf extends QTreePage {
   }
 
   boolean containsKey(Value key) {
-    return lookup(key) >= 0;
+    return this.lookup(key) >= 0;
   }
 
   @Override
   public boolean containsKey(Value key, long xk, long yk) {
-    return containsKey(key);
+    return this.containsKey(key);
   }
 
   Value get(Value key) {
-    final int i = lookup(key);
+    final int i = this.lookup(key);
     if (i >= 0) {
       return this.slots[i].toValue().body();
     } else {
@@ -207,29 +131,29 @@ public final class QTreeLeaf extends QTreePage {
 
   @Override
   public Value get(Value key, long xk, long yk) {
-    return get(key);
+    return this.get(key);
   }
 
   @Override
   public QTreeLeaf updated(Value key, long xk, long yk, Value newValue,
                            long newVersion, boolean canSplit) {
-    int i = lookup(key);
+    int i = this.lookup(key);
     if (i >= 0) {
-      return updatedSlot(i, key, xk, yk, newValue, newVersion);
+      return this.updatedSlot(i, key, xk, yk, newValue, newVersion);
     } else {
       i = -(i + 1);
-      return insertedSlot(i, key, xk, yk, newValue, newVersion);
+      return this.insertedSlot(i, key, xk, yk, newValue, newVersion);
     }
   }
 
   @Override
   QTreeLeaf updatedSlot(Slot newSlot, long newVersion) {
-    int i = lookup(newSlot.key());
+    int i = this.lookup(newSlot.key());
     if (i >= 0) {
-      return updatedSlot(i, newSlot, newVersion);
+      return this.updatedSlot(i, newSlot, newVersion);
     } else {
       i = -(i + 1);
-      return insertedSlot(i, newSlot, newVersion);
+      return this.insertedSlot(i, newSlot, newVersion);
     }
   }
 
@@ -241,7 +165,7 @@ public final class QTreeLeaf extends QTreePage {
       final Slot[] newSlots = new Slot[n];
       System.arraycopy(oldSlots, 0, newSlots, 0, n);
       newSlots[i] = newSlot.commit();
-      return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+      return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
     } else {
       return this;
     }
@@ -254,7 +178,7 @@ public final class QTreeLeaf extends QTreePage {
     System.arraycopy(oldSlots, 0, newSlots, 0, i);
     newSlots[i] = newSlot.commit();
     System.arraycopy(oldSlots, i, newSlots, i + 1, n - (i + 1));
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   QTreeLeaf updatedSlot(int i, Value key, long xk, long yk, Value newValue, long newVersion) {
@@ -268,7 +192,7 @@ public final class QTreeLeaf extends QTreePage {
       final Slot[] newSlots = new Slot[n];
       System.arraycopy(oldSlots, 0, newSlots, 0, n);
       newSlots[i] = slot(key, xk, yk, newValue);
-      return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+      return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
     } else {
       return this;
     }
@@ -281,25 +205,25 @@ public final class QTreeLeaf extends QTreePage {
     System.arraycopy(oldSlots, 0, newSlots, 0, i);
     newSlots[i] = slot(key, xk, yk, newValue);
     System.arraycopy(oldSlots, i, newSlots, i + 1, n - (i + 1));
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   @Override
   QTreeLeaf insertedPageRef(QTreePageRef newPageRef, long newVersion) {
-    return mergedPage(newPageRef.page(), newVersion);
+    return this.mergedPage(newPageRef.page(), newVersion);
   }
 
   @Override
   QTreeLeaf mergedPage(QTreePage newPage, long newVersion) {
     if (newPage.isLeaf()) {
-      return mergedLeaf((QTreeLeaf) newPage, newVersion);
+      return this.mergedLeaf((QTreeLeaf) newPage, newVersion);
     } else {
-      return mergedNode(newPage, newVersion);
+      return this.mergedNode(newPage, newVersion);
     }
   }
 
   QTreeLeaf mergedLeaf(QTreeLeaf newPage, long newVersion) {
-    return mergedSlots(newPage.slots, newVersion);
+    return this.mergedSlots(newPage.slots, newVersion);
   }
 
   QTreeLeaf mergedNode(QTreePage newPage, long newVersion) {
@@ -313,8 +237,8 @@ public final class QTreeLeaf extends QTreePage {
       newSlots[i] = cursor.next();
       i += 1;
     }
-    BitInterval.sort(newSlots, SLOT_ORDERING);
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    BitInterval.sort(newSlots, QTreePage.SLOT_ORDERING);
+    return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   @Override
@@ -323,18 +247,18 @@ public final class QTreeLeaf extends QTreePage {
     final Slot[] newSlots = new Slot[oldSlots.length + subSlots.length];
     System.arraycopy(oldSlots, 0, newSlots, 0, oldSlots.length);
     System.arraycopy(subSlots, 0, newSlots, oldSlots.length, subSlots.length);
-    BitInterval.sort(newSlots, SLOT_ORDERING);
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    BitInterval.sort(newSlots, QTreePage.SLOT_ORDERING);
+    return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   @Override
   public QTreeLeaf removed(Value key, long xk, long yk, long newVersion) {
-    final int i = lookup(key);
+    final int i = this.lookup(key);
     if (i >= 0) {
       if (this.slots.length > 1) {
-        return removedSlot(i, newVersion);
+        return this.removedSlot(i, newVersion);
       } else {
-        return empty(this.pageRef.context, this.pageRef.stem, newVersion);
+        return QTreeLeaf.empty(this.pageRef.context, this.pageRef.stem, newVersion);
       }
     } else {
       return this;
@@ -347,7 +271,7 @@ public final class QTreeLeaf extends QTreePage {
     final Slot[] newSlots = new Slot[n];
     System.arraycopy(oldSlots, 0, newSlots, 0, i);
     System.arraycopy(oldSlots, i + 1, newSlots, i, n - i);
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   @Override
@@ -358,7 +282,7 @@ public final class QTreeLeaf extends QTreePage {
   @Override
   public QTreePage balanced(long newVersion) {
     if (this.slots.length > 1 && this.pageRef.context.pageShouldSplit(this)) {
-      return split(newVersion);
+      return this.split(newVersion);
     } else {
       return this;
     }
@@ -704,9 +628,9 @@ public final class QTreeLeaf extends QTreePage {
         System.arraycopy(slots00, 0, newSlots00, 0, slotCount00);
         slots00 = newSlots00;
       }
-      BitInterval.sort(slots00, SLOT_ORDERING);
-      pageRefs[pageRefOffset] = create(this.pageRef.context, this.pageRef.stem,
-          newVersion, x00, y00, Value.absent(), slots00).pageRef();
+      BitInterval.sort(slots00, QTreePage.SLOT_ORDERING);
+      pageRefs[pageRefOffset] = QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                                                 x00, y00, Value.absent(), slots00).pageRef();
       pageRefOffset += 1;
     }
     if (slotCount01 > 0) {
@@ -715,9 +639,9 @@ public final class QTreeLeaf extends QTreePage {
         System.arraycopy(slots01, 0, newSlots01, 0, slotCount01);
         slots01 = newSlots01;
       }
-      BitInterval.sort(slots01, SLOT_ORDERING);
-      pageRefs[pageRefOffset] = create(this.pageRef.context, this.pageRef.stem,
-          newVersion, x01, y01, Value.absent(), slots01).pageRef();
+      BitInterval.sort(slots01, QTreePage.SLOT_ORDERING);
+      pageRefs[pageRefOffset] = QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                                                 x01, y01, Value.absent(), slots01).pageRef();
       pageRefOffset += 1;
     }
     if (slotCount10 > 0) {
@@ -726,9 +650,9 @@ public final class QTreeLeaf extends QTreePage {
         System.arraycopy(slots10, 0, newSlots10, 0, slotCount10);
         slots10 = newSlots10;
       }
-      BitInterval.sort(slots10, SLOT_ORDERING);
-      pageRefs[pageRefOffset] = create(this.pageRef.context, this.pageRef.stem,
-          newVersion, x10, y10, Value.absent(), slots10).pageRef();
+      BitInterval.sort(slots10, QTreePage.SLOT_ORDERING);
+      pageRefs[pageRefOffset] = QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                                                 x10, y10, Value.absent(), slots10).pageRef();
       pageRefOffset += 1;
     }
     if (slotCount11 > 0) {
@@ -737,24 +661,24 @@ public final class QTreeLeaf extends QTreePage {
         System.arraycopy(slots11, 0, newSlots11, 0, slotCount11);
         slots11 = newSlots11;
       }
-      BitInterval.sort(slots11, SLOT_ORDERING);
-      pageRefs[pageRefOffset] = create(this.pageRef.context, this.pageRef.stem,
-          newVersion, x11, y11, Value.absent(), slots11).pageRef();
+      BitInterval.sort(slots11, QTreePage.SLOT_ORDERING);
+      pageRefs[pageRefOffset] = QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                                                 x11, y11, Value.absent(), slots11).pageRef();
       pageRefOffset += 1;
     }
-    BitInterval.sort(pageRefs, PAGE_REF_ORDERING);
+    BitInterval.sort(pageRefs, QTreePage.PAGE_REF_ORDERING);
 
     if (slotCountXY == 0) {
-      slotsXY = EMPTY_SLOTS;
+      slotsXY = QTreePage.EMPTY_SLOTS;
     } else if (slotCountXY < slotCount) {
       final Slot[] newSlotsXY = new Slot[slotCountXY];
       System.arraycopy(slotsXY, 0, newSlotsXY, 0, slotCountXY);
       slotsXY = newSlotsXY;
     }
-    BitInterval.sort(slotsXY, SLOT_ORDERING);
+    BitInterval.sort(slotsXY, QTreePage.SLOT_ORDERING);
 
-    return QTreeNode.create(this.pageRef.context, this.pageRef.stem,
-        newVersion, this.pageRef.span, Value.absent(), pageRefs, slotsXY);
+    return QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            this.pageRef.span, Value.absent(), pageRefs, slotsXY);
   }
 
   @Override
@@ -785,15 +709,14 @@ public final class QTreeLeaf extends QTreePage {
 
   @Override
   public Value toHeader() {
-    final Record header = Record.create(2)
-        .slot("stem", this.pageRef.stem)
-        .slot("v", this.version);
+    final Record header = Record.create(2).slot("stem", this.pageRef.stem)
+                                          .slot("v", this.version);
     return Record.create(1).attr("qleaf", header);
   }
 
   @Override
   public Value toValue() {
-    final Record record = (Record) toHeader();
+    final Record record = (Record) this.toHeader();
     final Slot[] slots = this.slots;
     for (int i = 0, n = slots.length; i < n; i += 1) {
       record.add(slots[i]);
@@ -809,16 +732,16 @@ public final class QTreeLeaf extends QTreePage {
     for (int i = 0, n = slots.length; i < n; i += 1) {
       fold = accumulator.combine(fold, slots[i].value());
     }
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        this.pageRef.x, this.pageRef.y, fold, slots);
+    return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            this.pageRef.x, this.pageRef.y, fold, slots);
   }
 
   @Override
   public QTreeLeaf evacuated(int post, long version) {
     final int oldPost = this.pageRef.post;
     if (oldPost != 0 && oldPost < post) {
-      return create(this.pageRef.context, this.pageRef.stem, version,
-          this.pageRef.x, this.pageRef.y, this.pageRef.fold, this.slots);
+      return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, version,
+                              this.pageRef.x, this.pageRef.y, this.pageRef.fold, this.slots);
     } else {
       return this;
     }
@@ -826,20 +749,20 @@ public final class QTreeLeaf extends QTreePage {
 
   @Override
   public QTreeLeaf committed(int zone, long base, long version) {
-    return create(this.pageRef.context, this.pageRef.stem, version, zone, base,
-        this.pageRef.x, this.pageRef.y, this.pageRef.fold, this.slots);
+    return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, version, zone, base,
+                            this.pageRef.x, this.pageRef.y, this.pageRef.fold, this.slots);
   }
 
   @Override
   public QTreeLeaf uncommitted(long version) {
-    return create(this.pageRef.context, this.pageRef.stem, version,
-        this.pageRef.x, this.pageRef.y, this.pageRef.fold, this.slots);
+    return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, version,
+                            this.pageRef.x, this.pageRef.y, this.pageRef.fold, this.slots);
   }
 
   @Override
   public void writePage(Output<?> output) {
-    Recon.write(toHeader(), output);
-    writePageContent(output);
+    Recon.write(this.toHeader(), output);
+    this.writePageContent(output);
     output.write('\n');
   }
 
@@ -859,16 +782,16 @@ public final class QTreeLeaf extends QTreePage {
 
   @Override
   public void writeDiff(Output<?> output) {
-    writePage(output);
+    this.writePage(output);
   }
 
   @Override
   public void loadTreeAsync(PageLoader pageLoader, Cont<Page> future) {
     try {
       // Call continuation on fresh stack
-      this.pageRef.context.stage().execute(Conts.async(future, this));
+      this.pageRef.context.stage().execute(Cont.async(future, this));
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         future.trap(cause);
       } else {
         throw cause;
@@ -888,13 +811,13 @@ public final class QTreeLeaf extends QTreePage {
 
   @Override
   public Cursor<Slot> depthCursor(long x, long y, int maxDepth) {
-    return cursor(x, y);
+    return this.cursor(x, y);
   }
 
   @Override
   public Cursor<Slot> deltaCursor(long x, long y, long sinceVersion) {
-    if (sinceVersion <= version) {
-      return cursor(x, y);
+    if (sinceVersion <= this.version) {
+      return this.cursor(x, y);
     } else {
       return Cursor.empty();
     }
@@ -907,10 +830,85 @@ public final class QTreeLeaf extends QTreePage {
 
   @Override
   public String toString() {
-    final Output<String> output = Unicode.stringOutput(pageSize() - 1); // ignore trailing '\n'
-    Recon.write(toHeader(), output);
-    writePageContent(output);
+    final Output<String> output = Unicode.stringOutput(this.pageSize() - 1); // ignore trailing '\n'
+    Recon.write(this.toHeader(), output);
+    this.writePageContent(output);
     return output.bind();
+  }
+
+  public static QTreeLeaf create(PageContext context, int stem, long version, int zone,
+                                 long base, long x, long y, Value fold, Slot[] slots) {
+    final QTreePageRef pageRef = new QTreePageRef(context, PageType.LEAF, stem, zone,
+                                                  zone, base, slots.length, x, y, fold);
+    final QTreeLeaf page = new QTreeLeaf(pageRef, version, slots);
+    pageRef.page = page;
+    return page;
+  }
+
+  public static QTreeLeaf create(PageContext context, int stem, long version,
+                                 long x, long y, Value fold, Slot[] slots) {
+    return QTreeLeaf.create(context, stem, version, 0, 0L, x, y, fold, slots);
+  }
+
+  public static QTreeLeaf create(PageContext context, int stem, long version,
+                                 Value fold, Slot[] slots) {
+    int xRank = 0;
+    int yRank = 0;
+    long xBase = 0L;
+    long yBase = 0L;
+    long xMask = -1L;
+    long yMask = -1L;
+    for (int i = 0, n = slots.length; i < n; i += 1) {
+      final Value tile = slots[i].toValue().header("tile");
+      final long xt = tile.getItem(0).longValue();
+      final long yt = tile.getItem(1).longValue();
+      final int xtRank = Long.numberOfLeadingZeros(~xt);
+      final int ytRank = Long.numberOfLeadingZeros(~yt);
+      final long xtBase = xt << xtRank;
+      final long ytBase = yt << ytRank;
+      xRank = Math.max(xRank, xtRank);
+      yRank = Math.max(yRank, ytRank);
+      xBase |= xtBase;
+      yBase |= ytBase;
+      xMask &= xtBase;
+      yMask &= ytBase;
+    }
+    xMask ^= xBase;
+    yMask ^= yBase;
+    xRank = Math.max(xRank, 64 - Long.numberOfLeadingZeros(xMask));
+    yRank = Math.max(yRank, 64 - Long.numberOfLeadingZeros(yMask));
+    xMask = ~((1L << xRank) - 1L);
+    yMask = ~((1L << yRank) - 1L);
+    xBase &= xMask;
+    yBase &= yMask;
+    final long x = BitInterval.from(xRank, xBase);
+    final long y = BitInterval.from(yRank, yBase);
+    return QTreeLeaf.create(context, stem, version, 0, 0L, x, y, fold, slots);
+  }
+
+  public static QTreeLeaf empty(PageContext context, int stem, long version) {
+    return QTreeLeaf.create(context, stem, version, 0, 0L, -1L, -1L, Value.absent(), QTreePage.EMPTY_SLOTS);
+  }
+
+  public static QTreeLeaf fromValue(QTreePageRef pageRef, Value value) {
+    Throwable cause = null;
+    try {
+      final Value header = value.header("qleaf");
+      final long version = header.get("v").longValue();
+      final Record tail = value.tail();
+      final Slot[] slots = new Slot[tail.size()];
+      tail.toArray(slots);
+      return new QTreeLeaf(pageRef, version, slots);
+    } catch (Throwable error) {
+      if (Cont.isNonFatal(error)) {
+        cause = error;
+      } else {
+        throw error;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed qleaf: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), cause);
   }
 
 }

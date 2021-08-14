@@ -16,8 +16,6 @@ package swim.uri;
 
 public class UriException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public UriException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class UriException extends RuntimeException {
   public UriException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

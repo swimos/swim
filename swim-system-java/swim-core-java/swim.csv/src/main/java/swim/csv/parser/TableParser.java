@@ -38,6 +38,11 @@ final class TableParser<T, R, C> extends Parser<T> {
     this(csv, header, null, 1);
   }
 
+  @Override
+  public Parser<T> feed(Input input) {
+    return TableParser.parse(input, this.csv, this.header, this.headerParser, this.step);
+  }
+
   static <T, R, C> Parser<T> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header,
                                    Parser<CsvHeader<T, R, C>> headerParser, int step) {
     int c = 0;
@@ -64,10 +69,10 @@ final class TableParser<T, R, C> extends Parser<T> {
           input = input.step();
           return csv.parseBody(headerParser.bind(), input);
         } else {
-          return error(Diagnostic.expected("carriage return or line feed", input));
+          return Parser.error(Diagnostic.expected("carriage return or line feed", input));
         }
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected("carriage return or line feed", input));
+        return Parser.error(Diagnostic.expected("carriage return or line feed", input));
       }
     }
     if (step == 3) {
@@ -79,18 +84,13 @@ final class TableParser<T, R, C> extends Parser<T> {
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new TableParser<T, R, C>(csv, header, headerParser, step);
   }
 
   static <T, R, C> Parser<T> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header) {
-    return parse(input, csv, header, null, 1);
-  }
-
-  @Override
-  public Parser<T> feed(Input input) {
-    return parse(input, this.csv, this.header, this.headerParser, this.step);
+    return TableParser.parse(input, csv, header, null, 1);
   }
 
 }

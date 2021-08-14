@@ -20,102 +20,68 @@ package swim.codec;
  * and data formats, without intermediate buffering.
  *
  * <h3>Output tokens</h3>
- * <p>A {@code Writer} writes tokens to an {@code Output} writer.  Output
+ * <p>A {@code Writer} writes tokens to an {@code Output} writer. Output
  * tokens are modeled as primitive {@code int}s, commonly representing Unicode
- * code points, or raw octets.  Each {@code Writer} implementation specifies
+ * code points, or raw octets. Each {@code Writer} implementation specifies
  * the semantic type of output tokens it produces.</p>
  *
  * <h3>Writer states</h3>
  * <p>A {@code Writer} is always in one of three states: <em>cont</em>inue,
- * <em>done</em>, or <em>error</em>.  The <em>cont</em> state indicates that
+ * <em>done</em>, or <em>error</em>. The <em>cont</em> state indicates that
  * {@link #pull(Output) pull} is ready to produce {@code Output}; the
  * <em>done</em> state indicates that writing terminated successfully, and that
  * {@link #bind() bind} will return the written result; the <em>error</em>
  * state indicates that writing terminated in failure, and that {@link #trap()
- * trap} will return the write error.  {@code Writer} subclasses default to the
+ * trap} will return the write error. {@code Writer} subclasses default to the
  * <em>cont</em> state.</p>
  *
  * <h3>Feeding input</h3>
  * <p>The {@link #feed(Object) feed(I)} method returns a {@code Writer} that
  * represents the continuation of how to write the given input object to
- * subsequent {@code Output} writers.  {@code feed} can be used to specify
+ * subsequent {@code Output} writers. {@code feed} can be used to specify
  * an initial object to write, or to change the object to be written.</p>
  *
  * <h3>Pulling output</h3>
  * <p>The {@link #pull(Output)} method incrementally writes as much {@code
  * Output} as it can, before returning another {@code Writer} that represents
- * the continuation of how to write additional {@code Output}.  The {@code
+ * the continuation of how to write additional {@code Output}. The {@code
  * Output} passed to {@code pull} is only guaranteed to be valid for the
  * duration of the method call; references to the provided {@code Output}
  * instance must not be stored.</p>
  *
  * <h3>Writer results</h3>
  * <p>A {@code Writer} produces a written result of type {@code O}, obtained
- * via the {@link #bind()} method.  {@code bind} is only guaranteed to return a
+ * via the {@link #bind()} method. {@code bind} is only guaranteed to return a
  * result when in the <em>done</em> state; though {@code bind} may optionally
- * make available partial results in other states.  A failed {@code Writer}
- * provides a write error via the {@link #trap()} method.  {@code trap} is only
+ * make available partial results in other states. A failed {@code Writer}
+ * provides a write error via the {@link #trap()} method. {@code trap} is only
  * guaranteed to return an error when in the <em>error</em> state.</p>
  *
  * <h3>Continuations</h3>
  * <p>A {@code Writer} instance represents a continuation of how to write
- * remaining {@code Output}.  Rather than writing a complete output in one go,
+ * remaining {@code Output}. Rather than writing a complete output in one go,
  * a {@code Writer} takes an {@code Output} chunk and returns another {@code
  * Writer} instance that knows how to write subsequent {@code Output} chunks.
  * This enables non-blocking, incremental writing that can be interrupted
- * whenever an {@code Output} writer runs out of space.  A {@code Writer}
+ * whenever an {@code Output} writer runs out of space. A {@code Writer}
  * terminates by returning a continuation in either the <em>done</em> state,
- * or the <em>error</em> state.  {@link Writer#done(Object)} returns a {@code
- * Writer} in the <em>done</em> state.  {@link Writer#error(Throwable)} returns
+ * or the <em>error</em> state. {@link Writer#done(Object)} returns a {@code
+ * Writer} in the <em>done</em> state. {@link Writer#error(Throwable)} returns
  * a {@code Writer} in the <em>error</em> state.</p>
  *
  * <h3>Forking</h3>
  * <p>The {@link #fork(Object)} method passes an out-of-band condition to a
  * {@code Writer}, yielding a {@code Writer} continuation whose behavior may
- * be altered by the given condition.  For example, a console {@code Writer}
+ * be altered by the given condition. For example, a console {@code Writer}
  * might support a {@code fork} condition that changes the color and style of
- * printed text.  The types of conditions accepted by {@code fork}, and their
+ * printed text. The types of conditions accepted by {@code fork}, and their
  * intended semantics, are implementation defined.</p>
  */
 public abstract class Writer<I, O> extends Encoder<I, O> {
 
-  private static Writer<Object, Object> done;
-
-  /**
-   * Returns a {@code Writer} in the <em>done</em> state that {@code bind}s
-   * a {@code null} written result.
-   */
-  @SuppressWarnings("unchecked")
-  public static <I, O> Writer<I, O> done() {
-    if (done == null) {
-      done = new WriterDone<Object, Object>(null);
-    }
-    return (Writer<I, O>) done;
-  }
-
-  /**
-   * Returns a {@code Writer} in the <em>done</em> state that {@code bind}s
-   * the given written {@code output}.
-   */
-  public static <I, O> Writer<I, O> done(O output) {
-    if (output == null) {
-      return done();
-    } else {
-      return new WriterDone<I, O>(output);
-    }
-  }
-
-  /**
-   * Returns a {@code Writer} in the <em>error</em> state that {@code trap}s
-   * the given write {@code error}.
-   */
-  public static <I, O> Writer<I, O> error(Throwable error) {
-    return new WriterError<I, O>(error);
-  }
-
   /**
    * Returns {@code true} when {@link #pull(Output) pull} is able to produce
-   * {@code Output}.  i.e. this {@code Writer} is in the <em>cont</em> state.
+   * {@code Output}. i.e. this {@code Writer} is in the <em>cont</em> state.
    */
   @Override
   public boolean isCont() {
@@ -124,7 +90,7 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
 
   /**
    * Returns {@code true} when writing has terminated successfully, and {@link
-   * #bind() bind} will return the written result.  i.e. this {@code Writer} is
+   * #bind() bind} will return the written result. i.e. this {@code Writer} is
    * in the <em>done</em> state.
    */
   @Override
@@ -134,7 +100,7 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
 
   /**
    * Returns {@code true} when writing has terminated in failure, and {@link
-   * #trap() trap} will return the write error.  i.e. this {@code Writer} is in
+   * #trap() trap} will return the write error. i.e. this {@code Writer} is in
    * the <em>error</em> state.
    */
   @Override
@@ -157,10 +123,10 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
   /**
    * Incrementally writes as much {@code output} as possible, and returns
    * another {@code Writer} that represents the continuation of how to write
-   * additional {@code Output}.  If {@code output} enters the <em>done</em>
+   * additional {@code Output}. If {@code output} enters the <em>done</em>
    * state, {@code pull} <em>must</em> return a terminated {@code Writer},
    * i.e. a {@code Writer} in the <em>done</em> state, or in the <em>error</em>
-   * state.  The given {@code output} is only guaranteed to be valid for the
+   * state. The given {@code output} is only guaranteed to be valid for the
    * duration of the method call; references to {@code output} must not be
    * stored.
    */
@@ -168,7 +134,7 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
 
   @Override
   public Writer<I, O> pull(OutputBuffer<?> output) {
-    return pull((Output<?>) output);
+    return this.pull((Output<?>) output);
   }
 
   /**
@@ -181,7 +147,7 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
   }
 
   /**
-   * Returns the written result.  Only guaranteed to return a result when in
+   * Returns the written result. Only guaranteed to return a result when in
    * the <em>done</em> state.
    *
    * @throws IllegalStateException if this {@code Writer} is not in the
@@ -193,7 +159,7 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
   }
 
   /**
-   * Returns the write error.  Only guaranteed to return an error when in the
+   * Returns the write error. Only guaranteed to return an error when in the
    * <em>error</em> state.
    *
    * @throws IllegalStateException if this {@code Writer} is not in the
@@ -239,7 +205,41 @@ public abstract class Writer<I, O> extends Encoder<I, O> {
 
   @Override
   public <O2> Writer<I, O2> andThen(Encoder<I, O2> that) {
-    return andThen((Writer<I, O2>) that);
+    return this.andThen((Writer<I, O2>) that);
+  }
+
+  private static Writer<Object, Object> done;
+
+  /**
+   * Returns a {@code Writer} in the <em>done</em> state that {@code bind}s
+   * a {@code null} written result.
+   */
+  @SuppressWarnings("unchecked")
+  public static <I, O> Writer<I, O> done() {
+    if (Writer.done == null) {
+      Writer.done = new WriterDone<Object, Object>(null);
+    }
+    return (Writer<I, O>) Writer.done;
+  }
+
+  /**
+   * Returns a {@code Writer} in the <em>done</em> state that {@code bind}s
+   * the given written {@code output}.
+   */
+  public static <I, O> Writer<I, O> done(O output) {
+    if (output == null) {
+      return Writer.done();
+    } else {
+      return new WriterDone<I, O>(output);
+    }
+  }
+
+  /**
+   * Returns a {@code Writer} in the <em>error</em> state that {@code trap}s
+   * the given write {@code error}.
+   */
+  public static <I, O> Writer<I, O> error(Throwable error) {
+    return new WriterError<I, O>(error);
   }
 
 }

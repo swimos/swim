@@ -42,7 +42,7 @@ public class MapDataView<K, V> extends ValueOrderedMap<K, V> implements MapData<
   }
 
   public <K2> MapDataView<K2, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   public <V2> MapDataView<K, V2> valueForm(Form<V2> valueForm) {
@@ -50,7 +50,7 @@ public class MapDataView<K, V> extends ValueOrderedMap<K, V> implements MapData<
   }
 
   public <V2> MapDataView<K, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override
@@ -107,37 +107,37 @@ public class MapDataView<K, V> extends ValueOrderedMap<K, V> implements MapData<
 
   @Override
   public void didChange() {
-    // stub
+    // hook
   }
 
   @Override
   public void didCommit() {
-    // stub
+    // hook
   }
 
   @Override
   public void didUpdate(Value key, Value newValue, Value oldValue) {
-    // stub
+    // hook
   }
 
   @Override
   public void didRemove(Value key, Value oldValue) {
-    // stub
+    // hook
   }
 
   @Override
   public void didDrop(long lower) {
-    // stub
+    // hook
   }
 
   @Override
   public void didTake(long upper) {
-    // stub
+    // hook
   }
 
   @Override
   public void didClear() {
-    // stub
+    // hook
   }
 
 }

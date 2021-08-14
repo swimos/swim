@@ -40,7 +40,7 @@ public class ValueList<T> extends ValueCollection<T> implements List<T> {
 
   @Override
   public <T2> ValueList<T2> valueClass(Class<T2> valueClass) {
-    return valueForm(Form.<T2>forClass(valueClass));
+    return this.valueForm(Form.<T2>forClass(valueClass));
   }
 
   @SuppressWarnings("unchecked")
@@ -153,7 +153,7 @@ public class ValueList<T> extends ValueCollection<T> implements List<T> {
     if (this == other) {
       return true;
     } else if (other instanceof List<?>) {
-      final Iterator<T> these = iterator();
+      final Iterator<T> these = this.iterator();
       final Iterator<?> those = ((List<?>) other).iterator();
       while (these.hasNext() && those.hasNext()) {
         final T x = these.next();
@@ -170,7 +170,7 @@ public class ValueList<T> extends ValueCollection<T> implements List<T> {
 
   @Override
   public int hashCode() {
-    final Iterator<T> these = iterator();
+    final Iterator<T> these = this.iterator();
     int code = 0;
     while (these.hasNext()) {
       final T object = these.next();

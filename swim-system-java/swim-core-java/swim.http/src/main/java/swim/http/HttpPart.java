@@ -23,18 +23,18 @@ public abstract class HttpPart {
   public abstract Writer<?, ?> httpWriter(HttpWriter http);
 
   public Writer<?, ?> httpWriter() {
-    return httpWriter(Http.standardWriter());
+    return this.httpWriter(Http.standardWriter());
   }
 
   public abstract Writer<?, ?> writeHttp(Output<?> output, HttpWriter http);
 
   public Writer<?, ?> writeHttp(Output<?> output) {
-    return writeHttp(output, Http.standardWriter());
+    return this.writeHttp(output, Http.standardWriter());
   }
 
   public String toHttp() {
     final Output<String> output = Utf8.decodedString();
-    writeHttp(output);
+    this.writeHttp(output).bind();
     return output.bind();
   }
 

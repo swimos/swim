@@ -42,6 +42,11 @@ final class AcceptCharsetParser extends Parser<AcceptCharset> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<AcceptCharset> feed(Input input) {
+    return AcceptCharsetParser.parse(input, this.http, this.charset, this.charsets, this.step);
+  }
+
   static Parser<AcceptCharset> parse(Input input, HttpParser http, Parser<HttpCharset> charset,
                                      Builder<HttpCharset, FingerTrieSeq<HttpCharset>> charsets, int step) {
     int c = 0;
@@ -76,7 +81,7 @@ final class AcceptCharsetParser extends Parser<AcceptCharset> {
           input = input.step();
           step = 3;
         } else if (!input.isEmpty()) {
-          return done(AcceptCharset.from(charsets.bind()));
+          return Parser.done(AcceptCharset.create(charsets.bind()));
         }
       }
       if (step == 3) {
@@ -91,7 +96,7 @@ final class AcceptCharsetParser extends Parser<AcceptCharset> {
         if (input.isCont()) {
           step = 4;
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
@@ -112,18 +117,13 @@ final class AcceptCharsetParser extends Parser<AcceptCharset> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new AcceptCharsetParser(http, charset, charsets, step);
   }
 
   static Parser<AcceptCharset> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<AcceptCharset> feed(Input input) {
-    return parse(input, this.http, this.charset, this.charsets, this.step);
+    return AcceptCharsetParser.parse(input, http, null, null, 1);
   }
 
 }

@@ -19,6 +19,67 @@ import java.util.Map;
 
 public interface Cursor<T> extends ListIterator<T> {
 
+  boolean isEmpty();
+
+  T head();
+
+  void step();
+
+  void skip(long count);
+
+  @Override
+  boolean hasNext();
+
+  long nextIndexLong();
+
+  @Override
+  default int nextIndex() {
+    final long k = this.nextIndexLong();
+    final int i = (int) k;
+    if (i != k) {
+      throw new IndexOutOfBoundsException("index overflow");
+    }
+    return i;
+  }
+
+  @Override
+  T next();
+
+  boolean hasPrevious();
+
+  long previousIndexLong();
+
+  @Override
+  default int previousIndex() {
+    final long k = this.previousIndexLong();
+    final int i = (int) k;
+    if (i != k) {
+      throw new IndexOutOfBoundsException("index overflow");
+    }
+    return i;
+  }
+
+  T previous();
+
+  @Override
+  default void set(T object) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  default void add(T object) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  default void remove() {
+    throw new UnsupportedOperationException();
+  }
+
+  default void load() throws InterruptedException {
+    // hook
+  }
+
   static <T> Cursor<T> empty() {
     return new CursorEmpty<T>();
   }
@@ -45,67 +106,6 @@ public interface Cursor<T> extends ListIterator<T> {
 
   static <V> Cursor<V> values(Cursor<? extends Map.Entry<?, ? extends V>> entries) {
     return new CursorValues<V>(entries);
-  }
-
-  boolean isEmpty();
-
-  T head();
-
-  void step();
-
-  void skip(long count);
-
-  @Override
-  boolean hasNext();
-
-  long nextIndexLong();
-
-  @Override
-  default int nextIndex() {
-    final long k = nextIndexLong();
-    final int i = (int) k;
-    if (i != k) {
-      throw new IndexOutOfBoundsException("index overflow");
-    }
-    return i;
-  }
-
-  @Override
-  T next();
-
-  boolean hasPrevious();
-
-  long previousIndexLong();
-
-  @Override
-  default int previousIndex() {
-    final long k = previousIndexLong();
-    final int i = (int) k;
-    if (i != k) {
-      throw new IndexOutOfBoundsException("index overflow");
-    }
-    return i;
-  }
-
-  T previous();
-
-  @Override
-  default void set(T object) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  default void add(T object) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  default void remove() {
-    throw new UnsupportedOperationException();
-  }
-
-  default void load() throws InterruptedException {
-    // stub
   }
 
 }

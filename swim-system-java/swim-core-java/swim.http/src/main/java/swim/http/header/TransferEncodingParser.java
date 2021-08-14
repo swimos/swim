@@ -42,6 +42,11 @@ final class TransferEncodingParser extends Parser<TransferEncoding> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<TransferEncoding> feed(Input input) {
+    return TransferEncodingParser.parse(input, this.http, this.coding, this.codings, this.step);
+  }
+
   static Parser<TransferEncoding> parse(Input input, HttpParser http, Parser<TransferCoding> coding,
                                         Builder<TransferCoding, FingerTrieSeq<TransferCoding>> codings, int step) {
     int c = 0;
@@ -76,7 +81,7 @@ final class TransferEncodingParser extends Parser<TransferEncoding> {
           input = input.step();
           step = 3;
         } else if (!input.isEmpty()) {
-          return done(TransferEncoding.from(codings.bind()));
+          return Parser.done(TransferEncoding.create(codings.bind()));
         }
       }
       if (step == 3) {
@@ -91,7 +96,7 @@ final class TransferEncodingParser extends Parser<TransferEncoding> {
         if (input.isCont()) {
           step = 4;
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
@@ -112,18 +117,13 @@ final class TransferEncodingParser extends Parser<TransferEncoding> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new TransferEncodingParser(http, coding, codings, step);
   }
 
   static Parser<TransferEncoding> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<TransferEncoding> feed(Input input) {
-    return parse(input, this.http, this.coding, this.codings, this.step);
+    return TransferEncodingParser.parse(input, http, null, null, 1);
   }
 
 }

@@ -25,6 +25,10 @@ import swim.observable.ObservableValue;
 
 public final class HostObservableValue {
 
+  private HostObservableValue() {
+    // static
+  }
+
   public static final HostObjectType<ObservableValue<Object>> TYPE;
 
   static {
@@ -35,10 +39,6 @@ public final class HostObservableValue {
     type.addMember(new HostObservableValueSet());
     type.addMember(new HostObservableValueWillSet());
     type.addMember(new HostObservableValueDidSet());
-  }
-
-  private HostObservableValue() {
-    // static
   }
 
 }

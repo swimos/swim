@@ -39,7 +39,7 @@ public class PingPongSpec {
   public void testCommandPingPong() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestPingPongPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestPingPongPlane.class);
+                                          .openPlane("test", TestPingPongPlane.class);
     final CountDownLatch onPong = new CountDownLatch(1);
 
     try {

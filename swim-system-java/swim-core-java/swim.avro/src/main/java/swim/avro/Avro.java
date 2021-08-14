@@ -24,25 +24,25 @@ import swim.codec.InputBuffer;
  */
 public final class Avro {
 
-  private static AvroDecoder decoder;
-
   private Avro() {
     // static
   }
 
+  private static AvroDecoder decoder;
+
   public static AvroDecoder decoder() {
-    if (decoder == null) {
-      decoder = new AvroDecoder();
+    if (Avro.decoder == null) {
+      Avro.decoder = new AvroDecoder();
     }
-    return decoder;
+    return Avro.decoder;
   }
 
   public static <T> Decoder<T> decodeType(AvroType<T> type, InputBuffer input) {
-    return decoder().decodeType(type, input);
+    return Avro.decoder().decodeType(type, input);
   }
 
   public static <T> Decoder<T> typeDecoder(AvroType<T> type) {
-    return decoder().typeDecoder(type);
+    return Avro.decoder().typeDecoder(type);
   }
 
   public static boolean isNameStartChar(int c) {

@@ -54,12 +54,12 @@ public final class UplinkAddress implements EdgeAddressed, MeshAddressed, PartAd
 
   @Override
   public UplinkAddress meshUri(Uri meshUri) {
-    return copy(this.edgeName, meshUri, this.partKey, this.hostUri, this.nodeUri, this.laneUri, this.linkKey);
+    return this.copy(this.edgeName, meshUri, this.partKey, this.hostUri, this.nodeUri, this.laneUri, this.linkKey);
   }
 
   @Override
   public UplinkAddress meshUri(String meshUri) {
-    return meshUri(Uri.parse(meshUri));
+    return this.meshUri(Uri.parse(meshUri));
   }
 
   @Override
@@ -69,7 +69,7 @@ public final class UplinkAddress implements EdgeAddressed, MeshAddressed, PartAd
 
   @Override
   public UplinkAddress partKey(Value partKey) {
-    return copy(this.edgeName, this.meshUri, partKey, this.hostUri, this.nodeUri, this.laneUri, this.linkKey);
+    return this.copy(this.edgeName, this.meshUri, partKey, this.hostUri, this.nodeUri, this.laneUri, this.linkKey);
   }
 
   @Override
@@ -79,12 +79,12 @@ public final class UplinkAddress implements EdgeAddressed, MeshAddressed, PartAd
 
   @Override
   public UplinkAddress hostUri(Uri hostUri) {
-    return copy(this.edgeName, this.meshUri, this.partKey, hostUri, this.nodeUri, this.laneUri, this.linkKey);
+    return this.copy(this.edgeName, this.meshUri, this.partKey, hostUri, this.nodeUri, this.laneUri, this.linkKey);
   }
 
   @Override
   public UplinkAddress hostUri(String hostUri) {
-    return hostUri(Uri.parse(hostUri));
+    return this.hostUri(Uri.parse(hostUri));
   }
 
   @Override
@@ -94,12 +94,12 @@ public final class UplinkAddress implements EdgeAddressed, MeshAddressed, PartAd
 
   @Override
   public UplinkAddress nodeUri(Uri nodeUri) {
-    return copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, nodeUri, this.laneUri, this.linkKey);
+    return this.copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, nodeUri, this.laneUri, this.linkKey);
   }
 
   @Override
   public UplinkAddress nodeUri(String nodeUri) {
-    return nodeUri(Uri.parse(nodeUri));
+    return this.nodeUri(Uri.parse(nodeUri));
   }
 
   @Override
@@ -109,12 +109,12 @@ public final class UplinkAddress implements EdgeAddressed, MeshAddressed, PartAd
 
   @Override
   public UplinkAddress laneUri(Uri laneUri) {
-    return copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, this.nodeUri, laneUri, this.linkKey);
+    return this.copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, this.nodeUri, laneUri, this.linkKey);
   }
 
   @Override
   public UplinkAddress laneUri(String laneUri) {
-    return laneUri(Uri.parse(laneUri));
+    return this.laneUri(Uri.parse(laneUri));
   }
 
   @Override
@@ -124,7 +124,7 @@ public final class UplinkAddress implements EdgeAddressed, MeshAddressed, PartAd
 
   @Override
   public UplinkAddress linkKey(Value linkKey) {
-    return copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, this.nodeUri, this.laneUri, linkKey);
+    return this.copy(this.edgeName, this.meshUri, this.partKey, this.hostUri, this.nodeUri, this.laneUri, linkKey);
   }
 
   UplinkAddress copy(String edgeName, Uri meshUri, Value partKey, Uri hostUri,
@@ -146,24 +146,27 @@ public final class UplinkAddress implements EdgeAddressed, MeshAddressed, PartAd
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
     if (hashSeed == 0) {
       hashSeed = Murmur3.hash(UplinkAddress.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
-        this.edgeName.hashCode()), this.meshUri.hashCode()), this.partKey.hashCode()),
-        this.hostUri.hashCode()), this.nodeUri.hashCode()), this.laneUri.hashCode()),
-        this.linkKey.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
+        Murmur3.mix(Murmur3.mix(UplinkAddress.hashSeed, this.edgeName.hashCode()),
+        this.meshUri.hashCode()), this.partKey.hashCode()), this.hostUri.hashCode()),
+        this.nodeUri.hashCode()), this.laneUri.hashCode()), this.linkKey.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("UplinkAddress").write('.').write("from").write('(')
-        .debug(this.edgeName).write(", ").debug(this.meshUri.toString()).write(", ")
-        .debug(this.partKey).write(", ").debug(this.hostUri.toString()).write(", ")
-        .debug(this.nodeUri).write(", ").debug(this.laneUri.toString()).write(", ")
-        .debug(this.linkKey).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("UplinkAddress").write('.').write("create").write('(')
+                   .debug(this.edgeName).write(", ").debug(this.meshUri.toString()).write(", ")
+                   .debug(this.partKey).write(", ").debug(this.hostUri.toString()).write(", ")
+                   .debug(this.nodeUri).write(", ").debug(this.laneUri.toString()).write(", ")
+                   .debug(this.linkKey).write(')');
+    return output;
   }
 
   @Override
@@ -171,17 +174,15 @@ public final class UplinkAddress implements EdgeAddressed, MeshAddressed, PartAd
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static UplinkAddress from(String edgeName, Uri meshUri, Value partKey,
-                                   Uri hostUri, Uri nodeUri, Uri laneUri, Value linkKey) {
+  public static UplinkAddress create(String edgeName, Uri meshUri, Value partKey,
+                                     Uri hostUri, Uri nodeUri, Uri laneUri, Value linkKey) {
     return new UplinkAddress(edgeName, meshUri, partKey, hostUri, nodeUri, laneUri, linkKey);
   }
 
-  public static UplinkAddress from(String edgeName, String meshUri, Value partKey,
-                                   String hostUri, String nodeUri, String laneUri, Value linkKey) {
+  public static UplinkAddress create(String edgeName, String meshUri, Value partKey,
+                                     String hostUri, String nodeUri, String laneUri, Value linkKey) {
     return new UplinkAddress(edgeName, Uri.parse(meshUri), partKey, Uri.parse(hostUri),
-        Uri.parse(nodeUri), Uri.parse(laneUri), linkKey);
+                             Uri.parse(nodeUri), Uri.parse(laneUri), linkKey);
   }
 
 }

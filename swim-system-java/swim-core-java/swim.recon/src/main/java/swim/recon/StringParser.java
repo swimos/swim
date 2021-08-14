@@ -38,7 +38,7 @@ final class StringParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.output, this.quote, this.code, this.step);
+    return StringParser.parse(input, this.recon, this.output, this.quote, this.code, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Output<V> output,
@@ -62,10 +62,10 @@ final class StringParser<I, V> extends Parser<V> {
           quote = c;
           step = 2;
         } else {
-          return error(Diagnostic.expected("string", input));
+          return Parser.error(Diagnostic.expected("string", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("string", input));
+        return Parser.error(Diagnostic.expected("string", input));
       }
     }
     string: do {
@@ -82,15 +82,15 @@ final class StringParser<I, V> extends Parser<V> {
         if (input.isCont()) {
           if (c == quote) {
             input = input.step();
-            return done(output.bind());
+            return Parser.done(output.bind());
           } else if (c == '\\') {
             input = input.step();
             step = 3;
           } else {
-            return error(Diagnostic.expected(quote, input));
+            return Parser.error(Diagnostic.expected(quote, input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected(quote, input));
+          return Parser.error(Diagnostic.expected(quote, input));
         }
       }
       if (step == 3) {
@@ -130,10 +130,10 @@ final class StringParser<I, V> extends Parser<V> {
             input = input.step();
             step = 4;
           } else {
-            return error(Diagnostic.expected("escape character", input));
+            return Parser.error(Diagnostic.expected("escape character", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("escape character", input));
+          return Parser.error(Diagnostic.expected("escape character", input));
         }
       }
       if (step >= 4) {
@@ -153,10 +153,10 @@ final class StringParser<I, V> extends Parser<V> {
                 continue string;
               }
             } else {
-              return error(Diagnostic.expected("hex digit", input));
+              return Parser.error(Diagnostic.expected("hex digit", input));
             }
           } else if (input.isDone()) {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
           break;
         } while (true);
@@ -164,17 +164,17 @@ final class StringParser<I, V> extends Parser<V> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new StringParser<I, V>(recon, output, quote, code, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
-    return parse(input, recon, null, 0, 0, 1);
+    return StringParser.parse(input, recon, null, 0, 0, 1);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Output<V> output) {
-    return parse(input, recon, output, 0, 0, 1);
+    return StringParser.parse(input, recon, output, 0, 0, 1);
   }
 
 }

@@ -393,12 +393,12 @@ public class MockClockSpec {
 
         @Override
         public void runTimer() {
-          if (!rescheduled) {
+          if (!this.rescheduled) {
             assertEquals(clock.tick(), 1L);
             assertEquals(fire1.getCount(), 1);
             assertEquals(fire2.getCount(), 1);
             fire1.countDown();
-            rescheduled = true;
+            this.rescheduled = true;
             reschedule(100L);
           } else {
             assertEquals(clock.tick(), 2L);

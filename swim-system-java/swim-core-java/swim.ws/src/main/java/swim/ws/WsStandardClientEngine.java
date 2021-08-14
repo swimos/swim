@@ -32,7 +32,7 @@ final class WsStandardClientEngine extends WsEngine {
   public WsEngine extension(WebSocketExtension extension, WsEngineSettings settings) {
     final String extensionName = extension.name();
     if ("permessage-deflate".equals(extensionName) || "x-webkit-deflate-frame".equals(extensionName)) {
-      return deflateClientEngine(extension, settings);
+      return WsEngine.deflateClientEngine(extension, settings);
     } else {
       return this;
     }

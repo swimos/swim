@@ -35,6 +35,10 @@ import swim.observable.ObservableList;
 
 public final class HostObservableList {
 
+  private HostObservableList() {
+    // static
+  }
+
   public static final HostObjectType<ObservableList<Object>> TYPE;
 
   static {
@@ -56,10 +60,6 @@ public final class HostObservableList {
     type.addMember(new HostObservableListDidTake());
     type.addMember(new HostObservableListWillClear());
     type.addMember(new HostObservableListDidClear());
-  }
-
-  private HostObservableList() {
-    // static
   }
 
 }

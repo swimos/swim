@@ -37,6 +37,16 @@ final class MqttSubscriptionEncoder extends Encoder<MqttSubscription, MqttSubscr
     this(mqtt, subscription, null, 1);
   }
 
+  @Override
+  public Encoder<MqttSubscription, MqttSubscription> feed(MqttSubscription subscription) {
+    return new MqttSubscriptionEncoder(this.mqtt, subscription, null, 1);
+  }
+
+  @Override
+  public Encoder<MqttSubscription, MqttSubscription> pull(OutputBuffer<?> output) {
+    return MqttSubscriptionEncoder.encode(output, this.mqtt, this.subscription, this.part, this.step);
+  }
+
   static int sizeOf(MqttEncoder mqtt, MqttSubscription subscription) {
     return mqtt.sizeOfString(subscription.topicName) + 1;
   }
@@ -59,29 +69,19 @@ final class MqttSubscriptionEncoder extends Encoder<MqttSubscription, MqttSubscr
     }
     if (step == 2 && output.isCont()) {
       output = output.write(subscription.flags);
-      return done(subscription);
+      return Encoder.done(subscription);
     }
     if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new MqttSubscriptionEncoder(mqtt, subscription, part, step);
   }
 
   static Encoder<MqttSubscription, MqttSubscription> encode(OutputBuffer<?> output, MqttEncoder mqtt,
                                                             MqttSubscription subscription) {
-    return encode(output, mqtt, subscription, null, 1);
-  }
-
-  @Override
-  public Encoder<MqttSubscription, MqttSubscription> feed(MqttSubscription subscription) {
-    return new MqttSubscriptionEncoder(this.mqtt, subscription, null, 1);
-  }
-
-  @Override
-  public Encoder<MqttSubscription, MqttSubscription> pull(OutputBuffer<?> output) {
-    return encode(output, this.mqtt, this.subscription, this.part, this.step);
+    return MqttSubscriptionEncoder.encode(output, mqtt, subscription, null, 1);
   }
 
 }

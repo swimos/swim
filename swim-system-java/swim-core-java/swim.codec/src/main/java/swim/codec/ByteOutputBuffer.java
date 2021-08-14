@@ -24,12 +24,12 @@ final class ByteOutputBuffer extends ByteOutput<ByteBuffer> {
 
   @Override
   public ByteBuffer bind() {
-    return toByteBuffer();
+    return this.toByteBuffer();
   }
 
   @Override
   public Output<ByteBuffer> clone() {
-    return new ByteOutputBuffer(cloneArray(), this.size, this.settings);
+    return new ByteOutputBuffer(this.cloneArray(), this.size, this.settings);
   }
 
 }

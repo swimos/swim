@@ -30,7 +30,6 @@ import swim.codec.Input;
 import swim.codec.Parser;
 import swim.codec.Utf8;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.concurrent.Sync;
 import swim.recon.Recon;
@@ -38,14 +37,6 @@ import swim.structure.Value;
 
 public class FileZone extends Zone {
 
-  static final int OPENING = 1 << 0;
-  static final int OPENED = 1 << 1;
-  static final int FAILED = 1 << 2;
-  static final boolean WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
-  static final AtomicReferenceFieldUpdater<FileZone, Database> DATABASE =
-      AtomicReferenceFieldUpdater.newUpdater(FileZone.class, Database.class, "database");
-  static final AtomicIntegerFieldUpdater<FileZone> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(FileZone.class, "status");
   final Store store;
   final int id;
   final File file;
@@ -65,7 +56,7 @@ public class FileZone extends Zone {
     this.stage = stage;
     this.database = database;
     this.germ = germ;
-    this.status = OPENED;
+    this.status = FileZone.OPENED;
   }
 
   public FileZone(Store store, int id, File file, Stage stage) {
@@ -116,34 +107,34 @@ public class FileZone extends Zone {
     try {
       do {
         final int oldStatus = this.status;
-        if ((oldStatus & (OPENING | OPENED | FAILED)) == 0) {
-          final int newStatus = oldStatus | OPENING;
-          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if ((oldStatus & (FileZone.OPENING | FileZone.OPENED | FileZone.FAILED)) == 0) {
+          final int newStatus = oldStatus | FileZone.OPENING;
+          if (FileZone.STATUS.compareAndSet(this, oldStatus, newStatus)) {
             try {
               FileChannel channel = null;
               try {
-                channel = openReadChannel();
+                channel = this.openReadChannel();
                 this.size = channel.size();
               } catch (FileNotFoundException cause) {
                 // Continue with null channel.
               }
               this.stage.execute(new FileZoneOpen(this, channel, cont));
             } catch (Throwable cause) {
-              STATUS.set(this, FAILED);
+              FileZone.STATUS.set(this, FileZone.FAILED);
               synchronized (this) {
-                notifyAll();
+                this.notifyAll();
               }
               throw cause;
             }
             break;
           }
         } else {
-          if ((oldStatus & OPENING) != 0) {
+          if ((oldStatus & FileZone.OPENING) != 0) {
             synchronized (this) {
               ForkJoinPool.managedBlock(new FileZoneAwait(this));
             }
           }
-          if ((this.status & OPENED) != 0) {
+          if ((this.status & FileZone.OPENED) != 0) {
             cont.bind(this);
           } else {
             cont.trap(new StoreException("failed to open zone " + this.file.getPath()));
@@ -154,7 +145,7 @@ public class FileZone extends Zone {
     } catch (IOException | InterruptedException cause) {
       cont.trap(cause);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -165,8 +156,8 @@ public class FileZone extends Zone {
   @Override
   public FileZone open() throws InterruptedException {
     final Sync<Zone> syncZone = new Sync<Zone>();
-    openAsync(syncZone);
-    return (FileZone) syncZone.await(settings().zoneOpenTimeout);
+    this.openAsync(syncZone);
+    return (FileZone) syncZone.await(this.settings().zoneOpenTimeout);
   }
 
   @Override
@@ -177,9 +168,9 @@ public class FileZone extends Zone {
   @Override
   public void openDatabaseAsync(Cont<Database> cont) {
     try {
-      openAsync(new FileZoneOpenDatabase(this, cont));
+      this.openAsync(new FileZoneOpenDatabase(this, cont));
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -188,20 +179,20 @@ public class FileZone extends Zone {
   }
 
   public FileChannel openReadChannel() throws IOException {
-    return new RandomAccessFile(file, "r").getChannel();
+    return new RandomAccessFile(this.file, "r").getChannel();
   }
 
   public FileChannel openWriteChannel() throws IOException {
-    return new RandomAccessFile(file, "rw").getChannel();
+    return new RandomAccessFile(this.file, "rw").getChannel();
   }
 
   void loadPageAsync(FileChannel channel, PageRef pageRef, TreeDelegate treeDelegate,
                      boolean isResident, Cont<Page> cont) {
     try {
       this.stage.execute(new FileZonePageReader(this, channel, pageRef.base(), pageRef.pageSize(),
-          pageRef, treeDelegate, isResident, cont));
+                                                pageRef, treeDelegate, isResident, cont));
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -213,9 +204,9 @@ public class FileZone extends Zone {
   public Chunk commitAndWriteChunk(Commit commit) {
     final Database database = this.database;
     Chunk chunk = null;
-    try (FileChannel channel = openWriteChannel()) {
+    try (FileChannel channel = this.openWriteChannel()) {
       FileLock fileLock = null;
-      if (!WINDOWS) {
+      if (!FileZone.WINDOWS) {
         fileLock = channel.lock();
       }
       try {
@@ -223,13 +214,13 @@ public class FileZone extends Zone {
         chunk = database.commitChunk(commit, this.id, base);
         if (chunk != null) {
           ByteBuffer buffer = chunk.toByteBuffer();
-          write(channel, buffer, base);
+          this.write(channel, buffer, base);
 
           final Germ germ = chunk.germ();
           buffer = germ.toByteBuffer();
-          write(channel, buffer, 0L);
+          this.write(channel, buffer, 0L);
           ((Buffer) buffer).flip();
-          write(channel, buffer, Germ.BLOCK_SIZE);
+          this.write(channel, buffer, Germ.BLOCK_SIZE);
           if (commit.isForced()) {
             channel.force(true);
           }
@@ -248,7 +239,7 @@ public class FileZone extends Zone {
       }
       throw new StoreException(cause);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         if (chunk != null) {
           database.uncommit(chunk.germ.version);
         }
@@ -269,6 +260,17 @@ public class FileZone extends Zone {
       throw new StoreException("wrote incomplete chunk to " + this.file.getPath());
     }
   }
+
+  static final int OPENING = 1 << 0;
+  static final int OPENED = 1 << 1;
+  static final int FAILED = 1 << 2;
+
+  static final boolean WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
+
+  static final AtomicReferenceFieldUpdater<FileZone, Database> DATABASE =
+      AtomicReferenceFieldUpdater.newUpdater(FileZone.class, Database.class, "database");
+  static final AtomicIntegerFieldUpdater<FileZone> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(FileZone.class, "status");
 
 }
 
@@ -304,16 +306,16 @@ abstract class FileZoneReader implements Runnable {
       } while (k >= 0 && buffer.hasRemaining());
       if (!buffer.hasRemaining()) {
         ((Buffer) buffer).flip();
-        bind(buffer);
+        this.bind(buffer);
       } else {
-        throw new StoreException("incomplete read from " + zone.file.getPath()
-            + ':' + this.offset + '-' + position);
+        throw new StoreException("incomplete read from " + this.zone.file.getPath()
+                               + ':' + this.offset + '-' + position);
       }
     } catch (IOException cause) {
-      trap(cause);
+      this.trap(cause);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        trap(cause);
+      if (Cont.isNonFatal(cause)) {
+        this.trap(cause);
       } else {
         throw cause;
       }
@@ -322,7 +324,7 @@ abstract class FileZoneReader implements Runnable {
 
   @Override
   public void run() {
-    doRead(this.channel);
+    this.doRead(this.channel);
   }
 
 }
@@ -339,16 +341,16 @@ abstract class FileZoneReconReader extends FileZoneReader {
   protected void bind(ByteBuffer buffer) {
     try {
       final Parser<Value> parser = Utf8.parseDecoded(Recon.structureParser().blockParser(),
-          Binary.inputBuffer(buffer));
+                                                     Binary.inputBuffer(buffer));
       if (parser.isDone()) {
-        bind(parser.bind());
+        this.bind(parser.bind());
       } else {
-        trap(parser.trap());
+        this.trap(parser.trap());
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        trap(new StoreException("failed read from " + this.zone.file.getPath()
-            + ':' + this.offset + '-' + this.size, cause));
+      if (Cont.isNonFatal(cause)) {
+        this.trap(new StoreException("failed read from " + this.zone.file.getPath()
+                                   + ':' + this.offset + '-' + this.size, cause));
       } else {
         throw cause;
       }
@@ -378,13 +380,13 @@ final class FileZonePageReader extends FileZoneReconReader {
   protected void bind(Value value) {
     try {
       final Page page = this.pageRef.setPageValue(value, this.isResident);
-      if (treeDelegate != null) {
-        treeDelegate.treeDidLoadPage(page);
+      if (this.treeDelegate != null) {
+        this.treeDelegate.treeDidLoadPage(page);
       }
       this.cont.bind(page);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        trap(cause);
+      if (Cont.isNonFatal(cause)) {
+        this.trap(cause);
       } else {
         throw cause;
       }
@@ -426,7 +428,7 @@ final class FileZoneOpenDatabase implements Cont<Zone> {
       } while (true);
       newDatabase.openAsync(this.cont);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         this.cont.trap(cause);
       } else {
         throw cause;
@@ -453,9 +455,9 @@ final class FileZoneOpen extends FileZoneReader {
   @Override
   protected void bind(ByteBuffer buffer) {
     ((Buffer) buffer).position(0).limit(Germ.BLOCK_SIZE);
-    final Germ germ0 = parseGerm(Utf8.decodedInput(Binary.inputBuffer(buffer)));
+    final Germ germ0 = this.parseGerm(Utf8.decodedInput(Binary.inputBuffer(buffer)));
     ((Buffer) buffer).position(Germ.BLOCK_SIZE).limit(2 * Germ.BLOCK_SIZE);
-    final Germ germ1 = parseGerm(Utf8.decodedInput(Binary.inputBuffer(buffer)));
+    final Germ germ1 = this.parseGerm(Utf8.decodedInput(Binary.inputBuffer(buffer)));
     final Germ germ;
     if (germ0 != null && germ1 != null) {
       if (germ0.updated() < germ1.updated()) {
@@ -499,10 +501,10 @@ final class FileZoneOpen extends FileZoneReader {
         this.cont.bind(this.zone);
       }
     } catch (IOException cause) {
-      trap(cause);
+      this.trap(cause);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        trap(cause);
+      if (Cont.isNonFatal(cause)) {
+        this.trap(cause);
       } else {
         throw cause;
       }
@@ -530,7 +532,7 @@ final class FileZoneOpen extends FileZoneReader {
         return null;
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         return null;
       } else {
         throw cause;

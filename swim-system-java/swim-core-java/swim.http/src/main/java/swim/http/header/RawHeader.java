@@ -25,7 +25,6 @@ import swim.util.Murmur3;
 
 public final class RawHeader extends HttpHeader {
 
-  private static int hashSeed;
   final String lowerCaseName;
   final String name;
   final String value;
@@ -34,19 +33,6 @@ public final class RawHeader extends HttpHeader {
     this.lowerCaseName = lowerCaseName;
     this.name = name;
     this.value = value;
-  }
-
-  public static RawHeader from(String lowerCaseName, String name, String value) {
-    return new RawHeader(lowerCaseName, name, value);
-  }
-
-  public static RawHeader from(String name, String value) {
-    return new RawHeader(name.toLowerCase(), name, value);
-  }
-
-  public static Parser<RawHeader> parseHttpValue(Input input, HttpParser http,
-                                                 String lowerCaseName, String name) {
-    return RawHeaderParser.parse(input, lowerCaseName, name);
   }
 
   @Override
@@ -85,18 +71,35 @@ public final class RawHeader extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(RawHeader.class);
+    if (RawHeader.hashSeed == 0) {
+      RawHeader.hashSeed = Murmur3.seed(RawHeader.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed, this.name.hashCode()), this.value.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(RawHeader.hashSeed,
+        this.name.hashCode()), this.value.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("RawHeader").write('.').write("from").write('(')
-        .debug(this.name).write(", ").debug(this.value).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("RawHeader").write('.').write("create").write('(')
+                   .debug(this.name).write(", ").debug(this.value).write(')');
+    return output;
+  }
+
+  public static RawHeader create(String lowerCaseName, String name, String value) {
+    return new RawHeader(lowerCaseName, name, value);
+  }
+
+  public static RawHeader create(String name, String value) {
+    return new RawHeader(name.toLowerCase(), name, value);
+  }
+
+  public static Parser<RawHeader> parseHttpValue(Input input, HttpParser http,
+                                                 String lowerCaseName, String name) {
+    return RawHeaderParser.parse(input, lowerCaseName, name);
   }
 
 }

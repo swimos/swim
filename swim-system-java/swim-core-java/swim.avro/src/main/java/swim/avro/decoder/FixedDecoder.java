@@ -35,6 +35,11 @@ final class FixedDecoder<T> extends Decoder<T> {
     this(type, type.size(), null);
   }
 
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return FixedDecoder.decode(input, this.type, this.size, this.decoder);
+  }
+
   static <T> Decoder<T> decode(InputBuffer input, AvroFixedType<T> type,
                                long size, Decoder<T> decoder) {
 
@@ -60,26 +65,21 @@ final class FixedDecoder<T> extends Decoder<T> {
       if (size == 0L) {
         return decoder;
       } else {
-        return error(new DecoderException("unconsumed input"));
+        return Decoder.error(new DecoderException("unconsumed input"));
       }
     } else if (decoder.isError()) {
       return decoder.asError();
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new FixedDecoder<T>(type, size, decoder);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, AvroFixedType<T> type) {
-    return decode(input, type, type.size(), null);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.size, this.decoder);
+    return FixedDecoder.decode(input, type, type.size(), null);
   }
 
 }

@@ -40,24 +40,24 @@ public class ValueReducedMap<K, V, U> extends ValueOrderedMap<K, V> implements R
   @Override
   public <K2> ValueReducedMap<K2, V, U> keyForm(Form<K2> keyForm) {
     return new ValueReducedMap<K2, V, U>((ReducedMap<Value, Value, Value>) this.inner,
-        keyForm, this.valueForm, this.reducedForm);
+                                         keyForm, this.valueForm, this.reducedForm);
   }
 
   @Override
   public <K2> ValueReducedMap<K2, V, U> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <V2> ValueReducedMap<K, V2, U> valueForm(Form<V2> valueForm) {
     return new ValueReducedMap<K, V2, U>((ReducedMap<Value, Value, Value>) this.inner,
-        this.keyForm, valueForm, this.reducedForm);
+                                         this.keyForm, valueForm, this.reducedForm);
   }
 
   @Override
   public <V2> ValueReducedMap<K, V2, U> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   public Form<U> reducedForm() {
@@ -67,11 +67,11 @@ public class ValueReducedMap<K, V, U> extends ValueOrderedMap<K, V> implements R
   @SuppressWarnings("unchecked")
   public <U2> ValueReducedMap<K, V, U2> reducedForm(Form<U2> reducedForm) {
     return new ValueReducedMap<K, V, U2>((ReducedMap<Value, Value, Value>) this.inner,
-        this.keyForm, this.valueForm, reducedForm);
+                                         this.keyForm, this.valueForm, reducedForm);
   }
 
   public <U2> ValueReducedMap<K, V, U2> reducedClass(Class<U2> reducedClass) {
-    return reducedForm(Form.<U2>forClass(reducedClass));
+    return this.reducedForm(Form.<U2>forClass(reducedClass));
   }
 
   @SuppressWarnings("unchecked")

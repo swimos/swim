@@ -23,21 +23,12 @@ import swim.util.Murmur3;
 
 public final class MqttPubComp extends MqttPacket<Object> implements Debug {
 
-  private static int hashSeed;
   final int packetFlags;
   final int packetId;
 
   MqttPubComp(int packetFlags, int packetId) {
     this.packetFlags = packetFlags;
     this.packetId = packetId;
-  }
-
-  public static MqttPubComp from(int packetFlags, int packetId) {
-    return new MqttPubComp(packetFlags, packetId);
-  }
-
-  public static MqttPubComp from(int packetId) {
-    return new MqttPubComp(0, packetId);
   }
 
   @Override
@@ -88,26 +79,36 @@ public final class MqttPubComp extends MqttPacket<Object> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttPubComp.class);
+    if (MqttPubComp.hashSeed == 0) {
+      MqttPubComp.hashSeed = Murmur3.seed(MqttPubComp.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed, this.packetFlags), this.packetId));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(MqttPubComp.hashSeed, this.packetFlags), this.packetId));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("MqttPubComp").write('.').write("from").write('(')
-        .debug(this.packetId).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MqttPubComp").write('.').write("create").write('(').debug(this.packetId).write(')');
     if (this.packetFlags != 0) {
       output = output.write('.').write("packetFlags").write('(').debug(this.packetFlags).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static MqttPubComp create(int packetFlags, int packetId) {
+    return new MqttPubComp(packetFlags, packetId);
+  }
+
+  public static MqttPubComp create(int packetId) {
+    return new MqttPubComp(0, packetId);
   }
 
 }

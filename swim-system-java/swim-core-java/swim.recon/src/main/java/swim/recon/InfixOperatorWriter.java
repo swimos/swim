@@ -43,8 +43,8 @@ final class InfixOperatorWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.lhs, this.operator, this.rhs,
-                 this.precedence, this.part, this.step);
+    return InfixOperatorWriter.write(output, this.recon, this.lhs, this.operator, this.rhs,
+                                     this.precedence, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, I lhs, String operator, I rhs, int precedence) {
@@ -153,23 +153,23 @@ final class InfixOperatorWriter<I, V> extends Writer<Object, Object> {
       if (recon.precedence(rhs) < precedence) {
         if (output.isCont()) {
           output = output.write(')');
-          return done();
+          return Writer.done();
         }
       } else {
-        return done();
+        return Writer.done();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new InfixOperatorWriter<I, V>(recon, lhs, operator, rhs, precedence, part, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon,
                                              I lhs, String operator, I rhs, int precedence) {
-    return write(output, recon, lhs, operator, rhs, precedence, null, 1);
+    return InfixOperatorWriter.write(output, recon, lhs, operator, rhs, precedence, null, 1);
   }
 
 }

@@ -16,8 +16,6 @@ package swim.mqtt;
 
 public class MqttException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public MqttException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -29,5 +27,7 @@ public class MqttException extends RuntimeException {
   public MqttException(Throwable cause) {
     super(cause);
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

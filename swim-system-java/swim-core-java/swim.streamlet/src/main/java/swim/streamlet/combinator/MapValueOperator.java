@@ -21,7 +21,7 @@ public abstract class MapValueOperator<I, O> extends AbstractInoutlet<I, O> {
   @Override
   public O get() {
     if (this.input != null) {
-      return evaluate(this.input.get());
+      return this.evaluate(this.input.get());
     } else {
       return null;
     }

@@ -31,7 +31,6 @@ import swim.structure.Value;
 
 public class EcDomainDef {
 
-  private static Form<EcDomainDef> form;
   protected final String name;
   protected final EcDef curve;
   protected final EcPointDef base;
@@ -54,36 +53,6 @@ public class EcDomainDef {
 
   public EcDomainDef(EcDef curve, EcPointDef base, BigInteger order, int cofactor) {
     this(null, curve, base, order, cofactor, null);
-  }
-
-  public static EcDomainDef from(String name, ECParameterSpec params) {
-    return new EcDomainDef(name, EcDef.from(params.getCurve()), EcPointDef.from(params.getGenerator()),
-        params.getOrder(), params.getCofactor(), params);
-  }
-
-  public static EcDomainDef from(ECParameterSpec params) {
-    return from(null, params);
-  }
-
-  public static EcDomainDef forName(String name) {
-    try {
-      final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
-      final ECGenParameterSpec parameterSpec = new ECGenParameterSpec(name);
-      keyPairGenerator.initialize(parameterSpec);
-      final KeyPair keyPair = keyPairGenerator.generateKeyPair();
-      final ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
-      return from(name, publicKey.getParams());
-    } catch (GeneralSecurityException cause) {
-      return null;
-    }
-  }
-
-  @Kind
-  public static Form<EcDomainDef> form() {
-    if (form == null) {
-      form = new EcDomainForm();
-    }
-    return form;
   }
 
   public final String name() {
@@ -119,8 +88,40 @@ public class EcDomainDef {
     if (this.name != null) {
       return Text.from(this.name);
     } else {
-      return form().mold(this).toValue();
+      return EcDomainDef.form().mold(this).toValue();
     }
+  }
+
+  public static EcDomainDef create(String name, ECParameterSpec params) {
+    return new EcDomainDef(name, EcDef.from(params.getCurve()), EcPointDef.from(params.getGenerator()),
+                           params.getOrder(), params.getCofactor(), params);
+  }
+
+  public static EcDomainDef create(ECParameterSpec params) {
+    return EcDomainDef.create(null, params);
+  }
+
+  public static EcDomainDef forName(String name) {
+    try {
+      final KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
+      final ECGenParameterSpec parameterSpec = new ECGenParameterSpec(name);
+      keyPairGenerator.initialize(parameterSpec);
+      final KeyPair keyPair = keyPairGenerator.generateKeyPair();
+      final ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
+      return EcDomainDef.create(name, publicKey.getParams());
+    } catch (GeneralSecurityException cause) {
+      return null;
+    }
+  }
+
+  private static Form<EcDomainDef> form;
+
+  @Kind
+  public static Form<EcDomainDef> form() {
+    if (EcDomainDef.form == null) {
+      EcDomainDef.form = new EcDomainForm();
+    }
+    return EcDomainDef.form;
   }
 
 }
@@ -146,17 +147,17 @@ final class EcDomainForm extends Form<EcDomainDef> {
       header = Value.extant();
     }
     return Record.create(5)
-        .attr(tag(), header)
-        .slot("curve", domainDef.curve.toValue())
-        .slot("base", domainDef.base.toValue())
-        .slot("order", Num.from(domainDef.order))
-        .slot("cofactor", domainDef.cofactor);
+                 .attr(this.tag(), header)
+                 .slot("curve", domainDef.curve.toValue())
+                 .slot("base", domainDef.base.toValue())
+                 .slot("order", Num.from(domainDef.order))
+                 .slot("cofactor", domainDef.cofactor);
   }
 
   @Override
   public EcDomainDef cast(Item item) {
     final Value value = item.toValue();
-    final Value header = value.getAttr(tag());
+    final Value header = value.getAttr(this.tag());
     if (header.isDefined()) {
       final String name = header.get("name").stringValue(null);
       final EcDef curve = EcDef.form().cast(value.get("curve"));

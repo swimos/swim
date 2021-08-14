@@ -22,11 +22,11 @@ public abstract class ProtobufMapType<K, V, E, M> extends ProtobufRepeatedType<E
   public abstract ProtobufMapEntryType<? extends K, ? extends V, ? extends E> itemType();
 
   public ProtobufType<? extends K> keyType() {
-    return itemType().keyField().valueType();
+    return this.itemType().keyField().valueType();
   }
 
   public ProtobufType<? extends V> valueType() {
-    return itemType().valueField().valueType();
+    return this.itemType().valueField().valueType();
   }
 
   @Override

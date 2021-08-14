@@ -34,7 +34,7 @@ public abstract class AbstractWsClient extends AbstractHttpClient {
   public void setHttpClientContext(HttpClientContext context) {
     this.context = context;
     if (this.wsSettings == null) {
-      this.wsSettings = WsSettings.from(context.httpSettings());
+      this.wsSettings = WsSettings.create(context.httpSettings());
     }
   }
 

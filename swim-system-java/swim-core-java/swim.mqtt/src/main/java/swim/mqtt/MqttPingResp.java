@@ -23,27 +23,10 @@ import swim.util.Murmur3;
 
 public final class MqttPingResp extends MqttPacket<Object> implements Debug {
 
-  private static int hashSeed;
-  private static MqttPingResp packet;
   final int packetFlags;
 
   MqttPingResp(int packetFlags) {
     this.packetFlags = packetFlags;
-  }
-
-  public static MqttPingResp packet() {
-    if (packet == null) {
-      packet = new MqttPingResp(0);
-    }
-    return packet;
-  }
-
-  public static MqttPingResp from(int packetFlags) {
-    if (packetFlags == 0) {
-      return packet();
-    } else {
-      return new MqttPingResp(packetFlags);
-    }
   }
 
   @Override
@@ -86,25 +69,45 @@ public final class MqttPingResp extends MqttPacket<Object> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttPingResp.class);
+    if (MqttPingResp.hashSeed == 0) {
+      MqttPingResp.hashSeed = Murmur3.seed(MqttPingResp.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.packetFlags));
+    return Murmur3.mash(Murmur3.mix(MqttPingResp.hashSeed, this.packetFlags));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("MqttPingResp").write('.').write("packet").write('(').write(')');
     if (this.packetFlags != 0) {
       output = output.write('.').write("packetFlags").write('(').debug(this.packetFlags).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static MqttPingResp packet;
+
+  public static MqttPingResp packet() {
+    if (MqttPingResp.packet == null) {
+      MqttPingResp.packet = new MqttPingResp(0);
+    }
+    return MqttPingResp.packet;
+  }
+
+  public static MqttPingResp create(int packetFlags) {
+    if (packetFlags == 0) {
+      return MqttPingResp.packet();
+    } else {
+      return new MqttPingResp(packetFlags);
+    }
   }
 
 }

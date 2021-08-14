@@ -23,9 +23,6 @@ import swim.util.Murmur3;
 
 public final class MqttConnAck extends MqttPacket<Object> implements Debug {
 
-  static final int SESSION_PRESENT_FLAG = 0x01;
-  private static int hashSeed;
-  private static MqttConnAck accepted;
   final int packetFlags;
   final int connectFlags;
   final int connectCode;
@@ -34,29 +31,6 @@ public final class MqttConnAck extends MqttPacket<Object> implements Debug {
     this.packetFlags = packetFlags;
     this.connectFlags = connectFlags;
     this.connectCode = connectCode;
-  }
-
-  public static MqttConnAck accepted() {
-    if (accepted == null) {
-      accepted = new MqttConnAck(0, 0, 0);
-    }
-    return accepted;
-  }
-
-  public static MqttConnAck from(int packetFlags, int connectFlags, int connectCode) {
-    if (packetFlags == 0 && connectFlags == 0 && connectCode == 0) {
-      return accepted();
-    } else {
-      return new MqttConnAck(packetFlags, connectFlags, connectCode);
-    }
-  }
-
-  public static MqttConnAck from(MqttConnStatus connectStatus) {
-    if (connectStatus.code == 0) {
-      return accepted();
-    } else {
-      return new MqttConnAck(0, 0, connectStatus.code);
-    }
   }
 
   @Override
@@ -82,18 +56,18 @@ public final class MqttConnAck extends MqttPacket<Object> implements Debug {
   }
 
   public boolean sessionPresent() {
-    return (this.connectFlags & SESSION_PRESENT_FLAG) != 0;
+    return (this.connectFlags & MqttConnAck.SESSION_PRESENT_FLAG) != 0;
   }
 
   public MqttConnAck sessionPresent(boolean sessionPresent) {
     final int connectFlags = sessionPresent
-        ? this.connectFlags | SESSION_PRESENT_FLAG
-        : this.connectFlags & ~SESSION_PRESENT_FLAG;
+        ? this.connectFlags | MqttConnAck.SESSION_PRESENT_FLAG
+        : this.connectFlags & ~MqttConnAck.SESSION_PRESENT_FLAG;
     return new MqttConnAck(this.packetFlags, connectFlags, this.connectCode);
   }
 
   public MqttConnStatus connectStatus() {
-    return MqttConnStatus.from(connectCode);
+    return MqttConnStatus.create(this.connectCode);
   }
 
   public MqttConnAck connectStatus(MqttConnStatus connectStatus) {
@@ -127,34 +101,64 @@ public final class MqttConnAck extends MqttPacket<Object> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttConnAck.class);
+    if (MqttConnAck.hashSeed == 0) {
+      MqttConnAck.hashSeed = Murmur3.seed(MqttConnAck.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(MqttConnAck.hashSeed,
         this.packetFlags), this.connectFlags), this.connectCode));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("MqttConnAck").write('.');
     if (this.packetFlags == 0 && this.connectFlags == 0 && this.connectCode == 0) {
       output = output.write('.').write("accepted").write('(').write(')');
     } else {
-      output = output.write("from").write('(').debug(connectStatus()).write(')');
+      output = output.write("create").write('(').debug(this.connectStatus()).write(')');
       if (this.packetFlags != 0) {
         output = output.write('.').write("packetFlags").write('(').debug(this.packetFlags).write(')');
       }
-      if (sessionPresent()) {
+      if (this.sessionPresent()) {
         output = output.write('.').write("sessionPresent").write('(').write("true").write(')');
       }
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  static final int SESSION_PRESENT_FLAG = 0x01;
+
+  private static MqttConnAck accepted;
+
+  public static MqttConnAck accepted() {
+    if (MqttConnAck.accepted == null) {
+      MqttConnAck.accepted = new MqttConnAck(0, 0, 0);
+    }
+    return MqttConnAck.accepted;
+  }
+
+  public static MqttConnAck create(int packetFlags, int connectFlags, int connectCode) {
+    if (packetFlags == 0 && connectFlags == 0 && connectCode == 0) {
+      return MqttConnAck.accepted();
+    } else {
+      return new MqttConnAck(packetFlags, connectFlags, connectCode);
+    }
+  }
+
+  public static MqttConnAck create(MqttConnStatus connectStatus) {
+    if (connectStatus.code == 0) {
+      return MqttConnAck.accepted();
+    } else {
+      return new MqttConnAck(0, 0, connectStatus.code);
+    }
   }
 
 }

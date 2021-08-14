@@ -16,8 +16,6 @@ package swim.vm.js;
 
 public class JsModuleException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public JsModuleException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class JsModuleException extends RuntimeException {
   public JsModuleException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

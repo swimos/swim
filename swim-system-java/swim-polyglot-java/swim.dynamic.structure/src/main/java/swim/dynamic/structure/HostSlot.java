@@ -20,16 +20,16 @@ import swim.structure.Slot;
 
 public final class HostSlot {
 
+  private HostSlot() {
+    // static
+  }
+
   public static final HostObjectType<Slot> TYPE;
 
   static {
     final JavaHostClassType<Slot> type = new JavaHostClassType<>(Slot.class);
     TYPE = type;
     type.extendType(HostField.TYPE);
-  }
-
-  private HostSlot() {
-    // static
   }
 
 }

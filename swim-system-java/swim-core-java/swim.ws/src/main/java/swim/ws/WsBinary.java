@@ -26,29 +26,12 @@ import swim.util.Murmur3;
 
 public final class WsBinary<T> extends WsData<T> implements Debug {
 
-  private static int hashSeed;
   final T value;
   final Encoder<?, ?> content;
 
   WsBinary(T value, Encoder<?, ?> content) {
     this.value = value;
     this.content = content;
-  }
-
-  public static <T> WsBinary<T> from(T value, Encoder<?, ?> content) {
-    return new WsBinary<T>(value, content);
-  }
-
-  public static <T> WsBinary<T> from(Encoder<?, ?> content) {
-    return new WsBinary<T>(null, content);
-  }
-
-  public static WsBinary<ByteBuffer> from(ByteBuffer payload) {
-    return new WsBinary<ByteBuffer>(payload.duplicate(), Binary.byteBufferWriter(payload));
-  }
-
-  public static WsBinary<Data> from(Data payload) {
-    return new WsBinary<Data>(payload, payload.writer());
   }
 
   @Override
@@ -92,26 +75,45 @@ public final class WsBinary<T> extends WsData<T> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(WsBinary.class);
+    if (WsBinary.hashSeed == 0) {
+      WsBinary.hashSeed = Murmur3.seed(WsBinary.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, Murmur3.hash(this.value)));
+    return Murmur3.mash(Murmur3.mix(WsBinary.hashSeed, Murmur3.hash(this.value)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("WsBinary").write('.').write("from").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("WsBinary").write('.').write("create").write('(');
     if (this.value != null) {
       output = output.debug(this.value).write(", ");
     }
     output = output.debug(this.content).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static <T> WsBinary<T> create(T value, Encoder<?, ?> content) {
+    return new WsBinary<T>(value, content);
+  }
+
+  public static <T> WsBinary<T> create(Encoder<?, ?> content) {
+    return new WsBinary<T>(null, content);
+  }
+
+  public static WsBinary<ByteBuffer> create(ByteBuffer payload) {
+    return new WsBinary<ByteBuffer>(payload.duplicate(), Binary.byteBufferWriter(payload));
+  }
+
+  public static WsBinary<Data> create(Data payload) {
+    return new WsBinary<Data>(payload, payload.writer());
   }
 
 }

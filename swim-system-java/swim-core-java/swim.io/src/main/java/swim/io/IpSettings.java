@@ -31,44 +31,12 @@ import swim.util.Murmur3;
  */
 public class IpSettings implements Debug {
 
-  private static int hashSeed;
-  private static IpSettings standard;
-  private static Form<IpSettings> form;
   protected final TcpSettings tcpSettings;
   protected final TlsSettings tlsSettings;
 
   public IpSettings(TcpSettings tcpSettings, TlsSettings tlsSettings) {
     this.tcpSettings = tcpSettings;
     this.tlsSettings = tlsSettings;
-  }
-
-  /**
-   * Returns the default {@code IpSettings} instance.
-   */
-  public static IpSettings standard() {
-    if (standard == null) {
-      standard = new IpSettings(TcpSettings.standard(), TlsSettings.standard());
-    }
-    return standard;
-  }
-
-  public static IpSettings from(TcpSettings tcpSettings) {
-    return new IpSettings(tcpSettings, TlsSettings.standard());
-  }
-
-  public static IpSettings from(TlsSettings tlsSettings) {
-    return new IpSettings(TcpSettings.standard(), tlsSettings);
-  }
-
-  /**
-   * Returns the structural {@code Form} of {@code IpSettings}.
-   */
-  @Kind
-  public static Form<IpSettings> form() {
-    if (form == null) {
-      form = new IpSettingsForm();
-    }
-    return form;
   }
 
   /**
@@ -83,7 +51,7 @@ public class IpSettings implements Debug {
    * {@code tcpSettings}.
    */
   public IpSettings tcpSettings(TcpSettings tcpSettings) {
-    return copy(tcpSettings, this.tlsSettings);
+    return this.copy(tcpSettings, this.tlsSettings);
   }
 
   /**
@@ -98,7 +66,7 @@ public class IpSettings implements Debug {
    * {@code tlsSettings}.
    */
   public IpSettings tlsSettings(TlsSettings tlsSettings) {
-    return copy(this.tcpSettings, tlsSettings);
+    return this.copy(this.tcpSettings, tlsSettings);
   }
 
   /**
@@ -121,7 +89,7 @@ public class IpSettings implements Debug {
    * Returns a structural {@code Value} representing these {@code IpSettings}.
    */
   public Value toValue() {
-    return form().mold(this).toValue();
+    return IpSettings.form().mold(this).toValue();
   }
 
   /**
@@ -144,25 +112,61 @@ public class IpSettings implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(IpSettings.class);
+    if (IpSettings.hashSeed == 0) {
+      IpSettings.hashSeed = Murmur3.seed(IpSettings.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(IpSettings.hashSeed,
         this.tcpSettings.hashCode()), this.tlsSettings.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("IpSettings").write('.').write("standard").write('(').write(')')
-        .write('.').write("tcpSettings").write('(').debug(this.tcpSettings).write(')')
-        .write('.').write("tlsSettings").write('(').debug(this.tlsSettings).write(')');
+                   .write('.').write("tcpSettings").write('(').debug(this.tcpSettings).write(')')
+                   .write('.').write("tlsSettings").write('(').debug(this.tlsSettings).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static IpSettings standard;
+
+  /**
+   * Returns the default {@code IpSettings} instance.
+   */
+  public static IpSettings standard() {
+    if (IpSettings.standard == null) {
+      IpSettings.standard = new IpSettings(TcpSettings.standard(), TlsSettings.standard());
+    }
+    return IpSettings.standard;
+  }
+
+  public static IpSettings create(TcpSettings tcpSettings) {
+    return new IpSettings(tcpSettings, TlsSettings.standard());
+  }
+
+  public static IpSettings create(TlsSettings tlsSettings) {
+    return new IpSettings(TcpSettings.standard(), tlsSettings);
+  }
+
+  private static Form<IpSettings> form;
+
+  /**
+   * Returns the structural {@code Form} of {@code IpSettings}.
+   */
+  @Kind
+  public static Form<IpSettings> form() {
+    if (IpSettings.form == null) {
+      IpSettings.form = new IpSettingsForm();
+    }
+    return IpSettings.form;
   }
 
 }

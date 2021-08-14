@@ -40,8 +40,15 @@ final class WebSocketExtensionWriter extends Writer<Object, Object> {
     this(http, name, params, null, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return WebSocketExtensionWriter.write(output, this.http, this.name,
+                                          this.params, this.part, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name,
-                                      Iterator<WebSocketParam> params, Writer<?, ?> part, int step) {
+                                      Iterator<WebSocketParam> params,
+                                      Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
         part = http.writeToken(name, output);
@@ -58,7 +65,7 @@ final class WebSocketExtensionWriter extends Writer<Object, Object> {
     do {
       if (step == 2) {
         if (!params.hasNext()) {
-          return done();
+          return Writer.done();
         } else if (output.isCont()) {
           output = output.write(';');
           step = 3;
@@ -85,21 +92,16 @@ final class WebSocketExtensionWriter extends Writer<Object, Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new WebSocketExtensionWriter(http, name, params, part, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name,
                                       Iterator<WebSocketParam> params) {
-    return write(output, http, name, params, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.name, this.params, this.part, this.step);
+    return WebSocketExtensionWriter.write(output, http, name, params, null, 1);
   }
 
 }

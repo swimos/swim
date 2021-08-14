@@ -58,9 +58,6 @@ of the following component libraries:
 - [**swim-protobuf**](swim-core-java/swim.protobuf) –
   Protocol Buffers (protobuf) codec that incrementally parses and writes
   **swim-structure** values.
-- [**swim-decipher**](swim-core-java/swim.decipher) –
-  universal decoder that detects and incrementally parses Recon, JSON, XML,
-  plain text, and binary data formats as **swim-structure** values.
 - [**swim-math**](swim-core-java/swim.math) –
   mathematical and geometric structures, including rings, fields, vector
   modules and spaces, affine spaces, tensor spaces, probability distributions,

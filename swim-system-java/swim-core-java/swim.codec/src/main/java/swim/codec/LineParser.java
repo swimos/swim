@@ -26,6 +26,11 @@ final class LineParser extends Parser<String> {
     this(null);
   }
 
+  @Override
+  public Parser<String> feed(Input input) {
+    return LineParser.parse(input, this.output);
+  }
+
   static Parser<String> parse(Input input, StringBuilder output) {
     if (output == null) {
       output = new StringBuilder();
@@ -38,20 +43,15 @@ final class LineParser extends Parser<String> {
       } else if (c != '\n') {
         output.appendCodePoint(c);
       } else {
-        return done(output.toString());
+        return Parser.done(output.toString());
       }
     }
     if (input.isDone()) {
-      return done(output.toString());
+      return Parser.done(output.toString());
     } else if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new LineParser(output);
-  }
-
-  @Override
-  public Parser<String> feed(Input input) {
-    return parse(input, this.output);
   }
 
 }

@@ -18,8 +18,8 @@ import java.util.Map;
 import swim.api.Link;
 import swim.api.data.ValueData;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Stage;
+import swim.runtime.LaneModel;
 import swim.runtime.LaneRelay;
 import swim.runtime.LaneView;
 import swim.runtime.Push;
@@ -31,14 +31,12 @@ import swim.warp.CommandMessage;
 
 public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUplink> {
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
   protected int flags;
   protected ValueData<Value> data;
 
   ValueLaneModel(int flags) {
     this.flags = flags;
+    this.data = null;
   }
 
   public ValueLaneModel() {
@@ -68,7 +66,7 @@ public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUpl
   }
 
   public final boolean isResident() {
-    return (this.flags & RESIDENT) != 0;
+    return (this.flags & ValueLaneModel.RESIDENT) != 0;
   }
 
   public ValueLaneModel isResident(boolean isResident) {
@@ -77,12 +75,12 @@ public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUpl
     }
 
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= ValueLaneModel.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~ValueLaneModel.RESIDENT;
     }
 
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof ValueLaneView<?>) {
       ((ValueLaneView<?>) views).didSetResident(isResident);
     } else if (views instanceof LaneView[]) {
@@ -95,7 +93,7 @@ public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUpl
   }
 
   public final boolean isTransient() {
-    return (this.flags & TRANSIENT) != 0;
+    return (this.flags & ValueLaneModel.TRANSIENT) != 0;
   }
 
   public ValueLaneModel isTransient(boolean isTransient) {
@@ -103,12 +101,12 @@ public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUpl
       this.data.isTransient(isTransient);
     }
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= ValueLaneModel.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~ValueLaneModel.TRANSIENT;
     }
 
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof ValueLaneView<?>) {
       ((ValueLaneView<?>) views).didSetTransient(isTransient);
     } else if (views instanceof LaneView[]) {
@@ -129,7 +127,7 @@ public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUpl
   public <V> V set(ValueLaneView<V> view, V newObject) {
     final Form<V> valueForm = view.valueForm;
     final Value newValue = valueForm.mold(newObject).toValue();
-    final ValueLaneRelaySet relay = new ValueLaneRelaySet(this, stage(), newValue);
+    final ValueLaneRelaySet relay = new ValueLaneRelaySet(this, this.stage(), newValue);
     relay.valueForm = (Form<Object>) valueForm;
     relay.oldObject = newObject;
     relay.newObject = newObject;
@@ -146,16 +144,19 @@ public class ValueLaneModel extends WarpLaneModel<ValueLaneView<?>, ValueLaneUpl
   }
 
   protected void openStore() {
-    this.data = this.laneContext.store().valueData(laneUri().toString())
-        .isTransient(isTransient())
-        .isResident(isResident());
+    this.data = this.laneContext.store().valueData(this.laneUri().toString())
+                                        .isTransient(this.isTransient())
+                                        .isResident(this.isResident());
   }
 
   @Override
   protected void willLoad() {
-    openStore();
+    this.openStore();
     super.willLoad();
   }
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
 
 }
 
@@ -267,7 +268,7 @@ final class ValueLaneRelaySet extends LaneRelay<ValueLaneModel, ValueLaneView<?>
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;

@@ -28,34 +28,6 @@ public class GoogleIdToken extends OpenIdToken {
     super();
   }
 
-  public static GoogleIdToken from(Value value) {
-    return new GoogleIdToken(value);
-  }
-
-  public static GoogleIdToken parse(String json) {
-    return new GoogleIdToken(Json.parse(json));
-  }
-
-  public static GoogleIdToken verify(JsonWebSignature jws, Iterable<PublicKeyDef> publicKeyDefs) {
-    final Value payload = jws.payload();
-    final GoogleIdToken idToken = new GoogleIdToken(payload);
-    // TODO: check payload
-    for (PublicKeyDef publicKeyDef : publicKeyDefs) {
-      if (jws.verifySignature(publicKeyDef.publicKey())) {
-        return idToken;
-      }
-    }
-    return null;
-  }
-
-  public static GoogleIdToken verify(String compactJws, Iterable<PublicKeyDef> publicKeyDefs) {
-    final JsonWebSignature jws = JsonWebSignature.parse(compactJws);
-    if (jws != null) {
-      return verify(jws, publicKeyDefs);
-    }
-    return null;
-  }
-
   @Override
   public GoogleIdToken issuer(String issuer) {
     return (GoogleIdToken) super.issuer(issuer);
@@ -125,7 +97,7 @@ public class GoogleIdToken extends OpenIdToken {
   }
 
   public GoogleIdToken hostedDomain(String hostedDomain) {
-    return copy(this.value.updatedSlot("hd", hostedDomain));
+    return this.copy(this.value.updatedSlot("hd", hostedDomain));
   }
 
   public String email() {
@@ -133,7 +105,7 @@ public class GoogleIdToken extends OpenIdToken {
   }
 
   public GoogleIdToken email(String email) {
-    return copy(this.value.updatedSlot("email", email));
+    return this.copy(this.value.updatedSlot("email", email));
   }
 
   public boolean emailVerified() {
@@ -141,7 +113,7 @@ public class GoogleIdToken extends OpenIdToken {
   }
 
   public GoogleIdToken emailVerified(boolean emailVerified) {
-    return copy(this.value.updatedSlot("email_verified", emailVerified));
+    return this.copy(this.value.updatedSlot("email_verified", emailVerified));
   }
 
   public String name() {
@@ -149,7 +121,7 @@ public class GoogleIdToken extends OpenIdToken {
   }
 
   public GoogleIdToken name(String name) {
-    return copy(this.value.updatedSlot("name", name));
+    return this.copy(this.value.updatedSlot("name", name));
   }
 
   public String picture() {
@@ -157,7 +129,7 @@ public class GoogleIdToken extends OpenIdToken {
   }
 
   public GoogleIdToken picture(String picture) {
-    return copy(this.value.updatedSlot("picture", picture));
+    return this.copy(this.value.updatedSlot("picture", picture));
   }
 
   public String givenName() {
@@ -165,7 +137,7 @@ public class GoogleIdToken extends OpenIdToken {
   }
 
   public GoogleIdToken givenName(String givenName) {
-    return copy(this.value.updatedSlot("given_name", givenName));
+    return this.copy(this.value.updatedSlot("given_name", givenName));
   }
 
   public String familyName() {
@@ -173,7 +145,7 @@ public class GoogleIdToken extends OpenIdToken {
   }
 
   public GoogleIdToken familyName(String familyName) {
-    return copy(this.value.updatedSlot("family_name", familyName));
+    return this.copy(this.value.updatedSlot("family_name", familyName));
   }
 
   public String locale() {
@@ -181,12 +153,40 @@ public class GoogleIdToken extends OpenIdToken {
   }
 
   public GoogleIdToken locale(String locale) {
-    return copy(this.value.updatedSlot("locale", locale));
+    return this.copy(this.value.updatedSlot("locale", locale));
   }
 
   @Override
   protected GoogleIdToken copy(Value value) {
     return new GoogleIdToken(value);
+  }
+
+  public static GoogleIdToken from(Value value) {
+    return new GoogleIdToken(value);
+  }
+
+  public static GoogleIdToken parse(String json) {
+    return new GoogleIdToken(Json.parse(json));
+  }
+
+  public static GoogleIdToken verify(JsonWebSignature jws, Iterable<PublicKeyDef> publicKeyDefs) {
+    final Value payload = jws.payload();
+    final GoogleIdToken idToken = new GoogleIdToken(payload);
+    // TODO: check payload
+    for (PublicKeyDef publicKeyDef : publicKeyDefs) {
+      if (jws.verifySignature(publicKeyDef.publicKey())) {
+        return idToken;
+      }
+    }
+    return null;
+  }
+
+  public static GoogleIdToken verify(String compactJws, Iterable<PublicKeyDef> publicKeyDefs) {
+    final JsonWebSignature jws = JsonWebSignature.parse(compactJws);
+    if (jws != null) {
+      return GoogleIdToken.verify(jws, publicKeyDefs);
+    }
+    return null;
   }
 
 }

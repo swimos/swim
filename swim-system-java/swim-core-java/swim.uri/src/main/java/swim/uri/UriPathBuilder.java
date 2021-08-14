@@ -46,9 +46,9 @@ public final class UriPathBuilder implements Builder<String, UriPath> {
       throw new NullPointerException();
     }
     if (component.equals("/")) {
-      return addSlash();
+      return this.addSlash();
     } else {
-      return addSegment(component);
+      return this.addSegment(component);
     }
   }
 
@@ -58,11 +58,11 @@ public final class UriPathBuilder implements Builder<String, UriPath> {
       throw new NullPointerException();
     }
     if (components instanceof UriPath) {
-      return addPath((UriPath) components);
+      return this.addPath((UriPath) components);
     } else {
       boolean modified = false;
       for (String component : components) {
-        modified = add(component) || modified;
+        modified = this.add(component) || modified;
       }
       return modified;
     }
@@ -80,7 +80,7 @@ public final class UriPathBuilder implements Builder<String, UriPath> {
     if (size == 0) {
       this.first = tail;
     } else {
-      dealias(size - 1).setTail(tail);
+      this.dealias(size - 1).setTail(tail);
     }
     this.last = tail;
     this.size = size + 1;
@@ -95,7 +95,7 @@ public final class UriPathBuilder implements Builder<String, UriPath> {
     if (size == 0) {
       this.first = tail;
     } else {
-      final UriPath last = dealias(size - 1);
+      final UriPath last = this.dealias(size - 1);
       if (last.isAbsolute()) {
         last.setTail(tail);
       } else {
@@ -116,7 +116,7 @@ public final class UriPathBuilder implements Builder<String, UriPath> {
       if (size == 0) {
         this.first = path;
       } else {
-        final UriPath last = dealias(size - 1);
+        final UriPath last = this.dealias(size - 1);
         if (last.isAbsolute() || path.isAbsolute()) {
           last.setTail(path);
         } else {
@@ -159,7 +159,7 @@ public final class UriPathBuilder implements Builder<String, UriPath> {
       }
       return first;
     } else {
-      final UriPath last = dealias(size - 2);
+      final UriPath last = this.dealias(size - 2);
       last.setTail(UriPath.empty());
       this.last = last;
       this.size = size - 1;

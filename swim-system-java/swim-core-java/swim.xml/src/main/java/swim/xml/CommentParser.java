@@ -31,6 +31,11 @@ final class CommentParser<I> extends Parser<I> {
     this.step = step;
   }
 
+  @Override
+  public Parser<I> feed(Input input) {
+    return CommentParser.parse(input, this.xml, this.output, this.step);
+  }
+
   static <I> Parser<I> parse(Input input, XmlParser<I, ?> xml, Output<I> output, int step) {
     int c = 0;
     while (step >= 1 && step <= 4) {
@@ -40,10 +45,10 @@ final class CommentParser<I> extends Parser<I> {
           step += 1;
           continue;
         } else {
-          return error(Diagnostic.expected("<!--".charAt(step - 1), input));
+          return Parser.error(Diagnostic.expected("<!--".charAt(step - 1), input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("<!--".charAt(step - 1), input));
+        return Parser.error(Diagnostic.expected("<!--".charAt(step - 1), input));
       }
       break;
     }
@@ -66,10 +71,10 @@ final class CommentParser<I> extends Parser<I> {
             input = input.step();
             step = 6;
           } else {
-            return error(Diagnostic.unexpected(input));
+            return Parser.error(Diagnostic.unexpected(input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 6) {
@@ -87,7 +92,7 @@ final class CommentParser<I> extends Parser<I> {
             continue;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 7) {
@@ -98,7 +103,7 @@ final class CommentParser<I> extends Parser<I> {
           }
           if (c == '>') {
             input = input.step();
-            return done(output.bind());
+            return Parser.done(output.bind());
           } else {
             output = output.write('-');
             output = output.write('-');
@@ -106,28 +111,23 @@ final class CommentParser<I> extends Parser<I> {
             continue;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new CommentParser<I>(xml, output, step);
   }
 
   static <I> Parser<I> parse(Input input, XmlParser<I, ?> xml) {
-    return parse(input, xml, null, 1);
+    return CommentParser.parse(input, xml, null, 1);
   }
 
   static <I> Parser<I> parseRest(Input input, XmlParser<I, ?> xml) {
-    return parse(input, xml, null, 3);
-  }
-
-  @Override
-  public Parser<I> feed(Input input) {
-    return parse(input, this.xml, this.output, this.step);
+    return CommentParser.parse(input, xml, null, 3);
   }
 
 }

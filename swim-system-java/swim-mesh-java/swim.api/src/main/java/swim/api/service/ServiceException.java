@@ -16,8 +16,6 @@ package swim.api.service;
 
 public class ServiceException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public ServiceException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class ServiceException extends RuntimeException {
   public ServiceException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

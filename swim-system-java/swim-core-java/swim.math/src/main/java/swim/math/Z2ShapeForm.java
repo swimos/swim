@@ -68,9 +68,9 @@ final class Z2ShapeForm extends Z2Form<Z2Shape> {
     final Value value = item.toValue();
     final String tag = value.tag();
     if ("point".equals(tag)) {
-      return PointZ2.form().cast(value);
+      return Z2Point.form().cast(value);
     } else if ("box".equals(tag)) {
-      return BoxZ2.form().cast(value);
+      return Z2Box.form().cast(value);
     }
     return null;
   }

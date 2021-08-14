@@ -20,19 +20,10 @@ import swim.util.Cursor;
 
 final class STreeLeaf<T> extends STreePage<T> {
 
-  private static STreeLeaf<Object> empty;
   final Map.Entry<Object, T>[] slots;
 
   STreeLeaf(Map.Entry<Object, T>[] slots) {
     this.slots = slots;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> STreeLeaf<T> empty() {
-    if (empty == null) {
-      empty = new STreeLeaf<Object>((Map.Entry<Object, Object>[]) new Map.Entry<?, ?>[0]);
-    }
-    return (STreeLeaf<T>) empty;
   }
 
   @Override
@@ -52,9 +43,8 @@ final class STreeLeaf<T> extends STreePage<T> {
 
   @Override
   public boolean contains(Object value) {
-    final Map.Entry<Object, T>[] slots = this.slots;
-    for (int i = 0, n = slots.length; i < n; i += 1) {
-      if (value.equals(slots[i])) {
+    for (int i = 0, n = this.slots.length; i < n; i += 1) {
+      if (value.equals(this.slots[i])) {
         return true;
       }
     }
@@ -63,9 +53,8 @@ final class STreeLeaf<T> extends STreePage<T> {
 
   @Override
   public int indexOf(Object value) {
-    final Map.Entry<Object, T>[] slots = this.slots;
-    for (int i = 0, n = slots.length; i < n; i += 1) {
-      if (value.equals(slots[i])) {
+    for (int i = 0, n = this.slots.length; i < n; i += 1) {
+      if (value.equals(this.slots[i])) {
         return i;
       }
     }
@@ -74,9 +63,8 @@ final class STreeLeaf<T> extends STreePage<T> {
 
   @Override
   public int lastIndexOf(Object value) {
-    final Map.Entry<Object, T>[] slots = this.slots;
-    for (int i = slots.length - 1; i >= 0; i -= 1) {
-      if (value.equals(slots[i])) {
+    for (int i = this.slots.length - 1; i >= 0; i -= 1) {
+      if (value.equals(this.slots[i])) {
         return i;
       }
     }
@@ -103,7 +91,7 @@ final class STreeLeaf<T> extends STreePage<T> {
     if (index < 0 || index >= this.slots.length) {
       throw new IndexOutOfBoundsException(Integer.toString(index));
     }
-    return updatedSlot(index, newValue);
+    return this.updatedSlot(index, newValue);
   }
 
   @SuppressWarnings("unchecked")
@@ -126,7 +114,7 @@ final class STreeLeaf<T> extends STreePage<T> {
     if (index < 0 || index > this.slots.length) {
       throw new IndexOutOfBoundsException(Integer.toString(index));
     }
-    return insertedSlot(index, newValue, id, tree);
+    return this.insertedSlot(index, newValue, id, tree);
   }
 
   @SuppressWarnings("unchecked")
@@ -149,7 +137,7 @@ final class STreeLeaf<T> extends STreePage<T> {
       throw new IndexOutOfBoundsException(Integer.toString(index));
     }
     if (this.slots.length > 1) {
-      return removedSlot(index);
+      return this.removedSlot(index);
     } else {
       return STreeLeaf.empty();
     }
@@ -167,10 +155,10 @@ final class STreeLeaf<T> extends STreePage<T> {
 
   @Override
   public STreeLeaf<T> removed(Object object, STreeContext<T> tree) {
-    final int index = indexOf(object);
+    final int index = this.indexOf(object);
     if (index >= 0) {
       if (this.slots.length > 1) {
-        return removedSlot(index);
+        return this.removedSlot(index);
       } else {
         return STreeLeaf.empty();
       }
@@ -220,7 +208,7 @@ final class STreeLeaf<T> extends STreePage<T> {
     final int n = this.slots.length;
     if (n > 1 && tree.pageShouldSplit(this)) {
       final int x = n >>> 1;
-      return split(x);
+      return this.split(x);
     } else {
       return this;
     }
@@ -230,8 +218,8 @@ final class STreeLeaf<T> extends STreePage<T> {
   @Override
   public STreeNode<T> split(int x) {
     final STreePage<T>[] newPages = (STreePage<T>[]) new STreePage<?>[2];
-    final STreeLeaf<T> newLeftPage = splitLeft(x);
-    final STreeLeaf<T> newRightPage = splitRight(x);
+    final STreeLeaf<T> newLeftPage = this.splitLeft(x);
+    final STreeLeaf<T> newRightPage = this.splitRight(x);
     newPages[0] = newLeftPage;
     newPages[1] = newRightPage;
 
@@ -262,9 +250,8 @@ final class STreeLeaf<T> extends STreePage<T> {
 
   @Override
   public void copyToArray(Object[] array, int offset) {
-    final Map.Entry<Object, T>[] slots = this.slots;
-    for (int i = 0, n = slots.length; i < n; i += 1) {
-      array[offset + i] = slots[i].getValue();
+    for (int i = 0, n = this.slots.length; i < n; i += 1) {
+      array[offset + i] = this.slots[i].getValue();
     }
   }
 
@@ -276,6 +263,16 @@ final class STreeLeaf<T> extends STreePage<T> {
   @Override
   public Cursor<Map.Entry<Object, T>> reverseEntryIterator() {
     return Cursor.array(this.slots, this.slots.length);
+  }
+
+  private static STreeLeaf<Object> empty;
+
+  @SuppressWarnings("unchecked")
+  public static <T> STreeLeaf<T> empty() {
+    if (STreeLeaf.empty == null) {
+      STreeLeaf.empty = new STreeLeaf<Object>((Map.Entry<Object, Object>[]) new Map.Entry<?, ?>[0]);
+    }
+    return (STreeLeaf<T>) STreeLeaf.empty;
   }
 
 }

@@ -20,9 +20,6 @@ import swim.structure.Value;
 
 public final class AuthRequest extends HostAddressed {
 
-  @Kind
-  public static final Form<AuthRequest> FORM = new AuthRequestForm();
-
   public AuthRequest(Value body) {
     super(body);
   }
@@ -38,13 +35,16 @@ public final class AuthRequest extends HostAddressed {
 
   @Override
   public Form<AuthRequest> form() {
-    return FORM;
+    return AuthRequest.FORM;
   }
 
   @Override
   public AuthRequest body(Value body) {
     return new AuthRequest(body);
   }
+
+  @Kind
+  public static final Form<AuthRequest> FORM = new AuthRequestForm();
 
 }
 
@@ -61,7 +61,7 @@ final class AuthRequestForm extends HostAddressedForm<AuthRequest> {
   }
 
   @Override
-  public AuthRequest from(Value body) {
+  public AuthRequest create(Value body) {
     return new AuthRequest(body);
   }
 

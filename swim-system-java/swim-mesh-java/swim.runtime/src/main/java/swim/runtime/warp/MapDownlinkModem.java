@@ -26,9 +26,6 @@ import swim.warp.CommandMessage;
 
 public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends WarpDownlinkModel<View> {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<MapDownlinkModem<?>, HashTrieSet<Value>> KEY_QUEUE =
-      AtomicReferenceFieldUpdater.newUpdater((Class<MapDownlinkModem<?>>) (Class<?>) MapDownlinkModem.class, (Class<HashTrieSet<Value>>) (Class<?>) HashTrieSet.class, "keyQueue");
   final ConcurrentLinkedQueue<Push<CommandMessage>> upQueue;
   volatile HashTrieSet<Value> keyQueue;
   volatile Value lastKey;
@@ -38,6 +35,7 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
     super(meshUri, hostUri, nodeUri, laneUri, prio, rate, body);
     this.upQueue = new ConcurrentLinkedQueue<Push<CommandMessage>>();
     this.keyQueue = HashTrieSet.empty();
+    this.lastKey = null;
   }
 
   @Override
@@ -47,10 +45,10 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
 
   @Override
   protected void queueUp(Value body, Cont<CommandMessage> cont) {
-    final Uri hostUri = hostUri();
-    final Uri nodeUri = nodeUri();
-    final Uri laneUri = laneUri();
-    final float prio = prio();
+    final Uri hostUri = this.hostUri();
+    final Uri nodeUri = this.nodeUri();
+    final Uri laneUri = this.laneUri();
+    final float prio = this.prio();
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
     this.upQueue.add(new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
                                               prio, null, message, cont));
@@ -58,11 +56,11 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
 
   public void cueUpKey(Value key) {
     do {
-      final HashTrieSet<Value> oldKeyQueue = this.keyQueue;
+      final HashTrieSet<Value> oldKeyQueue = MapDownlinkModem.KEY_QUEUE.get(this);
       final HashTrieSet<Value> newKeyQueue = oldKeyQueue.added(key);
       if (oldKeyQueue != newKeyQueue) {
-        if (KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue)) {
-          cueUp();
+        if (MapDownlinkModem.KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue)) {
+          this.cueUp();
           break;
         }
       } else {
@@ -74,13 +72,13 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
   protected void cueUpKeys(Collection<? extends Value> keys) {
     if (!keys.isEmpty()) {
       do {
-        final HashTrieSet<Value> oldKeyQueue = this.keyQueue;
+        final HashTrieSet<Value> oldKeyQueue = MapDownlinkModem.KEY_QUEUE.get(this);
         final HashTrieSet<Value> newKeyQueue = oldKeyQueue.added(keys);
-        if (KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue)) {
+        if (MapDownlinkModem.KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue)) {
           break;
         }
       } while (true);
-      cueUp();
+      this.cueUp();
     }
   }
 
@@ -93,35 +91,38 @@ public abstract class MapDownlinkModem<View extends WarpDownlinkView> extends Wa
 
   @Override
   protected Push<CommandMessage> nextUpCue() {
-    HashTrieSet<Value> oldKeyQueue;
-    HashTrieSet<Value> newKeyQueue;
-    Value key;
     do {
-      oldKeyQueue = this.keyQueue;
-      key = oldKeyQueue.next(this.lastKey);
-      newKeyQueue = oldKeyQueue.removed(key);
-    } while (oldKeyQueue != newKeyQueue && !KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue));
-    if (key != null) {
-      this.lastKey = key;
-      final Uri hostUri = hostUri();
-      final Uri nodeUri = nodeUri();
-      final Uri laneUri = laneUri();
-      final float prio = prio();
-      final Value body = nextUpKey(key);
-      final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
-      return new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
-                                      prio, null, message, null);
-    } else {
-      return null;
-    }
+      final HashTrieSet<Value> oldKeyQueue = MapDownlinkModem.KEY_QUEUE.get(this);
+      final Value key = oldKeyQueue.next(this.lastKey);
+      final HashTrieSet<Value> newKeyQueue = oldKeyQueue.removed(key);
+      if (MapDownlinkModem.KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue)) {
+        if (key != null) {
+          this.lastKey = key;
+          final Uri hostUri = this.hostUri();
+          final Uri nodeUri = this.nodeUri();
+          final Uri laneUri = this.laneUri();
+          final float prio = this.prio();
+          final Value body = this.nextUpKey(key);
+          final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
+          return new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
+                                          prio, null, message, null);
+        } else {
+          return null;
+        }
+      }
+    } while (true);
   }
 
   @Override
   protected void feedUp() {
-    if (!this.keyQueue.isEmpty()) {
-      cueUp();
+    if (!MapDownlinkModem.KEY_QUEUE.get(this).isEmpty()) {
+      this.cueUp();
     }
     super.feedUp();
   }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<MapDownlinkModem<?>, HashTrieSet<Value>> KEY_QUEUE =
+      AtomicReferenceFieldUpdater.newUpdater((Class<MapDownlinkModem<?>>) (Class<?>) MapDownlinkModem.class, (Class<HashTrieSet<Value>>) (Class<?>) HashTrieSet.class, "keyQueue");
 
 }

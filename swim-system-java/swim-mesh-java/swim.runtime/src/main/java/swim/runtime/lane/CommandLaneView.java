@@ -28,7 +28,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 
@@ -36,13 +36,13 @@ public class CommandLaneView<V> extends WarpLaneView implements CommandLane<V> {
 
   protected final AgentContext agentContext;
   protected Form<V> valueForm;
-
   protected CommandLaneModel laneBinding;
 
   public CommandLaneView(AgentContext agentContext, Form<V> valueForm, Object observers) {
     super(observers);
     this.agentContext = agentContext;
     this.valueForm = valueForm;
+    this.laneBinding = null;
   }
 
   public CommandLaneView(AgentContext agentContext, Form<V> valueForm) {
@@ -76,12 +76,12 @@ public class CommandLaneView<V> extends WarpLaneView implements CommandLane<V> {
   @Override
   public <V2> CommandLaneView<V2> valueForm(Form<V2> valueForm) {
     return new CommandLaneView<V2>(this.agentContext, valueForm,
-        typesafeObservers(this.observers));
+                                   this.typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> CommandLaneView<V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   public void setValueForm(Form<V> valueForm) {
@@ -112,50 +112,51 @@ public class CommandLaneView<V> extends WarpLaneView implements CommandLane<V> {
 
   @Override
   public CommandLaneView<V> onCommand(OnCommand<V> onCommand) {
-    return observe(onCommand);
+    return this.observe(onCommand);
   }
 
   @Override
   public CommandLaneView<V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public CommandLaneView<V> didCommand(DidCommand didCommand) {
-    return observe(didCommand);
+    return this.observe(didCommand);
   }
 
   @Override
   public CommandLaneView<V> willUplink(WillUplink willUplink) {
-    return observe(willUplink);
+    return this.observe(willUplink);
   }
 
   @Override
   public CommandLaneView<V> didUplink(DidUplink didUplink) {
-    return observe(didUplink);
+    return this.observe(didUplink);
   }
 
   @Override
   public CommandLaneView<V> willEnter(WillEnter willEnter) {
-    return observe(willEnter);
+    return this.observe(willEnter);
   }
 
   @Override
   public CommandLaneView<V> didEnter(DidEnter didEnter) {
-    return observe(didEnter);
+    return this.observe(didEnter);
   }
 
   @Override
   public CommandLaneView<V> willLeave(WillLeave willLeave) {
-    return observe(willLeave);
+    return this.observe(willLeave);
   }
 
   @Override
   public CommandLaneView<V> didLeave(DidLeave didLeave) {
-    return observe(didLeave);
+    return this.observe(didLeave);
   }
 
   public void laneOnCommand(V value) {
+    // hook
   }
 
   @SuppressWarnings("unchecked")
@@ -172,8 +173,8 @@ public class CommandLaneView<V> extends WarpLaneView implements CommandLane<V> {
           try {
             ((OnCommand<V>) observers).onCommand(value);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -189,8 +190,8 @@ public class CommandLaneView<V> extends WarpLaneView implements CommandLane<V> {
               try {
                 ((OnCommand<V>) observer).onCommand(value);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }

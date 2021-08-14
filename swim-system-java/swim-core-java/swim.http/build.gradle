@@ -16,5 +16,4 @@ dependencies {
   implementation project(':swim-recon')
   implementation project(':swim-json')
   implementation project(':swim-xml')
-  implementation project(':swim-decipher')
 }

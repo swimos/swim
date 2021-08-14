@@ -19,8 +19,6 @@ import static org.testng.Assert.assertEquals;
 
 public class GeoProjectionSpec {
 
-  static final double MAX_LAT = Math.toDegrees(Math.atan(Math.sinh(Math.PI)));
-
   @Test
   public void testWGS84() {
     assertEquals(GeoProjection.wgs84().transformX(-180.0, -90.0), 0L);
@@ -49,7 +47,6 @@ public class GeoProjectionSpec {
     assertEquals(GeoProjection.wgs84Inverse().transformY(0x14a8d299063d7900L, 0x5a8c58bbfa466c00L), 37.333447);
   }
 
-  @Test(description = "fixme: fails", enabled = false)
   public void testSphericalMercator() {
     assertEquals(GeoProjection.sphericalMercator().transformX(-180.0, -90.0), 0L);
     assertEquals(GeoProjection.sphericalMercator().transformY(-180.0, -90.0), 0L);
@@ -78,5 +75,7 @@ public class GeoProjectionSpec {
     assertEquals(GeoProjection.sphericalMercatorInverse().transformX(0x14a8d299063d7800L, 0x4e53cbe98b71c400L), -121.895259);
     assertEquals(GeoProjection.sphericalMercatorInverse().transformY(0x14a8d299063d7800L, 0x4e53cbe98b71c400L), 37.333447);
   }
+
+  static final double MAX_LAT = Math.toDegrees(Math.atan(Math.sinh(Math.PI)));
 
 }

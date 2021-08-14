@@ -38,9 +38,9 @@ public class AvroDecoder {
 
   public <T> Decoder<T> decodeType(AvroType<T> type, InputBuffer input) {
     if (type instanceof AvroPrimitiveType<?>) {
-      return decodePrimitive((AvroPrimitiveType<T>) type, input);
+      return this.decodePrimitive((AvroPrimitiveType<T>) type, input);
     } else if (type instanceof AvroComplexType<?>) {
-      return decodeComplex((AvroComplexType<T>) type, input);
+      return this.decodeComplex((AvroComplexType<T>) type, input);
     } else {
       return Decoder.error(new DecoderException("unsupported avro type: " + type));
     }
@@ -48,19 +48,19 @@ public class AvroDecoder {
 
   public <T> Decoder<T> decodePrimitive(AvroPrimitiveType<T> type, InputBuffer input) {
     if (type instanceof AvroNullType<?>) {
-      return decodeNull((AvroNullType<T>) type, input);
+      return this.decodeNull((AvroNullType<T>) type, input);
     } else if (type instanceof AvroBooleanType<?>) {
-      return decodeBoolean((AvroBooleanType<T>) type, input);
+      return this.decodeBoolean((AvroBooleanType<T>) type, input);
     } else if (type instanceof AvroVarintType<?>) {
-      return decodeVarint((AvroVarintType<T>) type, input);
+      return this.decodeVarint((AvroVarintType<T>) type, input);
     } else if (type instanceof AvroFloatType<?>) {
-      return decodeFloat((AvroFloatType<T>) type, input);
+      return this.decodeFloat((AvroFloatType<T>) type, input);
     } else if (type instanceof AvroDoubleType<?>) {
-      return decodeDouble((AvroDoubleType<T>) type, input);
+      return this.decodeDouble((AvroDoubleType<T>) type, input);
     } else if (type instanceof AvroDataType<?>) {
-      return decodeData((AvroDataType<T>) type, input);
+      return this.decodeData((AvroDataType<T>) type, input);
     } else if (type instanceof AvroStringType<?>) {
-      return decodeString((AvroStringType<T>) type, input);
+      return this.decodeString((AvroStringType<T>) type, input);
     } else {
       return Decoder.error(new DecoderException("unsupported avro type: " + type));
     }
@@ -68,17 +68,17 @@ public class AvroDecoder {
 
   public <T> Decoder<T> decodeComplex(AvroComplexType<T> type, InputBuffer input) {
     if (type instanceof AvroRecordType<?, ?>) {
-      return decodeRecord((AvroRecordType<T, ?>) type, input);
+      return this.decodeRecord((AvroRecordType<T, ?>) type, input);
     } else if (type instanceof AvroEnumType<?>) {
-      return decodeEnum((AvroEnumType<T>) type, input);
+      return this.decodeEnum((AvroEnumType<T>) type, input);
     } else if (type instanceof AvroArrayType<?, ?>) {
-      return decodeArray((AvroArrayType<?, T>) type, input);
+      return this.decodeArray((AvroArrayType<?, T>) type, input);
     } else if (type instanceof AvroMapType<?, ?, ?>) {
-      return decodeMap((AvroMapType<?, ?, T>) type, input);
+      return this.decodeMap((AvroMapType<?, ?, T>) type, input);
     } else if (type instanceof AvroUnionType<?>) {
-      return decodeUnion((AvroUnionType<T>) type, input);
+      return this.decodeUnion((AvroUnionType<T>) type, input);
     } else if (type instanceof AvroFixedType<?>) {
-      return decodeFixed((AvroFixedType<T>) type, input);
+      return this.decodeFixed((AvroFixedType<T>) type, input);
     } else {
       return Decoder.error(new DecoderException("unsupported avro type: " + type));
     }
@@ -138,9 +138,9 @@ public class AvroDecoder {
 
   public <T> Decoder<T> typeDecoder(AvroType<T> type) {
     if (type instanceof AvroPrimitiveType<?>) {
-      return primitiveDecoder((AvroPrimitiveType<T>) type);
+      return this.primitiveDecoder((AvroPrimitiveType<T>) type);
     } else if (type instanceof AvroComplexType<?>) {
-      return complexDecoder((AvroComplexType<T>) type);
+      return this.complexDecoder((AvroComplexType<T>) type);
     } else {
       return Decoder.error(new DecoderException("unsupported avro type: " + type));
     }
@@ -148,19 +148,19 @@ public class AvroDecoder {
 
   public <T> Decoder<T> primitiveDecoder(AvroPrimitiveType<T> type) {
     if (type instanceof AvroNullType<?>) {
-      return nullDecoder((AvroNullType<T>) type);
+      return this.nullDecoder((AvroNullType<T>) type);
     } else if (type instanceof AvroBooleanType<?>) {
-      return booleanDecoder((AvroBooleanType<T>) type);
+      return this.booleanDecoder((AvroBooleanType<T>) type);
     } else if (type instanceof AvroVarintType<?>) {
-      return varintDecoder((AvroVarintType<T>) type);
+      return this.varintDecoder((AvroVarintType<T>) type);
     } else if (type instanceof AvroFloatType<?>) {
-      return floatDecoder((AvroFloatType<T>) type);
+      return this.floatDecoder((AvroFloatType<T>) type);
     } else if (type instanceof AvroDoubleType<?>) {
-      return doubleDecoder((AvroDoubleType<T>) type);
+      return this.doubleDecoder((AvroDoubleType<T>) type);
     } else if (type instanceof AvroDataType<?>) {
-      return dataDecoder((AvroDataType<T>) type);
+      return this.dataDecoder((AvroDataType<T>) type);
     } else if (type instanceof AvroStringType<?>) {
-      return stringDecoder((AvroStringType<T>) type);
+      return this.stringDecoder((AvroStringType<T>) type);
     } else {
       return Decoder.error(new DecoderException("unsupported avro type: " + type));
     }
@@ -168,17 +168,17 @@ public class AvroDecoder {
 
   public <T> Decoder<T> complexDecoder(AvroComplexType<T> type) {
     if (type instanceof AvroRecordType<?, ?>) {
-      return recordDecoder((AvroRecordType<T, ?>) type);
+      return this.recordDecoder((AvroRecordType<T, ?>) type);
     } else if (type instanceof AvroEnumType<?>) {
-      return enumDecoder((AvroEnumType<T>) type);
+      return this.enumDecoder((AvroEnumType<T>) type);
     } else if (type instanceof AvroArrayType<?, ?>) {
-      return arrayDecoder((AvroArrayType<?, T>) type);
+      return this.arrayDecoder((AvroArrayType<?, T>) type);
     } else if (type instanceof AvroMapType<?, ?, ?>) {
-      return mapDecoder((AvroMapType<?, ?, T>) type);
+      return this.mapDecoder((AvroMapType<?, ?, T>) type);
     } else if (type instanceof AvroUnionType<?>) {
-      return unionDecoder((AvroUnionType<T>) type);
+      return this.unionDecoder((AvroUnionType<T>) type);
     } else if (type instanceof AvroFixedType<?>) {
-      return fixedDecoder((AvroFixedType<T>) type);
+      return this.fixedDecoder((AvroFixedType<T>) type);
     } else {
       return Decoder.error(new DecoderException("unsupported avro type: " + type));
     }

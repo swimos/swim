@@ -29,19 +29,6 @@ public enum MqttQoS implements Debug {
     this.code = code;
   }
 
-  public static MqttQoS from(int code) {
-    switch (code) {
-      case 0:
-        return AT_MOST_ONCE;
-      case 1:
-        return AT_LEAST_ONCE;
-      case 2:
-        return EXACTLY_ONCE;
-      default:
-        throw new IllegalArgumentException(Integer.toString(code));
-    }
-  }
-
   public boolean isAtMostOnce() {
     return this.code == 0;
   }
@@ -55,8 +42,18 @@ public enum MqttQoS implements Debug {
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("MqttQoS").write('.').write(name());
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MqttQoS").write('.').write(this.name());
+    return output;
+  }
+
+  public static MqttQoS from(int code) {
+    switch (code) {
+      case 0: return MqttQoS.AT_MOST_ONCE;
+      case 1: return MqttQoS.AT_LEAST_ONCE;
+      case 2: return MqttQoS.EXACTLY_ONCE;
+      default: throw new IllegalArgumentException(Integer.toString(code));
+    }
   }
 
 }

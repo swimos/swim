@@ -32,28 +32,28 @@ public class RecordScope extends RecordModel {
     this.scope = scope;
   }
 
-  public static RecordScope from(Record record) {
-    final RecordScope scope = new RecordScope(globalScope());
+  @Override
+  public final StreamletScope<? extends Value> streamletScope() {
+    return this.scope;
+  }
+
+  public static RecordScope create(Record record) {
+    final RecordScope scope = new RecordScope(RecordModel.globalScope());
     scope.materialize(record);
     scope.compile(record);
     return scope;
   }
 
   public static RecordScope of() {
-    return new RecordScope(globalScope());
+    return new RecordScope(RecordModel.globalScope());
   }
 
   public static RecordScope of(Object object) {
-    return from(Record.of(object));
+    return RecordScope.create(Record.of(object));
   }
 
   public static RecordScope of(Object... objects) {
-    return from(Record.of(objects));
-  }
-
-  @Override
-  public final StreamletScope<? extends Value> streamletScope() {
-    return this.scope;
+    return RecordScope.create(Record.of(objects));
   }
 
 }

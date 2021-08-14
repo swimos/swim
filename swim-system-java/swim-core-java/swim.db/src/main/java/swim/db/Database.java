@@ -30,7 +30,6 @@ import swim.codec.Utf8;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.concurrent.Sync;
 import swim.math.Z2Form;
@@ -79,7 +78,7 @@ public class Database {
     this.stem = germ.stem();
     this.version = germ.version() + 1L;
     this.metaTrunk = new Trunk<BTree>(this, Record.create(1).attr("meta"), null);
-    this.metaTrunk.tree = new BTree(this.metaTrunk, 0, version, true, false);
+    this.metaTrunk.tree = new BTree(this.metaTrunk, 0, this.version, true, false);
     this.seedTrunk = new Trunk<BTree>(this, Record.create(1).attr("seed"), null);
     this.seedTrunk.tree = new BTree(this.seedTrunk, germ.seed(), true, false);
     this.trunks = HashTrieMap.empty();
@@ -146,28 +145,28 @@ public class Database {
     try {
       do {
         final int oldStatus = this.status;
-        if ((oldStatus & (OPENING | OPENED | FAILED)) == 0) {
-          final int newStatus = oldStatus | OPENING;
-          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if ((oldStatus & (Database.OPENING | Database.OPENED | Database.FAILED)) == 0) {
+          final int newStatus = oldStatus | Database.OPENING;
+          if (Database.STATUS.compareAndSet(this, oldStatus, newStatus)) {
             try {
               this.store.databaseWillOpen(this);
               this.seedTrunk.tree.loadAsync(new DatabaseOpen(this, cont));
             } catch (Throwable cause) {
-              STATUS.set(this, FAILED);
+              Database.STATUS.set(this, Database.FAILED);
               synchronized (this) {
-                notifyAll();
+                this.notifyAll();
               }
               throw cause;
             }
             break;
           }
         } else {
-          if ((oldStatus & OPENING) != 0) {
+          if ((oldStatus & Database.OPENING) != 0) {
             synchronized (this) {
               ForkJoinPool.managedBlock(new DatabaseAwait(this));
             }
           }
-          if ((this.status & OPENED) != 0) {
+          if ((this.status & Database.OPENED) != 0) {
             cont.bind(this);
           } else {
             cont.trap(new StoreException("failed to open database"));
@@ -178,7 +177,7 @@ public class Database {
     } catch (InterruptedException cause) {
       cont.trap(cause);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -188,15 +187,15 @@ public class Database {
 
   public Database open() throws InterruptedException {
     final Sync<Database> syncDatabase = new Sync<Database>();
-    openAsync(syncDatabase);
-    return syncDatabase.await(settings().databaseOpenTimeout);
+    this.openAsync(syncDatabase);
+    return syncDatabase.await(this.settings().databaseOpenTimeout);
   }
 
   public void closeAsync(Cont<Database> cont) {
     try {
-      commitAsync(Commit.closed().andThen(new DatabaseClose(this, cont)));
+      this.commitAsync(Commit.closed().andThen(new DatabaseClose(this, cont)));
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -206,8 +205,8 @@ public class Database {
 
   public void close() throws InterruptedException {
     final Sync<Database> syncDatabase = new Sync<Database>();
-    closeAsync(syncDatabase);
-    syncDatabase.await(settings().databaseCloseTimeout);
+    this.closeAsync(syncDatabase);
+    syncDatabase.await(this.settings().databaseCloseTimeout);
   }
 
   @SuppressWarnings("unchecked")
@@ -226,7 +225,7 @@ public class Database {
           if (seed != null) {
             newTrunk.tree = (T) seed.treeType().treeFromSeed(newTrunk, seed, isResident, isTransient);
           } else if (treeType != null) {
-            final int stem = STEM.getAndIncrement(this);
+            final int stem = Database.STEM.getAndIncrement(this);
             newTrunk.tree = (T) treeType.emptyTree(newTrunk, stem, this.version, isResident, isTransient);
             created = true;
           } else {
@@ -235,11 +234,11 @@ public class Database {
           newTrunkRef = new WeakReference<Trunk<Tree>>((Trunk<Tree>) newTrunk);
         }
         final HashTrieMap<Value, WeakReference<Trunk<Tree>>> newTrunks = oldTrunks.updated(name, newTrunkRef);
-        if (TRUNKS.compareAndSet(this, oldTrunks, newTrunks)) {
+        if (Database.TRUNKS.compareAndSet(this, oldTrunks, newTrunks)) {
           if (created) {
-            databaseDidCreateTrunk(newTrunk);
+            this.databaseDidCreateTrunk(newTrunk);
           }
-          databaseDidOpenTrunk(newTrunk);
+          this.databaseDidOpenTrunk(newTrunk);
           return newTrunk;
         }
       } else {
@@ -249,63 +248,63 @@ public class Database {
   }
 
   public Trunk<BTree> openBTreeTrunk(Value name, boolean isResident, boolean isTransient) {
-    return openTrunk(name, TreeType.BTREE, isResident, isTransient);
+    return this.openTrunk(name, TreeType.BTREE, isResident, isTransient);
   }
 
   public BTreeMap openBTreeMap(Value name, boolean isResident, boolean isTransient) {
-    return new BTreeMap(openBTreeTrunk(name, isResident, isTransient));
+    return new BTreeMap(this.openBTreeTrunk(name, isResident, isTransient));
   }
 
   public BTreeMap openBTreeMap(Value name) {
-    return new BTreeMap(openBTreeTrunk(name, false, false));
+    return new BTreeMap(this.openBTreeTrunk(name, false, false));
   }
 
   public BTreeMap openBTreeMap(String name) {
-    return new BTreeMap(openBTreeTrunk(Text.from(name), false, false));
+    return new BTreeMap(this.openBTreeTrunk(Text.from(name), false, false));
   }
 
   public Trunk<QTree> openQTreeTrunk(Value name, boolean isResident, boolean isTransient) {
-    return openTrunk(name, TreeType.QTREE, isResident, isTransient);
+    return this.openTrunk(name, TreeType.QTREE, isResident, isTransient);
   }
 
   public <S> QTreeMap<S> openQTreeMap(Value name, Z2Form<S> shapeForm, boolean isResident, boolean isTransient) {
-    return new QTreeMap<S>(openQTreeTrunk(name, isResident, isTransient), shapeForm);
+    return new QTreeMap<S>(this.openQTreeTrunk(name, isResident, isTransient), shapeForm);
   }
 
   public <S> QTreeMap<S> openQTreeMap(Value name, Z2Form<S> shapeForm) {
-    return new QTreeMap<S>(openQTreeTrunk(name, false, false), shapeForm);
+    return new QTreeMap<S>(this.openQTreeTrunk(name, false, false), shapeForm);
   }
 
   public <S> QTreeMap<S> openQTreeMap(String name, Z2Form<S> shapeForm) {
-    return new QTreeMap<S>(openQTreeTrunk(Text.from(name), false, false), shapeForm);
+    return new QTreeMap<S>(this.openQTreeTrunk(Text.from(name), false, false), shapeForm);
   }
 
   public Trunk<STree> openSTreeTrunk(Value name, boolean isResident, boolean isTransient) {
-    return openTrunk(name, TreeType.STREE, isResident, isTransient);
+    return this.openTrunk(name, TreeType.STREE, isResident, isTransient);
   }
 
   public STreeList openSTreeList(Value name, boolean isResident, boolean isTransient) {
-    return new STreeList(openSTreeTrunk(name, isResident, isTransient));
+    return new STreeList(this.openSTreeTrunk(name, isResident, isTransient));
   }
 
   public STreeList openSTreeList(Value name) {
-    return new STreeList(openSTreeTrunk(name, false, false));
+    return new STreeList(this.openSTreeTrunk(name, false, false));
   }
 
   public STreeList openSTreeList(String name) {
-    return new STreeList(openSTreeTrunk(Text.from(name), false, false));
+    return new STreeList(this.openSTreeTrunk(Text.from(name), false, false));
   }
 
   private Trunk<UTree> openUTreeTrunk(Value name, boolean isResident, boolean isTransient) {
-    return openTrunk(name, TreeType.UTREE, isResident, isTransient);
+    return this.openTrunk(name, TreeType.UTREE, isResident, isTransient);
   }
 
   public UTreeValue openUTreeValue(Value name) {
-    return new UTreeValue(openUTreeTrunk(name, false, false));
+    return new UTreeValue(this.openUTreeTrunk(name, false, false));
   }
 
   public UTreeValue openUTreeValue(String name) {
-    return new UTreeValue(openUTreeTrunk(Text.from(name), false, false));
+    return new UTreeValue(this.openUTreeTrunk(Text.from(name), false, false));
   }
 
   public void closeTrunk(Value name) {
@@ -313,11 +312,11 @@ public class Database {
       final HashTrieMap<Value, WeakReference<Trunk<Tree>>> oldTrunks = this.trunks;
       final HashTrieMap<Value, WeakReference<Trunk<Tree>>> newTrunks = oldTrunks.removed(name);
       if (oldTrunks != newTrunks) {
-        if (TRUNKS.compareAndSet(this, oldTrunks, newTrunks)) {
+        if (Database.TRUNKS.compareAndSet(this, oldTrunks, newTrunks)) {
           final WeakReference<Trunk<Tree>> oldTrunkRef = oldTrunks.get(name);
           final Trunk<?> oldTrunk = oldTrunkRef.get();
           if (oldTrunk != null) {
-            databaseDidCloseTrunk(oldTrunk);
+            this.databaseDidCloseTrunk(oldTrunk);
           }
           break;
         }
@@ -328,12 +327,12 @@ public class Database {
   }
 
   public void removeTree(Value name) {
-    closeTrunk(name);
+    this.closeTrunk(name);
     do {
       final HashTrieMap<Value, Trunk<Tree>> oldSprouts = this.sprouts;
       final HashTrieMap<Value, Trunk<Tree>> newSprouts = oldSprouts.removed(name);
       if (oldSprouts != newSprouts) {
-        if (SPROUTS.compareAndSet(this, oldSprouts, newSprouts)) {
+        if (Database.SPROUTS.compareAndSet(this, oldSprouts, newSprouts)) {
           break;
         }
       } else {
@@ -350,7 +349,7 @@ public class Database {
           final Value seedValue = oldSeedTree.get(name);
           final Value sizeValue = seedValue.get("root").head().toValue().get("area");
           final long treeSize = sizeValue.longValue(0L);
-          TREE_SIZE.addAndGet(this, -treeSize);
+          Database.TREE_SIZE.addAndGet(this, -treeSize);
           break;
         }
       } else {
@@ -367,7 +366,7 @@ public class Database {
         commit.bind(null);
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         commit.trap(cause);
       } else {
         throw cause;
@@ -378,8 +377,8 @@ public class Database {
   public Chunk commit(Commit commit) throws InterruptedException {
     if (this.diffSize > 0L) {
       final Sync<Chunk> syncChunk = new Sync<Chunk>();
-      commitAsync(commit.andThen(syncChunk));
-      return syncChunk.await(settings().databaseCommitTimeout);
+      this.commitAsync(commit.andThen(syncChunk));
+      return syncChunk.await(this.settings().databaseCommitTimeout);
     } else {
       return null;
     }
@@ -389,7 +388,7 @@ public class Database {
     try {
       this.store.compactAsync(compact);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         compact.trap(cause);
       } else {
         throw cause;
@@ -399,15 +398,15 @@ public class Database {
 
   public Store compact(Compact compact) throws InterruptedException {
     final Sync<Store> syncStore = new Sync<Store>();
-    compactAsync(compact.andThen(syncStore));
-    return syncStore.await(settings().databaseCompactTimeout);
+    this.compactAsync(compact.andThen(syncStore));
+    return syncStore.await(this.settings().databaseCompactTimeout);
   }
 
   public void evacuateAsync(int post, Cont<Database> cont) {
     try {
-      stage().execute(new DatabaseEvacuate(this, this.post, cont));
+      this.stage().execute(new DatabaseEvacuate(this, this.post, cont));
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -426,7 +425,7 @@ public class Database {
         final Value name = seedCursor.next().getKey();
         do {
           final long version = this.version;
-          final Trunk<Tree> trunk = openTrunk(name, null, false, false);
+          final Trunk<Tree> trunk = this.openTrunk(name, null, false, false);
           final Tree oldTree = trunk.tree;
           final Tree newTree = oldTree.evacuated(post, version);
           if (oldTree != newTree) {
@@ -486,14 +485,14 @@ public class Database {
   }
 
   public Chunk commitChunk(Commit commit, int zone, long base) {
-    DIFF_SIZE.set(this, 0L);
-    final long version = VERSION.getAndIncrement(this);
+    Database.DIFF_SIZE.set(this, 0L);
+    final long version = Database.VERSION.getAndIncrement(this);
     final long time = System.currentTimeMillis();
 
     HashTrieMap<Value, Trunk<Tree>> sprouts;
     do {
       sprouts = this.sprouts;
-    } while (!SPROUTS.compareAndSet(this, sprouts, HashTrieMap.<Value, Trunk<Tree>>empty()));
+    } while (!Database.SPROUTS.compareAndSet(this, sprouts, HashTrieMap.<Value, Trunk<Tree>>empty()));
     if (sprouts.isEmpty()) {
       return null;
     }
@@ -518,7 +517,7 @@ public class Database {
               }
             } while (true);
             commitBuilder.add(newTree);
-            TREE_SIZE.addAndGet(this, newTree.treeSize() - oldTree.treeSize());
+            Database.TREE_SIZE.addAndGet(this, newTree.treeSize() - oldTree.treeSize());
             newTree.treeContext().treeDidCommit(newTree, oldTree);
             step += newTree.diffSize(version);
             break;
@@ -545,9 +544,9 @@ public class Database {
     do {
       final BTree oldMetaTree = this.metaTrunk.tree;
       metaTree = oldMetaTree.updated(Text.from("seed"), seedTree.rootRef().toValue(), version, this.post)
-          .updated(Text.from("stem"), Num.from(this.stem), version, this.post)
-          .updated(Text.from("time"), Num.from(time), version, this.post)
-          .committed(zone, step, version, time);
+                            .updated(Text.from("stem"), Num.from(this.stem), version, this.post)
+                            .updated(Text.from("time"), Num.from(time), version, this.post)
+                            .committed(zone, step, version, time);
       if (Trunk.TREE.compareAndSet(this.metaTrunk, oldMetaTree, metaTree)) {
         step += metaTree.diffSize(version);
         break;
@@ -564,25 +563,25 @@ public class Database {
     for (Tree tree : commits) {
       tree.writeDiff(encoder, version);
       step += tree.diffSize(version);
-      assertStep(output, base, step);
+      Database.assertStep(output, base, step);
     }
 
     // Write seed pages
     seedTree.writeDiff(encoder, version);
     step += seedTree.diffSize(version);
-    assertStep(output, base, step);
+    Database.assertStep(output, base, step);
 
     // Write meta pages
     metaTree.writeDiff(encoder, version);
     step += metaTree.diffSize(version);
-    assertStep(output, base, step);
+    Database.assertStep(output, base, step);
 
     if (output.index() != size) {
       throw new StoreException();
     }
 
     final Germ germ = new Germ(this.stem, version, this.germ.created(), time,
-        seedTree.rootRef().toValue());
+                               seedTree.rootRef().toValue());
     this.germ = germ;
     return new Chunk(this, commit, zone, germ, commits, output.bind());
   }
@@ -605,7 +604,7 @@ public class Database {
       final Value name = seedCursor.next().getKey();
       do {
         final long newVersion = this.version;
-        final Trunk<Tree> trunk = openTrunk(name, null, false, false);
+        final Trunk<Tree> trunk = this.openTrunk(name, null, false, false);
         final Tree oldTree = trunk.tree;
         final Tree newTree = oldTree.uncommitted(version);
         if (oldTree != newTree) {
@@ -624,7 +623,7 @@ public class Database {
   }
 
   public Iterator<MetaLeaf> leafs() {
-    return new DatabaseLeafIterator(this, trees());
+    return new DatabaseLeafIterator(this, this.trees());
   }
 
   void databaseDidOpen() {
@@ -635,7 +634,7 @@ public class Database {
       final Value sizeValue = seedValue.get("root").head().toValue().get("area");
       treeSize += sizeValue.longValue(0L);
     }
-    TREE_SIZE.set(this, treeSize);
+    Database.TREE_SIZE.set(this, treeSize);
     this.store.databaseDidOpen(this);
   }
 
@@ -644,7 +643,7 @@ public class Database {
   }
 
   public void databaseDidCreateTrunk(Trunk<?> trunk) {
-    TREE_SIZE.addAndGet(this, trunk.tree.treeSize());
+    Database.TREE_SIZE.addAndGet(this, trunk.tree.treeSize());
   }
 
   public void databaseDidOpenTrunk(Trunk<?> trunk) {
@@ -690,7 +689,7 @@ public class Database {
         final HashTrieMap<Value, Trunk<Tree>> oldSprouts = this.sprouts;
         final HashTrieMap<Value, Trunk<Tree>> newSprouts = oldSprouts.updated(trunk.name, (Trunk<Tree>) trunk);
         if (oldSprouts != newSprouts) {
-          if (SPROUTS.compareAndSet(this, oldSprouts, newSprouts)) {
+          if (Database.SPROUTS.compareAndSet(this, oldSprouts, newSprouts)) {
             break;
           }
         } else {
@@ -701,9 +700,9 @@ public class Database {
       if (!oldTree.isTransient()) {
         deltaSize -= oldTree.diffSize(newVersion);
       }
-      DIFF_SIZE.addAndGet(this, deltaSize);
+      Database.DIFF_SIZE.addAndGet(this, deltaSize);
     }
-    TREE_SIZE.addAndGet(this, newTree.treeSize() - oldTree.treeSize());
+    Database.TREE_SIZE.addAndGet(this, newTree.treeSize() - oldTree.treeSize());
   }
 
   public void databaseDidCloseTrunk(Trunk<?> trunk) {
@@ -762,8 +761,8 @@ final class DatabaseOpen implements Cont<Tree> {
         this.database.notifyAll();
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        trap(cause);
+      if (Cont.isNonFatal(cause)) {
+        this.trap(cause);
       } else {
         throw cause;
       }
@@ -824,8 +823,8 @@ final class DatabaseClose implements Cont<Chunk> {
       database.databaseDidClose();
       database.stage().call(this.andThen).bind(database);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        trap(cause);
+      if (Cont.isNonFatal(cause)) {
+        this.trap(cause);
       } else {
         throw cause;
       }
@@ -857,7 +856,7 @@ final class DatabaseEvacuate implements Runnable {
       this.database.evacuate(this.post);
       this.andThen.bind(this.database);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         this.andThen.trap(cause);
       } else {
         throw cause;

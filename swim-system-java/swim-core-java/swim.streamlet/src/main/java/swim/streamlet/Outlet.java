@@ -22,13 +22,13 @@ import swim.streamlet.function.MapValueFunction;
 import swim.streamlet.function.WatchValueFunction;
 
 /**
- * Output connector from a {@link Streamlet}.  An {@code Outlet} represents a
+ * Output connector from a {@link Streamlet}. An {@code Outlet} represents a
  * sink to which a {@code Streamlet} provides state.
  * <p>
  * An {@code Outlet} has a one-to-many relationship with a set of output sinks.
  * An output sink of an {@code Outlet} is an {@link Inlet} of some other {@code
- * Streamlet}.  The {@link #bindOutput(Inlet)} method &quot;plugs&quot; an {@code
- * Inlet} into the {@code Outlet}.  The {@link #unbindOutput(Inlet)} method
+ * Streamlet}. The {@link #bindOutput(Inlet)} method &quot;plugs&quot; an {@code
+ * Inlet} into the {@code Outlet}. The {@link #unbindOutput(Inlet)} method
  * &quot;unplugs&quot; an {@code Inlet} from the {@code Outlet}.
  */
 public interface Outlet<O> {
@@ -46,7 +46,7 @@ public interface Outlet<O> {
 
   /**
    * Adds an {@code output} to the set of {@code Inlet}s that depend on the
-   * state of this {@code Outlet}.  The {@code output} will be decohered when
+   * state of this {@code Outlet}. The {@code output} will be decohered when
    * the state of this {@code Outlet} is decohered, and recohered when this
    * {@code Outlet} is recohered.
    */
@@ -67,14 +67,14 @@ public interface Outlet<O> {
 
   /**
    * Disconnects all {@code Outlet}s dominated by this {@code Outlet} in the
-   * dataflow graph.  Used to recursively clean up chains of combinators
+   * dataflow graph. Used to recursively clean up chains of combinators
    * originating from this {@code Inlet}.
    */
   void disconnectOutputs();
 
   /**
    * Disconnects all {@code Inlet}s dominated by this {@code Outlet} in the
-   * dataflow dependency graph.  Used to recursively clean up chains of
+   * dataflow dependency graph. Used to recursively clean up chains of
    * combinators passing through this {@code Outlet}.
    */
   void disconnectInputs();
@@ -87,7 +87,7 @@ public interface Outlet<O> {
 
   /**
    * Updates the state of this {@code Outlet} to make it consistent with the
-   * target {@code version}.  The {@code Outlet} only needs to update if its
+   * target {@code version}. The {@code Outlet} only needs to update if its
    * current {@code version} differs from the target {@code version}.
    * To update its state, the {@code Outlet} first invokes {@link
    * Streamlet#recohere(int)} on the {@code Streamlet} to which it's attached.

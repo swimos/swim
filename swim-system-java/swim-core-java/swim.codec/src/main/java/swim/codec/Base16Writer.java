@@ -54,6 +54,23 @@ final class Base16Writer extends Writer<Object, Object> {
     this(null, null, base16, 0, 0, 1);
   }
 
+  @Override
+  public Writer<Object, Object> feed(Object value) {
+    if (value instanceof ByteBuffer) {
+      return new Base16Writer((ByteBuffer) value, this.base16);
+    } else if (value instanceof byte[]) {
+      return new Base16Writer((byte[]) value, this.base16);
+    } else {
+      throw new IllegalArgumentException(value.toString());
+    }
+  }
+
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return Base16Writer.write(output, this.value, this.input, this.base16,
+                              this.index, this.limit, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, Object value, ByteBuffer input,
                                       Base16 base16, int index, int limit, int step) {
     while (index < limit) {
@@ -69,45 +86,29 @@ final class Base16Writer extends Writer<Object, Object> {
       }
     }
     if (index == limit) {
-      return done(value);
+      return Writer.done(value);
     } else if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new Base16Writer(value, input, base16, index, limit, step);
   }
 
   static Writer<?, ?> write(Output<?> output, Object value, ByteBuffer input, Base16 base16) {
-    return write(output, value, input, base16, input.position(), input.limit(), 1);
+    return Base16Writer.write(output, value, input, base16, input.position(), input.limit(), 1);
   }
 
   static Writer<?, ?> write(Output<?> output, ByteBuffer input, Base16 base16) {
-    return write(output, null, input, base16);
+    return Base16Writer.write(output, null, input, base16);
   }
 
   static Writer<?, ?> write(Output<?> output, Object value, byte[] input, Base16 base16) {
-    return write(output, value, ByteBuffer.wrap(input), base16);
+    return Base16Writer.write(output, value, ByteBuffer.wrap(input), base16);
   }
 
   static Writer<?, ?> write(Output<?> output, byte[] input, Base16 base16) {
-    return write(output, null, ByteBuffer.wrap(input), base16);
-  }
-
-  @Override
-  public Writer<Object, Object> feed(Object value) {
-    if (value instanceof ByteBuffer) {
-      return new Base16Writer((ByteBuffer) value, this.base16);
-    } else if (value instanceof byte[]) {
-      return new Base16Writer((byte[]) value, this.base16);
-    } else {
-      throw new IllegalArgumentException(value.toString());
-    }
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.value, this.input, this.base16, this.index, this.limit, this.step);
+    return Base16Writer.write(output, null, ByteBuffer.wrap(input), base16);
   }
 
 }

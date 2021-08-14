@@ -79,7 +79,7 @@ final class NumberStructure implements CsvStructureCol {
   public void addCell(Item cell, Builder<Item, ?> rowBuilder) {
     if (!this.optional || cell != null) {
       if (cell == null) {
-        cell = defaultCell();
+        cell = this.defaultCell();
       }
       if (this.key.isDefined() && cell instanceof Value) {
         rowBuilder.add(Slot.of(this.key, (Value) cell));
@@ -101,6 +101,11 @@ final class NumberStructureParser extends Parser<Item> {
     this.step = step;
   }
 
+  @Override
+  public Parser<Item> feed(Input input) {
+    return NumberStructureParser.parse(input, this.numberParser, this.step);
+  }
+
   static Parser<Item> parse(Input input, Parser<Number> numberParser, int step) {
     int c = 0;
     if (step == 1) {
@@ -109,10 +114,10 @@ final class NumberStructureParser extends Parser<Item> {
         if (c == '-' || '0' <= c && c <= '9') {
           step = 2;
         } else {
-          return done();
+          return Parser.done();
         }
       } else if (input.isDone()) {
-        return done();
+        return Parser.done();
       }
     }
     if (step == 2) {
@@ -123,20 +128,15 @@ final class NumberStructureParser extends Parser<Item> {
         numberParser = numberParser.feed(input);
       }
       if (numberParser.isDone()) {
-        return done(Num.from(numberParser.bind()));
+        return Parser.done(Num.from(numberParser.bind()));
       } else if (numberParser.isError()) {
         return numberParser.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new NumberStructureParser(numberParser, step);
-  }
-
-  @Override
-  public Parser<Item> feed(Input input) {
-    return parse(input, this.numberParser, this.step);
   }
 
 }

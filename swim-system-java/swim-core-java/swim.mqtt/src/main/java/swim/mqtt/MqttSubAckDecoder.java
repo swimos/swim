@@ -42,9 +42,14 @@ final class MqttSubAckDecoder extends Decoder<MqttSubAck> {
     this(mqtt, 0, 0, FingerTrieSeq.<MqttSubStatus>empty(), 0, 1);
   }
 
-  static Decoder<MqttSubAck> decode(InputBuffer input,
-                                    MqttDecoder mqtt, int packetFlags, int packetId,
-                                    FingerTrieSeq<MqttSubStatus> subscriptions,
+  @Override
+  public Decoder<MqttSubAck> feed(InputBuffer input) {
+    return MqttSubAckDecoder.decode(input, this.mqtt, this.packetFlags, this.packetId,
+                                    this.subscriptions, this.remaining, this.step);
+  }
+
+  static Decoder<MqttSubAck> decode(InputBuffer input, MqttDecoder mqtt, int packetFlags,
+                                    int packetId, FingerTrieSeq<MqttSubStatus> subscriptions,
                                     int remaining, int step) {
     if (step == 1 && input.isCont()) {
       packetFlags = input.head() & 0x0f;
@@ -61,7 +66,7 @@ final class MqttSubAckDecoder extends Decoder<MqttSubAck> {
       } else if (step < 5) {
         step += 1;
       } else {
-        return error(new MqttException("packet length too long"));
+        return Decoder.error(new MqttException("packet length too long"));
       }
     }
     if (step == 6 && remaining > 0 && input.isCont()) {
@@ -91,26 +96,20 @@ final class MqttSubAckDecoder extends Decoder<MqttSubAck> {
       }
     }
     if (step == 9 && remaining == 0) {
-      return done(mqtt.subAck(packetFlags, packetId, subscriptions));
+      return Decoder.done(mqtt.subAck(packetFlags, packetId, subscriptions));
     }
     if (remaining < 0) {
-      return error(new MqttException("packet length too short"));
+      return Decoder.error(new MqttException("packet length too short"));
     } else if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new MqttSubAckDecoder(mqtt, packetFlags, packetId, subscriptions, remaining, step);
   }
 
   static Decoder<MqttSubAck> decode(InputBuffer input, MqttDecoder mqtt) {
-    return decode(input, mqtt, 0, 0, FingerTrieSeq.<MqttSubStatus>empty(), 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttSubAck> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.packetId,
-        this.subscriptions, this.remaining, this.step);
+    return MqttSubAckDecoder.decode(input, mqtt, 0, 0, FingerTrieSeq.<MqttSubStatus>empty(), 0, 1);
   }
 
 }

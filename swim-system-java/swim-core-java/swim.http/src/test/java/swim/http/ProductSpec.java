@@ -19,40 +19,40 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class ProductSpec {
 
-  public void assertParses(String string, Product product) {
-    HttpAssertions.assertParses(Http.standardParser().productParser(), string, product);
-  }
-
   @Test
   public void parseProducts() {
-    assertParses("swim", Product.from("swim"));
+    assertParses("swim", Product.create("swim"));
   }
 
   @Test
   public void writeProducts() {
-    assertWrites(Product.from("swim"), "swim");
+    assertWrites(Product.create("swim"), "swim");
   }
 
   @Test
   public void parseProductsWithVersions() {
-    assertParses("swim/1.0", Product.from("swim", "1.0"));
+    assertParses("swim/1.0", Product.create("swim", "1.0"));
   }
 
   @Test
   public void writeProductsWithVersions() {
-    assertWrites(Product.from("swim", "1.0"), "swim/1.0");
+    assertWrites(Product.create("swim", "1.0"), "swim/1.0");
   }
 
   @Test
   public void parseProductsWithComments() {
-    assertParses("swim (beta)", Product.from("swim").comment("beta"));
-    assertParses("swim (beta) (debug)", Product.from("swim").comment("beta").comment("debug"));
+    assertParses("swim (beta)", Product.create("swim").comment("beta"));
+    assertParses("swim (beta) (debug)", Product.create("swim").comment("beta").comment("debug"));
   }
 
   @Test
   public void writeProductsWithComments() {
-    assertWrites(Product.from("swim").comment("beta"), "swim (beta)");
-    assertWrites(Product.from("swim").comment("beta").comment("debug"), "swim (beta) (debug)");
+    assertWrites(Product.create("swim").comment("beta"), "swim (beta)");
+    assertWrites(Product.create("swim").comment("beta").comment("debug"), "swim (beta) (debug)");
+  }
+
+  public static void assertParses(String string, Product product) {
+    HttpAssertions.assertParses(Http.standardParser().productParser(), string, product);
   }
 
 }

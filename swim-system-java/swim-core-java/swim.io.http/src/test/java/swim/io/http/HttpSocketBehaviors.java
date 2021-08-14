@@ -46,7 +46,7 @@ public abstract class HttpSocketBehaviors {
     final AbstractHttpRequester<String> requester = new AbstractHttpRequester<String>() {
       @Override
       public void doRequest() {
-        writeRequest(HttpRequest.post(Uri.parse("/")).body("clientToServer"));
+        this.writeRequest(HttpRequest.post(Uri.parse("/")).body("clientToServer"));
       }
 
       @Override
@@ -64,7 +64,7 @@ public abstract class HttpSocketBehaviors {
       @Override
       public void didConnect() {
         super.didConnect();
-        doRequest(requester);
+        this.doRequest(requester);
       }
     };
     final AbstractHttpResponder<String> responder = new AbstractHttpResponder<String>() {
@@ -72,7 +72,7 @@ public abstract class HttpSocketBehaviors {
       public void doRespond(HttpRequest<String> request) {
         assertEquals(request.entity().get(), "clientToServer");
         serverRequest.countDown();
-        writeResponse(HttpResponse.from(HttpStatus.OK).body("serverToClient"));
+        this.writeResponse(HttpResponse.create(HttpStatus.OK).body("serverToClient"));
       }
 
       @Override
@@ -95,8 +95,8 @@ public abstract class HttpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       clientRequest.await();
       clientResponse.await();
       serverRequest.await();
@@ -126,10 +126,10 @@ public abstract class HttpSocketBehaviors {
       public void didConnect() {
         super.didConnect();
         for (int i = 0; i < requestCount; i += 1) {
-          doRequest(new AbstractHttpRequester<String>() {
+          this.doRequest(new AbstractHttpRequester<String>() {
             @Override
             public void doRequest() {
-              writeRequest(HttpRequest.post(Uri.parse("/")).body("clientToServer"));
+              this.writeRequest(HttpRequest.post(Uri.parse("/")).body("clientToServer"));
             }
 
             @Override
@@ -154,7 +154,7 @@ public abstract class HttpSocketBehaviors {
           public void doRespond(HttpRequest<String> request) {
             assertEquals(request.entity().get(), "clientToServer");
             serverRequest.countDown();
-            writeResponse(HttpResponse.from(HttpStatus.OK).body("serverToClient"));
+            this.writeResponse(HttpResponse.create(HttpStatus.OK).body("serverToClient"));
           }
 
           @Override
@@ -173,8 +173,8 @@ public abstract class HttpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       clientRequest.await();
       clientResponse.await();
       serverRequest.await();
@@ -201,9 +201,9 @@ public abstract class HttpSocketBehaviors {
     final AbstractHttpRequester<String> requester = new AbstractHttpRequester<String>() {
       @Override
       public void doRequest() {
-        writeRequest(HttpRequest.post(Uri.parse("/"))
-            .content(HttpChunked.from(Utf8.stringWriter("clientTo").andThen(Utf8.stringWriter("Server")),
-                MediaType.textPlain())));
+        this.writeRequest(HttpRequest.post(Uri.parse("/"))
+                                     .content(HttpChunked.create(Utf8.stringWriter("clientTo").andThen(Utf8.stringWriter("Server")),
+                                                                 MediaType.textPlain())));
       }
 
       @Override
@@ -221,7 +221,7 @@ public abstract class HttpSocketBehaviors {
       @Override
       public void didConnect() {
         super.didConnect();
-        doRequest(requester);
+        this.doRequest(requester);
       }
     };
     final AbstractHttpResponder<String> responder = new AbstractHttpResponder<String>() {
@@ -229,9 +229,9 @@ public abstract class HttpSocketBehaviors {
       public void doRespond(HttpRequest<String> request) {
         assertEquals(request.entity().get(), "clientToServer");
         serverRequest.countDown();
-        writeResponse(HttpResponse.from(HttpStatus.OK)
-            .content(HttpChunked.from(Utf8.stringWriter("serverTo").andThen(Utf8.stringWriter("Client")),
-                MediaType.textPlain())));
+        this.writeResponse(HttpResponse.create(HttpStatus.OK)
+                                       .content(HttpChunked.create(Utf8.stringWriter("serverTo").andThen(Utf8.stringWriter("Client")),
+                                                                   MediaType.textPlain())));
       }
 
       @Override
@@ -254,8 +254,8 @@ public abstract class HttpSocketBehaviors {
     try {
       stage.start();
       endpoint.start();
-      bind(endpoint, service);
-      connect(endpoint, client);
+      this.bind(endpoint, service);
+      this.connect(endpoint, client);
       clientRequest.await();
       clientResponse.await();
       serverRequest.await();

@@ -46,6 +46,12 @@ final class RowParser<T, R, C> extends Parser<R> {
     this(csv, header, null, null, 0, -1, 1);
   }
 
+  @Override
+  public Parser<R> feed(Input input) {
+    return RowParser.parse(input, this.csv, this.header, this.rowBuilder,
+                           this.cellParser, this.index, this.head, this.step);
+  }
+
   @SuppressWarnings("unchecked")
   static <T, R, C> Parser<R> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header,
                                    Builder<C, R> rowBuilder, Parser<? extends C> cellParser,
@@ -59,7 +65,7 @@ final class RowParser<T, R, C> extends Parser<R> {
             if (rowBuilder == null) {
               rowBuilder = header.rowBuilder();
             }
-            return done(rowBuilder.bind());
+            return Parser.done(rowBuilder.bind());
           } else if (c == '"') {
             input = input.step();
             step = 3;
@@ -121,7 +127,7 @@ final class RowParser<T, R, C> extends Parser<R> {
           head = ((CsvQuotedInput) cellInput).next();
         }
         if (head == -4) {
-          return error(Diagnostic.expected('"', input));
+          return Parser.error(Diagnostic.expected('"', input));
         } else if (cellParser.isDone()) {
           if (col == null) {
             if (index < header.colCount()) {
@@ -149,37 +155,31 @@ final class RowParser<T, R, C> extends Parser<R> {
             if (rowBuilder == null) {
               rowBuilder = header.rowBuilder();
             }
-            return done(rowBuilder.bind());
+            return Parser.done(rowBuilder.bind());
           } else if (csv.isDelimiter(c)) {
             input = input.step();
             step = 1;
             continue;
           } else {
-            return error(Diagnostic.expected("delimiter", input));
+            return Parser.error(Diagnostic.expected("delimiter", input));
           }
         } else if (input.isDone()) {
           if (rowBuilder == null) {
             rowBuilder = header.rowBuilder();
           }
-          return done(rowBuilder.bind());
+          return Parser.done(rowBuilder.bind());
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new RowParser<T, R, C>(csv, header, rowBuilder, cellParser, index, head, step);
   }
 
   static <T, R, C> Parser<R> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header) {
-    return parse(input, csv, header, null, null, 0, -1, 1);
-  }
-
-  @Override
-  public Parser<R> feed(Input input) {
-    return parse(input, this.csv, this.header, this.rowBuilder,
-        this.cellParser, this.index, this.head, this.step);
+    return RowParser.parse(input, csv, header, null, null, 0, -1, 1);
   }
 
 }

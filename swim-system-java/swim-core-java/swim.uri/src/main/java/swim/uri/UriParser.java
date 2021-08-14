@@ -23,19 +23,19 @@ public class UriParser {
 
   public Uri absolute(UriScheme scheme, UriAuthority authority, UriPath path,
                       UriQuery query, UriFragment fragment) {
-    return Uri.from(scheme, authority, path, query, fragment);
+    return Uri.create(scheme, authority, path, query, fragment);
   }
 
   public UriScheme scheme(String name) {
-    return UriScheme.from(name);
+    return UriScheme.create(name);
   }
 
   public UriAuthority authority(UriUser user, UriHost host, UriPort port) {
-    return UriAuthority.from(user, host, port);
+    return UriAuthority.create(user, host, port);
   }
 
   public UriUser user(String username, String password) {
-    return UriUser.from(username, password);
+    return UriUser.create(username, password);
   }
 
   public UriHost hostName(String address) {
@@ -51,7 +51,7 @@ public class UriParser {
   }
 
   public UriPort port(int number) {
-    return UriPort.from(number);
+    return UriPort.create(number);
   }
 
   public UriPath pathEmpty() {
@@ -67,7 +67,7 @@ public class UriParser {
   }
 
   public UriFragment fragment(String identifier) {
-    return UriFragment.from(identifier);
+    return UriFragment.create(identifier);
   }
 
   public Parser<Uri> absoluteParser() {
@@ -80,7 +80,7 @@ public class UriParser {
 
   public Uri parseAbsoluteString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<Uri> parser = parseAbsolute(input);
+    Parser<Uri> parser = this.parseAbsolute(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -97,7 +97,7 @@ public class UriParser {
 
   public UriScheme parseSchemeString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<UriScheme> parser = parseScheme(input);
+    Parser<UriScheme> parser = this.parseScheme(input);
     if (input.isCont() && parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -114,7 +114,7 @@ public class UriParser {
 
   public UriAuthority parseAuthorityString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<UriAuthority> parser = parseAuthority(input);
+    Parser<UriAuthority> parser = this.parseAuthority(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -131,7 +131,7 @@ public class UriParser {
 
   public UriUser parseUserString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<UriUser> parser = parseUser(input);
+    Parser<UriUser> parser = this.parseUser(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -148,7 +148,7 @@ public class UriParser {
 
   public UriHost parseHostString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<UriHost> parser = parseHost(input);
+    Parser<UriHost> parser = this.parseHost(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -181,7 +181,7 @@ public class UriParser {
 
   public UriPort parsePortString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<UriPort> parser = parsePort(input);
+    Parser<UriPort> parser = this.parsePort(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -206,7 +206,7 @@ public class UriParser {
 
   public UriPath parsePathString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<UriPath> parser = parsePath(input);
+    Parser<UriPath> parser = this.parsePath(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -231,7 +231,7 @@ public class UriParser {
 
   public UriQuery parseQueryString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<UriQuery> parser = parseQuery(input);
+    Parser<UriQuery> parser = this.parseQuery(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -248,7 +248,7 @@ public class UriParser {
 
   public UriFragment parseFragmentString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<UriFragment> parser = parseFragment(input);
+    Parser<UriFragment> parser = this.parseFragment(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }

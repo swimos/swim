@@ -33,20 +33,6 @@ import swim.util.Murmur3;
 
 public class GoogleIdAuthenticatorDef implements AuthenticatorDef, Debug {
 
-  static final Uri PUBLIC_KEY_URI;
-  private static int hashSeed;
-  private static Form<GoogleIdAuthenticatorDef> form;
-
-  static {
-    Uri publicKeyUri;
-    try {
-      publicKeyUri = Uri.parse(System.getProperty("swim.auth.google.public.key.uri"));
-    } catch (NullPointerException | ParserException error) {
-      publicKeyUri = Uri.parse("https://www.googleapis.com/oauth2/v3/certs");
-    }
-    PUBLIC_KEY_URI = publicKeyUri;
-  }
-
   final String authenticatorName;
   final FingerTrieSeq<String> audiences;
   final HashTrieSet<String> emails;
@@ -61,14 +47,6 @@ public class GoogleIdAuthenticatorDef implements AuthenticatorDef, Debug {
     this.emails = emails;
     this.publicKeyUri = publicKeyUri;
     this.httpSettings = httpSettings;
-  }
-
-  @Kind
-  public static Form<GoogleIdAuthenticatorDef> form() {
-    if (form == null) {
-      form = new GoogleIdAuthenticatorForm();
-    }
-    return form;
   }
 
   @Override
@@ -105,27 +83,52 @@ public class GoogleIdAuthenticatorDef implements AuthenticatorDef, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(GoogleIdAuthenticatorDef.class);
+    if (GoogleIdAuthenticatorDef.hashSeed == 0) {
+      GoogleIdAuthenticatorDef.hashSeed = Murmur3.seed(GoogleIdAuthenticatorDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(GoogleIdAuthenticatorDef.hashSeed,
         Murmur3.hash(this.authenticatorName)), this.audiences.hashCode()),
         this.emails.hashCode()), this.publicKeyUri.hashCode()), this.httpSettings.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("new").write(' ').write("GoogleIdAuthenticatorDef").write('(')
-        .debug(this.authenticatorName).write(", ").debug(this.audiences).write(", ")
-        .debug(this.emails).write(", ").debug(this.publicKeyUri).write(", ")
-        .debug(this.httpSettings).write(')');
+                   .debug(this.authenticatorName).write(", ").debug(this.audiences).write(", ")
+                   .debug(this.emails).write(", ").debug(this.publicKeyUri).write(", ")
+                   .debug(this.httpSettings).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  static final Uri PUBLIC_KEY_URI;
+
+  static {
+    Uri publicKeyUri;
+    try {
+      publicKeyUri = Uri.parse(System.getProperty("swim.auth.google.public.key.uri"));
+    } catch (NullPointerException | ParserException error) {
+      publicKeyUri = Uri.parse("https://www.googleapis.com/oauth2/v3/certs");
+    }
+    PUBLIC_KEY_URI = publicKeyUri;
+  }
+
+  private static Form<GoogleIdAuthenticatorDef> form;
+
+  @Kind
+  public static Form<GoogleIdAuthenticatorDef> form() {
+    if (GoogleIdAuthenticatorDef.form == null) {
+      GoogleIdAuthenticatorDef.form = new GoogleIdAuthenticatorForm();
+    }
+    return GoogleIdAuthenticatorDef.form;
   }
 
 }
@@ -145,7 +148,7 @@ final class GoogleIdAuthenticatorForm extends Form<GoogleIdAuthenticatorDef> {
   @Override
   public Item mold(GoogleIdAuthenticatorDef authenticatorDef) {
     if (authenticatorDef != null) {
-      final Record record = Record.create().attr(tag());
+      final Record record = Record.create().attr(this.tag());
       for (String audience : authenticatorDef.audiences) {
         record.add(Record.create(1).attr("audience", audience));
       }
@@ -161,7 +164,7 @@ final class GoogleIdAuthenticatorForm extends Form<GoogleIdAuthenticatorDef> {
   @Override
   public GoogleIdAuthenticatorDef cast(Item item) {
     final Value value = item.toValue();
-    final Value headers = value.getAttr(tag());
+    final Value headers = value.getAttr(this.tag());
     if (headers.isDefined()) {
       final String authenticatorName = item.key().stringValue(null);
       final Builder<String, FingerTrieSeq<String>> audiences = FingerTrieSeq.builder();
@@ -185,7 +188,7 @@ final class GoogleIdAuthenticatorForm extends Form<GoogleIdAuthenticatorDef> {
       }
       final HttpSettings httpSettings = HttpSettings.form().cast(value);
       return new GoogleIdAuthenticatorDef(authenticatorName, audiences.bind(),
-          emails, publicKeyUri, httpSettings);
+                                          emails, publicKeyUri, httpSettings);
     }
     return null;
   }

@@ -28,7 +28,7 @@ import swim.api.lane.function.OnSyncKeys;
 import swim.api.policy.Policy;
 import swim.api.warp.WarpUplink;
 import swim.collections.FingerTrieSeq;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.runtime.AbstractTierBinding;
@@ -71,6 +71,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   volatile FingerTrieSeq<PartBinding> parts;
   volatile PartBinding gateway;
   volatile PartBinding ourself;
+
   volatile int partOpenDelta;
   volatile long partOpenCount;
   volatile int partCloseDelta;
@@ -114,6 +115,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   volatile int uplinkCommandRate;
   volatile long uplinkCommandCount;
   volatile long lastReportTime;
+
   MeshPulse pulse;
   AgentNode metaNode;
   DemandMapLane<Value, PartInfo> metaParts;
@@ -126,7 +128,66 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   SupplyLane<LogEntry> metaFailLog;
 
   public MeshTable() {
+    this.meshContext = null;
     this.parts = FingerTrieSeq.empty();
+    this.gateway = null;
+    this.ourself = null;
+
+    this.partOpenDelta = 0;
+    this.partOpenCount = 0L;
+    this.partCloseDelta = 0;
+    this.partCloseCount = 0L;
+    this.hostOpenDelta = 0;
+    this.hostOpenCount = 0L;
+    this.hostCloseDelta = 0;
+    this.hostCloseCount = 0L;
+    this.nodeOpenDelta = 0;
+    this.nodeOpenCount = 0L;
+    this.nodeCloseDelta = 0;
+    this.nodeCloseCount = 0L;
+    this.agentOpenDelta = 0;
+    this.agentOpenCount = 0L;
+    this.agentCloseDelta = 0;
+    this.agentCloseCount = 0L;
+    this.agentExecDelta = 0L;
+    this.agentExecRate = 0L;
+    this.agentExecTime = 0L;
+    this.timerEventDelta = 0;
+    this.timerEventRate = 0;
+    this.timerEventCount = 0L;
+    this.downlinkOpenDelta = 0;
+    this.downlinkOpenCount = 0L;
+    this.downlinkCloseDelta = 0;
+    this.downlinkCloseCount = 0L;
+    this.downlinkEventDelta = 0;
+    this.downlinkEventRate = 0;
+    this.downlinkEventCount = 0L;
+    this.downlinkCommandDelta = 0;
+    this.downlinkCommandRate = 0;
+    this.downlinkCommandCount = 0L;
+    this.uplinkOpenDelta = 0;
+    this.uplinkOpenCount = 0L;
+    this.uplinkCloseDelta = 0;
+    this.uplinkCloseCount = 0L;
+    this.uplinkEventDelta = 0;
+    this.uplinkEventRate = 0;
+    this.uplinkEventCount = 0L;
+    this.uplinkCommandDelta = 0;
+    this.uplinkCommandRate = 0;
+    this.uplinkCommandCount = 0L;
+    this.lastReportTime = 0L;
+
+
+    this.pulse = null;
+    this.metaNode = null;
+    this.metaParts = null;
+    this.metaPulse = null;
+    this.metaTraceLog = null;
+    this.metaDebugLog = null;
+    this.metaInfoLog = null;
+    this.metaWarnLog = null;
+    this.metaErrorLog = null;
+    this.metaFailLog = null;
   }
 
   @Override
@@ -157,7 +218,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapMesh(Class<T> meshClass) {
-    if (meshClass.isAssignableFrom(getClass())) {
+    if (meshClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.meshContext.unwrapMesh(meshClass);
@@ -168,7 +229,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   @Override
   public <T> T bottomMesh(Class<T> meshClass) {
     T mesh = this.meshContext.bottomMesh(meshClass);
-    if (mesh == null && meshClass.isAssignableFrom(getClass())) {
+    if (mesh == null && meshClass.isAssignableFrom(this.getClass())) {
       mesh = (T) this;
     }
     return mesh;
@@ -217,52 +278,46 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   public void openMetaMesh(MeshBinding mesh, NodeBinding metaMesh) {
     if (metaMesh instanceof AgentNode) {
       this.metaNode = (AgentNode) metaMesh;
-      openMetaLanes(mesh, (AgentNode) metaMesh);
+      this.openMetaLanes(mesh, (AgentNode) metaMesh);
     }
     this.meshContext.openMetaMesh(mesh, metaMesh);
   }
 
   protected void openMetaLanes(MeshBinding mesh, AgentNode metaMesh) {
-    openReflectLanes(mesh, metaMesh);
-    openLogLanes(mesh, metaMesh);
+    this.openReflectLanes(mesh, metaMesh);
+    this.openLogLanes(mesh, metaMesh);
   }
 
   protected void openReflectLanes(MeshBinding mesh, AgentNode metaMesh) {
     this.metaParts = metaMesh.demandMapLane()
-        .keyForm(Form.forValue())
-        .valueForm(PartInfo.form())
-        .observe(new MeshTablePartsController(mesh));
-    metaMesh.openLane(PARTS_URI, this.metaParts);
+                             .keyForm(Form.forValue())
+                             .valueForm(PartInfo.form())
+                             .observe(new MeshTablePartsController(mesh));
+    metaMesh.openLane(MeshTable.PARTS_URI, this.metaParts);
 
-    this.metaPulse = metaNode.demandLane()
-        .valueForm(MeshPulse.form())
-        .observe(new MeshTablePulseController(this));
-    metaNode.openLane(MeshPulse.PULSE_URI, this.metaPulse);
+    this.metaPulse = this.metaNode.demandLane()
+                                  .valueForm(MeshPulse.form())
+                                  .observe(new MeshTablePulseController(this));
+    this.metaNode.openLane(MeshPulse.PULSE_URI, this.metaPulse);
   }
 
   protected void openLogLanes(MeshBinding mesh, AgentNode metaMesh) {
-    this.metaTraceLog = metaMesh.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaTraceLog = metaMesh.supplyLane().valueForm(LogEntry.form());
     metaMesh.openLane(LogEntry.TRACE_LOG_URI, this.metaTraceLog);
 
-    this.metaDebugLog = metaMesh.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaDebugLog = metaMesh.supplyLane().valueForm(LogEntry.form());
     metaMesh.openLane(LogEntry.DEBUG_LOG_URI, this.metaDebugLog);
 
-    this.metaInfoLog = metaMesh.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaInfoLog = metaMesh.supplyLane().valueForm(LogEntry.form());
     metaMesh.openLane(LogEntry.INFO_LOG_URI, this.metaInfoLog);
 
-    this.metaWarnLog = metaMesh.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaWarnLog = metaMesh.supplyLane().valueForm(LogEntry.form());
     metaMesh.openLane(LogEntry.WARN_LOG_URI, this.metaWarnLog);
 
-    this.metaErrorLog = metaMesh.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaErrorLog = metaMesh.supplyLane().valueForm(LogEntry.form());
     metaMesh.openLane(LogEntry.ERROR_LOG_URI, this.metaErrorLog);
 
-    this.metaFailLog = metaMesh.supplyLane()
-        .valueForm(LogEntry.form());
+    this.metaFailLog = metaMesh.supplyLane().valueForm(LogEntry.form());
     metaMesh.openLane(LogEntry.FAIL_LOG_URI, this.metaFailLog);
   }
 
@@ -288,19 +343,19 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
 
   @Override
   public FingerTrieSeq<PartBinding> parts() {
-    return this.parts;
+    return MeshTable.PARTS.get(this);
   }
 
   boolean isMetaNode(Uri nodeUri) {
-    return !meshUri().isDefined() && "swim".equals(nodeUri.schemeName());
+    return !this.meshUri().isDefined() && "swim".equals(nodeUri.schemeName());
   }
 
   @Override
   public PartBinding getPart(Uri nodeUri) {
-    if (isMetaNode(nodeUri)) {
+    if (this.isMetaNode(nodeUri)) {
       return this.ourself;
     }
-    final FingerTrieSeq<PartBinding> parts = this.parts;
+    final FingerTrieSeq<PartBinding> parts = MeshTable.PARTS.get(this);
     for (int i = 0, n = parts.size(); i < n; i += 1) {
       final PartBinding part = parts.get(i);
       if (part.predicate().test(nodeUri)) {
@@ -312,7 +367,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
 
   @Override
   public PartBinding getPart(Value partKey) {
-    final FingerTrieSeq<PartBinding> parts = this.parts;
+    final FingerTrieSeq<PartBinding> parts = MeshTable.PARTS.get(this);
     for (int i = 0, n = parts.size(); i < n; i += 1) {
       final PartBinding part = parts.get(i);
       if (partKey.equals(part.partKey())) {
@@ -324,14 +379,11 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
 
   @Override
   public PartBinding openPart(Uri nodeUri) {
-    FingerTrieSeq<PartBinding> oldParts;
-    FingerTrieSeq<PartBinding> newParts;
     PartBinding partBinding = null;
-    Value partKey = Value.extant();
     do {
-      oldParts = this.parts;
+      final FingerTrieSeq<PartBinding> oldParts = MeshTable.PARTS.get(this);
       PartBinding part = null;
-      if (isMetaNode(nodeUri)) {
+      if (this.isMetaNode(nodeUri)) {
         part = this.ourself;
       } else {
         for (int i = 0, n = oldParts.size(); i < n; i += 1) {
@@ -348,50 +400,50 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
           partBinding.close();
         }
         partBinding = part;
-        newParts = oldParts;
         break;
-      } else if (partBinding == null) {
-        if (isMetaNode(nodeUri)) {
-          partKey = Text.from("swim");
+      } else {
+        final Value partKey;
+        if (partBinding == null) {
+          if (this.isMetaNode(nodeUri)) {
+            partKey = Text.from("swim");
+          } else {
+            partKey = Value.extant();
+          }
+          final PartAddress partAddress = this.cellAddress().partKey(partKey);
+          partBinding = this.meshContext.createPart(partAddress);
+          if (partBinding != null) {
+            partBinding = this.meshContext.injectPart(partAddress, partBinding);
+            final PartContext partContext = this.createPartContext(partAddress, partBinding);
+            partBinding.setPartContext(partContext);
+            partBinding = partBinding.partWrapper();
+          } else {
+            break;
+          }
         } else {
           partKey = Value.extant();
         }
-        final PartAddress partAddress = cellAddress().partKey(partKey);
-        partBinding = this.meshContext.createPart(partAddress);
-        if (partBinding != null) {
-          partBinding = this.meshContext.injectPart(partAddress, partBinding);
-          final PartContext partContext = createPartContext(partAddress, partBinding);
-          partBinding.setPartContext(partContext);
-          partBinding = partBinding.partWrapper();
-          newParts = oldParts.appended(partBinding);
-        } else {
-          newParts = oldParts;
+        final FingerTrieSeq<PartBinding> newParts = oldParts.appended(partBinding);
+        if (MeshTable.PARTS.compareAndSet(this, oldParts, newParts)) {
+          if (partKey instanceof Extant) {
+            this.gateway = partBinding;
+          } else if (this.isMetaNode(nodeUri)) {
+            this.ourself = partBinding;
+          }
+          this.activate(partBinding);
+          this.didOpenPart(partBinding);
           break;
         }
-      } else {
-        newParts = oldParts.appended(partBinding);
       }
-    } while (oldParts != newParts && !PARTS.compareAndSet(this, oldParts, newParts));
-    if (oldParts != newParts) {
-      if (partKey instanceof Extant) {
-        this.gateway = partBinding;
-      } else if (isMetaNode(nodeUri)) {
-        this.ourself = partBinding;
-      }
-      activate(partBinding);
-      didOpenPart(partBinding);
-    }
+    } while (true);
     return partBinding;
   }
 
   @Override
   public PartBinding openGateway() {
     final Value partKey = Value.extant();
-    FingerTrieSeq<PartBinding> oldParts;
-    FingerTrieSeq<PartBinding> newParts;
     PartBinding partBinding = null;
     do {
-      oldParts = this.parts;
+      final FingerTrieSeq<PartBinding> oldParts = MeshTable.PARTS.get(this);
       final PartBinding part = this.gateway;
       if (part != null) {
         if (partBinding != null) {
@@ -399,91 +451,87 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
           partBinding.close();
         }
         partBinding = part;
-        newParts = oldParts;
         break;
-      } else if (partBinding == null) {
-        final PartAddress partAddress = cellAddress().partKey(partKey);
-        partBinding = this.meshContext.createPart(partAddress);
-        if (partBinding != null) {
-          partBinding = this.meshContext.injectPart(partAddress, partBinding);
-          final PartContext partContext = createPartContext(partAddress, partBinding);
-          partBinding.setPartContext(partContext);
-          partBinding = partBinding.partWrapper();
-          newParts = oldParts.appended(partBinding);
-        } else {
-          newParts = oldParts;
+      } else {
+        if (partBinding == null) {
+          final PartAddress partAddress = this.cellAddress().partKey(partKey);
+          partBinding = this.meshContext.createPart(partAddress);
+          if (partBinding != null) {
+            partBinding = this.meshContext.injectPart(partAddress, partBinding);
+            final PartContext partContext = this.createPartContext(partAddress, partBinding);
+            partBinding.setPartContext(partContext);
+            partBinding = partBinding.partWrapper();
+          } else {
+            break;
+          }
+        }
+        final FingerTrieSeq<PartBinding> newParts = oldParts.appended(partBinding);
+        if (MeshTable.PARTS.compareAndSet(this, oldParts, newParts)) {
+          this.gateway = partBinding;
+          this.activate(partBinding);
+          this.didOpenPart(partBinding);
           break;
         }
-      } else {
-        newParts = oldParts.appended(partBinding);
       }
-    } while (oldParts != newParts && !PARTS.compareAndSet(this, oldParts, newParts));
-    if (oldParts != newParts) {
-      this.gateway = partBinding;
-      activate(partBinding);
-      didOpenPart(partBinding);
-    }
+    } while (true);
     return partBinding;
   }
 
   @Override
   public PartBinding addPart(Value partKey, PartBinding part) {
-    FingerTrieSeq<PartBinding> oldParts;
-    FingerTrieSeq<PartBinding> newParts;
     PartBinding partBinding = null;
     do {
-      oldParts = this.parts;
+      final FingerTrieSeq<PartBinding> oldParts = MeshTable.PARTS.get(this);
       for (int i = 0, n = oldParts.size(); i < n; i += 1) {
         final PartBinding oldPart = oldParts.get(i);
         if (partKey.equals(oldPart.partKey())) {
+          partBinding = null;
           break;
         }
       }
       if (partBinding == null) {
-        final PartAddress partAddress = cellAddress().partKey(partKey);
+        final PartAddress partAddress = this.cellAddress().partKey(partKey);
         partBinding = this.meshContext.injectPart(partAddress, part);
-        final PartContext partContext = createPartContext(partAddress, partBinding);
+        final PartContext partContext = this.createPartContext(partAddress, partBinding);
         partBinding.setPartContext(partContext);
         partBinding = partBinding.partWrapper();
       }
-      newParts = oldParts.appended(partBinding);
-    } while (oldParts != newParts && !PARTS.compareAndSet(this, oldParts, newParts));
-    if (partBinding != null) {
-      activate(partBinding);
-      didOpenPart(partBinding);
-    }
+      final FingerTrieSeq<PartBinding> newParts = oldParts.appended(partBinding);
+      if (MeshTable.PARTS.compareAndSet(this, oldParts, newParts)) {
+        this.activate(partBinding);
+        this.didOpenPart(partBinding);
+        break;
+      }
+    } while (true);
     return partBinding;
   }
 
   public void closePart(Value partKey) {
-    FingerTrieSeq<PartBinding> oldParts;
-    FingerTrieSeq<PartBinding> newParts;
-    PartBinding partBinding;
-    do {
-      oldParts = this.parts;
-      newParts = oldParts;
-      partBinding = null;
+    outer: do {
+      final FingerTrieSeq<PartBinding> oldParts = MeshTable.PARTS.get(this);
       for (int i = 0, n = oldParts.size(); i < n; i += 1) {
-        final PartBinding part = oldParts.get(i);
-        if (partKey.equals(part.partKey())) {
-          partBinding = part;
-          newParts = oldParts.removed(i);
-          break;
+        final PartBinding partBinding = oldParts.get(i);
+        if (partKey.equals(partBinding.partKey())) {
+          final FingerTrieSeq<PartBinding> newParts = oldParts.removed(i);
+          if (MeshTable.PARTS.compareAndSet(this, oldParts, newParts)) {
+            if (this.gateway == partBinding) {
+              this.gateway = null;
+            } else if (this.ourself == partBinding) {
+              this.ourself = null;
+            }
+            partBinding.didClose();
+            this.didClosePart(partBinding);
+            if (newParts.isEmpty()) {
+              this.close();
+            }
+            break;
+          } else {
+            continue outer;
+          }
         }
       }
-    } while (oldParts != newParts && !PARTS.compareAndSet(this, oldParts, newParts));
-    if (partBinding != null) {
-      if (this.gateway == partBinding) {
-        this.gateway = null;
-      } else if (this.ourself == partBinding) {
-        this.ourself = null;
-      }
-      partBinding.didClose();
-      didClosePart(partBinding);
-      if (newParts.isEmpty()) {
-        close();
-      }
-    }
+      break;
+    } while (true);
   }
 
   protected void didOpenPart(PartBinding part) {
@@ -491,8 +539,8 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
     if (metaParts != null) {
       metaParts.cue(part.partKey());
     }
-    PART_OPEN_DELTA.incrementAndGet(this);
-    flushMetrics();
+    MeshTable.PART_OPEN_DELTA.incrementAndGet(this);
+    this.flushMetrics();
   }
 
   protected void didClosePart(PartBinding part) {
@@ -500,8 +548,8 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
     if (metaParts != null) {
       metaParts.remove(part.partKey());
     }
-    PART_CLOSE_DELTA.incrementAndGet(this);
-    flushMetrics();
+    MeshTable.PART_CLOSE_DELTA.incrementAndGet(this);
+    this.flushMetrics();
   }
 
   @Override
@@ -549,11 +597,12 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
 
   @Override
   public void closeDownlink(LinkBinding link) {
+    // nop
   }
 
   @Override
   public void openUplink(LinkBinding link) {
-    PartBinding partBinding = openPart(link.nodeUri());
+    PartBinding partBinding = this.openPart(link.nodeUri());
     if (partBinding != null) {
       partBinding = partBinding.bottomPart(PartBinding.class);
     }
@@ -572,7 +621,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   @Override
   public void pushUp(Push<?> push) {
     final Uri nodeUri = push.nodeUri();
-    PartBinding partBinding = openPart(nodeUri);
+    PartBinding partBinding = this.openPart(nodeUri);
     if (partBinding != null) {
       partBinding = partBinding.bottomPart(PartBinding.class);
     }
@@ -640,7 +689,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   @Override
   protected void willOpen() {
     super.willOpen();
-    final Iterator<PartBinding> partsIterator = this.parts.iterator();
+    final Iterator<PartBinding> partsIterator = MeshTable.PARTS.get(this).iterator();
     while (partsIterator.hasNext()) {
       partsIterator.next().open();
     }
@@ -649,7 +698,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   @Override
   protected void willLoad() {
     super.willLoad();
-    final Iterator<PartBinding> partsIterator = this.parts.iterator();
+    final Iterator<PartBinding> partsIterator = MeshTable.PARTS.get(this).iterator();
     while (partsIterator.hasNext()) {
       partsIterator.next().load();
     }
@@ -658,7 +707,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   @Override
   protected void willStart() {
     super.willStart();
-    final Iterator<PartBinding> partsIterator = this.parts.iterator();
+    final Iterator<PartBinding> partsIterator = MeshTable.PARTS.get(this).iterator();
     while (partsIterator.hasNext()) {
       partsIterator.next().start();
     }
@@ -667,7 +716,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   @Override
   protected void willStop() {
     super.willStop();
-    final Iterator<PartBinding> partsIterator = this.parts.iterator();
+    final Iterator<PartBinding> partsIterator = MeshTable.PARTS.get(this).iterator();
     while (partsIterator.hasNext()) {
       partsIterator.next().stop();
     }
@@ -676,7 +725,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   @Override
   protected void willUnload() {
     super.willUnload();
-    final Iterator<PartBinding> partsIterator = this.parts.iterator();
+    final Iterator<PartBinding> partsIterator = MeshTable.PARTS.get(this).iterator();
     while (partsIterator.hasNext()) {
       partsIterator.next().unload();
     }
@@ -685,7 +734,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   @Override
   protected void willClose() {
     super.willClose();
-    final Iterator<PartBinding> partsIterator = this.parts.iterator();
+    final Iterator<PartBinding> partsIterator = MeshTable.PARTS.get(this).iterator();
     while (partsIterator.hasNext()) {
       partsIterator.next().close();
     }
@@ -706,13 +755,13 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
       this.metaErrorLog = null;
       this.metaFailLog = null;
     }
-    flushMetrics();
+    this.flushMetrics();
   }
 
   @Override
   public void didFail(Throwable error) {
-    if (Conts.isNonFatal(error)) {
-      fail(error);
+    if (Cont.isNonFatal(error)) {
+      this.fail(error);
     } else {
       error.printStackTrace();
     }
@@ -721,62 +770,62 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   @Override
   public void reportDown(Metric metric) {
     if (metric instanceof PartProfile) {
-      accumulatePartProfile((PartProfile) metric);
+      this.accumulatePartProfile((PartProfile) metric);
     } else if (metric instanceof WarpDownlinkProfile) {
-      accumulateWarpDownlinkProfile((WarpDownlinkProfile) metric);
+      this.accumulateWarpDownlinkProfile((WarpDownlinkProfile) metric);
     } else {
       this.meshContext.reportDown(metric);
     }
   }
 
   protected void accumulatePartProfile(PartProfile profile) {
-    HOST_OPEN_DELTA.addAndGet(this, profile.hostOpenDelta());
-    HOST_CLOSE_DELTA.addAndGet(this, profile.hostCloseDelta());
-    NODE_OPEN_DELTA.addAndGet(this, profile.nodeOpenDelta());
-    NODE_CLOSE_DELTA.addAndGet(this, profile.nodeCloseDelta());
-    AGENT_OPEN_DELTA.addAndGet(this, profile.agentOpenDelta());
-    AGENT_CLOSE_DELTA.addAndGet(this, profile.agentCloseDelta());
-    AGENT_EXEC_DELTA.addAndGet(this, profile.agentExecDelta());
-    AGENT_EXEC_RATE.addAndGet(this, profile.agentExecRate());
-    TIMER_EVENT_DELTA.addAndGet(this, profile.timerEventDelta());
-    TIMER_EVENT_RATE.addAndGet(this, profile.timerEventRate());
-    DOWNLINK_OPEN_DELTA.addAndGet(this, profile.downlinkOpenDelta());
-    DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.downlinkCloseDelta());
-    DOWNLINK_EVENT_DELTA.addAndGet(this, profile.downlinkEventDelta());
-    DOWNLINK_EVENT_RATE.addAndGet(this, profile.downlinkEventRate());
-    DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.downlinkCommandDelta());
-    DOWNLINK_COMMAND_RATE.addAndGet(this, profile.downlinkCommandRate());
-    UPLINK_OPEN_DELTA.addAndGet(this, profile.uplinkOpenDelta());
-    UPLINK_CLOSE_DELTA.addAndGet(this, profile.uplinkCloseDelta());
-    UPLINK_EVENT_DELTA.addAndGet(this, profile.uplinkEventDelta());
-    UPLINK_EVENT_RATE.addAndGet(this, profile.uplinkEventRate());
-    UPLINK_COMMAND_DELTA.addAndGet(this, profile.uplinkCommandDelta());
-    UPLINK_COMMAND_RATE.addAndGet(this, profile.uplinkCommandRate());
-    didUpdateMetrics();
+    MeshTable.HOST_OPEN_DELTA.addAndGet(this, profile.hostOpenDelta());
+    MeshTable.HOST_CLOSE_DELTA.addAndGet(this, profile.hostCloseDelta());
+    MeshTable.NODE_OPEN_DELTA.addAndGet(this, profile.nodeOpenDelta());
+    MeshTable.NODE_CLOSE_DELTA.addAndGet(this, profile.nodeCloseDelta());
+    MeshTable.AGENT_OPEN_DELTA.addAndGet(this, profile.agentOpenDelta());
+    MeshTable.AGENT_CLOSE_DELTA.addAndGet(this, profile.agentCloseDelta());
+    MeshTable.AGENT_EXEC_DELTA.addAndGet(this, profile.agentExecDelta());
+    MeshTable.AGENT_EXEC_RATE.addAndGet(this, profile.agentExecRate());
+    MeshTable.TIMER_EVENT_DELTA.addAndGet(this, profile.timerEventDelta());
+    MeshTable.TIMER_EVENT_RATE.addAndGet(this, profile.timerEventRate());
+    MeshTable.DOWNLINK_OPEN_DELTA.addAndGet(this, profile.downlinkOpenDelta());
+    MeshTable.DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.downlinkCloseDelta());
+    MeshTable.DOWNLINK_EVENT_DELTA.addAndGet(this, profile.downlinkEventDelta());
+    MeshTable.DOWNLINK_EVENT_RATE.addAndGet(this, profile.downlinkEventRate());
+    MeshTable.DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.downlinkCommandDelta());
+    MeshTable.DOWNLINK_COMMAND_RATE.addAndGet(this, profile.downlinkCommandRate());
+    MeshTable.UPLINK_OPEN_DELTA.addAndGet(this, profile.uplinkOpenDelta());
+    MeshTable.UPLINK_CLOSE_DELTA.addAndGet(this, profile.uplinkCloseDelta());
+    MeshTable.UPLINK_EVENT_DELTA.addAndGet(this, profile.uplinkEventDelta());
+    MeshTable.UPLINK_EVENT_RATE.addAndGet(this, profile.uplinkEventRate());
+    MeshTable.UPLINK_COMMAND_DELTA.addAndGet(this, profile.uplinkCommandDelta());
+    MeshTable.UPLINK_COMMAND_RATE.addAndGet(this, profile.uplinkCommandRate());
+    this.didUpdateMetrics();
   }
 
   protected void accumulateWarpDownlinkProfile(WarpDownlinkProfile profile) {
-    DOWNLINK_OPEN_DELTA.addAndGet(this, profile.openDelta());
-    DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.closeDelta());
-    DOWNLINK_EVENT_DELTA.addAndGet(this, profile.eventDelta());
-    DOWNLINK_EVENT_RATE.addAndGet(this, profile.eventRate());
-    DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.commandDelta());
-    DOWNLINK_COMMAND_RATE.addAndGet(this, profile.commandRate());
-    didUpdateMetrics();
+    MeshTable.DOWNLINK_OPEN_DELTA.addAndGet(this, profile.openDelta());
+    MeshTable.DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.closeDelta());
+    MeshTable.DOWNLINK_EVENT_DELTA.addAndGet(this, profile.eventDelta());
+    MeshTable.DOWNLINK_EVENT_RATE.addAndGet(this, profile.eventRate());
+    MeshTable.DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.commandDelta());
+    MeshTable.DOWNLINK_COMMAND_RATE.addAndGet(this, profile.commandRate());
+    this.didUpdateMetrics();
   }
 
   protected void didUpdateMetrics() {
     do {
       final long newReportTime = System.currentTimeMillis();
-      final long oldReportTime = this.lastReportTime;
+      final long oldReportTime = MeshTable.LAST_REPORT_TIME.get(this);
       final long dt = newReportTime - oldReportTime;
       if (dt >= Metric.REPORT_INTERVAL) {
-        if (LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
+        if (MeshTable.LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
           try {
-            reportMetrics(dt);
+            this.reportMetrics(dt);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              didFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.didFail(error);
             } else {
               throw error;
             }
@@ -791,13 +840,13 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
 
   protected void flushMetrics() {
     final long newReportTime = System.currentTimeMillis();
-    final long oldReportTime = LAST_REPORT_TIME.getAndSet(this, newReportTime);
+    final long oldReportTime = MeshTable.LAST_REPORT_TIME.getAndSet(this, newReportTime);
     final long dt = newReportTime - oldReportTime;
     try {
-      reportMetrics(dt);
+      this.reportMetrics(dt);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
+      if (Cont.isNonFatal(error)) {
+        this.didFail(error);
       } else {
         throw error;
       }
@@ -805,59 +854,59 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   }
 
   protected void reportMetrics(long dt) {
-    final MeshProfile profile = collectProfile(dt);
+    final MeshProfile profile = this.collectProfile(dt);
     this.meshContext.reportDown(profile);
   }
 
   protected MeshProfile collectProfile(long dt) {
-    final int partOpenDelta = PART_OPEN_DELTA.getAndSet(this, 0);
-    final long partOpenCount = PART_OPEN_COUNT.addAndGet(this, (long) partOpenDelta);
-    final int partCloseDelta = PART_CLOSE_DELTA.getAndSet(this, 0);
-    final long partCloseCount = PART_CLOSE_COUNT.addAndGet(this, (long) partCloseDelta);
+    final int partOpenDelta = MeshTable.PART_OPEN_DELTA.getAndSet(this, 0);
+    final long partOpenCount = MeshTable.PART_OPEN_COUNT.addAndGet(this, (long) partOpenDelta);
+    final int partCloseDelta = MeshTable.PART_CLOSE_DELTA.getAndSet(this, 0);
+    final long partCloseCount = MeshTable.PART_CLOSE_COUNT.addAndGet(this, (long) partCloseDelta);
 
-    final int hostOpenDelta = HOST_OPEN_DELTA.getAndSet(this, 0);
-    final long hostOpenCount = HOST_OPEN_COUNT.addAndGet(this, (long) hostOpenDelta);
-    final int hostCloseDelta = HOST_CLOSE_DELTA.getAndSet(this, 0);
-    final long hostCloseCount = HOST_CLOSE_COUNT.addAndGet(this, (long) hostCloseDelta);
+    final int hostOpenDelta = MeshTable.HOST_OPEN_DELTA.getAndSet(this, 0);
+    final long hostOpenCount = MeshTable.HOST_OPEN_COUNT.addAndGet(this, (long) hostOpenDelta);
+    final int hostCloseDelta = MeshTable.HOST_CLOSE_DELTA.getAndSet(this, 0);
+    final long hostCloseCount = MeshTable.HOST_CLOSE_COUNT.addAndGet(this, (long) hostCloseDelta);
 
-    final int nodeOpenDelta = NODE_OPEN_DELTA.getAndSet(this, 0);
-    final long nodeOpenCount = NODE_OPEN_COUNT.addAndGet(this, (long) nodeOpenDelta);
-    final int nodeCloseDelta = NODE_CLOSE_DELTA.getAndSet(this, 0);
-    final long nodeCloseCount = NODE_CLOSE_COUNT.addAndGet(this, (long) nodeCloseDelta);
+    final int nodeOpenDelta = MeshTable.NODE_OPEN_DELTA.getAndSet(this, 0);
+    final long nodeOpenCount = MeshTable.NODE_OPEN_COUNT.addAndGet(this, (long) nodeOpenDelta);
+    final int nodeCloseDelta = MeshTable.NODE_CLOSE_DELTA.getAndSet(this, 0);
+    final long nodeCloseCount = MeshTable.NODE_CLOSE_COUNT.addAndGet(this, (long) nodeCloseDelta);
 
-    final int agentOpenDelta = AGENT_OPEN_DELTA.getAndSet(this, 0);
-    final long agentOpenCount = AGENT_OPEN_COUNT.addAndGet(this, (long) agentOpenDelta);
-    final int agentCloseDelta = AGENT_CLOSE_DELTA.getAndSet(this, 0);
-    final long agentCloseCount = AGENT_CLOSE_COUNT.addAndGet(this, (long) agentCloseDelta);
-    final long agentExecDelta = AGENT_EXEC_DELTA.getAndSet(this, 0L);
-    final long agentExecRate = AGENT_EXEC_RATE.getAndSet(this, 0L);
-    final long agentExecTime = AGENT_EXEC_TIME.addAndGet(this, agentExecDelta);
+    final int agentOpenDelta = MeshTable.AGENT_OPEN_DELTA.getAndSet(this, 0);
+    final long agentOpenCount = MeshTable.AGENT_OPEN_COUNT.addAndGet(this, (long) agentOpenDelta);
+    final int agentCloseDelta = MeshTable.AGENT_CLOSE_DELTA.getAndSet(this, 0);
+    final long agentCloseCount = MeshTable.AGENT_CLOSE_COUNT.addAndGet(this, (long) agentCloseDelta);
+    final long agentExecDelta = MeshTable.AGENT_EXEC_DELTA.getAndSet(this, 0L);
+    final long agentExecRate = MeshTable.AGENT_EXEC_RATE.getAndSet(this, 0L);
+    final long agentExecTime = MeshTable.AGENT_EXEC_TIME.addAndGet(this, agentExecDelta);
 
-    final int timerEventDelta = TIMER_EVENT_DELTA.getAndSet(this, 0);
-    final int timerEventRate = TIMER_EVENT_RATE.getAndSet(this, 0);
-    final long timerEventCount = TIMER_EVENT_COUNT.addAndGet(this, (long) timerEventDelta);
+    final int timerEventDelta = MeshTable.TIMER_EVENT_DELTA.getAndSet(this, 0);
+    final int timerEventRate = MeshTable.TIMER_EVENT_RATE.getAndSet(this, 0);
+    final long timerEventCount = MeshTable.TIMER_EVENT_COUNT.addAndGet(this, (long) timerEventDelta);
 
-    final int downlinkOpenDelta = DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
-    final long downlinkOpenCount = DOWNLINK_OPEN_COUNT.addAndGet(this, (long) downlinkOpenDelta);
-    final int downlinkCloseDelta = DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
-    final long downlinkCloseCount = DOWNLINK_CLOSE_COUNT.addAndGet(this, (long) downlinkCloseDelta);
-    final int downlinkEventDelta = DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
-    final int downlinkEventRate = DOWNLINK_EVENT_RATE.getAndSet(this, 0);
-    final long downlinkEventCount = DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
-    final int downlinkCommandDelta = DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
-    final int downlinkCommandRate = DOWNLINK_COMMAND_RATE.getAndSet(this, 0);
-    final long downlinkCommandCount = DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
+    final int downlinkOpenDelta = MeshTable.DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long downlinkOpenCount = MeshTable.DOWNLINK_OPEN_COUNT.addAndGet(this, (long) downlinkOpenDelta);
+    final int downlinkCloseDelta = MeshTable.DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long downlinkCloseCount = MeshTable.DOWNLINK_CLOSE_COUNT.addAndGet(this, (long) downlinkCloseDelta);
+    final int downlinkEventDelta = MeshTable.DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int downlinkEventRate = MeshTable.DOWNLINK_EVENT_RATE.getAndSet(this, 0);
+    final long downlinkEventCount = MeshTable.DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
+    final int downlinkCommandDelta = MeshTable.DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int downlinkCommandRate = MeshTable.DOWNLINK_COMMAND_RATE.getAndSet(this, 0);
+    final long downlinkCommandCount = MeshTable.DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
 
-    final int uplinkOpenDelta = UPLINK_OPEN_DELTA.getAndSet(this, 0);
-    final long uplinkOpenCount = UPLINK_OPEN_COUNT.addAndGet(this, (long) uplinkOpenDelta);
-    final int uplinkCloseDelta = UPLINK_CLOSE_DELTA.getAndSet(this, 0);
-    final long uplinkCloseCount = UPLINK_CLOSE_COUNT.addAndGet(this, (long) uplinkCloseDelta);
-    final int uplinkEventDelta = UPLINK_EVENT_DELTA.getAndSet(this, 0);
-    final int uplinkEventRate = UPLINK_EVENT_RATE.getAndSet(this, 0);
-    final long uplinkEventCount = UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
-    final int uplinkCommandDelta = UPLINK_COMMAND_DELTA.getAndSet(this, 0);
-    final int uplinkCommandRate = UPLINK_COMMAND_RATE.getAndSet(this, 0);
-    final long uplinkCommandCount = UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
+    final int uplinkOpenDelta = MeshTable.UPLINK_OPEN_DELTA.getAndSet(this, 0);
+    final long uplinkOpenCount = MeshTable.UPLINK_OPEN_COUNT.addAndGet(this, (long) uplinkOpenDelta);
+    final int uplinkCloseDelta = MeshTable.UPLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final long uplinkCloseCount = MeshTable.UPLINK_CLOSE_COUNT.addAndGet(this, (long) uplinkCloseDelta);
+    final int uplinkEventDelta = MeshTable.UPLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int uplinkEventRate = MeshTable.UPLINK_EVENT_RATE.getAndSet(this, 0);
+    final long uplinkEventCount = MeshTable.UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
+    final int uplinkCommandDelta = MeshTable.UPLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int uplinkCommandRate = MeshTable.UPLINK_COMMAND_RATE.getAndSet(this, 0);
+    final long uplinkCommandCount = MeshTable.UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
 
     final int partCount = (int) (partOpenCount - partCloseCount);
     final int hostCount = (int) (hostOpenCount - hostCloseCount);
@@ -866,29 +915,29 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
     final AgentPulse agentPulse = new AgentPulse(agentCount, agentExecRate, agentExecTime, timerEventRate, timerEventCount);
     final long downlinkCount = downlinkOpenCount - downlinkCloseCount;
     final WarpDownlinkPulse downlinkPulse = new WarpDownlinkPulse(downlinkCount, downlinkEventRate, downlinkEventCount,
-        downlinkCommandRate, downlinkCommandCount);
+                                                                  downlinkCommandRate, downlinkCommandCount);
     final long uplinkCount = uplinkOpenCount - uplinkCloseCount;
     final WarpUplinkPulse uplinkPulse = new WarpUplinkPulse(uplinkCount, uplinkEventRate, uplinkEventCount,
-        uplinkCommandRate, uplinkCommandCount);
+                                                            uplinkCommandRate, uplinkCommandCount);
     this.pulse = new MeshPulse(partCount, hostCount, nodeCount, agentPulse, downlinkPulse, uplinkPulse);
     final DemandLane<MeshPulse> metaPulse = this.metaPulse;
     if (metaPulse != null) {
       metaPulse.cue();
     }
 
-    return new MeshProfile(cellAddress(),
-        partOpenDelta, partOpenCount, partCloseDelta, partCloseCount,
-        hostOpenDelta, hostOpenCount, hostCloseDelta, hostCloseCount,
-        nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
-        agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
-        agentExecDelta, agentExecRate, agentExecTime,
-        timerEventDelta, timerEventRate, timerEventCount,
-        downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
-        downlinkEventDelta, downlinkEventRate, downlinkEventCount,
-        downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
-        uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
-        uplinkEventDelta, uplinkEventRate, uplinkEventCount,
-        uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
+    return new MeshProfile(this.cellAddress(),
+                           partOpenDelta, partOpenCount, partCloseDelta, partCloseCount,
+                           hostOpenDelta, hostOpenCount, hostCloseDelta, hostCloseCount,
+                           nodeOpenDelta, nodeOpenCount, nodeCloseDelta, nodeCloseCount,
+                           agentOpenDelta, agentOpenCount, agentCloseDelta, agentCloseCount,
+                           agentExecDelta, agentExecRate, agentExecTime,
+                           timerEventDelta, timerEventRate, timerEventCount,
+                           downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
+                           downlinkEventDelta, downlinkEventRate, downlinkEventCount,
+                           downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
+                           uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
+                           uplinkEventDelta, uplinkEventRate, uplinkEventCount,
+                           uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
   }
 
   static final Uri PARTS_URI = Uri.parse("parts");
@@ -896,6 +945,7 @@ public class MeshTable extends AbstractTierBinding implements MeshBinding {
   @SuppressWarnings("unchecked")
   static final AtomicReferenceFieldUpdater<MeshTable, FingerTrieSeq<PartBinding>> PARTS =
       AtomicReferenceFieldUpdater.newUpdater(MeshTable.class, (Class<FingerTrieSeq<PartBinding>>) (Class<?>) FingerTrieSeq.class, "parts");
+
   static final AtomicIntegerFieldUpdater<MeshTable> PART_OPEN_DELTA =
       AtomicIntegerFieldUpdater.newUpdater(MeshTable.class, "partOpenDelta");
   static final AtomicLongFieldUpdater<MeshTable> PART_OPEN_COUNT =
@@ -997,7 +1047,7 @@ final class MeshTablePartsController implements OnCueKey<Value, PartInfo>, OnSyn
   public PartInfo onCue(Value partKey, WarpUplink uplink) {
     final PartBinding partBinding = this.mesh.getPart(partKey);
     if (partBinding != null) {
-      return PartInfo.from(partBinding);
+      return PartInfo.create(partBinding);
     }
     return null;
   }

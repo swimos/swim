@@ -58,19 +58,19 @@ public interface MapOutlet<K, V, O> extends Outlet<O> {
 
   /**
    * Marks this {@code MapOutlet} as needing an {@code effect} applied to a
-   * given {@code key}.  Decohering an individual key decoheres the entire
-   * state of the {@code Outlet}.  But only the decoherent keys need to be
+   * given {@code key}. Decohering an individual key decoheres the entire
+   * state of the {@code Outlet}. But only the decoherent keys need to be
    * updated in order to recohere the overall state of the {@code Outlet}.
    */
   void decohereInputKey(K key, KeyEffect effect);
 
   /**
    * Updates the state of an individual {@code key} in this {@code MapOutlet}
-   * to make it consistent with the target {@code version}.  The {@code
+   * to make it consistent with the target {@code version}. The {@code
    * MapOutlet} only needs to update if its current {@code version} differs
-   * from the target {@code version}.  To update the state of a key, the {@code
+   * from the target {@code version}. To update the state of a key, the {@code
    * MapOutlet} first invokes {@link Streamlet#recohere(int)} on its attached
-   * streamlets.  Then, for each dependent output, it invokes {@link
+   * streamlets. Then, for each dependent output, it invokes {@link
    * MapInlet#recohereOutputKey(Object, int)}, if the dependent output is a
    * {@link MapInlet}, or it invokes {@link Inlet#recohereOutput(int)}, if the
    * dependent output is not a {@code MapInlet}.

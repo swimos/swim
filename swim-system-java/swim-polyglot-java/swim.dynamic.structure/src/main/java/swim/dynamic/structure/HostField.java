@@ -20,16 +20,16 @@ import swim.structure.Field;
 
 public final class HostField {
 
+  private HostField() {
+    // static
+  }
+
   public static final HostObjectType<Field> TYPE;
 
   static {
     final JavaHostClassType<Field> type = new JavaHostClassType<>(Field.class);
     TYPE = type;
     type.extendType(HostItem.TYPE);
-  }
-
-  private HostField() {
-    // static
   }
 
 }

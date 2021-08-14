@@ -22,24 +22,24 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class HostSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseHostHeaders() {
-    assertParses("Host: example.com", Host.from("example.com"));
-    assertParses("Host: example.com:80", Host.from("example.com", 80));
-    assertParses("Host: 127.0.0.1", Host.from("127.0.0.1"));
-    assertParses("Host: 127.0.0.1:8080", Host.from("127.0.0.1", 8080));
+    assertParses("Host: example.com", Host.create("example.com"));
+    assertParses("Host: example.com:80", Host.create("example.com", 80));
+    assertParses("Host: 127.0.0.1", Host.create("127.0.0.1"));
+    assertParses("Host: 127.0.0.1:8080", Host.create("127.0.0.1", 8080));
   }
 
   @Test
   public void writeHostHeaders() {
-    assertWrites(Host.from("example.com"), "Host: example.com");
-    assertWrites(Host.from("example.com", 80), "Host: example.com:80");
-    assertWrites(Host.from("127.0.0.1"), "Host: 127.0.0.1");
-    assertWrites(Host.from("127.0.0.1", 8080), "Host: 127.0.0.1:8080");
+    assertWrites(Host.create("example.com"), "Host: example.com");
+    assertWrites(Host.create("example.com", 80), "Host: example.com:80");
+    assertWrites(Host.create("127.0.0.1"), "Host: 127.0.0.1");
+    assertWrites(Host.create("127.0.0.1", 8080), "Host: 127.0.0.1:8080");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

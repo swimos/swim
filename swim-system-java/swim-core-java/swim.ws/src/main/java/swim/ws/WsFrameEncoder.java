@@ -38,7 +38,7 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
 
   @Override
   public Encoder<Object, WsFrame<O>> pull(OutputBuffer<?> output) {
-    return encode(output, this.ws, this.frame, this.content, this.offset);
+    return WsFrameEncoder.encode(output, this.ws, this.frame, this.content, this.offset);
   }
 
   static <O> Encoder<Object, WsFrame<O>> encode(OutputBuffer<?> output, WsEncoder ws,
@@ -89,18 +89,18 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
           output = output.write(isMasked ? 0x80 | payloadSize : payloadSize);
         } else if (payloadSize < 1 << 16) {
           output = output.write(isMasked ? 254 : 126)
-              .write(payloadSize >>> 8)
-              .write(payloadSize);
+                         .write(payloadSize >>> 8)
+                         .write(payloadSize);
         } else {
           output = output.write(isMasked ? 255 : 127)
-              .write(0)
-              .write(0)
-              .write(0)
-              .write(0)
-              .write(payloadSize >>> 24)
-              .write(payloadSize >>> 16)
-              .write(payloadSize >>> 8)
-              .write(payloadSize);
+                         .write(0)
+                         .write(0)
+                         .write(0)
+                         .write(0)
+                         .write(payloadSize >>> 24)
+                         .write(payloadSize >>> 16)
+                         .write(payloadSize >>> 8)
+                         .write(payloadSize);
         }
 
         if (isMasked) {
@@ -124,20 +124,20 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
         output = output.index(outputBase + headerSize + payloadSize);
 
         if (content.isDone()) {
-          return done(frame);
+          return Encoder.done(frame);
         }
       }
     }
     if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new WsFrameEncoder<O>(ws, frame, content, offset);
   }
 
   static <O> Encoder<Object, WsFrame<O>> encode(OutputBuffer<?> output, WsEncoder ws, WsFrame<O> frame) {
-    return encode(output, ws, frame, null, 0L);
+    return WsFrameEncoder.encode(output, ws, frame, null, 0L);
   }
 
 }

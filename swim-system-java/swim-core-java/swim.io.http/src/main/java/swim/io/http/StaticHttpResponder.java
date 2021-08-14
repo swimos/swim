@@ -31,7 +31,7 @@ public class StaticHttpResponder<T> extends AbstractHttpResponder<T> {
 
   @Override
   public void doRespond(HttpRequest<T> request) {
-    writeResponse(this.response);
+    this.writeResponse(this.response);
   }
 
 }

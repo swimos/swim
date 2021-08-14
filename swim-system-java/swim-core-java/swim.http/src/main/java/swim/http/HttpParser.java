@@ -51,76 +51,76 @@ public class HttpParser {
 
   public <T> HttpRequest<T> request(HttpMethod method, Uri uri, HttpVersion version,
                                     FingerTrieSeq<HttpHeader> headers) {
-    return HttpRequest.from(method, uri, version, headers);
+    return HttpRequest.create(method, uri, version, headers);
   }
 
   public <T> HttpResponse<T> response(HttpVersion version, HttpStatus status,
                                       FingerTrieSeq<HttpHeader> headers) {
-    return HttpResponse.from(version, status, headers);
+    return HttpResponse.create(version, status, headers);
   }
 
   public HttpMethod method(String name) {
-    return HttpMethod.from(name);
+    return HttpMethod.create(name);
   }
 
   public HttpStatus status(int code, String phrase) {
-    return HttpStatus.from(code, phrase);
+    return HttpStatus.create(code, phrase);
   }
 
   public HttpVersion version(int major, int minor) {
-    return HttpVersion.from(major, minor);
+    return HttpVersion.create(major, minor);
   }
 
   public HttpChunkHeader chunkHeader(long size, FingerTrieSeq<ChunkExtension> extensions) {
-    return HttpChunkHeader.from(size, extensions);
+    return HttpChunkHeader.create(size, extensions);
   }
 
   public HttpChunkTrailer chunkTrailer(FingerTrieSeq<HttpHeader> headers) {
-    return HttpChunkTrailer.from(headers);
+    return HttpChunkTrailer.create(headers);
   }
 
   public ChunkExtension chunkExtension(String name, String value) {
-    return ChunkExtension.from(name, value);
+    return ChunkExtension.create(name, value);
   }
 
   public HttpCharset charset(String name, float weight) {
-    return HttpCharset.from(name, weight);
+    return HttpCharset.create(name, weight);
   }
 
   public LanguageRange languageRange(String tag, String subtag, float weight) {
-    return LanguageRange.from(tag, subtag, weight);
+    return LanguageRange.create(tag, subtag, weight);
   }
 
   public MediaRange mediaRange(String type, String subtype, float weight, HashTrieMap<String, String> params) {
-    return MediaRange.from(type, subtype, weight, params);
+    return MediaRange.create(type, subtype, weight, params);
   }
 
   public MediaType mediaType(String type, String subtype, HashTrieMap<String, String> params) {
-    return MediaType.from(type, subtype, params);
+    return MediaType.create(type, subtype, params);
   }
 
   public Product product(String name, String version, FingerTrieSeq<String> comments) {
-    return Product.from(name, version, comments);
+    return Product.create(name, version, comments);
   }
 
   public ContentCoding contentCoding(String name, float weight) {
-    return ContentCoding.from(name, weight);
+    return ContentCoding.create(name, weight);
   }
 
   public TransferCoding transferCoding(String name, HashTrieMap<String, String> params) {
-    return TransferCoding.from(name, params);
+    return TransferCoding.create(name, params);
   }
 
   public UpgradeProtocol upgradeProtocol(String name, String version) {
-    return UpgradeProtocol.from(name, version);
+    return UpgradeProtocol.create(name, version);
   }
 
   public WebSocketParam webSocketParam(String key, String value) {
-    return WebSocketParam.from(key, value);
+    return WebSocketParam.create(key, value);
   }
 
   public WebSocketExtension webSocketExtension(String name, FingerTrieSeq<WebSocketParam> params) {
-    return WebSocketExtension.from(name, params);
+    return WebSocketExtension.create(name, params);
   }
 
   public <T> Parser<HttpRequest<T>> requestParser() {
@@ -133,7 +133,7 @@ public class HttpParser {
 
   public <T> HttpRequest<T> parseRequestString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<HttpRequest<T>> parser = parseRequest(input);
+    Parser<HttpRequest<T>> parser = this.parseRequest(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -150,7 +150,7 @@ public class HttpParser {
 
   public <T> HttpResponse<T> parseResponseString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<HttpResponse<T>> parser = parseResponse(input);
+    Parser<HttpResponse<T>> parser = this.parseResponse(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -167,7 +167,7 @@ public class HttpParser {
 
   public HttpMethod parseMethodString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<HttpMethod> parser = parseMethod(input);
+    Parser<HttpMethod> parser = this.parseMethod(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -184,7 +184,7 @@ public class HttpParser {
 
   public HttpStatus parseStatusString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<HttpStatus> parser = parseStatus(input);
+    Parser<HttpStatus> parser = this.parseStatus(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -201,7 +201,7 @@ public class HttpParser {
 
   public HttpVersion parseVersionString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<HttpVersion> parser = parseVersion(input);
+    Parser<HttpVersion> parser = this.parseVersion(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -218,7 +218,7 @@ public class HttpParser {
 
   public HttpHeader parseHeaderString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<? extends HttpHeader> parser = parseHeader(input);
+    Parser<? extends HttpHeader> parser = this.parseHeader(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -285,7 +285,7 @@ public class HttpParser {
 
   public HttpChunkHeader parseChunkHeaderString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<HttpChunkHeader> parser = parseChunkHeader(input);
+    Parser<HttpChunkHeader> parser = this.parseChunkHeader(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -302,7 +302,7 @@ public class HttpParser {
 
   public HttpChunkTrailer parseChunkTrailerString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<HttpChunkTrailer> parser = parseChunkTrailer(input);
+    Parser<HttpChunkTrailer> parser = this.parseChunkTrailer(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -319,7 +319,7 @@ public class HttpParser {
 
   public ChunkExtension parseChunkExtensionString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<ChunkExtension> parser = parseChunkExtension(input);
+    Parser<ChunkExtension> parser = this.parseChunkExtension(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -336,7 +336,7 @@ public class HttpParser {
 
   public HttpCharset parseCharsetString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<HttpCharset> parser = parseCharset(input);
+    Parser<HttpCharset> parser = this.parseCharset(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -353,7 +353,7 @@ public class HttpParser {
 
   public LanguageRange parseLanguageRangeString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<LanguageRange> parser = parseLanguageRange(input);
+    Parser<LanguageRange> parser = this.parseLanguageRange(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -370,7 +370,7 @@ public class HttpParser {
 
   public MediaRange parseMediaRangeString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<MediaRange> parser = parseMediaRange(input);
+    Parser<MediaRange> parser = this.parseMediaRange(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -387,7 +387,7 @@ public class HttpParser {
 
   public MediaType parseMediaTypeString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<MediaType> parser = parseMediaType(input);
+    Parser<MediaType> parser = this.parseMediaType(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -404,7 +404,7 @@ public class HttpParser {
 
   public Product parseProductString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<Product> parser = parseProduct(input);
+    Parser<Product> parser = this.parseProduct(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -421,7 +421,7 @@ public class HttpParser {
 
   public ContentCoding parseContentCodingString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<ContentCoding> parser = parseContentCoding(input);
+    Parser<ContentCoding> parser = this.parseContentCoding(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -438,7 +438,7 @@ public class HttpParser {
 
   public TransferCoding parseTransferCodingString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<TransferCoding> parser = parseTransferCoding(input);
+    Parser<TransferCoding> parser = this.parseTransferCoding(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -455,7 +455,7 @@ public class HttpParser {
 
   public UpgradeProtocol parseUpgradeProtocolString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<UpgradeProtocol> parser = parseUpgradeProtocol(input);
+    Parser<UpgradeProtocol> parser = this.parseUpgradeProtocol(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -472,7 +472,7 @@ public class HttpParser {
 
   public WebSocketParam parseWebSocketParamString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<WebSocketParam> parser = parseWebSocketParam(input);
+    Parser<WebSocketParam> parser = this.parseWebSocketParam(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }
@@ -489,7 +489,7 @@ public class HttpParser {
 
   public WebSocketExtension parseWebSocketExtensionString(String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<WebSocketExtension> parser = parseWebSocketExtension(input);
+    Parser<WebSocketExtension> parser = this.parseWebSocketExtension(input);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     }

@@ -19,33 +19,35 @@ import swim.deflate.Inflate;
 
 public final class Ws {
 
-  private static WsDecoder standardDecoder;
-  private static WsEncoder standardEncoderMasked;
-  private static WsEncoder standardEncoderUnmasked;
-
   private Ws() {
-    // stub
+    // static
   }
+
+  private static WsDecoder standardDecoder;
 
   public static WsDecoder standardDecoder() {
-    if (standardDecoder == null) {
-      standardDecoder = new WsStandardDecoder();
+    if (Ws.standardDecoder == null) {
+      Ws.standardDecoder = new WsStandardDecoder();
     }
-    return standardDecoder;
+    return Ws.standardDecoder;
   }
+
+  private static WsEncoder standardEncoderMasked;
 
   public static WsEncoder standardEncoderMasked() {
-    if (standardEncoderMasked == null) {
-      standardEncoderMasked = new WsStandardEncoderMasked();
+    if (Ws.standardEncoderMasked == null) {
+      Ws.standardEncoderMasked = new WsStandardEncoderMasked();
     }
-    return standardEncoderMasked;
+    return Ws.standardEncoderMasked;
   }
 
+  private static WsEncoder standardEncoderUnmasked;
+
   public static WsEncoder standardEncoderUnmasked() {
-    if (standardEncoderUnmasked == null) {
-      standardEncoderUnmasked = new WsStandardEncoderUnmasked();
+    if (Ws.standardEncoderUnmasked == null) {
+      Ws.standardEncoderUnmasked = new WsStandardEncoderUnmasked();
     }
-    return standardEncoderUnmasked;
+    return Ws.standardEncoderUnmasked;
   }
 
   public static WsDeflateDecoder deflateDecoder(Inflate<?> inflate) {

@@ -78,11 +78,11 @@ final class R3ShapeForm extends R3Form<R3Shape> {
     final Value value = item.toValue();
     final String tag = value.tag();
     if ("point".equals(tag)) {
-      return PointR3.form().cast(value);
+      return R3Point.form().cast(value);
     } else if ("box".equals(tag)) {
-      return BoxR3.form().cast(value);
+      return R3Box.form().cast(value);
     } else if ("sphere".equals(tag)) {
-      return SphereR3.form().cast(value);
+      return R3Sphere.form().cast(value);
     }
     return null;
   }

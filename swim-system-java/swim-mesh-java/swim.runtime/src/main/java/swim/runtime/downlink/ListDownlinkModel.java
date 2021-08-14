@@ -22,8 +22,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import swim.api.DownlinkException;
 import swim.collections.STreeList;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Stage;
+import swim.runtime.DownlinkModel;
 import swim.runtime.DownlinkRelay;
 import swim.runtime.DownlinkView;
 import swim.runtime.Push;
@@ -36,28 +36,27 @@ import swim.warp.EventMessage;
 
 public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
 
-  protected static final int STATEFUL = 1 << 0;
   protected final STreeList<Value> state;
   protected int flags;
 
   public ListDownlinkModel(Uri meshUri, Uri hostUri, Uri nodeUri, Uri laneUri,
                            float prio, float rate, Value body) {
     super(meshUri, hostUri, nodeUri, laneUri, prio, rate, body);
+    this.state = STreeList.empty();
     this.flags = 0;
-    state = STreeList.empty();
   }
 
   public final boolean isStateful() {
-    return (this.flags & STATEFUL) != 0;
+    return (this.flags & ListDownlinkModel.STATEFUL) != 0;
   }
 
   public ListDownlinkModel isStateful(boolean isStateful) {
     if (isStateful) {
-      this.flags |= STATEFUL;
+      this.flags |= ListDownlinkModel.STATEFUL;
     } else {
-      this.flags &= ~STATEFUL;
+      this.flags &= ~ListDownlinkModel.STATEFUL;
     }
-    final Object views = this.views;
+    final Object views = DownlinkModel.VIEWS.get(this);
     if (views instanceof DownlinkView) {
       ((ListDownlinkView<?>) views).didSetStateful(isStateful);
     } else if (views instanceof DownlinkView[]) {
@@ -72,7 +71,7 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
   @Override
   protected void pushDownEvent(Push<EventMessage> push) {
     final EventMessage message = push.message();
-    onEvent(message);
+    this.onEvent(message);
     final Value payload = message.body();
     final String tag = payload.tag();
     if ("update".equals(tag)) {
@@ -131,8 +130,8 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
   @Override
   protected void didAddDownlink(ListDownlinkView<?> view) {
     super.didAddDownlink(view);
-    if (this.views instanceof DownlinkView) {
-      isStateful(((ListDownlinkView<?>) view).isStateful());
+    if (DownlinkModel.VIEWS.get(this) instanceof DownlinkView) {
+      this.isStateful(((ListDownlinkView<?>) view).isStateful());
     }
   }
 
@@ -210,7 +209,7 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
 
   @SuppressWarnings("unchecked")
   public <V> boolean add(ListDownlinkView<V> view, int index, V newObject) {
-    return add(view, index, newObject, null);
+    return this.add(view, index, newObject, null);
   }
 
   @SuppressWarnings("unchecked")
@@ -230,7 +229,7 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
 
   @SuppressWarnings("unchecked")
   public <V> V set(ListDownlinkView<V> view, int index, V newObject) {
-    return set(view, index, newObject, null);
+    return this.set(view, index, newObject, null);
   }
 
   @SuppressWarnings("unchecked")
@@ -250,7 +249,7 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
   }
 
   public <V> void move(ListDownlinkView<V> view, int fromIndex, int toIndex) {
-    move(view, fromIndex, toIndex, null);
+    this.move(view, fromIndex, toIndex, null);
   }
 
   public <V> void move(ListDownlinkView<V> view, int fromIndex, int toIndex, Object key) {
@@ -260,13 +259,13 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
 
   @SuppressWarnings("unchecked")
   public <V> V remove(ListDownlinkView<V> view, int index) {
-    return remove(view, index, null);
+    return this.remove(view, index, null);
   }
 
   @SuppressWarnings("unchecked")
   public <V> V remove(ListDownlinkView<V> view, int index, Object key) {
     final Form<V> valueForm = view.valueForm;
-    final Map.Entry<Object, Value> entry = getEntry(index, key);
+    final Map.Entry<Object, Value> entry = this.getEntry(index, key);
     if (entry != null) {
       final Object actualKey = key == null ? entry.getKey() : key;
       final ListDownlinkRelayRemove relay = new ListDownlinkRelayRemove(this, view.stage(), index, actualKey);
@@ -289,22 +288,24 @@ public class ListDownlinkModel extends ListDownlinkModem<ListDownlinkView<?>> {
   }
 
   public void drop(ListDownlinkView<?> view, int lower) {
-    pushUp(ListLinkDelta.drop(lower));
+    this.pushUp(ListLinkDelta.drop(lower));
     //final ListDownlinkRelayDrop relay = new ListDownlinkRelayDrop(this, view.stage(), lower);
     //relay.run();
   }
 
   public void take(ListDownlinkView<?> view, int upper) {
-    pushUp(ListLinkDelta.take(upper));
+    this.pushUp(ListLinkDelta.take(upper));
     //final ListDownlinkRelayTake relay = new ListDownlinkRelayTake(this, view.stage(), upper);
     //relay.run();
   }
 
   public void clear(ListDownlinkView<?> view) {
-    pushUp(ListLinkDelta.clear());
+    this.pushUp(ListLinkDelta.clear());
     //final ListDownlinkRelayClear relay = new ListDownlinkRelayClear(this, view.stage());
     //relay.run();
   }
+
+  protected static final int STATEFUL = 1 << 0;
 
 }
 
@@ -387,7 +388,7 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
         if (this.oldObject == null) {
           this.oldObject = valueForm.unit();
         }
-        newObject = valueForm.cast(newValue);
+        this.newObject = valueForm.cast(this.newValue);
       }
       if (preemptive) {
         this.newObject = ((ListDownlinkView<Object>) view).downlinkWillUpdate(this.index, this.newObject);
@@ -438,7 +439,7 @@ final class ListDownlinkRelayUpdate extends DownlinkRelay<ListDownlinkModel, Lis
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -556,7 +557,7 @@ final class ListDownlinkRelayMove extends DownlinkRelay<ListDownlinkModel, ListD
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -671,7 +672,7 @@ final class ListDownlinkRelayRemove extends DownlinkRelay<ListDownlinkModel, Lis
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -749,7 +750,7 @@ final class ListDownlinkRelayDrop extends DownlinkRelay<ListDownlinkModel, ListD
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -827,7 +828,7 @@ final class ListDownlinkRelayTake extends DownlinkRelay<ListDownlinkModel, ListD
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;
@@ -902,7 +903,7 @@ final class ListDownlinkRelayClear extends DownlinkRelay<ListDownlinkModel, List
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;

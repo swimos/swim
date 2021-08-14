@@ -81,8 +81,8 @@ public class AbstractStreamletSpec {
 
       @Override
       public Integer getOutput(Outlet<? super Integer> outlet) {
-        if (outlet == baz) {
-          return getInput(foo) + getInput(bar);
+        if (outlet == this.baz) {
+          return getInput(this.foo) + getInput(this.bar);
         }
         return null;
       }

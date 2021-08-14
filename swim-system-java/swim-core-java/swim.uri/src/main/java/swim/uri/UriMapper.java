@@ -27,31 +27,8 @@ import swim.codec.Output;
 
 public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<Uri, T>, Debug {
 
-  private static UriMapper<Object> empty;
-
   UriMapper() {
     // sealed
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> UriMapper<T> empty() {
-    if (empty == null) {
-      empty = new UriEmptyMapping<Object>();
-    }
-    return (UriMapper<T>) empty;
-  }
-
-  public static <T> UriMapper<T> from(Uri pattern, T value) {
-    return UriSchemeMapper.compile(pattern, pattern.scheme(), pattern.authority(),
-        pattern.path(), pattern.query(), pattern.fragment(), value);
-  }
-
-  public static <T> UriMapper<T> from(UriPattern pattern, T value) {
-    return from(pattern.toUri(), value);
-  }
-
-  public static <T> UriMapper<T> from(String uriString, T value) {
-    return from(Uri.parse(uriString), value);
   }
 
   @Override
@@ -62,7 +39,7 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
 
   @Override
   public boolean containsKey(Object key) {
-    return get(key) != null;
+    return this.get(key) != null;
   }
 
   @Override
@@ -71,21 +48,21 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
   public abstract UriMapper<T> getSuffix(Uri uri);
 
   public UriMapper<T> getSuffix(String uri) {
-    return getSuffix(Uri.parse(uri));
+    return this.getSuffix(Uri.parse(uri));
   }
 
   public abstract T get(Uri uri);
 
   public T get(String uri) {
-    return get(Uri.parse(uri));
+    return this.get(Uri.parse(uri));
   }
 
   @Override
   public T get(Object key) {
     if (key instanceof Uri) {
-      return get((Uri) key);
+      return this.get((Uri) key);
     } else if (key instanceof String) {
-      return get((String) key);
+      return this.get((String) key);
     } else {
       return null;
     }
@@ -114,31 +91,31 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
   public abstract UriMapper<T> merged(UriMapper<T> that);
 
   public UriMapper<T> updated(Uri pattern, T value) {
-    return merged(from(pattern, value));
+    return this.merged(UriMapper.mapping(pattern, value));
   }
 
   public UriMapper<T> updated(UriPattern pattern, T value) {
-    return updated(pattern.toUri(), value);
+    return this.updated(pattern.toUri(), value);
   }
 
   public UriMapper<T> updated(String pattern, T value) {
-    return updated(Uri.parse(pattern), value);
+    return this.updated(Uri.parse(pattern), value);
   }
 
   public abstract UriMapper<T> removed(Uri pattern);
 
   public UriMapper<T> removed(UriPattern pattern) {
-    return removed(pattern.toUri());
+    return this.removed(pattern.toUri());
   }
 
   public UriMapper<T> removed(String pattern) {
-    return removed(Uri.parse(pattern));
+    return this.removed(Uri.parse(pattern));
   }
 
   public abstract UriMapper<T> unmerged(UriMapper<T> that);
 
   @Override
-  public Set<Entry<Uri, T>> entrySet() {
+  public Set<Map.Entry<Uri, T>> entrySet() {
     return new UriMapperEntrySet<T>(this);
   }
 
@@ -153,7 +130,7 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
   }
 
   @Override
-  public abstract Iterator<Entry<Uri, T>> iterator();
+  public abstract Iterator<Map.Entry<Uri, T>> iterator();
 
   public abstract Iterator<Uri> keyIterator();
 
@@ -168,18 +145,42 @@ public abstract class UriMapper<T> implements Iterable<Map.Entry<Uri, T>>, Map<U
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <U> Output<U> debug(Output<U> output) {
     output = output.write("UriMapper").write('.').write("empty").write('(').write(')');
-    for (Entry<Uri, T> from : this) {
+    for (Map.Entry<Uri, T> entry : this) {
       output = output.write('.').write("updated").write('(')
-          .debug(from.getKey().toString()).write(", ")
-          .debug(from.getValue()).write(')');
+                     .debug(entry.getKey().toString()).write(", ")
+                     .debug(entry.getValue()).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static UriMapper<Object> empty;
+
+  @SuppressWarnings("unchecked")
+  public static <T> UriMapper<T> empty() {
+    if (UriMapper.empty == null) {
+      UriMapper.empty = new UriEmptyMapping<Object>();
+    }
+    return (UriMapper<T>) UriMapper.empty;
+  }
+
+  public static <T> UriMapper<T> mapping(Uri pattern, T value) {
+    return UriSchemeMapper.compile(pattern, pattern.scheme(), pattern.authority(),
+                                   pattern.path(), pattern.query(), pattern.fragment(), value);
+  }
+
+  public static <T> UriMapper<T> mapping(UriPattern pattern, T value) {
+    return UriMapper.mapping(pattern.toUri(), value);
+  }
+
+  public static <T> UriMapper<T> mapping(String uriString, T value) {
+    return UriMapper.mapping(Uri.parse(uriString), value);
   }
 
 }

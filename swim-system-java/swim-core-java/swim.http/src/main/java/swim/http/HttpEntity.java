@@ -20,16 +20,6 @@ import swim.collections.FingerTrieSeq;
 
 public abstract class HttpEntity<T> {
 
-  private static HttpEntity<Object> empty;
-
-  @SuppressWarnings("unchecked")
-  public static <T> HttpEntity<T> empty() {
-    if (empty == null) {
-      empty = new HttpEmpty();
-    }
-    return (HttpEntity<T>) empty;
-  }
-
   public abstract boolean isDefined();
 
   public abstract T get();
@@ -45,14 +35,24 @@ public abstract class HttpEntity<T> {
   public abstract <T2> Encoder<?, HttpMessage<T2>> httpEncoder(HttpMessage<T2> message, HttpWriter http);
 
   public <T2> Encoder<?, HttpMessage<T2>> httpEncoder(HttpMessage<T2> message) {
-    return httpEncoder(message, Http.standardWriter());
+    return this.httpEncoder(message, Http.standardWriter());
   }
 
   public abstract <T2> Encoder<?, HttpMessage<T2>> encodeHttp(HttpMessage<T2> message,
                                                               OutputBuffer<?> output, HttpWriter http);
 
   public <T2> Encoder<?, HttpMessage<T2>> encodeHttp(HttpMessage<T2> message, OutputBuffer<?> output) {
-    return encodeHttp(message, output, Http.standardWriter());
+    return this.encodeHttp(message, output, Http.standardWriter());
+  }
+
+  private static HttpEntity<Object> empty;
+
+  @SuppressWarnings("unchecked")
+  public static <T> HttpEntity<T> empty() {
+    if (HttpEntity.empty == null) {
+      HttpEntity.empty = new HttpEmpty();
+    }
+    return (HttpEntity<T>) HttpEntity.empty;
   }
 
 }

@@ -38,58 +38,6 @@ import static org.testng.Assert.fail;
 
 public class ReconWriterSpec {
 
-  public static void assertWrites(Item item, byte... expected) {
-    final int size = Recon.structureWriter().sizeOfItem(item);
-    final int n = expected.length;
-    if (size != n) {
-      fail("expected " + n + " bytes, but found " + size + " bytes: " + Recon.toString(item));
-    }
-    for (int i = 0; i <= n; i += 1) {
-      final byte[] actual = new byte[n];
-      OutputBuffer<?> buffer = Binary.outputBuffer(actual);
-      buffer = buffer.limit(i);
-      Writer<?, ?> writer = Recon.write(item, Utf8.decodedOutput(buffer).isPart(true));
-      buffer = buffer.limit(buffer.capacity());
-      writer = writer.pull(Utf8.decodedOutput(buffer).isPart(false));
-      if (writer.isError()) {
-        throw new TestException(writer.trap());
-      }
-      assertFalse(writer.isCont());
-      assertTrue(writer.isDone());
-      assertEquals(actual, expected);
-    }
-  }
-
-  public static void assertWrites(Item item, String expected) {
-    assertWrites(item, expected.getBytes(Charset.forName("UTF-8")));
-  }
-
-  public static void assertWritesBlock(Item item, byte... expected) {
-    final int size = Recon.structureWriter().sizeOfBlockItem(item);
-    final int n = expected.length;
-    if (size != n) {
-      fail("expected " + n + " bytes, but found " + size + " bytes: " + Recon.toBlockString(item));
-    }
-    for (int i = 0; i <= n; i += 1) {
-      final byte[] actual = new byte[n];
-      OutputBuffer<?> buffer = Binary.outputBuffer(actual);
-      buffer = buffer.limit(i);
-      Writer<?, ?> writer = Recon.writeBlock(item, Utf8.decodedOutput(buffer).isPart(true));
-      buffer = buffer.limit(buffer.capacity());
-      writer = writer.pull(Utf8.decodedOutput(buffer).isPart(false));
-      if (writer.isError()) {
-        throw new TestException(writer.trap());
-      }
-      assertFalse(writer.isCont());
-      assertTrue(writer.isDone());
-      assertEquals(actual, expected);
-    }
-  }
-
-  public static void assertWritesBlock(Item item, String expected) {
-    assertWritesBlock(item, expected.getBytes(Charset.forName("UTF-8")));
-  }
-
   @Test
   public void writeAbsent() {
     assertWrites(Value.absent(), "");
@@ -156,7 +104,7 @@ public class ReconWriterSpec {
     assertWrites(Data.fromBase64("AA=="), "%AA==");
     assertWrites(Data.fromBase64("ABCDabcd12/+"), "%ABCDabcd12/+");
     assertWrites(Data.fromBase64("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+"),
-        "%ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+");
+                 "%ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+");
   }
 
   @Test
@@ -436,6 +384,58 @@ public class ReconWriterSpec {
   @Test
   public void writeMarkupEmbeddedAttributedRecordsWithNonPrefixAttributes() {
     assertWrites(Record.of("Hello, ", Record.of(1, Attr.of("second")), "!"), "[Hello, {1@second}!]");
+  }
+
+  public static void assertWrites(Item item, byte... expected) {
+    final int size = Recon.structureWriter().sizeOfItem(item);
+    final int n = expected.length;
+    if (size != n) {
+      fail("expected " + n + " bytes, but found " + size + " bytes: " + Recon.toString(item));
+    }
+    for (int i = 0; i <= n; i += 1) {
+      final byte[] actual = new byte[n];
+      OutputBuffer<?> buffer = Binary.outputBuffer(actual);
+      buffer = buffer.limit(i);
+      Writer<?, ?> writer = Recon.write(item, Utf8.decodedOutput(buffer).isPart(true));
+      buffer = buffer.limit(buffer.capacity());
+      writer = writer.pull(Utf8.decodedOutput(buffer).isPart(false));
+      if (writer.isError()) {
+        throw new TestException(writer.trap());
+      }
+      assertFalse(writer.isCont());
+      assertTrue(writer.isDone());
+      assertEquals(actual, expected);
+    }
+  }
+
+  public static void assertWrites(Item item, String expected) {
+    assertWrites(item, expected.getBytes(Charset.forName("UTF-8")));
+  }
+
+  public static void assertWritesBlock(Item item, byte... expected) {
+    final int size = Recon.structureWriter().sizeOfBlockItem(item);
+    final int n = expected.length;
+    if (size != n) {
+      fail("expected " + n + " bytes, but found " + size + " bytes: " + Recon.toBlockString(item));
+    }
+    for (int i = 0; i <= n; i += 1) {
+      final byte[] actual = new byte[n];
+      OutputBuffer<?> buffer = Binary.outputBuffer(actual);
+      buffer = buffer.limit(i);
+      Writer<?, ?> writer = Recon.writeBlock(item, Utf8.decodedOutput(buffer).isPart(true));
+      buffer = buffer.limit(buffer.capacity());
+      writer = writer.pull(Utf8.decodedOutput(buffer).isPart(false));
+      if (writer.isError()) {
+        throw new TestException(writer.trap());
+      }
+      assertFalse(writer.isCont());
+      assertTrue(writer.isDone());
+      assertEquals(actual, expected);
+    }
+  }
+
+  public static void assertWritesBlock(Item item, String expected) {
+    assertWritesBlock(item, expected.getBytes(Charset.forName("UTF-8")));
   }
 
 }

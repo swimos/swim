@@ -25,17 +25,7 @@ public class JsCachedModuleResolver implements JsModuleResolver {
 
   public JsCachedModuleResolver(JsModuleResolver moduleResolver) {
     this.moduleResolver = moduleResolver;
-    this.sourceCache = createSourceCache();
-  }
-
-  static HashGenCacheMap<UriPath, Source> createSourceCache() {
-    int sourceCacheSize;
-    try {
-      sourceCacheSize = Integer.parseInt(System.getProperty("swim.vm.js.source.cache.size"));
-    } catch (NumberFormatException e) {
-      sourceCacheSize = 128;
-    }
-    return new HashGenCacheMap<UriPath, Source>(sourceCacheSize);
+    this.sourceCache = JsCachedModuleResolver.createSourceCache();
   }
 
   public final JsModuleResolver moduleResolver() {
@@ -55,6 +45,16 @@ public class JsCachedModuleResolver implements JsModuleResolver {
       this.sourceCache.put(moduleId, moduleSource);
     }
     return moduleSource;
+  }
+
+  static HashGenCacheMap<UriPath, Source> createSourceCache() {
+    int sourceCacheSize;
+    try {
+      sourceCacheSize = Integer.parseInt(System.getProperty("swim.vm.js.source.cache.size"));
+    } catch (NumberFormatException e) {
+      sourceCacheSize = 128;
+    }
+    return new HashGenCacheMap<UriPath, Source>(sourceCacheSize);
   }
 
 }

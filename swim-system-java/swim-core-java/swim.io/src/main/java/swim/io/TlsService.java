@@ -22,7 +22,7 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Collection;
 import javax.net.ssl.SSLEngine;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 
 class TlsService implements Transport, IpServiceContext {
 
@@ -123,15 +123,9 @@ class TlsService implements Transport, IpServiceContext {
     final SSLEngine sslEngine = tlsSettings.sslContext().createSSLEngine(/*remoteAddress.getHostString(), remoteAddress.getPort()*/);
     sslEngine.setUseClientMode(false);
     switch (tlsSettings.clientAuth()) {
-      case NEED:
-        sslEngine.setNeedClientAuth(true);
-        break;
-      case WANT:
-        sslEngine.setWantClientAuth(true);
-        break;
-      case NONE:
-        sslEngine.setWantClientAuth(false);
-        break;
+      case NEED: sslEngine.setNeedClientAuth(true); break;
+      case WANT: sslEngine.setWantClientAuth(true); break;
+      case NONE: sslEngine.setWantClientAuth(false); break;
       default:
     }
     final Collection<String> cipherSuites = tlsSettings.cipherSuites();
@@ -151,7 +145,7 @@ class TlsService implements Transport, IpServiceContext {
       this.service.didAccept(socket);
       transport.didConnect();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       socket.didFail(cause);
@@ -192,12 +186,12 @@ class TlsService implements Transport, IpServiceContext {
 
   @Override
   public void didTimeout() {
-    // stub
+    // hook
   }
 
   @Override
   public void didClose() {
-    didUnbind();
+    this.didUnbind();
   }
 
   @Override

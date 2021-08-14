@@ -16,16 +16,12 @@ package swim.uri;
 
 abstract class UriQueryMapper<T> extends UriPathMapper<T> {
 
-  static <T> UriQueryMapper<T> compile(Uri pattern, UriQuery query, UriFragment fragment, T value) {
-    return UriFragmentMapper.compile(pattern, fragment, value);
-  }
-
   abstract UriMapper<T> getSuffix(UriQuery query, UriFragment fragment);
 
   @Override
   UriMapper<T> getSuffix(UriPath path, UriQuery query, UriFragment fragment) {
     if (path.isEmpty()) {
-      return getSuffix(query, fragment);
+      return this.getSuffix(query, fragment);
     } else {
       return UriMapper.empty();
     }
@@ -36,7 +32,7 @@ abstract class UriQueryMapper<T> extends UriPathMapper<T> {
   @Override
   T get(UriPath path, UriQuery query, UriFragment fragment) {
     if (path.isEmpty()) {
-      return get(query, fragment);
+      return this.get(query, fragment);
     } else {
       return null;
     }
@@ -47,7 +43,7 @@ abstract class UriQueryMapper<T> extends UriPathMapper<T> {
   @Override
   UriPathMapper<T> merged(UriPathMapper<T> that) {
     if (that instanceof UriQueryMapper<?>) {
-      return merged((UriQueryMapper<T>) that);
+      return this.merged((UriQueryMapper<T>) that);
     } else {
       return that;
     }
@@ -58,7 +54,7 @@ abstract class UriQueryMapper<T> extends UriPathMapper<T> {
   @Override
   UriPathMapper<T> removed(UriPath path, UriQuery query, UriFragment fragment) {
     if (path.isEmpty()) {
-      return removed(query, fragment);
+      return this.removed(query, fragment);
     } else {
       return this;
     }
@@ -69,10 +65,14 @@ abstract class UriQueryMapper<T> extends UriPathMapper<T> {
   @Override
   UriPathMapper<T> unmerged(UriPathMapper<T> that) {
     if (that instanceof UriQueryMapper<?>) {
-      return unmerged((UriQueryMapper<T>) that);
+      return this.unmerged((UriQueryMapper<T>) that);
     } else {
       return this;
     }
+  }
+
+  static <T> UriQueryMapper<T> compile(Uri pattern, UriQuery query, UriFragment fragment, T value) {
+    return UriFragmentMapper.compile(pattern, fragment, value);
   }
 
 }

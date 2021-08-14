@@ -36,7 +36,7 @@ final class StringWriter extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.string, this.index, this.escape, this.step);
+    return StringWriter.write(output, this.string, this.index, this.escape, this.step);
   }
 
   static int sizeOf(String string) {
@@ -127,18 +127,18 @@ final class StringWriter extends Writer<Object, Object> {
     }
     if (step == 9 && output.isCont()) {
       output = output.write('"');
-      return done();
+      return Writer.done();
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new StringWriter(string, index, escape, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, String string) {
-    return write(output, string, 0, 0, 1);
+    return StringWriter.write(output, string, 0, 0, 1);
   }
 
 }

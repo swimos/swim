@@ -1,9 +1,9 @@
 // Based on zlib-1.2.8
 // Copyright (c) 1995-2013 Jean-loup Gailly and Mark Adler
-// Copyright (c) 2016-2018 Swim.it inc.
+// Copyright (c) 2015-2021 Swim inc.
 //
 // This software is provided 'as-is', without any express or implied
-// warranty.  In no event will the authors be held liable for any damages
+// warranty. In no event will the authors be held liable for any damages
 // arising from the use of this software.
 //
 // Permission is granted to anyone to use this software for any purpose,
@@ -22,11 +22,11 @@ package swim.deflate;
 
 final class CRC32 {
 
-  static final int[] CRC_TABLE = makeCRCTable();
-
   private CRC32() {
-    // stub
+    // static
   }
+
+  static final int[] CRC_TABLE = CRC32.makeCRCTable();
 
   // Generate tables for a byte-wise 32-bit CRC calculation on the polynomial:
   // x^32+x^26+x^23+x^22+x^16+x^12+x^11+x^10+x^8+x^7+x^5+x^4+x^2+x+1.
@@ -48,19 +48,19 @@ final class CRC32 {
     }
     crc = ~crc;
     while (length >= 8) {
-      crc = CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
-      crc = CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
-      crc = CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
-      crc = CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
-      crc = CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
-      crc = CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
-      crc = CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
-      crc = CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
+      crc = CRC32.CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
+      crc = CRC32.CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
+      crc = CRC32.CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
+      crc = CRC32.CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
+      crc = CRC32.CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
+      crc = CRC32.CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
+      crc = CRC32.CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
+      crc = CRC32.CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
       length -= 8;
     }
     if (length != 0) {
       do {
-        crc = CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
+        crc = CRC32.CRC_TABLE[(crc ^ buffer[offset++]) & 0xFF] ^ (crc >>> 8);
       } while (--length != 0);
     }
     return ~crc;

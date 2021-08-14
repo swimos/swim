@@ -22,10 +22,8 @@ import swim.util.Murmur3;
 
 public final class BitwiseXorOperator extends BinaryOperator {
 
-  private static int hashSeed;
-
-  public BitwiseXorOperator(Item operand1, Item operand2) {
-    super(operand1, operand2);
+  public BitwiseXorOperator(Item lhs, Item rhs) {
+    super(lhs, rhs);
   }
 
   @Override
@@ -41,18 +39,18 @@ public final class BitwiseXorOperator extends BinaryOperator {
   @Override
   public Item evaluate(Interpreter interpreter) {
     interpreter.willOperate(this);
-    final Item argument1 = this.operand1.evaluate(interpreter);
-    final Item argument2 = this.operand2.evaluate(interpreter);
-    final Item result = argument1.bitwiseXor(argument2);
+    final Item lhs = this.lhs.evaluate(interpreter);
+    final Item rhs = this.rhs.evaluate(interpreter);
+    final Item result = lhs.bitwiseXor(rhs);
     interpreter.didOperate(this, result);
     return result;
   }
 
   @Override
   public Item substitute(Interpreter interpreter) {
-    final Item argument1 = this.operand1.substitute(interpreter);
-    final Item argument2 = this.operand2.substitute(interpreter);
-    return argument1.bitwiseXor(argument2);
+    final Item lhs = this.lhs.substitute(interpreter);
+    final Item rhs = this.rhs.substitute(interpreter);
+    return lhs.bitwiseXor(rhs);
   }
 
   @Override
@@ -63,15 +61,15 @@ public final class BitwiseXorOperator extends BinaryOperator {
   @Override
   protected int compareTo(Operator that) {
     if (that instanceof BitwiseXorOperator) {
-      return compareTo((BitwiseXorOperator) that);
+      return this.compareTo((BitwiseXorOperator) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(BitwiseXorOperator that) {
-    int order = this.operand1.compareTo(that.operand1);
+    int order = this.lhs.compareTo(that.lhs);
     if (order == 0) {
-      order = this.operand2.compareTo(that.operand2);
+      order = this.rhs.compareTo(that.rhs);
     }
     return order;
   }
@@ -82,23 +80,26 @@ public final class BitwiseXorOperator extends BinaryOperator {
       return true;
     } else if (other instanceof BitwiseXorOperator) {
       final BitwiseXorOperator that = (BitwiseXorOperator) other;
-      return this.operand1.equals(that.operand1) && this.operand2.equals(that.operand2);
+      return this.lhs.equals(that.lhs) && this.rhs.equals(that.rhs);
     }
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(BitwiseXorOperator.class);
+    if (BitwiseXorOperator.hashSeed == 0) {
+      BitwiseXorOperator.hashSeed = Murmur3.seed(BitwiseXorOperator.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
-        this.operand1.hashCode()), this.operand2.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(BitwiseXorOperator.hashSeed,
+        this.lhs.hashCode()), this.rhs.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.debug(this.operand1).write('.').write("bitwiseXor").write('(').debug(this.operand2).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output.debug(this.lhs).write('.').write("bitwiseXor").write('(').debug(this.rhs).write(')');
+    return output;
   }
 
 }

@@ -36,6 +36,12 @@ final class MqttDisconnectDecoder extends Decoder<MqttDisconnect> {
     this(mqtt, 0, 0, 1);
   }
 
+  @Override
+  public Decoder<MqttDisconnect> feed(InputBuffer input) {
+    return MqttDisconnectDecoder.decode(input, this.mqtt, this.packetFlags,
+                                        this.remaining, this.step);
+  }
+
   static Decoder<MqttDisconnect> decode(InputBuffer input, MqttDecoder mqtt,
                                         int packetFlags, int remaining, int step) {
     if (step == 1 && input.isCont()) {
@@ -53,29 +59,24 @@ final class MqttDisconnectDecoder extends Decoder<MqttDisconnect> {
       } else if (step < 5) {
         step += 1;
       } else {
-        return error(new MqttException("packet length too long"));
+        return Decoder.error(new MqttException("packet length too long"));
       }
     }
     if (step == 6 && remaining == 0) {
-      return done(mqtt.disconnect(packetFlags));
+      return Decoder.done(mqtt.disconnect(packetFlags));
     }
     if (remaining < 0) {
-      return error(new MqttException("packet length too short"));
+      return Decoder.error(new MqttException("packet length too short"));
     } else if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new MqttDisconnectDecoder(mqtt, packetFlags, remaining, step);
   }
 
   static Decoder<MqttDisconnect> decode(InputBuffer input, MqttDecoder mqtt) {
-    return decode(input, mqtt, 0, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttDisconnect> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.remaining, this.step);
+    return MqttDisconnectDecoder.decode(input, mqtt, 0, 0, 1);
   }
 
 }

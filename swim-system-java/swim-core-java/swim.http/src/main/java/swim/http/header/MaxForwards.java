@@ -26,22 +26,10 @@ import swim.util.Murmur3;
 
 public final class MaxForwards extends HttpHeader {
 
-  private static int hashSeed;
   final int count;
 
   MaxForwards(int count) {
     this.count = count;
-  }
-
-  public static MaxForwards from(int count) {
-    if (count < 0) {
-      throw new IllegalArgumentException(Integer.toString(count));
-    }
-    return new MaxForwards(count);
-  }
-
-  public static Parser<MaxForwards> parseHttpValue(Input input, HttpParser http) {
-    return MaxForwardsParser.parse(input);
   }
 
   @Override
@@ -74,18 +62,32 @@ public final class MaxForwards extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MaxForwards.class);
+    if (MaxForwards.hashSeed == 0) {
+      MaxForwards.hashSeed = Murmur3.seed(MaxForwards.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.count));
+    return Murmur3.mash(Murmur3.mix(MaxForwards.hashSeed, this.count));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("MaxForwards").write('.').write("from").write('(')
-        .debug(this.count).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MaxForwards").write('.').write("create").write('(')
+                   .debug(this.count).write(')');
+    return output;
+  }
+
+  public static MaxForwards create(int count) {
+    if (count < 0) {
+      throw new IllegalArgumentException(Integer.toString(count));
+    }
+    return new MaxForwards(count);
+  }
+
+  public static Parser<MaxForwards> parseHttpValue(Input input, HttpParser http) {
+    return MaxForwardsParser.parse(input);
   }
 
 }

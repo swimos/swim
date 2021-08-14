@@ -26,89 +26,8 @@ import swim.util.Murmur3;
 
 public abstract class UriHost implements Comparable<UriHost>, Debug, Display {
 
-  private static UriHost undefined;
-  private static ThreadLocal<HashGenCacheMap<String, UriHost>> cache = new ThreadLocal<>();
-
   protected UriHost() {
-    // stub
-  }
-
-  public static UriHost undefined() {
-    if (undefined == null) {
-      undefined = new UriHostUndefined();
-    }
-    return undefined;
-  }
-
-  public static UriHost name(String address) {
-    if (address == null) {
-      throw new NullPointerException();
-    }
-    final HashGenCacheMap<String, UriHost> cache = cache();
-    final UriHost host = cache.get(address);
-    if (host instanceof UriHostName) {
-      return host;
-    } else {
-      return cache.put(address, new UriHostName(address));
-    }
-  }
-
-  public static UriHost ipv4(String address) {
-    if (address == null) {
-      throw new NullPointerException();
-    }
-    final HashGenCacheMap<String, UriHost> cache = cache();
-    final UriHost host = cache.get(address);
-    if (host instanceof UriHostIPv4) {
-      return host;
-    } else {
-      return cache.put(address, new UriHostIPv4(address));
-    }
-  }
-
-  public static UriHost ipv6(String address) {
-    if (address == null) {
-      throw new NullPointerException();
-    }
-    final HashGenCacheMap<String, UriHost> cache = cache();
-    final UriHost host = cache.get(address);
-    if (host instanceof UriHostIPv6) {
-      return host;
-    } else {
-      return cache.put(address, new UriHostIPv6(address));
-    }
-  }
-
-  public static UriHost inetAddress(InetAddress address) {
-    if (address == null) {
-      throw new NullPointerException();
-    }
-    if (address instanceof Inet4Address) {
-      return ipv4(address.getHostAddress());
-    } else if (address instanceof Inet6Address) {
-      return ipv6(address.getHostAddress());
-    } else {
-      return name(address.getHostName());
-    }
-  }
-
-  public static UriHost parse(String string) {
-    return Uri.standardParser().parseHostString(string);
-  }
-
-  static HashGenCacheMap<String, UriHost> cache() {
-    HashGenCacheMap<String, UriHost> cache = UriHost.cache.get();
-    if (cache == null) {
-      int cacheSize;
-      try {
-        cacheSize = Integer.parseInt(System.getProperty("swim.uri.host.cache.size"));
-      } catch (NumberFormatException e) {
-        cacheSize = 16;
-      }
-      cache = new HashGenCacheMap<String, UriHost>(cacheSize);
-      UriHost.cache.set(cache);
-    }
-    return cache;
+    // sealed
   }
 
   public boolean isDefined() {
@@ -130,12 +49,12 @@ public abstract class UriHost implements Comparable<UriHost>, Debug, Display {
   }
 
   public InetAddress inetAddress() throws UnknownHostException {
-    return InetAddress.getByName(address());
+    return InetAddress.getByName(this.address());
   }
 
   @Override
   public final int compareTo(UriHost that) {
-    return toString().compareTo(that.toString());
+    return this.toString().compareTo(that.toString());
   }
 
   @Override
@@ -143,23 +62,105 @@ public abstract class UriHost implements Comparable<UriHost>, Debug, Display {
     if (this == other) {
       return true;
     } else if (other instanceof UriHost) {
-      return toString().equals(((UriHost) other).toString());
+      return this.toString().equals(((UriHost) other).toString());
     }
     return false;
   }
 
   @Override
   public final int hashCode() {
-    return Murmur3.seed(toString());
+    return Murmur3.seed(this.toString());
   }
 
   @Override
-  public abstract void debug(Output<?> output);
+  public abstract <T> Output<T> debug(Output<T> output);
 
   @Override
-  public abstract void display(Output<?> output);
+  public abstract <T> Output<T> display(Output<T> output);
 
   @Override
   public abstract String toString();
+
+  private static UriHost undefined;
+
+  public static UriHost undefined() {
+    if (UriHost.undefined == null) {
+      UriHost.undefined = new UriHostUndefined();
+    }
+    return UriHost.undefined;
+  }
+
+  public static UriHost name(String address) {
+    if (address == null) {
+      throw new NullPointerException();
+    }
+    final HashGenCacheMap<String, UriHost> cache = UriHost.cache();
+    final UriHost host = cache.get(address);
+    if (host instanceof UriHostName) {
+      return host;
+    } else {
+      return cache.put(address, new UriHostName(address));
+    }
+  }
+
+  public static UriHost ipv4(String address) {
+    if (address == null) {
+      throw new NullPointerException();
+    }
+    final HashGenCacheMap<String, UriHost> cache = UriHost.cache();
+    final UriHost host = cache.get(address);
+    if (host instanceof UriHostIPv4) {
+      return host;
+    } else {
+      return cache.put(address, new UriHostIPv4(address));
+    }
+  }
+
+  public static UriHost ipv6(String address) {
+    if (address == null) {
+      throw new NullPointerException();
+    }
+    final HashGenCacheMap<String, UriHost> cache = UriHost.cache();
+    final UriHost host = cache.get(address);
+    if (host instanceof UriHostIPv6) {
+      return host;
+    } else {
+      return cache.put(address, new UriHostIPv6(address));
+    }
+  }
+
+  public static UriHost inetAddress(InetAddress address) {
+    if (address == null) {
+      throw new NullPointerException();
+    }
+    if (address instanceof Inet4Address) {
+      return UriHost.ipv4(address.getHostAddress());
+    } else if (address instanceof Inet6Address) {
+      return UriHost.ipv6(address.getHostAddress());
+    } else {
+      return UriHost.name(address.getHostName());
+    }
+  }
+
+  public static UriHost parse(String string) {
+    return Uri.standardParser().parseHostString(string);
+  }
+
+  private static ThreadLocal<HashGenCacheMap<String, UriHost>> cache = new ThreadLocal<>();
+
+  static HashGenCacheMap<String, UriHost> cache() {
+    HashGenCacheMap<String, UriHost> cache = UriHost.cache.get();
+    if (cache == null) {
+      int cacheSize;
+      try {
+        cacheSize = Integer.parseInt(System.getProperty("swim.uri.host.cache.size"));
+      } catch (NumberFormatException e) {
+        cacheSize = 16;
+      }
+      cache = new HashGenCacheMap<String, UriHost>(cacheSize);
+      UriHost.cache.set(cache);
+    }
+    return cache;
+  }
 
 }

@@ -21,12 +21,12 @@ public class AvroNameSpec {
 
   @Test
   public void parseUnqualifiedNames() {
-    assertEquals(AvroName.parse("test"), AvroName.from("test"));
+    assertEquals(AvroName.parse("test"), AvroName.create("test"));
   }
 
   @Test
   public void parseQualifiedNames() {
-    assertEquals(AvroName.parse("com.example.test"), AvroName.from(AvroNamespace.from("com", "example"), "test"));
+    assertEquals(AvroName.parse("com.example.test"), AvroName.create(AvroNamespace.of("com", "example"), "test"));
   }
 
 }

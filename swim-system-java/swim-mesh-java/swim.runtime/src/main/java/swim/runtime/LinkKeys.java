@@ -20,14 +20,14 @@ import swim.structure.Value;
 
 public final class LinkKeys {
 
-  static final AtomicLong LINK_COUNT = new AtomicLong(0);
-
   private LinkKeys() {
     // static
   }
 
+  static final AtomicLong LINK_COUNT = new AtomicLong(0);
+
   public static Value generateLinkKey() {
-    return Num.from(LINK_COUNT.incrementAndGet());
+    return Num.from(LinkKeys.LINK_COUNT.incrementAndGet());
   }
 
 }

@@ -16,8 +16,6 @@ package swim.api.client;
 
 public class ClientException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public ClientException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class ClientException extends RuntimeException {
   public ClientException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

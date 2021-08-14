@@ -50,66 +50,66 @@ public final class ProtobufStructure {
   }
 
   public static ProtobufVarintType<Value> booleanType() {
-    if (booleanType == null) {
-      booleanType = new BooleanStructure();
+    if (ProtobufStructure.booleanType == null) {
+      ProtobufStructure.booleanType = new BooleanStructure();
     }
-    return booleanType;
+    return ProtobufStructure.booleanType;
   }
 
   public static ProtobufVarintType<Value> varintType() {
-    if (varintType == null) {
-      varintType = new VarintStructure();
+    if (ProtobufStructure.varintType == null) {
+      ProtobufStructure.varintType = new VarintStructure();
     }
-    return varintType;
+    return ProtobufStructure.varintType;
   }
 
   public static ProtobufZigZagType<Value> zigZagType() {
-    if (zigZagType == null) {
-      zigZagType = new ZigZagStructure();
+    if (ProtobufStructure.zigZagType == null) {
+      ProtobufStructure.zigZagType = new ZigZagStructure();
     }
-    return zigZagType;
+    return ProtobufStructure.zigZagType;
   }
 
   public static ProtobufFixed32Type<Value> fixed32Type() {
-    if (fixed32Type == null) {
-      fixed32Type = new Fixed32Structure();
+    if (ProtobufStructure.fixed32Type == null) {
+      ProtobufStructure.fixed32Type = new Fixed32Structure();
     }
-    return fixed32Type;
+    return ProtobufStructure.fixed32Type;
   }
 
   public static ProtobufFixed32Type<Value> floatType() {
-    if (floatType == null) {
-      floatType = new FloatStructure();
+    if (ProtobufStructure.floatType == null) {
+      ProtobufStructure.floatType = new FloatStructure();
     }
-    return floatType;
+    return ProtobufStructure.floatType;
   }
 
   public static ProtobufFixed64Type<Value> fixed64Type() {
-    if (fixed64Type == null) {
-      fixed64Type = new Fixed64Structure();
+    if (ProtobufStructure.fixed64Type == null) {
+      ProtobufStructure.fixed64Type = new Fixed64Structure();
     }
-    return fixed64Type;
+    return ProtobufStructure.fixed64Type;
   }
 
   public static ProtobufFixed64Type<Value> doubleType() {
-    if (doubleType == null) {
-      doubleType = new DoubleStructure();
+    if (ProtobufStructure.doubleType == null) {
+      ProtobufStructure.doubleType = new DoubleStructure();
     }
-    return doubleType;
+    return ProtobufStructure.doubleType;
   }
 
   public static ProtobufDataType<Value> dataType() {
-    if (dataType == null) {
-      dataType = new DataStructure();
+    if (ProtobufStructure.dataType == null) {
+      ProtobufStructure.dataType = new DataStructure();
     }
-    return dataType;
+    return ProtobufStructure.dataType;
   }
 
   public static ProtobufStringType<Value> stringType() {
-    if (stringType == null) {
-      stringType = new StringStructure();
+    if (ProtobufStructure.stringType == null) {
+      ProtobufStructure.stringType = new StringStructure();
     }
-    return stringType;
+    return ProtobufStructure.stringType;
   }
 
   public static ProtobufMessageType<Record, Record> messageType() {

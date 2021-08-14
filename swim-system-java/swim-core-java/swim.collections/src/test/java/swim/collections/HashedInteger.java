@@ -24,31 +24,37 @@ public final class HashedInteger {
     this.value = value;
   }
 
-  public static HashedInteger valueOf(int value) {
-    return new HashedInteger(value);
-  }
-
   public int intValue() {
-    return value;
+    return this.value;
   }
 
   public long longValue() {
-    return (long) value;
+    return (long) this.value;
   }
 
   @Override
   public boolean equals(Object other) {
-    return other instanceof HashedInteger && value == ((HashedInteger) other).value;
+    if (this == other) {
+      return true;
+    } else if (other instanceof HashedInteger) {
+      final HashedInteger that = (HashedInteger) other;
+      return this.value == that.value;
+    }
+    return false;
   }
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(value);
+    return Murmur3.mash(this.value);
   }
 
   @Override
   public String toString() {
-    return Integer.toString(value);
+    return Integer.toString(this.value);
+  }
+
+  public static HashedInteger valueOf(int value) {
+    return new HashedInteger(value);
   }
 
 }

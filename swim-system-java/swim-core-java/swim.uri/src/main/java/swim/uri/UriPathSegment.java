@@ -123,18 +123,20 @@ final class UriPathSegment extends UriPath {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("UriPath").write('.').write("parse").write('(').write('"')
-        .display(this).write('"').write(')');
+                   .display(this).write('"').write(')');
+    return output;
   }
 
   @Override
-  public void display(Output<?> output) {
+  public <T> Output<T> display(Output<T> output) {
     if (this.string != null) {
       output = output.write(this.string);
     } else {
-      UriPath.display(this, output);
+      output = UriPath.display(this, output);
     }
+    return output;
   }
 
   @Override

@@ -36,6 +36,11 @@ final class HttpCharsetParser extends Parser<HttpCharset> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<HttpCharset> feed(Input input) {
+    return HttpCharsetParser.parse(input, this.http, this.name, this.weight, this.step);
+  }
+
   static Parser<HttpCharset> parse(Input input, HttpParser http, StringBuilder name,
                                    Parser<Float> weight, int step) {
     int c = 0;
@@ -50,10 +55,10 @@ final class HttpCharsetParser extends Parser<HttpCharset> {
           name.appendCodePoint(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("charset", input));
+          return Parser.error(Diagnostic.expected("charset", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("charset", input));
+        return Parser.error(Diagnostic.expected("charset", input));
       }
     }
     if (step == 2) {
@@ -79,24 +84,19 @@ final class HttpCharsetParser extends Parser<HttpCharset> {
       if (weight.isDone()) {
         final Float qvalue = weight.bind();
         final float q = qvalue != null ? (float) qvalue : 1f;
-        return done(http.charset(name.toString(), q));
+        return Parser.done(http.charset(name.toString(), q));
       } else if (weight.isError()) {
         return weight.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new HttpCharsetParser(http, name, weight, step);
   }
 
   static Parser<HttpCharset> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<HttpCharset> feed(Input input) {
-    return parse(input, this.http, this.name, this.weight, this.step);
+    return HttpCharsetParser.parse(input, http, null, null, 1);
   }
 
 }

@@ -20,68 +20,7 @@ package swim.codec;
 public final class Base10 {
 
   private Base10() {
-    // nop
-  }
-
-  /**
-   * Returns {@code true} if the Unicode code point {@code c} is a valid
-   * base-10 digit.
-   */
-  public static boolean isDigit(int c) {
-    return c >= '0' && c <= '9';
-  }
-
-  /**
-   * Returns the decimal quantity between {@code 0} (inclusive) and {@code 10}
-   * (exclusive) represented by the base-10 digit {@code c}.
-   *
-   * @throws IllegalArgumentException if {@code c} is not a valid base-10 digit.
-   */
-  public static int decodeDigit(int c) {
-    if (c >= '0' && c <= '9') {
-      return c - '0';
-    } else {
-      final Output<String> message = Unicode.stringOutput();
-      message.write("Invalid base-10 digit: ");
-      Format.debugChar(c, message);
-      throw new IllegalArgumentException(message.bind());
-    }
-  }
-
-  /**
-   * Returns the Unicode code point of the base-10 digit that encodes the given
-   * decimal quantity between {@code 0} (inclusive) and {@code 10} (exclusive).
-   */
-  public static int encodeDigit(int b) {
-    if (b >= 0 && b <= 9) {
-      return '0' + b;
-    } else {
-      throw new IllegalArgumentException(Integer.toString(b));
-    }
-  }
-
-  /**
-   * Returns the number of decimal digits in the given absolute {@code value}.
-   */
-  public static int countDigits(int value) {
-    int size = 0;
-    do {
-      size += 1;
-      value /= 10;
-    } while (value != 0);
-    return size;
-  }
-
-  /**
-   * Returns the number of decimal digits in the given absolute {@code value}.
-   */
-  public static int countDigits(long value) {
-    int size = 0;
-    do {
-      size += 1;
-      value /= 10L;
-    } while (value != 0L);
-    return size;
+    // static
   }
 
   public static Parser<Number> parseNumber(Input input) {
@@ -198,6 +137,67 @@ public final class Base10 {
    */
   public static Writer<?, ?> writeDouble(double input, Output<?> output) {
     return StringWriter.write(output, null, input);
+  }
+
+  /**
+   * Returns {@code true} if the Unicode code point {@code c} is a valid
+   * base-10 digit.
+   */
+  public static boolean isDigit(int c) {
+    return c >= '0' && c <= '9';
+  }
+
+  /**
+   * Returns the decimal quantity between {@code 0} (inclusive) and {@code 10}
+   * (exclusive) represented by the base-10 digit {@code c}.
+   *
+   * @throws IllegalArgumentException if {@code c} is not a valid base-10 digit.
+   */
+  public static int decodeDigit(int c) {
+    if (c >= '0' && c <= '9') {
+      return c - '0';
+    } else {
+      Output<String> message = Unicode.stringOutput();
+      message = message.write("Invalid base-10 digit: ");
+      message = Format.debugChar(c, message);
+      throw new IllegalArgumentException(message.bind());
+    }
+  }
+
+  /**
+   * Returns the Unicode code point of the base-10 digit that encodes the given
+   * decimal quantity between {@code 0} (inclusive) and {@code 10} (exclusive).
+   */
+  public static int encodeDigit(int b) {
+    if (b >= 0 && b <= 9) {
+      return '0' + b;
+    } else {
+      throw new IllegalArgumentException(Integer.toString(b));
+    }
+  }
+
+  /**
+   * Returns the number of decimal digits in the given absolute {@code value}.
+   */
+  public static int countDigits(int value) {
+    int size = 0;
+    do {
+      size += 1;
+      value /= 10;
+    } while (value != 0);
+    return size;
+  }
+
+  /**
+   * Returns the number of decimal digits in the given absolute {@code value}.
+   */
+  public static int countDigits(long value) {
+    int size = 0;
+    do {
+      size += 1;
+      value /= 10L;
+    } while (value != 0L);
+    return size;
   }
 
 }

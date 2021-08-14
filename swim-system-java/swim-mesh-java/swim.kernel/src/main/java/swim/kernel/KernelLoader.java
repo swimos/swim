@@ -33,16 +33,16 @@ public final class KernelLoader {
   }
 
   public static Kernel loadKernel() {
-    return loadKernel(KernelLoader.class.getClassLoader());
+    return KernelLoader.loadKernel(KernelLoader.class.getClassLoader());
   }
 
   public static Kernel loadKernel(ClassLoader classLoader) {
     try {
-      Value kernelConfig = loadConfig(classLoader);
+      Value kernelConfig = KernelLoader.loadConfig(classLoader);
       if (kernelConfig == null) {
         kernelConfig = Value.absent();
       }
-      return loadKernelStack(classLoader, kernelConfig);
+      return KernelLoader.loadKernelStack(classLoader, kernelConfig);
     } catch (IOException cause) {
       throw new KernelException(cause);
     }
@@ -52,7 +52,7 @@ public final class KernelLoader {
     Kernel kernelStack = null;
     for (int i = 0, n = kernelConfig.length(); i < n; i += 1) {
       final Item moduleConfig = kernelConfig.getItem(i);
-      final Kernel kernelModule = loadKernelModule(classLoader, moduleConfig.toValue());
+      final Kernel kernelModule = KernelLoader.loadKernelModule(classLoader, moduleConfig.toValue());
       if (kernelModule != null) {
         kernelStack = kernelStack == null ? kernelModule : kernelStack.injectKernel(kernelModule);
       }
@@ -92,13 +92,13 @@ public final class KernelLoader {
   }
 
   public static Value loadConfig() throws IOException {
-    return loadConfig(KernelLoader.class.getClassLoader());
+    return KernelLoader.loadConfig(KernelLoader.class.getClassLoader());
   }
 
   public static Value loadConfig(ClassLoader classLoader) throws IOException {
-    Value configValue = loadConfigFile();
+    Value configValue = KernelLoader.loadConfigFile();
     if (configValue == null) {
-      configValue = loadConfigResource(classLoader);
+      configValue = KernelLoader.loadConfigResource(classLoader);
     }
     return configValue;
   }
@@ -112,7 +112,7 @@ public final class KernelLoader {
     if (configPath != null) {
       final File configFile = new File(configPath);
       if (configFile.exists()) {
-        configValue = loadConfigFile(configFile);
+        configValue = KernelLoader.loadConfigFile(configFile);
       }
     }
     return configValue;
@@ -124,7 +124,7 @@ public final class KernelLoader {
     try {
       configInput = new FileInputStream(configFile);
       if (configInput != null) {
-        configValue = parseConfigValue(configInput);
+        configValue = KernelLoader.parseConfigValue(configInput);
       }
     } finally {
       try {
@@ -144,7 +144,7 @@ public final class KernelLoader {
       configResource = System.getProperty("swim.config");
     }
     if (configResource != null) {
-      configValue = loadConfigResource(classLoader, configResource);
+      configValue = KernelLoader.loadConfigResource(classLoader, configResource);
     }
     return configValue;
   }
@@ -155,7 +155,7 @@ public final class KernelLoader {
     try {
       configInput = classLoader.getResourceAsStream(configResource);
       if (configInput != null) {
-        configValue = parseConfigValue(configInput);
+        configValue = KernelLoader.parseConfigValue(configInput);
       }
     } finally {
       try {

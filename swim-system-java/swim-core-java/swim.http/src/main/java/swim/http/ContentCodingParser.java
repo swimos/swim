@@ -36,6 +36,11 @@ final class ContentCodingParser extends Parser<ContentCoding> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<ContentCoding> feed(Input input) {
+    return ContentCodingParser.parse(input, this.http, this.name, this.weight, this.step);
+  }
+
   static Parser<ContentCoding> parse(Input input, HttpParser http, StringBuilder name,
                                      Parser<Float> weight, int step) {
     int c = 0;
@@ -50,10 +55,10 @@ final class ContentCodingParser extends Parser<ContentCoding> {
           name.appendCodePoint(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("content coding", input));
+          return Parser.error(Diagnostic.expected("content coding", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("content coding", input));
+        return Parser.error(Diagnostic.expected("content coding", input));
       }
     }
     if (step == 2) {
@@ -69,7 +74,7 @@ final class ContentCodingParser extends Parser<ContentCoding> {
       if (!input.isEmpty()) {
         step = 3;
       } else if (input.isDone()) {
-        return done(http.contentCoding(name.toString(), 1f));
+        return Parser.done(http.contentCoding(name.toString(), 1f));
       }
     }
     if (step == 3) {
@@ -81,24 +86,19 @@ final class ContentCodingParser extends Parser<ContentCoding> {
       if (weight.isDone()) {
         final Float qvalue = weight.bind();
         final float q = qvalue != null ? (float) qvalue : 1f;
-        return done(http.contentCoding(name.toString(), q));
+        return Parser.done(http.contentCoding(name.toString(), q));
       } else if (weight.isError()) {
         return weight.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ContentCodingParser(http, name, weight, step);
   }
 
   static Parser<ContentCoding> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<ContentCoding> feed(Input input) {
-    return parse(input, this.http, this.name, this.weight, this.step);
+    return ContentCodingParser.parse(input, http, null, null, 1);
   }
 
 }

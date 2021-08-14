@@ -39,7 +39,8 @@ final class MarkupParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.textOutput, this.valueParser, this.step);
+    return MarkupParser.parse(input, this.recon, this.builder, this.textOutput,
+                              this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -52,10 +53,10 @@ final class MarkupParser<I, V> extends Parser<V> {
           input = input.step();
           step = 2;
         } else {
-          return error(Diagnostic.expected('[', input));
+          return Parser.error(Diagnostic.expected('[', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('[', input));
+        return Parser.error(Diagnostic.expected('[', input));
       }
     }
     do {
@@ -81,7 +82,7 @@ final class MarkupParser<I, V> extends Parser<V> {
             if (textOutput != null) {
               builder.add(recon.item(textOutput.bind()));
             }
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           } else if (c == '@') {
             if (builder == null) {
               builder = recon.recordBuilder();
@@ -116,10 +117,10 @@ final class MarkupParser<I, V> extends Parser<V> {
             input = input.step();
             step = 5;
           } else {
-            return error(Diagnostic.unexpected(input));
+            return Parser.error(Diagnostic.unexpected(input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 3) {
@@ -178,27 +179,27 @@ final class MarkupParser<I, V> extends Parser<V> {
             textOutput.write('\t');
             step = 2;
           } else {
-            return error(Diagnostic.expected("escape character", input));
+            return Parser.error(Diagnostic.expected("escape character", input));
           }
           continue;
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("escape character", input));
+          return Parser.error(Diagnostic.expected("escape character", input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new MarkupParser<I, V>(recon, builder, textOutput, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, null, 1);
+    return MarkupParser.parse(input, recon, builder, null, null, 1);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
-    return parse(input, recon, null, null, null, 1);
+    return MarkupParser.parse(input, recon, null, null, null, 1);
   }
 
 }

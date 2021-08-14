@@ -24,7 +24,6 @@ import swim.util.Murmur3;
 
 public final class MqttSubscribe extends MqttPacket<Object> implements Debug {
 
-  private static int hashSeed;
   final int packetFlags;
   final int packetId;
   final FingerTrieSeq<MqttSubscription> subscriptions;
@@ -33,23 +32,6 @@ public final class MqttSubscribe extends MqttPacket<Object> implements Debug {
     this.packetFlags = packetFlags;
     this.packetId = packetId;
     this.subscriptions = subscriptions;
-  }
-
-  public static MqttSubscribe from(int packetFlags, int packetId,
-                                   FingerTrieSeq<MqttSubscription> subscriptions) {
-    return new MqttSubscribe(packetFlags, packetId, subscriptions);
-  }
-
-  public static MqttSubscribe from(int packetId, FingerTrieSeq<MqttSubscription> subscriptions) {
-    return new MqttSubscribe(2, packetId, subscriptions);
-  }
-
-  public static MqttSubscribe from(int packetId, MqttSubscription... subscriptions) {
-    return new MqttSubscribe(2, packetId, FingerTrieSeq.of(subscriptions));
-  }
-
-  public static MqttSubscribe from(int packetId) {
-    return new MqttSubscribe(2, packetId, FingerTrieSeq.<MqttSubscription>empty());
   }
 
   @Override
@@ -91,11 +73,11 @@ public final class MqttSubscribe extends MqttPacket<Object> implements Debug {
   }
 
   public MqttSubscribe subscription(String topicName, MqttQoS qos) {
-    return subscription(MqttSubscription.from(topicName, qos));
+    return this.subscription(MqttSubscription.create(topicName, qos));
   }
 
   public MqttSubscribe subscription(String topicName) {
-    return subscription(MqttSubscription.from(topicName));
+    return this.subscription(MqttSubscription.create(topicName));
   }
 
   @Override
@@ -129,35 +111,55 @@ public final class MqttSubscribe extends MqttPacket<Object> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttSubscribe.class);
+    if (MqttSubscribe.hashSeed == 0) {
+      MqttSubscribe.hashSeed = Murmur3.seed(MqttSubscribe.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(MqttSubscribe.hashSeed,
         this.packetFlags), this.packetId), this.subscriptions.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("MqttSubscribe").write('.').write("from").write('(')
-        .debug(this.packetId).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MqttSubscribe").write('.').write("create").write('(')
+                   .debug(this.packetId).write(')');
     if (this.packetFlags != 2) {
       output = output.write('.').write("packetFlags").write('(').debug(this.packetFlags).write(')');
     }
-    for (int i = 0, n = subscriptions.size(); i < n; i += 1) {
-      final MqttSubscription subscription = subscriptions.get(i);
+    for (int i = 0, n = this.subscriptions.size(); i < n; i += 1) {
+      final MqttSubscription subscription = this.subscriptions.get(i);
       output = output.write('.').write("subscription").write('(').debug(subscription.topicName);
       if ((subscription.flags & MqttSubscription.QOS_MASK) != 0) {
         output = output.write(", ").debug(subscription.qos());
       }
       output = output.write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static MqttSubscribe create(int packetFlags, int packetId,
+                                     FingerTrieSeq<MqttSubscription> subscriptions) {
+    return new MqttSubscribe(packetFlags, packetId, subscriptions);
+  }
+
+  public static MqttSubscribe create(int packetId, FingerTrieSeq<MqttSubscription> subscriptions) {
+    return new MqttSubscribe(2, packetId, subscriptions);
+  }
+
+  public static MqttSubscribe create(int packetId, MqttSubscription... subscriptions) {
+    return new MqttSubscribe(2, packetId, FingerTrieSeq.of(subscriptions));
+  }
+
+  public static MqttSubscribe create(int packetId) {
+    return new MqttSubscribe(2, packetId, FingerTrieSeq.<MqttSubscription>empty());
   }
 
 }

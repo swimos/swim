@@ -16,7 +16,6 @@ package swim.runtime.lane;
 
 import swim.api.Link;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.runtime.LaneRelay;
 import swim.runtime.Push;
 import swim.runtime.WarpBinding;
@@ -33,7 +32,7 @@ public class CommandLaneModel extends WarpLaneModel<CommandLaneView<?>, CommandL
 
   @Override
   protected CommandLaneUplink createWarpUplink(WarpBinding link) {
-    return new CommandLaneUplink(this, link, createUplinkAddress(link));
+    return new CommandLaneUplink(this, link, this.createUplinkAddress(link));
   }
 
   @Override
@@ -102,7 +101,7 @@ final class CommandLaneRelayCommand extends LaneRelay<CommandLaneModel, CommandL
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;

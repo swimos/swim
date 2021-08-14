@@ -26,12 +26,16 @@ import swim.uri.Uri;
 
 public final class HostAgentContext {
 
+  private HostAgentContext() {
+    // static
+  }
+
   public static final HostObjectType<AgentContext> TYPE;
 
   static {
     final JavaHostObjectType<AgentContext> type = new JavaHostObjectType<>(AgentContext.class);
     TYPE = type;
-    // FIXME: type.inheritType(HostSwimRef.TYPE);
+    // FIXME: type.inheritType(HostWarpRef.TYPE);
     type.extendType(HostLaneFactory.TYPE);
     // FIXME: type.inheritType(HostStore.TYPE);
     // FIXME: type.inheritType(HostLog.TYPE);
@@ -43,10 +47,6 @@ public final class HostAgentContext {
     type.addMember(new HostAgentContextStage());
     type.addMember(new HostAgentContextGetLane());
     type.addMember(new HostAgentContextOpenLane());
-  }
-
-  private HostAgentContext() {
-    // static
   }
 
 }

@@ -35,7 +35,7 @@ final class PrimaryParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.exprParser, this.step);
+    return PrimaryParser.parse(input, this.recon, this.builder, this.exprParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -113,13 +113,13 @@ final class PrimaryParser<I, V> extends Parser<V> {
             if (exprParser != null) {
               return exprParser;
             } else {
-              return done(builder.bind());
+              return Parser.done(builder.bind());
             }
           } else {
-            return error(Diagnostic.expected(')', input));
+            return Parser.error(Diagnostic.expected(')', input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected(')', input));
+          return Parser.error(Diagnostic.expected(')', input));
         }
       }
       if (step == 5) {
@@ -140,13 +140,13 @@ final class PrimaryParser<I, V> extends Parser<V> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new PrimaryParser<I, V>(recon, builder, exprParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, 1);
+    return PrimaryParser.parse(input, recon, builder, null, 1);
   }
 
 }

@@ -22,8 +22,6 @@ import swim.util.Murmur3;
 
 public final class PositiveOperator extends UnaryOperator {
 
-  private static int hashSeed;
-
   public PositiveOperator(Item operand) {
     super(operand);
   }
@@ -61,9 +59,9 @@ public final class PositiveOperator extends UnaryOperator {
   @Override
   protected int compareTo(Operator that) {
     if (that instanceof PositiveOperator) {
-      return compareTo((PositiveOperator) that);
+      return this.compareTo((PositiveOperator) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(PositiveOperator that) {
@@ -81,17 +79,20 @@ public final class PositiveOperator extends UnaryOperator {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(PositiveOperator.class);
+    if (PositiveOperator.hashSeed == 0) {
+      PositiveOperator.hashSeed = Murmur3.seed(PositiveOperator.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.operand.hashCode()));
+    return Murmur3.mash(Murmur3.mix(PositiveOperator.hashSeed, this.operand.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.debug(this.operand).write('.').write("positive").write('(').write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.debug(this.operand).write('.').write("positive").write('(').write(')');
+    return output;
   }
 
 }

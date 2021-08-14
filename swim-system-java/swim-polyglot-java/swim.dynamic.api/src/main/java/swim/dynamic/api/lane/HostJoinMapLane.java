@@ -27,6 +27,10 @@ import swim.dynamic.observable.HostObservableMap;
 
 public final class HostJoinMapLane {
 
+  private HostJoinMapLane() {
+    // static
+  }
+
   public static final HostObjectType<JoinMapLane<Object, Object, Object>> TYPE;
 
   static {
@@ -43,10 +47,6 @@ public final class HostJoinMapLane {
     type.addMember(new HostJoinMapLaneDidDownlink());
     type.addMember(new HostJoinMapLaneDownlink());
     type.addMember(new HostJoinMapLaneGetDownlink());
-  }
-
-  private HostJoinMapLane() {
-    // static
   }
 
 }

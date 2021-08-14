@@ -58,7 +58,7 @@ final class FieldStructure extends AvroFieldType<Value, Record> {
   @Override
   public AvroFieldType<Value, Record> doc(String doc) {
     return new FieldStructure(this.name, doc, this.valueType, this.defaultValue,
-        this.order, this.aliases);
+                              this.order, this.aliases);
   }
 
   @Override
@@ -89,7 +89,7 @@ final class FieldStructure extends AvroFieldType<Value, Record> {
   @Override
   public AvroFieldType<Value, Record> alias(String alias) {
     return new FieldStructure(this.name, this.doc, this.valueType, this.defaultValue,
-        this.order, this.aliases.appended(alias));
+                              this.order, this.aliases.appended(alias));
   }
 
   @Override

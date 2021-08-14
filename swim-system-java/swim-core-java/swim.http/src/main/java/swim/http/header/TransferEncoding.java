@@ -28,39 +28,10 @@ import swim.util.Murmur3;
 
 public final class TransferEncoding extends HttpHeader {
 
-  private static int hashSeed;
-  private static TransferEncoding chunked;
   final FingerTrieSeq<TransferCoding> codings;
 
   TransferEncoding(FingerTrieSeq<TransferCoding> codings) {
     this.codings = codings;
-  }
-
-  public static TransferEncoding chunked() {
-    if (chunked == null) {
-      chunked = new TransferEncoding(FingerTrieSeq.of(TransferCoding.chunked()));
-    }
-    return chunked;
-  }
-
-  public static TransferEncoding from(FingerTrieSeq<TransferCoding> codings) {
-    return new TransferEncoding(codings);
-  }
-
-  public static TransferEncoding from(TransferCoding... codings) {
-    return from(FingerTrieSeq.of(codings));
-  }
-
-  public static TransferEncoding from(String... codingStrings) {
-    final Builder<TransferCoding, FingerTrieSeq<TransferCoding>> codings = FingerTrieSeq.builder();
-    for (int i = 0, n = codingStrings.length; i < n; i += 1) {
-      codings.add(TransferCoding.parse(codingStrings[i]));
-    }
-    return from(codings.bind());
-  }
-
-  public static Parser<TransferEncoding> parseHttpValue(Input input, HttpParser http) {
-    return TransferEncodingParser.parse(input, http);
   }
 
   @Override
@@ -98,25 +69,57 @@ public final class TransferEncoding extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(TransferEncoding.class);
+    if (TransferEncoding.hashSeed == 0) {
+      TransferEncoding.hashSeed = Murmur3.seed(TransferEncoding.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.codings.hashCode()));
+    return Murmur3.mash(Murmur3.mix(TransferEncoding.hashSeed, this.codings.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("TransferEncoding").write('.').write("from").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("TransferEncoding").write('.').write("create").write('(');
     final int n = this.codings.size();
     if (n != 0) {
-      output.debug(this.codings.head());
+      output = output.debug(this.codings.head());
       for (int i = 1; i < n; i += 1) {
         output = output.write(", ").debug(this.codings.get(i));
       }
     }
     output = output.write(')');
+    return output;
+  }
+
+  private static TransferEncoding chunked;
+
+  public static TransferEncoding chunked() {
+    if (TransferEncoding.chunked == null) {
+      TransferEncoding.chunked = new TransferEncoding(FingerTrieSeq.of(TransferCoding.chunked()));
+    }
+    return TransferEncoding.chunked;
+  }
+
+  public static TransferEncoding create(FingerTrieSeq<TransferCoding> codings) {
+    return new TransferEncoding(codings);
+  }
+
+  public static TransferEncoding create(TransferCoding... codings) {
+    return TransferEncoding.create(FingerTrieSeq.of(codings));
+  }
+
+  public static TransferEncoding create(String... codingStrings) {
+    final Builder<TransferCoding, FingerTrieSeq<TransferCoding>> codings = FingerTrieSeq.builder();
+    for (int i = 0, n = codingStrings.length; i < n; i += 1) {
+      codings.add(TransferCoding.parse(codingStrings[i]));
+    }
+    return TransferEncoding.create(codings.bind());
+  }
+
+  public static Parser<TransferEncoding> parseHttpValue(Input input, HttpParser http) {
+    return TransferEncodingParser.parse(input, http);
   }
 
 }

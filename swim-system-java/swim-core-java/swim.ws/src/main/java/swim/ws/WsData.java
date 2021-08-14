@@ -17,7 +17,7 @@ package swim.ws;
 public abstract class WsData<T> extends WsFrame<T> {
 
   public WsData() {
-    // stub
+    // sealed
   }
 
 }

@@ -16,8 +16,6 @@ package swim.runtime;
 
 public class HostException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public HostException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class HostException extends RuntimeException {
   public HostException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

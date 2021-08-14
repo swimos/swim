@@ -54,9 +54,10 @@ final class TensorArrayObjectSpace<V, S> extends TensorArraySpace<TensorArray<V,
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.write("TensorArray").write('.').write("space").write('(')
-        .debug(this.next).write(", ").debug(this.dims).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("TensorArray").write('.').write("space").write('(')
+                   .debug(this.next).write(", ").debug(this.dims).write(')');
+    return output;
   }
 
   @Override

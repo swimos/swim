@@ -16,7 +16,7 @@ package swim.db;
 
 import swim.codec.Output;
 import swim.codec.Unicode;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.recon.Recon;
 import swim.structure.Record;
 import swim.structure.Value;
@@ -35,30 +35,6 @@ public class Seed {
     this.created = created;
     this.updated = updated;
     this.rootRefValue = rootRefValue.commit();
-  }
-
-  public static Seed fromValue(Value value) {
-    try {
-      final String tag = value.tag();
-      final TreeType treeType = TreeType.fromTag(tag);
-      if (treeType == null) {
-        return null;
-      }
-      final Value header = value.header(tag);
-      final int stem = header.get("stem").intValue();
-      final long created = header.get("created").longValue();
-      final long updated = header.get("updated").longValue();
-      final Value rootRefValue = value.get("root");
-      return new Seed(treeType, stem, created, updated, rootRefValue);
-    } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        final Output<String> message = Unicode.stringOutput("Malformed seed: ");
-        Recon.write(value, message);
-        throw new StoreException(message.bind(), cause);
-      } else {
-        throw cause;
-      }
-    }
   }
 
   public TreeType treeType() {
@@ -98,13 +74,35 @@ public class Seed {
   }
 
   public Value toValue() {
-    final Record header = Record.create(3)
-        .slot("stem", this.stem)
-        .slot("created", this.created)
-        .slot("updated", this.updated);
-    return Record.create(2)
-        .attr(this.treeType.tag(), header)
-        .slot("root", this.rootRefValue);
+    final Record header = Record.create(3).slot("stem", this.stem)
+                                          .slot("created", this.created)
+                                          .slot("updated", this.updated);
+    return Record.create(2).attr(this.treeType.tag(), header)
+                           .slot("root", this.rootRefValue);
+  }
+
+  public static Seed fromValue(Value value) {
+    try {
+      final String tag = value.tag();
+      final TreeType treeType = TreeType.fromTag(tag);
+      if (treeType == null) {
+        return null;
+      }
+      final Value header = value.header(tag);
+      final int stem = header.get("stem").intValue();
+      final long created = header.get("created").longValue();
+      final long updated = header.get("updated").longValue();
+      final Value rootRefValue = value.get("root");
+      return new Seed(treeType, stem, created, updated, rootRefValue);
+    } catch (Throwable cause) {
+      if (Cont.isNonFatal(cause)) {
+        final Output<String> message = Unicode.stringOutput("Malformed seed: ");
+        Recon.write(value, message);
+        throw new StoreException(message.bind(), cause);
+      } else {
+        throw cause;
+      }
+    }
   }
 
 }

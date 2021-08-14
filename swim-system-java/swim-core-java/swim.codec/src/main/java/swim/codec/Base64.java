@@ -21,72 +21,8 @@ import java.nio.ByteBuffer;
  */
 public abstract class Base64 {
 
-  private static Base64 standard;
-  private static Base64 standardUnpadded;
-  private static Base64 url;
-  private static Base64 urlUnpadded;
-
   Base64() {
-    // stub
-  }
-
-  /**
-   * Returns the {@code Base64} encoding with the standard alphabet.
-   */
-  public static Base64 standard() {
-    if (standard == null) {
-      standard = new Base64Standard(true);
-    }
-    return standard;
-  }
-
-  static Base64 standardUnpadded() {
-    if (standardUnpadded == null) {
-      standardUnpadded = new Base64Standard(false);
-    }
-    return standardUnpadded;
-  }
-
-  /**
-   * Returns the {@code Base64} encoding with the standard alphabet, and
-   * required padding, if {@code isPadded} is {@code true}.
-   */
-  public static Base64 standard(boolean isPadded) {
-    if (isPadded) {
-      return standard();
-    } else {
-      return standardUnpadded();
-    }
-  }
-
-  /**
-   * Returns the {@code Base64} encoding with the url and filename safe
-   * alphabet.
-   */
-  public static Base64 url() {
-    if (url == null) {
-      url = new Base64Url(true);
-    }
-    return url;
-  }
-
-  public static Base64 urlUnpadded() {
-    if (urlUnpadded == null) {
-      urlUnpadded = new Base64Url(false);
-    }
-    return urlUnpadded;
-  }
-
-  /**
-   * Returns the {@code Base64} encoding with the url and filename safe
-   * alphabet, and required padding, if {@code isPadded} is {@code true}.
-   */
-  public static Base64 url(boolean isPadded) {
-    if (isPadded) {
-      return url();
-    } else {
-      return urlUnpadded();
-    }
+    // sealed
   }
 
   /**
@@ -129,9 +65,9 @@ public abstract class Base64 {
     } else if (c == '/' || c == '_') {
       return 63;
     } else {
-      final Output<String> message = Unicode.stringOutput();
-      message.write("Invalid base-64 digit: ");
-      Format.debugChar(c, message);
+      Output<String> message = Unicode.stringOutput();
+      message = message.write("Invalid base-64 digit: ");
+      message = Format.debugChar(c, message);
       throw new IllegalArgumentException(message.bind());
     }
   }
@@ -141,34 +77,36 @@ public abstract class Base64 {
    * 7-bit quantity.
    */
   public char encodeDigit(int b) {
-    return alphabet().charAt(b);
+    return this.alphabet().charAt(b);
   }
 
   /**
    * Decodes the base-64 digits {@code c1}, {@code c2}, {@code c3}, and {@code
    * c4}, and writes the 8 to 24 bit quantity they represent to the given
    * {@code output}.
+   *
+   * @return the continuation of the {@code output}.
    */
-  public void writeQuantum(int c1, int c2, int c3, int c4, Output<?> output) {
-    final int x = decodeDigit(c1);
-    final int y = decodeDigit(c2);
+  public <T> Output<T> writeQuantum(int c1, int c2, int c3, int c4, Output<T> output) {
+    final int x = this.decodeDigit(c1);
+    final int y = this.decodeDigit(c2);
     if (c3 != '=') {
-      final int z = decodeDigit(c3);
+      final int z = this.decodeDigit(c3);
       if (c4 != '=') {
-        final int w = decodeDigit(c4);
-        output.write((x << 2) | (y >>> 4));
-        output.write((y << 4) | (z >>> 2));
-        output.write((z << 6) | w);
+        final int w = this.decodeDigit(c4);
+        output = output.write((x << 2) | (y >>> 4));
+        output = output.write((y << 4) | (z >>> 2));
+        output = output.write((z << 6) | w);
       } else {
-        output.write((x << 2) | (y >>> 4));
-        output.write((y << 4) | (z >>> 2));
+        output = output.write((x << 2) | (y >>> 4));
+        output = output.write((y << 4) | (z >>> 2));
       }
+    } else if (c4 == '=') {
+      output = output.write((x << 2) | (y >>> 4));
     } else {
-      if (c4 != '=') {
-        throw new IllegalArgumentException("Improperly padded base-64");
-      }
-      output.write((x << 2) | (y >>> 4));
+      output = Output.error(new IllegalArgumentException("Improperly padded base-64"));
     }
+    return output;
   }
 
   /**
@@ -191,7 +129,7 @@ public abstract class Base64 {
   /**
    * Parses the base-64 (7-bit ASCII) encoded {@code input}, and writes the
    * decoded bytes to a growable array, returning a {@code Parser} continuation
-   * that knows how to parse any additional input.  The returned {@code Parser}
+   * that knows how to parse any additional input. The returned {@code Parser}
    * {@link Parser#bind() binds} a {@code byte[]} array containing all parsed
    * base-64 data.
    */
@@ -202,7 +140,7 @@ public abstract class Base64 {
   /**
    * Parses the base-64 (t-bit ASCII) encoded {@code input}, and writes the
    * decoded bytes to a growable buffer, returning a {@code Parser} continuation
-   * that knows how to parse any additional input.  The returned {@code Parser}
+   * that knows how to parse any additional input. The returned {@code Parser}
    * {@link Parser#bind() binds} a {@code ByteBuffer} containing all parsed
    * base-64 data.
    */
@@ -264,6 +202,73 @@ public abstract class Base64 {
    */
   public Writer<?, ?> writeByteBuffer(ByteBuffer input, Output<?> output) {
     return Base64Writer.write(output, input, this);
+  }
+
+  private static Base64 standard;
+
+  /**
+   * Returns the {@code Base64} encoding with the standard alphabet.
+   */
+  public static Base64 standard() {
+    if (Base64.standard == null) {
+      Base64.standard = new Base64Standard(true);
+    }
+    return Base64.standard;
+  }
+
+  private static Base64 standardUnpadded;
+
+  static Base64 standardUnpadded() {
+    if (Base64.standardUnpadded == null) {
+      Base64.standardUnpadded = new Base64Standard(false);
+    }
+    return Base64.standardUnpadded;
+  }
+
+  /**
+   * Returns the {@code Base64} encoding with the standard alphabet, and
+   * required padding, if {@code isPadded} is {@code true}.
+   */
+  public static Base64 standard(boolean isPadded) {
+    if (isPadded) {
+      return Base64.standard();
+    } else {
+      return Base64.standardUnpadded();
+    }
+  }
+
+  private static Base64 url;
+
+  /**
+   * Returns the {@code Base64} encoding with the url and filename safe
+   * alphabet.
+   */
+  public static Base64 url() {
+    if (Base64.url == null) {
+      Base64.url = new Base64Url(true);
+    }
+    return Base64.url;
+  }
+
+  private static Base64 urlUnpadded;
+
+  public static Base64 urlUnpadded() {
+    if (Base64.urlUnpadded == null) {
+      Base64.urlUnpadded = new Base64Url(false);
+    }
+    return Base64.urlUnpadded;
+  }
+
+  /**
+   * Returns the {@code Base64} encoding with the url and filename safe
+   * alphabet, and required padding, if {@code isPadded} is {@code true}.
+   */
+  public static Base64 url(boolean isPadded) {
+    if (isPadded) {
+      return Base64.url();
+    } else {
+      return Base64.urlUnpadded();
+    }
   }
 
 }

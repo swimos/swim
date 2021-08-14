@@ -33,7 +33,7 @@ public class PartTableWarpUplink extends WarpProxy {
   @Override
   public void didOpenDown() {
     super.didOpenDown();
-    didOpen();
+    this.didOpen();
   }
 
   protected void didClose() {
@@ -43,13 +43,13 @@ public class PartTableWarpUplink extends WarpProxy {
   @Override
   public void didCloseDown() {
     super.didCloseDown();
-    didClose();
+    this.didClose();
   }
 
   @Override
   public void didCloseUp() {
     super.didCloseUp();
-    didClose();
+    this.didClose();
   }
 
 }

@@ -21,85 +21,7 @@ import swim.util.Murmur3;
 public abstract class Num extends Value {
 
   Num() {
-    //stub
-  }
-
-  public static Num from(int value) {
-    return NumI32.from(value);
-  }
-
-  public static Num from(long value) {
-    return NumI64.from(value);
-  }
-
-  public static Num from(float value) {
-    return NumF32.from(value);
-  }
-
-  public static Num from(double value) {
-    return NumF64.from(value);
-  }
-
-  public static Num from(BigInteger value) {
-    return NumInt.from(value);
-  }
-
-  public static Num from(Number value) {
-    if (value instanceof Byte) {
-      return from(value.byteValue());
-    } else if (value instanceof Short) {
-      return from(value.shortValue());
-    } else if (value instanceof Integer) {
-      return from(value.intValue());
-    } else if (value instanceof Long) {
-      return from(value.longValue());
-    } else if (value instanceof Float) {
-      return from(value.floatValue());
-    } else if (value instanceof Double) {
-      return from(value.doubleValue());
-    } else if (value instanceof BigInteger) {
-      return from((BigInteger) value);
-    } else {
-      return from(value.doubleValue());
-    }
-  }
-
-  public static Num from(char value) {
-    return NumI32.from((int) value);
-  }
-
-  public static Num from(String value) {
-    if ("NaN".equals(value)) {
-      return NumF64.nan();
-    } else {
-      try {
-        final long longValue = Long.parseLong(value);
-        if ((int) longValue == longValue) {
-          return from((int) longValue);
-        } else {
-          return from(longValue);
-        }
-      } catch (NumberFormatException e1) {
-        try {
-          final double doubleValue = Double.parseDouble(value);
-          if ((float) doubleValue == doubleValue) {
-            return from((float) doubleValue);
-          } else {
-            return from(doubleValue);
-          }
-        } catch (NumberFormatException e2) {
-          return from(new BigInteger(value));
-        }
-      }
-    }
-  }
-
-  public static Num uint32(int value) {
-    return NumI32.uint32(value);
-  }
-
-  public static Num uint64(long value) {
-    return NumI64.uint64(value);
+    // sealed
   }
 
   @Override
@@ -145,7 +67,7 @@ public abstract class Num extends Value {
    */
   @Override
   public String stringValue(String orElse) {
-    return stringValue();
+    return this.stringValue();
   }
 
   /**
@@ -160,7 +82,7 @@ public abstract class Num extends Value {
    */
   @Override
   public byte byteValue(byte orElse) {
-    return byteValue();
+    return this.byteValue();
   }
 
   /**
@@ -175,7 +97,7 @@ public abstract class Num extends Value {
    */
   @Override
   public short shortValue(short orElse) {
-    return shortValue();
+    return this.shortValue();
   }
 
   /**
@@ -190,7 +112,7 @@ public abstract class Num extends Value {
    */
   @Override
   public int intValue(int orElse) {
-    return intValue();
+    return this.intValue();
   }
 
   /**
@@ -205,7 +127,7 @@ public abstract class Num extends Value {
    */
   @Override
   public long longValue(long orElse) {
-    return longValue();
+    return this.longValue();
   }
 
   /**
@@ -220,7 +142,7 @@ public abstract class Num extends Value {
    */
   @Override
   public float floatValue(float orElse) {
-    return floatValue();
+    return this.floatValue();
   }
 
   /**
@@ -235,7 +157,7 @@ public abstract class Num extends Value {
    */
   @Override
   public double doubleValue(double orElse) {
-    return doubleValue();
+    return this.doubleValue();
   }
 
   /**
@@ -250,7 +172,7 @@ public abstract class Num extends Value {
    */
   @Override
   public BigInteger integerValue(BigInteger orElse) {
-    return integerValue();
+    return this.integerValue();
   }
 
   /**
@@ -265,7 +187,7 @@ public abstract class Num extends Value {
    */
   @Override
   public Number numberValue(Number orElse) {
-    return numberValue();
+    return this.numberValue();
   }
 
   /**
@@ -280,7 +202,7 @@ public abstract class Num extends Value {
    */
   @Override
   public char charValue(char orElse) {
-    return charValue();
+    return this.charValue();
   }
 
   /**
@@ -295,13 +217,13 @@ public abstract class Num extends Value {
    */
   @Override
   public boolean booleanValue(boolean orElse) {
-    return booleanValue();
+    return this.booleanValue();
   }
 
   @Override
   public Value bitwiseOr(Value that) {
     if (that instanceof Num) {
-      return bitwiseOr((Num) that);
+      return this.bitwiseOr((Num) that);
     }
     return super.bitwiseOr(that);
   }
@@ -311,7 +233,7 @@ public abstract class Num extends Value {
   @Override
   public Value bitwiseXor(Value that) {
     if (that instanceof Num) {
-      return bitwiseXor((Num) that);
+      return this.bitwiseXor((Num) that);
     }
     return super.bitwiseXor(that);
   }
@@ -321,7 +243,7 @@ public abstract class Num extends Value {
   @Override
   public Value bitwiseAnd(Value that) {
     if (that instanceof Num) {
-      return bitwiseAnd((Num) that);
+      return this.bitwiseAnd((Num) that);
     }
     return super.bitwiseAnd(that);
   }
@@ -331,7 +253,7 @@ public abstract class Num extends Value {
   @Override
   public Value plus(Value that) {
     if (that instanceof Num) {
-      return plus((Num) that);
+      return this.plus((Num) that);
     }
     return super.plus(that);
   }
@@ -341,7 +263,7 @@ public abstract class Num extends Value {
   @Override
   public Value minus(Value that) {
     if (that instanceof Num) {
-      return minus((Num) that);
+      return this.minus((Num) that);
     }
     return super.minus(that);
   }
@@ -351,7 +273,7 @@ public abstract class Num extends Value {
   @Override
   public Value times(Value that) {
     if (that instanceof Num) {
-      return times((Num) that);
+      return this.times((Num) that);
     }
     return super.times(that);
   }
@@ -361,7 +283,7 @@ public abstract class Num extends Value {
   @Override
   public Value divide(Value that) {
     if (that instanceof Num) {
-      return divide((Num) that);
+      return this.divide((Num) that);
     }
     return super.divide(that);
   }
@@ -371,7 +293,7 @@ public abstract class Num extends Value {
   @Override
   public Value modulo(Value that) {
     if (that instanceof Num) {
-      return modulo((Num) that);
+      return this.modulo((Num) that);
     }
     return super.modulo(that);
   }
@@ -405,11 +327,11 @@ public abstract class Num extends Value {
   public abstract Num pow(Num that);
 
   public Num max(Num that) {
-    return compareTo(that) >= 0 ? this : that;
+    return this.compareTo(that) >= 0 ? this : that;
   }
 
   public Num min(Num that) {
-    return compareTo(that) <= 0 ? this : that;
+    return this.compareTo(that) <= 0 ? this : that;
   }
 
   @Override
@@ -420,30 +342,30 @@ public abstract class Num extends Value {
   @Override
   public int compareTo(Item other) {
     if (other instanceof Num) {
-      return compareTo((Num) other);
+      return this.compareTo((Num) other);
     }
-    return Integer.compare(typeOrder(), other.typeOrder());
+    return Integer.compare(this.typeOrder(), other.typeOrder());
   }
 
   public int compareTo(Num that) {
-    if (isValidByte() && that.isValidByte()) {
-      return Byte.compare(byteValue(), that.byteValue());
-    } else if (isValidShort() && that.isValidShort()) {
-      return Short.compare(shortValue(), that.shortValue());
-    } else if (isValidInt() && that.isValidInt()) {
-      return Integer.compare(intValue(), that.intValue());
-    } else if (isValidLong() && that.isValidLong()) {
-      return Long.compare(longValue(), that.longValue());
-    } else if (isValidFloat() && that.isValidFloat()) {
-      final float x = floatValue();
+    if (this.isValidByte() && that.isValidByte()) {
+      return Byte.compare(this.byteValue(), that.byteValue());
+    } else if (this.isValidShort() && that.isValidShort()) {
+      return Short.compare(this.shortValue(), that.shortValue());
+    } else if (this.isValidInt() && that.isValidInt()) {
+      return Integer.compare(this.intValue(), that.intValue());
+    } else if (this.isValidLong() && that.isValidLong()) {
+      return Long.compare(this.longValue(), that.longValue());
+    } else if (this.isValidFloat() && that.isValidFloat()) {
+      final float x = this.floatValue();
       final float y = that.floatValue();
       return x < y ? -1 : x > y ? 1 : Float.isNaN(y) ? (Float.isNaN(x) ? 0 : -1) : Float.isNaN(x) ? 1 : 0;
-    } else if (isValidDouble() && that.isValidDouble()) {
-      final double x = doubleValue();
+    } else if (this.isValidDouble() && that.isValidDouble()) {
+      final double x = this.doubleValue();
       final double y = that.doubleValue();
       return x < y ? -1 : x > y ? 1 : Double.isNaN(y) ? (Double.isNaN(x) ? 0 : -1) : Double.isNaN(x) ? 1 : 0;
     } else {
-      return stringValue().compareTo(that.stringValue());
+      return this.stringValue().compareTo(that.stringValue());
     }
   }
 
@@ -452,59 +374,138 @@ public abstract class Num extends Value {
     if (this == other) {
       return true;
     } else if (other instanceof Num) {
-      return equals((Num) other);
+      return this.equals((Num) other);
     } else {
       return false;
     }
   }
 
   boolean equals(Num that) {
-    if (isValidByte() && that.isValidByte()) {
-      return byteValue() == that.byteValue();
-    } else if (isValidShort() && that.isValidShort()) {
-      return shortValue() == that.shortValue();
-    } else if (isValidInt() && that.isValidInt()) {
-      return intValue() == that.intValue();
-    } else if (isValidLong() && that.isValidLong()) {
-      return longValue() == that.longValue();
-    } else if (isValidFloat() && that.isValidFloat()) {
-      final float x = floatValue();
+    if (this.isValidByte() && that.isValidByte()) {
+      return this.byteValue() == that.byteValue();
+    } else if (this.isValidShort() && that.isValidShort()) {
+      return this.shortValue() == that.shortValue();
+    } else if (this.isValidInt() && that.isValidInt()) {
+      return this.intValue() == that.intValue();
+    } else if (this.isValidLong() && that.isValidLong()) {
+      return this.longValue() == that.longValue();
+    } else if (this.isValidFloat() && that.isValidFloat()) {
+      final float x = this.floatValue();
       final float y = that.floatValue();
       return x == y || Float.isNaN(x) && Float.isNaN(y);
-    } else if (isValidDouble() && that.isValidDouble()) {
-      final double x = doubleValue();
+    } else if (this.isValidDouble() && that.isValidDouble()) {
+      final double x = this.doubleValue();
       final double y = that.doubleValue();
       return x == y || Double.isNaN(x) && Double.isNaN(y);
     } else {
-      return stringValue().equals(that.stringValue());
+      return this.stringValue().equals(that.stringValue());
     }
   }
 
   @Override
   public int hashCode() {
-    if (isValidByte()) {
-      return Murmur3.hash(byteValue());
-    } else if (isValidShort()) {
-      return Murmur3.hash(shortValue());
-    } else if (isValidInt()) {
-      return Murmur3.hash(intValue());
-    } else if (isValidLong()) {
-      return Murmur3.hash(longValue());
-    } else if (isValidFloat()) {
-      return Murmur3.hash(floatValue());
-    } else if (isValidDouble()) {
-      return Murmur3.hash(doubleValue());
+    if (this.isValidByte()) {
+      return Murmur3.hash(this.byteValue());
+    } else if (this.isValidShort()) {
+      return Murmur3.hash(this.shortValue());
+    } else if (this.isValidInt()) {
+      return Murmur3.hash(this.intValue());
+    } else if (this.isValidLong()) {
+      return Murmur3.hash(this.longValue());
+    } else if (this.isValidFloat()) {
+      return Murmur3.hash(this.floatValue());
+    } else if (this.isValidDouble()) {
+      return Murmur3.hash(this.doubleValue());
     } else {
-      return stringValue().hashCode();
+      return this.stringValue().hashCode();
     }
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Num").write('.').write("from").write('(').display(this).write(')');
+    return output;
   }
 
   @Override
-  public abstract void display(Output<?> output);
+  public abstract <T> Output<T> display(Output<T> output);
+
+  public static Num from(int value) {
+    return NumI32.from(value);
+  }
+
+  public static Num from(long value) {
+    return NumI64.from(value);
+  }
+
+  public static Num from(float value) {
+    return NumF32.from(value);
+  }
+
+  public static Num from(double value) {
+    return NumF64.from(value);
+  }
+
+  public static Num from(BigInteger value) {
+    return NumInteger.from(value);
+  }
+
+  public static Num from(Number value) {
+    if (value instanceof Byte) {
+      return Num.from(value.byteValue());
+    } else if (value instanceof Short) {
+      return Num.from(value.shortValue());
+    } else if (value instanceof Integer) {
+      return Num.from(value.intValue());
+    } else if (value instanceof Long) {
+      return Num.from(value.longValue());
+    } else if (value instanceof Float) {
+      return Num.from(value.floatValue());
+    } else if (value instanceof Double) {
+      return Num.from(value.doubleValue());
+    } else if (value instanceof BigInteger) {
+      return Num.from((BigInteger) value);
+    } else {
+      return Num.from(value.doubleValue());
+    }
+  }
+
+  public static Num from(char value) {
+    return NumI32.from((int) value);
+  }
+
+  public static Num from(String value) {
+    if ("NaN".equals(value)) {
+      return NumF64.nan();
+    } else {
+      try {
+        final long longValue = Long.parseLong(value);
+        if ((int) longValue == longValue) {
+          return Num.from((int) longValue);
+        } else {
+          return Num.from(longValue);
+        }
+      } catch (NumberFormatException e1) {
+        try {
+          final double doubleValue = Double.parseDouble(value);
+          if ((float) doubleValue == doubleValue) {
+            return Num.from((float) doubleValue);
+          } else {
+            return Num.from(doubleValue);
+          }
+        } catch (NumberFormatException e2) {
+          return Num.from(new BigInteger(value));
+        }
+      }
+    }
+  }
+
+  public static Num uint32(int value) {
+    return NumI32.uint32(value);
+  }
+
+  public static Num uint64(long value) {
+    return NumI64.uint64(value);
+  }
 
 }

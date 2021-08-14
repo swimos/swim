@@ -23,6 +23,10 @@ import swim.dynamic.java.lang.HostObject;
 
 public final class HostLink {
 
+  private HostLink() {
+    // static
+  }
+
   public static final HostObjectType<Link> TYPE;
 
   static {
@@ -32,10 +36,6 @@ public final class HostLink {
     type.addMember(new HostLinkHostUri());
     type.addMember(new HostLinkNodeUri());
     type.addMember(new HostLinkLaneUri());
-  }
-
-  private HostLink() {
-    // static
   }
 
 }

@@ -36,6 +36,11 @@ final class MqttDataDecoder extends Decoder<Data> {
     this(null, 0, 1);
   }
 
+  @Override
+  public Decoder<Data> feed(InputBuffer input) {
+    return MqttDataDecoder.decode(input, this.decoder, this.remaining, this.step);
+  }
+
   static Decoder<Data> decode(InputBuffer input, Decoder<byte[]> decoder, int remaining, int step) {
     if (step == 1 && input.isCont()) {
       remaining = input.head() << 8;
@@ -64,26 +69,21 @@ final class MqttDataDecoder extends Decoder<Data> {
       input = input.limit(inputLimit).isPart(inputPart);
       remaining -= input.index() - inputStart;
       if (decoder.isDone()) {
-        return done(Data.wrap(decoder.bind()));
+        return Decoder.done(Data.wrap(decoder.bind()));
       } else if (decoder.isError()) {
         return decoder.asError();
       }
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new MqttDataDecoder(decoder, remaining, step);
   }
 
   static Decoder<Data> decode(InputBuffer input) {
-    return decode(input, null, 0, 1);
-  }
-
-  @Override
-  public Decoder<Data> feed(InputBuffer input) {
-    return decode(input, this.decoder, this.remaining, this.step);
+    return MqttDataDecoder.decode(input, null, 0, 1);
   }
 
 }

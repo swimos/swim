@@ -40,13 +40,18 @@ final class OriginWriter extends Writer<Object, Object> {
     this(origins, null, null, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return OriginWriter.write(output, this.origins, this.origin, this.part, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, Iterator<Uri> origins, Uri origin,
                                       Writer<?, ?> part, int step) {
     do {
       if (step == 1) {
         if (part == null) {
           if (!origins.hasNext()) {
-            return done();
+            return Writer.done();
           } else {
             origin = origins.next();
             part = Unicode.writeString(origin.scheme().toString(), output);
@@ -87,7 +92,7 @@ final class OriginWriter extends Writer<Object, Object> {
             origin = null;
             step = 8;
           } else {
-            return done();
+            return Writer.done();
           }
         } else if (part.isError()) {
           return part.asError();
@@ -109,7 +114,7 @@ final class OriginWriter extends Writer<Object, Object> {
             origin = null;
             step = 8;
           } else {
-            return done();
+            return Writer.done();
           }
         } else if (part.isError()) {
           return part.asError();
@@ -123,20 +128,15 @@ final class OriginWriter extends Writer<Object, Object> {
       break;
     } while (true);
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new OriginWriter(origins, origin, part, step);
   }
 
   public static Writer<Object, Object> write(Output<?> output, Iterator<Uri> origins) {
-    return write(output, origins, null, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.origins, this.origin, this.part, this.step);
+    return OriginWriter.write(output, origins, null, null, 1);
   }
 
 }

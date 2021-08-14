@@ -66,22 +66,22 @@ public class TestCellContext implements CellContext {
 
   @Override
   public Policy policy() {
-    return policy;
+    return this.policy;
   }
 
   @Override
   public Schedule schedule() {
-    return schedule;
+    return this.schedule;
   }
 
   @Override
   public Stage stage() {
-    return stage;
+    return this.stage;
   }
 
   @Override
   public StoreBinding store() {
-    return store;
+    return this.store;
   }
 
   @Override
@@ -91,46 +91,57 @@ public class TestCellContext implements CellContext {
 
   @Override
   public void openDownlink(LinkBinding link) {
+    // hook
   }
 
   @Override
   public void closeDownlink(LinkBinding link) {
+    // hook
   }
 
   @Override
   public void pushDown(Push<?> push) {
+    // hook
   }
 
   @Override
   public void reportDown(Metric metric) {
+    // hook
   }
 
   @Override
   public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
+    // hook
   }
 
   @Override
   public void trace(Object message) {
+    // hook
   }
 
   @Override
   public void debug(Object message) {
+    // hook
   }
 
   @Override
   public void info(Object message) {
+    // hook
   }
 
   @Override
   public void warn(Object message) {
+    // hook
   }
 
   @Override
   public void error(Object message) {
+    // hook
   }
 
   @Override
   public void fail(Object message) {
+    // hook
   }
 
 }

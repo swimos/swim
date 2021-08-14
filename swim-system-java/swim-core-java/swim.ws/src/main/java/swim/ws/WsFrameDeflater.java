@@ -40,7 +40,7 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
 
   @Override
   public Encoder<Object, WsFrame<O>> pull(OutputBuffer<?> output) {
-    return encode(output, this.ws, this.frame, this.content, this.offset);
+    return WsFrameDeflater.encode(output, this.ws, this.frame, this.content, this.offset);
   }
 
   @SuppressWarnings("unchecked")
@@ -94,18 +94,18 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
           output = output.write(isMasked ? 0x80 | payloadSize : payloadSize);
         } else if (payloadSize < 1 << 16) {
           output = output.write(isMasked ? 254 : 126)
-              .write(payloadSize >>> 8)
-              .write(payloadSize);
+                         .write(payloadSize >>> 8)
+                         .write(payloadSize);
         } else {
           output = output.write(isMasked ? 255 : 127)
-              .write(0)
-              .write(0)
-              .write(0)
-              .write(0)
-              .write(payloadSize >>> 24)
-              .write(payloadSize >>> 16)
-              .write(payloadSize >>> 8)
-              .write(payloadSize);
+                         .write(0)
+                         .write(0)
+                         .write(0)
+                         .write(0)
+                         .write(payloadSize >>> 24)
+                         .write(payloadSize >>> 16)
+                         .write(payloadSize >>> 8)
+                         .write(payloadSize);
         }
 
         if (isMasked) {
@@ -129,10 +129,10 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
         output = output.index(outputBase + headerSize + payloadSize);
 
         if (eof) {
-          return done(frame);
+          return Encoder.done(frame);
         }
       } catch (DeflateException cause) {
-        return error(new EncoderException(cause));
+        return Encoder.error(new EncoderException(cause));
       } finally {
         ws.deflate.input = null;
         ws.deflate.next_out = null;
@@ -141,15 +141,15 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
       }
     }
     if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new WsFrameDeflater<O>(ws, frame, content, offset);
   }
 
   static <O> Encoder<Object, WsFrame<O>> encode(OutputBuffer<?> output, WsDeflateEncoder ws, WsFrame<O> frame) {
-    return encode(output, ws, frame, null, 0L);
+    return WsFrameDeflater.encode(output, ws, frame, null, 0L);
   }
 
 }

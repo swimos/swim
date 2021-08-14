@@ -29,9 +29,9 @@ import swim.structure.selector.ValuesSelector;
 
 /**
  * An {@link Expression} that returns references to {@code Items} when it is
- * {@link #evaluate evaluated}.  Because most application-level {@code Items}
+ * {@link #evaluate evaluated}. Because most application-level {@code Items}
  * are {@link Record Records}, a way to only extract certain parts of {@code
- * Records} is often required.  Technically, this can be accomplished without
+ * Records} is often required. Technically, this can be accomplished without
  * {@code Selectors} to some extent because the {@code Record} class implements
  * {@link java.util.List java.util.List&lt;Item&gt;} and (implicitly) {@link
  * java.util.Map java.util.Map&lt;Value,Value&gt;}; however, {@code Selectors}
@@ -53,9 +53,9 @@ public abstract class Selector extends Expression {
 
   /**
    * Evaluates {@link Selectee#selected callback.selected} against the
-   * {@code Items} that match this {@code Selector's} selection criteria.  That
+   * {@code Items} that match this {@code Selector's} selection criteria. That
    * is, it pushes such {@code Items} to {@code interpreter}, then invokes
-   * {@code callback} against it.  To support chained {@code Selectors}, this is
+   * {@code callback} against it. To support chained {@code Selectors}, this is
    * a recursive procedure that invokes {@code forSelected} through
    * {@code this.then} wherever it exists (which it always does outside of
    * {@link IdentitySelector}); we define "subselection" to be such an
@@ -69,7 +69,7 @@ public abstract class Selector extends Expression {
   public abstract Item mapSelected(Interpreter interpreter, Selectee<Item> transform);
 
   /**
-   * Evaluates this {@code Selector} against some {@link Interpreter}.  This is
+   * Evaluates this {@code Selector} against some {@link Interpreter}. This is
    * accomplished by creating a new {@link SelecteeBuilder} and populating
    * its internal {@link Record} with (recursive) calls to {@link #forSelected}.
    */
@@ -77,12 +77,12 @@ public abstract class Selector extends Expression {
   public final Item evaluate(Interpreter interpreter) {
     final Record selected = Record.create();
     final Selectee<Object> callback = new SelecteeBuilder(selected);
-    forSelected(interpreter, callback);
+    this.forSelected(interpreter, callback);
     return selected.isEmpty() ? Item.absent() : selected.flattened();
   }
 
   /**
-   * The means to chain {@code Selectors}.  By intention, this is NOT a strict
+   * The means to chain {@code Selectors}. By intention, this is NOT a strict
    * functional composition: for two {@code Selectors} {@code s1} and {@code
    * s2}, {@code s1.andThen(s2)} DOES NOT NECESSARILY return a new {@code
    * Selector} {@code s3} such that {@code s3.evaluate(args)} is equivalent to
@@ -106,7 +106,7 @@ public abstract class Selector extends Expression {
    */
   @Override
   public Selector get(Value key) {
-    return andThen(new GetSelector(key, Selector.identity()));
+    return this.andThen(new GetSelector(key, Selector.identity()));
   }
 
   /**
@@ -117,7 +117,7 @@ public abstract class Selector extends Expression {
    */
   @Override
   public Selector get(String key) {
-    return get(Text.from(key));
+    return this.get(Text.from(key));
   }
 
   /**
@@ -128,7 +128,7 @@ public abstract class Selector extends Expression {
    */
   @Override
   public Selector getAttr(Text key) {
-    return andThen(new GetAttrSelector(key, Selector.identity()));
+    return this.andThen(new GetAttrSelector(key, Selector.identity()));
   }
 
   /**
@@ -139,7 +139,7 @@ public abstract class Selector extends Expression {
    */
   @Override
   public Selector getAttr(String key) {
-    return getAttr(Text.from(key));
+    return this.getAttr(Text.from(key));
   }
 
   /**
@@ -150,7 +150,7 @@ public abstract class Selector extends Expression {
    *              GetItemSelector}.
    */
   public Selector getItem(Num index) {
-    return andThen(new GetItemSelector(index, Selector.identity()));
+    return this.andThen(new GetItemSelector(index, Selector.identity()));
   }
 
   /**
@@ -162,7 +162,7 @@ public abstract class Selector extends Expression {
    */
   @Override
   public Selector getItem(int index) {
-    return getItem(Num.from(index));
+    return this.getItem(Num.from(index));
   }
 
   /**
@@ -170,7 +170,7 @@ public abstract class Selector extends Expression {
    * KeysSelector}.
    */
   public Selector keys() {
-    return andThen(Selector.identity().keys());
+    return this.andThen(Selector.identity().keys());
   }
 
   /**
@@ -178,7 +178,7 @@ public abstract class Selector extends Expression {
    * ValuesSelector}.
    */
   public Selector values() {
-    return andThen(Selector.identity().values());
+    return this.andThen(Selector.identity().values());
   }
 
   /**
@@ -186,7 +186,7 @@ public abstract class Selector extends Expression {
    * ChildrenSelector}.
    */
   public Selector children() {
-    return andThen(Selector.identity().children());
+    return this.andThen(Selector.identity().children());
   }
 
   /**
@@ -194,7 +194,7 @@ public abstract class Selector extends Expression {
    * DescendantsSelector}.
    */
   public Selector descendants() {
-    return andThen(Selector.identity().descendants());
+    return this.andThen(Selector.identity().descendants());
   }
 
   /**
@@ -212,7 +212,7 @@ public abstract class Selector extends Expression {
    */
   @Override
   public Selector filter(Item predicate) {
-    return andThen(predicate.filter());
+    return this.andThen(predicate.filter());
   }
 
   /**
@@ -230,19 +230,20 @@ public abstract class Selector extends Expression {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Selector").write('.').write("identity").write('(').write(')');
-    debugThen(output);
+    output = this.debugThen(output);
+    return output;
   }
 
-  public abstract void debugThen(Output<?> output);
+  public abstract <T> Output<T> debugThen(Output<T> output);
 
   @Override
   public int compareTo(Item other) {
     if (other instanceof Selector) {
-      return compareTo((Selector) other);
+      return this.compareTo((Selector) other);
     }
-    return Integer.compare(typeOrder(), other.typeOrder());
+    return Integer.compare(this.typeOrder(), other.typeOrder());
   }
 
   protected abstract int compareTo(Selector that);
@@ -278,7 +279,7 @@ final class SelecteeBuilder implements Selectee<Object> {
 
   /**
    * Adds the top of the {@code interpreter}'s scope stack to the {@code
-   * selected} record.  Always returns {@code null} because {@code
+   * selected} record. Always returns {@code null} because {@code
    * SelecteeBuilder} never terminates early; it accumulates all visited items
    * into an internal, mutable {@code Record}.
    */

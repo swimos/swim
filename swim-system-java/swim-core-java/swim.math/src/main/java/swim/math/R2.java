@@ -18,19 +18,10 @@ import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
 
-public class R2 implements AffineSpace<PointR2, VectorR2, Double>, VectorSpace<VectorR2, Double>, F2<VectorR2, Double>, Debug {
-
-  private static R2 space;
+public class R2 implements AffineSpace<R2Point, R2Vector, Double>, VectorSpace<R2Vector, Double>, F2<R2Vector, Double>, Debug {
 
   protected R2() {
-    // stub
-  }
-
-  public static R2 space() {
-    if (space == null) {
-      space = new R2();
-    }
-    return space;
+    // singleton
   }
 
   @Override
@@ -49,73 +40,83 @@ public class R2 implements AffineSpace<PointR2, VectorR2, Double>, VectorSpace<V
   }
 
   @Override
-  public final PointR2 origin() {
-    return PointR2.origin();
+  public final R2Point origin() {
+    return R2Point.origin();
   }
 
   @Override
-  public final VectorR2 zero() {
-    return VectorR2.zero();
+  public final R2Vector zero() {
+    return R2Vector.zero();
   }
 
   @Override
-  public final VectorR2 of(Double x, Double y) {
-    return VectorR2.of(x, y);
+  public final R2Vector of(Double x, Double y) {
+    return new R2Vector(x, y);
   }
 
   @Override
-  public final Double getX(VectorR2 v) {
+  public final Double getX(R2Vector v) {
     return v.x;
   }
 
   @Override
-  public final Double getY(VectorR2 v) {
+  public final Double getY(R2Vector v) {
     return v.y;
   }
 
   @Override
-  public final VectorR2 add(VectorR2 u, VectorR2 v) {
+  public final R2Vector add(R2Vector u, R2Vector v) {
     return u.plus(v);
   }
 
   @Override
-  public final VectorR2 opposite(VectorR2 v) {
+  public final R2Vector opposite(R2Vector v) {
     return v.opposite();
   }
 
   @Override
-  public final VectorR2 subtract(VectorR2 u, VectorR2 v) {
+  public final R2Vector subtract(R2Vector u, R2Vector v) {
     return u.minus(v);
   }
 
   @Override
-  public final VectorR2 multiply(VectorR2 u, Double a) {
+  public final R2Vector multiply(R2Vector u, Double a) {
     return u.times(a);
   }
 
   @Override
-  public final VectorR2 combine(Double a, VectorR2 u, Double b, VectorR2 v) {
-    return new VectorR2(a * u.x + b * v.x, a * u.y + b * v.y);
+  public final R2Vector combine(Double a, R2Vector u, Double b, R2Vector v) {
+    return new R2Vector(a * u.x + b * v.x, a * u.y + b * v.y);
   }
 
   @Override
-  public final PointR2 translate(PointR2 p, VectorR2 v) {
+  public final R2Point translate(R2Point p, R2Vector v) {
     return p.plus(v);
   }
 
   @Override
-  public final VectorR2 difference(PointR2 p, PointR2 q) {
+  public final R2Vector difference(R2Point p, R2Point q) {
     return p.minus(q);
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.write("R2").write('.').write("space").write('(').write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("R2").write('.').write("space").write('(').write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static R2 space;
+
+  public static R2 space() {
+    if (R2.space == null) {
+      R2.space = new R2();
+    }
+    return R2.space;
   }
 
 }

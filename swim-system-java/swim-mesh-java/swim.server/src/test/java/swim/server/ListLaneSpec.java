@@ -83,7 +83,7 @@ public class ListLaneSpec {
   public void testInsert() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestListPlane.class);
+                                      .openPlane("test", TestListPlane.class);
 
     laneWillUpdate = new CountDownLatch(3);
     laneDidUpdate = new CountDownLatch(3);
@@ -121,7 +121,7 @@ public class ListLaneSpec {
   public void testUpdate() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestListPlane.class);
+                                      .openPlane("test", TestListPlane.class);
     laneDidUpdateLower = new CountDownLatch(3);
     laneDidUpdateUpper = new CountDownLatch(3);
     try {
@@ -172,7 +172,7 @@ public class ListLaneSpec {
   public void testMove() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestListPlane.class);
+                                      .openPlane("test", TestListPlane.class);
 
     laneDidUpdate = new CountDownLatch(3);
     laneDidMove = new CountDownLatch(2);
@@ -224,7 +224,7 @@ public class ListLaneSpec {
   public void testRemove() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestListPlane.class);
+                                      .openPlane("test", TestListPlane.class);
 
     laneDidUpdate = new CountDownLatch(3);
     laneDidRemove = new CountDownLatch(1);
@@ -276,7 +276,7 @@ public class ListLaneSpec {
   public void testDrop() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestListPlane.class);
+                                      .openPlane("test", TestListPlane.class);
     final int total = 5;
 
     laneDidUpdate = new CountDownLatch(total);
@@ -327,7 +327,7 @@ public class ListLaneSpec {
   public void testTake() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestListPlane.class);
+                                      .openPlane("test", TestListPlane.class);
     final int total = 5;
     laneDidUpdate = new CountDownLatch(total);
     laneDidTake = new CountDownLatch(1);
@@ -375,7 +375,7 @@ public class ListLaneSpec {
   public void testClear() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestListPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestListPlane.class);
+                                      .openPlane("test", TestListPlane.class);
     final int total = 3;
     laneDidUpdate = new CountDownLatch(total);
     laneDidClear = new CountDownLatch(1);
@@ -456,8 +456,8 @@ public class ListLaneSpec {
       @Override
       public void didUpdate(int index, String newValue, String oldValue) {
         System.out.println("lane didUpdate index " + index + "; newValue: " + Format.debug(newValue) + "; oldValue: " + Format.debug(oldValue));
-        listLaneCopy = testList.snapshot();
-        testList1.add(index, newValue);
+        listLaneCopy = TestListLaneAgent.this.testList.snapshot();
+        TestListLaneAgent.this.testList1.add(index, newValue);
         laneDidUpdate.countDown();
 
         final char letter = newValue.length() > 0 ? newValue.charAt(0) : '\0';
@@ -477,8 +477,8 @@ public class ListLaneSpec {
       @Override
       public void didMove(int fromIndex, int toIndex, String value) {
         System.out.println("lane didMove fromIndex: " + fromIndex + "; toIndex: " + toIndex + "; value: " + Format.debug(value));
-        listLaneCopy = testList.snapshot();
-        testList1.move(fromIndex, toIndex);
+        listLaneCopy = TestListLaneAgent.this.testList.snapshot();
+        TestListLaneAgent.this.testList1.move(fromIndex, toIndex);
         laneDidMove.countDown();
       }
 
@@ -491,8 +491,8 @@ public class ListLaneSpec {
       @Override
       public void didRemove(int index, String oldValue) {
         System.out.println("lane didRemove index: " + index + "; oldValue: " + Format.debug(oldValue));
-        listLaneCopy = testList.snapshot();
-        testList1.remove(index);
+        listLaneCopy = TestListLaneAgent.this.testList.snapshot();
+        TestListLaneAgent.this.testList1.remove(index);
         laneDidRemove.countDown();
       }
 
@@ -518,8 +518,8 @@ public class ListLaneSpec {
       @Override
       public void didDrop(int lower) {
         System.out.println("lane didDrop lower : " + lower);
-        listLaneCopy = testList.snapshot();
-        testList1.drop(lower);
+        listLaneCopy = TestListLaneAgent.this.testList.snapshot();
+        TestListLaneAgent.this.testList1.drop(lower);
         laneDidDrop.countDown();
       }
 
@@ -532,8 +532,8 @@ public class ListLaneSpec {
       @Override
       public void didTake(int upper) {
         System.out.println("lane didTake upper: " + upper);
-        listLaneCopy = testList.snapshot();
-        testList1.take(upper);
+        listLaneCopy = TestListLaneAgent.this.testList.snapshot();
+        TestListLaneAgent.this.testList1.take(upper);
         laneDidTake.countDown();
       }
 
@@ -546,8 +546,8 @@ public class ListLaneSpec {
       @Override
       public void didClear() {
         System.out.println("lane didClear");
-        listLaneCopy = testList.snapshot();
-        testList1.clear();
+        listLaneCopy = TestListLaneAgent.this.testList.snapshot();
+        TestListLaneAgent.this.testList1.clear();
         laneDidClear.countDown();
       }
 

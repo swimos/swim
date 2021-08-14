@@ -37,8 +37,6 @@ import swim.util.Murmur3;
 
 public class RsaPrivateKeyDef extends PrivateKeyDef implements RsaKeyDef {
 
-  private static int hashSeed;
-  private static Form<RsaPrivateKeyDef> form;
   protected final BigInteger modulus;
   protected final BigInteger publicExponent;
   protected final BigInteger privateExponent;
@@ -72,42 +70,6 @@ public class RsaPrivateKeyDef extends PrivateKeyDef implements RsaKeyDef {
     this(modulus, null, privateExponent, FingerTrieSeq.<RsaPrimeDef>empty());
   }
 
-  public static RsaPrivateKeyDef from(RSAPrivateKey key) {
-    if (key instanceof RSAMultiPrimePrivateCrtKey) {
-      return from((RSAMultiPrimePrivateCrtKey) key);
-    } else if (key instanceof RSAPrivateCrtKey) {
-      return from((RSAPrivateCrtKey) key);
-    } else {
-      return new RsaPrivateKeyDef(key.getModulus(), key.getPrivateExponent(), key);
-    }
-  }
-
-  private static RsaPrivateKeyDef from(RSAMultiPrimePrivateCrtKey key) {
-    FingerTrieSeq<RsaPrimeDef> primeDefs = FingerTrieSeq.empty();
-    primeDefs = primeDefs.appended(new RsaPrimeDef(key.getPrimeP(), key.getPrimeExponentP()));
-    primeDefs = primeDefs.appended(new RsaPrimeDef(key.getPrimeQ(), key.getPrimeExponentQ(), key.getCrtCoefficient()));
-    final RSAOtherPrimeInfo[] otherPrimes = key.getOtherPrimeInfo();
-    for (int i = 0, n = otherPrimes.length; i < n; i += 1) {
-      primeDefs = primeDefs.appended(RsaPrimeDef.from(otherPrimes[i]));
-    }
-    return new RsaPrivateKeyDef(key.getModulus(), key.getPublicExponent(), key.getPrivateExponent(), primeDefs, key);
-  }
-
-  private static RsaPrivateKeyDef from(RSAPrivateCrtKey key) {
-    FingerTrieSeq<RsaPrimeDef> primeDefs = FingerTrieSeq.empty();
-    primeDefs = primeDefs.appended(new RsaPrimeDef(key.getPrimeP(), key.getPrimeExponentP()));
-    primeDefs = primeDefs.appended(new RsaPrimeDef(key.getPrimeQ(), key.getPrimeExponentQ(), key.getCrtCoefficient()));
-    return new RsaPrivateKeyDef(key.getModulus(), key.getPublicExponent(), key.getPrivateExponent(), primeDefs, key);
-  }
-
-  @Kind
-  public static Form<RsaPrivateKeyDef> form() {
-    if (form == null) {
-      form = new RsaPrivateKeyForm();
-    }
-    return form;
-  }
-
   @Override
   public final BigInteger modulus() {
     return this.modulus;
@@ -139,15 +101,15 @@ public class RsaPrivateKeyDef extends PrivateKeyDef implements RsaKeyDef {
           final RsaPrimeDef q = this.primeDefs.get(1);
           if (primeCount == 2) {
             keySpec = new RSAPrivateCrtKeySpec(this.modulus, this.publicExponent, this.privateExponent,
-                p.factor, q.factor, p.exponent, q.exponent, q.coefficient);
+                                               p.factor, q.factor, p.exponent, q.exponent, q.coefficient);
           } else {
             final RSAOtherPrimeInfo[] otherPrimes = new RSAOtherPrimeInfo[primeCount - 2];
             for (int i = 2; i < primeCount; i += 1) {
               otherPrimes[i - 2] = this.primeDefs.get(i).toRSAOtherPrimeInfo();
             }
             keySpec = new RSAMultiPrimePrivateCrtKeySpec(this.modulus, this.publicExponent, this.privateExponent,
-                p.factor, q.factor, p.exponent, q.exponent, q.coefficient,
-                otherPrimes);
+                                                         p.factor, q.factor, p.exponent, q.exponent, q.coefficient,
+                                                         otherPrimes);
           }
         }
         final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -162,12 +124,12 @@ public class RsaPrivateKeyDef extends PrivateKeyDef implements RsaKeyDef {
 
   @Override
   public Key key() {
-    return privateKey();
+    return this.privateKey();
   }
 
   @Override
   public Value toValue() {
-    return form().mold(this).toValue();
+    return RsaPrivateKeyDef.form().mold(this).toValue();
   }
 
   @Override
@@ -186,11 +148,51 @@ public class RsaPrivateKeyDef extends PrivateKeyDef implements RsaKeyDef {
 
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(RsaPrivateKeyDef.class);
+    if (RsaPrivateKeyDef.hashSeed == 0) {
+      RsaPrivateKeyDef.hashSeed = Murmur3.seed(RsaPrivateKeyDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(RsaPrivateKeyDef.hashSeed,
         this.modulus.hashCode()), this.privateExponent.hashCode()));
+  }
+
+  private static int hashSeed;
+
+  public static RsaPrivateKeyDef from(RSAPrivateKey key) {
+    if (key instanceof RSAMultiPrimePrivateCrtKey) {
+      return RsaPrivateKeyDef.from((RSAMultiPrimePrivateCrtKey) key);
+    } else if (key instanceof RSAPrivateCrtKey) {
+      return RsaPrivateKeyDef.from((RSAPrivateCrtKey) key);
+    } else {
+      return new RsaPrivateKeyDef(key.getModulus(), key.getPrivateExponent(), key);
+    }
+  }
+
+  private static RsaPrivateKeyDef from(RSAMultiPrimePrivateCrtKey key) {
+    FingerTrieSeq<RsaPrimeDef> primeDefs = FingerTrieSeq.empty();
+    primeDefs = primeDefs.appended(new RsaPrimeDef(key.getPrimeP(), key.getPrimeExponentP()));
+    primeDefs = primeDefs.appended(new RsaPrimeDef(key.getPrimeQ(), key.getPrimeExponentQ(), key.getCrtCoefficient()));
+    final RSAOtherPrimeInfo[] otherPrimes = key.getOtherPrimeInfo();
+    for (int i = 0, n = otherPrimes.length; i < n; i += 1) {
+      primeDefs = primeDefs.appended(RsaPrimeDef.from(otherPrimes[i]));
+    }
+    return new RsaPrivateKeyDef(key.getModulus(), key.getPublicExponent(), key.getPrivateExponent(), primeDefs, key);
+  }
+
+  private static RsaPrivateKeyDef from(RSAPrivateCrtKey key) {
+    FingerTrieSeq<RsaPrimeDef> primeDefs = FingerTrieSeq.empty();
+    primeDefs = primeDefs.appended(new RsaPrimeDef(key.getPrimeP(), key.getPrimeExponentP()));
+    primeDefs = primeDefs.appended(new RsaPrimeDef(key.getPrimeQ(), key.getPrimeExponentQ(), key.getCrtCoefficient()));
+    return new RsaPrivateKeyDef(key.getModulus(), key.getPublicExponent(), key.getPrivateExponent(), primeDefs, key);
+  }
+
+  private static Form<RsaPrivateKeyDef> form;
+
+  @Kind
+  public static Form<RsaPrivateKeyDef> form() {
+    if (RsaPrivateKeyDef.form == null) {
+      RsaPrivateKeyDef.form = new RsaPrivateKeyForm();
+    }
+    return RsaPrivateKeyDef.form;
   }
 
 }
@@ -212,8 +214,8 @@ final class RsaPrivateKeyForm extends Form<RsaPrivateKeyDef> {
     final FingerTrieSeq<RsaPrimeDef> primeDefs = keyDef.primeDefs;
     final int n = primeDefs.size();
     final Record record = Record.create((keyDef.publicExponent != null ? 4 : 3) + n)
-        .attr(tag())
-        .slot("modulus", Num.from(keyDef.modulus));
+                                .attr(this.tag())
+                                .slot("modulus", Num.from(keyDef.modulus));
     if (keyDef.publicExponent != null) {
       record.slot("publicExponent", Num.from(keyDef.publicExponent));
     }
@@ -227,7 +229,7 @@ final class RsaPrivateKeyForm extends Form<RsaPrivateKeyDef> {
   @Override
   public RsaPrivateKeyDef cast(Item item) {
     final Value value = item.toValue();
-    if (value.getAttr(tag()).isDefined()) {
+    if (value.getAttr(this.tag()).isDefined()) {
       BigInteger modulus = null;
       BigInteger publicExponent = null;
       BigInteger privateExponent = null;

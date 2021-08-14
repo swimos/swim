@@ -26,26 +26,12 @@ import swim.util.Murmur3;
 
 public class EcPointDef {
 
-  private static int hashSeed;
-  private static Form<EcPointDef> form;
   protected final BigInteger x;
   protected final BigInteger y;
 
   public EcPointDef(BigInteger x, BigInteger y) {
     this.x = x;
     this.y = y;
-  }
-
-  public static EcPointDef from(ECPoint point) {
-    return new EcPointDef(point.getAffineX(), point.getAffineY());
-  }
-
-  @Kind
-  public static Form<EcPointDef> form() {
-    if (form == null) {
-      form = new EcPointForm();
-    }
-    return form;
   }
 
   public final BigInteger x() {
@@ -61,7 +47,7 @@ public class EcPointDef {
   }
 
   public Value toValue() {
-    return form().mold(this).toValue();
+    return EcPointDef.form().mold(this).toValue();
   }
 
   @Override
@@ -75,13 +61,29 @@ public class EcPointDef {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(EcPointDef.class);
+    if (EcPointDef.hashSeed == 0) {
+      EcPointDef.hashSeed = Murmur3.seed(EcPointDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(EcPointDef.hashSeed,
         this.x.hashCode()), this.y.hashCode()));
+  }
+
+  public static EcPointDef from(ECPoint point) {
+    return new EcPointDef(point.getAffineX(), point.getAffineY());
+  }
+
+  private static Form<EcPointDef> form;
+
+  @Kind
+  public static Form<EcPointDef> form() {
+    if (EcPointDef.form == null) {
+      EcPointDef.form = new EcPointForm();
+    }
+    return EcPointDef.form;
   }
 
 }
@@ -101,14 +103,14 @@ final class EcPointForm extends Form<EcPointDef> {
   @Override
   public Item mold(EcPointDef pointDef) {
     final Record header = Record.create(2)
-        .slot("x", Num.from(pointDef.x))
-        .slot("y", Num.from(pointDef.y));
-    return Record.create(1).attr(tag(), header);
+                                .slot("x", Num.from(pointDef.x))
+                                .slot("y", Num.from(pointDef.y));
+    return Record.create(1).attr(this.tag(), header);
   }
 
   @Override
   public EcPointDef cast(Item item) {
-    final Value header = item.toValue().header(tag());
+    final Value header = item.toValue().header(this.tag());
     if (header.isDefined()) {
       final BigInteger x = header.get("x").integerValue(null);
       final BigInteger y = header.get("y").integerValue(null);

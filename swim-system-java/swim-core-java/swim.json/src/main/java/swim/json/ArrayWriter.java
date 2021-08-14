@@ -35,6 +35,11 @@ final class ArrayWriter<I, V> extends Writer<Object, Object> {
     this.step = step;
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return ArrayWriter.write(output, this.json, this.items, this.part, this.index, this.step);
+  }
+
   static <I, V> Writer<Object, Object> write(Output<?> output, JsonWriter<I, V> json, Iterator<I> items,
                                              Writer<?, ?> part, int index, int step) {
     if (step == 1 && output.isCont()) {
@@ -76,23 +81,18 @@ final class ArrayWriter<I, V> extends Writer<Object, Object> {
     } while (step == 2);
     if (step == 4 && output.isCont()) {
       output = output.write(']');
-      return done();
+      return Writer.done();
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new ArrayWriter<I, V>(json, items, part, index, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, JsonWriter<I, V> json, Iterator<I> items) {
-    return write(output, json, items, null, 0, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.json, this.items, this.part, this.index, this.step);
+    return ArrayWriter.write(output, json, items, null, 0, 1);
   }
 
 }

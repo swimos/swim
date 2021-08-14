@@ -31,13 +31,13 @@ public class SupplyLaneView<V> extends WarpLaneView implements SupplyLane<V> {
 
   protected final AgentContext agentContext;
   protected Form<V> valueForm;
-
   protected SupplyLaneModel laneBinding;
 
   public SupplyLaneView(AgentContext agentContext, Form<V> valueForm, Object observers) {
     super(observers);
     this.agentContext = agentContext;
     this.valueForm = valueForm;
+    this.laneBinding = null;
   }
 
   public SupplyLaneView(AgentContext agentContext, Form<V> valueForm) {
@@ -75,7 +75,7 @@ public class SupplyLaneView<V> extends WarpLaneView implements SupplyLane<V> {
 
   @Override
   public <V2> SupplyLaneView<V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   public void setValueForm(Form<V> valueForm) {
@@ -101,42 +101,42 @@ public class SupplyLaneView<V> extends WarpLaneView implements SupplyLane<V> {
 
   @Override
   public SupplyLaneView<V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public SupplyLaneView<V> didCommand(DidCommand didCommand) {
-    return observe(didCommand);
+    return this.observe(didCommand);
   }
 
   @Override
   public SupplyLaneView<V> willUplink(WillUplink willUplink) {
-    return observe(willUplink);
+    return this.observe(willUplink);
   }
 
   @Override
   public SupplyLaneView<V> didUplink(DidUplink didUplink) {
-    return observe(didUplink);
+    return this.observe(didUplink);
   }
 
   @Override
   public SupplyLaneView<V> willEnter(WillEnter willEnter) {
-    return observe(willEnter);
+    return this.observe(willEnter);
   }
 
   @Override
   public SupplyLaneView<V> didEnter(DidEnter didEnter) {
-    return observe(didEnter);
+    return this.observe(didEnter);
   }
 
   @Override
   public SupplyLaneView<V> willLeave(WillLeave willLeave) {
-    return observe(willLeave);
+    return this.observe(willLeave);
   }
 
   @Override
   public SupplyLaneView<V> didLeave(DidLeave didLeave) {
-    return observe(didLeave);
+    return this.observe(didLeave);
   }
 
   @Override

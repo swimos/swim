@@ -36,7 +36,7 @@ final class MarkupTextWriter extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.text, this.index, this.escape, this.step);
+    return MarkupTextWriter.write(output, this.text, this.index, this.escape, this.step);
   }
 
   static int sizeOf(String text) {
@@ -95,7 +95,7 @@ final class MarkupTextWriter extends Writer<Object, Object> {
             output = output.write(c);
           }
         } else {
-          return done();
+          return Writer.done();
         }
       } else if (step == 2) {
         output = output.write(escape);
@@ -120,15 +120,15 @@ final class MarkupTextWriter extends Writer<Object, Object> {
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new MarkupTextWriter(text, index, escape, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, String text) {
-    return write(output, text, 0, 0, 1);
+    return MarkupTextWriter.write(output, text, 0, 0, 1);
   }
 
 }

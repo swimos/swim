@@ -34,23 +34,10 @@ import javax.net.ssl.SSLSession;
 import swim.codec.Binary;
 import swim.codec.InputBuffer;
 import swim.codec.OutputBuffer;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 
 class TlsSocket implements Transport, IpSocketContext {
 
-  static final int CLIENT = 1 << 0;
-  static final int SERVER = 1 << 1;
-  static final int CONNECTING = 1 << 2;
-  static final int CONNECTED = 1 << 3;
-  static final int HANDSHAKING = 1 << 4;
-  static final int HANDSHAKED = 1 << 5;
-  static final int OPEN = 1 << 6;
-  static final int CLOSING_INBOUND = 1 << 7;
-  static final int CLOSING_OUTBOUND = 1 << 8;
-  static final AtomicReferenceFieldUpdater<TlsSocket, FlowControl> FLOW_CONTROL =
-      AtomicReferenceFieldUpdater.newUpdater(TlsSocket.class, FlowControl.class, "flowControl");
-  static final AtomicIntegerFieldUpdater<TlsSocket> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(TlsSocket.class, "status");
   final InetSocketAddress localAddress;
   final InetSocketAddress remoteAddress;
   final ByteBuffer readBuffer;
@@ -78,7 +65,7 @@ class TlsSocket implements Transport, IpSocketContext {
     this.sslEngine = sslEngine;
     this.ipSettings = ipSettings;
     this.flowControl = FlowControl.WAIT;
-    this.status = isClient ? CLIENT : SERVER;
+    this.status = isClient ? TlsSocket.CLIENT : TlsSocket.SERVER;
 
     final SSLSession sslSession = this.sslEngine.getSession();
     final TcpSettings tcpSettings = this.ipSettings.tcpSettings();
@@ -90,8 +77,8 @@ class TlsSocket implements Transport, IpSocketContext {
     this.inputBuffer = ByteBuffer.allocate(readBufferSize);
     this.outputBuffer = ByteBuffer.allocate(writeBufferSize);
     ((Buffer) this.outputBuffer).position(this.outputBuffer.capacity());
-    this.reader = Binary.inputBuffer(inputBuffer);
-    this.writer = Binary.outputBuffer(outputBuffer);
+    this.reader = Binary.inputBuffer(this.inputBuffer);
+    this.writer = Binary.outputBuffer(this.outputBuffer);
   }
 
   @Override
@@ -141,17 +128,17 @@ class TlsSocket implements Transport, IpSocketContext {
 
   @Override
   public boolean isConnected() {
-    return (this.status & CONNECTED) != 0;
+    return (TlsSocket.STATUS.get(this) & TlsSocket.CONNECTED) != 0;
   }
 
   @Override
   public boolean isClient() {
-    return (this.status & CLIENT) != 0;
+    return (TlsSocket.STATUS.get(this) & TlsSocket.CLIENT) != 0;
   }
 
   @Override
   public boolean isServer() {
-    return (this.status & SERVER) != 0;
+    return (TlsSocket.STATUS.get(this) & TlsSocket.SERVER) != 0;
   }
 
   @Override
@@ -223,32 +210,25 @@ class TlsSocket implements Transport, IpSocketContext {
 
   @Override
   public void flowControl(FlowControl flowControl) {
-    FLOW_CONTROL.set(this, flowControl);
-    if ((this.status & OPEN) != 0) {
+    TlsSocket.FLOW_CONTROL.set(this, flowControl);
+    if ((TlsSocket.STATUS.get(this) & TlsSocket.OPEN) != 0) {
       this.context.flowControl(flowControl);
     }
   }
 
   @Override
   public FlowControl flowControl(FlowModifier flowModifier) {
-    FlowControl oldFlow;
-    FlowControl newFlow;
     do {
-      oldFlow = this.flowControl;
-      newFlow = oldFlow.modify(flowModifier);
-      if (!oldFlow.equals(newFlow)) {
-        if (FLOW_CONTROL.compareAndSet(this, oldFlow, newFlow)) {
-          break;
+      final FlowControl oldFlowControl = this.flowControl;
+      final FlowControl newFlowControl = oldFlowControl.modify(flowModifier);
+      if (TlsSocket.FLOW_CONTROL.compareAndSet(this, oldFlowControl, newFlowControl)) {
+        if ((TlsSocket.STATUS.get(this) & TlsSocket.OPEN) != 0) {
+          return this.context.flowControl(flowModifier);
+        } else {
+          return newFlowControl;
         }
-      } else {
-        break;
       }
     } while (true);
-    if ((this.status & OPEN) != 0) {
-      return this.context.flowControl(flowModifier);
-    } else {
-      return newFlow;
-    }
   }
 
   @Override
@@ -258,12 +238,12 @@ class TlsSocket implements Transport, IpSocketContext {
       oldSocket.willBecome(newSocket);
     }
 
-    final int status = this.status;
+    final int status = TlsSocket.STATUS.get(this);
     newSocket.setIpSocketContext(this);
     this.socket = newSocket;
-    if ((status & CONNECTED) != 0) {
+    if ((status & TlsSocket.CONNECTED) != 0) {
       newSocket.didConnect();
-    } else if ((status & CONNECTING) != 0) {
+    } else if ((status & TlsSocket.CONNECTING) != 0) {
       newSocket.willConnect();
     }
 
@@ -275,10 +255,10 @@ class TlsSocket implements Transport, IpSocketContext {
   @Override
   public void close() {
     do {
-      final int oldStatus = this.status;
-      if ((oldStatus & OPEN) != 0) {
-        final int newStatus = oldStatus & ~OPEN | CLOSING_OUTBOUND;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+      final int oldStatus = TlsSocket.STATUS.get(this);
+      if ((oldStatus & TlsSocket.OPEN) != 0) {
+        final int newStatus = oldStatus & ~TlsSocket.OPEN | TlsSocket.CLOSING_OUTBOUND;
+        if (TlsSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.sslEngine.closeOutbound();
           this.context.flowControl(FlowModifier.ENABLE_READ_WRITE);
           break;
@@ -299,21 +279,20 @@ class TlsSocket implements Transport, IpSocketContext {
   public void doConnect() throws IOException {
     try {
       this.channel.finishConnect();
-      didConnect();
+      this.didConnect();
     } catch (ConnectException cause) {
-      didClose();
+      this.didClose();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
-      didFail(cause);
+      this.didFail(cause);
     }
   }
 
   @Override
   public void doRead() {
-    read:
-    do {
+    read: do {
       final SSLEngineResult result;
       try {
         result = this.sslEngine.unwrap(this.readBuffer, this.inputBuffer);
@@ -322,7 +301,7 @@ class TlsSocket implements Transport, IpSocketContext {
         this.context.close();
         return;
       } catch (Throwable cause) {
-        if (!Conts.isNonFatal(cause)) {
+        if (!Cont.isNonFatal(cause)) {
           throw cause;
         }
         this.socket.didFail(cause);
@@ -343,8 +322,7 @@ class TlsSocket implements Transport, IpSocketContext {
             }
           }
           handshakeStatus = result.getHandshakeStatus();
-          handshake:
-          do {
+          handshake: do {
             switch (handshakeStatus) {
               case NEED_UNWRAP:
                 this.context.flowControl(FlowModifier.ENABLE_READ);
@@ -372,7 +350,7 @@ class TlsSocket implements Transport, IpSocketContext {
                 } while (true);
                 continue handshake;
               case FINISHED:
-                handshakeAcknowledged();
+                this.handshakeAcknowledged();
                 break read;
               case NOT_HANDSHAKING:
                 break read;
@@ -383,7 +361,7 @@ class TlsSocket implements Transport, IpSocketContext {
           } while (true);
           // unreachable
         case CLOSED:
-          receivedClose();
+          this.receivedClose();
           break read;
         case BUFFER_UNDERFLOW:
           handshakeStatus = result.getHandshakeStatus();
@@ -412,7 +390,7 @@ class TlsSocket implements Transport, IpSocketContext {
 
   @Override
   public void doWrite() {
-    if ((this.status & OPEN) != 0 && !this.outputBuffer.hasRemaining()) {
+    if ((TlsSocket.STATUS.get(this) & TlsSocket.OPEN) != 0 && !this.outputBuffer.hasRemaining()) {
       ((Buffer) this.outputBuffer).clear();
       this.socket.doWrite();
       ((Buffer) this.outputBuffer).flip();
@@ -425,7 +403,7 @@ class TlsSocket implements Transport, IpSocketContext {
       this.context.close();
       return;
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       this.socket.didFail(cause);
@@ -436,8 +414,7 @@ class TlsSocket implements Transport, IpSocketContext {
     switch (sslStatus) {
       case OK:
         SSLEngineResult.HandshakeStatus handshakeStatus = result.getHandshakeStatus();
-        handshake:
-        do {
+        handshake: do {
           switch (handshakeStatus) {
             case NEED_UNWRAP:
               this.context.flowControl(FlowModifier.ENABLE_READ);
@@ -447,7 +424,7 @@ class TlsSocket implements Transport, IpSocketContext {
               break;
             case FINISHED:
               this.context.flowControl(FlowModifier.DISABLE_WRITE);
-              handshakeFinished();
+              this.handshakeFinished();
               break;
             case NEED_TASK:
               do {
@@ -490,11 +467,10 @@ class TlsSocket implements Transport, IpSocketContext {
 
   @Override
   public void didWrite() {
-    final int status = this.status;
-    if ((status & HANDSHAKING) != 0) {
+    final int status = TlsSocket.STATUS.get(this);
+    if ((status & TlsSocket.HANDSHAKING) != 0) {
       SSLEngineResult.HandshakeStatus handshakeStatus = this.sslEngine.getHandshakeStatus();
-      handshake:
-      do {
+      handshake: do {
         switch (handshakeStatus) {
           case NEED_UNWRAP:
             this.context.flowControl(FlowModifier.DISABLE_WRITE_ENABLE_READ);
@@ -524,19 +500,19 @@ class TlsSocket implements Transport, IpSocketContext {
         }
         break;
       } while (true);
-    } else if ((status & HANDSHAKED) != 0) {
-      handshakeAcknowledged();
-    } else if ((status & OPEN) != 0) {
+    } else if ((status & TlsSocket.HANDSHAKED) != 0) {
+      this.handshakeAcknowledged();
+    } else if ((status & TlsSocket.OPEN) != 0) {
       this.socket.didWrite();
     }
   }
 
   void handshakeFinished() {
     do {
-      final int oldStatus = this.status;
-      if ((oldStatus & (HANDSHAKING | HANDSHAKED)) != HANDSHAKED) {
-        final int newStatus = oldStatus & ~HANDSHAKING | HANDSHAKED;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+      final int oldStatus = TlsSocket.STATUS.get(this);
+      if ((oldStatus & (TlsSocket.HANDSHAKING | TlsSocket.HANDSHAKED)) != TlsSocket.HANDSHAKED) {
+        final int newStatus = oldStatus & ~TlsSocket.HANDSHAKING | TlsSocket.HANDSHAKED;
+        if (TlsSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           break;
         }
       } else {
@@ -547,10 +523,10 @@ class TlsSocket implements Transport, IpSocketContext {
 
   void handshakeAcknowledged() {
     do {
-      final int oldStatus = this.status;
-      if ((oldStatus & (HANDSHAKING | HANDSHAKED)) != 0) {
-        final int newStatus = oldStatus & ~(HANDSHAKING | HANDSHAKED) | OPEN;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+      final int oldStatus = TlsSocket.STATUS.get(this);
+      if ((oldStatus & (TlsSocket.HANDSHAKING | TlsSocket.HANDSHAKED)) != 0) {
+        final int newStatus = oldStatus & ~(TlsSocket.HANDSHAKING | TlsSocket.HANDSHAKED) | TlsSocket.OPEN;
+        if (TlsSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.socket.didSecure();
           this.context.flowControl(this.flowControl);
           break;
@@ -563,16 +539,16 @@ class TlsSocket implements Transport, IpSocketContext {
 
   void receivedClose() {
     do {
-      final int oldStatus = this.status;
-      if ((oldStatus & CLOSING_OUTBOUND) != 0) {
-        final int newStatus = oldStatus & ~CLOSING_OUTBOUND;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+      final int oldStatus = TlsSocket.STATUS.get(this);
+      if ((oldStatus & TlsSocket.CLOSING_OUTBOUND) != 0) {
+        final int newStatus = oldStatus & ~TlsSocket.CLOSING_OUTBOUND;
+        if (TlsSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.context.close();
           break;
         }
-      } else if ((oldStatus & CLOSING_INBOUND) == 0) {
-        final int newStatus = oldStatus & ~OPEN | CLOSING_INBOUND;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+      } else if ((oldStatus & TlsSocket.CLOSING_INBOUND) == 0) {
+        final int newStatus = oldStatus & ~TlsSocket.OPEN | TlsSocket.CLOSING_INBOUND;
+        if (TlsSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.sslEngine.closeOutbound();
           this.context.flowControl(FlowModifier.ENABLE_READ_WRITE);
           break;
@@ -585,10 +561,10 @@ class TlsSocket implements Transport, IpSocketContext {
 
   void willConnect() {
     do {
-      final int oldStatus = this.status;
-      if ((oldStatus & CONNECTING) == 0) {
-        final int newStatus = oldStatus | CONNECTING;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+      final int oldStatus = TlsSocket.STATUS.get(this);
+      if ((oldStatus & TlsSocket.CONNECTING) == 0) {
+        final int newStatus = oldStatus | TlsSocket.CONNECTING;
+        if (TlsSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.socket.willConnect();
           break;
         }
@@ -600,14 +576,14 @@ class TlsSocket implements Transport, IpSocketContext {
 
   void didConnect() throws SSLException {
     do {
-      final int oldStatus = this.status;
-      if ((oldStatus & (CONNECTING | CONNECTED | HANDSHAKING)) != (CONNECTED | HANDSHAKING)) {
-        final int newStatus = oldStatus & ~CONNECTING | (CONNECTED | HANDSHAKING);
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          if ((oldStatus & CONNECTED) != (newStatus & CONNECTED)) {
+      final int oldStatus = TlsSocket.STATUS.get(this);
+      if ((oldStatus & (TlsSocket.CONNECTING | TlsSocket.CONNECTED | TlsSocket.HANDSHAKING)) != (TlsSocket.CONNECTED | TlsSocket.HANDSHAKING)) {
+        final int newStatus = oldStatus & ~TlsSocket.CONNECTING | (TlsSocket.CONNECTED | TlsSocket.HANDSHAKING);
+        if (TlsSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+          if ((oldStatus & TlsSocket.CONNECTED) != (newStatus & TlsSocket.CONNECTED)) {
             this.socket.didConnect();
           }
-          if ((oldStatus & HANDSHAKING) != (newStatus & HANDSHAKING)) {
+          if ((oldStatus & TlsSocket.HANDSHAKING) != (newStatus & TlsSocket.HANDSHAKING)) {
             this.socket.willSecure();
           }
           this.sslEngine.beginHandshake();
@@ -633,10 +609,10 @@ class TlsSocket implements Transport, IpSocketContext {
   @Override
   public void didClose() {
     do {
-      final int oldStatus = this.status;
-      if ((oldStatus & (CONNECTING | CONNECTED | HANDSHAKING | HANDSHAKED | OPEN | CLOSING_INBOUND | CLOSING_OUTBOUND)) != 0) {
-        final int newStatus = oldStatus & ~(CONNECTING | CONNECTED | HANDSHAKING | HANDSHAKED | OPEN | CLOSING_INBOUND | CLOSING_OUTBOUND);
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+      final int oldStatus = TlsSocket.STATUS.get(this);
+      if ((oldStatus & (TlsSocket.CONNECTING | TlsSocket.CONNECTED | TlsSocket.HANDSHAKING | TlsSocket.HANDSHAKED | TlsSocket.OPEN | TlsSocket.CLOSING_INBOUND | TlsSocket.CLOSING_OUTBOUND)) != 0) {
+        final int newStatus = oldStatus & ~(TlsSocket.CONNECTING | TlsSocket.CONNECTED | TlsSocket.HANDSHAKING | TlsSocket.HANDSHAKED | TlsSocket.OPEN | TlsSocket.CLOSING_INBOUND | TlsSocket.CLOSING_OUTBOUND);
+        if (TlsSocket.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.socket.didDisconnect();
           break;
         }
@@ -658,7 +634,7 @@ class TlsSocket implements Transport, IpSocketContext {
       try {
         this.socket.didFail(error);
       } catch (Throwable cause) {
-        if (!Conts.isNonFatal(cause)) {
+        if (!Cont.isNonFatal(cause)) {
           throw cause;
         }
         failure = cause;
@@ -671,5 +647,21 @@ class TlsSocket implements Transport, IpSocketContext {
       throw (Error) failure;
     }
   }
+
+  static final int CLIENT = 1 << 0;
+  static final int SERVER = 1 << 1;
+  static final int CONNECTING = 1 << 2;
+  static final int CONNECTED = 1 << 3;
+  static final int HANDSHAKING = 1 << 4;
+  static final int HANDSHAKED = 1 << 5;
+  static final int OPEN = 1 << 6;
+  static final int CLOSING_INBOUND = 1 << 7;
+  static final int CLOSING_OUTBOUND = 1 << 8;
+
+  static final AtomicReferenceFieldUpdater<TlsSocket, FlowControl> FLOW_CONTROL =
+      AtomicReferenceFieldUpdater.newUpdater(TlsSocket.class, FlowControl.class, "flowControl");
+
+  static final AtomicIntegerFieldUpdater<TlsSocket> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(TlsSocket.class, "status");
 
 }

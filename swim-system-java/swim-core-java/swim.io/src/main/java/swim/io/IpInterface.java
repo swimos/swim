@@ -23,97 +23,97 @@ public interface IpInterface {
   IpServiceRef bindTcp(InetSocketAddress localAddress, IpService service, IpSettings ipSettings);
 
   default IpServiceRef bindTcp(InetSocketAddress localAddress, IpService service) {
-    return bindTcp(localAddress, service, ipSettings());
+    return this.bindTcp(localAddress, service, this.ipSettings());
   }
 
   default IpServiceRef bindTcp(String address, int port, IpService service, IpSettings ipSettings) {
-    return bindTcp(new InetSocketAddress(address, port), service, ipSettings);
+    return this.bindTcp(new InetSocketAddress(address, port), service, ipSettings);
   }
 
   default IpServiceRef bindTcp(String address, int port, IpService service) {
-    return bindTcp(new InetSocketAddress(address, port), service, ipSettings());
+    return this.bindTcp(new InetSocketAddress(address, port), service, this.ipSettings());
   }
 
   IpServiceRef bindTls(InetSocketAddress localAddress, IpService service, IpSettings ipSettings);
 
   default IpServiceRef bindTls(InetSocketAddress localAddress, IpService service) {
-    return bindTls(localAddress, service, ipSettings());
+    return this.bindTls(localAddress, service, this.ipSettings());
   }
 
   default IpServiceRef bindTls(String address, int port, IpService service, IpSettings ipSettings) {
-    return bindTls(new InetSocketAddress(address, port), service, ipSettings);
+    return this.bindTls(new InetSocketAddress(address, port), service, ipSettings);
   }
 
   default IpServiceRef bindTls(String address, int port, IpService service) {
-    return bindTls(new InetSocketAddress(address, port), service, ipSettings());
+    return this.bindTls(new InetSocketAddress(address, port), service, this.ipSettings());
   }
 
   IpSocketRef connectTcp(InetSocketAddress remoteAddress, IpSocket socket, IpSettings ipSettings);
 
   default IpSocketRef connectTcp(InetSocketAddress remoteAddress, IpSocket socket) {
-    return connectTcp(remoteAddress, socket, ipSettings());
+    return this.connectTcp(remoteAddress, socket, this.ipSettings());
   }
 
   default IpSocketRef connectTcp(String address, int port, IpSocket socket, IpSettings ipSettings) {
-    return connectTcp(new InetSocketAddress(address, port), socket, ipSettings);
+    return this.connectTcp(new InetSocketAddress(address, port), socket, ipSettings);
   }
 
   default IpSocketRef connectTcp(String address, int port, IpSocket socket) {
-    return connectTcp(new InetSocketAddress(address, port), socket, ipSettings());
+    return this.connectTcp(new InetSocketAddress(address, port), socket, this.ipSettings());
   }
 
   default <I, O> IpSocketRef connectTcp(InetSocketAddress remoteAddress, IpModem<I, O> modem, IpSettings ipSettings) {
     final IpSocket socket = new IpSocketModem<I, O>(modem);
-    return connectTcp(remoteAddress, socket, ipSettings);
+    return this.connectTcp(remoteAddress, socket, ipSettings);
   }
 
   default <I, O> IpSocketRef connectTcp(InetSocketAddress remoteAddress, IpModem<I, O> modem) {
     final IpSocket socket = new IpSocketModem<I, O>(modem);
-    return connectTcp(remoteAddress, socket, ipSettings());
+    return this.connectTcp(remoteAddress, socket, this.ipSettings());
   }
 
   default <I, O> IpSocketRef connectTcp(String address, int port, IpModem<I, O> modem, IpSettings ipSettings) {
     final IpSocket socket = new IpSocketModem<I, O>(modem);
-    return connectTcp(new InetSocketAddress(address, port), socket, ipSettings);
+    return this.connectTcp(new InetSocketAddress(address, port), socket, ipSettings);
   }
 
   default <I, O> IpSocketRef connectTcp(String address, int port, IpModem<I, O> modem) {
     final IpSocket socket = new IpSocketModem<I, O>(modem);
-    return connectTcp(new InetSocketAddress(address, port), socket, ipSettings());
+    return this.connectTcp(new InetSocketAddress(address, port), socket, this.ipSettings());
   }
 
   IpSocketRef connectTls(InetSocketAddress remoteAddress, IpSocket socket, IpSettings ipSettings);
 
   default IpSocketRef connectTls(InetSocketAddress remoteAddress, IpSocket socket) {
-    return connectTls(remoteAddress, socket, ipSettings());
+    return this.connectTls(remoteAddress, socket, this.ipSettings());
   }
 
   default IpSocketRef connectTls(String address, int port, IpSocket socket, IpSettings ipSettings) {
-    return connectTls(new InetSocketAddress(address, port), socket, ipSettings);
+    return this.connectTls(new InetSocketAddress(address, port), socket, ipSettings);
   }
 
   default IpSocketRef connectTls(String address, int port, IpSocket socket) {
-    return connectTls(new InetSocketAddress(address, port), socket, ipSettings());
+    return this.connectTls(new InetSocketAddress(address, port), socket, this.ipSettings());
   }
 
   default <I, O> IpSocketRef connectTls(InetSocketAddress remoteAddress, IpModem<I, O> modem, IpSettings ipSettings) {
     final IpSocket socket = new IpSocketModem<I, O>(modem);
-    return connectTls(remoteAddress, socket, ipSettings);
+    return this.connectTls(remoteAddress, socket, ipSettings);
   }
 
   default <I, O> IpSocketRef connectTls(InetSocketAddress remoteAddress, IpModem<I, O> modem) {
     final IpSocket socket = new IpSocketModem<I, O>(modem);
-    return connectTls(remoteAddress, socket, ipSettings());
+    return this.connectTls(remoteAddress, socket, this.ipSettings());
   }
 
   default <I, O> IpSocketRef connectTls(String address, int port, IpModem<I, O> modem, IpSettings ipSettings) {
     final IpSocket socket = new IpSocketModem<I, O>(modem);
-    return connectTls(new InetSocketAddress(address, port), socket, ipSettings);
+    return this.connectTls(new InetSocketAddress(address, port), socket, ipSettings);
   }
 
   default <I, O> IpSocketRef connectTls(String address, int port, IpModem<I, O> modem) {
     final IpSocket socket = new IpSocketModem<I, O>(modem);
-    return connectTls(new InetSocketAddress(address, port), socket, ipSettings());
+    return this.connectTls(new InetSocketAddress(address, port), socket, this.ipSettings());
   }
 
 }

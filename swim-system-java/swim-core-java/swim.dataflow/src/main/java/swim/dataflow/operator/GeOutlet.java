@@ -20,8 +20,8 @@ import swim.structure.Value;
 public final class GeOutlet extends BinaryOutlet {
 
   @Override
-  protected Item evaluate(Value argument1, Value argument2) {
-    return argument1.ge(argument2);
+  protected Item evaluate(Value lhs, Value rhs) {
+    return lhs.ge(rhs);
   }
 
 }

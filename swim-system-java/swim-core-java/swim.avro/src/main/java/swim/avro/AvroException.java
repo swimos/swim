@@ -16,8 +16,6 @@ package swim.avro;
 
 public class AvroException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public AvroException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class AvroException extends RuntimeException {
   public AvroException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

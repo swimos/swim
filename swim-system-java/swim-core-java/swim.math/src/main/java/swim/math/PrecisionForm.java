@@ -40,8 +40,7 @@ final class PrecisionForm extends Form<Precision> {
   @Override
   public Item mold(Precision precision) {
     if (precision != null) {
-      return Record.create(1).attr(tag(), Record.create(1)
-          .slot("bits", precision.bits));
+      return Record.create(1).attr(this.tag(), Record.create(1).slot("bits", precision.bits));
     } else {
       return Item.extant();
     }
@@ -49,7 +48,7 @@ final class PrecisionForm extends Form<Precision> {
 
   @Override
   public Precision cast(Item item) {
-    final Value header = item.toValue().getAttr(tag());
+    final Value header = item.toValue().getAttr(this.tag());
     if (header.isDefined()) {
       final Value bits = header.get("bits");
       if (bits instanceof Num) {

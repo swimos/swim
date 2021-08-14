@@ -19,7 +19,7 @@ import swim.codec.OutputBuffer;
 
 /**
  * Network socket context that manages asynchronous I/O operations for a
- * non-blocking NIO network channel.  An {@code IpSocketContext} is implicitly
+ * non-blocking NIO network channel. An {@code IpSocketContext} is implicitly
  * bound to an {@link IpSocket}, providing the {@code IpSocket} with the
  * ability to modify its {@link FlowControl} state, access its read and write
  * buffers, to {@link #become(IpSocket) become} a different kind of {@code
@@ -35,14 +35,14 @@ public interface IpSocketContext extends IpSocketRef, FlowContext {
 
   /**
    * Returns the buffer into which input data is read by the underlying network
-   * socket.  The bound {@code IpSocket} reads from this buffer in response to
+   * socket. The bound {@code IpSocket} reads from this buffer in response to
    * {@link IpSocket#doRead() doRead} callbacks.
    */
   InputBuffer inputBuffer();
 
   /**
    * Returns the buffer from which output data is written by the underlying
-   * network socket.  The bound {@code IpSocket} writes to this buffer in
+   * network socket. The bound {@code IpSocket} writes to this buffer in
    * repsonse to {@link IpSocket#doWrite() doWrite} callbacks.
    */
   OutputBuffer<?> outputBuffer();

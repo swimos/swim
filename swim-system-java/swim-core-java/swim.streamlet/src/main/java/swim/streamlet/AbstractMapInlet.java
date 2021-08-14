@@ -38,7 +38,7 @@ public abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
   @Override
   public void bindInput(Outlet<? extends O> input) {
     if (input instanceof MapOutlet<?, ?, ?>) {
-      bindInput((MapOutlet<K, V, ? extends O>) input);
+      this.bindInput((MapOutlet<K, V, ? extends O>) input);
     } else {
       throw new IllegalArgumentException(input.toString());
     }
@@ -81,21 +81,21 @@ public abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
   public void decohereOutputKey(K key, KeyEffect effect) {
     final HashTrieMap<K, KeyEffect> oldEffects = this.effects;
     if (oldEffects.get(key) != effect) {
-      willDecohereOutputKey(key, effect);
+      this.willDecohereOutputKey(key, effect);
       this.effects = oldEffects.updated(key, effect);
       this.version = -1;
-      onDecohereOutputKey(key, effect);
-      didDecohereOutputKey(key, effect);
+      this.onDecohereOutputKey(key, effect);
+      this.didDecohereOutputKey(key, effect);
     }
   }
 
   @Override
   public void decohereOutput() {
     if (this.version >= 0) {
-      willDecohereOutput();
+      this.willDecohereOutput();
       this.version = -1;
-      onDecohereOutput();
-      didDecohereOutput();
+      this.onDecohereOutput();
+      this.didDecohereOutput();
     }
   }
 
@@ -105,13 +105,13 @@ public abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
       final HashTrieMap<K, KeyEffect> oldEffects = this.effects;
       final KeyEffect effect = oldEffects.get(key);
       if (effect != null) {
-        willRecohereOutputKey(key, effect, version);
+        this.willRecohereOutputKey(key, effect, version);
         this.effects = oldEffects.removed(key);
         if (this.input != null) {
           this.input.recohereInputKey(key, version);
         }
-        onRecohereOutputKey(key, effect, version);
-        didRecohereOutputKey(key, effect, version);
+        this.onRecohereOutputKey(key, effect, version);
+        this.didRecohereOutputKey(key, effect, version);
       }
     }
   }
@@ -119,14 +119,14 @@ public abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
   @Override
   public void recohereOutput(int version) {
     if (this.version < 0) {
-      willRecohereOutput(version);
+      this.willRecohereOutput(version);
       final Iterator<K> keys = this.effects.keyIterator();
       while (keys.hasNext()) {
-        recohereOutputKey(keys.next(), version);
+        this.recohereOutputKey(keys.next(), version);
       }
       this.version = version;
-      onRecohereOutput(version);
-      didRecohereOutput(version);
+      this.onRecohereOutput(version);
+      this.didRecohereOutput(version);
     }
   }
 

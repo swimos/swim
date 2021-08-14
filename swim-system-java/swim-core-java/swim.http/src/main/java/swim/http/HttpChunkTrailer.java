@@ -24,39 +24,10 @@ import swim.util.Murmur3;
 
 public final class HttpChunkTrailer extends HttpPart implements Debug {
 
-  private static int hashSeed;
-  private static HttpChunkTrailer empty;
   final FingerTrieSeq<HttpHeader> headers;
 
   HttpChunkTrailer(FingerTrieSeq<HttpHeader> headers) {
     this.headers = headers;
-  }
-
-  public static HttpChunkTrailer empty() {
-    if (empty == null) {
-      empty = new HttpChunkTrailer(FingerTrieSeq.<HttpHeader>empty());
-    }
-    return empty;
-  }
-
-  public static HttpChunkTrailer from(FingerTrieSeq<HttpHeader> headers) {
-    if (headers.isEmpty()) {
-      return empty();
-    } else {
-      return new HttpChunkTrailer(headers);
-    }
-  }
-
-  public static HttpChunkTrailer from(HttpHeader... headers) {
-    if (headers.length == 0) {
-      return empty();
-    } else {
-      return new HttpChunkTrailer(FingerTrieSeq.of(headers));
-    }
-  }
-
-  public static HttpChunkTrailer parse(String chunkTrailer) {
-    return Http.standardParser().parseChunkTrailerString(chunkTrailer);
   }
 
   public FingerTrieSeq<HttpHeader> headers() {
@@ -84,32 +55,64 @@ public final class HttpChunkTrailer extends HttpPart implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(HttpChunkTrailer.class);
+    if (HttpChunkTrailer.hashSeed == 0) {
+      HttpChunkTrailer.hashSeed = Murmur3.seed(HttpChunkTrailer.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.headers.hashCode()));
+    return Murmur3.mash(Murmur3.mix(HttpChunkTrailer.hashSeed, this.headers.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("HttpChunkTrailer").write('.');
     final Iterator<HttpHeader> headers = this.headers.iterator();
     if (headers.hasNext()) {
-      output = output.write("apply").write('(').debug(headers.next());
+      output = output.write("create").write('(').debug(headers.next());
       while (headers.hasNext()) {
         output = output.write(", ").debug(headers.next());
       }
-      output = output.write(')');
     } else {
-      output = output.write("empty").write('(').write(')');
+      output = output.write("empty").write('(');
     }
+    output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static HttpChunkTrailer empty;
+
+  public static HttpChunkTrailer empty() {
+    if (HttpChunkTrailer.empty == null) {
+      HttpChunkTrailer.empty = new HttpChunkTrailer(FingerTrieSeq.<HttpHeader>empty());
+    }
+    return HttpChunkTrailer.empty;
+  }
+
+  public static HttpChunkTrailer create(FingerTrieSeq<HttpHeader> headers) {
+    if (headers.isEmpty()) {
+      return HttpChunkTrailer.empty();
+    } else {
+      return new HttpChunkTrailer(headers);
+    }
+  }
+
+  public static HttpChunkTrailer create(HttpHeader... headers) {
+    if (headers.length == 0) {
+      return HttpChunkTrailer.empty();
+    } else {
+      return new HttpChunkTrailer(FingerTrieSeq.of(headers));
+    }
+  }
+
+  public static HttpChunkTrailer parse(String chunkTrailer) {
+    return Http.standardParser().parseChunkTrailerString(chunkTrailer);
   }
 
 }

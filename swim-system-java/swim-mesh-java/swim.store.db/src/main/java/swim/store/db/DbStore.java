@@ -50,6 +50,7 @@ public class DbStore implements StoreBinding, StoreContext {
   public DbStore(Store store, Value name) {
     this.store = store;
     this.name = name;
+    this.storeContext = null;
   }
 
   @Override
@@ -77,7 +78,7 @@ public class DbStore implements StoreBinding, StoreContext {
 
   @Override
   public void closeData(Value name) {
-    final Value treeName = treeName(name);
+    final Value treeName = this.treeName(name);
     this.store.database().closeTrunk(treeName);
   }
 
@@ -98,7 +99,7 @@ public class DbStore implements StoreBinding, StoreContext {
 
   @Override
   public StoreBinding openStore(Value name) {
-    final Value storeName = storeName(name);
+    final Value storeName = this.storeName(name);
     return new DbStore(this.store, storeName);
   }
 
@@ -109,7 +110,7 @@ public class DbStore implements StoreBinding, StoreContext {
 
   @Override
   public ListDataBinding openListData(Value name) {
-    final Value treeName = treeName(name);
+    final Value treeName = this.treeName(name);
     final STreeList stree = this.store.database().openSTreeList(treeName);
     return new ListDataModel(treeName, stree);
   }
@@ -121,7 +122,7 @@ public class DbStore implements StoreBinding, StoreContext {
 
   @Override
   public MapDataBinding openMapData(Value name) {
-    final Value treeName = treeName(name);
+    final Value treeName = this.treeName(name);
     final BTreeMap btree = this.store.database().openBTreeMap(treeName);
     return new MapDataModel(treeName, btree);
   }
@@ -133,7 +134,7 @@ public class DbStore implements StoreBinding, StoreContext {
 
   @Override
   public <S> SpatialDataBinding<S> openSpatialData(Value name, Z2Form<S> shapeForm) {
-    final Value treeName = treeName(name);
+    final Value treeName = this.treeName(name);
     final QTreeMap<S> qtree = this.store.database().openQTreeMap(treeName, shapeForm);
     return new SpatialDataModel<S>(treeName, qtree);
   }
@@ -145,7 +146,7 @@ public class DbStore implements StoreBinding, StoreContext {
 
   @Override
   public ValueDataBinding openValueData(Value name) {
-    final Value treeName = treeName(name);
+    final Value treeName = this.treeName(name);
     final UTreeValue utree = this.store.database().openUTreeValue(treeName);
     return new ValueDataModel(treeName, utree);
   }
@@ -157,60 +158,60 @@ public class DbStore implements StoreBinding, StoreContext {
 
   @Override
   public ListData<Value> listData(Value name) {
-    ListDataBinding dataBinding = openListData(name);
-    dataBinding = injectListData(dataBinding);
+    ListDataBinding dataBinding = this.openListData(name);
+    dataBinding = this.injectListData(dataBinding);
     return dataBinding;
   }
 
   @Override
   public ListData<Value> listData(String name) {
-    return listData(Text.from(name));
+    return this.listData(Text.from(name));
   }
 
   @Override
   public MapData<Value, Value> mapData(Value name) {
-    MapDataBinding dataBinding = openMapData(name);
-    dataBinding = injectMapData(dataBinding);
+    MapDataBinding dataBinding = this.openMapData(name);
+    dataBinding = this.injectMapData(dataBinding);
     return dataBinding;
   }
 
   @Override
   public MapData<Value, Value> mapData(String name) {
-    return mapData(Text.from(name));
+    return this.mapData(Text.from(name));
   }
 
   @Override
   public <S> SpatialData<Value, S, Value> spatialData(Value name, Z2Form<S> shapeForm) {
-    SpatialDataBinding<S> dataBinding = openSpatialData(name, shapeForm);
-    dataBinding = injectSpatialData(dataBinding);
+    SpatialDataBinding<S> dataBinding = this.openSpatialData(name, shapeForm);
+    dataBinding = this.injectSpatialData(dataBinding);
     return dataBinding;
   }
 
   @Override
   public <S> SpatialData<Value, S, Value> spatialData(String name, Z2Form<S> shapeForm) {
-    return spatialData(Text.from(name), shapeForm);
+    return this.spatialData(Text.from(name), shapeForm);
   }
 
   @Override
   public SpatialData<Value, R2Shape, Value> geospatialData(Value name) {
-    return spatialData(name, GeoProjection.wgs84Form());
+    return this.spatialData(name, GeoProjection.wgs84Form());
   }
 
   @Override
   public SpatialData<Value, R2Shape, Value> geospatialData(String name) {
-    return geospatialData(Text.from(name));
+    return this.geospatialData(Text.from(name));
   }
 
   @Override
   public ValueData<Value> valueData(Value name) {
-    ValueDataBinding dataBinding = openValueData(name);
-    dataBinding = injectValueData(dataBinding);
+    ValueDataBinding dataBinding = this.openValueData(name);
+    dataBinding = this.injectValueData(dataBinding);
     return dataBinding;
   }
 
   @Override
   public ValueData<Value> valueData(String name) {
-    return valueData(Text.from(name));
+    return this.valueData(Text.from(name));
   }
 
 }

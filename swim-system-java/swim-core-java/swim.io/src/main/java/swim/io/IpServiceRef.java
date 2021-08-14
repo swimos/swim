@@ -23,7 +23,7 @@ public interface IpServiceRef {
 
   /**
    * Returns the IP address and port to which the underlying network listener
-   * is bound.  Returns {@code null} if the underlying network listener is not
+   * is bound. Returns {@code null} if the underlying network listener is not
    * currently bound.
    */
   InetSocketAddress localAddress();

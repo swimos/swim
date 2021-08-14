@@ -28,31 +28,10 @@ import swim.util.Murmur3;
 
 public final class AcceptLanguage extends HttpHeader {
 
-  private static int hashSeed;
   final FingerTrieSeq<LanguageRange> languages;
 
   AcceptLanguage(FingerTrieSeq<LanguageRange> languages) {
     this.languages = languages;
-  }
-
-  public static AcceptLanguage from(FingerTrieSeq<LanguageRange> languages) {
-    return new AcceptLanguage(languages);
-  }
-
-  public static AcceptLanguage from(LanguageRange... languages) {
-    return new AcceptLanguage(FingerTrieSeq.of(languages));
-  }
-
-  public static AcceptLanguage from(String... languageStrings) {
-    final Builder<LanguageRange, FingerTrieSeq<LanguageRange>> languages = FingerTrieSeq.builder();
-    for (int i = 0, n = languageStrings.length; i < n; i += 1) {
-      languages.add(LanguageRange.parse(languageStrings[i]));
-    }
-    return new AcceptLanguage(languages.bind());
-  }
-
-  public static Parser<AcceptLanguage> parseHttpValue(Input input, HttpParser http) {
-    return AcceptLanguageParser.parse(input, http);
   }
 
   @Override
@@ -90,25 +69,48 @@ public final class AcceptLanguage extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(AcceptLanguage.class);
+    if (AcceptLanguage.hashSeed == 0) {
+      AcceptLanguage.hashSeed = Murmur3.seed(AcceptLanguage.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.languages.hashCode()));
+    return Murmur3.mash(Murmur3.mix(AcceptLanguage.hashSeed, this.languages.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("AcceptLanguage").write('.').write("from").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("AcceptLanguage").write('.').write("create").write('(');
     final int n = this.languages.size();
     if (n > 0) {
-      output.debug(this.languages.head());
+      output = output.debug(this.languages.head());
       for (int i = 1; i < n; i += 1) {
         output = output.write(", ").debug(this.languages.get(i));
       }
     }
     output = output.write(')');
+    return output;
+  }
+
+  public static AcceptLanguage create(FingerTrieSeq<LanguageRange> languages) {
+    return new AcceptLanguage(languages);
+  }
+
+  public static AcceptLanguage create(LanguageRange... languages) {
+    return new AcceptLanguage(FingerTrieSeq.of(languages));
+  }
+
+  public static AcceptLanguage create(String... languageStrings) {
+    final Builder<LanguageRange, FingerTrieSeq<LanguageRange>> languages = FingerTrieSeq.builder();
+    for (int i = 0, n = languageStrings.length; i < n; i += 1) {
+      languages.add(LanguageRange.parse(languageStrings[i]));
+    }
+    return new AcceptLanguage(languages.bind());
+  }
+
+  public static Parser<AcceptLanguage> parseHttpValue(Input input, HttpParser http) {
+    return AcceptLanguageParser.parse(input, http);
   }
 
 }

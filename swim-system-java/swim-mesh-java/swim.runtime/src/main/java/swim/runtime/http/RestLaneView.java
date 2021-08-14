@@ -70,32 +70,32 @@ public class RestLaneView<V> extends HttpLaneView<V> {
 
   @Override
   public RestLaneView<V> decodeRequest(DecodeRequestHttp<V> decodeRequest) {
-    return observe(decodeRequest);
+    return this.observe(decodeRequest);
   }
 
   @Override
   public RestLaneView<V> willRequest(WillRequestHttp<?> willRequest) {
-    return observe(willRequest);
+    return this.observe(willRequest);
   }
 
   @Override
   public RestLaneView<V> didRequest(DidRequestHttp<V> didRequest) {
-    return observe(didRequest);
+    return this.observe(didRequest);
   }
 
   @Override
   public RestLaneView<V> doRespond(DoRespondHttp<V> doRespond) {
-    return observe(doRespond);
+    return this.observe(doRespond);
   }
 
   @Override
   public RestLaneView<V> willRespond(WillRespondHttp<?> willRespond) {
-    return observe(willRespond);
+    return this.observe(willRespond);
   }
 
   @Override
   public RestLaneView<V> didRespond(DidRespondHttp<?> didRespond) {
-    return observe(didRespond);
+    return this.observe(didRespond);
   }
 
 }

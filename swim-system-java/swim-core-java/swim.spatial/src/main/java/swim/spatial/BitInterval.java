@@ -55,7 +55,7 @@ import java.util.Comparator;
 public final class BitInterval {
 
   private BitInterval() {
-    // stub
+    // static
   }
 
   public static long from(int rank, long base) {
@@ -68,7 +68,7 @@ public final class BitInterval {
     final int rank = 64 - Long.numberOfLeadingZeros(-1L & x0 & x1 ^ (x0 | x1));
     final long mask = ~((1L << rank) - 1L);
     final long base = (x0 | x1) & mask;
-    return from(rank, base);
+    return BitInterval.from(rank, base);
   }
 
   public static long union(long a, long b) {
@@ -79,7 +79,7 @@ public final class BitInterval {
     final long base = aBase | bBase;
     final long mask = -1L & aBase & bBase ^ base;
     final int rank = Math.max(64 - Long.numberOfLeadingZeros(mask), Math.max(aRank, bRank));
-    return from(rank, base);
+    return BitInterval.from(rank, base);
   }
 
   public static int rank(long bitInterval) {
@@ -87,12 +87,12 @@ public final class BitInterval {
   }
 
   public static long base(long bitInterval) {
-    final int rank = rank(bitInterval);
+    final int rank = BitInterval.rank(bitInterval);
     return rank < 64 ? bitInterval << rank : 0L;
   }
 
   public static long mask(long bitInterval) {
-    final int rank = rank(bitInterval);
+    final int rank = BitInterval.rank(bitInterval);
     return rank < 64 ? ~((1L << rank) - 1L) : 0L;
   }
 
@@ -112,9 +112,9 @@ public final class BitInterval {
   }
 
   public static int compare(long xa, long ya, long xb, long yb) {
-    int order = compare(xa, xb);
+    int order = BitInterval.compare(xa, xb);
     if (order == 0) {
-      order = compare(ya, yb);
+      order = BitInterval.compare(ya, yb);
     }
     return order;
   }
@@ -129,7 +129,7 @@ public final class BitInterval {
   }
 
   public static boolean contains(long xq, long yq, long xa, long ya) {
-    return contains(xq, xa) && contains(yq, ya);
+    return BitInterval.contains(xq, xa) && contains(yq, ya);
   }
 
   public static boolean intersects(long q, long a) {
@@ -144,11 +144,11 @@ public final class BitInterval {
   }
 
   public static boolean intersects(long xq, long yq, long xa, long ya) {
-    return intersects(xq, xa) && intersects(yq, ya);
+    return BitInterval.intersects(xq, xa) && BitInterval.intersects(yq, ya);
   }
 
   public static <T> void sort(T[] array, Comparator<? super T> comparator) {
-    sort(null, array, 0, array.length, 0, comparator);
+    BitInterval.sort(null, array, 0, array.length, 0, comparator);
   }
 
   private static <T> void sort(T[] src, T[] dest, int low, int high, int offset, Comparator<? super T> comparator) {
@@ -170,8 +170,8 @@ public final class BitInterval {
       if (src == null) {
         src = dest.clone();
       }
-      sort(dest, src, low, mid, -offset, comparator);
-      sort(dest, src, mid, high, -offset, comparator);
+      BitInterval.sort(dest, src, low, mid, -offset, comparator);
+      BitInterval.sort(dest, src, mid, high, -offset, comparator);
       if (comparator.compare(src[mid - 1], src[mid]) <= 0) {
         System.arraycopy(src, low, dest, destLow, length);
       } else {

@@ -28,8 +28,6 @@ import swim.util.Murmur3;
 
 public class EcPublicKeyDef extends PublicKeyDef implements EcKeyDef {
 
-  private static int hashSeed;
-  private static Form<EcPublicKeyDef> form;
   protected final EcDomainDef domain;
   protected final EcPointDef point;
   protected ECPublicKey publicKey;
@@ -42,19 +40,6 @@ public class EcPublicKeyDef extends PublicKeyDef implements EcKeyDef {
 
   public EcPublicKeyDef(EcDomainDef domain, EcPointDef point) {
     this(domain, point, null);
-  }
-
-  public static EcPublicKeyDef from(ECPublicKey key) {
-    return new EcPublicKeyDef(EcDomainDef.from(key.getParams()),
-        EcPointDef.from(key.getW()), key);
-  }
-
-  @Kind
-  public static Form<EcPublicKeyDef> form() {
-    if (form == null) {
-      form = new EcPublicKeyForm();
-    }
-    return form;
   }
 
   @Override
@@ -72,7 +57,7 @@ public class EcPublicKeyDef extends PublicKeyDef implements EcKeyDef {
     if (publicKey == null) {
       try {
         final ECPublicKeySpec keySpec = new ECPublicKeySpec(this.point.toECPoint(),
-            this.domain.toECParameterSpec());
+                                                            this.domain.toECParameterSpec());
         final KeyFactory keyFactory = KeyFactory.getInstance("EC");
         publicKey = (ECPublicKey) keyFactory.generatePublic(keySpec);
         this.publicKey = publicKey;
@@ -85,12 +70,12 @@ public class EcPublicKeyDef extends PublicKeyDef implements EcKeyDef {
 
   @Override
   public Key key() {
-    return publicKey();
+    return this.publicKey();
   }
 
   @Override
   public Value toValue() {
-    return form().mold(this).toValue();
+    return EcPublicKeyDef.form().mold(this).toValue();
   }
 
   @Override
@@ -104,13 +89,30 @@ public class EcPublicKeyDef extends PublicKeyDef implements EcKeyDef {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(EcPublicKeyDef.class);
+    if (EcPublicKeyDef.hashSeed == 0) {
+      EcPublicKeyDef.hashSeed = Murmur3.seed(EcPublicKeyDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(EcPublicKeyDef.hashSeed,
         this.domain.hashCode()), this.point.hashCode()));
+  }
+
+  public static EcPublicKeyDef from(ECPublicKey key) {
+    return new EcPublicKeyDef(EcDomainDef.create(key.getParams()),
+                              EcPointDef.from(key.getW()), key);
+  }
+
+  private static Form<EcPublicKeyDef> form;
+
+  @Kind
+  public static Form<EcPublicKeyDef> form() {
+    if (EcPublicKeyDef.form == null) {
+      EcPublicKeyDef.form = new EcPublicKeyForm();
+    }
+    return EcPublicKeyDef.form;
   }
 
 }
@@ -130,7 +132,7 @@ final class EcPublicKeyForm extends Form<EcPublicKeyDef> {
   @Override
   public Item mold(EcPublicKeyDef keyDef) {
     return Record.create(3)
-        .attr(tag())
+        .attr(this.tag())
         .slot("domain", keyDef.domain.toValue())
         .slot("point", keyDef.point.toValue());
   }
@@ -138,7 +140,7 @@ final class EcPublicKeyForm extends Form<EcPublicKeyDef> {
   @Override
   public EcPublicKeyDef cast(Item item) {
     final Value value = item.toValue();
-    if (value.getAttr(tag()).isDefined()) {
+    if (value.getAttr(this.tag()).isDefined()) {
       final EcDomainDef domain = EcDomainDef.form().cast(value.get("domain"));
       final EcPointDef point = EcPointDef.form().cast(value.get("point"));
       if (domain != null && point != null) {

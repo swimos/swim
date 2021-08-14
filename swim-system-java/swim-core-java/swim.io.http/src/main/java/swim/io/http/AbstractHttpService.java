@@ -38,17 +38,17 @@ public abstract class AbstractHttpService implements HttpService, FlowContext {
 
   @Override
   public void didBind() {
-    // stub
+    // hook
   }
 
   @Override
   public void didAccept(HttpServer server) {
-    // stub
+    // hook
   }
 
   @Override
   public void didUnbind() {
-    // stub
+    // hook
   }
 
   @Override

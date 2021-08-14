@@ -48,7 +48,7 @@ final class GzHeader implements Cloneable {
   boolean done;
 
   GzHeader() {
-    // nop
+    // zero init
   }
 
   GzHeader(GzHeader from) {

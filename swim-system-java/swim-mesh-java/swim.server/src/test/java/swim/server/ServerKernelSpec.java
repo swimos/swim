@@ -34,7 +34,7 @@ public class ServerKernelSpec {
     final Kernel kernel = ServerLoader.loadServerStack();
 
     final TestPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestPlane.class);
+                                  .openPlane("test", TestPlane.class);
     assertNotNull(plane);
 
     final AgentRoute<?> nopRoute = plane.getAgentRoute("test");

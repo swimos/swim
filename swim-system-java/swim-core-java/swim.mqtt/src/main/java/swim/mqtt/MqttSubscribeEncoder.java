@@ -41,6 +41,12 @@ final class MqttSubscribeEncoder extends Encoder<Object, MqttSubscribe> {
     this(mqtt, packet, null, 0, 0, 1);
   }
 
+  @Override
+  public Encoder<Object, MqttSubscribe> pull(OutputBuffer<?> output) {
+    return MqttSubscribeEncoder.encode(output, this.mqtt, this.packet, this.part,
+                                       this.length, this.remaining, this.step);
+  }
+
   static Encoder<Object, MqttSubscribe> encode(OutputBuffer<?> output, MqttEncoder mqtt,
                                                MqttSubscribe packet, Encoder<?, ?> part,
                                                int length, int remaining, int step) {
@@ -63,7 +69,7 @@ final class MqttSubscribeEncoder extends Encoder<Object, MqttSubscribe> {
       } else if (step < 5) {
         step += 1;
       } else {
-        return error(new MqttException("packet length too long: " + remaining));
+        return Encoder.error(new MqttException("packet length too long: " + remaining));
       }
     }
     if (step == 6 && remaining > 0 && output.isCont()) {
@@ -100,27 +106,21 @@ final class MqttSubscribeEncoder extends Encoder<Object, MqttSubscribe> {
       }
     }
     if (step == 8 + packet.subscriptions.size() && remaining == 0) {
-      return done(packet);
+      return Encoder.done(packet);
     }
     if (remaining < 0) {
-      return error(new MqttException("packet length too short"));
+      return Encoder.error(new MqttException("packet length too short"));
     } else if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new MqttSubscribeEncoder(mqtt, packet, part, length, remaining, step);
   }
 
   static Encoder<Object, MqttSubscribe> encode(OutputBuffer<?> output, MqttEncoder mqtt,
                                                MqttSubscribe packet) {
-    return encode(output, mqtt, packet, null, 0, 0, 1);
-  }
-
-  @Override
-  public Encoder<Object, MqttSubscribe> pull(OutputBuffer<?> output) {
-    return encode(output, this.mqtt, this.packet, this.part, this.length,
-        this.remaining, this.step);
+    return MqttSubscribeEncoder.encode(output, mqtt, packet, null, 0, 0, 1);
   }
 
 }

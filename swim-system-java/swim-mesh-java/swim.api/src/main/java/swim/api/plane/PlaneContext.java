@@ -19,14 +19,14 @@ import swim.api.agent.AgentFactory;
 import swim.api.agent.AgentRoute;
 import swim.api.auth.Authenticator;
 import swim.api.policy.PlanePolicy;
-import swim.api.ref.SwimRef;
+import swim.api.ref.WarpRef;
 import swim.concurrent.Schedule;
 import swim.concurrent.Stage;
 import swim.uri.Uri;
 import swim.uri.UriPattern;
 import swim.util.Log;
 
-public interface PlaneContext extends SwimRef, Log {
+public interface PlaneContext extends WarpRef, Log {
 
   Schedule schedule();
 

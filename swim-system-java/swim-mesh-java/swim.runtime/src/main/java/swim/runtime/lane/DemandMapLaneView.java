@@ -31,7 +31,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.runtime.warp.WarpLaneView;
 import swim.structure.Form;
 import swim.structure.Value;
@@ -41,7 +41,6 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
   protected final AgentContext agentContext;
   protected Form<K> keyForm;
   protected Form<V> valueForm;
-
   protected DemandMapLaneModel laneBinding;
 
   public DemandMapLaneView(AgentContext agentContext, Form<K> keyForm, Form<V> valueForm, Object observers) {
@@ -49,6 +48,7 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
     this.agentContext = agentContext;
     this.keyForm = keyForm;
     this.valueForm = valueForm;
+    this.laneBinding = null;
   }
 
   public DemandMapLaneView(AgentContext agentContext, Form<K> keyForm, Form<V> valueForm) {
@@ -82,12 +82,12 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
   @Override
   public <K2> DemandMapLaneView<K2, V> keyForm(Form<K2> keyForm) {
     return new DemandMapLaneView<K2, V>(this.agentContext, keyForm, this.valueForm,
-        typesafeObservers(this.observers));
+                                        this.typesafeObservers(this.observers));
   }
 
   @Override
   public <K2> DemandMapLaneView<K2, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   public void setKeyForm(Form<K> keyForm) {
@@ -102,12 +102,12 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
   @Override
   public <V2> DemandMapLaneView<K, V2> valueForm(Form<V2> valueForm) {
     return new DemandMapLaneView<K, V2>(this.agentContext, this.keyForm, valueForm,
-        typesafeObservers(this.observers));
+                                        this.typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> DemandMapLaneView<K, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   public void setValueForm(Form<V> valueForm) {
@@ -138,52 +138,52 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
 
   @Override
   public DemandMapLaneView<K, V> onCue(OnCueKey<K, V> onCue) {
-    return observe(onCue);
+    return this.observe(onCue);
   }
 
   @Override
   public DemandMapLaneView<K, V> onSync(OnSyncKeys<K> onSync) {
-    return observe(onSync);
+    return this.observe(onSync);
   }
 
   @Override
   public DemandMapLaneView<K, V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public DemandMapLaneView<K, V> didCommand(DidCommand didCommand) {
-    return observe(didCommand);
+    return this.observe(didCommand);
   }
 
   @Override
   public DemandMapLaneView<K, V> willUplink(WillUplink willUplink) {
-    return observe(willUplink);
+    return this.observe(willUplink);
   }
 
   @Override
   public DemandMapLaneView<K, V> didUplink(DidUplink didUplink) {
-    return observe(didUplink);
+    return this.observe(didUplink);
   }
 
   @Override
   public DemandMapLaneView<K, V> willEnter(WillEnter willEnter) {
-    return observe(willEnter);
+    return this.observe(willEnter);
   }
 
   @Override
   public DemandMapLaneView<K, V> didEnter(DidEnter didEnter) {
-    return observe(didEnter);
+    return this.observe(didEnter);
   }
 
   @Override
   public DemandMapLaneView<K, V> willLeave(WillLeave willLeave) {
-    return observe(willLeave);
+    return this.observe(willLeave);
   }
 
   @Override
   public DemandMapLaneView<K, V> didLeave(DidLeave didLeave) {
-    return observe(didLeave);
+    return this.observe(didLeave);
   }
 
   @SuppressWarnings("unchecked")
@@ -201,8 +201,8 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
             return value;
           }
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            laneDidFail(error);
+          if (Cont.isNonFatal(error)) {
+            this.laneDidFail(error);
           }
           throw error;
         }
@@ -217,8 +217,8 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
                 return value;
               }
             } catch (Throwable error) {
-              if (Conts.isNonFatal(error)) {
-                laneDidFail(error);
+              if (Cont.isNonFatal(error)) {
+                this.laneDidFail(error);
               }
               throw error;
             }
@@ -247,8 +247,8 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
             return iterator;
           }
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            laneDidFail(error);
+          if (Cont.isNonFatal(error)) {
+            this.laneDidFail(error);
           }
           throw error;
         }
@@ -263,8 +263,8 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
                 return iterator;
               }
             } catch (Throwable error) {
-              if (Conts.isNonFatal(error)) {
-                laneDidFail(error);
+              if (Cont.isNonFatal(error)) {
+                this.laneDidFail(error);
               }
               throw error;
             }
@@ -280,7 +280,7 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
 
   Value nextDownCue(Value key, WarpUplink uplink) {
     final K keyObject = this.keyForm.cast(key);
-    final V object = dispatchOnCue(keyObject, uplink);
+    final V object = this.dispatchOnCue(keyObject, uplink);
     if (object != null) {
       return this.valueForm.mold(object).toValue();
     } else {
@@ -290,7 +290,7 @@ public class DemandMapLaneView<K, V> extends WarpLaneView implements DemandMapLa
 
   @SuppressWarnings("unchecked")
   Iterator<Value> syncKeys(WarpUplink uplink) {
-    final Iterator<K> keyIterator = dispatchOnSync(uplink);
+    final Iterator<K> keyIterator = this.dispatchOnSync(uplink);
     if (keyIterator != null) {
       if (this.keyForm == Form.forValue() && this.valueForm == Form.forValue()) {
         return (Iterator<Value>) (Iterator<?>) keyIterator;

@@ -100,7 +100,7 @@ final class CommentOutput<I> extends Output<I> {
 
   @Override
   public I bind() {
-    return xml.comment(this.builder.toString());
+    return this.xml.comment(this.builder.toString());
   }
 
   @Override

@@ -74,59 +74,59 @@ public class WsRequest {
     responseHeaders.add(Upgrade.websocket());
     responseHeaders.add(this.key.accept());
     if (protocol != null) {
-      responseHeaders.add(SecWebSocketProtocol.from(protocol));
+      responseHeaders.add(SecWebSocketProtocol.create(protocol));
     }
     if (!extensions.isEmpty()) {
-      responseHeaders.add(SecWebSocketExtensions.from(extensions));
+      responseHeaders.add(SecWebSocketExtensions.create(extensions));
     }
     responseHeaders.addAll(headers);
-    return HttpResponse.from(HttpStatus.SWITCHING_PROTOCOLS, responseHeaders.bind());
+    return HttpResponse.create(HttpStatus.SWITCHING_PROTOCOLS, responseHeaders.bind());
   }
 
   public HttpResponse<?> httpResponse(String protocol, HttpHeader... headers) {
-    return httpResponse(protocol, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
+    return this.httpResponse(protocol, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
   }
 
   public HttpResponse<?> httpResponse(String protocol) {
-    return httpResponse(protocol, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
+    return this.httpResponse(protocol, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
   }
 
   public HttpResponse<?> httpResponse(FingerTrieSeq<HttpHeader> headers) {
-    return httpResponse(null, FingerTrieSeq.<WebSocketExtension>empty(), headers);
+    return this.httpResponse(null, FingerTrieSeq.<WebSocketExtension>empty(), headers);
   }
 
   public HttpResponse<?> httpResponse(HttpHeader... headers) {
-    return httpResponse(null, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
+    return this.httpResponse(null, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
   }
 
   public HttpResponse<?> httpResponse() {
-    return httpResponse(null, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
+    return this.httpResponse(null, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
   }
 
   public WsResponse accept(WsEngineSettings settings, String protocol, FingerTrieSeq<HttpHeader> headers) {
     final FingerTrieSeq<WebSocketExtension> responseExtensions = settings.acceptExtensions(this.extensions);
-    final HttpResponse<?> httpResponse = httpResponse(protocol, responseExtensions, headers);
+    final HttpResponse<?> httpResponse = this.httpResponse(protocol, responseExtensions, headers);
     return new WsResponse(this.httpRequest, httpResponse, protocol, responseExtensions);
   }
 
   public WsResponse accept(WsEngineSettings settings, String protocol, HttpHeader... headers) {
-    return accept(settings, protocol, FingerTrieSeq.of(headers));
+    return this.accept(settings, protocol, FingerTrieSeq.of(headers));
   }
 
   public WsResponse accept(WsEngineSettings settings, String protocol) {
-    return accept(settings, protocol, FingerTrieSeq.<HttpHeader>empty());
+    return this.accept(settings, protocol, FingerTrieSeq.<HttpHeader>empty());
   }
 
   public WsResponse accept(WsEngineSettings settings, FingerTrieSeq<HttpHeader> headers) {
-    return accept(settings, null, headers);
+    return this.accept(settings, null, headers);
   }
 
   public WsResponse accept(WsEngineSettings settings, HttpHeader... headers) {
-    return accept(settings, null, FingerTrieSeq.of(headers));
+    return this.accept(settings, null, FingerTrieSeq.of(headers));
   }
 
   public WsResponse accept(WsEngineSettings settings) {
-    return accept(settings, null, FingerTrieSeq.<HttpHeader>empty());
+    return this.accept(settings, null, FingerTrieSeq.<HttpHeader>empty());
   }
 
   public WsResponse accept(HttpResponse<?> httpResponse, WsEngineSettings settings) {
@@ -158,48 +158,48 @@ public class WsRequest {
     return null;
   }
 
-  public static WsRequest from(Uri uri, FingerTrieSeq<String> protocols,
-                               FingerTrieSeq<WebSocketExtension> extensions,
-                               FingerTrieSeq<HttpHeader> headers) {
+  public static WsRequest create(Uri uri, FingerTrieSeq<String> protocols,
+                                 FingerTrieSeq<WebSocketExtension> extensions,
+                                 FingerTrieSeq<HttpHeader> headers) {
     final SecWebSocketKey key = SecWebSocketKey.generate();
     final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> requestHeaders = FingerTrieSeq.builder();
-    requestHeaders.add(Host.from(uri.authority()));
+    requestHeaders.add(Host.create(uri.authority()));
     requestHeaders.add(Connection.upgrade());
     requestHeaders.add(Upgrade.websocket());
     requestHeaders.add(SecWebSocketVersion.version13());
     requestHeaders.add(key);
     if (!protocols.isEmpty()) {
-      requestHeaders.add(SecWebSocketProtocol.from(protocols));
+      requestHeaders.add(SecWebSocketProtocol.create(protocols));
     }
     if (!extensions.isEmpty()) {
-      requestHeaders.add(SecWebSocketExtensions.from(extensions));
+      requestHeaders.add(SecWebSocketExtensions.create(extensions));
     }
     if (headers != null) {
       requestHeaders.addAll(headers);
     }
     final UriPath requestPath = uri.path().isEmpty() ? UriPath.slash() : uri.path();
-    final Uri requestUri = Uri.from(null, null, requestPath, uri.query(), null);
+    final Uri requestUri = Uri.create(null, null, requestPath, uri.query(), null);
     final HttpRequest<?> httpRequest = HttpRequest.get(requestUri, requestHeaders.bind());
     return new WsRequest(httpRequest, key, protocols, extensions);
   }
 
-  public static WsRequest from(Uri uri, FingerTrieSeq<String> protocols, HttpHeader... headers) {
-    return from(uri, protocols, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
+  public static WsRequest create(Uri uri, FingerTrieSeq<String> protocols, HttpHeader... headers) {
+    return WsRequest.create(uri, protocols, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
   }
 
-  public static WsRequest from(Uri uri, FingerTrieSeq<String> protocols) {
-    return from(uri, protocols, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
+  public static WsRequest create(Uri uri, FingerTrieSeq<String> protocols) {
+    return WsRequest.create(uri, protocols, FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
   }
 
-  public static WsRequest from(Uri uri, HttpHeader... headers) {
-    return from(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
+  public static WsRequest create(Uri uri, HttpHeader... headers) {
+    return WsRequest.create(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.of(headers));
   }
 
-  public static WsRequest from(Uri uri) {
-    return from(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
+  public static WsRequest create(Uri uri) {
+    return WsRequest.create(uri, FingerTrieSeq.<String>empty(), FingerTrieSeq.<WebSocketExtension>empty(), FingerTrieSeq.<HttpHeader>empty());
   }
 
-  public static WsRequest from(HttpRequest<?> httpRequest) {
+  public static WsRequest create(HttpRequest<?> httpRequest) {
     boolean connectionUpgrade = false;
     boolean upgradeWebSocket = false;
     SecWebSocketKey key = null;

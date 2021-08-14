@@ -22,7 +22,6 @@ import swim.structure.Value;
 
 public class WarpUplinkPulse extends UplinkPulse implements WarpPulse {
 
-  private static Form<WarpUplinkPulse> form;
   protected final long linkCount;
   protected final int eventRate;
   protected final long eventCount;
@@ -36,14 +35,6 @@ public class WarpUplinkPulse extends UplinkPulse implements WarpPulse {
     this.eventCount = eventCount;
     this.commandRate = commandRate;
     this.commandCount = commandCount;
-  }
-
-  @Kind
-  public static Form<WarpUplinkPulse> form() {
-    if (form == null) {
-      form = new WarpUplinkPulseForm();
-    }
-    return form;
   }
 
   @Override
@@ -79,7 +70,17 @@ public class WarpUplinkPulse extends UplinkPulse implements WarpPulse {
 
   @Override
   public Value toValue() {
-    return form().mold(this).toValue();
+    return WarpUplinkPulse.form().mold(this).toValue();
+  }
+
+  private static Form<WarpUplinkPulse> form;
+
+  @Kind
+  public static Form<WarpUplinkPulse> form() {
+    if (WarpUplinkPulse.form == null) {
+      WarpUplinkPulse.form = new WarpUplinkPulseForm();
+    }
+    return WarpUplinkPulse.form;
   }
 
 }

@@ -26,38 +26,12 @@ import swim.util.Murmur3;
 
 public final class WsPong<P, T> extends WsControl<P, T> implements Debug {
 
-  private static int hashSeed;
   final P payload;
   final Encoder<?, ?> content;
 
   WsPong(P payload, Encoder<?, ?> content) {
     this.payload = payload;
     this.content = content;
-  }
-
-  public static <P, T> WsPong<P, T> empty() {
-    return new WsPong<P, T>(null, Encoder.done());
-  }
-
-  public static <P, T> WsPong<P, T> from(P payload, Encoder<?, ?> content) {
-    return new WsPong<P, T>(payload, content);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <P, T> WsPong<P, T> from(P payload) {
-    if (payload instanceof Data) {
-      return (WsPong<P, T>) from((Data) payload);
-    } else {
-      return new WsPong<P, T>(payload, Encoder.done());
-    }
-  }
-
-  public static <T> WsPong<ByteBuffer, T> from(ByteBuffer payload) {
-    return new WsPong<ByteBuffer, T>(payload.duplicate(), Binary.byteBufferWriter(payload));
-  }
-
-  public static <T> WsPong<Data, T> from(Data payload) {
-    return new WsPong<Data, T>(payload, payload.writer());
   }
 
   @Override
@@ -91,23 +65,51 @@ public final class WsPong<P, T> extends WsControl<P, T> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(WsPong.class);
+    if (WsPong.hashSeed == 0) {
+      WsPong.hashSeed = Murmur3.seed(WsPong.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, Murmur3.hash(this.payload)));
+    return Murmur3.mash(Murmur3.mix(WsPong.hashSeed, Murmur3.hash(this.payload)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("WsPong").write('.').write("from").write('(')
-        .debug(this.payload).write(", ").debug(this.content).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("WsPong").write('.').write("create").write('(')
+                   .debug(this.payload).write(", ").debug(this.content).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static <P, T> WsPong<P, T> empty() {
+    return new WsPong<P, T>(null, Encoder.done());
+  }
+
+  public static <P, T> WsPong<P, T> create(P payload, Encoder<?, ?> content) {
+    return new WsPong<P, T>(payload, content);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <P, T> WsPong<P, T> create(P payload) {
+    if (payload instanceof Data) {
+      return (WsPong<P, T>) WsPong.create((Data) payload);
+    } else {
+      return new WsPong<P, T>(payload, Encoder.done());
+    }
+  }
+
+  public static <T> WsPong<ByteBuffer, T> create(ByteBuffer payload) {
+    return new WsPong<ByteBuffer, T>(payload.duplicate(), Binary.byteBufferWriter(payload));
+  }
+
+  public static <T> WsPong<Data, T> create(Data payload) {
+    return new WsPong<Data, T>(payload, payload.writer());
   }
 
 }

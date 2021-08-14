@@ -38,6 +38,11 @@ final class TransferCodingParser extends Parser<TransferCoding> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<TransferCoding> feed(Input input) {
+    return TransferCodingParser.parse(input, this.http, this.name, this.params, this.step);
+  }
+
   static Parser<TransferCoding> parse(Input input, HttpParser http, StringBuilder name,
                                       Parser<HashTrieMap<String, String>> params, int step) {
     int c = 0;
@@ -52,10 +57,10 @@ final class TransferCodingParser extends Parser<TransferCoding> {
           name.appendCodePoint(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("transfer coding", input));
+          return Parser.error(Diagnostic.expected("transfer coding", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("transfer coding", input));
+        return Parser.error(Diagnostic.expected("transfer coding", input));
       }
     }
     if (step == 2) {
@@ -71,7 +76,7 @@ final class TransferCodingParser extends Parser<TransferCoding> {
       if (input.isCont()) {
         step = 3;
       } else if (input.isDone()) {
-        return done(http.transferCoding(name.toString(), HashTrieMap.<String, String>empty()));
+        return Parser.done(http.transferCoding(name.toString(), HashTrieMap.<String, String>empty()));
       }
     }
     if (step == 3) {
@@ -81,24 +86,19 @@ final class TransferCodingParser extends Parser<TransferCoding> {
         params = params.feed(input);
       }
       if (params.isDone()) {
-        return done(http.transferCoding(name.toString(), params.bind()));
+        return Parser.done(http.transferCoding(name.toString(), params.bind()));
       } else if (params.isError()) {
         return params.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new TransferCodingParser(http, name, params, step);
   }
 
   static Parser<TransferCoding> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<TransferCoding> feed(Input input) {
-    return parse(input, this.http, this.name, this.params, this.step);
+    return TransferCodingParser.parse(input, http, null, null, 1);
   }
 
 }

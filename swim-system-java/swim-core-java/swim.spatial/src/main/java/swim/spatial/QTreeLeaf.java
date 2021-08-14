@@ -18,7 +18,6 @@ import swim.util.Cursor;
 
 final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
 
-  private static QTreeLeaf<Object, Object, Object> empty;
   final QTreeEntry<K, S, V>[] slots;
   final long x;
   final long y;
@@ -27,49 +26,6 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
     this.slots = slots;
     this.x = x;
     this.y = y;
-  }
-
-  public static <K, S, V> QTreeLeaf<K, S, V> create(QTreeEntry<K, S, V>[] slots) {
-    int xRank = 0;
-    int yRank = 0;
-    long xBase = 0L;
-    long yBase = 0L;
-    long xMask = -1L;
-    long yMask = -1L;
-    for (int i = 0, n = slots.length; i < n; i += 1) {
-      final QTreeEntry<K, S, V> slot = slots[i];
-      final long xt = slot.x;
-      final long yt = slot.y;
-      final int xtRank = Long.numberOfLeadingZeros(~xt);
-      final int ytRank = Long.numberOfLeadingZeros(~yt);
-      final long xtBase = xt << xtRank;
-      final long ytBase = yt << ytRank;
-      xRank = Math.max(xRank, xtRank);
-      yRank = Math.max(yRank, ytRank);
-      xBase |= xtBase;
-      yBase |= ytBase;
-      xMask &= xtBase;
-      yMask &= ytBase;
-    }
-    xMask ^= xBase;
-    yMask ^= yBase;
-    xRank = Math.max(xRank, 64 - Long.numberOfLeadingZeros(xMask));
-    yRank = Math.max(yRank, 64 - Long.numberOfLeadingZeros(yMask));
-    xMask = ~((1L << xRank) - 1L);
-    yMask = ~((1L << yRank) - 1L);
-    xBase &= xMask;
-    yBase &= yMask;
-    final long x = BitInterval.from(xRank, xBase);
-    final long y = BitInterval.from(yRank, yBase);
-    return new QTreeLeaf<K, S, V>(slots, x, y);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <K, S, V> QTreeLeaf<K, S, V> empty() {
-    if (empty == null) {
-      empty = new QTreeLeaf<Object, Object, Object>((QTreeEntry<Object, Object, Object>[]) EMPTY_SLOTS, -1L, -1L);
-    }
-    return (QTreeLeaf<K, S, V>) empty;
   }
 
   @Override
@@ -114,12 +70,12 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
 
   @Override
   public long xBase() {
-    return this.x << xRank();
+    return this.x << this.xRank();
   }
 
   @Override
   public long xMask() {
-    return ~((1L << xRank()) - 1L);
+    return ~((1L << this.xRank()) - 1L);
   }
 
   @Override
@@ -139,12 +95,12 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
 
   @Override
   public long yBase() {
-    return this.y << yRank();
+    return this.y << this.yRank();
   }
 
   @Override
   public long yMask() {
-    return ~((1L << yRank()) - 1L);
+    return ~((1L << this.yRank()) - 1L);
   }
 
   @Override
@@ -153,16 +109,16 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
   }
 
   boolean containsKey(K key, QTreeContext<K, S, V> tree) {
-    return lookup(key, tree) >= 0;
+    return this.lookup(key, tree) >= 0;
   }
 
   @Override
   public boolean containsKey(K key, long xk, long yk, QTreeContext<K, S, V> tree) {
-    return containsKey(key, tree);
+    return this.containsKey(key, tree);
   }
 
   V get(K key, QTreeContext<K, S, V> tree) {
-    final int i = lookup(key, tree);
+    final int i = this.lookup(key, tree);
     if (i >= 0) {
       return this.slots[i].value;
     } else {
@@ -172,29 +128,29 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
 
   @Override
   public V get(K key, long xk, long yk, QTreeContext<K, S, V> tree) {
-    return get(key, tree);
+    return this.get(key, tree);
   }
 
   @Override
   public QTreeLeaf<K, S, V> updated(K key, S shape, long xk, long yk, V newValue,
                                     QTreeContext<K, S, V> tree, boolean canSplit) {
-    int i = lookup(key, tree);
+    int i = this.lookup(key, tree);
     if (i >= 0) {
-      return updatedSlot(i, key, shape, xk, yk, newValue);
+      return this.updatedSlot(i, key, shape, xk, yk, newValue);
     } else {
       i = -(i + 1);
-      return insertedSlot(i, key, shape, xk, yk, newValue);
+      return this.insertedSlot(i, key, shape, xk, yk, newValue);
     }
   }
 
   @Override
   QTreeLeaf<K, S, V> updatedSlot(QTreeEntry<K, S, V> newSlot, QTreeContext<K, S, V> tree) {
-    int i = lookup(newSlot.key, tree);
+    int i = this.lookup(newSlot.key, tree);
     if (i >= 0) {
-      return updatedSlot(i, newSlot);
+      return this.updatedSlot(i, newSlot);
     } else {
       i = -(i + 1);
-      return insertedSlot(i, newSlot);
+      return this.insertedSlot(i, newSlot);
     }
   }
 
@@ -254,20 +210,20 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
 
   @Override
   QTreeLeaf<K, S, V> insertedPage(QTreePage<K, S, V> newPage, QTreeContext<K, S, V> tree) {
-    return mergedPage(newPage, tree);
+    return this.mergedPage(newPage, tree);
   }
 
   @Override
   QTreeLeaf<K, S, V> mergedPage(QTreePage<K, S, V> newPage, QTreeContext<K, S, V> tree) {
     if (newPage instanceof QTreeLeaf<?, ?, ?>) {
-      return mergedLeaf((QTreeLeaf<K, S, V>) newPage, tree);
+      return this.mergedLeaf((QTreeLeaf<K, S, V>) newPage, tree);
     } else {
-      return mergedNode(newPage, tree);
+      return this.mergedNode(newPage, tree);
     }
   }
 
   QTreeLeaf<K, S, V> mergedLeaf(QTreeLeaf<K, S, V> newPage, QTreeContext<K, S, V> tree) {
-    return mergedSlots(newPage.slots, tree);
+    return this.mergedSlots(newPage.slots, tree);
   }
 
   @SuppressWarnings("unchecked")
@@ -299,10 +255,10 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
 
   @Override
   public QTreeLeaf<K, S, V> removed(K key, long xk, long yk, QTreeContext<K, S, V> tree) {
-    final int i = lookup(key, tree);
+    final int i = this.lookup(key, tree);
     if (i >= 0) {
       if (this.slots.length > 1) {
-        return removedSlot(i);
+        return this.removedSlot(i);
       } else {
         return QTreeLeaf.empty();
       }
@@ -329,7 +285,7 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
   @Override
   public QTreePage<K, S, V> balanced(QTreeContext<K, S, V> tree) {
     if (this.slots.length > 1 && tree.pageShouldSplit(this)) {
-      return split(tree);
+      return this.split(tree);
     } else {
       return this;
     }
@@ -709,10 +665,10 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
       pages[pageRefOffset] = new QTreeLeaf<K, S, V>(slots11, x11, y11);
       pageRefOffset += 1;
     }
-    BitInterval.sort(pages, PAGE_ORDERING);
+    BitInterval.sort(pages, QTreePage.PAGE_ORDERING);
 
     if (slotCountXY == 0) {
-      slotsXY = (QTreeEntry<K, S, V>[]) EMPTY_SLOTS;
+      slotsXY = (QTreeEntry<K, S, V>[]) QTreePage.EMPTY_SLOTS;
     } else if (slotCountXY < slotCount) {
       final QTreeEntry<K, S, V>[] newSlotsXY = (QTreeEntry<K, S, V>[]) new QTreeEntry<?, ?, ?>[slotCountXY];
       System.arraycopy(slotsXY, 0, newSlotsXY, 0, slotCountXY);
@@ -744,6 +700,51 @@ final class QTreeLeaf<K, S, V> extends QTreePage<K, S, V> {
       }
     }
     return -(low + 1);
+  }
+
+  private static QTreeLeaf<Object, Object, Object> empty;
+
+  @SuppressWarnings("unchecked")
+  public static <K, S, V> QTreeLeaf<K, S, V> empty() {
+    if (QTreeLeaf.empty == null) {
+      QTreeLeaf.empty = new QTreeLeaf<Object, Object, Object>((QTreeEntry<Object, Object, Object>[]) QTreePage.EMPTY_SLOTS, -1L, -1L);
+    }
+    return (QTreeLeaf<K, S, V>) QTreeLeaf.empty;
+  }
+
+  public static <K, S, V> QTreeLeaf<K, S, V> create(QTreeEntry<K, S, V>[] slots) {
+    int xRank = 0;
+    int yRank = 0;
+    long xBase = 0L;
+    long yBase = 0L;
+    long xMask = -1L;
+    long yMask = -1L;
+    for (int i = 0, n = slots.length; i < n; i += 1) {
+      final QTreeEntry<K, S, V> slot = slots[i];
+      final long xt = slot.x;
+      final long yt = slot.y;
+      final int xtRank = Long.numberOfLeadingZeros(~xt);
+      final int ytRank = Long.numberOfLeadingZeros(~yt);
+      final long xtBase = xt << xtRank;
+      final long ytBase = yt << ytRank;
+      xRank = Math.max(xRank, xtRank);
+      yRank = Math.max(yRank, ytRank);
+      xBase |= xtBase;
+      yBase |= ytBase;
+      xMask &= xtBase;
+      yMask &= ytBase;
+    }
+    xMask ^= xBase;
+    yMask ^= yBase;
+    xRank = Math.max(xRank, 64 - Long.numberOfLeadingZeros(xMask));
+    yRank = Math.max(yRank, 64 - Long.numberOfLeadingZeros(yMask));
+    xMask = ~((1L << xRank) - 1L);
+    yMask = ~((1L << yRank) - 1L);
+    xBase &= xMask;
+    yBase &= yMask;
+    final long x = BitInterval.from(xRank, xBase);
+    final long y = BitInterval.from(yRank, yBase);
+    return new QTreeLeaf<K, S, V>(slots, x, y);
   }
 
 }

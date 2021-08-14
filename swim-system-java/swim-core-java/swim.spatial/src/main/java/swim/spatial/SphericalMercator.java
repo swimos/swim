@@ -22,20 +22,6 @@ import swim.structure.Item;
 
 final class SphericalMercator extends Z2Form<R2Shape> implements R2ToZ2Operator {
 
-  static final double MAX_LAT = Math.atan(Math.sinh(Math.PI));
-
-  static long transformLng(double lng) {
-    return scale(Math.toRadians(lng));
-  }
-
-  static long transformLat(double lat) {
-    return scale(Math.log(Math.tan(Math.PI / 4.0 + Math.min(Math.max(-MAX_LAT, Math.toRadians(lat)), MAX_LAT) / 2.0)));
-  }
-
-  static long scale(double x) {
-    return (long) (((Math.min(Math.max(-Math.PI, x), Math.PI) + Math.PI) / (Math.PI * 2.0)) * (double) 0x7fffffffffffffffL);
-  }
-
   @Override
   public Class<?> type() {
     return R2Shape.class;
@@ -43,22 +29,22 @@ final class SphericalMercator extends Z2Form<R2Shape> implements R2ToZ2Operator 
 
   @Override
   public long getXMin(R2Shape shape) {
-    return transformLng(shape.xMin());
+    return SphericalMercator.transformLng(shape.xMin());
   }
 
   @Override
   public long getYMin(R2Shape shape) {
-    return transformLat(shape.yMin());
+    return SphericalMercator.transformLat(shape.yMin());
   }
 
   @Override
   public long getXMax(R2Shape shape) {
-    return transformLng(shape.xMax());
+    return SphericalMercator.transformLng(shape.xMax());
   }
 
   @Override
   public long getYMax(R2Shape shape) {
-    return transformLat(shape.yMax());
+    return SphericalMercator.transformLat(shape.yMax());
   }
 
   @Override
@@ -83,17 +69,31 @@ final class SphericalMercator extends Z2Form<R2Shape> implements R2ToZ2Operator 
 
   @Override
   public long transformX(double lng, double lat) {
-    return transformLng(lng);
+    return SphericalMercator.transformLng(lng);
   }
 
   @Override
   public long transformY(double lng, double lat) {
-    return transformLat(lat);
+    return SphericalMercator.transformLat(lat);
   }
 
   @Override
   public Z2ToR2Operator inverse() {
     return GeoProjection.sphericalMercatorInverse();
+  }
+
+  static final double MAX_LAT = Math.atan(Math.sinh(Math.PI));
+
+  static long transformLng(double lng) {
+    return SphericalMercator.scale(Math.toRadians(lng));
+  }
+
+  static long transformLat(double lat) {
+    return SphericalMercator.scale(Math.log(Math.tan(Math.PI / 4.0 + Math.min(Math.max(-MAX_LAT, Math.toRadians(lat)), MAX_LAT) / 2.0)));
+  }
+
+  static long scale(double x) {
+    return (long) (((Math.min(Math.max(-Math.PI, x), Math.PI) + Math.PI) / (Math.PI * 2.0)) * (double) 0x7fffffffffffffffL);
   }
 
 }

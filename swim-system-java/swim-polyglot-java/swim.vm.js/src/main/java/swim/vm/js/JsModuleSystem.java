@@ -35,14 +35,6 @@ public class JsModuleSystem {
     this(jsContext, new JsGuestModuleLoader());
   }
 
-  public static boolean isRelativeModulePath(UriPath modulePath) {
-    if (modulePath.isDefined() && modulePath.isRelative()) {
-      final String head = modulePath.head();
-      return ".".equals(head) || "..".equals(head);
-    }
-    return false;
-  }
-
   public final Context jsContext() {
     return this.jsContext;
   }
@@ -60,28 +52,28 @@ public class JsModuleSystem {
   }
 
   public final JsModule requireModule(UriPath basePath, UriPath modulePath) {
-    final UriPath moduleId = resolveModulePath(basePath, modulePath);
+    final UriPath moduleId = this.resolveModulePath(basePath, modulePath);
     if (moduleId != null) {
-      return requireModule(moduleId);
+      return this.requireModule(moduleId);
     } else {
       throw new JsModuleException("failed to resolve module " + Format.debug(modulePath.toString())
-          + " relative to " + Format.debug(basePath.toString()));
+                                + " relative to " + Format.debug(basePath.toString()));
     }
   }
 
   public final JsModule requireModule(UriPath moduleId) {
-    JsModule module = getModule(moduleId);
+    JsModule module = this.getModule(moduleId);
     if (module == null) {
-      module = openModule(moduleId);
+      module = this.openModule(moduleId);
     }
     return module;
   }
 
   protected final JsModule openModule(UriPath moduleId) {
-    final JsModule module = loadModule(moduleId);
+    final JsModule module = this.loadModule(moduleId);
     if (module != null) {
       this.modules = this.modules.updated(moduleId, module);
-      evalModule(module);
+      this.evalModule(module);
       return module;
     } else {
       throw new JsModuleException("failed to load module " + Format.debug(moduleId.toString()));
@@ -94,6 +86,14 @@ public class JsModuleSystem {
 
   protected void evalModule(JsModule module) {
     this.moduleLoader.evalModule(module);
+  }
+
+  public static boolean isRelativeModulePath(UriPath modulePath) {
+    if (modulePath.isDefined() && modulePath.isRelative()) {
+      final String head = modulePath.head();
+      return ".".equals(head) || "..".equals(head);
+    }
+    return false;
   }
 
 }

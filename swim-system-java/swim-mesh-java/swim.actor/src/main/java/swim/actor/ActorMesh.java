@@ -62,6 +62,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
 
   public ActorMesh(MeshBinding meshBinding, MeshDef meshDef) {
     this.meshBinding = meshBinding;
+    this.meshContext = null;
     this.meshDef = meshDef;
   }
 
@@ -70,7 +71,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   }
 
   public final ActorSpace actorEdge() {
-    return edge().unwrapEdge(ActorSpace.class);
+    return this.edge().unwrapEdge(ActorSpace.class);
   }
 
   @Override
@@ -101,7 +102,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapMesh(Class<T> meshClass) {
-    if (meshClass.isAssignableFrom(getClass())) {
+    if (meshClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.meshContext.unwrapMesh(meshClass);
@@ -112,7 +113,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   @Override
   public <T> T bottomMesh(Class<T> meshClass) {
     T mesh = this.meshContext.bottomMesh(meshClass);
-    if (mesh == null && meshClass.isAssignableFrom(getClass())) {
+    if (mesh == null && meshClass.isAssignableFrom(this.getClass())) {
       mesh = (T) this;
     }
     return mesh;
@@ -184,17 +185,17 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   }
 
   public Log createLog(LogDef logDef) {
-    final ActorSpace edge = actorEdge();
+    final ActorSpace edge = this.actorEdge();
     return edge != null ? edge.createLog(logDef) : null;
   }
 
   public Log createLog(CellAddress cellAddress) {
-    final ActorSpace edge = actorEdge();
+    final ActorSpace edge = this.actorEdge();
     return edge != null ? edge.createLog(cellAddress) : null;
   }
 
   public Log injectLog(Log log) {
-    final ActorSpace edge = actorEdge();
+    final ActorSpace edge = this.actorEdge();
     return edge != null ? edge.injectLog(log) : log;
   }
 
@@ -202,28 +203,28 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   protected Log openLog() {
     Log log;
     if (this.meshDef != null && this.meshDef.logDef() != null) {
-      log = createLog(this.meshDef.logDef());
+      log = this.createLog(this.meshDef.logDef());
     } else {
-      log = createLog(cellAddress());
+      log = this.createLog(this.cellAddress());
     }
     if (log != null) {
-      log = injectLog(log);
+      log = this.injectLog(log);
     }
     return log;
   }
 
   public Policy createPolicy(PolicyDef policyDef) {
-    final ActorSpace edge = actorEdge();
+    final ActorSpace edge = this.actorEdge();
     return edge != null ? edge.createPolicy(policyDef) : null;
   }
 
   public Policy createPolicy(CellAddress cellAddress) {
-    final ActorSpace edge = actorEdge();
+    final ActorSpace edge = this.actorEdge();
     return edge != null ? edge.createPolicy(cellAddress) : null;
   }
 
   public Policy injectPolicy(Policy policy) {
-    final ActorSpace edge = actorEdge();
+    final ActorSpace edge = this.actorEdge();
     return edge != null ? edge.injectPolicy(policy) : policy;
   }
 
@@ -231,28 +232,28 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   protected Policy openPolicy() {
     Policy policy;
     if (this.meshDef != null && this.meshDef.policyDef() != null) {
-      policy = createPolicy(this.meshDef.policyDef());
+      policy = this.createPolicy(this.meshDef.policyDef());
     } else {
-      policy = createPolicy(cellAddress());
+      policy = this.createPolicy(this.cellAddress());
     }
     if (policy != null) {
-      policy = injectPolicy(policy);
+      policy = this.injectPolicy(policy);
     }
     return policy;
   }
 
   public Stage createStage(StageDef stageDef) {
-    final ActorSpace edge = actorEdge();
+    final ActorSpace edge = this.actorEdge();
     return edge != null ? edge.createStage(stageDef) : null;
   }
 
   public Stage createStage(CellAddress cellAddress) {
-    final ActorSpace edge = actorEdge();
+    final ActorSpace edge = this.actorEdge();
     return edge != null ? edge.createStage(cellAddress) : null;
   }
 
   public Stage injectStage(Stage stage) {
-    final ActorSpace edge = actorEdge();
+    final ActorSpace edge = this.actorEdge();
     return edge != null ? edge.injectStage(stage) : stage;
   }
 
@@ -260,28 +261,28 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   protected Stage openStage() {
     Stage stage;
     if (this.meshDef != null && this.meshDef.stageDef() != null) {
-      stage = createStage(this.meshDef.stageDef());
+      stage = this.createStage(this.meshDef.stageDef());
     } else {
-      stage = createStage(cellAddress());
+      stage = this.createStage(this.cellAddress());
     }
     if (stage != null) {
-      stage = injectStage(stage);
+      stage = this.injectStage(stage);
     }
     return stage;
   }
 
   public StoreBinding createStore(StoreDef storeDef) {
-    final ActorSpace edge = actorEdge();
+    final ActorSpace edge = this.actorEdge();
     return edge != null ? edge.createStore(storeDef) : null;
   }
 
   public StoreBinding createStore(CellAddress cellAddress) {
-    final ActorSpace edge = actorEdge();
+    final ActorSpace edge = this.actorEdge();
     return edge != null ? edge.createStore(cellAddress) : null;
   }
 
   public StoreBinding injectStore(StoreBinding store) {
-    final ActorSpace edge = actorEdge();
+    final ActorSpace edge = this.actorEdge();
     return edge != null ? edge.injectStore(store) : store;
   }
 
@@ -289,12 +290,12 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   protected StoreBinding openStore() {
     StoreBinding store = null;
     if (this.meshDef != null && this.meshDef.storeDef() != null) {
-      store = createStore(this.meshDef.storeDef());
+      store = this.createStore(this.meshDef.storeDef());
     } else {
-      store = createStore(cellAddress());
+      store = this.createStore(this.cellAddress());
     }
     if (store != null) {
-      store = injectStore(store);
+      store = this.injectStore(store);
     }
     return store;
   }
@@ -308,7 +309,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
     final MeshDef meshDef = this.meshDef;
     PartDef partDef = meshDef != null ? meshDef.getPartDef(partAddress.partKey()) : null;
     if (partDef == null) {
-      final ActorSpace edge = actorEdge();
+      final ActorSpace edge = this.actorEdge();
       partDef = edge != null ? edge.getPartDef(partAddress) : null;
     }
     return partDef;
@@ -321,7 +322,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
 
   @Override
   public PartBinding injectPart(PartAddress partAddress, PartBinding part) {
-    final PartDef partDef = getPartDef(partAddress);
+    final PartDef partDef = this.getPartDef(partAddress);
     return new ActorPart(this.meshContext.injectPart(partAddress, part), partDef);
   }
 
@@ -334,7 +335,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
     final MeshDef meshDef = this.meshDef;
     HostDef hostDef = meshDef != null ? meshDef.getHostDef(hostAddress.hostUri()) : null;
     if (hostDef == null) {
-      final ActorSpace edge = actorEdge();
+      final ActorSpace edge = this.actorEdge();
       hostDef = edge != null ? edge.getHostDef(hostAddress) : null;
     }
     return hostDef;
@@ -359,7 +360,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
     final MeshDef meshDef = this.meshDef;
     NodeDef nodeDef = meshDef != null ? meshDef.getNodeDef(nodeAddress.nodeUri()) : null;
     if (nodeDef == null) {
-      final ActorSpace edge = actorEdge();
+      final ActorSpace edge = this.actorEdge();
       nodeDef = edge != null ? edge.getNodeDef(nodeAddress) : null;
     }
     return nodeDef;
@@ -368,7 +369,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   @Override
   public NodeBinding createNode(NodeAddress nodeAddress) {
     NodeBinding node = this.meshContext.createNode(nodeAddress);
-    if (node == null && !meshUri().isDefined()) {
+    if (node == null && !this.meshUri().isDefined()) {
       final MeshDef meshDef = this.meshDef;
       final NodeDef nodeDef = meshDef != null ? meshDef.getNodeDef(nodeAddress.nodeUri()) : null;
       if (nodeDef != null) {
@@ -393,7 +394,7 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
     final MeshDef meshDef = this.meshDef;
     LaneDef laneDef = meshDef != null ? meshDef.getLaneDef(laneAddress.laneUri()) : null;
     if (laneDef == null) {
-      final ActorSpace edge = actorEdge();
+      final ActorSpace edge = this.actorEdge();
       laneDef = edge != null ? edge.getLaneDef(laneAddress) : null;
     }
     return laneDef;
@@ -447,13 +448,13 @@ public class ActorMesh extends ActorTier implements MeshBinding, MeshContext {
   @Override
   public void openAgents(NodeBinding node) {
     this.meshContext.openAgents(node);
-    if (!meshUri().isDefined()) {
+    if (!this.meshUri().isDefined()) {
       final MeshDef meshDef = this.meshDef;
       final NodeDef nodeDef = meshDef != null ? meshDef.getNodeDef(node.nodeUri()) : null;
       if (nodeDef != null && node instanceof AgentModel) {
         final AgentModel agentModel = (AgentModel) node;
         for (AgentDef agentDef : nodeDef.agentDefs()) {
-          final AgentFactory<?> agentFactory = createAgentFactory(node, agentDef);
+          final AgentFactory<?> agentFactory = this.createAgentFactory(node, agentDef);
           if (agentDef != null) {
             final Value id = agentDef.id();
             final Value props = agentModel.props().concat(agentDef.props());

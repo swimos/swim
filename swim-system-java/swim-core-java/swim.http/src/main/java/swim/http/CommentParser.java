@@ -30,6 +30,11 @@ final class CommentParser extends Parser<String> {
     this.step = step;
   }
 
+  @Override
+  public Parser<String> feed(Input input) {
+    return CommentParser.parse(input, this.comment, this.level, this.step);
+  }
+
   static Parser<String> parse(Input input, StringBuilder comment, int level, int step) {
     int c = 0;
     if (step == 1) {
@@ -39,7 +44,7 @@ final class CommentParser extends Parser<String> {
         level = 1;
         step = 2;
       } else if (!input.isEmpty()) {
-        return done();
+        return Parser.done();
       }
     }
     do {
@@ -64,16 +69,16 @@ final class CommentParser extends Parser<String> {
             if (level > 0) {
               comment.append(')');
             } else {
-              return done(comment.toString());
+              return Parser.done(comment.toString());
             }
           } else if (c == '\\') {
             input = input.step();
             step = 3;
           } else {
-            return error(Diagnostic.unexpected(input));
+            return Parser.error(Diagnostic.unexpected(input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 3) {
@@ -85,27 +90,22 @@ final class CommentParser extends Parser<String> {
             step = 2;
             continue;
           } else {
-            return error(Diagnostic.expected("escape character", input));
+            return Parser.error(Diagnostic.expected("escape character", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("escape character", input));
+          return Parser.error(Diagnostic.expected("escape character", input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new CommentParser(comment, level, step);
   }
 
   static Parser<String> parse(Input input) {
-    return parse(input, null, 0, 1);
-  }
-
-  @Override
-  public Parser<String> feed(Input input) {
-    return parse(input, this.comment, this.level, this.step);
+    return CommentParser.parse(input, null, 0, 1);
   }
 
 }

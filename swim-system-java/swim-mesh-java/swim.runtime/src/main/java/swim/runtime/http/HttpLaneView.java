@@ -26,7 +26,7 @@ import swim.api.http.function.DoRespondHttp;
 import swim.api.http.function.WillRequestHttp;
 import swim.api.http.function.WillRespondHttp;
 import swim.codec.Decoder;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.runtime.LaneView;
@@ -82,8 +82,8 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
             return decoder;
           }
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            laneDidFail(error);
+          if (Cont.isNonFatal(error)) {
+            this.laneDidFail(error);
           }
           throw error;
         }
@@ -98,8 +98,8 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
                 return decoder;
               }
             } catch (Throwable error) {
-              if (Conts.isNonFatal(error)) {
-                laneDidFail(error);
+              if (Cont.isNonFatal(error)) {
+                this.laneDidFail(error);
               }
               throw error;
             }
@@ -127,8 +127,8 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
           try {
             ((WillRequestHttp<Object>) observers).willRequest((HttpRequest<Object>) request);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -144,8 +144,8 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
               try {
                 ((WillRequestHttp<Object>) observer).willRequest((HttpRequest<Object>) request);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -176,8 +176,8 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
           try {
             ((DidRequestHttp<Object>) observers).didRequest(request);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -193,8 +193,8 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
               try {
                 ((DidRequestHttp<Object>) observer).didRequest(request);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -228,8 +228,8 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
               return response;
             }
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -248,8 +248,8 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
                   return response;
                 }
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -280,8 +280,8 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
           try {
             ((WillRespondHttp<Object>) observers).willRespond((HttpResponse<Object>) response);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -297,8 +297,8 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
               try {
                 ((WillRespondHttp<Object>) observer).willRespond((HttpResponse<Object>) response);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -329,8 +329,8 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
           try {
             ((DidRespondHttp<Object>) observers).didRespond((HttpResponse<Object>) response);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -346,8 +346,8 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
               try {
                 ((DidRespondHttp<Object>) observer).didRespond((HttpResponse<Object>) response);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -369,11 +369,11 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
   }
 
   public void laneWillRequest(HttpUplink uplink, HttpRequest<?> request) {
-    // stub
+    // hook
   }
 
   public void laneDidRequest(HttpUplink uplink, HttpRequest<Object> request) {
-    // stub
+    // hook
   }
 
   public HttpResponse<?> laneDoRespond(HttpUplink uplink, HttpRequest<Object> request) {
@@ -381,11 +381,11 @@ public abstract class HttpLaneView<V> extends LaneView implements HttpLane<V> {
   }
 
   public void laneWillRespond(HttpUplink uplink, HttpResponse<?> response) {
-    // stub
+    // hook
   }
 
   public void laneDidRespond(HttpUplink uplink, HttpResponse<?> response) {
-    // stub
+    // hook
   }
 
 }

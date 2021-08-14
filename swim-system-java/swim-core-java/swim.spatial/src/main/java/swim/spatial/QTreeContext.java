@@ -20,7 +20,7 @@ public abstract class QTreeContext<K, S, V> implements Comparator<QTreeEntry<K, 
 
   @Override
   public int compare(QTreeEntry<K, S, V> x, QTreeEntry<K, S, V> y) {
-    return compareKey(x.key, y.key);
+    return this.compareKey(x.key, y.key);
   }
 
   @SuppressWarnings("unchecked")
@@ -33,11 +33,11 @@ public abstract class QTreeContext<K, S, V> implements Comparator<QTreeEntry<K, 
   }
 
   protected boolean pageShouldSplit(QTreePage<K, S, V> page) {
-    return page.arity() > pageSplitSize();
+    return page.arity() > this.pageSplitSize();
   }
 
   protected boolean pageShouldMerge(QTreePage<K, S, V> page) {
-    return page.arity() < pageSplitSize() >>> 1;
+    return page.arity() < this.pageSplitSize() >>> 1;
   }
 
 }

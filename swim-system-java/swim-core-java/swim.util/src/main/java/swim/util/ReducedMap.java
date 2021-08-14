@@ -24,7 +24,7 @@ public interface ReducedMap<K, V, U> extends OrderedMap<K, V> {
    * Returns the reduction of this {@code ReducedMap}, combining all contained
    * elements with the given {@code accumulator} and {@code combiner} functions,
    * recomputing only what has changed since the last invocation of {@code
-   * reduced}.  Stores partial computations to accelerate repeated reduction
+   * reduced}. Stores partial computations to accelerate repeated reduction
    * of continuously mutating datasets.
    */
   U reduced(U identity, CombinerFunction<? super V, U> accumulator, CombinerFunction<U, U> combiner);

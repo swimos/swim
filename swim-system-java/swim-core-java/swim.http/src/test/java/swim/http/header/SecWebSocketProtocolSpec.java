@@ -22,22 +22,22 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class SecWebSocketProtocolSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseSecWebSocketProtocolHeaders() {
-    assertParses("Sec-WebSocket-Protocol: chat", SecWebSocketProtocol.from("chat"));
-    assertParses("Sec-WebSocket-Protocol: chat,superchat", SecWebSocketProtocol.from("chat", "superchat"));
-    assertParses("Sec-WebSocket-Protocol: chat, superchat", SecWebSocketProtocol.from("chat", "superchat"));
-    assertParses("Sec-WebSocket-Protocol: chat , superchat", SecWebSocketProtocol.from("chat", "superchat"));
+    assertParses("Sec-WebSocket-Protocol: chat", SecWebSocketProtocol.create("chat"));
+    assertParses("Sec-WebSocket-Protocol: chat,superchat", SecWebSocketProtocol.create("chat", "superchat"));
+    assertParses("Sec-WebSocket-Protocol: chat, superchat", SecWebSocketProtocol.create("chat", "superchat"));
+    assertParses("Sec-WebSocket-Protocol: chat , superchat", SecWebSocketProtocol.create("chat", "superchat"));
   }
 
   @Test
   public void writeSecWebSocketProtocolHeaders() {
-    assertWrites(SecWebSocketProtocol.from("chat"), "Sec-WebSocket-Protocol: chat");
-    assertWrites(SecWebSocketProtocol.from("chat", "superchat"), "Sec-WebSocket-Protocol: chat, superchat");
+    assertWrites(SecWebSocketProtocol.create("chat"), "Sec-WebSocket-Protocol: chat");
+    assertWrites(SecWebSocketProtocol.create("chat", "superchat"), "Sec-WebSocket-Protocol: chat, superchat");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

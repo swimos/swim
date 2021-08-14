@@ -17,7 +17,6 @@ package swim.db;
 import swim.codec.Output;
 import swim.codec.Unicode;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.recon.Recon;
 import swim.spatial.BitInterval;
 import swim.structure.Item;
@@ -41,139 +40,6 @@ public final class QTreeNode extends QTreePage {
     this.version = version;
     this.childRefs = childRefs;
     this.slots = slots;
-  }
-
-  public static QTreeNode create(PageContext context, int stem, long version,
-                                 int post, int zone, long base, long span, long x, long y,
-                                 Value fold, QTreePageRef[] childRefs, Slot[] slots) {
-    final QTreePageRef pageRef = new QTreePageRef(context, PageType.NODE, stem, post,
-        zone, base, span, x, y, fold);
-    final QTreeNode page = new QTreeNode(pageRef, version, childRefs, slots);
-    pageRef.page = page;
-    return page;
-  }
-
-  public static QTreeNode create(PageContext context, int stem, long version,
-                                 int zone, long base, long span, long x, long y,
-                                 Value fold, QTreePageRef[] childRefs, Slot[] slots) {
-    int post = zone;
-    for (int i = 0, n = childRefs.length; i < n; i += 1) {
-      final int childPost = childRefs[i].post;
-      if (childPost != 0) {
-        post = post == 0 ? childPost : Math.min(post, childPost);
-      }
-    }
-    return create(context, stem, version, post, zone, base, span, x, y, fold, childRefs, slots);
-  }
-
-  public static QTreeNode create(PageContext context, int stem, long version, long span,
-                                 long x, long y, Value fold, QTreePageRef[] childRefs, Slot[] slots) {
-    return create(context, stem, version, 0, 0L, span, x, y, fold, childRefs, slots);
-  }
-
-  public static QTreeNode create(PageContext context, int stem, long version, long span,
-                                 Value fold, QTreePageRef[] childRefs, Slot[] slots) {
-    int xRank = 0;
-    int yRank = 0;
-    long xBase = 0L;
-    long yBase = 0L;
-    long xMask = -1L;
-    long yMask = -1L;
-    int post = 0;
-    for (int i = 0, childCount = childRefs.length; i < childCount; i += 1) {
-      final QTreePageRef childRef = childRefs[i];
-      final long cx = childRef.x;
-      final long cy = childRef.y;
-      final int cxRank = Long.numberOfLeadingZeros(~cx);
-      final int cyRank = Long.numberOfLeadingZeros(~cy);
-      final long cxBase = cx << cxRank;
-      final long cyBase = cy << cyRank;
-      xRank = Math.max(xRank, cxRank);
-      yRank = Math.max(yRank, cyRank);
-      xBase |= cxBase;
-      yBase |= cyBase;
-      xMask &= cxBase;
-      yMask &= cyBase;
-      final int childPost = childRef.post;
-      if (childPost != 0) {
-        post = post == 0 ? childPost : Math.min(post, childPost);
-      }
-    }
-    for (int i = 0, slotCount = slots.length; i < slotCount; i += 1) {
-      final Value tile = slots[i].toValue().header("tile");
-      final long tx = tile.getItem(0).longValue();
-      final long ty = tile.getItem(1).longValue();
-      final int txRank = Long.numberOfLeadingZeros(~tx);
-      final int tyRank = Long.numberOfLeadingZeros(~ty);
-      final long txBase = tx << txRank;
-      final long tyBase = ty << tyRank;
-      xRank = Math.max(xRank, txRank);
-      yRank = Math.max(yRank, tyRank);
-      xBase |= txBase;
-      yBase |= tyBase;
-      xMask &= txBase;
-      yMask &= tyBase;
-    }
-    xMask ^= xBase;
-    yMask ^= yBase;
-    xRank = Math.max(xRank, 64 - Long.numberOfLeadingZeros(xMask));
-    yRank = Math.max(yRank, 64 - Long.numberOfLeadingZeros(yMask));
-    xMask = ~((1L << xRank) - 1L);
-    yMask = ~((1L << yRank) - 1L);
-    xBase &= xMask;
-    yBase &= yMask;
-    final long x = BitInterval.from(xRank, xBase);
-    final long y = BitInterval.from(yRank, yBase);
-    return create(context, stem, version, post, 0, 0L, span, x, y, fold, childRefs, slots);
-  }
-
-  public static QTreeNode fromValue(QTreePageRef pageRef, Value value) {
-    Throwable cause = null;
-    try {
-      final Value header = value.header("qnode");
-      final long version = header.get("v").longValue();
-      final Record tail = value.tail();
-      final int n = tail.size();
-      QTreePageRef[] childRefs = new QTreePageRef[n];
-      Slot[] slots = null;
-      int childCount = 0;
-      int slotCount = 0;
-      for (int i = 0; i < n; i += 1) {
-        final Item item = tail.get(i);
-        if (item instanceof Slot) {
-          if (slots == null) {
-            slots = new Slot[n];
-          }
-          slots[slotCount] = (Slot) item;
-          slotCount += 1;
-        } else {
-          childRefs[childCount] = QTreePageRef.fromValue(pageRef.context, pageRef.stem, item.toValue());
-          childCount += 1;
-        }
-      }
-      if (childCount < n) {
-        final QTreePageRef[] newChildRefs = new QTreePageRef[childCount];
-        System.arraycopy(childRefs, 0, newChildRefs, 0, childCount);
-        childRefs = newChildRefs;
-      }
-      if (slotCount == 0) {
-        slots = EMPTY_SLOTS;
-      } else if (slotCount < n) {
-        final Slot[] newSlots = new Slot[slotCount];
-        System.arraycopy(slots, 0, newSlots, 0, slotCount);
-        slots = newSlots;
-      }
-      return new QTreeNode(pageRef, version, childRefs, slots);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        cause = error;
-      } else {
-        throw error;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed qnode: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), cause);
   }
 
   @Override
@@ -221,8 +87,8 @@ public final class QTreeNode extends QTreePage {
     try {
       return this.childRefs[index].page();
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -313,7 +179,7 @@ public final class QTreeNode extends QTreePage {
       final int xkRank = Long.numberOfLeadingZeros(~xk);
       final int ykRank = Long.numberOfLeadingZeros(~yk);
       if (xkRank <= xRank && ykRank <= yRank) {
-        final int i = scan(xk, yk);
+        final int i = this.scan(xk, yk);
         //final int i = lookup(xk, yk);
         if (i >= 0) {
           final QTreePageRef childRef = this.childRefs[i];
@@ -323,12 +189,12 @@ public final class QTreeNode extends QTreePage {
             }
           }
         }
-        return lookup(key) >= 0;
+        return this.lookup(key) >= 0;
       }
       return false;
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -343,7 +209,7 @@ public final class QTreeNode extends QTreePage {
       final int xkRank = Long.numberOfLeadingZeros(~xk);
       final int ykRank = Long.numberOfLeadingZeros(~yk);
       if (xkRank <= xRank && ykRank <= yRank) {
-        int i = scan(xk, yk);
+        int i = this.scan(xk, yk);
         //int i = lookup(xk, yk);
         if (i >= 0) {
           final QTreePageRef childRef = this.childRefs[i];
@@ -354,15 +220,15 @@ public final class QTreeNode extends QTreePage {
             }
           }
         }
-        i = lookup(key);
+        i = this.lookup(key);
         if (i >= 0) {
           return this.slots[i].toValue().body();
         }
       }
       return Value.absent();
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -375,22 +241,22 @@ public final class QTreeNode extends QTreePage {
     try {
       final QTreePageRef[] childRefs = this.childRefs;
       final int n = childRefs.length;
-      final int j = lookup(xk, yk);
+      final int j = this.lookup(xk, yk);
       final int i = j >= 0 ? j : -(j + 1);
       final QTreePage oldPage = childRefs[i].page();
       final QTreePage newPage = oldPage.updated(key, xk, yk, newValue, newVersion);
       if (oldPage.x() == newPage.x() && oldPage.y() == newPage.y()) {
         if (canSplit && oldPage.span() != newPage.span() && this.pageRef.context.pageShouldSplit(newPage)) {
-          return updatedPageSplit(i, newPage, oldPage, newVersion);
+          return this.updatedPageSplit(i, newPage, oldPage, newVersion);
         } else {
-          return updatedPage(i, newPage, oldPage, newVersion);
+          return this.updatedPage(i, newPage, oldPage, newVersion);
         }
       } else {
-        return coalescePage(this, i, newPage, oldPage, newVersion);
+        return this.coalescePage(this, i, newPage, oldPage, newVersion);
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -414,8 +280,8 @@ public final class QTreeNode extends QTreePage {
         }
       } while (true);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -428,19 +294,19 @@ public final class QTreeNode extends QTreePage {
     final QTreePageRef[] newChildRefs = new QTreePageRef[n];
     System.arraycopy(oldChildRefs, 0, newChildRefs, 0, n);
     newChildRefs[i] = newPage.pageRef();
-    BitInterval.sort(newChildRefs, PAGE_REF_ORDERING);
+    BitInterval.sort(newChildRefs, QTreePage.PAGE_REF_ORDERING);
     final long newSpan = this.pageRef.span - oldPage.span() + newPage.span();
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        newSpan, Value.absent(), newChildRefs, this.slots);
+    return QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            newSpan, Value.absent(), newChildRefs, this.slots);
   }
 
   QTreeNode updatedPageSplit(int i, QTreePage newPage, QTreePage oldPage, long newVersion) {
-    QTreeNode page = removedPage(i, oldPage, newVersion);
+    QTreeNode page = this.removedPage(i, oldPage, newVersion);
     final QTreeNode subPage = newPage.split(newVersion);
     final QTreePageRef[] subChildRefs = subPage.childRefs;
     final int subChildCount = subChildRefs.length;
     if (subChildCount <= 1) {
-      return updatedPage(i, newPage, oldPage, newVersion);
+      return this.updatedPage(i, newPage, oldPage, newVersion);
     }
     for (int j = 0; j < subChildCount; j += 1) {
       page = page.insertedPageRef(subChildRefs[j], newVersion);
@@ -449,7 +315,7 @@ public final class QTreeNode extends QTreePage {
   }
 
   QTreeNode updatedPageMerge(int i, QTreeNode newPage, QTreePage oldPage, long newVersion) {
-    QTreeNode page = removedPage(i, oldPage, newVersion);
+    QTreeNode page = this.removedPage(i, oldPage, newVersion);
     final QTreePageRef[] newChildRefs = newPage.childRefs;
     for (int j = 0, childCount = newChildRefs.length; j < childCount; j += 1) {
       page = page.insertedPageRef(newChildRefs[j], newVersion);
@@ -487,10 +353,10 @@ public final class QTreeNode extends QTreePage {
       final Slot[] newSlots = new Slot[oldSlots.length + subSlots.length];
       System.arraycopy(oldSlots, 0, newSlots, 0, oldSlots.length);
       System.arraycopy(subSlots, 0, newSlots, oldSlots.length, subSlots.length);
-      BitInterval.sort(newSlots, SLOT_ORDERING);
+      BitInterval.sort(newSlots, QTreePage.SLOT_ORDERING);
       final long newSpan = this.pageRef.span + subSlots.length;
-      return create(this.pageRef.context, this.pageRef.stem, newVersion,
-          newSpan, Value.absent(), this.childRefs, newSlots);
+      return QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                              newSpan, Value.absent(), this.childRefs, newSlots);
     } else {
       return this;
     }
@@ -527,14 +393,14 @@ public final class QTreeNode extends QTreePage {
 
     if (newSlots != null) {
       if (newSlotCount == 0) {
-        newSlots = EMPTY_SLOTS;
+        newSlots = QTreePage.EMPTY_SLOTS;
       } else if (newSlotCount < oldSlotCount - 1) {
         final Slot[] resizedSlots = new Slot[newSlotCount];
         System.arraycopy(newSlots, 0, resizedSlots, 0, newSlotCount);
         newSlots = resizedSlots;
       }
-      return create(page.pageRef.context, page.pageRef.stem, newVersion,
-          this.pageRef.span, Value.absent(), page.childRefs, newSlots);
+      return QTreeNode.create(page.pageRef.context, page.pageRef.stem, newVersion,
+                              this.pageRef.span, Value.absent(), page.childRefs, newSlots);
     } else {
       return page;
     }
@@ -543,16 +409,16 @@ public final class QTreeNode extends QTreePage {
   @Override
   QTreeNode insertedPageRef(QTreePageRef newPageRef, long newVersion) {
     try {
-      int i = lookup(newPageRef.x(), newPageRef.y());
+      int i = this.lookup(newPageRef.x(), newPageRef.y());
       if (i < 0) {
         i = -(i + 1);
-        return insertedPageRef(i, newPageRef, newVersion);
+        return this.insertedPageRef(i, newPageRef, newVersion);
       } else {
-        return mergedPage(newPageRef.page(), newVersion);
+        return this.mergedPage(newPageRef.page(), newVersion);
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -566,10 +432,10 @@ public final class QTreeNode extends QTreePage {
     System.arraycopy(oldChildRefs, 0, newChildRefs, 0, i);
     newChildRefs[i] = newPageRef;
     System.arraycopy(oldChildRefs, i, newChildRefs, i + 1, n - (i + 1));
-    BitInterval.sort(newChildRefs, PAGE_REF_ORDERING);
+    BitInterval.sort(newChildRefs, QTreePage.PAGE_REF_ORDERING);
     final long newSpan = this.pageRef.span + newPageRef.span();
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        newSpan, Value.absent(), newChildRefs, this.slots);
+    return QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            newSpan, Value.absent(), newChildRefs, this.slots);
   }
 
   QTreeNode insertedSlot(int i, Value key, long xk, long yk, Value newValue, long newVersion) {
@@ -579,12 +445,12 @@ public final class QTreeNode extends QTreePage {
     System.arraycopy(oldSlots, 0, newSlots, 0, i);
     newSlots[i] = slot(key, xk, yk, newValue);
     System.arraycopy(oldSlots, i, newSlots, i + 1, n - (i + 1));
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        this.pageRef.span + 1L, Value.absent(), this.childRefs, newSlots);
+    return QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            this.pageRef.span + 1L, Value.absent(), this.childRefs, newSlots);
   }
 
   QTreeNode updatedSlot(Value key, long xk, long yk, Value newValue, long newVersion) {
-    return updatedSlot(slot(key, xk, yk, newValue), newVersion);
+    return this.updatedSlot(slot(key, xk, yk, newValue), newVersion);
   }
 
   QTreeNode updatedSlot(int i, Value key, long xk, long yk, Value newValue, long newVersion) {
@@ -598,8 +464,8 @@ public final class QTreeNode extends QTreePage {
       final Slot[] newSlots = new Slot[n];
       System.arraycopy(oldSlots, 0, newSlots, 0, n);
       newSlots[i] = slot(key, xk, yk, newValue);
-      return create(this.pageRef.context, this.pageRef.stem, newVersion,
-          this.pageRef.span, Value.absent(), this.childRefs, newSlots);
+      return QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                              this.pageRef.span, Value.absent(), this.childRefs, newSlots);
     } else {
       return this;
     }
@@ -607,12 +473,12 @@ public final class QTreeNode extends QTreePage {
 
   @Override
   QTreeNode updatedSlot(Slot newSlot, long newVersion) {
-    int i = lookup(newSlot.key());
+    int i = this.lookup(newSlot.key());
     if (i >= 0) {
-      return updatedSlot(i, newSlot, newVersion);
+      return this.updatedSlot(i, newSlot, newVersion);
     } else {
       i = -(i + 1);
-      return insertedSlot(i, newSlot, newVersion);
+      return this.insertedSlot(i, newSlot, newVersion);
     }
   }
 
@@ -624,8 +490,8 @@ public final class QTreeNode extends QTreePage {
       final Slot[] newSlots = new Slot[n];
       System.arraycopy(oldSlots, 0, newSlots, 0, n);
       newSlots[i] = newSlot.commit();
-      return create(this.pageRef.context, this.pageRef.stem, newVersion,
-          this.pageRef.span, Value.absent(), this.childRefs, newSlots);
+      return QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                              this.pageRef.span, Value.absent(), this.childRefs, newSlots);
     } else {
       return this;
     }
@@ -638,8 +504,8 @@ public final class QTreeNode extends QTreePage {
     System.arraycopy(oldSlots, 0, newSlots, 0, i);
     newSlots[i] = newSlot.commit();
     System.arraycopy(oldSlots, i, newSlots, i + 1, n - (i + 1));
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        this.pageRef.span, Value.absent(), this.childRefs, newSlots);
+    return QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            this.pageRef.span, Value.absent(), this.childRefs, newSlots);
   }
 
   @Override
@@ -649,18 +515,18 @@ public final class QTreeNode extends QTreePage {
     final int xkRank = Long.numberOfLeadingZeros(~xk);
     final int ykRank = Long.numberOfLeadingZeros(~yk);
     if (xkRank <= xRank && ykRank <= yRank) {
-      int i = scan(xk, yk);
+      int i = this.scan(xk, yk);
       //int i = lookup(xk, yk);
       if (i >= 0) {
-        final QTreePage oldPage = getChild(i);
+        final QTreePage oldPage = this.getChild(i);
         final QTreePage newPage = oldPage.removed(key, xk, yk, newVersion);
         if (oldPage != newPage) {
-          return replacedPage(i, newPage, oldPage, newVersion);
+          return this.replacedPage(i, newPage, oldPage, newVersion);
         }
       }
-      i = lookup(key);
+      i = this.lookup(key);
       if (i >= 0) {
-        return removedSlot(i, newVersion);
+        return this.removedSlot(i, newVersion);
       }
     }
     return this;
@@ -669,18 +535,18 @@ public final class QTreeNode extends QTreePage {
   QTreePage replacedPage(int i, QTreePage newPage, QTreePage oldPage, long newVersion) {
     if (!newPage.isEmpty()) {
       if (newPage.isNode() && this.pageRef.context.pageShouldMerge(newPage)) {
-        return updatedPageMerge(i, (QTreeNode) newPage, oldPage, newVersion);
+        return this.updatedPageMerge(i, (QTreeNode) newPage, oldPage, newVersion);
       } else {
-        return updatedPage(i, newPage, oldPage, newVersion);
+        return this.updatedPage(i, newPage, oldPage, newVersion);
       }
     } else if (this.childRefs.length > 2) {
-      return removedPage(i, oldPage, newVersion);
+      return this.removedPage(i, oldPage, newVersion);
     } else if (this.childRefs.length > 1) {
       final QTreePage onlyChild;
       if (i == 0) {
-        onlyChild = getChild(1);
+        onlyChild = this.getChild(1);
       } else {
-        onlyChild = getChild(0);
+        onlyChild = this.getChild(0);
       }
       if (this.slots.length == 0) {
         return onlyChild;
@@ -689,7 +555,7 @@ public final class QTreeNode extends QTreePage {
       }
     } else if (this.slots.length > 0) {
       return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion,
-          Value.absent(), this.slots);
+                              Value.absent(), this.slots);
     } else {
       return QTreeLeaf.empty(this.pageRef.context, this.pageRef.stem, newVersion);
     }
@@ -701,10 +567,10 @@ public final class QTreeNode extends QTreePage {
     final QTreePageRef[] newChildRefs = new QTreePageRef[n];
     System.arraycopy(oldChildRefs, 0, newChildRefs, 0, i);
     System.arraycopy(oldChildRefs, i + 1, newChildRefs, i, n - i);
-    BitInterval.sort(newChildRefs, PAGE_REF_ORDERING);
+    BitInterval.sort(newChildRefs, QTreePage.PAGE_REF_ORDERING);
     final long newSpan = this.pageRef.span - oldPage.span();
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        newSpan, Value.absent(), newChildRefs, this.slots);
+    return QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            newSpan, Value.absent(), newChildRefs, this.slots);
   }
 
   QTreeNode removedSlot(int i, long newVersion) {
@@ -713,8 +579,8 @@ public final class QTreeNode extends QTreePage {
     final Slot[] newSlots = new Slot[n];
     System.arraycopy(oldSlots, 0, newSlots, 0, i);
     System.arraycopy(oldSlots, i + 1, newSlots, i, n - i);
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        this.pageRef.span - 1L, Value.absent(), this.childRefs, newSlots);
+    return QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            this.pageRef.span - 1L, Value.absent(), this.childRefs, newSlots);
   }
 
   @Override
@@ -733,13 +599,13 @@ public final class QTreeNode extends QTreePage {
         }
       } else if (slots.length > 0) {
         return QTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion,
-            Value.absent(), slots);
+                                Value.absent(), slots);
       } else {
         return QTreeLeaf.empty(this.pageRef.context, this.pageRef.stem, newVersion);
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        throw new StoreException(toDebugString(), cause);
+      if (Cont.isNonFatal(cause)) {
+        throw new StoreException(this.toDebugString(), cause);
       } else {
         throw cause;
       }
@@ -749,7 +615,7 @@ public final class QTreeNode extends QTreePage {
   @Override
   public QTreeNode balanced(long newVersion) {
     if (this.childRefs.length > 1 && this.pageRef.context.pageShouldSplit(this)) {
-      return split(newVersion);
+      return this.split(newVersion);
     } else {
       return this;
     }
@@ -1191,23 +1057,23 @@ public final class QTreeNode extends QTreePage {
         childRefs00 = newChildRefs;
       }
       if (slotCount00 == 0) {
-        slots00 = EMPTY_SLOTS;
+        slots00 = QTreePage.EMPTY_SLOTS;
       } else if (slotCount00 < slotCount) {
         final Slot[] newSlots = new Slot[slotCount00];
         System.arraycopy(slots00, 0, newSlots, 0, slotCount00);
         slots00 = newSlots;
       }
       if (childCount00 > 1 || childCount00 == 1 && slotCount00 > 0) {
-        BitInterval.sort(childRefs00, PAGE_REF_ORDERING);
-        BitInterval.sort(slots00, SLOT_ORDERING);
-        pageRefs[pageRefOffset] = create(this.pageRef.context, this.pageRef.stem, newVersion,
-            span00, x00, y00, Value.absent(), childRefs00, slots00).pageRef();
+        BitInterval.sort(childRefs00, QTreePage.PAGE_REF_ORDERING);
+        BitInterval.sort(slots00, QTreePage.SLOT_ORDERING);
+        pageRefs[pageRefOffset] = QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                                                   span00, x00, y00, Value.absent(), childRefs00, slots00).pageRef();
       } else if (slotCount00 == 0) {
         pageRefs[pageRefOffset] = childRefs00[0];
       } else {
-        BitInterval.sort(slots00, SLOT_ORDERING);
+        BitInterval.sort(slots00, QTreePage.SLOT_ORDERING);
         pageRefs[pageRefOffset] = QTreeLeaf.create(this.pageRef.context, this.pageRef.stem,
-            newVersion, Value.absent(), slots00).pageRef();
+                                                   newVersion, Value.absent(), slots00).pageRef();
       }
       pageRefOffset += 1;
     }
@@ -1218,23 +1084,23 @@ public final class QTreeNode extends QTreePage {
         childRefs01 = newChildRefs;
       }
       if (slotCount01 == 0) {
-        slots01 = EMPTY_SLOTS;
+        slots01 = QTreePage.EMPTY_SLOTS;
       } else if (slotCount01 < slotCount) {
         final Slot[] newSlots = new Slot[slotCount01];
         System.arraycopy(slots01, 0, newSlots, 0, slotCount01);
         slots01 = newSlots;
       }
       if (childCount01 > 1 || childCount01 == 1 && slotCount01 > 0) {
-        BitInterval.sort(childRefs01, PAGE_REF_ORDERING);
-        BitInterval.sort(slots01, SLOT_ORDERING);
-        pageRefs[pageRefOffset] = create(this.pageRef.context, this.pageRef.stem, newVersion,
-            span01, x01, y01, Value.absent(), childRefs01, slots01).pageRef();
+        BitInterval.sort(childRefs01, QTreePage.PAGE_REF_ORDERING);
+        BitInterval.sort(slots01, QTreePage.SLOT_ORDERING);
+        pageRefs[pageRefOffset] = QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                                                   span01, x01, y01, Value.absent(), childRefs01, slots01).pageRef();
       } else if (slotCount01 == 0) {
         pageRefs[pageRefOffset] = childRefs01[0];
       } else {
-        BitInterval.sort(slots01, SLOT_ORDERING);
+        BitInterval.sort(slots01, QTreePage.SLOT_ORDERING);
         pageRefs[pageRefOffset] = QTreeLeaf.create(this.pageRef.context, this.pageRef.stem,
-            newVersion, Value.absent(), slots01).pageRef();
+                                                   newVersion, Value.absent(), slots01).pageRef();
       }
       pageRefOffset += 1;
     }
@@ -1245,23 +1111,23 @@ public final class QTreeNode extends QTreePage {
         childRefs10 = newChildRefs;
       }
       if (slotCount10 == 0) {
-        slots10 = EMPTY_SLOTS;
+        slots10 = QTreePage.EMPTY_SLOTS;
       } else if (slotCount10 < slotCount) {
         final Slot[] newSlots = new Slot[slotCount10];
         System.arraycopy(slots10, 0, newSlots, 0, slotCount10);
         slots10 = newSlots;
       }
       if (childCount10 > 1 || childCount10 == 1 && slotCount10 > 0) {
-        BitInterval.sort(childRefs10, PAGE_REF_ORDERING);
-        BitInterval.sort(slots10, SLOT_ORDERING);
-        pageRefs[pageRefOffset] = create(this.pageRef.context, this.pageRef.stem, newVersion,
-            span10, x10, y10, Value.absent(), childRefs10, slots10).pageRef();
+        BitInterval.sort(childRefs10, QTreePage.PAGE_REF_ORDERING);
+        BitInterval.sort(slots10, QTreePage.SLOT_ORDERING);
+        pageRefs[pageRefOffset] = QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                                                   span10, x10, y10, Value.absent(), childRefs10, slots10).pageRef();
       } else if (slotCount10 == 0) {
         pageRefs[pageRefOffset] = childRefs10[0];
       } else {
-        BitInterval.sort(slots10, SLOT_ORDERING);
+        BitInterval.sort(slots10, QTreePage.SLOT_ORDERING);
         pageRefs[pageRefOffset] = QTreeLeaf.create(this.pageRef.context, this.pageRef.stem,
-            newVersion, Value.absent(), slots10).pageRef();
+                                                   newVersion, Value.absent(), slots10).pageRef();
       }
       pageRefOffset += 1;
     }
@@ -1272,39 +1138,39 @@ public final class QTreeNode extends QTreePage {
         childRefs11 = newChildRefs;
       }
       if (slotCount11 == 0) {
-        slots11 = EMPTY_SLOTS;
+        slots11 = QTreePage.EMPTY_SLOTS;
       } else if (slotCount11 < slotCount) {
         final Slot[] newSlots = new Slot[slotCount11];
         System.arraycopy(slots11, 0, newSlots, 0, slotCount11);
         slots11 = newSlots;
       }
       if (childCount11 > 1 || childCount11 == 1 && slotCount11 > 0) {
-        BitInterval.sort(childRefs11, PAGE_REF_ORDERING);
-        BitInterval.sort(slots11, SLOT_ORDERING);
-        pageRefs[pageRefOffset] = create(this.pageRef.context, this.pageRef.stem, newVersion,
-            span11, x11, y11, Value.absent(), childRefs11, slots11).pageRef();
+        BitInterval.sort(childRefs11, QTreePage.PAGE_REF_ORDERING);
+        BitInterval.sort(slots11, QTreePage.SLOT_ORDERING);
+        pageRefs[pageRefOffset] = QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                                                   span11, x11, y11, Value.absent(), childRefs11, slots11).pageRef();
       } else if (slotCount11 == 0) {
         pageRefs[pageRefOffset] = childRefs11[0];
       } else {
-        BitInterval.sort(slots11, SLOT_ORDERING);
+        BitInterval.sort(slots11, QTreePage.SLOT_ORDERING);
         pageRefs[pageRefOffset] = QTreeLeaf.create(this.pageRef.context, this.pageRef.stem,
-            newVersion, Value.absent(), slots11).pageRef();
+                                                   newVersion, Value.absent(), slots11).pageRef();
       }
       pageRefOffset += 1;
     }
-    BitInterval.sort(pageRefs, PAGE_REF_ORDERING);
+    BitInterval.sort(pageRefs, QTreePage.PAGE_REF_ORDERING);
 
     if (slotCountXY == 0) {
-      slotsXY = EMPTY_SLOTS;
+      slotsXY = QTreePage.EMPTY_SLOTS;
     } else if (slotCountXY < slotCount) {
       final Slot[] newSlotsXY = new Slot[slotCountXY];
       System.arraycopy(slotsXY, 0, newSlotsXY, 0, slotCountXY);
       slotsXY = newSlotsXY;
     }
-    BitInterval.sort(slotsXY, SLOT_ORDERING);
+    BitInterval.sort(slotsXY, QTreePage.SLOT_ORDERING);
 
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        this.pageRef.span, Value.absent(), pageRefs, slotsXY);
+    return QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            this.pageRef.span, Value.absent(), pageRefs, slotsXY);
   }
 
   @Override
@@ -1350,15 +1216,14 @@ public final class QTreeNode extends QTreePage {
 
   @Override
   public Value toHeader() {
-    final Record header = Record.create(2)
-        .slot("stem", this.pageRef.stem)
-        .slot("v", this.version);
+    final Record header = Record.create(2).slot("stem", this.pageRef.stem)
+                                          .slot("v", this.version);
     return Record.create(1).attr("qnode", header);
   }
 
   @Override
   public Value toValue() {
-    final Record record = (Record) toHeader();
+    final Record record = (Record) this.toHeader();
     final QTreePageRef[] childRefs = this.childRefs;
     for (int i = 0, n = childRefs.length; i < n; i += 1) {
       record.add(childRefs[i].toValue());
@@ -1384,9 +1249,9 @@ public final class QTreeNode extends QTreePage {
     for (int i = 0, k = slots.length; i < k; i += 1) {
       fold = accumulator.combine(fold, slots[i].value());
     }
-    return create(this.pageRef.context, this.pageRef.stem, newVersion,
-        this.pageRef.span, this.pageRef.x, this.pageRef.y,
-        fold, newChildRefs, slots);
+    return QTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
+                            this.pageRef.span, this.pageRef.x, this.pageRef.y,
+                            fold, newChildRefs, slots);
   }
 
   @Override
@@ -1405,9 +1270,9 @@ public final class QTreeNode extends QTreePage {
           if (i < n) {
             System.arraycopy(oldChildRefs, i, newChildRefs, i, n - i);
           }
-          return create(this.pageRef.context, this.pageRef.stem, version,
-              this.pageRef.span, this.pageRef.x, this.pageRef.y,
-              this.pageRef.fold, newChildRefs, this.slots);
+          return QTreeNode.create(this.pageRef.context, this.pageRef.stem, version,
+                                  this.pageRef.span, this.pageRef.x, this.pageRef.y,
+                                  this.pageRef.fold, newChildRefs, this.slots);
         }
       }
     }
@@ -1432,9 +1297,9 @@ public final class QTreeNode extends QTreePage {
       }
     }
 
-    return create(this.pageRef.context, this.pageRef.stem, version, zone, step,
-        this.pageRef.span, this.pageRef.x, this.pageRef.y,
-        this.pageRef.fold, newChildRefs, this.slots);
+    return QTreeNode.create(this.pageRef.context, this.pageRef.stem, version, zone, step,
+                            this.pageRef.span, this.pageRef.x, this.pageRef.y,
+                            this.pageRef.fold, newChildRefs, this.slots);
   }
 
   @Override
@@ -1445,14 +1310,14 @@ public final class QTreeNode extends QTreePage {
     for (int i = 0; i < n; i += 1) {
       newChildRefs[i] = oldChildRefs[i].uncommitted(version);
     }
-    return create(this.pageRef.context, this.pageRef.stem, version, this.pageRef.span,
-        this.pageRef.x, this.pageRef.y, this.pageRef.fold, newChildRefs, this.slots);
+    return QTreeNode.create(this.pageRef.context, this.pageRef.stem, version, this.pageRef.span,
+                            this.pageRef.x, this.pageRef.y, this.pageRef.fold, newChildRefs, this.slots);
   }
 
   @Override
   public void writePage(Output<?> output) {
-    Recon.write(toHeader(), output);
-    writePageContent(output);
+    Recon.write(this.toHeader(), output);
+    this.writePageContent(output);
     output.write('\n');
   }
 
@@ -1485,7 +1350,7 @@ public final class QTreeNode extends QTreePage {
         childRef.writeDiff(output);
       }
     }
-    writePage(output);
+    this.writePage(output);
   }
 
   @Override
@@ -1496,10 +1361,10 @@ public final class QTreeNode extends QTreePage {
         childRefs[0].loadTreeAsync(pageLoader, new LoadSubtree(pageLoader, this, 1, cont));
       } else {
         // Call continuation on fresh stack
-        this.pageRef.context.stage().execute(Conts.async(cont, this));
+        this.pageRef.context.stage().execute(Cont.async(cont, this));
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -1538,9 +1403,142 @@ public final class QTreeNode extends QTreePage {
   @Override
   public String toString() {
     final Output<String> output = Unicode.stringOutput(pageSize() - 1); // ignore trailing '\n'
-    Recon.write(toHeader(), output);
-    writePageContent(output);
+    Recon.write(this.toHeader(), output);
+    this.writePageContent(output);
     return output.bind();
+  }
+
+  public static QTreeNode create(PageContext context, int stem, long version,
+                                 int post, int zone, long base, long span, long x, long y,
+                                 Value fold, QTreePageRef[] childRefs, Slot[] slots) {
+    final QTreePageRef pageRef = new QTreePageRef(context, PageType.NODE, stem, post,
+                                                  zone, base, span, x, y, fold);
+    final QTreeNode page = new QTreeNode(pageRef, version, childRefs, slots);
+    pageRef.page = page;
+    return page;
+  }
+
+  public static QTreeNode create(PageContext context, int stem, long version,
+                                 int zone, long base, long span, long x, long y,
+                                 Value fold, QTreePageRef[] childRefs, Slot[] slots) {
+    int post = zone;
+    for (int i = 0, n = childRefs.length; i < n; i += 1) {
+      final int childPost = childRefs[i].post;
+      if (childPost != 0) {
+        post = post == 0 ? childPost : Math.min(post, childPost);
+      }
+    }
+    return QTreeNode.create(context, stem, version, post, zone, base, span, x, y, fold, childRefs, slots);
+  }
+
+  public static QTreeNode create(PageContext context, int stem, long version, long span,
+                                 long x, long y, Value fold, QTreePageRef[] childRefs, Slot[] slots) {
+    return QTreeNode.create(context, stem, version, 0, 0L, span, x, y, fold, childRefs, slots);
+  }
+
+  public static QTreeNode create(PageContext context, int stem, long version, long span,
+                                 Value fold, QTreePageRef[] childRefs, Slot[] slots) {
+    int xRank = 0;
+    int yRank = 0;
+    long xBase = 0L;
+    long yBase = 0L;
+    long xMask = -1L;
+    long yMask = -1L;
+    int post = 0;
+    for (int i = 0, childCount = childRefs.length; i < childCount; i += 1) {
+      final QTreePageRef childRef = childRefs[i];
+      final long cx = childRef.x;
+      final long cy = childRef.y;
+      final int cxRank = Long.numberOfLeadingZeros(~cx);
+      final int cyRank = Long.numberOfLeadingZeros(~cy);
+      final long cxBase = cx << cxRank;
+      final long cyBase = cy << cyRank;
+      xRank = Math.max(xRank, cxRank);
+      yRank = Math.max(yRank, cyRank);
+      xBase |= cxBase;
+      yBase |= cyBase;
+      xMask &= cxBase;
+      yMask &= cyBase;
+      final int childPost = childRef.post;
+      if (childPost != 0) {
+        post = post == 0 ? childPost : Math.min(post, childPost);
+      }
+    }
+    for (int i = 0, slotCount = slots.length; i < slotCount; i += 1) {
+      final Value tile = slots[i].toValue().header("tile");
+      final long tx = tile.getItem(0).longValue();
+      final long ty = tile.getItem(1).longValue();
+      final int txRank = Long.numberOfLeadingZeros(~tx);
+      final int tyRank = Long.numberOfLeadingZeros(~ty);
+      final long txBase = tx << txRank;
+      final long tyBase = ty << tyRank;
+      xRank = Math.max(xRank, txRank);
+      yRank = Math.max(yRank, tyRank);
+      xBase |= txBase;
+      yBase |= tyBase;
+      xMask &= txBase;
+      yMask &= tyBase;
+    }
+    xMask ^= xBase;
+    yMask ^= yBase;
+    xRank = Math.max(xRank, 64 - Long.numberOfLeadingZeros(xMask));
+    yRank = Math.max(yRank, 64 - Long.numberOfLeadingZeros(yMask));
+    xMask = ~((1L << xRank) - 1L);
+    yMask = ~((1L << yRank) - 1L);
+    xBase &= xMask;
+    yBase &= yMask;
+    final long x = BitInterval.from(xRank, xBase);
+    final long y = BitInterval.from(yRank, yBase);
+    return QTreeNode.create(context, stem, version, post, 0, 0L, span, x, y, fold, childRefs, slots);
+  }
+
+  public static QTreeNode fromValue(QTreePageRef pageRef, Value value) {
+    Throwable cause = null;
+    try {
+      final Value header = value.header("qnode");
+      final long version = header.get("v").longValue();
+      final Record tail = value.tail();
+      final int n = tail.size();
+      QTreePageRef[] childRefs = new QTreePageRef[n];
+      Slot[] slots = null;
+      int childCount = 0;
+      int slotCount = 0;
+      for (int i = 0; i < n; i += 1) {
+        final Item item = tail.get(i);
+        if (item instanceof Slot) {
+          if (slots == null) {
+            slots = new Slot[n];
+          }
+          slots[slotCount] = (Slot) item;
+          slotCount += 1;
+        } else {
+          childRefs[childCount] = QTreePageRef.fromValue(pageRef.context, pageRef.stem, item.toValue());
+          childCount += 1;
+        }
+      }
+      if (childCount < n) {
+        final QTreePageRef[] newChildRefs = new QTreePageRef[childCount];
+        System.arraycopy(childRefs, 0, newChildRefs, 0, childCount);
+        childRefs = newChildRefs;
+      }
+      if (slotCount == 0) {
+        slots = QTreePage.EMPTY_SLOTS;
+      } else if (slotCount < n) {
+        final Slot[] newSlots = new Slot[slotCount];
+        System.arraycopy(slots, 0, newSlots, 0, slotCount);
+        slots = newSlots;
+      }
+      return new QTreeNode(pageRef, version, childRefs, slots);
+    } catch (Throwable error) {
+      if (Cont.isNonFatal(error)) {
+        cause = error;
+      } else {
+        throw error;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed qnode: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), cause);
   }
 
 }

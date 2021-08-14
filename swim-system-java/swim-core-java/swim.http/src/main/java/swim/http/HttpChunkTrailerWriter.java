@@ -38,6 +38,11 @@ final class HttpChunkTrailerWriter extends Writer<Object, Object> {
     this(http, headers, null, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return HttpChunkTrailerWriter.write(output, this.http, this.headers, this.part, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, HttpWriter http,
                                       Iterator<HttpHeader> headers,
                                       Writer<?, ?> part, int step) {
@@ -77,24 +82,19 @@ final class HttpChunkTrailerWriter extends Writer<Object, Object> {
     }
     if (step == 5 && output.isCont()) {
       output = output.write('\n');
-      return done();
+      return Writer.done();
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new HttpChunkTrailerWriter(http, headers, part, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http,
                                       Iterator<HttpHeader> headers) {
-    return write(output, http, headers, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.headers, this.part, this.step);
+    return HttpChunkTrailerWriter.write(output, http, headers, null, 1);
   }
 
 }

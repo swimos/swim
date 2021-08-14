@@ -22,11 +22,7 @@ import swim.util.OrderedMapCursor;
 public abstract class BTreePage<K, V, U> {
 
   BTreePage() {
-    // stub
-  }
-
-  public static <K, V, U> BTreePage<K, V, U> empty() {
-    return BTreeLeaf.empty();
+    // sealed
   }
 
   public abstract boolean isEmpty();
@@ -81,23 +77,27 @@ public abstract class BTreePage<K, V, U> {
                                              CombinerFunction<U, U> combiner);
 
   public Cursor<K> keyIterator() {
-    return Cursor.keys(iterator());
+    return Cursor.keys(this.iterator());
   }
 
   public Cursor<V> valueIterator() {
-    return Cursor.values(iterator());
+    return Cursor.values(this.iterator());
   }
 
   public abstract OrderedMapCursor<K, V> iterator();
 
-  public Cursor<K> lastKeyIterator() {
-    return Cursor.keys(lastIterator());
+  public Cursor<K> reverseKeyIterator() {
+    return Cursor.keys(this.reverseIterator());
   }
 
-  public Cursor<V> lastValueIterator() {
-    return Cursor.values(lastIterator());
+  public Cursor<V> reverseValueIterator() {
+    return Cursor.values(this.reverseIterator());
   }
 
-  public abstract OrderedMapCursor<K, V> lastIterator();
+  public abstract OrderedMapCursor<K, V> reverseIterator();
+
+  public static <K, V, U> BTreePage<K, V, U> empty() {
+    return BTreeLeaf.empty();
+  }
 
 }

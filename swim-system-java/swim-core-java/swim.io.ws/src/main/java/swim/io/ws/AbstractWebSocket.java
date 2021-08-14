@@ -51,67 +51,67 @@ public abstract class AbstractWebSocket<I, O> implements WebSocket<I, O>, IpCont
 
   @Override
   public void doRead() {
-    // stub
+    // hook
   }
 
   @Override
   public void didRead(WsFrame<? extends I> frame) {
-    // stub
+    // hook
   }
 
   @Override
   public void doWrite() {
-    // stub
+    // hook
   }
 
   @Override
   public void didWrite(WsFrame<? extends O> frame) {
-    // stub
+    // hook
   }
 
   @Override
   public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-    // stub
+    // hook
   }
 
   @Override
   public void willConnect() {
-    // stub
+    // hook
   }
 
   @Override
   public void didConnect() {
-    // stub
+    // hook
   }
 
   @Override
   public void willSecure() {
-    // stub
+    // hook
   }
 
   @Override
   public void didSecure() {
-    // stub
+    // hook
   }
 
   @Override
   public void willBecome(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didBecome(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didTimeout() {
-    // stub
+    // hook
   }
 
   @Override
   public void didDisconnect() {
-    // stub
+    // hook
   }
 
   @Override

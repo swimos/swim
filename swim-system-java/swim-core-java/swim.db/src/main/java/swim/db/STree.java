@@ -16,7 +16,6 @@ package swim.db;
 
 import swim.codec.Output;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Sync;
 import swim.structure.Slot;
 import swim.structure.Value;
@@ -126,10 +125,11 @@ public final class STree extends Tree {
   public STree updated(long index, Value newValue, long newVersion, int newPost) {
     final STreePage oldRoot = this.rootRef.page();
     final STreePage newRoot = oldRoot.updated(index, newValue, newVersion)
-        .balanced(newVersion).evacuated(newPost, newVersion);
+                                     .balanced(newVersion)
+                                     .evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -138,42 +138,47 @@ public final class STree extends Tree {
   public STree inserted(long index, Value key, Value newValue, long newVersion, int newPost) {
     final STreePage oldRoot = this.rootRef.page();
     final STreePage newRoot = oldRoot.inserted(index, key, newValue, newVersion)
-        .balanced(newVersion).evacuated(newPost, newVersion);
+                                     .balanced(newVersion)
+                                     .evacuated(newPost, newVersion);
     return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-        this.isResident, this.isTransient);
+                     this.isResident, this.isTransient);
   }
 
   public STree appended(Value key, Value newValue, long newVersion, int newPost) {
     final STreePage oldRoot = this.rootRef.page();
     final STreePage newRoot = oldRoot.appended(key, newValue, newVersion)
-        .balanced(newVersion).evacuated(newPost, newVersion);
+                                     .balanced(newVersion)
+                                     .evacuated(newPost, newVersion);
     return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-        this.isResident, this.isTransient);
+                     this.isResident, this.isTransient);
   }
 
   public STree prepended(Value key, Value newValue, long newVersion, int newPost) {
     final STreePage oldRoot = this.rootRef.page();
     final STreePage newRoot = oldRoot.prepended(key, newValue, newVersion)
-        .balanced(newVersion).evacuated(newPost, newVersion);
+                                     .balanced(newVersion)
+                                     .evacuated(newPost, newVersion);
     return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-        this.isResident, this.isTransient);
+                     this.isResident, this.isTransient);
   }
 
   public STree removed(long index, long newVersion, int newPost) {
     final STreePage oldRoot = this.rootRef.page();
     final STreePage newRoot = oldRoot.removed(index, newVersion)
-        .balanced(newVersion).evacuated(newPost, newVersion);
+                                     .balanced(newVersion)
+                                     .evacuated(newPost, newVersion);
     return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-        this.isResident, this.isTransient);
+                     this.isResident, this.isTransient);
   }
 
   public STree removed(Object object, long newVersion, int newPost) {
     final STreePage oldRoot = this.rootRef.page();
     final STreePage newRoot = oldRoot.removed(object, newVersion)
-        .balanced(newVersion).evacuated(newPost, newVersion);
+                                     .balanced(newVersion)
+                                     .evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -185,12 +190,13 @@ public final class STree extends Tree {
       final STreePage newRoot;
       if (lower < oldRootRef.span()) {
         newRoot = oldRootRef.page().drop(lower, newVersion)
-            .balanced(newVersion).evacuated(newPost, newVersion);
+                                   .balanced(newVersion)
+                                   .evacuated(newPost, newVersion);
       } else {
         newRoot = STreePage.empty(this.treeContext, this.seed.stem, newVersion);
       }
       return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -202,12 +208,13 @@ public final class STree extends Tree {
       final STreePage newRoot;
       if (upper > 0L) {
         newRoot = oldRootRef.page().take(upper, newVersion)
-            .balanced(newVersion).evacuated(newPost, newVersion);
+                                   .balanced(newVersion)
+                                   .evacuated(newPost, newVersion);
       } else {
         newRoot = STreePage.empty(this.treeContext, this.seed.stem, newVersion);
       }
       return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -217,7 +224,7 @@ public final class STree extends Tree {
     if (!this.rootRef.isEmpty()) {
       final STreePage newRoot = STreePage.empty(this.treeContext, this.seed.stem, newVersion);
       return new STree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -269,7 +276,7 @@ public final class STree extends Tree {
                        CombinerFunction<Value, Value> combiner, long newVersion, int newPost) {
     final STreePageRef oldRootRef = this.rootRef;
     final STreePageRef newRootRef = oldRootRef.reduced(identity, accumulator, combiner, newVersion)
-        .evacuated(newPost, newVersion);
+                                              .evacuated(newPost, newVersion);
     if (oldRootRef != newRootRef) {
       return new STree(this.treeContext, newRootRef, this.seed, this.isResident, this.isTransient);
     } else {
@@ -321,10 +328,10 @@ public final class STree extends Tree {
   @Override
   public void loadAsync(Cont<Tree> cont) {
     try {
-      final Cont<Page> andThen = Conts.constant(cont, this);
+      final Cont<Page> andThen = Cont.constant(cont, this);
       this.rootRef.loadTreeAsync(this.isResident, andThen);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
+      if (Cont.isNonFatal(error)) {
         cont.trap(new StoreException(this.rootRef.toDebugString(), error));
       } else {
         throw error;
@@ -335,8 +342,8 @@ public final class STree extends Tree {
   @Override
   public STree load() throws InterruptedException {
     final Sync<Tree> syncTree = new Sync<Tree>();
-    loadAsync(syncTree);
-    return (STree) syncTree.await(settings().treeLoadTimeout);
+    this.loadAsync(syncTree);
+    return (STree) syncTree.await(this.settings().treeLoadTimeout);
   }
 
   @Override

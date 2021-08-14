@@ -19,8 +19,6 @@ package swim.concurrent;
  */
 public class ScheduleException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public ScheduleException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -36,5 +34,7 @@ public class ScheduleException extends RuntimeException {
   public ScheduleException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

@@ -50,39 +50,6 @@ final class ByteWriter extends Writer<Object, Object> {
     this(null, (Input) null);
   }
 
-  static Writer<Object, Object> write(Output<?> output, Object value, Input input) {
-    while (input.isCont() && output.isCont()) {
-      output = output.write(input.head());
-      input = input.step();
-    }
-    if (input.isDone() && !output.isError()) {
-      return done(value);
-    } else if (input.isError()) {
-      return error(input.trap());
-    } else if (output.isDone()) {
-      return error(new WriterException("truncated"));
-    } else if (output.isError()) {
-      return error(output.trap());
-    }
-    return new ByteWriter(value, input);
-  }
-
-  static Writer<Object, Object> write(Output<?> output, Object value, ByteBuffer input) {
-    return write(output, value, Binary.inputBuffer(input));
-  }
-
-  static Writer<Object, Object> write(Output<?> output, Object value, byte[] input) {
-    return write(output, value, Binary.inputBuffer(input));
-  }
-
-  static Writer<Object, Object> write(Output<?> output, ByteBuffer input) {
-    return write(output, null, Binary.inputBuffer(input));
-  }
-
-  static Writer<Object, Object> write(Output<?> output, byte[] input) {
-    return write(output, null, Binary.inputBuffer(input));
-  }
-
   @Override
   public Writer<Object, Object> feed(Object value) {
     if (value == null) {
@@ -98,7 +65,40 @@ final class ByteWriter extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.value, this.input.clone());
+    return ByteWriter.write(output, this.value, this.input.clone());
+  }
+
+  static Writer<Object, Object> write(Output<?> output, Object value, Input input) {
+    while (input.isCont() && output.isCont()) {
+      output = output.write(input.head());
+      input = input.step();
+    }
+    if (input.isDone() && !output.isError()) {
+      return Writer.done(value);
+    } else if (input.isError()) {
+      return Writer.error(input.trap());
+    } else if (output.isDone()) {
+      return Writer.error(new WriterException("truncated"));
+    } else if (output.isError()) {
+      return Writer.error(output.trap());
+    }
+    return new ByteWriter(value, input);
+  }
+
+  static Writer<Object, Object> write(Output<?> output, Object value, ByteBuffer input) {
+    return ByteWriter.write(output, value, Binary.inputBuffer(input));
+  }
+
+  static Writer<Object, Object> write(Output<?> output, Object value, byte[] input) {
+    return ByteWriter.write(output, value, Binary.inputBuffer(input));
+  }
+
+  static Writer<Object, Object> write(Output<?> output, ByteBuffer input) {
+    return ByteWriter.write(output, null, Binary.inputBuffer(input));
+  }
+
+  static Writer<Object, Object> write(Output<?> output, byte[] input) {
+    return ByteWriter.write(output, null, Binary.inputBuffer(input));
   }
 
 }

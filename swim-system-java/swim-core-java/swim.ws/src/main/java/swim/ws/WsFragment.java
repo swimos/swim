@@ -31,10 +31,6 @@ public final class WsFragment<T> extends WsFrame<T> implements Debug {
     this.content = content;
   }
 
-  public static <T> WsFragment<T> from(WsOpcode opcode, Decoder<T> content) {
-    return new WsFragment<T>(opcode, content);
-  }
-
   @Override
   public boolean isDefined() {
     return false;
@@ -70,14 +66,19 @@ public final class WsFragment<T> extends WsFrame<T> implements Debug {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("WsFragment").write('.').write("from").write('(')
-        .debug(this.opcode).write(", ").debug(this.content).write(')');
+                   .debug(this.opcode).write(", ").debug(this.content).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static <T> WsFragment<T> create(WsOpcode opcode, Decoder<T> content) {
+    return new WsFragment<T>(opcode, content);
   }
 
 }

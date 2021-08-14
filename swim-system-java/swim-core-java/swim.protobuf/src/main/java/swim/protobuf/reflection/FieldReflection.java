@@ -44,7 +44,7 @@ final class FieldReflection<V, M> extends ProtobufFieldType<V, M> {
   @Override
   public M updated(M message, V value) {
     try {
-      field.set(message, value);
+      this.field.set(message, value);
       return message;
     } catch (IllegalAccessException cause) {
       throw new ProtobufException(cause);

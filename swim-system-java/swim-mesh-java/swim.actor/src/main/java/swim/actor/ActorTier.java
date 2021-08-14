@@ -26,6 +26,11 @@ public abstract class ActorTier extends ActorCell implements TierBinding, TierCo
   Stage stage;
   StoreBinding store;
 
+  public ActorTier() {
+    this.stage = null;
+    this.store = null;
+  }
+
   @Override
   public final TierContext tierContext() {
     return this;
@@ -34,19 +39,19 @@ public abstract class ActorTier extends ActorCell implements TierBinding, TierCo
   @Override
   public Schedule schedule() {
     final Stage stage = this.stage;
-    return stage != null ? stage : cellContext().schedule();
+    return stage != null ? stage : this.cellContext().schedule();
   }
 
   @Override
   public Stage stage() {
     final Stage stage = this.stage;
-    return stage != null ? stage : cellContext().stage();
+    return stage != null ? stage : this.cellContext().stage();
   }
 
   @Override
   public StoreBinding store() {
     final StoreBinding store = this.store;
-    return store != null ? store : cellContext().store();
+    return store != null ? store : this.cellContext().store();
   }
 
   protected Stage openStage() {
@@ -75,123 +80,123 @@ public abstract class ActorTier extends ActorCell implements TierBinding, TierCo
 
   @Override
   public boolean isClosed() {
-    return ((TierBinding) cellBinding()).isClosed();
+    return ((TierBinding) this.cellBinding()).isClosed();
   }
 
   @Override
   public boolean isOpened() {
-    return ((TierBinding) cellBinding()).isOpened();
+    return ((TierBinding) this.cellBinding()).isOpened();
   }
 
   @Override
   public boolean isLoaded() {
-    return ((TierBinding) cellBinding()).isLoaded();
+    return ((TierBinding) this.cellBinding()).isLoaded();
   }
 
   @Override
   public boolean isStarted() {
-    return ((TierBinding) cellBinding()).isStarted();
+    return ((TierBinding) this.cellBinding()).isStarted();
   }
 
   @Override
   public void open() {
-    ((TierBinding) cellBinding()).open();
+    ((TierBinding) this.cellBinding()).open();
   }
 
   @Override
   public void load() {
-    ((TierBinding) cellBinding()).load();
+    ((TierBinding) this.cellBinding()).load();
   }
 
   @Override
   public void start() {
-    ((TierBinding) cellBinding()).start();
+    ((TierBinding) this.cellBinding()).start();
   }
 
   @Override
   public void stop() {
-    ((TierBinding) cellBinding()).stop();
+    ((TierBinding) this.cellBinding()).stop();
   }
 
   @Override
   public void unload() {
-    ((TierBinding) cellBinding()).unload();
+    ((TierBinding) this.cellBinding()).unload();
   }
 
   @Override
   public void close() {
-    ((TierContext) cellContext()).close();
+    ((TierContext) this.cellContext()).close();
   }
 
   @Override
   public void willOpen() {
-    ((TierContext) cellContext()).willOpen();
+    ((TierContext) this.cellContext()).willOpen();
     if (this.log == null) {
-      this.log = openLog();
+      this.log = this.openLog();
     }
     if (this.policy == null) {
-      this.policy = openPolicy();
+      this.policy = this.openPolicy();
     }
     if (this.stage == null) {
-      this.stage = openStage();
+      this.stage = this.openStage();
     }
     if (this.store == null) {
-      this.store = openStore();
+      this.store = this.openStore();
     }
   }
 
   @Override
   public void didOpen() {
-    ((TierContext) cellContext()).didOpen();
+    ((TierContext) this.cellContext()).didOpen();
   }
 
   @Override
   public void willLoad() {
-    ((TierContext) cellContext()).willLoad();
+    ((TierContext) this.cellContext()).willLoad();
   }
 
   @Override
   public void didLoad() {
-    ((TierContext) cellContext()).didLoad();
+    ((TierContext) this.cellContext()).didLoad();
   }
 
   @Override
   public void willStart() {
-    ((TierContext) cellContext()).willStart();
+    ((TierContext) this.cellContext()).willStart();
   }
 
   @Override
   public void didStart() {
-    ((TierContext) cellContext()).didStart();
+    ((TierContext) this.cellContext()).didStart();
   }
 
   @Override
   public void willStop() {
-    ((TierContext) cellContext()).willStop();
+    ((TierContext) this.cellContext()).willStop();
   }
 
   @Override
   public void didStop() {
-    ((TierContext) cellContext()).didStop();
+    ((TierContext) this.cellContext()).didStop();
   }
 
   @Override
   public void willUnload() {
-    ((TierContext) cellContext()).willUnload();
+    ((TierContext) this.cellContext()).willUnload();
   }
 
   @Override
   public void didUnload() {
-    ((TierContext) cellContext()).didUnload();
+    ((TierContext) this.cellContext()).didUnload();
   }
 
   @Override
   public void willClose() {
-    ((TierContext) cellContext()).willClose();
-    closeStore();
-    closeStage();
-    closePolicy();
-    closeLog();
+    ((TierContext) this.cellContext()).willClose();
+    this.closeStore();
+    this.closeStage();
+    this.closePolicy();
+    this.closeLog();
   }
 
 }

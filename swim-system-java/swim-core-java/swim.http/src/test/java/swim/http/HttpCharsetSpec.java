@@ -19,31 +19,31 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpCharsetSpec {
 
-  public void assertParses(String string, HttpCharset charset) {
-    HttpAssertions.assertParses(Http.standardParser().charsetParser(), string, charset);
-  }
-
   @Test
   public void parseCharsets() {
     assertParses("*", HttpCharset.star());
-    assertParses("utf-8", HttpCharset.from("utf-8"));
+    assertParses("utf-8", HttpCharset.create("utf-8"));
   }
 
   @Test
   public void writeCharsets() {
     assertWrites(HttpCharset.star(), "*");
-    assertWrites(HttpCharset.from("utf-8"), "utf-8");
+    assertWrites(HttpCharset.create("utf-8"), "utf-8");
   }
 
   @Test
   public void parseCharsetsWithWeights() {
-    assertParses("utf-8;q=0.5", HttpCharset.from("utf-8", 0.5f));
-    assertParses("utf-8 ; q=0.5", HttpCharset.from("utf-8", 0.5f));
+    assertParses("utf-8;q=0.5", HttpCharset.create("utf-8", 0.5f));
+    assertParses("utf-8 ; q=0.5", HttpCharset.create("utf-8", 0.5f));
   }
 
   @Test
   public void writeCharsetsWithWeights() {
-    assertWrites(HttpCharset.from("utf-8", 0.5f), "utf-8; q=0.5");
+    assertWrites(HttpCharset.create("utf-8", 0.5f), "utf-8; q=0.5");
+  }
+
+  public static void assertParses(String string, HttpCharset charset) {
+    HttpAssertions.assertParses(Http.standardParser().charsetParser(), string, charset);
   }
 
 }

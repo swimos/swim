@@ -51,7 +51,7 @@ public abstract class AbstractRecordOutlet extends Record implements RecordOutle
 
   @Override
   public StreamletContext streamletContext() {
-    final StreamletScope<? extends Value> scope = streamletScope();
+    final StreamletScope<? extends Value> scope = this.streamletScope();
     if (scope != null) {
       return scope.streamletContext();
     }
@@ -59,7 +59,7 @@ public abstract class AbstractRecordOutlet extends Record implements RecordOutle
   }
 
   public boolean containsOwnKey(Value key) {
-    return containsKey(key);
+    return this.containsKey(key);
   }
 
   @Override
@@ -72,8 +72,8 @@ public abstract class AbstractRecordOutlet extends Record implements RecordOutle
 
   @Override
   public Outlet<Value> outlet(Value key) {
-    if (!containsOwnKey(key)) {
-      final StreamletScope<? extends Value> scope = streamletScope();
+    if (!this.containsOwnKey(key)) {
+      final StreamletScope<? extends Value> scope = this.streamletScope();
       if (scope instanceof RecordOutlet && ((RecordOutlet) scope).containsKey(key)) {
         // TODO: Support dynamic shadowing?
         return ((RecordOutlet) scope).outlet(key);
@@ -83,14 +83,14 @@ public abstract class AbstractRecordOutlet extends Record implements RecordOutle
     if (outlet == null) {
       outlet = new KeyOutlet<Value, Value>(this, key);
       this.outlets = this.outlets.updated(key, outlet);
-      decohereInputKey(key, KeyEffect.UPDATE);
+      this.decohereInputKey(key, KeyEffect.UPDATE);
     }
     return outlet;
   }
 
   @Override
   public Outlet<Value> outlet(String key) {
-    return outlet(Text.from(key));
+    return this.outlet(Text.from(key));
   }
 
   @Override
@@ -193,10 +193,10 @@ public abstract class AbstractRecordOutlet extends Record implements RecordOutle
   public void decohereInputKey(Value key, KeyEffect effect) {
     final HashTrieMap<Value, KeyEffect> oldEffects = this.effects;
     if (oldEffects.get(key) != effect) {
-      willDecohereInputKey(key, effect);
+      this.willDecohereInputKey(key, effect);
       this.effects = oldEffects.updated(key, effect);
       this.version = -1;
-      onDecohereInputKey(key, effect);
+      this.onDecohereInputKey(key, effect);
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         final Inlet<?> output = this.outputs[i];
@@ -210,16 +210,16 @@ public abstract class AbstractRecordOutlet extends Record implements RecordOutle
       if (outlet != null) {
         outlet.decohereInput();
       }
-      didDecohereInputKey(key, effect);
+      this.didDecohereInputKey(key, effect);
     }
   }
 
   @Override
   public void decohereInput() {
     if (this.version >= 0) {
-      willDecohereInput();
+      this.willDecohereInput();
       this.version = -1;
-      onDecohereInput();
+      this.onDecohereInput();
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         this.outputs[i].decohereOutput();
@@ -228,7 +228,7 @@ public abstract class AbstractRecordOutlet extends Record implements RecordOutle
       while (outlets.hasNext()) {
         outlets.next().decohereInput();
       }
-      didDecohereInput();
+      this.didDecohereInput();
     }
   }
 
@@ -239,9 +239,9 @@ public abstract class AbstractRecordOutlet extends Record implements RecordOutle
       final HashTrieMap<Value, KeyEffect> oldEffects = this.effects;
       final KeyEffect effect = oldEffects.get(key);
       if (effect != null) {
-        willRecohereInputKey(key, effect, version);
+        this.willRecohereInputKey(key, effect, version);
         this.effects = oldEffects.removed(key);
-        onRecohereInputKey(key, effect, version);
+        this.onRecohereInputKey(key, effect, version);
         for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
           final Inlet<?> output = this.outputs[i];
           if (output instanceof MapInlet<?, ?, ?>) {
@@ -252,7 +252,7 @@ public abstract class AbstractRecordOutlet extends Record implements RecordOutle
         if (outlet != null) {
           outlet.recohereInput(version);
         }
-        didRecohereInputKey(key, effect, version);
+        this.didRecohereInputKey(key, effect, version);
       }
     }
   }
@@ -260,13 +260,13 @@ public abstract class AbstractRecordOutlet extends Record implements RecordOutle
   @Override
   public void recohereInput(int version) {
     if (this.version < 0) {
-      willRecohereInput(version);
+      this.willRecohereInput(version);
       final Iterator<Value> keys = this.effects.keyIterator();
       while (keys.hasNext()) {
-        recohereInputKey(keys.next(), version);
+        this.recohereInputKey(keys.next(), version);
       }
       this.version = version;
-      onRecohereInput(version);
+      this.onRecohereInput(version);
       for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
         this.outputs[i].recohereOutput(version);
       }
@@ -280,7 +280,7 @@ public abstract class AbstractRecordOutlet extends Record implements RecordOutle
           ((RecordStreamlet) member).recohere(version);
         }
       }
-      didRecohereInput(version);
+      this.didRecohereInput(version);
     }
   }
 

@@ -38,7 +38,8 @@ final class PrefixOperatorParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.operator, this.rhsParser, this.step);
+    return PrefixOperatorParser.parse(input, this.recon, this.builder, this.operator,
+                                      this.rhsParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -84,30 +85,30 @@ final class PrefixOperatorParser<I, V> extends Parser<V> {
       if (rhsParser.isDone()) {
         final V operand = rhsParser.bind();
         if (!recon.isDistinct(operand)) {
-          return error(Diagnostic.expected("value", input));
+          return Parser.error(Diagnostic.expected("value", input));
         } else if ("!".equals(operator)) {
-          return done(recon.not(operand));
+          return Parser.done(recon.not(operand));
         } else if ("~".equals(operator)) {
-          return done(recon.bitwiseNot(operand));
+          return Parser.done(recon.bitwiseNot(operand));
         } else if ("-".equals(operator)) {
-          return done(recon.negative(operand));
+          return Parser.done(recon.negative(operand));
         } else if ("+".equals(operator)) {
-          return done(recon.positive(operand));
+          return Parser.done(recon.positive(operand));
         } else {
-          return error(Diagnostic.message(operator, input));
+          return Parser.error(Diagnostic.message(operator, input));
         }
       } else if (rhsParser.isError()) {
         return rhsParser.asError();
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new PrefixOperatorParser<I, V>(recon, builder, operator, rhsParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, null, 1);
+    return PrefixOperatorParser.parse(input, recon, builder, null, null, 1);
   }
 
 }

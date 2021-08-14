@@ -28,16 +28,6 @@ abstract class ByteOutput<T> extends Output<T> {
     this.settings = settings;
   }
 
-  static int expand(int n) {
-    n = Math.max(32, n) - 1;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
-    return n + 1;
-  }
-
   @Override
   public final boolean isCont() {
     return true;
@@ -142,6 +132,16 @@ abstract class ByteOutput<T> extends Output<T> {
   public Output<T> settings(OutputSettings settings) {
     this.settings = settings;
     return this;
+  }
+
+  static int expand(int n) {
+    n = Math.max(32, n) - 1;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    return n + 1;
   }
 
 }

@@ -32,6 +32,11 @@ final class FieldWriter extends Writer<Object, Object> {
     this(field, 0);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return FieldWriter.write(output, this.field, this.index);
+  }
+
   static Writer<Object, Object> write(Output<?> output, String field, int index) {
     final int length = field.length();
     while (index < length && output.isCont()) {
@@ -40,26 +45,21 @@ final class FieldWriter extends Writer<Object, Object> {
         output = output.write(c);
         index = field.offsetByCodePoints(index, 1);
       } else {
-        return error(new HttpException("invalid field: " + field));
+        return Writer.error(new HttpException("invalid field: " + field));
       }
     }
     if (index >= length) {
-      return done();
+      return Writer.done();
     } else if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new FieldWriter(field, index);
   }
 
   static Writer<Object, Object> write(Output<?> output, String field) {
-    return write(output, field, 0);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.field, this.index);
+    return FieldWriter.write(output, field, 0);
   }
 
 }

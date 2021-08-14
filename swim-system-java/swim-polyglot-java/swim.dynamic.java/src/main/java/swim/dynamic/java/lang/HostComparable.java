@@ -21,6 +21,10 @@ import swim.dynamic.JavaHostObjectType;
 
 public final class HostComparable {
 
+  private HostComparable() {
+    // static
+  }
+
   public static final HostObjectType<Comparable<Object>> TYPE;
 
   static {
@@ -28,10 +32,6 @@ public final class HostComparable {
     TYPE = type;
     type.inheritType(HostObject.TYPE);
     type.addMember(new HostComparableCompareTo());
-  }
-
-  private HostComparable() {
-    // static
   }
 
 }

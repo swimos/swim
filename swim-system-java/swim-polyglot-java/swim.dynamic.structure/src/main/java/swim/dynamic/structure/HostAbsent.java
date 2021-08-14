@@ -20,16 +20,16 @@ import swim.structure.Absent;
 
 public final class HostAbsent {
 
+  private HostAbsent() {
+    // static
+  }
+
   public static final HostObjectType<Absent> TYPE;
 
   static {
     final JavaHostClassType<Absent> type = new JavaHostClassType<>(Absent.class);
     TYPE = type;
     type.extendType(HostValue.TYPE);
-  }
-
-  private HostAbsent() {
-    // static
   }
 
 }

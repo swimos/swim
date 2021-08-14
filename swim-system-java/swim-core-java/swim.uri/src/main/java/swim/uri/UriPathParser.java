@@ -45,6 +45,11 @@ final class UriPathParser extends Parser<UriPath> {
     this(uri, null, null, 0, 1);
   }
 
+  @Override
+  public Parser<UriPath> feed(Input input) {
+    return UriPathParser.parse(input, this.uri, this.builder, this.output, this.c1, this.step);
+  }
+
   static Parser<UriPath> parse(Input input, UriParser uri, UriPathBuilder builder,
                                Output<String> output, int c1, int step) {
     int c = 0;
@@ -84,9 +89,9 @@ final class UriPathParser extends Parser<UriPath> {
             builder.addSegment(output.bind());
           }
           if (builder != null) {
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           } else {
-            return done(uri.pathEmpty());
+            return Parser.done(uri.pathEmpty());
           }
         }
       }
@@ -98,10 +103,10 @@ final class UriPathParser extends Parser<UriPath> {
             c1 = c;
             step = 3;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       if (step == 3) {
@@ -117,31 +122,26 @@ final class UriPathParser extends Parser<UriPath> {
             step = 1;
             continue;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new UriPathParser(uri, builder, output, c1, step);
   }
 
   static Parser<UriPath> parse(Input input, UriParser uri, UriPathBuilder builder) {
-    return parse(input, uri, builder, null, 0, 1);
+    return UriPathParser.parse(input, uri, builder, null, 0, 1);
   }
 
   static Parser<UriPath> parse(Input input, UriParser uri) {
-    return parse(input, uri, null, null, 0, 1);
-  }
-
-  @Override
-  public Parser<UriPath> feed(Input input) {
-    return parse(input, this.uri, this.builder, this.output, this.c1, this.step);
+    return UriPathParser.parse(input, uri, null, null, 0, 1);
   }
 
 }

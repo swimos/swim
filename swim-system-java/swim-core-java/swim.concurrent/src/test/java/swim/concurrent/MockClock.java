@@ -27,8 +27,8 @@ class MockClock extends Clock {
 
   MockClock(int tickMillis, int tickCount) {
     super(tickMillis, tickCount);
-    tickBarrier = new CyclicBarrier(2);
-    nanos = 100000L;
+    this.tickBarrier = new CyclicBarrier(2);
+    this.nanos = 100000L;
   }
 
   MockClock() {
@@ -77,7 +77,7 @@ class MockClock extends Clock {
   }
 
   void tick(int count) {
-    start();
+    this.start();
     try {
       for (int n = count; n > 0; n -= 1) {
         this.tickBarrier.await();
@@ -91,7 +91,7 @@ class MockClock extends Clock {
 
   void halfTick() {
     try {
-      tickBarrier.await();
+      this.tickBarrier.await();
     } catch (BrokenBarrierException | InterruptedException error) {
       throw new TestException(error);
     }
@@ -108,7 +108,7 @@ class MockClock extends Clock {
   }
 
   void await(CountDownLatch latch) {
-    await(latch, 1000);
+    this.await(latch, 1000);
   }
 
 }

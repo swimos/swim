@@ -48,6 +48,12 @@ final class UriQueryParser extends Parser<UriQuery> {
     this(uri, null, null, null, 0, 1);
   }
 
+  @Override
+  public Parser<UriQuery> feed(Input input) {
+    return UriQueryParser.parse(input, this.uri, this.builder, this.keyOutput,
+                                this.valueOutput, this.c1, this.step);
+  }
+
   static Parser<UriQuery> parse(Input input, UriParser uri, UriQueryBuilder builder,
                                 Output<String> keyOutput, Output<String> valueOutput,
                                 int c1, int step) {
@@ -85,7 +91,7 @@ final class UriQueryParser extends Parser<UriQuery> {
             builder = uri.queryBuilder();
           }
           builder.addParam(keyOutput.bind());
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
       if (step == 2) {
@@ -96,10 +102,10 @@ final class UriQueryParser extends Parser<UriQuery> {
             c1 = c;
             step = 3;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       if (step == 3) {
@@ -112,10 +118,10 @@ final class UriQueryParser extends Parser<UriQuery> {
             step = 1;
             continue;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       if (step == 4) {
@@ -149,7 +155,7 @@ final class UriQueryParser extends Parser<UriQuery> {
             builder = uri.queryBuilder();
           }
           builder.addParam(keyOutput.bind(), valueOutput.bind());
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
       if (step == 5) {
@@ -160,10 +166,10 @@ final class UriQueryParser extends Parser<UriQuery> {
             c1 = c;
             step = 6;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       if (step == 6) {
@@ -176,32 +182,26 @@ final class UriQueryParser extends Parser<UriQuery> {
             step = 4;
             continue;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new UriQueryParser(uri, builder, keyOutput, valueOutput, c1, step);
   }
 
   static Parser<UriQuery> parse(Input input, UriParser uri, UriQueryBuilder builder) {
-    return parse(input, uri, builder, null, null, 0, 1);
+    return UriQueryParser.parse(input, uri, builder, null, null, 0, 1);
   }
 
   static Parser<UriQuery> parse(Input input, UriParser uri) {
-    return parse(input, uri, null, null, null, 0, 1);
-  }
-
-  @Override
-  public Parser<UriQuery> feed(Input input) {
-    return parse(input, this.uri, this.builder, this.keyOutput,
-        this.valueOutput, this.c1, this.step);
+    return UriQueryParser.parse(input, uri, null, null, null, 0, 1);
   }
 
 }

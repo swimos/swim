@@ -38,17 +38,17 @@ public abstract class AbstractMqttService implements MqttService, FlowContext {
 
   @Override
   public void didBind() {
-    // stub
+    // hook
   }
 
   @Override
   public void didAccept(MqttSocket<?, ?> socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didUnbind() {
-    // stub
+    // hook
   }
 
   @Override

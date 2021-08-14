@@ -35,6 +35,11 @@ final class HttpChunkedEncoder<T> extends Encoder<Object, HttpMessage<T>> {
     this(message, content, 1);
   }
 
+  @Override
+  public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
+    return HttpChunkedEncoder.encode(output, this.message, this.content, this.step);
+  }
+
   static <T> Encoder<Object, HttpMessage<T>> encode(OutputBuffer<?> output, HttpMessage<T> message,
                                                     Encoder<?, ?> content, int step) {
     if (step == 1 && output.remaining() > 12) { // chunk
@@ -68,7 +73,7 @@ final class HttpChunkedEncoder<T> extends Encoder<Object, HttpMessage<T>> {
       } while (true);
       final int chunkLength = chunkEnd - chunkStart;
       output = output.move(chunkStart, outputStart, chunkLength)
-          .index(outputStart + chunkLength);
+                     .index(outputStart + chunkLength);
       if (content.isDone()) {
         if (chunkSize > 0) {
           step = 2;
@@ -85,24 +90,19 @@ final class HttpChunkedEncoder<T> extends Encoder<Object, HttpMessage<T>> {
     }
     if (step == 3 && output.remaining() >= 2) { // chunk trailer
       output = output.write('\r').write('\n');
-      return done(message);
+      return Encoder.done(message);
     }
     if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new HttpChunkedEncoder<T>(message, content, step);
   }
 
   static <T> Encoder<Object, HttpMessage<T>> encode(OutputBuffer<?> output, HttpMessage<T> message,
                                                     Encoder<?, ?> content) {
-    return encode(output, message, content, 1);
-  }
-
-  @Override
-  public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
-    return encode(output, this.message, this.content, this.step);
+    return HttpChunkedEncoder.encode(output, message, content, 1);
   }
 
 }

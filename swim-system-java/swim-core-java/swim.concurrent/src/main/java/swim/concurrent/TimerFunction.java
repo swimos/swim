@@ -15,13 +15,13 @@
 package swim.concurrent;
 
 /**
- * Function to invoke at a scheduled time.  Use {@link Schedule#setTimer(long,
+ * Function to invoke at a scheduled time. Use {@link Schedule#setTimer(long,
  * TimerFunction)} to schedule a {@code TimerFunction} for future execution.
  *
  * @see Timer
  * @see Schedule
  */
-//@FunctionalInterface
+@FunctionalInterface
 public interface TimerFunction {
 
   /**

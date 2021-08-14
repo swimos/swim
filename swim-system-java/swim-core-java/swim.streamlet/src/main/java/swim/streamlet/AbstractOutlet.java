@@ -100,26 +100,26 @@ public abstract class AbstractOutlet<O> implements Outlet<O> {
   @Override
   public void decohereInput() {
     if (this.version >= 0) {
-      willDecohereInput();
+      this.willDecohereInput();
       this.version = -1;
-      onDecohereInput();
+      this.onDecohereInput();
       for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
         this.outputs[i].decohereOutput();
       }
-      didDecohereInput();
+      this.didDecohereInput();
     }
   }
 
   @Override
   public void recohereInput(int version) {
     if (this.version < 0) {
-      willRecohereInput(version);
+      this.willRecohereInput(version);
       this.version = version;
-      onRecohereInput(version);
+      this.onRecohereInput(version);
       for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
         this.outputs[i].recohereOutput(version);
       }
-      didRecohereInput(version);
+      this.didRecohereInput(version);
     }
   }
 

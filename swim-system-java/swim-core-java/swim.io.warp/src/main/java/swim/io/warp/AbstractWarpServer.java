@@ -38,8 +38,8 @@ public abstract class AbstractWarpServer extends AbstractWsServer {
   public void setHttpServerContext(HttpServerContext context) {
     this.context = context;
     if (this.wsSettings == null) {
-      this.wsSettings = WsSettings.from(context.httpSettings());
-      this.warpSettings = WarpSettings.from(this.wsSettings);
+      this.wsSettings = WsSettings.create(context.httpSettings());
+      this.warpSettings = WarpSettings.create(this.wsSettings);
     }
   }
 

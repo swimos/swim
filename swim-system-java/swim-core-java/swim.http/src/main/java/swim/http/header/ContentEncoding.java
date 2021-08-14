@@ -26,23 +26,10 @@ import swim.util.Murmur3;
 
 public final class ContentEncoding extends HttpHeader {
 
-  private static int hashSeed;
   final FingerTrieSeq<String> codings;
 
   ContentEncoding(FingerTrieSeq<String> codings) {
     this.codings = codings;
-  }
-
-  public static ContentEncoding from(FingerTrieSeq<String> codings) {
-    return new ContentEncoding(codings);
-  }
-
-  public static ContentEncoding from(String... codings) {
-    return new ContentEncoding(FingerTrieSeq.of(codings));
-  }
-
-  public static Parser<ContentEncoding> parseHttpValue(Input input, HttpParser http) {
-    return ContentEncodingParser.parse(input, http);
   }
 
   @Override
@@ -90,25 +77,40 @@ public final class ContentEncoding extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ContentEncoding.class);
+    if (ContentEncoding.hashSeed == 0) {
+      ContentEncoding.hashSeed = Murmur3.seed(ContentEncoding.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.codings.hashCode()));
+    return Murmur3.mash(Murmur3.mix(ContentEncoding.hashSeed, this.codings.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("ContentEncoding").write('.').write("from").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("ContentEncoding").write('.').write("create").write('(');
     final int n = this.codings.size();
     if (n > 0) {
-      output.debug(this.codings.head());
+      output = output.debug(this.codings.head());
       for (int i = 1; i < n; i += 1) {
         output = output.write(", ").debug(this.codings.get(i));
       }
     }
     output = output.write(')');
+    return output;
+  }
+
+  public static ContentEncoding create(FingerTrieSeq<String> codings) {
+    return new ContentEncoding(codings);
+  }
+
+  public static ContentEncoding create(String... codings) {
+    return new ContentEncoding(FingerTrieSeq.of(codings));
+  }
+
+  public static Parser<ContentEncoding> parseHttpValue(Input input, HttpParser http) {
+    return ContentEncodingParser.parse(input, http);
   }
 
 }

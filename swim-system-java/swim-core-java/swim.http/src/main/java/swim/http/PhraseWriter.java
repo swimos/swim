@@ -32,6 +32,11 @@ final class PhraseWriter extends Writer<Object, Object> {
     this(phrase, 0);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return PhraseWriter.write(output, this.phrase, this.index);
+  }
+
   static Writer<Object, Object> write(Output<?> output, String phrase, int index) {
     final int length = phrase.length();
     while (index < length && output.isCont()) {
@@ -40,26 +45,21 @@ final class PhraseWriter extends Writer<Object, Object> {
         output = output.write(c);
         index = phrase.offsetByCodePoints(index, 1);
       } else {
-        return error(new HttpException("invalid phrase: " + phrase));
+        return Writer.error(new HttpException("invalid phrase: " + phrase));
       }
     }
     if (index >= length) {
-      return done();
+      return Writer.done();
     } else if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new PhraseWriter(phrase, index);
   }
 
   static Writer<Object, Object> write(Output<?> output, String phrase) {
-    return write(output, phrase, 0);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.phrase, this.index);
+    return PhraseWriter.write(output, phrase, 0);
   }
 
 }

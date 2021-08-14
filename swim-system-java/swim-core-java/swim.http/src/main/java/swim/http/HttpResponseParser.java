@@ -44,6 +44,12 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
     this(http, null, null, null, null, 1);
   }
 
+  @Override
+  public Parser<HttpResponse<T>> feed(Input input) {
+    return HttpResponseParser.parse(input, this.http, this.version, this.status,
+                                    this.header, this.headers, this.step);
+  }
+
   static <T> Parser<HttpResponse<T>> parse(Input input, HttpParser http, Parser<HttpVersion> version,
                                            Parser<HttpStatus> status, Parser<? extends HttpHeader> header,
                                            Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers, int step) {
@@ -51,7 +57,7 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
     if (step == 1) {
       if (version == null) {
         if (input.isDone()) {
-          return done();
+          return Parser.done();
         }
         version = http.parseVersion(input);
       } else {
@@ -68,7 +74,7 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
         input = input.step();
         step = 3;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected("space", input));
+        return Parser.error(Diagnostic.expected("space", input));
       }
     }
     if (step == 3) {
@@ -88,7 +94,7 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
         input = input.step();
         step = 5;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected("carriage return", input));
+        return Parser.error(Diagnostic.expected("carriage return", input));
       }
     }
     if (step == 5) {
@@ -96,7 +102,7 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
         input = input.step();
         step = 6;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected("line feed", input));
+        return Parser.error(Diagnostic.expected("line feed", input));
       }
     }
     do {
@@ -106,15 +112,15 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
           if (Http.isTokenChar(c)) {
             step = 7;
           } else if (Http.isSpace(c)) {
-            return error(Diagnostic.message("unsupported header line extension", input));
+            return Parser.error(Diagnostic.message("unsupported header line extension", input));
           } else if (c == '\r') {
             input = input.step();
             step = 10;
           } else {
-            return error(Diagnostic.expected("HTTP header", input));
+            return Parser.error(Diagnostic.expected("HTTP header", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("HTTP header", input));
+          return Parser.error(Diagnostic.expected("HTTP header", input));
         }
       }
       if (step == 7) {
@@ -134,7 +140,7 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
           input = input.step();
           step = 9;
         } else if (!input.isEmpty()) {
-          return error(Diagnostic.expected("carriage return", input));
+          return Parser.error(Diagnostic.expected("carriage return", input));
         }
       }
       if (step == 9) {
@@ -148,7 +154,7 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
           step = 6;
           continue;
         } else if (!input.isEmpty()) {
-          return error(Diagnostic.expected("line feed", input));
+          return Parser.error(Diagnostic.expected("line feed", input));
         }
       }
       break;
@@ -159,28 +165,23 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
         if (headers == null) {
           final HttpResponse<T> response = http.response(version.bind(), status.bind(),
               FingerTrieSeq.<HttpHeader>empty());
-          return done(response);
+          return Parser.done(response);
         } else {
           final HttpResponse<T> response = http.response(version.bind(), status.bind(), headers.bind());
-          return done(response);
+          return Parser.done(response);
         }
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected("line feed", input));
+        return Parser.error(Diagnostic.expected("line feed", input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new HttpResponseParser<T>(http, version, status, header, headers, step);
   }
 
   static <T> Parser<HttpResponse<T>> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<HttpResponse<T>> feed(Input input) {
-    return parse(input, this.http, this.version, this.status, this.header, this.headers, this.step);
+    return HttpResponseParser.parse(input, http, null, null, null, null, 1);
   }
 
 }

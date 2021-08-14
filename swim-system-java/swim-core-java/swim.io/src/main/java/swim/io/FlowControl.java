@@ -113,66 +113,6 @@ public enum FlowControl implements Debug {
     this.flags = flags;
   }
 
-  private static FlowControl fromFlags(int flags) {
-    switch (flags) {
-      case 0x0:
-        return WAIT;
-      case 0x1:
-        return ACCEPT;
-      case 0x2:
-        return CONNECT;
-      case 0x3:
-        return ACCEPT_CONNECT;
-      case 0x4:
-        return READ;
-      case 0x5:
-        return ACCEPT_READ;
-      case 0x6:
-        return CONNECT_READ;
-      case 0x7:
-        return ACCEPT_CONNECT_READ;
-      case 0x8:
-        return WRITE;
-      case 0x9:
-        return ACCEPT_WRITE;
-      case 0xa:
-        return CONNECT_WRITE;
-      case 0xb:
-        return ACCEPT_CONNECT_WRITE;
-      case 0xc:
-        return READ_WRITE;
-      case 0xd:
-        return ACCEPT_READ_WRITE;
-      case 0xe:
-        return CONNECT_READ_WRITE;
-      case 0xf:
-        return ACCEPT_CONNECT_READ_WRITE;
-      default:
-        throw new IllegalArgumentException("0x" + Integer.toHexString(flags));
-    }
-  }
-
-  /**
-   * Returns the {@code FlowControl} corresponding to the given {@link
-   * SelectionKey} interest set.
-   */
-  public static FlowControl fromSelectorOps(int selectorOps) {
-    int flags = 0;
-    if ((selectorOps & SelectionKey.OP_ACCEPT) != 0) {
-      flags |= 0x1;
-    }
-    if ((selectorOps & SelectionKey.OP_CONNECT) != 0) {
-      flags |= 0x2;
-    }
-    if ((selectorOps & SelectionKey.OP_READ) != 0) {
-      flags |= 0x4;
-    }
-    if ((selectorOps & SelectionKey.OP_WRITE) != 0) {
-      flags |= 0x8;
-    }
-    return fromFlags(flags);
-  }
-
   /**
    * Returns {@code true} if the <em>accept</em> operation is enabled.
    */
@@ -205,56 +145,56 @@ public enum FlowControl implements Debug {
    * Returns an updated {@code FlowControl} with its <em>accept</em> operation disabled.
    */
   public FlowControl acceptDisabled() {
-    return fromFlags(this.flags & ~0x1);
+    return FlowControl.fromFlags(this.flags & ~0x1);
   }
 
   /**
    * Returns an updated {@code FlowControl} with its <em>accept</em> operation enabled.
    */
   public FlowControl acceptEnabled() {
-    return fromFlags(this.flags | 0x1);
+    return FlowControl.fromFlags(this.flags | 0x1);
   }
 
   /**
    * Returns an updated {@code FlowControl} with its <em>connect</em> operation disabled.
    */
   public FlowControl connectDisabled() {
-    return fromFlags(this.flags & ~0x2);
+    return FlowControl.fromFlags(this.flags & ~0x2);
   }
 
   /**
    * Returns an updated {@code FlowControl} with its <em>connect</em> operation enabled.
    */
   public FlowControl connectEnabled() {
-    return fromFlags(this.flags | 0x2);
+    return FlowControl.fromFlags(this.flags | 0x2);
   }
 
   /**
    * Returns an updated {@code FlowControl} with its <em>read</em> operation disabled.
    */
   public FlowControl readDisabled() {
-    return fromFlags(this.flags & ~0x4);
+    return FlowControl.fromFlags(this.flags & ~0x4);
   }
 
   /**
    * Returns an updated {@code FlowControl} with its <em>read</em> operation enabled.
    */
   public FlowControl readEnabled() {
-    return fromFlags(this.flags | 0x4);
+    return FlowControl.fromFlags(this.flags | 0x4);
   }
 
   /**
    * Returns an updated {@code FlowControl} with its <em>write</em> operation disabled.
    */
   public FlowControl writeDisabled() {
-    return fromFlags(this.flags & ~0x8);
+    return FlowControl.fromFlags(this.flags & ~0x8);
   }
 
   /**
    * Returns an updated {@code FlowControl} with its <em>write</em> operation enabled.
    */
   public FlowControl writeEnabled() {
-    return fromFlags(this.flags | 0x8);
+    return FlowControl.fromFlags(this.flags | 0x8);
   }
 
   /**
@@ -275,7 +215,7 @@ public enum FlowControl implements Debug {
     if (flowModifier.isWriteEnabled()) {
       flags |= 0x8;
     }
-    return fromFlags(flags);
+    return FlowControl.fromFlags(flags);
   }
 
   /**
@@ -283,7 +223,7 @@ public enum FlowControl implements Debug {
    * this} or {@code that} enabled.
    */
   public FlowControl or(FlowControl that) {
-    return fromFlags(this.flags | that.flags);
+    return FlowControl.fromFlags(this.flags | that.flags);
   }
 
   /**
@@ -291,7 +231,7 @@ public enum FlowControl implements Debug {
    * this} or {@code that}—but not both—enabled.
    */
   public FlowControl xor(FlowControl that) {
-    return fromFlags(this.flags ^ that.flags);
+    return FlowControl.fromFlags(this.flags ^ that.flags);
   }
 
   /**
@@ -299,7 +239,7 @@ public enum FlowControl implements Debug {
    * this} and {@code that} enabled.
    */
   public FlowControl and(FlowControl that) {
-    return fromFlags(this.flags & that.flags);
+    return FlowControl.fromFlags(this.flags & that.flags);
   }
 
   /**
@@ -307,7 +247,7 @@ public enum FlowControl implements Debug {
    * this} disabled, and all operations disabled in {@code this} enabled.
    */
   public FlowControl not() {
-    return fromFlags(~this.flags & 0xf);
+    return FlowControl.fromFlags(~this.flags & 0xf);
   }
 
   /**
@@ -333,8 +273,52 @@ public enum FlowControl implements Debug {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("FlowControl").write('.').write(name());
+    return output;
+  }
+
+  private static FlowControl fromFlags(int flags) {
+    switch (flags) {
+      case 0x0: return FlowControl.WAIT;
+      case 0x1: return FlowControl.ACCEPT;
+      case 0x2: return FlowControl.CONNECT;
+      case 0x3: return FlowControl.ACCEPT_CONNECT;
+      case 0x4: return FlowControl.READ;
+      case 0x5: return FlowControl.ACCEPT_READ;
+      case 0x6: return FlowControl.CONNECT_READ;
+      case 0x7: return FlowControl.ACCEPT_CONNECT_READ;
+      case 0x8: return FlowControl.WRITE;
+      case 0x9: return FlowControl.ACCEPT_WRITE;
+      case 0xa: return FlowControl.CONNECT_WRITE;
+      case 0xb: return FlowControl.ACCEPT_CONNECT_WRITE;
+      case 0xc: return FlowControl.READ_WRITE;
+      case 0xd: return FlowControl.ACCEPT_READ_WRITE;
+      case 0xe: return FlowControl.CONNECT_READ_WRITE;
+      case 0xf: return FlowControl.ACCEPT_CONNECT_READ_WRITE;
+      default: throw new IllegalArgumentException("0x" + Integer.toHexString(flags));
+    }
+  }
+
+  /**
+   * Returns the {@code FlowControl} corresponding to the given {@link
+   * SelectionKey} interest set.
+   */
+  public static FlowControl fromSelectorOps(int selectorOps) {
+    int flags = 0;
+    if ((selectorOps & SelectionKey.OP_ACCEPT) != 0) {
+      flags |= 0x1;
+    }
+    if ((selectorOps & SelectionKey.OP_CONNECT) != 0) {
+      flags |= 0x2;
+    }
+    if ((selectorOps & SelectionKey.OP_READ) != 0) {
+      flags |= 0x4;
+    }
+    if ((selectorOps & SelectionKey.OP_WRITE) != 0) {
+      flags |= 0x8;
+    }
+    return FlowControl.fromFlags(flags);
   }
 
 }

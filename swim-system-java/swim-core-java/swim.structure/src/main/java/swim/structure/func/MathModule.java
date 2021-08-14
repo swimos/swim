@@ -24,6 +24,10 @@ import swim.structure.operator.InvokeOperator;
 
 public final class MathModule {
 
+  private MathModule() {
+    // static
+  }
+
   private static Func max;
   private static Func min;
   private static Func abs;
@@ -36,96 +40,92 @@ public final class MathModule {
   private static Func random;
   private static Record scope;
 
-  private MathModule() {
-    // stub
-  }
-
   public static Func max() {
-    if (max == null) {
-      max = new MaxFunc();
+    if (MathModule.max == null) {
+      MathModule.max = new MaxFunc();
     }
-    return max;
+    return MathModule.max;
   }
 
   public static Func min() {
-    if (min == null) {
-      min = new MinFunc();
+    if (MathModule.min == null) {
+      MathModule.min = new MinFunc();
     }
-    return min;
+    return MathModule.min;
   }
 
   public static Func abs() {
-    if (abs == null) {
-      abs = new AbsFunc();
+    if (MathModule.abs == null) {
+      MathModule.abs = new AbsFunc();
     }
-    return abs;
+    return MathModule.abs;
   }
 
   public static Func ceil() {
-    if (ceil == null) {
-      ceil = new CeilFunc();
+    if (MathModule.ceil == null) {
+      MathModule.ceil = new CeilFunc();
     }
-    return ceil;
+    return MathModule.ceil;
   }
 
   public static Func floor() {
-    if (floor == null) {
-      floor = new FloorFunc();
+    if (MathModule.floor == null) {
+      MathModule.floor = new FloorFunc();
     }
-    return floor;
+    return MathModule.floor;
   }
 
   public static Func round() {
-    if (round == null) {
-      round = new RoundFunc();
+    if (MathModule.round == null) {
+      MathModule.round = new RoundFunc();
     }
-    return round;
+    return MathModule.round;
   }
 
   public static Func sqrt() {
-    if (sqrt == null) {
-      sqrt = new SqrtFunc();
+    if (MathModule.sqrt == null) {
+      MathModule.sqrt = new SqrtFunc();
     }
-    return sqrt;
+    return MathModule.sqrt;
   }
 
   public static Func pow() {
-    if (pow == null) {
-      pow = new PowFunc();
+    if (MathModule.pow == null) {
+      MathModule.pow = new PowFunc();
     }
-    return pow;
+    return MathModule.pow;
   }
 
   public static Func rate() {
-    if (rate == null) {
-      rate = new RateFunc();
+    if (MathModule.rate == null) {
+      MathModule.rate = new RateFunc();
     }
-    return rate;
+    return MathModule.rate;
   }
 
   public static Func random() {
-    if (random == null) {
-      random = new RandomFunc();
+    if (MathModule.random == null) {
+      MathModule.random = new RandomFunc();
     }
-    return random;
+    return MathModule.random;
   }
 
   public static Record scope() {
-    if (scope == null) {
-      scope = Record.create(10)
-          .slot("max", max())
-          .slot("min", min())
-          .slot("abs", abs())
-          .slot("ceil", ceil())
-          .slot("floor", floor())
-          .slot("round", round())
-          .slot("sqrt", sqrt())
-          .slot("pow", pow())
-          .slot("rate", rate())
-          .slot("random", random())
-          .commit();
+    if (MathModule.scope == null) {
+      MathModule.scope = Record.create(10)
+                               .slot("max", max())
+                               .slot("min", min())
+                               .slot("abs", abs())
+                               .slot("ceil", ceil())
+                               .slot("floor", floor())
+                               .slot("round", round())
+                               .slot("sqrt", sqrt())
+                               .slot("pow", pow())
+                               .slot("rate", rate())
+                               .slot("random", random())
+                               .commit();
     }
-    return scope;
+    return MathModule.scope;
   }
 
 }
@@ -158,7 +158,7 @@ final class MaxFunc extends BridgeFunc {
   public Item expand(Value args, Interpreter interpreter, InvokeOperator operator) {
     if (args.length() == 1) {
       args = args.evaluate(interpreter).toValue();
-      return invoke(args, interpreter, operator);
+      return this.invoke(args, interpreter, operator);
     }
     return null;
   }
@@ -193,7 +193,7 @@ final class MinFunc extends BridgeFunc {
   public Item expand(Value args, Interpreter interpreter, InvokeOperator operator) {
     if (args.length() == 1) {
       args = args.evaluate(interpreter).toValue();
-      return invoke(args, interpreter, operator);
+      return this.invoke(args, interpreter, operator);
     }
     return null;
   }
@@ -331,7 +331,7 @@ final class RateFunc extends BridgeFunc {
   @Override
   public Item expand(Value args, Interpreter interpreter, InvokeOperator operator) {
     args = args.evaluate(interpreter).toValue();
-    return invoke(args, interpreter, operator);
+    return this.invoke(args, interpreter, operator);
   }
 
 }

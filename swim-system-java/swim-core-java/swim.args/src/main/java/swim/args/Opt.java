@@ -22,7 +22,6 @@ import swim.util.Murmur3;
 
 public class Opt implements Cloneable, Debug {
 
-  private static int hashSeed;
   final String name;
   char flag;
   String desc;
@@ -35,14 +34,6 @@ public class Opt implements Cloneable, Debug {
     this.desc = desc;
     this.args = args;
     this.defs = defs;
-  }
-
-  public static Opt of(String name, char flag) {
-    return new Opt(name, flag, null, FingerTrieSeq.empty(), 0);
-  }
-
-  public static Opt of(String name) {
-    return new Opt(name, '\0', null, FingerTrieSeq.empty(), 0);
   }
 
   public String name() {
@@ -77,7 +68,7 @@ public class Opt implements Cloneable, Debug {
   }
 
   public Opt arg(String arg) {
-    return arg(Arg.of(arg));
+    return this.arg(Arg.create(arg));
   }
 
   public int defs() {
@@ -89,7 +80,7 @@ public class Opt implements Cloneable, Debug {
   }
 
   public Arg getArg() {
-    return getArg(0);
+    return this.getArg(0);
   }
 
   public Arg getArg(int index) {
@@ -97,7 +88,7 @@ public class Opt implements Cloneable, Debug {
   }
 
   public String getValue() {
-    return getValue(0);
+    return this.getValue(0);
   }
 
   public String getValue(int index) {
@@ -138,18 +129,20 @@ public class Opt implements Cloneable, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Opt.class);
+    if (Opt.hashSeed == 0) {
+      Opt.hashSeed = Murmur3.seed(Opt.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Opt.hashSeed,
         this.name.hashCode()), this.flag), Murmur3.hash(this.desc)), this.args.hashCode()), this.defs));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("Opt").write('.').write("of").write('(').debug(this.name).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Opt").write('.').write("create").write('(').debug(this.name).write(')');
     if (this.flag != 0) {
       output = output.write('.').write("flag").write('(').debug(this.flag).write(')');
     }
@@ -161,6 +154,7 @@ public class Opt implements Cloneable, Debug {
       final Arg arg = this.args.get(argIndex);
       output = output.write('.').write("arg").write('(').debug(arg).write(')');
     }
+    return output;
   }
 
   @Override
@@ -176,6 +170,14 @@ public class Opt implements Cloneable, Debug {
       args = args.appended(this.args.get(i).clone());
     }
     return new Opt(this.name, this.flag, this.desc, args, this.defs);
+  }
+
+  public static Opt create(String name, char flag) {
+    return new Opt(name, flag, null, FingerTrieSeq.empty(), 0);
+  }
+
+  public static Opt create(String name) {
+    return new Opt(name, '\0', null, FingerTrieSeq.empty(), 0);
   }
 
 }

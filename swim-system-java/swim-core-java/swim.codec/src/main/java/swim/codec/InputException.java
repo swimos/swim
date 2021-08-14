@@ -19,8 +19,6 @@ package swim.codec;
  */
 public class InputException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public InputException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -36,5 +34,7 @@ public class InputException extends RuntimeException {
   public InputException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

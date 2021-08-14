@@ -28,21 +28,21 @@ final class WsOpcodeDecoder<O> extends Decoder<WsFrame<O>> {
     this.content = content;
   }
 
+  @Override
+  public Decoder<WsFrame<O>> feed(InputBuffer input) {
+    return WsOpcodeDecoder.decode(input, this.ws, this.content);
+  }
+
   static <O> Decoder<WsFrame<O>> decode(InputBuffer input, WsDecoder ws, Decoder<O> content) {
     if (input.isCont()) {
       final int finRsvOp = input.head();
       return ws.decodeFrame(finRsvOp, content, input);
     } else if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new WsOpcodeDecoder<O>(ws, content);
-  }
-
-  @Override
-  public Decoder<WsFrame<O>> feed(InputBuffer input) {
-    return decode(input, this.ws, this.content);
   }
 
 }

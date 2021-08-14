@@ -47,7 +47,7 @@ public class ValueMap<K, V> implements Map<K, V> {
   }
 
   public <K2> ValueMap<K2, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   public Form<V> valueForm() {
@@ -59,7 +59,7 @@ public class ValueMap<K, V> implements Map<K, V> {
   }
 
   public <V2> ValueMap<K, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override
@@ -126,7 +126,7 @@ public class ValueMap<K, V> implements Map<K, V> {
   public void putAll(Map<? extends K, ? extends V> map) {
     if (this.keyForm != Form.forValue() || this.valueForm != Form.forValue()) {
       for (Entry<? extends K, ? extends V> entry : map.entrySet()) {
-        put(entry.getKey(), entry.getValue());
+        this.put(entry.getKey(), entry.getValue());
       }
     } else {
       this.inner.putAll((Map<? extends Value, ? extends Value>) map);
@@ -189,11 +189,11 @@ public class ValueMap<K, V> implements Map<K, V> {
       return true;
     } else if (other instanceof Map<?, ?>) {
       final Map<?, ?> that = (Map<?, ?>) other;
-      if (size() != that.size()) {
+      if (this.size() != that.size()) {
         return false;
       }
       try {
-        final Iterator<Entry<K, V>> these = entrySet().iterator();
+        final Iterator<Entry<K, V>> these = this.entrySet().iterator();
         while (these.hasNext()) {
           final Entry<K, V> entry = these.next();
           final K keyObject = entry.getKey();
@@ -218,7 +218,7 @@ public class ValueMap<K, V> implements Map<K, V> {
 
   @Override
   public int hashCode() {
-    final Iterator<Entry<K, V>> these = entrySet().iterator();
+    final Iterator<Entry<K, V>> these = this.entrySet().iterator();
     int code = 0;
     while (these.hasNext()) {
       code += these.next().hashCode();
@@ -228,7 +228,7 @@ public class ValueMap<K, V> implements Map<K, V> {
 
   @Override
   public String toString() {
-    final Iterator<Entry<K, V>> these = entrySet().iterator();
+    final Iterator<Entry<K, V>> these = this.entrySet().iterator();
     final StringBuilder sb = new StringBuilder();
     sb.append('{');
     if (these.hasNext()) {

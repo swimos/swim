@@ -47,16 +47,16 @@ public class HttpLaneSpec {
   public void testLinkToValueLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestHttpPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestHttpPlane.class);
+                                      .openPlane("test", TestHttpPlane.class);
 
     final CountDownLatch clientRequest = new CountDownLatch(1);
     final CountDownLatch clientResponse = new CountDownLatch(1);
     final AbstractHttpRequester<String> requester = new AbstractHttpRequester<String>() {
       @Override
       public void doRequest() {
-        final HttpRequest<?> request = HttpRequest.post(Uri.parse("/http/test?lane=http")).body("Hello, swim!");
+        final HttpRequest<?> request = HttpRequest.post(Uri.parse("/http/test?lane=http")).body("Hello, Swim!");
         System.out.println("client doRequest: " + Format.debug(request.toHttp()));
-        writeRequest(request);
+        this.writeRequest(request);
       }
 
       @Override
@@ -77,7 +77,7 @@ public class HttpLaneSpec {
       public void didConnect() {
         System.out.println("client didConnect");
         super.didConnect();
-        doRequest(requester);
+        this.doRequest(requester);
       }
     };
 
@@ -98,8 +98,7 @@ public class HttpLaneSpec {
   static class TestHttpLaneAgent extends AbstractAgent {
 
     @SwimLane("http")
-    HttpLane<Object> testHttp = httpLane()
-        .observe(new TestHttpLaneController());
+    HttpLane<Object> testHttp = httpLane().observe(new TestHttpLaneController());
 
     class TestHttpLaneController implements WillRequestHttp<Object>, DidRequestHttp<Object>,
         DoRespondHttp<Object>, WillRespondHttp<Object>, DidRespondHttp<Object> {
@@ -117,8 +116,8 @@ public class HttpLaneSpec {
       @Override
       public HttpResponse<?> doRespond(HttpRequest<Object> request) {
         System.out.println("lane doRespond: " + Format.debug(request.toHttp()));
-        assertEquals(request.entity().get(), "Hello, swim!");
-        return HttpResponse.from(HttpStatus.OK).body("Hello, world!");
+        assertEquals(request.entity().get(), "Hello, Swim!");
+        return HttpResponse.create(HttpStatus.OK).body("Hello, world!");
       }
 
       @Override

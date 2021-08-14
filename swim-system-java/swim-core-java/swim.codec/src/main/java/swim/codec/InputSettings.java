@@ -17,56 +17,16 @@ package swim.codec;
 import swim.util.Murmur3;
 
 /**
- * {@code Input} consumption parameters.  {@code InputSettings} provide
+ * {@code Input} consumption parameters. {@code InputSettings} provide
  * contextual configuration parameters to input consumers, such as {@link
  * Parser Parsers}.
  */
 public class InputSettings implements Debug {
 
-  private static int hashSeed;
-  private static InputSettings standard;
-  private static InputSettings stripped;
   protected final boolean isStripped;
 
   protected InputSettings(boolean isStripped) {
     this.isStripped = isStripped;
-  }
-
-  /**
-   * Returns {@code InputSettings} configured to include diagnostic metadata
-   * in generated output.
-   */
-  public static final InputSettings standard() {
-    if (standard == null) {
-      standard = new InputSettings(false);
-    }
-    return standard;
-  }
-
-  /**
-   * Returns {@code InputSettings} configured to not include diagnostic
-   * metadata in generated output.
-   */
-  public static final InputSettings stripped() {
-    if (stripped == null) {
-      stripped = new InputSettings(true);
-    }
-    return stripped;
-  }
-
-  /**
-   * Returns {@code InputSettings} configured to not include diagnostic
-   * metadata in generated output, if {@code isStripped} is {@code true}.
-   */
-  public static final InputSettings create(boolean isStripped) {
-    if (isStripped) {
-      return stripped();
-    }
-    return standard();
-  }
-
-  protected boolean canEqual(Object other) {
-    return other instanceof InputSettings;
   }
 
   /**
@@ -81,11 +41,15 @@ public class InputSettings implements Debug {
    * Returns a copy of these settings with the given {@code isStripped} flag.
    */
   public InputSettings isStripped(boolean isStripped) {
-    return copy(isStripped);
+    return this.copy(isStripped);
   }
 
   protected InputSettings copy(boolean isStripped) {
-    return create(isStripped);
+    return InputSettings.create(isStripped);
+  }
+
+  protected boolean canEqual(Object other) {
+    return other instanceof InputSettings;
   }
 
   @Override
@@ -99,16 +63,18 @@ public class InputSettings implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(InputSettings.class);
+    if (InputSettings.hashSeed == 0) {
+      InputSettings.hashSeed = Murmur3.seed(InputSettings.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, Murmur3.hash(this.isStripped)));
+    return Murmur3.mash(Murmur3.mix(InputSettings.hashSeed, Murmur3.hash(this.isStripped)));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("InputSettings").write('.');
     if (!this.isStripped) {
       output = output.write("standard");
@@ -116,11 +82,49 @@ public class InputSettings implements Debug {
       output = output.write("stripped");
     }
     output = output.write('(').write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static InputSettings standard;
+
+  /**
+   * Returns {@code InputSettings} configured to include diagnostic metadata
+   * in generated output.
+   */
+  public static final InputSettings standard() {
+    if (InputSettings.standard == null) {
+      InputSettings.standard = new InputSettings(false);
+    }
+    return InputSettings.standard;
+  }
+
+  private static InputSettings stripped;
+
+  /**
+   * Returns {@code InputSettings} configured to not include diagnostic
+   * metadata in generated output.
+   */
+  public static final InputSettings stripped() {
+    if (InputSettings.stripped == null) {
+      InputSettings.stripped = new InputSettings(true);
+    }
+    return InputSettings.stripped;
+  }
+
+  /**
+   * Returns {@code InputSettings} configured to not include diagnostic
+   * metadata in generated output, if {@code isStripped} is {@code true}.
+   */
+  public static final InputSettings create(boolean isStripped) {
+    if (isStripped) {
+      return InputSettings.stripped();
+    }
+    return InputSettings.standard();
   }
 
 }

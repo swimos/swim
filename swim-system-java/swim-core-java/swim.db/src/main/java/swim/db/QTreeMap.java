@@ -15,7 +15,6 @@
 package swim.db;
 
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.math.Z2Form;
 import swim.spatial.BitInterval;
 import swim.spatial.SpatialMap;
@@ -55,11 +54,11 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
   }
 
   public final TreeDelegate treeDelegate() {
-    return tree().treeDelegate();
+    return this.tree().treeDelegate();
   }
 
   public void setTreeDelegate(TreeDelegate treeDelegate) {
-    tree().setTreeDelegate(treeDelegate);
+    this.tree().setTreeDelegate(treeDelegate);
   }
 
   public Z2Form<S> shapeForm() {
@@ -67,13 +66,13 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
   }
 
   public boolean isResident() {
-    return tree().isResident();
+    return this.tree().isResident();
   }
 
   public QTreeMap<S> isResident(boolean isResident) {
     do {
       final long newVersion = this.trunk.version();
-      final QTree oldTree = tree();
+      final QTree oldTree = this.tree();
       final QTree newTree = oldTree.isResident(isResident);
       if (oldTree != newTree) {
         if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -87,13 +86,13 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
   }
 
   public boolean isTransient() {
-    return tree().isTransient();
+    return this.tree().isTransient();
   }
 
   public QTreeMap<S> isTransient(boolean isTransient) {
     do {
       final long newVersion = this.trunk.version();
-      final QTree oldTree = tree();
+      final QTree oldTree = this.tree();
       final QTree newTree = oldTree.isTransient(isTransient);
       if (oldTree != newTree) {
         if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -111,7 +110,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
   }
 
   public <K> SpatialValueMap<K, S, Value> keyClass(Class<K> keyClass) {
-    return keyForm(Form.<K>forClass(keyClass));
+    return this.keyForm(Form.<K>forClass(keyClass));
   }
 
   public <V> SpatialValueMap<Value, S, V> valueForm(Form<V> valueForm) {
@@ -119,29 +118,29 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
   }
 
   public <V> SpatialValueMap<Value, S, V> valueClass(Class<V> valueClass) {
-    return valueForm(Form.<V>forClass(valueClass));
+    return this.valueForm(Form.<V>forClass(valueClass));
   }
 
   public QTreeMapView<S> snapshot() {
-    return new QTreeMapView<S>(tree(), shapeForm);
+    return new QTreeMapView<S>(this.tree(), this.shapeForm);
   }
 
   @Override
   public boolean isEmpty() {
-    return tree().isEmpty();
+    return this.tree().isEmpty();
   }
 
   @Override
   public int size() {
-    return (int) tree().span();
+    return (int) this.tree().span();
   }
 
   public long span() {
-    return tree().span();
+    return this.tree().span();
   }
 
   public long treeSize() {
-    return tree().treeSize();
+    return this.tree().treeSize();
   }
 
   @Override
@@ -152,13 +151,13 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     int retries = 0;
     do {
       try {
-        return tree().containsKey(key, x, y);
+        return this.tree().containsKey(key, x, y);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -169,7 +168,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
   @Override
   public boolean containsKey(Object key) {
     if (key instanceof Value) {
-      return containsKey((Value) key);
+      return this.containsKey((Value) key);
     }
     return false;
   }
@@ -178,13 +177,13 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     int retries = 0;
     do {
       try {
-        return tree().containsKey(key);
+        return this.tree().containsKey(key);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -195,7 +194,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
   @Override
   public boolean containsValue(Object value) {
     if (value instanceof Value) {
-      return containsValue((Value) value);
+      return this.containsValue((Value) value);
     }
     return false;
   }
@@ -204,13 +203,13 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     int retries = 0;
     do {
       try {
-        return tree().containsValue(value);
+        return this.tree().containsValue(value);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -221,7 +220,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
   @Override
   public Value get(Object key) {
     if (key instanceof Value) {
-      return get((Value) key);
+      return this.get((Value) key);
     }
     return Value.absent();
   }
@@ -230,13 +229,13 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     int retries = 0;
     do {
       try {
-        return tree().get(key).body();
+        return this.tree().get(key).body();
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -252,13 +251,13 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     int retries = 0;
     do {
       try {
-        return tree().get(key, x, y).body();
+        return this.tree().get(key, x, y).body();
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -277,7 +276,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final QTree oldTree = tree();
+        final QTree oldTree = this.tree();
         final QTree newTree = oldTree.updated(key, x, y, newValue, newVersion, newPost);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -291,11 +290,11 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
           return Value.absent();
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -316,7 +315,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final QTree oldTree = tree();
+        final QTree oldTree = this.tree();
         final QTree newTree = oldTree.moved(key, oldX, oldY, newX, newY, newValue, newVersion, newPost);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -330,11 +329,11 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
           return Value.absent();
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -352,7 +351,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
       final long newVersion = this.trunk.version();
       final int newPost = this.trunk.post();
       try {
-        final QTree oldTree = tree();
+        final QTree oldTree = this.tree();
         final QTree newTree = oldTree.removed(key, x, y, newVersion, newPost);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -366,11 +365,11 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
           return Value.absent();
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -384,7 +383,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     do {
       final long newVersion = this.trunk.version();
       try {
-        final QTree oldTree = tree();
+        final QTree oldTree = this.tree();
         final QTree newTree = oldTree.cleared(newVersion);
         if (oldTree != newTree) {
           if (this.trunk.updateTree(oldTree, newTree, newVersion)) {
@@ -397,7 +396,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
           return;
         }
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
         } else {
           throw error;
@@ -414,13 +413,13 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
         final Z2Form<S> shapeForm = this.shapeForm;
         final long x = BitInterval.span(shapeForm.getXMin(shape), shapeForm.getXMax(shape));
         final long y = BitInterval.span(shapeForm.getYMin(shape), shapeForm.getYMax(shape));
-        return new QTreeShapeCursor<S>(tree().cursor(x, y), shapeForm, shape);
+        return new QTreeShapeCursor<S>(this.tree().cursor(x, y), shapeForm, shape);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -433,13 +432,13 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     int retries = 0;
     do {
       try {
-        return new QTreeEntryCursor<S>(tree().cursor(), this.shapeForm);
+        return new QTreeEntryCursor<S>(this.tree().cursor(), this.shapeForm);
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -452,13 +451,13 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     int retries = 0;
     do {
       try {
-        return Cursor.keys(tree().cursor());
+        return Cursor.keys(this.tree().cursor());
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -471,13 +470,13 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     int retries = 0;
     do {
       try {
-        return new QTreeValueCursor(tree().cursor());
+        return new QTreeValueCursor(this.tree().cursor());
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -489,13 +488,13 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     int retries = 0;
     do {
       try {
-        return new QTreeValueCursor(tree().depthCursor(maxDepth));
+        return new QTreeValueCursor(this.tree().depthCursor(maxDepth));
       } catch (StoreException error) {
-        if (retries < settings().maxRetries) {
+        if (retries < this.settings().maxRetries) {
           retries += 1;
-        } else if (retries == settings().maxRetries) {
+        } else if (retries == this.settings().maxRetries) {
           retries += 1;
-          didFail(error);
+          this.didFail(error);
         } else {
           throw error;
         }
@@ -506,15 +505,15 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
   protected void didFail(StoreException error) {
     System.err.println(error.getMessage());
     error.printStackTrace();
-    clear();
+    this.clear();
   }
 
   public void loadAsync(Cont<QTreeMap<S>> cont) {
     try {
-      final Cont<Tree> andThen = Conts.constant(cont, this);
-      tree().loadAsync(andThen);
+      final Cont<Tree> andThen = Cont.constant(cont, this);
+      this.tree().loadAsync(andThen);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -523,7 +522,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
   }
 
   public QTreeMap<S> load() throws InterruptedException {
-    tree().load();
+    this.tree().load();
     return this;
   }
 
@@ -531,7 +530,7 @@ public class QTreeMap<S> implements SpatialMap<Value, S, Value> {
     try {
       this.trunk.commitAsync(commit);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         commit.trap(cause);
       } else {
         throw cause;

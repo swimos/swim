@@ -37,7 +37,8 @@ final class BlockItemParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.fieldParser, this.valueParser, this.step);
+    return BlockItemParser.parse(input, this.recon, this.builder, this.fieldParser,
+                                 this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -81,15 +82,15 @@ final class BlockItemParser<I, V> extends Parser<V> {
             valueParser = recon.parseSelector(input);
             step = 4;
           } else if (builder == null) {
-            return done(recon.extant());
+            return Parser.done(recon.extant());
           } else {
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           }
         } else if (input.isDone()) {
           if (builder == null) {
-            return done(recon.extant());
+            return Parser.done(recon.extant());
           } else {
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           }
         }
       }
@@ -116,7 +117,7 @@ final class BlockItemParser<I, V> extends Parser<V> {
           step = 1;
           continue;
         } else if (input.isDone()) {
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
       if (step == 4) {
@@ -153,22 +154,22 @@ final class BlockItemParser<I, V> extends Parser<V> {
           if (input.head() == '@') {
             step = 1;
           } else {
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           }
         } else if (input.isDone()) {
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new BlockItemParser<I, V>(recon, builder, fieldParser, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
-    return parse(input, recon, null, null, null, 1);
+    return BlockItemParser.parse(input, recon, null, null, null, 1);
   }
 
 }

@@ -52,7 +52,7 @@ public abstract class AbstractAgentRoute<A extends Agent> implements AgentRoute<
   @Override
   public Value props(Uri nodeUri) {
     final Record props = Record.create();
-    final UriPattern pattern = pattern();
+    final UriPattern pattern = this.pattern();
     if (pattern != null) {
       final HashTrieMap<String, String> params = pattern.unapply(nodeUri);
       for (HashTrieMap.Entry<String, String> param : params) {

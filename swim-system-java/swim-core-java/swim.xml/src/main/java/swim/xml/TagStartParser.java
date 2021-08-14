@@ -41,6 +41,12 @@ final class TagStartParser<I, V> extends Parser<V> {
     this.step = step;
   }
 
+  @Override
+  public Parser<V> feed(Input input) {
+    return TagStartParser.parse(input, this.xml, this.builder, this.tagParser, this.attributes,
+                                this.nameParser, this.valueParser, this.step);
+  }
+
   static <I, V> Parser<V> parse(Input input, XmlParser<I, V> xml, Builder<I, V> builder,
                                 Parser<String> tagParser, Builder<I, V> attributes,
                                 Parser<String> nameParser, Parser<V> valueParser, int step) {
@@ -59,10 +65,10 @@ final class TagStartParser<I, V> extends Parser<V> {
           input = input.step();
           step = 2;
         } else {
-          return error(Diagnostic.expected('<', input));
+          return Parser.error(Diagnostic.expected('<', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('<', input));
+        return Parser.error(Diagnostic.expected('<', input));
       }
     }
     if (step == 2) {
@@ -88,7 +94,7 @@ final class TagStartParser<I, V> extends Parser<V> {
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
@@ -108,7 +114,7 @@ final class TagStartParser<I, V> extends Parser<V> {
             break;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 5) {
@@ -137,10 +143,10 @@ final class TagStartParser<I, V> extends Parser<V> {
             input = input.step();
             step = 7;
           } else {
-            return error(Diagnostic.expected('=', input));
+            return Parser.error(Diagnostic.expected('=', input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected('=', input));
+          return Parser.error(Diagnostic.expected('=', input));
         }
       }
       if (step == 7) {
@@ -156,10 +162,10 @@ final class TagStartParser<I, V> extends Parser<V> {
           if (c == '"' || c == '\'') {
             step = 8;
           } else {
-            return error(Diagnostic.expected("attribute value", input));
+            return Parser.error(Diagnostic.expected("attribute value", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("attribute value", input));
+          return Parser.error(Diagnostic.expected("attribute value", input));
         }
       }
       if (step == 8) {
@@ -210,10 +216,10 @@ final class TagStartParser<I, V> extends Parser<V> {
           }
           return xml.parseTagContent(input, tagParser.bind(), builder);
         } else {
-          return error(Diagnostic.expected("'/' or '>'", input));
+          return Parser.error(Diagnostic.expected("'/' or '>'", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("'/' or '>'", input));
+        return Parser.error(Diagnostic.expected("'/' or '>'", input));
       }
     }
     if (step == 10) {
@@ -232,37 +238,31 @@ final class TagStartParser<I, V> extends Parser<V> {
           } else {
             builder.add(xml.tag(tagParser.bind(), attributes.bind()));
           }
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         } else {
-          return error(Diagnostic.expected('>', input));
+          return Parser.error(Diagnostic.expected('>', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('>', input));
+        return Parser.error(Diagnostic.expected('>', input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new TagStartParser<I, V>(xml, builder, tagParser, attributes,
-        nameParser, valueParser, step);
+                                    nameParser, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, XmlParser<I, V> xml) {
-    return parse(input, xml, null, null, null, null, null, 1);
+    return TagStartParser.parse(input, xml, null, null, null, null, null, 1);
   }
 
   static <I, V> Parser<V> parseRest(Input input, XmlParser<I, V> xml, Builder<I, V> builder) {
-    return parse(input, xml, builder, null, null, null, null, 2);
+    return TagStartParser.parse(input, xml, builder, null, null, null, null, 2);
   }
 
   static <I, V> Parser<V> parseRest(Input input, XmlParser<I, V> xml) {
-    return parse(input, xml, null, null, null, null, null, 2);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.xml, this.builder, this.tagParser, this.attributes,
-        this.nameParser, this.valueParser, this.step);
+    return TagStartParser.parse(input, xml, null, null, null, null, null, 2);
   }
 
 }

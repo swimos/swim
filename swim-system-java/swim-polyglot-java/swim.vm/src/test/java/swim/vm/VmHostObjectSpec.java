@@ -32,19 +32,17 @@ import static org.testng.Assert.assertEquals;
 
 class Foo {
 
-  static final FooType TYPE = new FooType();
   final String bar = "BAR";
 
   String baz() {
     return "BAZ";
   }
 
+  static final FooType TYPE = new FooType();
+
 }
 
 class FooType extends AbstractHostObjectType<Foo> {
-
-  static final FooBar BAR = new FooBar();
-  static final FooBaz BAZ = new FooBaz();
 
   @Override
   public Class<?> hostClass() {
@@ -64,12 +62,9 @@ class FooType extends AbstractHostObjectType<Foo> {
   @Override
   public HostMember<? super Foo> getOwnMember(Bridge bridge, Foo foo, String key) {
     switch (key) {
-      case "bar":
-        return BAR;
-      case "baz":
-        return BAZ;
-      default:
-        return null;
+      case "bar": return BAR;
+      case "baz": return BAZ;
+      default: return null;
     }
   }
 
@@ -87,6 +82,9 @@ class FooType extends AbstractHostObjectType<Foo> {
   public Collection<HostStaticMember> ownStaticMembers(Bridge bridge) {
     return Arrays.asList();
   }
+
+  static final FooBar BAR = new FooBar();
+  static final FooBaz BAZ = new FooBaz();
 
 }
 

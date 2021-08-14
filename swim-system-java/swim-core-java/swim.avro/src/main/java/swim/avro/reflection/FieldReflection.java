@@ -57,7 +57,7 @@ final class FieldReflection<R, V> extends AvroFieldType<V, R> {
   @Override
   public AvroFieldType<V, R> doc(String doc) {
     return new FieldReflection<R, V>(this.field, doc, this.valueType, this.defaultValue,
-        this.order, this.aliases);
+                                     this.order, this.aliases);
   }
 
   @Override
@@ -88,7 +88,7 @@ final class FieldReflection<R, V> extends AvroFieldType<V, R> {
   @Override
   public AvroFieldType<V, R> alias(String alias) {
     return new FieldReflection<R, V>(this.field, this.doc, this.valueType, this.defaultValue,
-        this.order, this.aliases.appended(alias));
+                                     this.order, this.aliases.appended(alias));
   }
 
   @Override

@@ -29,13 +29,17 @@ import swim.uri.UriPattern;
 
 public final class HostPlaneContext {
 
+  private HostPlaneContext() {
+    // static
+  }
+
   public static final HostObjectType<PlaneContext> TYPE;
 
   static {
     final JavaHostObjectType<PlaneContext> type = new JavaHostObjectType<>(PlaneContext.class);
     TYPE = type;
     type.inheritType(HostObject.TYPE); // FIXME: remove once any other base type is inherited
-    // FIXME: type.inheritType(HostSwimRef.TYPE);
+    // FIXME: type.inheritType(HostWarpRef.TYPE);
     // FIXME: type.inheritType(HostLog.TYPE);
     type.addMember(new HostPlaneContextSchedule());
     type.addMember(new HostPlaneContextStage());
@@ -47,10 +51,6 @@ public final class HostPlaneContext {
     type.addMember(new HostPlaneContextGetAgentRoute());
     type.addMember(new HostPlaneContextAddAgentRoute());
     type.addMember(new HostPlaneContextRemoveAgentRoute());
-  }
-
-  private HostPlaneContext() {
-    // static
   }
 
 }

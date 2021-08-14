@@ -14,7 +14,7 @@
 
 package swim.runtime.agent;
 
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Schedule;
 import swim.concurrent.Timer;
 import swim.concurrent.TimerContext;
@@ -90,7 +90,7 @@ public class AgentTimer implements Timer, TimerContext, TimerRef, Runnable {
     try {
       this.timer.runTimer();
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
+      if (Cont.isNonFatal(error)) {
         this.node.didFail(error);
       } else {
         throw error;

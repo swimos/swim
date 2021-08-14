@@ -1,9 +1,9 @@
 // Based on zlib-1.2.8
 // Copyright (c) 1995-2013 Jean-loup Gailly and Mark Adler
-// Copyright (c) 2016-2018 Swim.it inc.
+// Copyright (c) 2015-2021 Swim inc.
 //
 // This software is provided 'as-is', without any express or implied
-// warranty.  In no event will the authors be held liable for any damages
+// warranty. In no event will the authors be held liable for any damages
 // arising from the use of this software.
 //
 // Permission is granted to anyone to use this software for any purpose,
@@ -30,352 +30,72 @@ import static swim.deflate.CRC32.crc32;
 @SuppressWarnings("checkstyle:all")
 public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
 
-  // Allowed flush values
-  public static final int Z_NO_FLUSH = 0;
-  public static final int Z_PARTIAL_FLUSH = 1;
-  public static final int Z_SYNC_FLUSH = 2;
-  public static final int Z_FULL_FLUSH = 3;
-  public static final int Z_FINISH = 4;
-  public static final int Z_BLOCK = 5;
-  public static final int Z_TREES = 6;
-  // Return codes for the compression/decompression functions. Negative values
-  // are errors, positive values are used for special but normal events.
-  public static final int Z_OK = 0;
-  public static final int Z_STREAM_END = 1;
-  public static final int Z_NEED_DICT = 2;
-  public static final int Z_ERRNO = -1;
+  // deflated input source
+  public Encoder<?, O> input;
+
+  // flush mode for pull operations
+  protected int flush;
+
+  // total number of input bytes read so far
+  public long total_in;
+
+  // output buffer
+  public byte[] next_out;
+
+  // next output byte should be put there
+  public int next_out_index;
+
+  // remaining free space at next_out_index
+  public int avail_out;
+
+  // total number of bytes output so far
+  public long total_out;
+
+  // best guess about the data type: binary or text
+  int data_type;
+
+  // adler32 value of the uncompressed data
+  int adler;
+
+  // as the name implies
+  int status;
+
+  // output still pending
+  byte[] pending_buf;
 
   // size of pending_buf
   //int pending_buf_size;
-  public static final int Z_STREAM_ERROR = -2;
-  public static final int Z_DATA_ERROR = -3;
-  public static final int Z_MEM_ERROR = -4;
-  public static final int Z_BUF_ERROR = -5;
-  public static final int Z_VERSION_ERROR = -6;
+
+  // next pending byte to output to the stream
+  int pending_out;
+
+  // number of bytes in the pending buffer
+  int pending;
+
+  // bit 0 true for zlib, bit 1 true for gzip
+  int wrap;
+
+  // gzip header information to write
+  GzHeader gzhead;
+
+  // where in extra, name, or comment
+  int gzindex;
 
   // can only be DEFLATED
   //byte method;
-  // Wrappers
-  public static final int Z_NO_WRAP = 0;
-  public static final int Z_WRAP_ZLIB = 1;
-  public static final int Z_WRAP_GZIP = 2;
-  // compression levels
-  public static final int Z_NO_COMPRESSION = 0;
-  public static final int Z_BEST_SPEED = 1;
-  public static final int Z_BEST_COMPRESSION = 9;
-  public static final int Z_DEFAULT_COMPRESSION = -1;
-  // compression strategy
-  public static final int Z_FILTERED = 1;
-  public static final int Z_HUFFMAN_ONLY = 2;
-  public static final int Z_RLE = 3;
-  public static final int Z_FIXED = 4;
-  public static final int Z_DEFAULT_STRATEGY = 0;
-  // Possible values of the data_type field
-  public static final int Z_BINARY = 0;
-  public static final int Z_TEXT = 1;
-  public static final int Z_UNKNOWN = 2;
-  // Maximum value for windowBits
-  public static final int MAX_WBITS = 15; // 32K LZ77 window
-  // Default memLevel
-  public static final int DEF_MEM_LEVEL = 8;
-  //public static final int OS_MSDOS = 0x00;
-  //public static final int OS_AMIGA = 0x01;
-  //public static final int OS_VMS = 0x02;
-  //public static final int OS_UNIX = 0x03;
-  //public static final int OS_VMCMS = 0x04;
-  //public static final int OS_ATARI = 0x05;
-  //public static final int OS_OS2 = 0x06;
-  //public static final int OS_MACOS = 0x07;
-  //public static final int OS_ZSYSTEM = 0x08;
-  //public static final int OS_CPM = 0x09;
-  //public static final int OS_TOPS20 = 0x0A;
-  //public static final int OS_WIN32 = 0x0B;
-  //public static final int OS_QDOS = 0x0C;
-  //public static final int OS_RISCOS = 0x0D;
-  public static final int OS_UNKNOWN = 0xFF;
-  public static final int OS_CODE = OS_UNKNOWN;
-  // The deflate compression method
-  static final int Z_DEFLATED = 8;
-  // number of length codes, not counting the special END_BLOCK code
-  static final int LENGTH_CODES = 29;
-  // number of literal bytes 0..255
-  static final int LITERALS = 256;
-  // number of Literal or Length codes, including the END_BLOCK code
-  static final int L_CODES = LITERALS + 1 + LENGTH_CODES;
-  // number of distance codes
-  static final int D_CODES = 30;
-  // number of codes used to transfer the bit lengths
-  static final int BL_CODES = 19;
-  // maximum heap size
-  static final int HEAP_SIZE = 2 * L_CODES + 1;
-  // All codes must not exceed MAX_BITS bits
-  static final int MAX_BITS = 15;
-  // end of block literal code
-  static final int END_BLOCK = 256;
-  // size of bit buffer in bi_buf
-  static final int BUF_SIZE = 16;
-  // Stream status
-  static final int INIT_STATE = 42;
-  static final int EXTRA_STATE = 69;
-  static final int NAME_STATE = 73;
-  static final int COMMENT_STATE = 91;
-  static final int HCRC_STATE = 103;
-  static final int BUSY_STATE = 113;
-  static final int FINISH_STATE = 666;
-  // The three kinds of block type
-  static final int STORED_BLOCK = 0;
-  static final int STATIC_TREES = 1;
-  static final int DYN_TREES = 2;
-  static final int MIN_MATCH = 3;
-  static final int MAX_MATCH = 258;
-  // Minimum amount of lookahead, except at the end of the input file.
-  static final int MIN_LOOKAHEAD = MAX_MATCH + MIN_MATCH + 1;
-  // Matches of length 3 are discarded if their distance exceeds TOO_FAR
-  static final int TOO_FAR = 4096;
-  // Maximum value for memLevel in deflateInit
-  static final int MAX_MEM_LEVEL = 9;
-  // block not completed, need more input or more output
-  static final int NEED_MORE = 0;
-  // block flush performed
-  static final int BLOCK_DONE = 1;
-  // finish started, need only more output at next deflate
-  static final int FINISH_STARTED = 2;
-  // finish done, accept no more input or output
-  static final int FINISH_DONE = 3;
-  // preset dictionary flag in zlib header
-  static final int PRESET_DICT = 0x20;
-  // compress_func
-  static final int STORED = 0;
-  static final int FAST = 1;
-  static final int SLOW = 2;
-  static final Config[] configuration_table = {
-      new Config(0, 0, 0, 0, STORED),
-      new Config(4, 4, 8, 4, FAST),
-      new Config(4, 5, 16, 8, FAST),
-      new Config(4, 6, 32, 32, FAST),
-      new Config(4, 4, 16, 16, SLOW),
-      new Config(8, 16, 32, 32, SLOW),
-      new Config(8, 16, 128, 128, SLOW),
-      new Config(8, 32, 128, 256, SLOW),
-      new Config(32, 128, 258, 1024, SLOW),
-      new Config(32, 258, 258, 4096, SLOW)
-  };
-  static final String[] z_errmsg = {
-      "need dictionary",     // Z_NEED_DICT      2
-      "stream end",          // Z_STREAM_END     1
-      "",                    // Z_OK             0
-      "file error",          // Z_ERRNO         -1
-      "stream error",        // Z_STREAM_ERROR  -2
-      "data error",          // Z_DATA_ERROR    -3
-      "insufficient memory", // Z_MEM_ERROR     -4
-      "buffer error",        // Z_BUF_ERROR     -5
-      "incompatible version",// Z_VERSION_ERROR -6
-      ""
-  };
-  // Bit length codes must not exceed MAX_BL_BITS bits
-  static final int MAX_BL_BITS = 7;
-  // repeat previous bit length 3-6 times (2 bits of repeat count)
-  static final int REP_3_6 = 16;
-  // repeat a zero length 3-10 times (3 bits of repeat count)
-  static final int REPZ_3_10 = 17;
-  // repeat a zero length 11-138 times (7 bits of repeat count)
-  static final int REPZ_11_138 = 18;
-  // extra bits for each length code
-  static final int[] extra_lbits = {
-      0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0
-  };
-  // extra bits for each distance code
-  static final int[] extra_dbits = {
-      0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13
-  };
-  // extra bits for each bit length code
-  static final int[] extra_blbits = {
-      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 7
-  };
-  // The lengths of the bit length codes are sent in order of decreasing
-  // probability, to avoid transmitting the lengths for unused bit length codes.
-  static final byte[] bl_order = {
-      16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
-  };
-  // see definition of array dist_code below
-  static final int DIST_CODE_LEN = 512;
-  // Distance codes. The first 256 values correspond to the distances
-  // 3 .. 258, the last 256 values correspond to the top 8 bits of
-  // the 15 bit distances.
-  static final byte[] dist_code = {
-      0, 1, 2, 3, 4, 4, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8,
-      8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10,
-      10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
-      11, 11, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-      12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13, 13, 13, 13,
-      13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13,
-      13, 13, 13, 13, 13, 13, 13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
-      14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
-      14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
-      14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 15, 15, 15, 15, 15, 15, 15,
-      15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
-      15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
-      15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 0, 0, 16, 17,
-      18, 18, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 22, 22, 22, 22, 22, 22, 22, 22,
-      23, 23, 23, 23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
-      26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
-      26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27,
-      27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
-      27, 27, 27, 27, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-      28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-      28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
-      28, 28, 28, 28, 28, 28, 28, 28, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29,
-      29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29,
-      29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29,
-      29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29
-  };
-  // length code for each normalized match length (0 == MIN_MATCH)
-  static final byte[] length_code = {
-      0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 12, 12,
-      13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15, 15, 16, 16, 16, 16, 16, 16, 16, 16,
-      17, 17, 17, 17, 17, 17, 17, 17, 18, 18, 18, 18, 18, 18, 18, 18, 19, 19, 19, 19,
-      19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
-      21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 22, 22, 22, 22,
-      22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 23, 23, 23, 23, 23, 23, 23, 23,
-      23, 23, 23, 23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
-      25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
-      25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 26, 26, 26, 26, 26, 26, 26,
-      26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
-      26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
-      27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 28
-  };
-  // First normalized length for each code (0 = MIN_MATCH)
-  static final int[] base_length = {
-      0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32, 40, 48, 56,
-      64, 80, 96, 112, 128, 160, 192, 224, 0
-  };
-  // First normalized distance for each code (0 = distance of 1)
-  static final int[] base_dist = {
-      0, 1, 2, 3, 4, 6, 8, 12, 16, 24,
-      32, 48, 64, 96, 128, 192, 256, 384, 512, 768,
-      1024, 1536, 2048, 3072, 4096, 6144, 8192, 12288, 16384, 24576
-  };
-  // The static literal tree. Since the bit lengths are imposed, there is no
-  // need for the L_CODES extra codes used during heap construction. However
-  // The codes 286 and 287 are needed to build a canonical tree.
-  static final short[] static_ltree = {
-      12, 8, 140, 8, 76, 8, 204, 8, 44, 8,
-      172, 8, 108, 8, 236, 8, 28, 8, 156, 8,
-      92, 8, 220, 8, 60, 8, 188, 8, 124, 8,
-      252, 8, 2, 8, 130, 8, 66, 8, 194, 8,
-      34, 8, 162, 8, 98, 8, 226, 8, 18, 8,
-      146, 8, 82, 8, 210, 8, 50, 8, 178, 8,
-      114, 8, 242, 8, 10, 8, 138, 8, 74, 8,
-      202, 8, 42, 8, 170, 8, 106, 8, 234, 8,
-      26, 8, 154, 8, 90, 8, 218, 8, 58, 8,
-      186, 8, 122, 8, 250, 8, 6, 8, 134, 8,
-      70, 8, 198, 8, 38, 8, 166, 8, 102, 8,
-      230, 8, 22, 8, 150, 8, 86, 8, 214, 8,
-      54, 8, 182, 8, 118, 8, 246, 8, 14, 8,
-      142, 8, 78, 8, 206, 8, 46, 8, 174, 8,
-      110, 8, 238, 8, 30, 8, 158, 8, 94, 8,
-      222, 8, 62, 8, 190, 8, 126, 8, 254, 8,
-      1, 8, 129, 8, 65, 8, 193, 8, 33, 8,
-      161, 8, 97, 8, 225, 8, 17, 8, 145, 8,
-      81, 8, 209, 8, 49, 8, 177, 8, 113, 8,
-      241, 8, 9, 8, 137, 8, 73, 8, 201, 8,
-      41, 8, 169, 8, 105, 8, 233, 8, 25, 8,
-      153, 8, 89, 8, 217, 8, 57, 8, 185, 8,
-      121, 8, 249, 8, 5, 8, 133, 8, 69, 8,
-      197, 8, 37, 8, 165, 8, 101, 8, 229, 8,
-      21, 8, 149, 8, 85, 8, 213, 8, 53, 8,
-      181, 8, 117, 8, 245, 8, 13, 8, 141, 8,
-      77, 8, 205, 8, 45, 8, 173, 8, 109, 8,
-      237, 8, 29, 8, 157, 8, 93, 8, 221, 8,
-      61, 8, 189, 8, 125, 8, 253, 8, 19, 9,
-      275, 9, 147, 9, 403, 9, 83, 9, 339, 9,
-      211, 9, 467, 9, 51, 9, 307, 9, 179, 9,
-      435, 9, 115, 9, 371, 9, 243, 9, 499, 9,
-      11, 9, 267, 9, 139, 9, 395, 9, 75, 9,
-      331, 9, 203, 9, 459, 9, 43, 9, 299, 9,
-      171, 9, 427, 9, 107, 9, 363, 9, 235, 9,
-      491, 9, 27, 9, 283, 9, 155, 9, 411, 9,
-      91, 9, 347, 9, 219, 9, 475, 9, 59, 9,
-      315, 9, 187, 9, 443, 9, 123, 9, 379, 9,
-      251, 9, 507, 9, 7, 9, 263, 9, 135, 9,
-      391, 9, 71, 9, 327, 9, 199, 9, 455, 9,
-      39, 9, 295, 9, 167, 9, 423, 9, 103, 9,
-      359, 9, 231, 9, 487, 9, 23, 9, 279, 9,
-      151, 9, 407, 9, 87, 9, 343, 9, 215, 9,
-      471, 9, 55, 9, 311, 9, 183, 9, 439, 9,
-      119, 9, 375, 9, 247, 9, 503, 9, 15, 9,
-      271, 9, 143, 9, 399, 9, 79, 9, 335, 9,
-      207, 9, 463, 9, 47, 9, 303, 9, 175, 9,
-      431, 9, 111, 9, 367, 9, 239, 9, 495, 9,
-      31, 9, 287, 9, 159, 9, 415, 9, 95, 9,
-      351, 9, 223, 9, 479, 9, 63, 9, 319, 9,
-      191, 9, 447, 9, 127, 9, 383, 9, 255, 9,
-      511, 9, 0, 7, 64, 7, 32, 7, 96, 7,
-      16, 7, 80, 7, 48, 7, 112, 7, 8, 7,
-      72, 7, 40, 7, 104, 7, 24, 7, 88, 7,
-      56, 7, 120, 7, 4, 7, 68, 7, 36, 7,
-      100, 7, 20, 7, 84, 7, 52, 7, 116, 7,
-      3, 8, 131, 8, 67, 8, 195, 8, 35, 8,
-      163, 8, 99, 8, 227, 8
-  };
-  // The static distance tree. (Actually a trivial tree since all codes use
-  // 5 bits.)
-  static final short[] static_dtree = {
-      0, 5, 16, 5, 8, 5, 24, 5, 4, 5,
-      20, 5, 12, 5, 28, 5, 2, 5, 18, 5,
-      10, 5, 26, 5, 6, 5, 22, 5, 14, 5,
-      30, 5, 1, 5, 17, 5, 9, 5, 25, 5,
-      5, 5, 21, 5, 13, 5, 29, 5, 3, 5,
-      19, 5, 11, 5, 27, 5, 7, 5, 23, 5
-  };
-  static final StaticTree static_l_desc = new StaticTree(static_ltree, extra_lbits,
-      LITERALS + 1, L_CODES, MAX_BITS);
-  static final StaticTree static_d_desc = new StaticTree(static_dtree, extra_dbits,
-      0, D_CODES, MAX_BITS);
-  static final StaticTree static_bl_desc = new StaticTree(null, extra_blbits,
-      0, BL_CODES, MAX_BL_BITS);
-  // deflated input source
-  public Encoder<?, O> input;
-  // total number of input bytes read so far
-  public long total_in;
-  // output buffer
-  public byte[] next_out;
-  // next output byte should be put there
-  public int next_out_index;
-  // remaining free space at next_out_index
-  public int avail_out;
-  // total number of bytes output so far
-  public long total_out;
-  // flush mode for pull operations
-  protected int flush;
-  // best guess about the data type: binary or text
-  int data_type;
-  // adler32 value of the uncompressed data
-  int adler;
-  // as the name implies
-  int status;
-  // output still pending
-  byte[] pending_buf;
-  // next pending byte to output to the stream
-  int pending_out;
-  // number of bytes in the pending buffer
-  int pending;
-  // bit 0 true for zlib, bit 1 true for gzip
-  int wrap;
-  // gzip header information to write
-  GzHeader gzhead;
-  // where in extra, name, or comment
-  int gzindex;
+
   // value of flush param for previous deflate call
   int last_flush;
+
   // LZ77 window size (32K by default)
   int w_size;
+
   // log2(w_size) (8..16)
   int w_bits;
+
   // w_size - 1
   int w_mask;
+
   // Sliding window. Input bytes are read into the second half of the window,
   // and move to the first half later to keep a dictionary of at least wSize
   // bytes. With this organization, matches are limited to a distance of
@@ -384,95 +104,132 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
   // the window size to 64K, which is quite useful on MSDOS.
   // To do: use the user input buffer as sliding window.
   byte[] window;
+
   // Input writes directly to sliding window through this buffer.
   OutputBuffer<?> window_buffer;
+
   // Actual size of window: 2*wSize, except when the user input buffer
   // is directly used as sliding window.
   int window_size;
+
   // Link to older string with same hash index. To limit the size of this
   // array to 64K, this link is maintained only for the last 32K strings.
   // An index in this array is thus a window index modulo 32K.
   short[] prev;
+
   // Heads of the hash chains or NIL.
   short[] head;
+
   // hash index of string to be inserted
   int ins_h;
+
   // number of elements in hash table
   int hash_size;
+
   // log2(hash_size)
   int hash_bits;
+
   // hash_size-1
   int hash_mask;
+
   // Number of bits by which ins_h must be shifted at each input
   // step. It must be such that after MIN_MATCH steps, the oldest
   // byte no longer takes part in the hash key, that is:
   // hash_shift * MIN_MATCH >= hash_bits
   int hash_shift;
+
   // Window position at the beginning of the current output block. Gets
   // negative when the window is moved backwards.
   int block_start;
+
   // length of best match
   int match_length;
+
   // previous match
   int prev_match;
+
   // set if previous match exists
   int match_available;
+
   // start of string to insert
   int strstart;
+
   // start of matching string
   int match_start;
+
   // number of valid bytes ahead in window
   int lookahead;
+
   // Length of the best match at previous step. Matches not greater than this
   // are discarded. This is used in the lazy match evaluation.
   int prev_length;
+
   // To speed up deflation, hash chains are never searched beyond this length.
   // A higher limit improves compression ratio but degrades the speed.
   int max_chain_length;
+
   // Attempt to find a better match only when the current match is strictly
   // smaller than this value. This mechanism is used only for compression
   // levels >= 4.
   int max_lazy_match;
+
   // compression level (1..9)
   int level;
+
   // favor or force Huffman coding
   int strategy;
+
   // Use a faster search when the previous match is longer than this
   int good_match;
+
   // Stop searching when current match exceeds this
   int nice_match;
+
   // literal and length tree
   short[] dyn_ltree = new short[HEAP_SIZE * 2];
+
   // distance tree
   short[] dyn_dtree = new short[(2 * D_CODES + 1) * 2];
+
   // Huffman tree for bit lengths
   short[] bl_tree = new short[(2 * BL_CODES + 1) * 2];
+
   // desc for literal tree;
   Tree l_desc;
+
   // desc for distance tree
   Tree d_desc;
+
   // desc for bit length tree
   Tree bl_desc;
+
   // number of codes at each bit length for an optimal tree
   short[] bl_count = new short[MAX_BITS + 1];
+
   // next code value for each bit length within gen_codes()
   short[] next_code = new short[MAX_BITS + 1];
+
   // heap used to build the Huffman trees
   int[] heap = new int[2 * L_CODES + 1];
+
   // number of elements in the heap
   int heap_len;
+
   // element of largest frequency
   int heap_max;
+
   // Depth of each subtree used as tie breaker for trees of equal frequency
   byte[] depth = new byte[2 * L_CODES + 1];
+
   // index for literals or lengths */
   byte[] l_buf;
-  // Size of match buffer for literals/lengths.  There are 4 reasons for
+
+  // Size of match buffer for literals/lengths. There are 4 reasons for
   // limiting lit_bufsize to 64K:
   //   - frequencies can be kept in 16 bit counters
   //   - if compression is not successful for the first block, all input
   //     data is still in the window so we can still emit a stored block even
-  //     when input comes from standard input.  (This can also be done for
+  //     when input comes from standard input. (This can also be done for
   //     all blocks if lit_bufsize is not greater than 32K.)
   //   - if compression is not successful for a file smaller than 64K, we can
   //     even emit a stored file instead of a stored block (saving 5 bytes).
@@ -485,24 +242,32 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
   //     trees more frequently.
   //   - I can't count above 4
   int lit_bufsize;
+
   // running index in l_buf
   int last_lit;
+
   // Buffer for distances. To simplify the code, d_buf and l_buf have
   // the same number of elements. To use different lengths, an extra flag
   // array would be necessary.
   int d_buf;
+
   // bit length of current block with optimal trees
   int opt_len;
+
   // bit length of current block with static trees
   int static_len;
+
   // number of string matches in current block
   int matches;
+
   // bytes at end of window left to insert
   int insert;
+
   // Output buffer. bits are inserted starting at the bottom (least
   // significant bits).
   short bi_buf;
-  // Number of valid bits in bi_buf.  All bits above the last valid bit
+
+  // Number of valid bits in bi_buf. All bits above the last valid bit
   // are always zero.
   int bi_valid;
 
@@ -569,12 +334,12 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     data_type = from.data_type;
     adler = from.adler;
     status = from.status;
-    pending_buf = pending_buf;
+    //pending_buf = from.pending_buf;
     //pending_buf_size = from.pending_buf_size;
     pending_out = from.pending_out;
     pending = from.pending;
     wrap = from.wrap;
-    if (gzhead != null) {
+    if (from.gzhead != null) {
       gzhead = from.gzhead.clone();
     }
     gzindex = from.gzindex;
@@ -641,34 +406,6 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     insert = from.insert;
     bi_buf = from.bi_buf;
     bi_valid = from.bi_valid;
-  }
-
-  // Compares to subtrees, using the tree depth as tie breaker when
-  // the subtrees have equal frequency. This minimizes the worst case length.
-  static boolean smaller(short[] tree, int n, int m, byte[] depth) {
-    short nFreq = tree[n * 2];
-    short mFreq = tree[m * 2];
-    return nFreq < mFreq || nFreq == mFreq && depth[n] <= depth[m];
-  }
-
-  // Reverse the first len bits of a code, using straightforward code (a faster
-  // method would use a table)
-  // IN assertion: 1 <= len <= 15
-  static int bi_reverse(int code, int len) {
-    int res = 0;
-    do {
-      res |= code & 1;
-      code >>>= 1;
-      res <<= 1;
-    } while (--len > 0);
-    return res >>> 1;
-  }
-
-  // Mapping from a distance to a distance code. dist is the distance - 1 and
-  // must not have side effects. dist_code[256] and dist_code[257] are never
-  // used.
-  static int d_code(int dist) {
-    return dist < 256 ? dist_code[dist] : dist_code[256 + (dist >>> 7)];
   }
 
   protected void deflateInit(int wrap, int level, int windowBits, int memLevel, int strategy) {
@@ -860,8 +597,8 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     }
 
     if (next_out == null ||
-        //(next_in == null && avail_in != 0) ||
-        (status == FINISH_STATE && flush != Z_FINISH)) {
+       //(next_in == null && avail_in != 0) ||
+       (status == FINISH_STATE && flush != Z_FINISH)) {
       throw new DeflateException(Z_STREAM_ERROR);
     }
     if (avail_out == 0) {
@@ -889,10 +626,10 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
           status = BUSY_STATE;
         } else {
           put_byte((gzhead.text ? 1 : 0) +
-              (gzhead.hcrc ? 2 : 0) +
-              (gzhead.extra == null ? 0 : 4) +
-              (gzhead.name == null ? 0 : 8) +
-              (gzhead.comment == null ? 0 : 16));
+                   (gzhead.hcrc ? 2 : 0) +
+                   (gzhead.extra == null ? 0 : 4) +
+                   (gzhead.name == null ? 0 : 8) +
+                   (gzhead.comment == null ? 0 : 16));
           put_byte(gzhead.time);
           put_byte(gzhead.time >> 8);
           put_byte(gzhead.time >> 16);
@@ -1074,17 +811,17 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     if (!input.isDone() || lookahead != 0 || (flush != Z_NO_FLUSH && status != FINISH_STATE)) {
       int bstate;
       switch (configuration_table[level].func) {
-        case STORED:
-          bstate = deflate_stored(flush);
-          break;
-        case FAST:
-          bstate = deflate_fast(flush);
-          break;
-        case SLOW:
-          bstate = deflate_slow(flush);
-          break;
-        default:
-          bstate = -1;
+      case STORED:
+        bstate = deflate_stored(flush);
+        break;
+      case FAST:
+        bstate = deflate_fast(flush);
+        break;
+      case SLOW:
+        bstate = deflate_slow(flush);
+        break;
+      default:
+        bstate = -1;
       }
 
       if (bstate == FINISH_STARTED || bstate == FINISH_DONE) {
@@ -1142,10 +879,10 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
       put_byte(adler >>> 8);
       put_byte(adler >>> 16);
       put_byte(adler >>> 24);
-      put_byte((int) total_in);
-      put_byte((int) total_in >>> 8);
-      put_byte((int) total_in >>> 16);
-      put_byte((int) total_in >>> 24);
+      put_byte((int)total_in);
+      put_byte((int)total_in >>> 8);
+      put_byte((int)total_in >>> 16);
+      put_byte((int)total_in >>> 24);
     } else {
       putShortMSB(adler >>> 16);
       putShortMSB(adler & 0xFFFF);
@@ -1178,7 +915,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
   }
 
   // Read a new buffer from the current input stream, update the adler32
-  // and total number of bytes read.  All deflate() input goes through
+  // and total number of bytes read. All deflate() input goes through
   // this function so some applications may wish to modify it to avoid
   // allocating a large strm->next_in buffer and copying from it.
   // (See also flush_pending()).
@@ -1267,7 +1004,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
 
       // Skip to next match if the match length cannot increase
       // or if the match length is less than 2.
-      if (window[match + best_len] != scan_end ||
+      if (window[match + best_len] != scan_end  ||
           window[match + best_len - 1] != scan_end1 ||
           window[match] != window[scan] ||
           window[++match] != window[scan + 1]) {
@@ -1287,14 +1024,14 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
       // the 256th check will be made at strstart+258.
       do {
       } while (window[++scan] == window[++match] &&
-          window[++scan] == window[++match] &&
-          window[++scan] == window[++match] &&
-          window[++scan] == window[++match] &&
-          window[++scan] == window[++match] &&
-          window[++scan] == window[++match] &&
-          window[++scan] == window[++match] &&
-          window[++scan] == window[++match] &&
-          scan < strend);
+               window[++scan] == window[++match] &&
+               window[++scan] == window[++match] &&
+               window[++scan] == window[++match] &&
+               window[++scan] == window[++match] &&
+               window[++scan] == window[++match] &&
+               window[++scan] == window[++match] &&
+               window[++scan] == window[++match] &&
+               scan < strend);
 
       assert scan <= window_size - 1 : "wild scan";
 
@@ -1353,14 +1090,14 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
         p = n;
         do {
           m = head[--p] & 0xFFFF;
-          head[p] = m >= w_size ? (short) (m - w_size) : 0;
+          head[p] = m >= w_size ? (short)(m - w_size) : 0;
         } while (--n != 0);
 
         n = w_size;
         p = n;
         do {
           m = prev[--p] & 0xFFFF;
-          prev[p] = m >= w_size ? (short) (m - w_size) : 0;
+          prev[p] = m >= w_size ? (short)( m - w_size) : 0;
           // If n is not on any hash chain, prev[n] is garbage but
           // its value will never be used.
         }
@@ -1397,7 +1134,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
         while (insert != 0) {
           ins_h = ((ins_h << hash_shift) ^ (window[str + (MIN_MATCH - 1)] & 0xFF)) & hash_mask;
           prev[str & w_mask] = head[ins_h];
-          head[ins_h] = (short) str;
+          head[ins_h] = (short)str;
           str++;
           insert--;
           if (lookahead + insert < MIN_MATCH) {
@@ -1525,7 +1262,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
         ins_h = ((ins_h << hash_shift) ^ (window[strstart + (MIN_MATCH - 1)] & 0xFF)) & hash_mask;
         prev[strstart & w_mask] = head[ins_h];
         hash_head = head[ins_h] & 0xFFFF;
-        head[ins_h] = (short) strstart;
+        head[ins_h] = (short)strstart;
       }
 
       // Find the longest match, discarding those <= prev_length.
@@ -1550,7 +1287,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
             ins_h = ((ins_h << hash_shift) ^ (window[strstart + (MIN_MATCH - 1)] & 0xFF)) & hash_mask;
             prev[strstart & w_mask] = head[ins_h];
             hash_head = head[ins_h] & 0xFFFF;
-            head[ins_h] = (short) strstart;
+            head[ins_h] = (short)strstart;
             // strstart never exceeds WSIZE-MAX_MATCH, so there are
             // always MIN_MATCH bytes ahead.
           } while (--match_length != 0);
@@ -1624,7 +1361,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
         ins_h = ((ins_h << hash_shift) ^ (window[strstart + (MIN_MATCH - 1)] & 0xFF)) & hash_mask;
         prev[strstart & w_mask] = head[ins_h];
         hash_head = head[ins_h] & 0xFFFF;
-        head[ins_h] = (short) strstart;
+        head[ins_h] = (short)strstart;
       }
 
       // Find the longest match, discarding those <= prev_length.
@@ -1633,7 +1370,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
       match_length = MIN_MATCH - 1;
 
       if (hash_head != 0 && prev_length < max_lazy_match &&
-          ((strstart - hash_head) & 0xFFFF) <= w_size - MIN_LOOKAHEAD) {
+         ((strstart - hash_head) & 0xFFFF) <= w_size - MIN_LOOKAHEAD) {
         // To simplify the code, we prevent matches with the string
         // of window index 0 (in particular we have to avoid a match
         // of the string with itself at the start of the input file).
@@ -1641,7 +1378,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
         // longest_match() sets match_start
 
         if (match_length <= 5 && (strategy == Z_FILTERED ||
-            (match_length == MIN_MATCH && strstart - match_start > TOO_FAR))) {
+           (match_length == MIN_MATCH && strstart - match_start > TOO_FAR))) {
           // If prev_match is also MIN_MATCH, match_start is garbage
           // but we will ignore the current match anyway.
           match_length = MIN_MATCH - 1;
@@ -1664,12 +1401,12 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
         // the hash table.
         lookahead -= prev_length - 1;
         prev_length -= 2;
-        do {
+        do{
           if (++strstart <= max_insert) {
             ins_h = ((ins_h << hash_shift) ^ (window[strstart + (MIN_MATCH - 1)] & 0xFF)) & hash_mask;
             prev[strstart & w_mask] = head[ins_h];
             hash_head = head[ins_h] & 0xFFFF;
-            head[ins_h] = (short) strstart;
+            head[ins_h] = (short)strstart;
           }
         } while (--prev_length != 0);
         match_available = 0;
@@ -1726,7 +1463,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
   }
 
   // For Z_RLE, simply look for runs of bytes, generate matches only of distance
-  // one.  Do not maintain a hash table.  (It will be regenerated if this run of
+  // one. Do not maintain a hash table. (It will be regenerated if this run of
   // deflate switches away from Z_RLE.)
   protected int deflate_rle(int flush) {
     boolean bflush; // set if current block must be flushed
@@ -1757,10 +1494,10 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
           strend = strstart + MAX_MATCH;
           do {
           } while (prev == (window[++scan] & 0xFF) && prev == (window[++scan] & 0xFF) &&
-              prev == (window[++scan] & 0xFF) && prev == (window[++scan] & 0xFF) &&
-              prev == (window[++scan] & 0xFF) && prev == (window[++scan] & 0xFF) &&
-              prev == (window[++scan] & 0xFF) && prev == (window[++scan] & 0xFF) &&
-              scan < strend);
+                   prev == (window[++scan] & 0xFF) && prev == (window[++scan] & 0xFF) &&
+                   prev == (window[++scan] & 0xFF) && prev == (window[++scan] & 0xFF) &&
+                   prev == (window[++scan] & 0xFF) && prev == (window[++scan] & 0xFF) &&
+                   scan < strend);
           match_length = MAX_MATCH - (strend - scan);
           if (match_length > lookahead) {
             match_length = lookahead;
@@ -1808,7 +1545,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     return BLOCK_DONE;
   }
 
-  // For Z_HUFFMAN_ONLY, do not look for matches.  Do not maintain a hash table.
+  // For Z_HUFFMAN_ONLY, do not look for matches. Do not maintain a hash table.
   // (It will be regenerated if this run of deflate switches away from Huffman.)
   protected int deflate_huff(int flush) {
     boolean bflush; // set if current block must be flushed
@@ -1860,7 +1597,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     if (bi_valid > BUF_SIZE - length) {
       bi_buf |= (value << bi_valid) & 0xFFFF;
       put_short(bi_buf);
-      bi_buf = (short) (value >>> (BUF_SIZE - bi_valid));
+      bi_buf = (short)(value >>> (BUF_SIZE - bi_valid));
       bi_valid += length - BUF_SIZE;
     } else {
       bi_buf |= (value << bi_valid) & 0xFFFF;
@@ -1907,6 +1644,14 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     last_lit = matches = 0;
   }
 
+  // Compares to subtrees, using the tree depth as tie breaker when
+  // the subtrees have equal frequency. This minimizes the worst case length.
+  static boolean smaller(short[] tree, int n, int m, byte[] depth) {
+    short nFreq = tree[n * 2];
+    short mFreq = tree[m * 2];
+    return nFreq < mFreq || nFreq == mFreq && depth[n] <= depth[m];
+  }
+
   // Restore the heap property by moving down the tree starting at node k,
   // exchanging a node with the smallest of its two sons if necessary, stopping
   // when the heap property is re-established (each father smaller than its
@@ -1940,7 +1685,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     int n; // iterates over all tree elements
     int prevlen = -1; // last emitted length
     int curlen; // length of current code
-    int nextlen = tree[0 * 2 + 1]; // length of next code
+    int nextlen = tree[0*2+1]; // length of next code
     int count = 0; // repeat count of the current code
     int max_count = 7; // max repeat count
     int min_count = 4; // min repeat count
@@ -1949,7 +1694,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
       max_count = 138;
       min_count = 3;
     }
-    tree[(max_code + 1) * 2 + 1] = (short) 0xFFFF; // guard
+    tree[(max_code + 1) * 2 + 1] = (short)0xFFFF; // guard
 
     for (n = 0; n <= max_code; n++) {
       curlen = nextlen;
@@ -1989,7 +1734,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     int n; // iterates over all tree elements
     int prevlen = -1; // last emitted length
     int curlen; // length of current code
-    int nextlen = tree[0 * 2 + 1]; // length of next code
+    int nextlen = tree[0*2+1]; // length of next code
     int count = 0; // repeat count of the current code
     int max_count = 7; // max repeat count
     int min_count = 4; // min repeat count
@@ -2001,8 +1746,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     }
 
     for (n = 0; n <= max_code; n++) {
-      curlen = nextlen;
-      nextlen = tree[(n + 1) * 2 + 1];
+      curlen = nextlen; nextlen = tree[(n+1)*2+1];
       if (++count < max_count && curlen == nextlen) {
         continue;
       } else if (count < min_count) {
@@ -2076,8 +1820,8 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     assert lcodes >= 257 && dcodes >= 1 && blcodes >= 4 : "not enough codes";
     assert lcodes <= L_CODES && dcodes <= D_CODES && blcodes <= BL_CODES : "too many codes";
     send_bits(lcodes - 257, 5); // not +255 as stated in appnote.txt
-    send_bits(dcodes - 1, 5);
-    send_bits(blcodes - 4, 4); // not -3 as stated in appnote.txt
+    send_bits(dcodes - 1,   5);
+    send_bits(blcodes - 4,  4); // not -3 as stated in appnote.txt
     for (rank = 0; rank < blcodes; rank++) {
       send_bits(bl_tree[bl_order[rank] * 2 + 1], 3);
     }
@@ -2164,9 +1908,9 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
   // Save the match info and tally the frequency counts. Return true if
   // the current block must be flushed.
   final boolean tr_tally(int dist, int lc) {
-    pending_buf[d_buf + last_lit * 2] = (byte) (dist >>> 8);
-    pending_buf[d_buf + last_lit * 2 + 1] = (byte) dist;
-    l_buf[last_lit++] = (byte) lc;
+    pending_buf[d_buf + last_lit * 2] = (byte)(dist >>> 8);
+    pending_buf[d_buf + last_lit * 2 + 1] = (byte)dist;
+    l_buf[last_lit++] = (byte)lc;
 
     if (dist == 0) {
       // lc is the unmatched char
@@ -2176,8 +1920,8 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
       // Here, lc is the match length - MIN_MATCH
       dist--; // dist = match distance - 1
       assert dist < w_size - MIN_LOOKAHEAD &&
-          lc <= MAX_MATCH - MIN_MATCH &&
-          d_code(dist) < D_CODES : "tr_tally: bad match";
+             lc <= MAX_MATCH - MIN_MATCH &&
+             d_code(dist) < D_CODES : "tr_tally: bad match";
 
       dyn_ltree[(length_code[lc] + LITERALS + 1) * 2]++;
       dyn_dtree[d_code(dist) * 2]++;
@@ -2272,6 +2016,19 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     return Z_BINARY;
   }
 
+  // Reverse the first len bits of a code, using straightforward code (a faster
+  // method would use a table)
+  // IN assertion: 1 <= len <= 15
+  static int bi_reverse(int code, int len) {
+    int res = 0;
+    do {
+      res |= code & 1;
+      code >>>= 1;
+      res <<= 1;
+    } while (--len > 0);
+    return res >>> 1;
+  }
+
   // Flush the bit buffer, keeping at most 7 bits in it.
   final void bi_flush() {
     if (bi_valid == 16) {
@@ -2326,11 +2083,11 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
   }
 
   final void put_byte(int b) {
-    pending_buf[pending++] = (byte) b;
+    pending_buf[pending++] = (byte)b;
   }
 
-  static final class Tree implements Cloneable {
 
+  static final class Tree implements Cloneable {
     // the dynamic tree
     short[] dyn_tree;
 
@@ -2340,8 +2097,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     // the corresponding static tree
     StaticTree stat_desc;
 
-    Tree() {
-    }
+    Tree() {}
 
     Tree(Tree from) {
       if (from.dyn_tree != null) {
@@ -2350,38 +2106,6 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
       }
       max_code = from.max_code;
       stat_desc = from.stat_desc;
-    }
-
-    // Generate the codes for a given tree and bit counts (which need not be
-    // optimal).
-    // IN assertion: the array bl_count contains the bit length statistics for
-    // the given tree and the field len is set for all tree elements.
-    // OUT assertion: the field code is set for all tree elements of non
-    //     zero code length.
-    static void gen_codes(short[] tree, int max_code, short[] bl_count, short[] next_code) {
-      short code = 0; // running code value
-      int bits; // bit index
-      int n; // code index
-
-      // The distribution counts are first used to generate the code values
-      // without bit reversal.
-      next_code[0] = 0;
-      for (bits = 1; bits <= MAX_BITS; bits++) {
-        next_code[bits] = code = (short) ((code + bl_count[bits - 1]) << 1);
-      }
-
-      // Check that the bit counts in bl_count are consistent. The last code
-      // must be all ones.
-      assert ((code + bl_count[MAX_BITS] - 1) & 0xFFFF) == (1 << MAX_BITS) - 1 : "inconsistent bit counts";
-
-      for (n = 0; n <= max_code; n++) {
-        final int len = tree[n * 2 + 1];
-        if (len == 0) {
-          continue;
-        }
-        // Now reverse the bits
-        tree[n * 2] = (short) (bi_reverse(next_code[len]++, len));
-      }
     }
 
     @Override
@@ -2425,7 +2149,7 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
           bits = max_length;
           overflow++;
         }
-        tree[n * 2 + 1] = (short) bits;
+        tree[n * 2 + 1] = (short)bits;
         // We overwrite tree[n].Dad which is no longer needed
 
         if (n > max_code) {
@@ -2474,10 +2198,42 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
           }
           if (tree[m * 2 + 1] != bits) {
             s.opt_len += (bits - tree[m * 2 + 1]) * tree[m * 2];
-            tree[m * 2 + 1] = (short) bits;
+            tree[m * 2 + 1] = (short)bits;
           }
           n--;
         }
+      }
+    }
+
+    // Generate the codes for a given tree and bit counts (which need not be
+    // optimal).
+    // IN assertion: the array bl_count contains the bit length statistics for
+    // the given tree and the field len is set for all tree elements.
+    // OUT assertion: the field code is set for all tree elements of non
+    //     zero code length.
+    static void gen_codes(short[] tree, int max_code, short[] bl_count, short[] next_code) {
+      short code = 0; // running code value
+      int bits; // bit index
+      int n; // code index
+
+      // The distribution counts are first used to generate the code values
+      // without bit reversal.
+      next_code[0] = 0;
+      for (bits = 1; bits <= MAX_BITS; bits++) {
+        next_code[bits] = code = (short)((code + bl_count[bits - 1]) << 1);
+      }
+
+      // Check that the bit counts in bl_count are consistent. The last code
+      // must be all ones.
+      assert ((code + bl_count[MAX_BITS] - 1) & 0xFFFF) == (1 << MAX_BITS) - 1 : "inconsistent bit counts";
+
+      for (n = 0; n <= max_code; n++) {
+        final int len = tree[n * 2 + 1];
+        if (len == 0) {
+          continue;
+        }
+        // Now reverse the bits
+        tree[n * 2] = (short)(bi_reverse(next_code[len]++, len));
       }
     }
 
@@ -2545,9 +2301,9 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
         s.heap[--s.heap_max] = m;
 
         // Create a new node father of n and m
-        tree[node * 2] = (short) (tree[n * 2] + tree[m * 2]);
-        s.depth[node] = (byte) (Math.max(s.depth[n], s.depth[m]) + 1);
-        tree[n * 2 + 1] = tree[m * 2 + 1] = (short) node;
+        tree[node * 2] = (short)(tree[n * 2] + tree[m * 2]);
+        s.depth[node] = (byte)(Math.max(s.depth[n], s.depth[m]) + 1);
+        tree[n * 2 + 1] = tree[m * 2 + 1] = (short)node;
 
         // and insert the new node in the heap
         s.heap[1] = node++;
@@ -2563,11 +2319,10 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
       // The field len is now set, we can generate the bit codes
       gen_codes(tree, max_code, s.bl_count, s.next_code);
     }
-
   }
 
-  static final class StaticTree {
 
+  static final class StaticTree {
     // static tree or null
     final short[] static_tree;
 
@@ -2583,18 +2338,17 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
     // max bit length for the codes
     final int max_length;
 
-    StaticTree(short[] static_tree, int[] extra_bits, int extra_base, int elems, int max_length) {
+    StaticTree(short[] static_tree, int[] extra_bits,  int extra_base, int elems, int max_length) {
       this.static_tree = static_tree;
       this.extra_bits = extra_bits;
       this.extra_base = extra_base;
       this.elems = elems;
       this.max_length = max_length;
     }
-
   }
 
-  static final class Config {
 
+  static final class Config {
     // reduce lazy search above this match length
     final int good_length;
 
@@ -2615,7 +2369,365 @@ public class Deflate<O> extends Encoder<Encoder<?, O>, O> implements Cloneable {
       this.max_chain = max_chain;
       this.func = func;
     }
-
   }
+
+
+  // Allowed flush values
+  public static final int Z_NO_FLUSH = 0;
+  public static final int Z_PARTIAL_FLUSH = 1;
+  public static final int Z_SYNC_FLUSH = 2;
+  public static final int Z_FULL_FLUSH = 3;
+  public static final int Z_FINISH = 4;
+  public static final int Z_BLOCK = 5;
+  public static final int Z_TREES = 6;
+
+  // Return codes for the compression/decompression functions. Negative values
+  // are errors, positive values are used for special but normal events.
+  public static final int Z_OK = 0;
+  public static final int Z_STREAM_END = 1;
+  public static final int Z_NEED_DICT = 2;
+  public static final int Z_ERRNO = -1;
+  public static final int Z_STREAM_ERROR = -2;
+  public static final int Z_DATA_ERROR = -3;
+  public static final int Z_MEM_ERROR = -4;
+  public static final int Z_BUF_ERROR = -5;
+  public static final int Z_VERSION_ERROR = -6;
+
+  // Wrappers
+  public static final int Z_NO_WRAP = 0;
+  public static final int Z_WRAP_ZLIB = 1;
+  public static final int Z_WRAP_GZIP = 2;
+
+  // compression levels
+  public static final int Z_NO_COMPRESSION = 0;
+  public static final int Z_BEST_SPEED = 1;
+  public static final int Z_BEST_COMPRESSION = 9;
+  public static final int Z_DEFAULT_COMPRESSION = -1;
+
+  // compression strategy
+  public static final int Z_FILTERED = 1;
+  public static final int Z_HUFFMAN_ONLY = 2;
+  public static final int Z_RLE = 3;
+  public static final int Z_FIXED = 4;
+  public static final int Z_DEFAULT_STRATEGY = 0;
+
+  // Possible values of the data_type field
+  public static final int Z_BINARY = 0;
+  public static final int Z_TEXT = 1;
+  public static final int Z_UNKNOWN = 2;
+
+  // Maximum value for windowBits
+  public static final int MAX_WBITS = 15; // 32K LZ77 window
+
+  // Default memLevel
+  public static final int DEF_MEM_LEVEL = 8;
+
+  //public static final int OS_MSDOS = 0x00;
+  //public static final int OS_AMIGA = 0x01;
+  //public static final int OS_VMS = 0x02;
+  //public static final int OS_UNIX = 0x03;
+  //public static final int OS_VMCMS = 0x04;
+  //public static final int OS_ATARI = 0x05;
+  //public static final int OS_OS2 = 0x06;
+  //public static final int OS_MACOS = 0x07;
+  //public static final int OS_ZSYSTEM = 0x08;
+  //public static final int OS_CPM = 0x09;
+  //public static final int OS_TOPS20 = 0x0A;
+  //public static final int OS_WIN32 = 0x0B;
+  //public static final int OS_QDOS = 0x0C;
+  //public static final int OS_RISCOS = 0x0D;
+  public static final int OS_UNKNOWN = 0xFF;
+  public static final int OS_CODE = OS_UNKNOWN;
+
+  // The deflate compression method
+  static final int Z_DEFLATED = 8;
+
+  // number of length codes, not counting the special END_BLOCK code
+  static final int LENGTH_CODES = 29;
+
+  // number of literal bytes 0..255
+  static final int LITERALS = 256;
+
+  // number of Literal or Length codes, including the END_BLOCK code
+  static final int L_CODES = LITERALS + 1 + LENGTH_CODES;
+
+  // number of distance codes
+  static final int D_CODES = 30;
+
+  // number of codes used to transfer the bit lengths
+  static final int BL_CODES = 19;
+
+  // maximum heap size
+  static final int HEAP_SIZE = 2 * L_CODES + 1;
+
+  // All codes must not exceed MAX_BITS bits
+  static final int MAX_BITS = 15;
+
+  // end of block literal code
+  static final int END_BLOCK = 256;
+
+  // size of bit buffer in bi_buf
+  static final int BUF_SIZE = 16;
+
+  // Stream status
+  static final int INIT_STATE = 42;
+  static final int EXTRA_STATE = 69;
+  static final int NAME_STATE = 73;
+  static final int COMMENT_STATE = 91;
+  static final int HCRC_STATE = 103;
+  static final int BUSY_STATE = 113;
+  static final int FINISH_STATE = 666;
+
+  // The three kinds of block type
+  static final int STORED_BLOCK = 0;
+  static final int STATIC_TREES = 1;
+  static final int DYN_TREES = 2;
+
+  static final int MIN_MATCH = 3;
+  static final int MAX_MATCH = 258;
+
+  // Minimum amount of lookahead, except at the end of the input file.
+  static final int MIN_LOOKAHEAD = MAX_MATCH + MIN_MATCH + 1;
+
+  // Matches of length 3 are discarded if their distance exceeds TOO_FAR
+  static final int TOO_FAR = 4096;
+
+  // Maximum value for memLevel in deflateInit
+  static final int MAX_MEM_LEVEL = 9;
+
+  // block not completed, need more input or more output
+  static final int NEED_MORE = 0;
+
+  // block flush performed
+  static final int BLOCK_DONE = 1;
+
+  // finish started, need only more output at next deflate
+  static final int FINISH_STARTED = 2;
+
+  // finish done, accept no more input or output
+  static final int FINISH_DONE = 3;
+
+  // preset dictionary flag in zlib header
+  static final int PRESET_DICT = 0x20;
+
+  // compress_func
+  static final int STORED = 0;
+  static final int FAST = 1;
+  static final int SLOW = 2;
+
+  static final Config[] configuration_table = {
+    new Config(0, 0, 0, 0, STORED),
+    new Config(4, 4, 8, 4, FAST),
+    new Config(4, 5, 16, 8, FAST),
+    new Config(4, 6, 32, 32, FAST),
+    new Config(4, 4, 16, 16, SLOW),
+    new Config(8, 16, 32, 32, SLOW),
+    new Config(8, 16, 128, 128, SLOW),
+    new Config(8, 32, 128, 256, SLOW),
+    new Config(32, 128, 258, 1024, SLOW),
+    new Config(32, 258, 258, 4096, SLOW)
+  };
+
+  static final String[] z_errmsg = {
+    "need dictionary",     // Z_NEED_DICT      2
+    "stream end",          // Z_STREAM_END     1
+    "",                    // Z_OK             0
+    "file error",          // Z_ERRNO         -1
+    "stream error",        // Z_STREAM_ERROR  -2
+    "data error",          // Z_DATA_ERROR    -3
+    "insufficient memory", // Z_MEM_ERROR     -4
+    "buffer error",        // Z_BUF_ERROR     -5
+    "incompatible version",// Z_VERSION_ERROR -6
+    ""
+  };
+
+  // Bit length codes must not exceed MAX_BL_BITS bits
+  static final int MAX_BL_BITS = 7;
+
+  // repeat previous bit length 3-6 times (2 bits of repeat count)
+  static final int REP_3_6 = 16;
+
+  // repeat a zero length 3-10 times (3 bits of repeat count)
+  static final int REPZ_3_10 = 17;
+
+  // repeat a zero length 11-138 times (7 bits of repeat count)
+  static final int REPZ_11_138 = 18;
+
+  // extra bits for each length code
+  static final int[] extra_lbits = {
+    0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0
+  };
+
+  // extra bits for each distance code
+  static final int[] extra_dbits = {
+    0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13
+  };
+
+  // extra bits for each bit length code
+  static final int[] extra_blbits = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,3,7
+  };
+
+  // The lengths of the bit length codes are sent in order of decreasing
+  // probability, to avoid transmitting the lengths for unused bit length codes.
+  static final byte[] bl_order = {
+    16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15
+  };
+
+  // Mapping from a distance to a distance code. dist is the distance - 1 and
+  // must not have side effects. dist_code[256] and dist_code[257] are never
+  // used.
+  static int d_code(int dist) {
+    return dist < 256 ? dist_code[dist] : dist_code[256 + (dist >>> 7)];
+  }
+
+  // see definition of array dist_code below
+  static final int DIST_CODE_LEN = 512;
+
+  // Distance codes. The first 256 values correspond to the distances
+  // 3 .. 258, the last 256 values correspond to the top 8 bits of
+  // the 15 bit distances.
+  static final byte[] dist_code = {
+    0,  1,  2,  3,  4,  4,  5,  5,  6,  6,  6,  6,  7,  7,  7,  7,  8,  8,  8,  8,
+    8,  8,  8,  8,  9,  9,  9,  9,  9,  9,  9,  9, 10, 10, 10, 10, 10, 10, 10, 10,
+    10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
+    11, 11, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
+    12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13, 13, 13, 13,
+    13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13,
+    13, 13, 13, 13, 13, 13, 13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
+    14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
+    14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14,
+    14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,
+    15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15,  0,  0, 16, 17,
+    18, 18, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 22, 22, 22, 22, 22, 22, 22, 22,
+    23, 23, 23, 23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
+    24, 24, 24, 24, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+    26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+    26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27,
+    27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
+    27, 27, 27, 27, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+    28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+    28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28,
+    28, 28, 28, 28, 28, 28, 28, 28, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29,
+    29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29,
+    29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29,
+    29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29
+  };
+
+  // length code for each normalized match length (0 == MIN_MATCH)
+  static final byte[] length_code = {
+    0,  1,  2,  3,  4,  5,  6,  7,  8,  8,  9,  9, 10, 10, 11, 11, 12, 12, 12, 12,
+    13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15, 15, 16, 16, 16, 16, 16, 16, 16, 16,
+    17, 17, 17, 17, 17, 17, 17, 17, 18, 18, 18, 18, 18, 18, 18, 18, 19, 19, 19, 19,
+    19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20,
+    21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 22, 22, 22, 22,
+    22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 23, 23, 23, 23, 23, 23, 23, 23,
+    23, 23, 23, 23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
+    24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24,
+    25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+    25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 26, 26, 26, 26, 26, 26, 26,
+    26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,
+    26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27,
+    27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 28
+  };
+
+  // First normalized length for each code (0 = MIN_MATCH)
+  static final int[] base_length = {
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32, 40, 48, 56,
+    64, 80, 96, 112, 128, 160, 192, 224, 0
+  };
+
+  // First normalized distance for each code (0 = distance of 1)
+  static final int[] base_dist = {
+       0,     1,     2,     3,     4,     6,     8,    12,    16,    24,
+      32,    48,    64,    96,   128,   192,   256,   384,   512,   768,
+    1024,  1536,  2048,  3072,  4096,  6144,  8192, 12288, 16384, 24576
+  };
+
+  // The static literal tree. Since the bit lengths are imposed, there is no
+  // need for the L_CODES extra codes used during heap construction. However
+  // The codes 286 and 287 are needed to build a canonical tree.
+  static final short[] static_ltree = {
+     12, 8, 140, 8,  76, 8, 204, 8,  44, 8,
+    172, 8, 108, 8, 236, 8,  28, 8, 156, 8,
+     92, 8, 220, 8,  60, 8, 188, 8, 124, 8,
+    252, 8,   2, 8, 130, 8,  66, 8, 194, 8,
+     34, 8, 162, 8,  98, 8, 226, 8,  18, 8,
+    146, 8,  82, 8, 210, 8,  50, 8, 178, 8,
+    114, 8, 242, 8,  10, 8, 138, 8,  74, 8,
+    202, 8,  42, 8, 170, 8, 106, 8, 234, 8,
+     26, 8, 154, 8,  90, 8, 218, 8,  58, 8,
+    186, 8, 122, 8, 250, 8,   6, 8, 134, 8,
+     70, 8, 198, 8,  38, 8, 166, 8, 102, 8,
+    230, 8,  22, 8, 150, 8,  86, 8, 214, 8,
+     54, 8, 182, 8, 118, 8, 246, 8,  14, 8,
+    142, 8,  78, 8, 206, 8,  46, 8, 174, 8,
+    110, 8, 238, 8,  30, 8, 158, 8,  94, 8,
+    222, 8,  62, 8, 190, 8, 126, 8, 254, 8,
+      1, 8, 129, 8,  65, 8, 193, 8,  33, 8,
+    161, 8,  97, 8, 225, 8,  17, 8, 145, 8,
+     81, 8, 209, 8,  49, 8, 177, 8, 113, 8,
+    241, 8,   9, 8, 137, 8,  73, 8, 201, 8,
+     41, 8, 169, 8, 105, 8, 233, 8,  25, 8,
+    153, 8,  89, 8, 217, 8,  57, 8, 185, 8,
+    121, 8, 249, 8,   5, 8, 133, 8,  69, 8,
+    197, 8,  37, 8, 165, 8, 101, 8, 229, 8,
+     21, 8, 149, 8,  85, 8, 213, 8,  53, 8,
+    181, 8, 117, 8, 245, 8,  13, 8, 141, 8,
+     77, 8, 205, 8,  45, 8, 173, 8, 109, 8,
+    237, 8,  29, 8, 157, 8,  93, 8, 221, 8,
+     61, 8, 189, 8, 125, 8, 253, 8,  19, 9,
+    275, 9, 147, 9, 403, 9,  83, 9, 339, 9,
+    211, 9, 467, 9,  51, 9, 307, 9, 179, 9,
+    435, 9, 115, 9, 371, 9, 243, 9, 499, 9,
+     11, 9, 267, 9, 139, 9, 395, 9,  75, 9,
+    331, 9, 203, 9, 459, 9,  43, 9, 299, 9,
+    171, 9, 427, 9, 107, 9, 363, 9, 235, 9,
+    491, 9,  27, 9, 283, 9, 155, 9, 411, 9,
+     91, 9, 347, 9, 219, 9, 475, 9,  59, 9,
+    315, 9, 187, 9, 443, 9, 123, 9, 379, 9,
+    251, 9, 507, 9,   7, 9, 263, 9, 135, 9,
+    391, 9,  71, 9, 327, 9, 199, 9, 455, 9,
+     39, 9, 295, 9, 167, 9, 423, 9, 103, 9,
+    359, 9, 231, 9, 487, 9,  23, 9, 279, 9,
+    151, 9, 407, 9,  87, 9, 343, 9, 215, 9,
+    471, 9,  55, 9, 311, 9, 183, 9, 439, 9,
+    119, 9, 375, 9, 247, 9, 503, 9,  15, 9,
+    271, 9, 143, 9, 399, 9,  79, 9, 335, 9,
+    207, 9, 463, 9,  47, 9, 303, 9, 175, 9,
+    431, 9, 111, 9, 367, 9, 239, 9, 495, 9,
+     31, 9, 287, 9, 159, 9, 415, 9,  95, 9,
+    351, 9, 223, 9, 479, 9,  63, 9, 319, 9,
+    191, 9, 447, 9, 127, 9, 383, 9, 255, 9,
+    511, 9,   0, 7,  64, 7,  32, 7,  96, 7,
+     16, 7,  80, 7,  48, 7, 112, 7,   8, 7,
+     72, 7,  40, 7, 104, 7,  24, 7,  88, 7,
+     56, 7, 120, 7,   4, 7,  68, 7,  36, 7,
+    100, 7,  20, 7,  84, 7,  52, 7, 116, 7,
+      3, 8, 131, 8,  67, 8, 195, 8,  35, 8,
+    163, 8,  99, 8, 227, 8
+  };
+
+  // The static distance tree. (Actually a trivial tree since all codes use
+  // 5 bits.)
+  static final short[] static_dtree = {
+     0, 5, 16, 5,  8, 5, 24, 5,  4, 5,
+    20, 5, 12, 5, 28, 5,  2, 5, 18, 5,
+    10, 5, 26, 5,  6, 5, 22, 5, 14, 5,
+    30, 5,  1, 5, 17, 5,  9, 5, 25, 5,
+     5, 5, 21, 5, 13, 5, 29, 5,  3, 5,
+    19, 5, 11, 5, 27, 5,  7, 5, 23, 5
+  };
+
+  static final StaticTree static_l_desc = new StaticTree(static_ltree, extra_lbits,
+                                                         LITERALS + 1, L_CODES, MAX_BITS);
+
+  static final StaticTree static_d_desc = new StaticTree(static_dtree, extra_dbits,
+                                                         0, D_CODES, MAX_BITS);
+
+  static final StaticTree static_bl_desc = new StaticTree(null, extra_blbits,
+                                                          0, BL_CODES, MAX_BL_BITS);
 
 }

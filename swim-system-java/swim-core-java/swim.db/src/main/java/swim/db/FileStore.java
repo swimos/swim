@@ -25,24 +25,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import swim.collections.HashTrieMap;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.concurrent.Sync;
 import swim.util.HashGenCacheSet;
 
 public class FileStore extends Store {
 
-  static final int OPENING = 1 << 0;
-  static final int OPENED = 1 << 1;
-  static final int COMMITTING = 1 << 2;
-  static final int COMPACTING = 1 << 3;
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<FileStore, HashTrieMap<Integer, FileZone>> ZONES =
-      AtomicReferenceFieldUpdater.newUpdater(FileStore.class, (Class<HashTrieMap<Integer, FileZone>>) (Class<?>) HashTrieMap.class, "zones");
-  static final AtomicReferenceFieldUpdater<FileStore, FileZone> ZONE =
-      AtomicReferenceFieldUpdater.newUpdater(FileStore.class, FileZone.class, "zone");
-  static final AtomicIntegerFieldUpdater<FileStore> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(FileStore.class, "status");
   final StoreContext context;
   final File directory;
   final String baseName;
@@ -75,7 +63,7 @@ public class FileStore extends Store {
     this.compactor = new FileStoreCompactor(this);
     stage.task(this.compactor);
     this.zonePattern = Pattern.compile(Pattern.quote(this.baseName) + "-([0-9]+)\\." + Pattern.quote(this.zoneFileExt));
-    this.zoneFilter = new FileStoreZoneFilter(zonePattern);
+    this.zoneFilter = new FileStoreZoneFilter(this.zonePattern);
     this.zones = HashTrieMap.empty();
     this.status = 0;
   }
@@ -148,12 +136,12 @@ public class FileStore extends Store {
 
   @Override
   public final boolean isCommitting() {
-    return (this.status & COMMITTING) != 0;
+    return (this.status & FileStore.COMMITTING) != 0;
   }
 
   @Override
   public final boolean isCompacting() {
-    return (this.status & COMPACTING) != 0;
+    return (this.status & FileStore.COMPACTING) != 0;
   }
 
   @Override
@@ -161,12 +149,12 @@ public class FileStore extends Store {
     try {
       do {
         final int oldStatus = this.status;
-        if ((oldStatus & (OPENING | OPENED)) == 0) {
-          final int newStatus = oldStatus | OPENING;
-          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if ((oldStatus & (FileStore.OPENING | FileStore.OPENED)) == 0) {
+          final int newStatus = oldStatus | FileStore.OPENING;
+          if (FileStore.STATUS.compareAndSet(this, oldStatus, newStatus)) {
             try {
               this.directory.mkdirs();
-              final TreeMap<Integer, File> zoneFiles = zoneFiles();
+              final TreeMap<Integer, File> zoneFiles = this.zoneFiles();
               final int newestZone;
               if (!zoneFiles.isEmpty()) {
                 newestZone = zoneFiles.lastKey();
@@ -174,27 +162,27 @@ public class FileStore extends Store {
               } else {
                 newestZone = 1;
               }
-              openZoneAsync(newestZone, new FileStoreOpenZone(this, zoneFiles, cont));
+              this.openZoneAsync(newestZone, new FileStoreOpenZone(this, zoneFiles, cont));
             } catch (Throwable cause) {
               try {
-                if (Conts.isNonFatal(cause)) {
-                  close();
+                if (Cont.isNonFatal(cause)) {
+                  this.close();
                 }
               } finally {
                 synchronized (this) {
-                  notifyAll();
+                  this.notifyAll();
                 }
               }
               throw cause;
             }
           }
         } else {
-          if ((oldStatus & OPENING) != 0) {
+          if ((oldStatus & FileStore.OPENING) != 0) {
             synchronized (this) {
               ForkJoinPool.managedBlock(new FileStoreAwait(this));
             }
           }
-          if ((this.status & OPENED) != 0) {
+          if ((this.status & FileStore.OPENED) != 0) {
             cont.bind(this);
           } else {
             throw new StoreException("failed to open store");
@@ -205,7 +193,7 @@ public class FileStore extends Store {
     } catch (InterruptedException cause) {
       cont.trap(cause);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -216,22 +204,22 @@ public class FileStore extends Store {
   @Override
   public FileStore open() throws InterruptedException {
     final Sync<Store> syncStore = new Sync<Store>();
-    openAsync(syncStore);
-    return (FileStore) syncStore.await(settings().storeOpenTimeout);
+    this.openAsync(syncStore);
+    return (FileStore) syncStore.await(this.settings().storeOpenTimeout);
   }
 
   @Override
   public void closeAsync(Cont<Store> cont) {
     try {
-      final Database database = database();
+      final Database database = this.database();
       if (database != null) {
         database.closeAsync(new FileStoreClose(this, cont));
       } else {
-        closeZones();
+        this.closeZones();
         cont.bind(this);
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -242,7 +230,7 @@ public class FileStore extends Store {
   @Override
   public void close() throws InterruptedException {
     final Sync<Store> syncStore = new Sync<Store>();
-    closeAsync(syncStore);
+    this.closeAsync(syncStore);
     syncStore.await(settings().storeCloseTimeout);
   }
 
@@ -278,7 +266,7 @@ public class FileStore extends Store {
         final FileZone oldZone = oldZones.get(zoneId);
         if (oldZone == null) {
           if (newZone == null) {
-            final File zoneFile = zoneFile(zoneId);
+            final File zoneFile = this.zoneFile(zoneId);
             final FileZone zone = this.zone;
             if (zone == null || zoneId > zone.id || zoneFile.exists()) {
               newZone = new FileZone(this, zoneId, zoneFile, this.stage);
@@ -287,7 +275,7 @@ public class FileStore extends Store {
             }
           }
           final HashTrieMap<Integer, FileZone> newZones = oldZones.updated(zoneId, newZone);
-          if (ZONES.compareAndSet(this, oldZones, newZones)) {
+          if (FileStore.ZONES.compareAndSet(this, oldZones, newZones)) {
             break;
           }
         } else {
@@ -301,7 +289,7 @@ public class FileStore extends Store {
       } while (true);
       newZone.openAsync(cont);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -312,8 +300,8 @@ public class FileStore extends Store {
   @Override
   public FileZone openZone(int zoneId) throws InterruptedException {
     final Sync<Zone> eventualZone = new Sync<Zone>();
-    openZoneAsync(zoneId, eventualZone);
-    return (FileZone) eventualZone.await(settings().zoneOpenTimeout);
+    this.openZoneAsync(zoneId, eventualZone);
+    return (FileZone) eventualZone.await(this.settings().zoneOpenTimeout);
   }
 
   void closeZone(int zoneId) {
@@ -321,7 +309,7 @@ public class FileStore extends Store {
       final HashTrieMap<Integer, FileZone> oldZones = this.zones;
       final HashTrieMap<Integer, FileZone> newZones = oldZones.removed(zoneId);
       if (oldZones != newZones) {
-        if (ZONES.compareAndSet(this, oldZones, newZones)) {
+        if (FileStore.ZONES.compareAndSet(this, oldZones, newZones)) {
           oldZones.get(zoneId).close();
           break;
         }
@@ -336,7 +324,7 @@ public class FileStore extends Store {
       final HashTrieMap<Integer, FileZone> oldZones = this.zones;
       final HashTrieMap<Integer, FileZone> newZones = HashTrieMap.empty();
       if (oldZones != newZones) {
-        if (ZONES.compareAndSet(this, oldZones, newZones)) {
+        if (FileStore.ZONES.compareAndSet(this, oldZones, newZones)) {
           final Iterator<FileZone> zoneIterator = oldZones.valueIterator();
           while (zoneIterator.hasNext()) {
             zoneIterator.next().close();
@@ -352,9 +340,9 @@ public class FileStore extends Store {
   @Override
   public void openDatabaseAsync(Cont<Database> cont) {
     try {
-      openAsync(new FileStoreOpenDatabase(this, cont));
+      this.openAsync(new FileStoreOpenDatabase(this, cont));
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -372,7 +360,7 @@ public class FileStore extends Store {
     try {
       this.committer.commitAsync(commit);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         commit.trap(cause);
       } else {
         throw cause;
@@ -385,7 +373,7 @@ public class FileStore extends Store {
     try {
       this.compactor.compactAsync(compact);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         compact.trap(cause);
       } else {
         throw cause;
@@ -395,9 +383,9 @@ public class FileStore extends Store {
 
   @Override
   public synchronized FileZone shiftZone() {
-    if ((this.status & OPENED) == 0) {
+    if ((this.status & FileStore.OPENED) == 0) {
       try {
-        open();
+        this.open();
       } catch (InterruptedException cause) {
         throw new StoreException(cause);
       }
@@ -411,8 +399,8 @@ public class FileStore extends Store {
       final FileZone zone = oldZones.get(newZoneId);
       if (zone == null) {
         if (newZone == null) {
-          newZone = new FileZone(this, newZoneId, zoneFile(newZoneId), this.stage,
-              oldZone.database, oldZone.germ());
+          newZone = new FileZone(this, newZoneId, this.zoneFile(newZoneId), this.stage,
+                                 oldZone.database, oldZone.germ());
           try {
             newZone.open();
           } catch (InterruptedException cause) {
@@ -420,8 +408,8 @@ public class FileStore extends Store {
           }
         }
         final HashTrieMap<Integer, FileZone> newZones = oldZones.updated(newZoneId, newZone);
-        if (ZONES.compareAndSet(this, oldZones, newZones)) {
-          ZONE.set(this, newZone);
+        if (FileStore.ZONES.compareAndSet(this, oldZones, newZones)) {
+          FileStore.ZONE.set(this, newZone);
           this.context.databaseDidShiftZone(this, newZone.database, newZone);
           break;
         }
@@ -465,6 +453,19 @@ public class FileStore extends Store {
     this.pageCache.put(page);
     super.hitPage(database, page);
   }
+
+  static final int OPENING = 1 << 0;
+  static final int OPENED = 1 << 1;
+  static final int COMMITTING = 1 << 2;
+  static final int COMPACTING = 1 << 3;
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<FileStore, HashTrieMap<Integer, FileZone>> ZONES =
+      AtomicReferenceFieldUpdater.newUpdater(FileStore.class, (Class<HashTrieMap<Integer, FileZone>>) (Class<?>) HashTrieMap.class, "zones");
+  static final AtomicReferenceFieldUpdater<FileStore, FileZone> ZONE =
+      AtomicReferenceFieldUpdater.newUpdater(FileStore.class, FileZone.class, "zone");
+  static final AtomicIntegerFieldUpdater<FileStore> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(FileStore.class, "status");
 
 }
 
@@ -527,8 +528,8 @@ final class FileStoreOpenZone implements Cont<Zone> {
         this.store.openZoneAsync(previousZone, new FileStoreOpenZone(this.store, this.zoneFiles, this.andThen));
       }
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        trap(cause);
+      if (Cont.isNonFatal(cause)) {
+        this.trap(cause);
       } else {
         throw cause;
       }
@@ -569,8 +570,8 @@ final class FileStoreOpenDatabase implements Cont<Store> {
     try {
       this.store.zone.openDatabaseAsync(this.cont);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        trap(cause);
+      if (Cont.isNonFatal(cause)) {
+        this.trap(cause);
       } else {
         throw cause;
       }
@@ -623,8 +624,8 @@ final class FileStoreClose implements Cont<Database> {
       this.store.closeZones();
       this.andThen.bind(this.store);
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
-        trap(cause);
+      if (Cont.isNonFatal(cause)) {
+        this.trap(cause);
       } else {
         throw cause;
       }

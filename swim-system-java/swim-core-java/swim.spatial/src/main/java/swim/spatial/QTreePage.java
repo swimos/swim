@@ -21,16 +21,8 @@ import swim.util.Cursor;
 
 public abstract class QTreePage<K, S, V> {
 
-  static final QTreePage<?, ?, ?>[] EMPTY_PAGES = new QTreePage<?, ?, ?>[0];
-  static final QTreeEntry<?, ?, ?>[] EMPTY_SLOTS = new QTreeEntry<?, ?, ?>[0];
-  static final Comparator<QTreePage<?, ?, ?>> PAGE_ORDERING = new QTreePageOrdering();
-
   QTreePage() {
-    // stub
-  }
-
-  public static <K, S, V> QTreePage<K, S, V> empty() {
-    return QTreeLeaf.empty();
+    // sealed
   }
 
   public abstract boolean isEmpty();
@@ -70,7 +62,7 @@ public abstract class QTreePage<K, S, V> {
   public boolean containsKey(K key, int xkRank, long xkBase, int ykRank, long ykBase, QTreeContext<K, S, V> tree) {
     final long x = BitInterval.from(xkRank, xkBase);
     final long y = BitInterval.from(ykRank, ykBase);
-    return containsKey(key, x, y, tree);
+    return this.containsKey(key, x, y, tree);
   }
 
   public abstract V get(K key, long xk, long yk, QTreeContext<K, S, V> tree);
@@ -78,12 +70,12 @@ public abstract class QTreePage<K, S, V> {
   public V get(K key, int xkRank, long xkBase, int ykRank, long ykBase, QTreeContext<K, S, V> tree) {
     final long x = BitInterval.from(xkRank, xkBase);
     final long y = BitInterval.from(ykRank, ykBase);
-    return get(key, x, y, tree);
+    return this.get(key, x, y, tree);
   }
 
   public Collection<QTreeEntry<K, S, V>> getAll(long x, long y) {
     final Collection<QTreeEntry<K, S, V>> slots = new ArrayList<QTreeEntry<K, S, V>>();
-    final Cursor<QTreeEntry<K, S, V>> cursor = cursor(x, y);
+    final Cursor<QTreeEntry<K, S, V>> cursor = this.cursor(x, y);
     while (cursor.hasNext()) {
       slots.add(cursor.next());
     }
@@ -93,21 +85,21 @@ public abstract class QTreePage<K, S, V> {
   public Collection<QTreeEntry<K, S, V>> getAll(long x0, long y0, long x1, long y1) {
     final long x = BitInterval.span(x0, x1);
     final long y = BitInterval.span(y0, y1);
-    return getAll(x, y);
+    return this.getAll(x, y);
   }
 
   abstract QTreePage<K, S, V> updated(K key, S shape, long xk, long yk, V newValue,
                                       QTreeContext<K, S, V> tree, boolean canSplit);
 
   public QTreePage<K, S, V> updated(K key, S shape, long xk, long yk, V newValue, QTreeContext<K, S, V> tree) {
-    return updated(key, shape, xk, yk, newValue, tree, true);
+    return this.updated(key, shape, xk, yk, newValue, tree, true);
   }
 
   public QTreePage<K, S, V> updated(K key, S shape, int xkRank, long xkBase,
                                     int ykRank, long ykBase, V newValue, QTreeContext<K, S, V> tree) {
     final long xk = BitInterval.from(xkRank, xkBase);
     final long yk = BitInterval.from(ykRank, ykBase);
-    return updated(key, shape, xk, yk, newValue, tree);
+    return this.updated(key, shape, xk, yk, newValue, tree);
   }
 
   abstract QTreePage<K, S, V> insertedPage(QTreePage<K, S, V> newPage, QTreeContext<K, S, V> tree);
@@ -123,7 +115,7 @@ public abstract class QTreePage<K, S, V> {
   public QTreePage<K, S, V> removed(K key, int xkRank, long xkBase, int ykRank, long ykBase, QTreeContext<K, S, V> tree) {
     final long xk = BitInterval.from(xkRank, xkBase);
     final long yk = BitInterval.from(ykRank, ykBase);
-    return removed(key, xk, yk, tree);
+    return this.removed(key, xk, yk, tree);
   }
 
   public abstract QTreePage<K, S, V> flattened(QTreeContext<K, S, V> tree);
@@ -138,11 +130,18 @@ public abstract class QTreePage<K, S, V> {
   public Cursor<QTreeEntry<K, S, V>> cursor(long x0, long y0, long x1, long y1) {
     final long x = BitInterval.span(x0, x1);
     final long y = BitInterval.span(y0, y1);
-    return cursor(x, y);
+    return this.cursor(x, y);
   }
 
   public Cursor<QTreeEntry<K, S, V>> cursor() {
-    return cursor(-1L, -1L);
+    return this.cursor(-1L, -1L);
+  }
+
+  static final QTreeEntry<?, ?, ?>[] EMPTY_SLOTS = new QTreeEntry<?, ?, ?>[0];
+  static final Comparator<QTreePage<?, ?, ?>> PAGE_ORDERING = new QTreePageOrdering();
+
+  public static <K, S, V> QTreePage<K, S, V> empty() {
+    return QTreeLeaf.empty();
   }
 
 }

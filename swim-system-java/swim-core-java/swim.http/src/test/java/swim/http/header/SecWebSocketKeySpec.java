@@ -22,20 +22,20 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class SecWebSocketKeySpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseSecWebSocketKeyHeaders() {
     assertParses("Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==",
-        SecWebSocketKey.from("dGhlIHNhbXBsZSBub25jZQ=="));
+                 SecWebSocketKey.create("dGhlIHNhbXBsZSBub25jZQ=="));
   }
 
   @Test
   public void writeSecWebSocketKeyHeaders() {
-    assertWrites(SecWebSocketKey.from("dGhlIHNhbXBsZSBub25jZQ=="),
-        "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==");
+    assertWrites(SecWebSocketKey.create("dGhlIHNhbXBsZSBub25jZQ=="),
+                 "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

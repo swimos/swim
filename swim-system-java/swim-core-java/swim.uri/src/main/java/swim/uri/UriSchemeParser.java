@@ -36,6 +36,11 @@ final class UriSchemeParser extends Parser<UriScheme> {
     this(uri, null, 1);
   }
 
+  @Override
+  public Parser<UriScheme> feed(Input input) {
+    return UriSchemeParser.parse(input, this.uri, this.output, this.step);
+  }
+
   static Parser<UriScheme> parse(Input input, UriParser uri, Output<String> output, int step) {
     int c = 0;
     if (step == 1) {
@@ -49,10 +54,10 @@ final class UriSchemeParser extends Parser<UriScheme> {
           output = output.write(Character.toLowerCase(c));
           step = 2;
         } else {
-          return error(Diagnostic.expected("scheme", input));
+          return Parser.error(Diagnostic.expected("scheme", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("scheme", input));
+        return Parser.error(Diagnostic.expected("scheme", input));
       }
     }
     if (step == 2) {
@@ -66,19 +71,14 @@ final class UriSchemeParser extends Parser<UriScheme> {
         }
       }
       if (!input.isEmpty()) {
-        return done(uri.scheme(output.bind()));
+        return Parser.done(uri.scheme(output.bind()));
       }
     }
     return new UriSchemeParser(uri, output, step);
   }
 
   static Parser<UriScheme> parse(Input input, UriParser uri) {
-    return parse(input, uri, null, 1);
-  }
-
-  @Override
-  public Parser<UriScheme> feed(Input input) {
-    return parse(input, this.uri, this.output, this.step);
+    return UriSchemeParser.parse(input, uri, null, 1);
   }
 
 }

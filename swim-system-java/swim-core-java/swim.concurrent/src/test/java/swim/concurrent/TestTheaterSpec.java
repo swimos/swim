@@ -85,10 +85,10 @@ public class TestTheaterSpec {
 
         @Override
         public void runTask() {
-          runs += 1;
-          if (runs == 1) {
+          this.runs += 1;
+          if (this.runs == 1) {
             execute1.countDown();
-          } else if (runs == 2) {
+          } else if (this.runs == 2) {
             execute2.countDown();
           } else {
             fail();
@@ -118,13 +118,13 @@ public class TestTheaterSpec {
 
         @Override
         public void runTask() {
-          runs += 1;
+          this.runs += 1;
           assertFalse(isCued());
-          if (runs == 1) {
+          if (this.runs == 1) {
             cue();
             assertTrue(isCued());
             execute.countDown();
-          } else if (runs == 2) {
+          } else if (this.runs == 2) {
             execute.countDown();
           } else {
             fail();
@@ -322,7 +322,7 @@ public class TestTheaterSpec {
     final CountDownLatch bind = new CountDownLatch(1);
     try {
       theater.start();
-      theater.call(Conts.constant(new Cont<String>() {
+      theater.call(Cont.constant(new Cont<String>() {
         @Override
         public void bind(String value) {
           assertEquals(value, "test");

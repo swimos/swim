@@ -28,31 +28,10 @@ import swim.util.Murmur3;
 
 public final class AcceptCharset extends HttpHeader {
 
-  private static int hashSeed;
   final FingerTrieSeq<HttpCharset> charsets;
 
   AcceptCharset(FingerTrieSeq<HttpCharset> charsets) {
     this.charsets = charsets;
-  }
-
-  public static AcceptCharset from(FingerTrieSeq<HttpCharset> charsets) {
-    return new AcceptCharset(charsets);
-  }
-
-  public static AcceptCharset from(HttpCharset... charsets) {
-    return new AcceptCharset(FingerTrieSeq.of(charsets));
-  }
-
-  public static AcceptCharset from(String... charsetStrings) {
-    final Builder<HttpCharset, FingerTrieSeq<HttpCharset>> charsets = FingerTrieSeq.builder();
-    for (int i = 0, n = charsetStrings.length; i < n; i += 1) {
-      charsets.add(HttpCharset.parse(charsetStrings[i]));
-    }
-    return new AcceptCharset(charsets.bind());
-  }
-
-  public static Parser<AcceptCharset> parseHttpValue(Input input, HttpParser http) {
-    return AcceptCharsetParser.parse(input, http);
   }
 
   @Override
@@ -90,25 +69,48 @@ public final class AcceptCharset extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(AcceptCharset.class);
+    if (AcceptCharset.hashSeed == 0) {
+      AcceptCharset.hashSeed = Murmur3.seed(AcceptCharset.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.charsets.hashCode()));
+    return Murmur3.mash(Murmur3.mix(AcceptCharset.hashSeed, this.charsets.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("AcceptCharset").write('.').write("from").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("AcceptCharset").write('.').write("create").write('(');
     final int n = this.charsets.size();
     if (n > 0) {
-      output.debug(this.charsets.head());
+      output = output.debug(this.charsets.head());
       for (int i = 1; i < n; i += 1) {
         output = output.write(", ").debug(this.charsets.get(i));
       }
     }
     output = output.write(')');
+    return output;
+  }
+
+  public static AcceptCharset create(FingerTrieSeq<HttpCharset> charsets) {
+    return new AcceptCharset(charsets);
+  }
+
+  public static AcceptCharset create(HttpCharset... charsets) {
+    return new AcceptCharset(FingerTrieSeq.of(charsets));
+  }
+
+  public static AcceptCharset create(String... charsetStrings) {
+    final Builder<HttpCharset, FingerTrieSeq<HttpCharset>> charsets = FingerTrieSeq.builder();
+    for (int i = 0, n = charsetStrings.length; i < n; i += 1) {
+      charsets.add(HttpCharset.parse(charsetStrings[i]));
+    }
+    return new AcceptCharset(charsets.bind());
+  }
+
+  public static Parser<AcceptCharset> parseHttpValue(Input input, HttpParser http) {
+    return AcceptCharsetParser.parse(input, http);
   }
 
 }

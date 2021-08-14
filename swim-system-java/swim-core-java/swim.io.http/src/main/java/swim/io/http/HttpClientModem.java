@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import swim.codec.Decoder;
 import swim.codec.Utf8;
 import swim.collections.FingerTrieSeq;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.http.Http;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
@@ -34,15 +34,6 @@ import swim.io.IpSocket;
 
 public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>, HttpClientContext {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<HttpClientModem, FingerTrieSeq<HttpClientRequester<?>>> REQUESTERS =
-      AtomicReferenceFieldUpdater.newUpdater(HttpClientModem.class, (Class<FingerTrieSeq<HttpClientRequester<?>>>) (Class<?>) FingerTrieSeq.class, "requesters");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<HttpClientModem, FingerTrieSeq<HttpClientRequester<?>>> RESPONDERS =
-      AtomicReferenceFieldUpdater.newUpdater(HttpClientModem.class, (Class<FingerTrieSeq<HttpClientRequester<?>>>) (Class<?>) FingerTrieSeq.class, "responders");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<HttpClientModem, HttpClientRequester<?>> RESPONDING =
-      AtomicReferenceFieldUpdater.newUpdater(HttpClientModem.class, (Class<HttpClientRequester<?>>) (Class<?>) HttpClientRequester.class, "responding");
   protected final HttpClient client;
   protected final HttpSettings httpSettings;
   protected IpModemContext<HttpResponse<?>, HttpRequest<?>> context;
@@ -80,10 +71,10 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
 
   @Override
   public void didRead(HttpResponse<?> response) {
-    if (RESPONDING.get(this) == null) {
-      willRespond(response);
+    if (HttpClientModem.RESPONDING.get(this) == null) {
+      this.willRespond(response);
     } else {
-      didRespond(response);
+      this.didRespond(response);
     }
   }
 
@@ -94,7 +85,7 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
 
   @Override
   public void didWrite(HttpRequest<?> request) {
-    didRequest(request);
+    this.didRequest(request);
   }
 
   @Override
@@ -130,11 +121,11 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
   @Override
   public void didTimeout() {
     Throwable failure = null;
-    for (HttpClientRequester<?> responderContext : RESPONDERS.get(this)) {
+    for (HttpClientRequester<?> responderContext : HttpClientModem.RESPONDERS.get(this)) {
       try {
         responderContext.didTimeout();
       } catch (Throwable cause) {
-        if (!Conts.isNonFatal(cause)) {
+        if (!Cont.isNonFatal(cause)) {
           throw cause;
         }
         failure = cause;
@@ -151,17 +142,17 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
   @Override
   public void didDisconnect() {
     Throwable failure = null;
-    REQUESTERS.set(this, FingerTrieSeq.<HttpClientRequester<?>>empty());
+    HttpClientModem.REQUESTERS.set(this, FingerTrieSeq.<HttpClientRequester<?>>empty());
     do {
-      final FingerTrieSeq<HttpClientRequester<?>> oldResponders = RESPONDERS.get(this);
+      final FingerTrieSeq<HttpClientRequester<?>> oldResponders = HttpClientModem.RESPONDERS.get(this);
       final FingerTrieSeq<HttpClientRequester<?>> newResponders = FingerTrieSeq.empty();
       if (oldResponders != newResponders) {
-        if (RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
+        if (HttpClientModem.RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
           for (HttpClientRequester<?> responderContext : oldResponders) {
             try {
               responderContext.didDisconnect();
             } catch (Throwable cause) {
-              if (!Conts.isNonFatal(cause)) {
+              if (!Cont.isNonFatal(cause)) {
                 throw cause;
               }
               failure = cause;
@@ -176,12 +167,12 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
     try {
       this.client.didDisconnect();
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
     }
-    close();
+    this.close();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -192,17 +183,17 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
   @Override
   public void didFail(Throwable error) {
     Throwable failure = null;
-    REQUESTERS.set(this, FingerTrieSeq.<HttpClientRequester<?>>empty());
+    HttpClientModem.REQUESTERS.set(this, FingerTrieSeq.<HttpClientRequester<?>>empty());
     do {
-      final FingerTrieSeq<HttpClientRequester<?>> oldResponders = RESPONDERS.get(this);
+      final FingerTrieSeq<HttpClientRequester<?>> oldResponders = HttpClientModem.RESPONDERS.get(this);
       final FingerTrieSeq<HttpClientRequester<?>> newResponders = FingerTrieSeq.empty();
       if (oldResponders != newResponders) {
-        if (RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
+        if (HttpClientModem.RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
           for (HttpClientRequester<?> responderContext : oldResponders) {
             try {
               responderContext.didFail(error);
             } catch (Throwable cause) {
-              if (!Conts.isNonFatal(cause)) {
+              if (!Cont.isNonFatal(cause)) {
                 throw cause;
               }
               failure = cause;
@@ -217,12 +208,12 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
     try {
       this.client.didFail(error);
     } catch (Throwable cause) {
-      if (!Conts.isNonFatal(cause)) {
+      if (!Cont.isNonFatal(cause)) {
         throw cause;
       }
       failure = cause;
     }
-    close();
+    this.close();
     if (failure instanceof RuntimeException) {
       throw (RuntimeException) failure;
     } else if (failure instanceof Error) {
@@ -317,15 +308,14 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
   public void doRequest(HttpRequester<?> requester) {
     final HttpClientRequester<?> requesterContext = new HttpClientRequester<Object>(this, (HttpRequester<Object>) requester);
     requester.setHttpRequesterContext(requesterContext);
-    outer:
-    do {
-      final FingerTrieSeq<HttpClientRequester<?>> oldRequesters = REQUESTERS.get(this);
+    outer: do {
+      final FingerTrieSeq<HttpClientRequester<?>> oldRequesters = HttpClientModem.REQUESTERS.get(this);
       final FingerTrieSeq<HttpClientRequester<?>> newRequesters = oldRequesters.appended(requesterContext);
-      if (REQUESTERS.compareAndSet(this, oldRequesters, newRequesters)) {
+      if (HttpClientModem.REQUESTERS.compareAndSet(this, oldRequesters, newRequesters)) {
         do {
-          final FingerTrieSeq<HttpClientRequester<?>> oldResponders = RESPONDERS.get(this);
+          final FingerTrieSeq<HttpClientRequester<?>> oldResponders = HttpClientModem.RESPONDERS.get(this);
           final FingerTrieSeq<HttpClientRequester<?>> newResponders = oldResponders.appended(requesterContext);
-          if (RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
+          if (HttpClientModem.RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
             if (oldRequesters.isEmpty()) {
               requesterContext.doRequest();
             }
@@ -338,7 +328,7 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
 
   @Override
   public void readResponse() {
-    doReadResponseMessage();
+    this.doReadResponseMessage();
   }
 
   @Override
@@ -352,20 +342,20 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
   }
 
   void doWriteRequest(HttpRequest<?> request) {
-    willRequest(request);
+    this.willRequest(request);
     this.context.write(request.httpEncoder());
   }
 
   void willRequest(HttpRequest<?> request) {
     this.client.willRequest(request);
-    RESPONDERS.get(this).head().willRequest(request);
+    HttpClientModem.RESPONDERS.get(this).head().willRequest(request);
   }
 
   void didRequest(HttpRequest<?> request) {
     do {
-      final FingerTrieSeq<HttpClientRequester<?>> oldRequesters = REQUESTERS.get(this);
+      final FingerTrieSeq<HttpClientRequester<?>> oldRequesters = HttpClientModem.REQUESTERS.get(this);
       final FingerTrieSeq<HttpClientRequester<?>> newRequesters = oldRequesters.tail();
-      if (REQUESTERS.compareAndSet(this, oldRequesters, newRequesters)) {
+      if (HttpClientModem.REQUESTERS.compareAndSet(this, oldRequesters, newRequesters)) {
         final HttpClientRequester<?> requesterContext = oldRequesters.head();
         requesterContext.didRequest(request);
         this.client.didRequest(request);
@@ -385,17 +375,17 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
     if (entityDecoder.isCont()) {
       this.context.read(entityDecoder);
     } else {
-      didRead(entityDecoder.bind());
+      this.didRead(entityDecoder.bind());
     }
   }
 
   void willRespond(HttpResponse<?> response) {
     do {
-      final FingerTrieSeq<HttpClientRequester<?>> oldResponders = RESPONDERS.get(this);
+      final FingerTrieSeq<HttpClientRequester<?>> oldResponders = HttpClientModem.RESPONDERS.get(this);
       final FingerTrieSeq<HttpClientRequester<?>> newResponders = oldResponders.tail();
-      if (RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
+      if (HttpClientModem.RESPONDERS.compareAndSet(this, oldResponders, newResponders)) {
         final HttpClientRequester<?> requesterContext = oldResponders.head();
-        if (!RESPONDING.compareAndSet(this, null, requesterContext)) {
+        if (!HttpClientModem.RESPONDING.compareAndSet(this, null, requesterContext)) {
           throw new AssertionError();
         }
         requesterContext.willRespond(response);
@@ -406,9 +396,19 @@ public class HttpClientModem implements IpModem<HttpResponse<?>, HttpRequest<?>>
   }
 
   void didRespond(HttpResponse<?> response) {
-    final HttpClientRequester<?> requesterContext = RESPONDING.getAndSet(this, null);
+    final HttpClientRequester<?> requesterContext = HttpClientModem.RESPONDING.getAndSet(this, null);
     requesterContext.didRespond(response);
     this.client.didRespond(response);
   }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<HttpClientModem, FingerTrieSeq<HttpClientRequester<?>>> REQUESTERS =
+      AtomicReferenceFieldUpdater.newUpdater(HttpClientModem.class, (Class<FingerTrieSeq<HttpClientRequester<?>>>) (Class<?>) FingerTrieSeq.class, "requesters");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<HttpClientModem, FingerTrieSeq<HttpClientRequester<?>>> RESPONDERS =
+      AtomicReferenceFieldUpdater.newUpdater(HttpClientModem.class, (Class<FingerTrieSeq<HttpClientRequester<?>>>) (Class<?>) FingerTrieSeq.class, "responders");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<HttpClientModem, HttpClientRequester<?>> RESPONDING =
+      AtomicReferenceFieldUpdater.newUpdater(HttpClientModem.class, (Class<HttpClientRequester<?>>) (Class<?>) HttpClientRequester.class, "responding");
 
 }

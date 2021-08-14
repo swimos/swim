@@ -51,7 +51,7 @@ public class CommandLaneSpec {
   public void testLinkToCommandLane() throws InterruptedException {
     final Kernel kernel = ServerLoader.loadServerStack();
     final TestCommandPlane plane = kernel.openSpace(ActorSpaceDef.fromName("test"))
-        .openPlane("test", TestCommandPlane.class);
+                                         .openPlane("test", TestCommandPlane.class);
 
     final CountDownLatch commandDidSend = new CountDownLatch(2);
     final CountDownLatch linkOnEvent = new CountDownLatch(2);

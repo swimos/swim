@@ -28,7 +28,7 @@ import swim.api.warp.function.OnSyncRequest;
 import swim.api.warp.function.OnSyncedResponse;
 import swim.api.warp.function.OnUnlinkRequest;
 import swim.api.warp.function.OnUnlinkedResponse;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.runtime.AbstractUplinkContext;
 import swim.runtime.LinkBinding;
 import swim.runtime.Metric;
@@ -52,29 +52,10 @@ import swim.warp.UnlinkedResponse;
 
 public abstract class WarpUplinkModem extends AbstractUplinkContext implements WarpContext, WarpUplink {
 
-  static final int LINKED = 1 << 0;
-  static final int LINKING = 1 << 1;
-  static final int SYNCING = 1 << 2;
-  static final int UNLINKING = 1 << 3;
-  static final int CUED_DOWN = 1 << 4;
-  static final int FEEDING_DOWN = 1 << 5;
-  static final int FEEDING_UP = 1 << 6;
-  static final int PULLING_UP = 1 << 7;
-  static final AtomicIntegerFieldUpdater<WarpUplinkModem> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater(WarpUplinkModem.class, "status");
-  static final AtomicIntegerFieldUpdater<WarpUplinkModem> EVENT_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(WarpUplinkModem.class, "eventDelta");
-  static final AtomicLongFieldUpdater<WarpUplinkModem> EVENT_COUNT =
-      AtomicLongFieldUpdater.newUpdater(WarpUplinkModem.class, "eventCount");
-  static final AtomicIntegerFieldUpdater<WarpUplinkModem> COMMAND_DELTA =
-      AtomicIntegerFieldUpdater.newUpdater(WarpUplinkModem.class, "commandDelta");
-  static final AtomicLongFieldUpdater<WarpUplinkModem> COMMAND_TOTAL =
-      AtomicLongFieldUpdater.newUpdater(WarpUplinkModem.class, "commandCount");
-  static final AtomicLongFieldUpdater<WarpUplinkModem> LAST_REPORT_TIME =
-      AtomicLongFieldUpdater.newUpdater(WarpUplinkModem.class, "lastReportTime");
   protected final WarpBinding linkBinding;
   protected final UplinkAddress uplinkAddress;
   protected volatile int status;
+
   volatile int eventDelta;
   volatile long eventCount;
   volatile int commandDelta;
@@ -84,6 +65,13 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   protected WarpUplinkModem(WarpBinding linkBinding, UplinkAddress uplinkAddress) {
     this.linkBinding = linkBinding;
     this.uplinkAddress = uplinkAddress;
+    this.status = 0;
+
+    this.eventDelta = 0;
+    this.eventCount = 0L;
+    this.commandDelta = 0;
+    this.commandCount = 0L;
+    this.lastReportTime = 0L;
   }
 
   @Override
@@ -150,56 +138,47 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
 
   @Override
   public WarpUplinkModem onEvent(OnEventMessage onEvent) {
-    observe(onEvent);
-    return this;
+    return this.observe(onEvent);
   }
 
   @Override
   public WarpUplinkModem onCommand(OnCommandMessage onCommand) {
-    observe(onCommand);
-    return this;
+    return this.observe(onCommand);
   }
 
   @Override
   public WarpUplinkModem onLink(OnLinkRequest onLink) {
-    observe(onLink);
-    return this;
+    return this.observe(onLink);
   }
 
   @Override
   public WarpUplinkModem onLinked(OnLinkedResponse onLinked) {
-    observe(onLinked);
-    return this;
+    return this.observe(onLinked);
   }
 
   @Override
   public WarpUplinkModem onSync(OnSyncRequest onSync) {
-    observe(onSync);
-    return this;
+    return this.observe(onSync);
   }
 
   @Override
   public WarpUplinkModem onSynced(OnSyncedResponse onSynced) {
-    observe(onSynced);
-    return this;
+    return this.observe(onSynced);
   }
 
   @Override
   public WarpUplinkModem onUnlink(OnUnlinkRequest onUnlink) {
-    observe(onUnlink);
-    return this;
+    return this.observe(onUnlink);
   }
 
   @Override
   public WarpUplinkModem onUnlinked(OnUnlinkedResponse onUnlinked) {
-    observe(onUnlinked);
-    return this;
+    return this.observe(onUnlinked);
   }
 
   @Override
   public WarpUplinkModem didClose(DidClose didClose) {
-    observe(didClose);
-    return this;
+    return this.observe(didClose);
   }
 
   protected void dispatchOnEvent(EventMessage message) {
@@ -211,8 +190,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
         try {
           ((OnEventMessage) observers).onEvent(message);
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            didFail(error);
+          if (Cont.isNonFatal(error)) {
+            this.didFail(error);
           } else {
             throw error;
           }
@@ -225,8 +204,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
             try {
               ((OnEventMessage) observer).onEvent(message);
             } catch (Throwable error) {
-              if (Conts.isNonFatal(error)) {
-                didFail(error);
+              if (Cont.isNonFatal(error)) {
+                this.didFail(error);
               } else {
                 throw error;
               }
@@ -250,8 +229,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
           try {
             ((OnCommandMessage) observers).onCommand(message);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              didFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.didFail(error);
             } else {
               throw error;
             }
@@ -268,8 +247,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
               try {
                 ((OnCommandMessage) observer).onCommand(message);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  didFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.didFail(error);
                 } else {
                   throw error;
                 }
@@ -297,8 +276,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
           try {
             ((OnLinkRequest) observers).onLink(request);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              didFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.didFail(error);
             } else {
               throw error;
             }
@@ -315,8 +294,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
               try {
                 ((OnLinkRequest) observer).onLink(request);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  didFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.didFail(error);
                 } else {
                   throw error;
                 }
@@ -342,8 +321,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
         try {
           ((OnLinkedResponse) observers).onLinked(response);
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            didFail(error);
+          if (Cont.isNonFatal(error)) {
+            this.didFail(error);
           } else {
             throw error;
           }
@@ -356,8 +335,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
             try {
               ((OnLinkedResponse) observer).onLinked(response);
             } catch (Throwable error) {
-              if (Conts.isNonFatal(error)) {
-                didFail(error);
+              if (Cont.isNonFatal(error)) {
+                this.didFail(error);
               } else {
                 throw error;
               }
@@ -381,8 +360,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
           try {
             ((OnSyncRequest) observers).onSync(request);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              didFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.didFail(error);
             } else {
               throw error;
             }
@@ -399,8 +378,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
               try {
                 ((OnSyncRequest) observer).onSync(request);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  didFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.didFail(error);
                 } else {
                   throw error;
                 }
@@ -426,8 +405,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
         try {
           ((OnSyncedResponse) observers).onSynced(response);
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            didFail(error);
+          if (Cont.isNonFatal(error)) {
+            this.didFail(error);
           } else {
             throw error;
           }
@@ -440,8 +419,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
             try {
               ((OnSyncedResponse) observer).onSynced(response);
             } catch (Throwable error) {
-              if (Conts.isNonFatal(error)) {
-                didFail(error);
+              if (Cont.isNonFatal(error)) {
+                this.didFail(error);
               } else {
                 throw error;
               }
@@ -465,8 +444,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
           try {
             ((OnUnlinkRequest) observers).onUnlink(request);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              didFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.didFail(error);
             } else {
               throw error;
             }
@@ -483,8 +462,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
               try {
                 ((OnUnlinkRequest) observer).onUnlink(request);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  didFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.didFail(error);
                 } else {
                   throw error;
                 }
@@ -510,8 +489,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
         try {
           ((OnUnlinkedResponse) observers).onUnlinked(response);
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            didFail(error);
+          if (Cont.isNonFatal(error)) {
+            this.didFail(error);
           } else {
             throw error;
           }
@@ -524,8 +503,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
             try {
               ((OnUnlinkedResponse) observer).onUnlinked(response);
             } catch (Throwable error) {
-              if (Conts.isNonFatal(error)) {
-                didFail(error);
+              if (Cont.isNonFatal(error)) {
+                this.didFail(error);
               } else {
                 throw error;
               }
@@ -547,8 +526,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
         try {
           ((DidClose) observers).didClose();
         } catch (Throwable error) {
-          if (Conts.isNonFatal(error)) {
-            didFail(error);
+          if (Cont.isNonFatal(error)) {
+            this.didFail(error);
           } else {
             throw error;
           }
@@ -561,8 +540,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
             try {
               ((DidClose) observer).didClose();
             } catch (Throwable error) {
-              if (Conts.isNonFatal(error)) {
-                didFail(error);
+              if (Cont.isNonFatal(error)) {
+                this.didFail(error);
               } else {
                 throw error;
               }
@@ -588,9 +567,9 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   }
 
   protected EventMessage nextDownQueueEvent() {
-    final Value body = nextDownQueue();
+    final Value body = this.nextDownQueue();
     if (body != null) {
-      return new EventMessage(nodeUri(), laneUri(), body);
+      return new EventMessage(this.nodeUri(), this.laneUri(), body);
     } else {
       return null;
     }
@@ -601,21 +580,21 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   }
 
   protected EventMessage nextDownCueEvent() {
-    final Value body = nextDownCue();
+    final Value body = this.nextDownCue();
     if (body != null) {
-      return new EventMessage(nodeUri(), laneUri(), body);
+      return new EventMessage(this.nodeUri(), this.laneUri(), body);
     } else {
       return null;
     }
   }
 
   public void sendDown(Value body) {
-    queueDown(body);
+    this.queueDown(body);
     do {
-      final int oldStatus = this.status;
-      final int newStatus = oldStatus | FEEDING_DOWN;
+      final int oldStatus = WarpUplinkModem.STATUS.get(this);
+      final int newStatus = oldStatus | WarpUplinkModem.FEEDING_DOWN;
       if (oldStatus != newStatus) {
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if (WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.linkBinding.feedDown();
           break;
         }
@@ -627,13 +606,13 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
 
   public void cueDown() {
     do {
-      final int oldStatus = this.status;
+      final int oldStatus = WarpUplinkModem.STATUS.get(this);
       final int newStatus;
-      if ((oldStatus & LINKED) != 0) {
-        newStatus = oldStatus | (FEEDING_DOWN | CUED_DOWN);
+      if ((oldStatus & WarpUplinkModem.LINKED) != 0) {
+        newStatus = oldStatus | (WarpUplinkModem.FEEDING_DOWN | WarpUplinkModem.CUED_DOWN);
         if (oldStatus != newStatus) {
-          if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-            if ((oldStatus & FEEDING_DOWN) == 0) {
+          if (WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+            if ((oldStatus & WarpUplinkModem.FEEDING_DOWN) == 0) {
               this.linkBinding.feedDown();
             }
             break;
@@ -642,8 +621,8 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
           break;
         }
       } else {
-        newStatus = oldStatus | CUED_DOWN;
-        if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        newStatus = oldStatus | WarpUplinkModem.CUED_DOWN;
+        if (oldStatus == newStatus || WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           break;
         }
       }
@@ -652,15 +631,15 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
 
   @Override
   public void pullDown() {
-    stage().execute(new WarpUplinkModemPullDown(this));
+    this.stage().execute(new WarpUplinkModemPullDown(this));
   }
 
   protected void runPullDown() {
     try {
-      pullDownEnvelope();
+      this.pullDownEnvelope();
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
+      if (Cont.isNonFatal(error)) {
+        this.didFail(error);
       } else {
         throw error;
       }
@@ -669,30 +648,30 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
 
   protected void pullDownEnvelope() {
     do {
-      int oldStatus = this.status;
+      int oldStatus = WarpUplinkModem.STATUS.get(this);
       int newStatus;
-      if ((oldStatus & UNLINKING) != 0) {
-        newStatus = oldStatus & ~UNLINKING;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          final UnlinkedResponse response = unlinkedResponse();
-          pullDownUnlinked(response);
-          pushDown(response);
+      if ((oldStatus & WarpUplinkModem.UNLINKING) != 0) {
+        newStatus = oldStatus & ~WarpUplinkModem.UNLINKING;
+        if (WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+          final UnlinkedResponse response = this.unlinkedResponse();
+          this.pullDownUnlinked(response);
+          this.pushDown(response);
           break;
         }
-      } else if ((oldStatus & LINKING) != 0) {
-        newStatus = oldStatus & ~LINKING;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          final LinkedResponse response = linkedResponse();
-          pullDownLinked(response);
-          pushDown(response);
-          if ((newStatus & SYNCING) != 0) {
+      } else if ((oldStatus & WarpUplinkModem.LINKING) != 0) {
+        newStatus = oldStatus & ~WarpUplinkModem.LINKING;
+        if (WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+          final LinkedResponse response = this.linkedResponse();
+          this.pullDownLinked(response);
+          this.pushDown(response);
+          if ((newStatus & WarpUplinkModem.SYNCING) != 0) {
             this.linkBinding.feedDown();
           } else {
             do {
-              oldStatus = this.status;
-              if ((oldStatus & CUED_DOWN) == 0 && downQueueIsEmpty()) {
-                newStatus = oldStatus & ~FEEDING_DOWN;
-                if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
+              oldStatus = WarpUplinkModem.STATUS.get(this);
+              if ((oldStatus & WarpUplinkModem.CUED_DOWN) == 0 && this.downQueueIsEmpty()) {
+                newStatus = oldStatus & ~WarpUplinkModem.FEEDING_DOWN;
+                if (oldStatus == newStatus || WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
                   break;
                 }
               } else {
@@ -704,65 +683,65 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
           break;
         }
       } else {
-        EventMessage message = nextDownQueueEvent();
-        if (message == null && (oldStatus & CUED_DOWN) != 0) {
+        EventMessage message = this.nextDownQueueEvent();
+        if (message == null && (oldStatus & WarpUplinkModem.CUED_DOWN) != 0) {
           do {
-            oldStatus = this.status;
-            newStatus = oldStatus & ~CUED_DOWN;
-            if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
+            oldStatus = WarpUplinkModem.STATUS.get(this);
+            newStatus = oldStatus & ~WarpUplinkModem.CUED_DOWN;
+            if (oldStatus == newStatus || WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
               break;
             }
           } while (true);
-          message = nextDownCueEvent();
+          message = this.nextDownCueEvent();
         }
         if (message != null) {
-          pullDownEvent(message);
-          pushDown(message);
+          this.pullDownEvent(message);
+          this.pushDown(message);
           do {
-            oldStatus = this.status;
-            if ((oldStatus & (SYNCING | CUED_DOWN)) == 0 && downQueueIsEmpty()) {
-              newStatus = oldStatus & ~FEEDING_DOWN;
-              final boolean statusHasChanged = STATUS.compareAndSet(this, oldStatus, newStatus);
-              if (downQueueIsEmpty() && (oldStatus == newStatus || statusHasChanged)) {
+            oldStatus = WarpUplinkModem.STATUS.get(this);
+            if ((oldStatus & (WarpUplinkModem.SYNCING | WarpUplinkModem.CUED_DOWN)) == 0 && this.downQueueIsEmpty()) {
+              newStatus = oldStatus & ~WarpUplinkModem.FEEDING_DOWN;
+              final boolean statusHasChanged = WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus);
+              if (this.downQueueIsEmpty() && (oldStatus == newStatus || statusHasChanged)) {
                 break;
               }
             } else {
-              newStatus = oldStatus | FEEDING_DOWN;
-              if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
+              newStatus = oldStatus | WarpUplinkModem.FEEDING_DOWN;
+              if (oldStatus == newStatus || WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
                 this.linkBinding.feedDown();
                 break;
               }
             }
           } while (true);
-        } else if ((oldStatus & SYNCING) != 0) {
-          final SyncedResponse response = syncedResponse();
-          pullDownSynced(response);
-          pushDown(response);
+        } else if ((oldStatus & WarpUplinkModem.SYNCING) != 0) {
+          final SyncedResponse response = this.syncedResponse();
+          this.pullDownSynced(response);
+          this.pushDown(response);
           do {
-            oldStatus = this.status;
-            if ((oldStatus & CUED_DOWN) == 0 && downQueueIsEmpty()) {
-              newStatus = oldStatus & ~(SYNCING | FEEDING_DOWN);
+            oldStatus = WarpUplinkModem.STATUS.get(this);
+            if ((oldStatus & WarpUplinkModem.CUED_DOWN) == 0 && this.downQueueIsEmpty()) {
+              newStatus = oldStatus & ~(WarpUplinkModem.SYNCING | WarpUplinkModem.FEEDING_DOWN);
             } else {
-              newStatus = oldStatus & ~SYNCING;
+              newStatus = oldStatus & ~WarpUplinkModem.SYNCING;
             }
-            if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+            if (WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
               break;
             }
           } while (true);
-          if ((newStatus & FEEDING_DOWN) != 0) {
+          if ((newStatus & WarpUplinkModem.FEEDING_DOWN) != 0) {
             this.linkBinding.feedDown();
           }
         } else {
           this.linkBinding.skipDown();
           do {
-            oldStatus = this.status;
-            if ((oldStatus & CUED_DOWN) == 0 && downQueueIsEmpty()) {
-              newStatus = oldStatus & ~FEEDING_DOWN;
-              if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
+            oldStatus = WarpUplinkModem.STATUS.get(this);
+            if ((oldStatus & WarpUplinkModem.CUED_DOWN) == 0 && this.downQueueIsEmpty()) {
+              newStatus = oldStatus & ~WarpUplinkModem.FEEDING_DOWN;
+              if (oldStatus == newStatus || WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
                 break;
               }
             } else {
-              if ((oldStatus & FEEDING_DOWN) != 0) {
+              if ((oldStatus & WarpUplinkModem.FEEDING_DOWN) != 0) {
                 this.linkBinding.feedDown();
               }
               break;
@@ -775,43 +754,43 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   }
 
   protected void pullDownEvent(EventMessage message) {
-    onEvent(message);
-    dispatchOnEvent(message);
+    this.onEvent(message);
+    this.dispatchOnEvent(message);
   }
 
   protected void pullDownLinked(LinkedResponse response) {
-    didLink(response);
-    dispatchOnLinked(response);
+    this.didLink(response);
+    this.dispatchOnLinked(response);
   }
 
   protected void pullDownSynced(SyncedResponse response) {
-    didSync(response);
-    dispatchOnSynced(response);
+    this.didSync(response);
+    this.dispatchOnSynced(response);
   }
 
   protected void pullDownUnlinked(UnlinkedResponse response) {
-    didUnlink(response);
-    dispatchOnUnlinked(response);
+    this.didUnlink(response);
+    this.dispatchOnUnlinked(response);
   }
 
   protected void pushDown(Envelope envelope) {
-    this.linkBinding.pushDown(new Push<Envelope>(Uri.empty(), hostUri(), nodeUri(), laneUri(),
-                                                 prio(), null, envelope, null));
+    this.linkBinding.pushDown(new Push<Envelope>(Uri.empty(), this.hostUri(), this.nodeUri(),
+                                                 this.laneUri(), this.prio(), null, envelope, null));
   }
 
   public void cueUp() {
     do {
-      final int oldStatus = this.status;
+      final int oldStatus = WarpUplinkModem.STATUS.get(this);
       final int newStatus;
-      if ((oldStatus & FEEDING_UP) != 0) {
-        newStatus = oldStatus & ~FEEDING_UP | PULLING_UP;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+      if ((oldStatus & WarpUplinkModem.FEEDING_UP) != 0) {
+        newStatus = oldStatus & ~WarpUplinkModem.FEEDING_UP | WarpUplinkModem.PULLING_UP;
+        if (WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.linkBinding.pullUp();
           break;
         }
       } else {
-        newStatus = oldStatus & ~PULLING_UP;
-        if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        newStatus = oldStatus & ~WarpUplinkModem.PULLING_UP;
+        if (oldStatus == newStatus || WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           break;
         }
       }
@@ -821,17 +800,17 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   @Override
   public void feedUp() {
     do {
-      final int oldStatus = this.status;
+      final int oldStatus = WarpUplinkModem.STATUS.get(this);
       final int newStatus;
-      if ((oldStatus & PULLING_UP) == 0) {
-        newStatus = oldStatus & ~FEEDING_UP | PULLING_UP;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
+      if ((oldStatus & WarpUplinkModem.PULLING_UP) == 0) {
+        newStatus = oldStatus & ~WarpUplinkModem.FEEDING_UP | WarpUplinkModem.PULLING_UP;
+        if (WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           this.linkBinding.pullUp();
           break;
         }
       } else {
-        newStatus = oldStatus | FEEDING_UP;
-        if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        newStatus = oldStatus | WarpUplinkModem.FEEDING_UP;
+        if (oldStatus == newStatus || WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
           break;
         }
       }
@@ -843,100 +822,100 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   public void pushUp(Push<?> push) {
     final Object message = push.message();
     if (message instanceof CommandMessage) {
-      pushUpCommand((Push<CommandMessage>) push);
+      this.pushUpCommand((Push<CommandMessage>) push);
     } else if (message instanceof LinkRequest) {
-      pushUpLink((Push<LinkRequest>) push);
+      this.pushUpLink((Push<LinkRequest>) push);
     } else if (message instanceof SyncRequest) {
-      pushUpSync((Push<SyncRequest>) push);
+      this.pushUpSync((Push<SyncRequest>) push);
     } else if (message instanceof UnlinkRequest) {
-      pushUpUnlink((Push<UnlinkRequest>) push);
+      this.pushUpUnlink((Push<UnlinkRequest>) push);
     } else if (message instanceof Envelope) {
-      pushUpUnknown(push);
+      this.pushUpUnknown(push);
     }
   }
 
   protected void pushUpCommand(Push<CommandMessage> push) {
     final CommandMessage message = push.message();
-    onCommand(message);
-    laneBinding().pushUpCommand(push);
-    if (!dispatchOnCommand(message, true)) {
-      stage().execute(new WarpUplinkModemOnCommand(this, push));
+    this.onCommand(message);
+    this.laneBinding().pushUpCommand(push);
+    if (!this.dispatchOnCommand(message, true)) {
+      this.stage().execute(new WarpUplinkModemOnCommand(this, push));
     } else {
-      cueUp();
+      this.cueUp();
     }
   }
 
   protected void runOnCommand(Push<CommandMessage> push) {
     try {
-      dispatchOnCommand(push.message(), false);
+      this.dispatchOnCommand(push.message(), false);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
+      if (Cont.isNonFatal(error)) {
+        this.didFail(error);
       } else {
         throw error;
       }
     } finally {
-      cueUp();
+      this.cueUp();
     }
   }
 
   protected void pushUpLink(Push<LinkRequest> push) {
     final LinkRequest request = push.message();
-    willLink(request);
-    if (!dispatchOnLink(request, true)) {
-      stage().execute(new WarpUplinkModemOnLink(this, push));
+    this.willLink(request);
+    if (!this.dispatchOnLink(request, true)) {
+      this.stage().execute(new WarpUplinkModemOnLink(this, push));
     } else {
       push.bind();
-      cueUp();
+      this.cueUp();
     }
   }
 
   protected void runOnLink(Push<LinkRequest> push) {
     try {
-      dispatchOnLink(push.message(), false);
+      this.dispatchOnLink(push.message(), false);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
+      if (Cont.isNonFatal(error)) {
+        this.didFail(error);
       } else {
         throw error;
       }
     } finally {
       push.bind();
-      cueUp();
+      this.cueUp();
     }
   }
 
   protected void pushUpSync(Push<SyncRequest> push) {
     final SyncRequest request = push.message();
-    willSync(request);
-    if (!dispatchOnSync(request, true)) {
-      stage().execute(new WarpUplinkModemOnSync(this, push));
+    this.willSync(request);
+    if (!this.dispatchOnSync(request, true)) {
+      this.stage().execute(new WarpUplinkModemOnSync(this, push));
     } else {
       push.bind();
-      cueUp();
+      this.cueUp();
     }
   }
 
   protected void runOnSync(Push<SyncRequest> push) {
     try {
-      dispatchOnSync(push.message(), false);
+      this.dispatchOnSync(push.message(), false);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
+      if (Cont.isNonFatal(error)) {
+        this.didFail(error);
       } else {
         throw error;
       }
     } finally {
       push.bind();
-      cueUp();
+      this.cueUp();
     }
   }
 
   protected void pushUpUnlink(Push<UnlinkRequest> push) {
     final UnlinkRequest request = push.message();
-    willUnlink(request);
-    if (!dispatchOnUnlink(request, true)) {
-      stage().execute(new WarpUplinkModemOnUnlink(this, push));
+    this.willUnlink(request);
+    if (!this.dispatchOnUnlink(request, true)) {
+      this.stage().execute(new WarpUplinkModemOnUnlink(this, push));
     } else {
       push.bind();
     }
@@ -944,10 +923,10 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
 
   protected void runOnUnlink(Push<UnlinkRequest> push) {
     try {
-      dispatchOnUnlink(push.message(), false);
+      this.dispatchOnUnlink(push.message(), false);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
+      if (Cont.isNonFatal(error)) {
+        this.didFail(error);
       } else {
         throw error;
       }
@@ -958,23 +937,23 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
 
   protected void pushUpUnknown(Push<?> push) {
     push.bind();
-    cueUp();
+    this.cueUp();
   }
 
   @Override
   public void skipUp() {
-    cueUp();
+    this.cueUp();
   }
 
   public void unlink() {
     int oldStatus;
     int newStatus;
     do {
-      oldStatus = this.status;
-      newStatus = oldStatus & ~(SYNCING | LINKING | LINKED) | (FEEDING_DOWN | UNLINKING);
+      oldStatus = WarpUplinkModem.STATUS.get(this);
+      newStatus = oldStatus & ~(WarpUplinkModem.SYNCING | WarpUplinkModem.LINKING | WarpUplinkModem.LINKED) | (WarpUplinkModem.FEEDING_DOWN | WarpUplinkModem.UNLINKING);
       if (oldStatus != newStatus) {
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          if ((oldStatus & FEEDING_DOWN) == 0) {
+        if (WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+          if ((oldStatus & WarpUplinkModem.FEEDING_DOWN) == 0) {
             this.linkBinding.feedDown();
           }
           break;
@@ -983,35 +962,35 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
         break;
       }
     } while (true);
-    if ((oldStatus & FEEDING_UP) != 0) {
+    if ((oldStatus & WarpUplinkModem.FEEDING_UP) != 0) {
       this.linkBinding.pullUp();
     }
   }
 
   protected void onEvent(EventMessage message) {
-    EVENT_DELTA.incrementAndGet(this);
-    didUpdateMetrics();
+    WarpUplinkModem.EVENT_DELTA.incrementAndGet(this);
+    this.didUpdateMetrics();
   }
 
   protected void onCommand(CommandMessage message) {
-    COMMAND_DELTA.incrementAndGet(this);
-    didUpdateMetrics();
+    WarpUplinkModem.COMMAND_DELTA.incrementAndGet(this);
+    this.didUpdateMetrics();
   }
 
   protected void willLink(LinkRequest request) {
     do {
-      final int oldStatus = this.status;
+      final int oldStatus = WarpUplinkModem.STATUS.get(this);
       final int newStatus;
-      if ((oldStatus & FEEDING_UP) == 0) {
-        newStatus = oldStatus & ~PULLING_UP | (FEEDING_DOWN | LINKING | LINKED);
+      if ((oldStatus & WarpUplinkModem.FEEDING_UP) == 0) {
+        newStatus = oldStatus & ~WarpUplinkModem.PULLING_UP | (WarpUplinkModem.FEEDING_DOWN | WarpUplinkModem.LINKING | WarpUplinkModem.LINKED);
       } else {
-        newStatus = oldStatus | (FEEDING_DOWN | LINKING | LINKED);
+        newStatus = oldStatus | (WarpUplinkModem.FEEDING_DOWN | WarpUplinkModem.LINKING | WarpUplinkModem.LINKED);
       }
-      if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
-        if ((oldStatus & FEEDING_DOWN) == 0) {
+      if (oldStatus == newStatus || WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if ((oldStatus & WarpUplinkModem.FEEDING_DOWN) == 0) {
           this.linkBinding.feedDown();
         }
-        if ((oldStatus & FEEDING_UP) != 0) {
+        if ((oldStatus & WarpUplinkModem.FEEDING_UP) != 0) {
           this.linkBinding.pullUp();
         }
         break;
@@ -1020,31 +999,31 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   }
 
   protected void didLink(LinkedResponse response) {
-    // stub
+    // hook
   }
 
   protected void willSync(SyncRequest request) {
     do {
-      final int oldStatus = this.status;
+      final int oldStatus = WarpUplinkModem.STATUS.get(this);
       final int newStatus;
-      if ((oldStatus & LINKED) == 0) {
-        if ((oldStatus & FEEDING_UP) == 0) {
-          newStatus = oldStatus & ~PULLING_UP | (FEEDING_DOWN | SYNCING | LINKING | LINKED);
+      if ((oldStatus & WarpUplinkModem.LINKED) == 0) {
+        if ((oldStatus & WarpUplinkModem.FEEDING_UP) == 0) {
+          newStatus = oldStatus & ~WarpUplinkModem.PULLING_UP | (WarpUplinkModem.FEEDING_DOWN | WarpUplinkModem.SYNCING | WarpUplinkModem.LINKING | WarpUplinkModem.LINKED);
         } else {
-          newStatus = oldStatus | (FEEDING_DOWN | SYNCING | LINKING | LINKED);
+          newStatus = oldStatus | (WarpUplinkModem.FEEDING_DOWN | WarpUplinkModem.SYNCING | WarpUplinkModem.LINKING | WarpUplinkModem.LINKED);
         }
       } else {
-        if ((oldStatus & FEEDING_UP) == 0) {
-          newStatus = oldStatus & ~PULLING_UP | (FEEDING_DOWN | SYNCING);
+        if ((oldStatus & WarpUplinkModem.FEEDING_UP) == 0) {
+          newStatus = oldStatus & ~WarpUplinkModem.PULLING_UP | (WarpUplinkModem.FEEDING_DOWN | WarpUplinkModem.SYNCING);
         } else {
-          newStatus = oldStatus | (FEEDING_DOWN | SYNCING);
+          newStatus = oldStatus | (WarpUplinkModem.FEEDING_DOWN | WarpUplinkModem.SYNCING);
         }
       }
-      if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
-        if ((oldStatus & FEEDING_DOWN) == 0) {
+      if (oldStatus == newStatus || WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if ((oldStatus & WarpUplinkModem.FEEDING_DOWN) == 0) {
           this.linkBinding.feedDown();
         }
-        if ((oldStatus & FEEDING_UP) != 0) {
+        if ((oldStatus & WarpUplinkModem.FEEDING_UP) != 0) {
           this.linkBinding.pullUp();
         }
         break;
@@ -1053,24 +1032,23 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   }
 
   protected void didSync(SyncedResponse response) {
-    // stub
+    // hook
   }
 
   protected void willUnlink(UnlinkRequest request) {
-    int oldStatus;
-    int newStatus;
     do {
-      oldStatus = this.status;
-      if ((oldStatus & FEEDING_UP) == 0) {
-        newStatus = oldStatus & ~(PULLING_UP | SYNCING | LINKING | LINKED) | (FEEDING_DOWN | UNLINKING);
+      final int oldStatus = WarpUplinkModem.STATUS.get(this);
+      final int newStatus;
+      if ((oldStatus & WarpUplinkModem.FEEDING_UP) == 0) {
+        newStatus = oldStatus & ~(WarpUplinkModem.PULLING_UP | WarpUplinkModem.SYNCING | WarpUplinkModem.LINKING | WarpUplinkModem.LINKED) | (WarpUplinkModem.FEEDING_DOWN | WarpUplinkModem.UNLINKING);
       } else {
-        newStatus = oldStatus & ~(SYNCING | LINKING | LINKED) | (FEEDING_DOWN | UNLINKING);
+        newStatus = oldStatus & ~(WarpUplinkModem.SYNCING | WarpUplinkModem.LINKING | WarpUplinkModem.LINKED) | (WarpUplinkModem.FEEDING_DOWN | WarpUplinkModem.UNLINKING);
       }
-      if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
-        if ((oldStatus & FEEDING_DOWN) == 0) {
+      if (oldStatus == newStatus || WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+        if ((oldStatus & WarpUplinkModem.FEEDING_DOWN) == 0) {
           this.linkBinding.feedDown();
         }
-        if ((oldStatus & FEEDING_UP) != 0) {
+        if ((oldStatus & WarpUplinkModem.FEEDING_UP) != 0) {
           this.linkBinding.pullUp();
         }
         break;
@@ -1079,45 +1057,45 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   }
 
   protected void didUnlink(UnlinkedResponse response) {
-    close();
+    this.close();
   }
 
   protected LinkedResponse linkedResponse() {
-    return new LinkedResponse(nodeUri(), laneUri(), prio(), rate(), body());
+    return new LinkedResponse(this.nodeUri(), this.laneUri(), this.prio(), this.rate(), this.body());
   }
 
   protected SyncedResponse syncedResponse() {
-    return new SyncedResponse(nodeUri(), laneUri());
+    return new SyncedResponse(this.nodeUri(), this.laneUri());
   }
 
   protected UnlinkedResponse unlinkedResponse() {
-    return new UnlinkedResponse(nodeUri(), laneUri());
+    return new UnlinkedResponse(this.nodeUri(), this.laneUri());
   }
 
   @Override
   protected void didClose() {
     super.didClose();
-    dispatchDidClose();
-    flushMetrics();
+    this.dispatchDidClose();
+    this.flushMetrics();
   }
 
   @Override
   public void openMetaUplink(LinkBinding uplink, NodeBinding metaUplink) {
-    laneBinding().openMetaUplink(uplink, metaUplink);
+    this.laneBinding().openMetaUplink(uplink, metaUplink);
   }
 
   protected void didUpdateMetrics() {
     do {
       final long newReportTime = System.currentTimeMillis();
-      final long oldReportTime = this.lastReportTime;
+      final long oldReportTime = WarpUplinkModem.LAST_REPORT_TIME.get(this);
       final long dt = newReportTime - oldReportTime;
       if (dt >= Metric.REPORT_INTERVAL) {
-        if (LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
+        if (WarpUplinkModem.LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
           try {
-            reportMetrics(dt);
+            this.reportMetrics(dt);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              didFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.didFail(error);
             } else {
               throw error;
             }
@@ -1132,13 +1110,13 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
 
   protected void flushMetrics() {
     final long newReportTime = System.currentTimeMillis();
-    final long oldReportTime = LAST_REPORT_TIME.getAndSet(this, newReportTime);
+    final long oldReportTime = WarpUplinkModem.LAST_REPORT_TIME.getAndSet(this, newReportTime);
     final long dt = newReportTime - oldReportTime;
     try {
-      reportMetrics(dt);
+      this.reportMetrics(dt);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
+      if (Cont.isNonFatal(error)) {
+        this.didFail(error);
       } else {
         throw error;
       }
@@ -1146,22 +1124,45 @@ public abstract class WarpUplinkModem extends AbstractUplinkContext implements W
   }
 
   protected void reportMetrics(long dt) {
-    final WarpUplinkProfile profile = collectProfile(dt);
-    laneBinding().reportDown(profile);
+    final WarpUplinkProfile profile = this.collectProfile(dt);
+    this.laneBinding().reportDown(profile);
   }
 
   protected WarpUplinkProfile collectProfile(long dt) {
-    final int eventDelta = EVENT_DELTA.getAndSet(this, 0);
+    final int eventDelta = WarpUplinkModem.EVENT_DELTA.getAndSet(this, 0);
     final int eventRate = (int) Math.ceil((1000.0 * (double) eventDelta) / (double) dt);
-    final long eventCount = EVENT_COUNT.addAndGet(this, (long) eventDelta);
-    final int commandDelta = COMMAND_DELTA.getAndSet(this, 0);
+    final long eventCount = WarpUplinkModem.EVENT_COUNT.addAndGet(this, (long) eventDelta);
+    final int commandDelta = WarpUplinkModem.COMMAND_DELTA.getAndSet(this, 0);
     final int commandRate = (int) Math.ceil((1000.0 * (double) commandDelta) / (double) dt);
-    final long commandCount = COMMAND_TOTAL.addAndGet(this, (long) commandDelta);
+    final long commandCount = WarpUplinkModem.COMMAND_TOTAL.addAndGet(this, (long) commandDelta);
 
     return new WarpUplinkProfile(this.uplinkAddress,
-        eventDelta, eventRate, eventCount,
-        commandDelta, commandRate, commandCount);
+                                 eventDelta, eventRate, eventCount,
+                                 commandDelta, commandRate, commandCount);
   }
+
+  static final int LINKED = 1 << 0;
+  static final int LINKING = 1 << 1;
+  static final int SYNCING = 1 << 2;
+  static final int UNLINKING = 1 << 3;
+  static final int CUED_DOWN = 1 << 4;
+  static final int FEEDING_DOWN = 1 << 5;
+  static final int FEEDING_UP = 1 << 6;
+  static final int PULLING_UP = 1 << 7;
+
+  static final AtomicIntegerFieldUpdater<WarpUplinkModem> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater(WarpUplinkModem.class, "status");
+
+  static final AtomicIntegerFieldUpdater<WarpUplinkModem> EVENT_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(WarpUplinkModem.class, "eventDelta");
+  static final AtomicLongFieldUpdater<WarpUplinkModem> EVENT_COUNT =
+      AtomicLongFieldUpdater.newUpdater(WarpUplinkModem.class, "eventCount");
+  static final AtomicIntegerFieldUpdater<WarpUplinkModem> COMMAND_DELTA =
+      AtomicIntegerFieldUpdater.newUpdater(WarpUplinkModem.class, "commandDelta");
+  static final AtomicLongFieldUpdater<WarpUplinkModem> COMMAND_TOTAL =
+      AtomicLongFieldUpdater.newUpdater(WarpUplinkModem.class, "commandCount");
+  static final AtomicLongFieldUpdater<WarpUplinkModem> LAST_REPORT_TIME =
+      AtomicLongFieldUpdater.newUpdater(WarpUplinkModem.class, "lastReportTime");
 
 }
 
@@ -1175,7 +1176,7 @@ final class WarpUplinkModemPullDown implements Runnable {
 
   @Override
   public void run() {
-    uplink.runPullDown();
+    this.uplink.runPullDown();
   }
 
 }
@@ -1192,7 +1193,7 @@ final class WarpUplinkModemOnCommand implements Runnable {
 
   @Override
   public void run() {
-    this.uplink.runOnCommand(push);
+    this.uplink.runOnCommand(this.push);
   }
 
 }
@@ -1209,7 +1210,7 @@ final class WarpUplinkModemOnLink implements Runnable {
 
   @Override
   public void run() {
-    this.uplink.runOnLink(push);
+    this.uplink.runOnLink(this.push);
   }
 
 }
@@ -1226,7 +1227,7 @@ final class WarpUplinkModemOnSync implements Runnable {
 
   @Override
   public void run() {
-    this.uplink.runOnSync(push);
+    this.uplink.runOnSync(this.push);
   }
 
 }
@@ -1243,7 +1244,7 @@ final class WarpUplinkModemOnUnlink implements Runnable {
 
   @Override
   public void run() {
-    this.uplink.runOnUnlink(push);
+    this.uplink.runOnUnlink(this.push);
   }
 
 }

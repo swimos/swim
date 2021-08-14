@@ -22,7 +22,6 @@ import swim.util.Murmur3;
 
 public class UriAuthority extends UriPart implements Comparable<UriAuthority>, Debug, Display {
 
-  private static UriAuthority undefined;
   protected final UriUser user;
   protected final UriHost host;
   protected final UriPort port;
@@ -32,42 +31,6 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
     this.user = user;
     this.host = host;
     this.port = port;
-  }
-
-  public static UriAuthority undefined() {
-    if (undefined == null) {
-      undefined = new UriAuthority(UriUser.undefined(), UriHost.undefined(), UriPort.undefined());
-    }
-    return undefined;
-  }
-
-  public static UriAuthority from(UriUser user, UriHost host, UriPort port) {
-    if (user == null) {
-      user = UriUser.undefined();
-    }
-    if (host == null) {
-      host = UriHost.undefined();
-    }
-    if (port == null) {
-      port = UriPort.undefined();
-    }
-    if (user.isDefined() || host.isDefined() || port.isDefined()) {
-      return new UriAuthority(user, host, port);
-    } else {
-      return undefined();
-    }
-  }
-
-  public static UriAuthority from(UriHost host, UriPort port) {
-    return from(null, host, port);
-  }
-
-  public static UriAuthority from(UriHost host) {
-    return from(null, host, null);
-  }
-
-  public static UriAuthority parse(String string) {
-    return Uri.standardParser().parseAuthorityString(string);
   }
 
   public final boolean isDefined() {
@@ -80,7 +43,7 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
 
   public UriAuthority user(UriUser user) {
     if (user != this.user) {
-      return copy(user, this.host, this.port);
+      return this.copy(user, this.host, this.port);
     } else {
       return this;
     }
@@ -91,7 +54,7 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
   }
 
   public UriAuthority userPart(String user) {
-    return user(UriUser.parse(user));
+    return this.user(UriUser.parse(user));
   }
 
   public String username() {
@@ -99,11 +62,11 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
   }
 
   public UriAuthority username(String username) {
-    return user(this.user.username(username));
+    return this.user(this.user.username(username));
   }
 
   public UriAuthority username(String username, String password) {
-    return user(UriUser.from(username, password));
+    return this.user(UriUser.create(username, password));
   }
 
   public String password() {
@@ -111,7 +74,7 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
   }
 
   public UriAuthority password(String password) {
-    return user(this.user.password(password));
+    return this.user(this.user.password(password));
   }
 
   public final UriHost host() {
@@ -120,7 +83,7 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
 
   public UriAuthority host(UriHost host) {
     if (host != this.host) {
-      return copy(this.user, host, this.port);
+      return this.copy(this.user, host, this.port);
     } else {
       return this;
     }
@@ -131,7 +94,7 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
   }
 
   public UriAuthority hostPart(String host) {
-    return host(UriHost.parse(host));
+    return this.host(UriHost.parse(host));
   }
 
   public final String hostAddress() {
@@ -143,7 +106,7 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
   }
 
   public UriAuthority hostName(String address) {
-    return host(UriHost.name(address));
+    return this.host(UriHost.name(address));
   }
 
   public final String hostIPv4() {
@@ -151,7 +114,7 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
   }
 
   public UriAuthority hostIPv4(String address) {
-    return host(UriHost.ipv4(address));
+    return this.host(UriHost.ipv4(address));
   }
 
   public final String hostIPv6() {
@@ -159,7 +122,7 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
   }
 
   public UriAuthority hostIPv6(String address) {
-    return host(UriHost.ipv6(address));
+    return this.host(UriHost.ipv6(address));
   }
 
   public final UriPort port() {
@@ -168,7 +131,7 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
 
   public UriAuthority port(UriPort port) {
     if (port != this.port) {
-      return copy(this.user, this.host, port);
+      return this.copy(this.user, this.host, port);
     } else {
       return this;
     }
@@ -179,7 +142,7 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
   }
 
   public UriAuthority portPart(String port) {
-    return port(UriPort.parse(port));
+    return this.port(UriPort.parse(port));
   }
 
   public final int portNumber() {
@@ -187,16 +150,16 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
   }
 
   public UriAuthority portNumber(int number) {
-    return port(UriPort.from(number));
+    return this.port(UriPort.create(number));
   }
 
   protected UriAuthority copy(UriUser user, UriHost host, UriPort port) {
-    return UriAuthority.from(user, host, port);
+    return UriAuthority.create(user, host, port);
   }
 
   @Override
   public final int compareTo(UriAuthority that) {
-    return toString().compareTo(that.toString());
+    return this.toString().compareTo(that.toString());
   }
 
   @Override
@@ -204,39 +167,42 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
     if (this == other) {
       return true;
     } else if (other instanceof UriAuthority) {
-      return toString().equals(((UriAuthority) other).toString());
+      return this.toString().equals(((UriAuthority) other).toString());
     }
     return false;
   }
 
   @Override
   public final int hashCode() {
-    return Murmur3.seed(toString());
+    return Murmur3.seed(this.toString());
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("UriAuthority").write('.');
-    if (isDefined()) {
-      output = output.write("parse").write('(').write('"').display(this).write('"').write(')');
+    if (this.isDefined()) {
+      output = output.write("parse").write('(').write('"').display(this).write('"');
     } else {
-      output = output.write("undefined").write('(').write(')');
+      output = output.write("undefined").write('(');
     }
+    output = output.write(')');
+    return output;
   }
 
   @Override
-  public void display(Output<?> output) {
+  public <T> Output<T> display(Output<T> output) {
     if (this.string != null) {
       output = output.write(this.string);
     } else {
       if (this.user.isDefined()) {
-        output.display(this.user).write('@');
+        output = output.display(this.user).write('@');
       }
-      output.display(this.host);
+      output = output.display(this.host);
       if (this.port.isDefined()) {
         output = output.write(':').display(this.port);
       }
     }
+    return output;
   }
 
   @Override
@@ -245,6 +211,44 @@ public class UriAuthority extends UriPart implements Comparable<UriAuthority>, D
       this.string = Format.display(this);
     }
     return this.string;
+  }
+
+  private static UriAuthority undefined;
+
+  public static UriAuthority undefined() {
+    if (UriAuthority.undefined == null) {
+      UriAuthority.undefined = new UriAuthority(UriUser.undefined(), UriHost.undefined(), UriPort.undefined());
+    }
+    return UriAuthority.undefined;
+  }
+
+  public static UriAuthority create(UriUser user, UriHost host, UriPort port) {
+    if (user == null) {
+      user = UriUser.undefined();
+    }
+    if (host == null) {
+      host = UriHost.undefined();
+    }
+    if (port == null) {
+      port = UriPort.undefined();
+    }
+    if (user.isDefined() || host.isDefined() || port.isDefined()) {
+      return new UriAuthority(user, host, port);
+    } else {
+      return UriAuthority.undefined();
+    }
+  }
+
+  public static UriAuthority create(UriHost host, UriPort port) {
+    return UriAuthority.create(null, host, port);
+  }
+
+  public static UriAuthority create(UriHost host) {
+    return UriAuthority.create(null, host, null);
+  }
+
+  public static UriAuthority parse(String string) {
+    return Uri.standardParser().parseAuthorityString(string);
   }
 
 }

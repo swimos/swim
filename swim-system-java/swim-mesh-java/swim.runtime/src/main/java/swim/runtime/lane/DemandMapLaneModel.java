@@ -17,6 +17,7 @@ package swim.runtime.lane;
 import java.util.Iterator;
 import swim.api.warp.WarpUplink;
 import swim.collections.FingerTrieSeq;
+import swim.runtime.LaneModel;
 import swim.runtime.LaneView;
 import swim.runtime.WarpBinding;
 import swim.runtime.warp.WarpLaneModel;
@@ -32,7 +33,7 @@ public class DemandMapLaneModel extends WarpLaneModel<DemandMapLaneView<?, ?>, D
 
   @Override
   protected DemandMapLaneUplink createWarpUplink(WarpBinding link) {
-    return new DemandMapLaneUplink(this, link, createUplinkAddress(link));
+    return new DemandMapLaneUplink(this, link, this.createUplinkAddress(link));
   }
 
   @Override
@@ -40,22 +41,23 @@ public class DemandMapLaneModel extends WarpLaneModel<DemandMapLaneView<?, ?>, D
     view.setLaneBinding(this);
   }
 
+  @SuppressWarnings("unchecked")
   void cueDownKey(Value key) {
     FingerTrieSeq<DemandMapLaneUplink> uplinks;
     do {
-      uplinks = this.uplinks;
+      uplinks = (FingerTrieSeq<DemandMapLaneUplink>) LaneModel.UPLINKS.get(this);
       for (int i = 0, n = uplinks.size(); i < n; i += 1) {
         uplinks.get(i).cueDownKey(key);
       }
-    } while (uplinks != this.uplinks);
+    } while (uplinks != LaneModel.UPLINKS.get(this));
   }
 
   void remove(Value key) {
-    sendDown(Record.create(1).attr("remove", Record.create(1).slot("key", key)));
+    this.sendDown(Record.create(1).attr("remove", Record.create(1).slot("key", key)));
   }
 
   Value nextDownCue(Value key, WarpUplink uplink) {
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof DemandMapLaneView<?, ?>) {
       return ((DemandMapLaneView<?, ?>) views).nextDownCue(key, uplink);
     } else if (views instanceof LaneView[]) {
@@ -71,7 +73,7 @@ public class DemandMapLaneModel extends WarpLaneModel<DemandMapLaneView<?, ?>, D
   }
 
   Iterator<Value> syncKeys(WarpUplink uplink) {
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof DemandMapLaneView<?, ?>) {
       return ((DemandMapLaneView<?, ?>) views).syncKeys(uplink);
     } else if (views instanceof LaneView[]) {

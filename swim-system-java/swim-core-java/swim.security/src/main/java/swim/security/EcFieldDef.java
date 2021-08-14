@@ -25,7 +25,9 @@ import swim.structure.Value;
 
 public abstract class EcFieldDef {
 
-  private static Form<EcFieldDef> form;
+  public abstract ECField toECField();
+
+  public abstract Value toValue();
 
   public static EcFieldDef from(ECField field) {
     if (field instanceof ECFieldFp) {
@@ -37,17 +39,15 @@ public abstract class EcFieldDef {
     }
   }
 
+  private static Form<EcFieldDef> form;
+
   @Kind
   public static Form<EcFieldDef> form() {
-    if (form == null) {
-      form = new EcFieldForm();
+    if (EcFieldDef.form == null) {
+      EcFieldDef.form = new EcFieldForm();
     }
-    return form;
+    return EcFieldDef.form;
   }
-
-  public abstract ECField toECField();
-
-  public abstract Value toValue();
 
 }
 
@@ -71,7 +71,7 @@ final class EcFieldForm extends Form<EcFieldDef> {
   @Override
   public EcFieldDef cast(Item item) {
     final Value value = item.toValue();
-    final Value header = value.getAttr(tag());
+    final Value header = value.getAttr(this.tag());
     if (header.isDefined()) {
       final BigInteger prime = value.get("prime").integerValue(null);
       if (prime != null) {

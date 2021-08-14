@@ -271,7 +271,7 @@ public class RecordMapSpec {
   public void testCompose() {
     for (int k = 4; k <= 20; k += 4) {
       final int n = 1 << k;
-      testComposeRecord(n);
+      this.testComposeRecord(n);
     }
   }
 
@@ -301,7 +301,7 @@ public class RecordMapSpec {
   @Test
   public void testDecompose() {
     for (int n = 4; n <= 4096; n *= 2) {
-      testDecomposeRecord(n);
+      this.testDecomposeRecord(n);
     }
   }
 

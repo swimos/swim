@@ -31,7 +31,7 @@ import swim.io.TlsSettings;
 import swim.io.http.HttpEndpoint;
 import swim.io.warp.WarpSettings;
 import swim.remote.RemoteHostClient;
-import swim.runtime.AbstractSwimRef;
+import swim.runtime.AbstractWarpRef;
 import swim.runtime.EdgeAddress;
 import swim.runtime.EdgeBinding;
 import swim.runtime.EdgeContext;
@@ -55,7 +55,7 @@ import swim.runtime.router.PartTable;
 import swim.store.StoreBinding;
 import swim.uri.Uri;
 
-public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContext {
+public class ClientRuntime extends AbstractWarpRef implements Client, EdgeContext {
 
   final Stage stage;
   final WarpSettings warpSettings;
@@ -69,6 +69,7 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
     this.endpoint = new HttpEndpoint(stage, warpSettings.httpSettings());
     this.edge = new EdgeTable();
     this.edge.setEdgeContext(this);
+    this.store = null;
   }
 
   public ClientRuntime(Stage stage) {
@@ -104,7 +105,7 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapEdge(Class<T> edgeClass) {
-    if (edgeClass.isAssignableFrom(getClass())) {
+    if (edgeClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -114,7 +115,7 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
   @SuppressWarnings("unchecked")
   @Override
   public <T> T bottomEdge(Class<T> edgeClass) {
-    if (edgeClass.isAssignableFrom(getClass())) {
+    if (edgeClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -123,7 +124,7 @@ public class ClientRuntime extends AbstractSwimRef implements Client, EdgeContex
 
   @Override
   public EdgeAddress cellAddress() {
-    return new EdgeAddress(edgeName());
+    return new EdgeAddress(this.edgeName());
   }
 
   @Override

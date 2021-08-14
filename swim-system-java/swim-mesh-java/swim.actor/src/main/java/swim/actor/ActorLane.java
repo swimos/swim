@@ -49,6 +49,7 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
 
   public ActorLane(LaneBinding laneBinding, LaneDef laneDef) {
     this.laneBinding = laneBinding;
+    this.laneContext = null;
     this.laneDef = laneDef;
   }
 
@@ -57,7 +58,7 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   }
 
   public final ActorNode actorNode() {
-    return node().unwrapNode(ActorNode.class);
+    return this.node().unwrapNode(ActorNode.class);
   }
 
   @Override
@@ -88,7 +89,7 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapLane(Class<T> laneClass) {
-    if (laneClass.isAssignableFrom(getClass())) {
+    if (laneClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.laneContext.unwrapLane(laneClass);
@@ -99,7 +100,7 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   @Override
   public <T> T bottomLane(Class<T> laneClass) {
     T lane = this.laneContext.bottomLane(laneClass);
-    if (lane == null && laneClass.isAssignableFrom(getClass())) {
+    if (lane == null && laneClass.isAssignableFrom(this.getClass())) {
       lane = (T) this;
     }
     return lane;
@@ -191,17 +192,17 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   }
 
   public Log createLog(LogDef logDef) {
-    final ActorNode node = actorNode();
+    final ActorNode node = this.actorNode();
     return node != null ? node.createLog(logDef) : null;
   }
 
   public Log createLog(CellAddress cellAddress) {
-    final ActorNode node = actorNode();
+    final ActorNode node = this.actorNode();
     return node != null ? node.createLog(cellAddress) : null;
   }
 
   public Log injectLog(Log log) {
-    final ActorNode node = actorNode();
+    final ActorNode node = this.actorNode();
     return node != null ? node.injectLog(log) : log;
   }
 
@@ -209,28 +210,28 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   protected Log openLog() {
     Log log;
     if (this.laneDef != null && this.laneDef.logDef() != null) {
-      log = createLog(this.laneDef.logDef());
+      log = this.createLog(this.laneDef.logDef());
     } else {
-      log = createLog(cellAddress());
+      log = this.createLog(this.cellAddress());
     }
     if (log != null) {
-      log = injectLog(log);
+      log = this.injectLog(log);
     }
     return log;
   }
 
   public Policy createPolicy(PolicyDef policyDef) {
-    final ActorNode node = actorNode();
+    final ActorNode node = this.actorNode();
     return node != null ? node.createPolicy(policyDef) : null;
   }
 
   public Policy createPolicy(CellAddress cellAddress) {
-    final ActorNode node = actorNode();
+    final ActorNode node = this.actorNode();
     return node != null ? node.createPolicy(cellAddress) : null;
   }
 
   public Policy injectPolicy(Policy policy) {
-    final ActorNode node = actorNode();
+    final ActorNode node = this.actorNode();
     return node != null ? node.injectPolicy(policy) : policy;
   }
 
@@ -238,28 +239,28 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   protected Policy openPolicy() {
     Policy policy;
     if (this.laneDef != null && this.laneDef.policyDef() != null) {
-      policy = createPolicy(this.laneDef.policyDef());
+      policy = this.createPolicy(this.laneDef.policyDef());
     } else {
-      policy = createPolicy(cellAddress());
+      policy = this.createPolicy(this.cellAddress());
     }
     if (policy != null) {
-      policy = injectPolicy(policy);
+      policy = this.injectPolicy(policy);
     }
     return policy;
   }
 
   public Stage createStage(StageDef stageDef) {
-    final ActorNode node = actorNode();
+    final ActorNode node = this.actorNode();
     return node != null ? node.createStage(stageDef) : null;
   }
 
   public Stage createStage(CellAddress cellAddress) {
-    final ActorNode node = actorNode();
+    final ActorNode node = this.actorNode();
     return node != null ? node.createStage(cellAddress) : null;
   }
 
   public Stage injectStage(Stage stage) {
-    final ActorNode node = actorNode();
+    final ActorNode node = this.actorNode();
     return node != null ? node.injectStage(stage) : stage;
   }
 
@@ -267,28 +268,28 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   protected Stage openStage() {
     Stage stage;
     if (this.laneDef != null && this.laneDef.stageDef() != null) {
-      stage = createStage(this.laneDef.stageDef());
+      stage = this.createStage(this.laneDef.stageDef());
     } else {
-      stage = createStage(cellAddress());
+      stage = this.createStage(this.cellAddress());
     }
     if (stage != null) {
-      stage = injectStage(stage);
+      stage = this.injectStage(stage);
     }
     return stage;
   }
 
   public StoreBinding createStore(StoreDef storeDef) {
-    final ActorNode node = actorNode();
+    final ActorNode node = this.actorNode();
     return node != null ? node.createStore(storeDef) : null;
   }
 
   public StoreBinding createStore(CellAddress cellAddress) {
-    final ActorNode node = actorNode();
+    final ActorNode node = this.actorNode();
     return node != null ? node.createStore(cellAddress) : null;
   }
 
   public StoreBinding injectStore(StoreBinding store) {
-    final ActorNode node = actorNode();
+    final ActorNode node = this.actorNode();
     return node != null ? node.injectStore(store) : store;
   }
 
@@ -296,12 +297,12 @@ public class ActorLane extends ActorTier implements LaneBinding, LaneContext {
   protected StoreBinding openStore() {
     StoreBinding store = null;
     if (this.laneDef != null && this.laneDef.storeDef() != null) {
-      store = createStore(this.laneDef.storeDef());
+      store = this.createStore(this.laneDef.storeDef());
     } else {
-      store = createStore(cellAddress());
+      store = this.createStore(this.cellAddress());
     }
     if (store != null) {
-      store = injectStore(store);
+      store = this.injectStore(store);
     }
     return store;
   }

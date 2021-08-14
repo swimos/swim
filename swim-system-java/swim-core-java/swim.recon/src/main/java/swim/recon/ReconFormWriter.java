@@ -40,18 +40,18 @@ final class ReconFormWriter<T> extends Writer<T, T> {
 
   @Override
   public Writer<T, T> feed(T object) {
-    return new ReconFormWriter<T>(recon, form, object, null);
+    return new ReconFormWriter<T>(this.recon, this.form, object, null);
   }
 
   @Override
   public Writer<T, T> pull(Output<?> output) {
-    return write(output, this.recon, this.form, this.object, this.part);
+    return ReconFormWriter.write(output, this.recon, this.form, this.object, this.part);
   }
 
   static <T> Writer<T, T> write(Output<?> output, ReconWriter<Item, Value> recon,
                                 Form<T> form, T object, Writer<?, ?> part) {
     if (output == null) {
-      return done();
+      return Writer.done();
     }
     if (part == null) {
       final Value value = form.mold(object).toValue();
@@ -60,16 +60,15 @@ final class ReconFormWriter<T> extends Writer<T, T> {
       part = part.pull(output);
     }
     if (part.isDone()) {
-      return done(object);
+      return Writer.done(object);
     } else if (part.isError()) {
       return part.asError();
     }
     return new ReconFormWriter<T>(recon, form, object, part);
   }
 
-  static <T> Writer<T, T> write(Output<T> output, ReconWriter<Item, Value> recon,
-                                Form<T> form, T object) {
-    return write(output, recon, form, object, null);
+  static <T> Writer<T, T> write(Output<T> output, ReconWriter<Item, Value> recon, Form<T> form, T object) {
+    return ReconFormWriter.write(output, recon, form, object, null);
   }
 
 }

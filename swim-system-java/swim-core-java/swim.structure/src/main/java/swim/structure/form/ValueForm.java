@@ -20,7 +20,7 @@ import swim.structure.Value;
 
 /**
  * Fall-through transformation between a structurally typed {@link Item} and a
- * structurally typed {@link Value}.  {@link #mold} simply returns the
+ * structurally typed {@link Value}. {@link #mold} simply returns the
  * {@code Value} argument itself, and {@link #cast} simply invokes {@link
  * Item#toValue()} against the {@code Item} argument.
  */

@@ -25,29 +25,12 @@ import swim.util.Murmur3;
 
 public final class WsStatus implements Debug {
 
-  private static int hashSeed;
   final int code;
   final String reason;
 
   WsStatus(int code, String reason) {
     this.code = code;
     this.reason = reason;
-  }
-
-  public static WsStatus from(int code, String reason) {
-    return new WsStatus(code, reason);
-  }
-
-  public static WsStatus from(int code) {
-    return new WsStatus(code, "");
-  }
-
-  public static Decoder<WsStatus> decoder() {
-    return new WsStatusDecoder();
-  }
-
-  public static Decoder<WsStatus> decode(InputBuffer input) {
-    return WsStatusDecoder.decode(input);
   }
 
   public int code() {
@@ -77,26 +60,46 @@ public final class WsStatus implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(WsStatus.class);
+    if (WsStatus.hashSeed == 0) {
+      WsStatus.hashSeed = Murmur3.seed(WsStatus.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed, this.code), this.reason.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(WsStatus.hashSeed,
+        this.code), this.reason.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("WsStatus").write('.').write("from").write('(').debug(code);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("WsStatus").write('.').write("create").write('(').debug(this.code);
     if (!this.reason.isEmpty()) {
       output = output.write(", ").debug(this.reason);
     }
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static WsStatus create(int code, String reason) {
+    return new WsStatus(code, reason);
+  }
+
+  public static WsStatus create(int code) {
+    return new WsStatus(code, "");
+  }
+
+  public static Decoder<WsStatus> decoder() {
+    return new WsStatusDecoder();
+  }
+
+  public static Decoder<WsStatus> decode(InputBuffer input) {
+    return WsStatusDecoder.decode(input);
   }
 
 }

@@ -22,7 +22,6 @@ import swim.util.Murmur3;
 
 public final class ConditionalOperator extends Operator {
 
-  private static int hashSeed;
   final Item ifTerm;
   final Item thenTerm;
   final Item elseTerm;
@@ -88,9 +87,9 @@ public final class ConditionalOperator extends Operator {
   @Override
   protected int compareTo(Operator that) {
     if (that instanceof ConditionalOperator) {
-      return compareTo((ConditionalOperator) that);
+      return this.compareTo((ConditionalOperator) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(ConditionalOperator that) {
@@ -116,19 +115,22 @@ public final class ConditionalOperator extends Operator {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ConditionalOperator.class);
+    if (ConditionalOperator.hashSeed == 0) {
+      ConditionalOperator.hashSeed = Murmur3.seed(ConditionalOperator.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(ConditionalOperator.hashSeed,
         this.ifTerm.hashCode()), this.thenTerm.hashCode()), this.elseTerm.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output.debug(this.ifTerm).write('.').write("conditional").write('(')
-        .debug(this.thenTerm).write(", ").debug(this.elseTerm).write(')');
+          .debug(this.thenTerm).write(", ").debug(this.elseTerm).write(')');
+    return output;
   }
 
 }

@@ -23,7 +23,6 @@ import swim.util.Murmur3;
 
 public class Cmd implements Cloneable, Debug {
 
-  private static int hashSeed;
   final String id;
   final String name;
   String desc;
@@ -43,21 +42,6 @@ public class Cmd implements Cloneable, Debug {
     this.cmds = cmds;
     this.exec = exec;
     this.base = base;
-  }
-
-  public static Cmd of(String id, String name) {
-    return new Cmd(id, name, null, FingerTrieSeq.empty(), FingerTrieSeq.empty(),
-                   FingerTrieSeq.empty(), null, null);
-  }
-
-  public static Cmd of(String id) {
-    return new Cmd(id, id, null, FingerTrieSeq.empty(), FingerTrieSeq.empty(),
-                   FingerTrieSeq.empty(), null, null);
-  }
-
-  public static Cmd help() {
-    return new Cmd("help", "help", null, FingerTrieSeq.empty(), FingerTrieSeq.empty(),
-                   FingerTrieSeq.empty(), new ExecHelpCmd(), null);
   }
 
   public Cmd base() {
@@ -91,7 +75,7 @@ public class Cmd implements Cloneable, Debug {
   }
 
   public Cmd opt(String opt) {
-    return opt(Opt.of(opt));
+    return this.opt(Opt.create(opt));
   }
 
   public FingerTrieSeq<Arg> args() {
@@ -104,7 +88,7 @@ public class Cmd implements Cloneable, Debug {
   }
 
   public Cmd arg(String arg) {
-    return arg(Arg.of(arg));
+    return this.arg(Arg.create(arg));
   }
 
   public FingerTrieSeq<Cmd> cmds() {
@@ -117,7 +101,7 @@ public class Cmd implements Cloneable, Debug {
   }
 
   public Cmd cmd(String cmd) {
-    return cmd(Cmd.of(cmd));
+    return this.cmd(Cmd.create(cmd));
   }
 
   public Opt getOpt(String name) {
@@ -131,7 +115,7 @@ public class Cmd implements Cloneable, Debug {
   }
 
   public Arg getArg() {
-    return getArg(0);
+    return this.getArg(0);
   }
 
   public Arg getArg(int index) {
@@ -139,7 +123,7 @@ public class Cmd implements Cloneable, Debug {
   }
 
   public String getValue() {
-    return getValue(0);
+    return this.getValue(0);
   }
 
   public String getValue(int index) {
@@ -148,7 +132,7 @@ public class Cmd implements Cloneable, Debug {
   }
 
   public Cmd parse(String[] params) {
-    return parse(params, 1);
+    return this.parse(params, 1);
   }
 
   public Cmd parse(String[] params, int paramIndex) {
@@ -226,80 +210,82 @@ public class Cmd implements Cloneable, Debug {
     return cmd;
   }
 
-  public void writeFullName(Output<String> output) {
+  public <T> Output<T> writeFullName(Output<T> output) {
     if (this.base != null) {
-      this.base.writeFullName(output);
-      output.write(' ');
+      output = this.base.writeFullName(output);
+      output = output.write(' ');
     }
-    output.write(this.name);
+    output = output.write(this.name);
+    return output;
   }
 
-  public void writeHelp(Output<String> output) {
-    output.write("Usage: ");
-    this.writeFullName(output);
+  public <T> Output<T> writeHelp(Output<T> output) {
+    output = output.write("Usage: ");
+    output = this.writeFullName(output);
     final int optCount = this.opts.size();
     final int argCount = this.args.size();
     final int cmdCount = this.cmds.size();
     if (optCount != 0) {
-      output.write(' ').write("[options]");
+      output = output.write(' ').write("[options]");
     }
     if (argCount != 0) {
       for (int argIndex = 0; argIndex < argCount; argIndex += 1) {
         final Arg arg = this.args.get(argIndex);
-        output.write(' ').write('[').write(arg.name).write(']');
+        output = output.write(' ').write('[').write(arg.name).write(']');
         if (arg.optional) {
-          output.write('?');
+          output = output.write('?');
         }
       }
     } else if (cmdCount != 0) {
-      output.write(' ').write("<command>");
+      output = output.write(' ').write("<command>");
     }
-    output.writeln();
+    output = output.writeln();
     if (optCount != 0) {
-      output.writeln();
-      output.writeln("Options:");
+      output = output.writeln();
+      output = output.writeln("Options:");
       for (int optIndex = 0; optIndex < optCount; optIndex += 1) {
         final Opt opt = this.opts.get(optIndex);
         if (opt.flag != 0) {
-          output.write("  -").write(opt.flag).write(", --").write(opt.name);
+          output = output.write("  -").write(opt.flag).write(", --").write(opt.name);
         } else {
-          output.write("      --").write(opt.name);
+          output = output.write("      --").write(opt.name);
         }
         int optLength = opt.name.length();
         final int optArgCount = opt.args.size();
         for (int optArgIndex = 0; optArgIndex < optArgCount; optArgIndex += 1) {
           final Arg optArg = opt.args.get(optArgIndex);
-          output.write(' ').write('<').write(optArg.name).write('>');
+          output = output.write(' ').write('<').write(optArg.name).write('>');
           optLength += 2 + optArg.name.length() + 1;
           if (optArg.optional) {
-            output.write('?');
+            output = output.write('?');
             optLength += 1;
           }
         }
         for (int i = optLength; i < 15; i += 1) {
-          output.write(' ');
+          output = output.write(' ');
         }
         if (opt.desc != null) {
-          output.write(' ').write(opt.desc);
+          output = output.write(' ').write(opt.desc);
         }
-        output.writeln();
+        output = output.writeln();
       }
     }
     if (cmdCount != 0) {
-      output.writeln();
-      output.writeln("Commands:");
+      output = output.writeln();
+      output = output.writeln("Commands:");
       for (int cmdIndex = 0; cmdIndex < cmdCount; cmdIndex += 1) {
         final Cmd cmd = this.cmds.get(cmdIndex);
-        output.write("  ").write(cmd.name);
+        output = output.write("  ").write(cmd.name);
         for (int i = cmd.name.length(); i < 20; i += 1) {
-          output.write(' ');
+          output = output.write(' ');
         }
         if (cmd.desc != null) {
-          output.write("  ").write(cmd.desc);
+          output = output.write("  ").write(cmd.desc);
         }
-        output.writeln();
+        output = output.writeln();
       }
     }
+    return output;
   }
 
   public String toHelp() {
@@ -327,19 +313,21 @@ public class Cmd implements Cloneable, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Cmd.class);
+    if (Cmd.hashSeed == 0) {
+      Cmd.hashSeed = Murmur3.seed(Cmd.class);
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
-        hashSeed, this.id.hashCode()), this.name.hashCode()), Murmur3.hash(this.desc)),
+        Cmd.hashSeed, this.id.hashCode()), this.name.hashCode()), Murmur3.hash(this.desc)),
         this.opts.hashCode()), this.args.hashCode()), this.cmds.hashCode()), Murmur3.hash(this.exec)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("Cmd").write('.').write("of").write('(').debug(this.name).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Cmd").write('.').write("create").write('(').debug(this.name).write(')');
     if (this.desc != null) {
       output = output.write('.').write("flag").write('(').debug(this.desc).write(')');
     }
@@ -364,6 +352,7 @@ public class Cmd implements Cloneable, Debug {
     if (this.base != null) {
       output = output.write('.').write("base").write('(').debug(this.base).write(')');
     }
+    return output;
   }
 
   @Override
@@ -389,6 +378,21 @@ public class Cmd implements Cloneable, Debug {
       cmds = cmds.appended(this.cmds.get(i).clone());
     }
     return new Cmd(this.id, this.name, this.desc, opts, args, cmds, this.exec, this.base);
+  }
+
+  public static Cmd create(String id, String name) {
+    return new Cmd(id, name, null, FingerTrieSeq.empty(), FingerTrieSeq.empty(),
+                   FingerTrieSeq.empty(), null, null);
+  }
+
+  public static Cmd create(String id) {
+    return new Cmd(id, id, null, FingerTrieSeq.empty(), FingerTrieSeq.empty(),
+                   FingerTrieSeq.empty(), null, null);
+  }
+
+  public static Cmd help() {
+    return new Cmd("help", "help", null, FingerTrieSeq.empty(), FingerTrieSeq.empty(),
+                   FingerTrieSeq.empty(), new ExecHelpCmd(), null);
   }
 
 }

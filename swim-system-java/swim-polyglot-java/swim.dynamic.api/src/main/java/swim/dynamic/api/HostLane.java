@@ -23,6 +23,10 @@ import swim.dynamic.java.lang.HostObject;
 
 public final class HostLane {
 
+  private HostLane() {
+    // static
+  }
+
   public static final HostObjectType<Lane> TYPE;
 
   static {
@@ -33,10 +37,6 @@ public final class HostLane {
     type.addMember(new HostLaneNodeUri());
     type.addMember(new HostLaneLaneUri());
     type.addMember(new HostLaneClose());
-  }
-
-  private HostLane() {
-    // static
   }
 
 }

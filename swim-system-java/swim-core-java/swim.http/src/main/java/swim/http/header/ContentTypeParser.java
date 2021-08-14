@@ -33,6 +33,11 @@ final class ContentTypeParser extends Parser<ContentType> {
     this(http, null);
   }
 
+  @Override
+  public Parser<ContentType> feed(Input input) {
+    return ContentTypeParser.parse(input, this.http, this.mediaType);
+  }
+
   static Parser<ContentType> parse(Input input, HttpParser http, Parser<MediaType> mediaType) {
     if (mediaType == null) {
       mediaType = http.parseMediaType(input);
@@ -40,22 +45,17 @@ final class ContentTypeParser extends Parser<ContentType> {
       mediaType = mediaType.feed(input);
     }
     if (mediaType.isDone()) {
-      return done(ContentType.from(mediaType.bind()));
+      return Parser.done(ContentType.create(mediaType.bind()));
     } else if (mediaType.isError()) {
       return mediaType.asError();
     } else if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new ContentTypeParser(http, mediaType);
   }
 
   static Parser<ContentType> parse(Input input, HttpParser http) {
-    return parse(input, http, null);
-  }
-
-  @Override
-  public Parser<ContentType> feed(Input input) {
-    return parse(input, this.http, this.mediaType);
+    return ContentTypeParser.parse(input, http, null);
   }
 
 }

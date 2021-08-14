@@ -25,7 +25,6 @@ module swim.http {
   requires swim.recon;
   requires swim.json;
   requires swim.xml;
-  requires swim.decipher;
 
   exports swim.http;
   exports swim.http.header;

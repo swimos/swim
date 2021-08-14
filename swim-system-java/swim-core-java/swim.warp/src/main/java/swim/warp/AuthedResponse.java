@@ -20,9 +20,6 @@ import swim.structure.Value;
 
 public final class AuthedResponse extends HostAddressed {
 
-  @Kind
-  public static final Form<AuthedResponse> FORM = new AuthedResponseForm();
-
   public AuthedResponse(Value body) {
     super(body);
   }
@@ -38,13 +35,16 @@ public final class AuthedResponse extends HostAddressed {
 
   @Override
   public Form<AuthedResponse> form() {
-    return FORM;
+    return AuthedResponse.FORM;
   }
 
   @Override
   public AuthedResponse body(Value body) {
     return new AuthedResponse(body);
   }
+
+  @Kind
+  public static final Form<AuthedResponse> FORM = new AuthedResponseForm();
 
 }
 
@@ -61,7 +61,7 @@ final class AuthedResponseForm extends HostAddressedForm<AuthedResponse> {
   }
 
   @Override
-  public AuthedResponse from(Value body) {
+  public AuthedResponse create(Value body) {
     return new AuthedResponse(body);
   }
 

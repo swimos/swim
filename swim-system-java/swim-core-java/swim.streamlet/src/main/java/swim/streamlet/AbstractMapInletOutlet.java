@@ -44,7 +44,7 @@ public abstract class AbstractMapInletOutlet<K, V, I, O> implements MapInletOutl
   @Override
   public void bindInput(Outlet<? extends I> input) {
     if (input instanceof MapOutlet<?, ?, ?>) {
-      bindInput((MapOutlet<K, V, ? extends I>) input);
+      this.bindInput((MapOutlet<K, V, ? extends I>) input);
     } else {
       throw new IllegalArgumentException(input.toString());
     }
@@ -150,39 +150,39 @@ public abstract class AbstractMapInletOutlet<K, V, I, O> implements MapInletOutl
   public void decohereOutputKey(K key, KeyEffect effect) {
     final HashTrieMap<K, KeyEffect> oldEffects = this.effects;
     if (oldEffects.get(key) != effect) {
-      willDecohereOutputKey(key, effect);
+      this.willDecohereOutputKey(key, effect);
       this.effects = oldEffects.updated(key, effect);
       this.version = -1;
-      onDecohereOutputKey(key, effect);
+      this.onDecohereOutputKey(key, effect);
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         final Inlet<?> output = this.outputs[i];
         output.decohereOutput();
       }
-      didDecohereOutputKey(key, effect);
+      this.didDecohereOutputKey(key, effect);
     }
   }
 
   @Override
   public void decohereOutput() {
-    decohere();
+    this.decohere();
   }
 
   @Override
   public void decohereInput() {
-    decohere();
+    this.decohere();
   }
 
   public void decohere() {
     if (this.version >= 0) {
-      willDecohere();
+      this.willDecohere();
       this.version = -1;
-      onDecohere();
+      this.onDecohere();
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         this.outputs[i].decohereOutput();
       }
-      didDecohere();
+      this.didDecohere();
     }
   }
 
@@ -193,40 +193,40 @@ public abstract class AbstractMapInletOutlet<K, V, I, O> implements MapInletOutl
       final HashTrieMap<K, KeyEffect> oldEffects = this.effects;
       final KeyEffect effect = oldEffects.get(key);
       if (effect != null) {
-        willRecohereOutputKey(key, effect, version);
+        this.willRecohereOutputKey(key, effect, version);
         this.effects = oldEffects.removed(key);
         if (this.input != null) {
           this.input.recohereInputKey(key, version);
         }
-        onRecohereOutputKey(key, effect, version);
-        didRecohereOutputKey(key, effect, version);
+        this.onRecohereOutputKey(key, effect, version);
+        this.didRecohereOutputKey(key, effect, version);
       }
     }
   }
 
   @Override
   public void recohereOutput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   @Override
   public void recohereInput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   public void recohere(int version) {
     if (this.version < 0) {
-      willRecohere(version);
+      this.willRecohere(version);
       final Iterator<K> keys = this.effects.keyIterator();
       while (keys.hasNext()) {
-        recohereOutputKey(keys.next(), version);
+        this.recohereOutputKey(keys.next(), version);
       }
       this.version = version;
-      onRecohere(version);
+      this.onRecohere(version);
       for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
         this.outputs[i].recohereOutput(version);
       }
-      didRecohere(version);
+      this.didRecohere(version);
     }
   }
 

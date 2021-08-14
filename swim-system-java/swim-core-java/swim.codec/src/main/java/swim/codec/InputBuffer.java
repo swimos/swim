@@ -19,131 +19,6 @@ package swim.codec;
  */
 public abstract class InputBuffer extends Input {
 
-  private static InputBuffer empty;
-  private static InputBuffer done;
-
-  /**
-   * Returns an {@code InputBuffer} in the <em>empty</em> state.
-   */
-  public static InputBuffer empty() {
-    if (empty == null) {
-      empty = new InputBufferEmpty(null, Mark.zero(), InputSettings.standard());
-    }
-    return empty;
-  }
-
-  /**
-   * Returns an {@code InputBuffer} in the <em>empty</em> state, with the given
-   * {@code settings}.
-   */
-  public static InputBuffer empty(InputSettings settings) {
-    if (settings == InputSettings.standard()) {
-      return empty();
-    }
-    return new InputBufferEmpty(null, Mark.zero(), settings);
-  }
-
-  /**
-   * Returns an {@code InputBuffer} in the <em>empty</em> state, at the {@code
-   * mark} position of a token stream logically identified by {@code id}.
-   */
-  public static InputBuffer empty(Object id, Mark mark) {
-    if (id == null && (mark == null || mark == Mark.zero())) {
-      return empty();
-    }
-    return new InputBufferEmpty(id, mark, InputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code InputBuffer} in the <em>empty</em> state, at the {@code
-   * mark} position of a token stream logically identified by {@code id},
-   * with the given {@code settings}.
-   */
-  public static InputBuffer empty(Object id, Mark mark, InputSettings settings) {
-    if (id == null && (mark == null || mark == Mark.zero()) && settings == InputSettings.standard()) {
-      return empty();
-    }
-    return new InputBufferEmpty(id, mark, settings);
-  }
-
-  /**
-   * Returns an {@code InputBuffer} in the <em>done</em> state.
-   */
-  public static InputBuffer done() {
-    if (done == null) {
-      done = new InputBufferDone(null, Mark.zero(), InputSettings.standard());
-    }
-    return done;
-  }
-
-  /**
-   * Returns an {@code InputBuffer} in the <em>done</em> state, with the given
-   * {@code settings}.
-   */
-  public static InputBuffer done(InputSettings settings) {
-    if (settings == InputSettings.standard()) {
-      return done();
-    }
-    return new InputBufferDone(null, Mark.zero(), settings);
-  }
-
-  /**
-   * Returns an {@code InputBuffer} in the <em>done</em> state, at the {@code
-   * mark} position of a token stream logically identified by {@code id}.
-   */
-  public static InputBuffer done(Object id, Mark mark) {
-    if (id == null && (mark == null || mark == Mark.zero())) {
-      return done();
-    }
-    return new InputBufferDone(id, mark, InputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code InputBuffer} in the <em>done</em> state, at the {@code
-   * mark} position of a token stream logically identified by {@code id},
-   * with the given {@code settings}.
-   */
-  public static InputBuffer done(Object id, Mark mark, InputSettings settings) {
-    if (id == null && (mark == null || mark == Mark.zero()) && settings == InputSettings.standard()) {
-      return done();
-    }
-    return new InputBufferDone(id, mark, settings);
-  }
-
-  /**
-   * Returns an {@code InputBuffer} in the <em>error</em> state, with the given
-   * input {@code error}.
-   */
-  public static InputBuffer error(Throwable error) {
-    return new InputBufferError(error, null, Mark.zero(), InputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code InputBuffer} in the <em>error</em> state, with the given
-   * input {@code error} and {@code settings}.
-   */
-  public static InputBuffer error(Throwable error, InputSettings settings) {
-    return new InputBufferError(error, null, Mark.zero(), settings);
-  }
-
-  /**
-   * Returns an {@code InputBuffer} in the <em>error</em> state, with the given
-   * input {@code error}, at the {@code mark} position of a token stream
-   * logically identified by {@code id}.
-   */
-  public static InputBuffer error(Throwable error, Object id, Mark mark) {
-    return new InputBufferError(error, id, mark, InputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code InputBuffer} in the <em>error</em> state, with the given
-   * input {@code error}, at the {@code mark} position of a token stream
-   * logically identified by {@code id}, with the given {@code settings}.
-   */
-  public static InputBuffer error(Throwable error, Object id, Mark mark, InputSettings settings) {
-    return new InputBufferError(error, id, mark, settings);
-  }
-
   @Override
   public abstract InputBuffer isPart(boolean isPart);
 
@@ -193,6 +68,131 @@ public abstract class InputBuffer extends Input {
 
   @Override
   public abstract InputBuffer clone();
+
+  private static InputBuffer empty;
+  private static InputBuffer done;
+
+  /**
+   * Returns an {@code InputBuffer} in the <em>empty</em> state.
+   */
+  public static InputBuffer empty() {
+    if (InputBuffer.empty == null) {
+      InputBuffer.empty = new InputBufferEmpty(null, Mark.zero(), InputSettings.standard());
+    }
+    return InputBuffer.empty;
+  }
+
+  /**
+   * Returns an {@code InputBuffer} in the <em>empty</em> state, with the given
+   * {@code settings}.
+   */
+  public static InputBuffer empty(InputSettings settings) {
+    if (settings == InputSettings.standard()) {
+      return InputBuffer.empty();
+    }
+    return new InputBufferEmpty(null, Mark.zero(), settings);
+  }
+
+  /**
+   * Returns an {@code InputBuffer} in the <em>empty</em> state, at the {@code
+   * mark} position of a token stream logically identified by {@code id}.
+   */
+  public static InputBuffer empty(Object id, Mark mark) {
+    if (id == null && (mark == null || mark == Mark.zero())) {
+      return InputBuffer.empty();
+    }
+    return new InputBufferEmpty(id, mark, InputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code InputBuffer} in the <em>empty</em> state, at the {@code
+   * mark} position of a token stream logically identified by {@code id},
+   * with the given {@code settings}.
+   */
+  public static InputBuffer empty(Object id, Mark mark, InputSettings settings) {
+    if (id == null && (mark == null || mark == Mark.zero()) && settings == InputSettings.standard()) {
+      return InputBuffer.empty();
+    }
+    return new InputBufferEmpty(id, mark, settings);
+  }
+
+  /**
+   * Returns an {@code InputBuffer} in the <em>done</em> state.
+   */
+  public static InputBuffer done() {
+    if (InputBuffer.done == null) {
+      InputBuffer.done = new InputBufferDone(null, Mark.zero(), InputSettings.standard());
+    }
+    return InputBuffer.done;
+  }
+
+  /**
+   * Returns an {@code InputBuffer} in the <em>done</em> state, with the given
+   * {@code settings}.
+   */
+  public static InputBuffer done(InputSettings settings) {
+    if (settings == InputSettings.standard()) {
+      return InputBuffer.done();
+    }
+    return new InputBufferDone(null, Mark.zero(), settings);
+  }
+
+  /**
+   * Returns an {@code InputBuffer} in the <em>done</em> state, at the {@code
+   * mark} position of a token stream logically identified by {@code id}.
+   */
+  public static InputBuffer done(Object id, Mark mark) {
+    if (id == null && (mark == null || mark == Mark.zero())) {
+      return InputBuffer.done();
+    }
+    return new InputBufferDone(id, mark, InputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code InputBuffer} in the <em>done</em> state, at the {@code
+   * mark} position of a token stream logically identified by {@code id},
+   * with the given {@code settings}.
+   */
+  public static InputBuffer done(Object id, Mark mark, InputSettings settings) {
+    if (id == null && (mark == null || mark == Mark.zero()) && settings == InputSettings.standard()) {
+      return InputBuffer.done();
+    }
+    return new InputBufferDone(id, mark, settings);
+  }
+
+  /**
+   * Returns an {@code InputBuffer} in the <em>error</em> state, with the given
+   * input {@code error}.
+   */
+  public static InputBuffer error(Throwable error) {
+    return new InputBufferError(error, null, Mark.zero(), InputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code InputBuffer} in the <em>error</em> state, with the given
+   * input {@code error} and {@code settings}.
+   */
+  public static InputBuffer error(Throwable error, InputSettings settings) {
+    return new InputBufferError(error, null, Mark.zero(), settings);
+  }
+
+  /**
+   * Returns an {@code InputBuffer} in the <em>error</em> state, with the given
+   * input {@code error}, at the {@code mark} position of a token stream
+   * logically identified by {@code id}.
+   */
+  public static InputBuffer error(Throwable error, Object id, Mark mark) {
+    return new InputBufferError(error, id, mark, InputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code InputBuffer} in the <em>error</em> state, with the given
+   * input {@code error}, at the {@code mark} position of a token stream
+   * logically identified by {@code id}, with the given {@code settings}.
+   */
+  public static InputBuffer error(Throwable error, Object id, Mark mark, InputSettings settings) {
+    return new InputBufferError(error, id, mark, settings);
+  }
 
 }
 

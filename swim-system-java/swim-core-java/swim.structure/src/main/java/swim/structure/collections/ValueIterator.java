@@ -42,7 +42,7 @@ public class ValueIterator<T> implements Iterator<T> {
   }
 
   public <T2> ValueIterator<T2> valueClass(Class<T2> valueClass) {
-    return valueForm(Form.<T2>forClass(valueClass));
+    return this.valueForm(Form.<T2>forClass(valueClass));
   }
 
   @Override

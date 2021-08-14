@@ -41,6 +41,11 @@ final class HttpRequestWriter<T> extends Writer<Object, HttpRequest<T>> {
     this(http, request, null, null, 1);
   }
 
+  @Override
+  public Writer<Object, HttpRequest<T>> pull(Output<?> output) {
+    return HttpRequestWriter.write(output, this.http, this.request, this.headers, this.part, this.step);
+  }
+
   static <T> Writer<Object, HttpRequest<T>> write(Output<?> output, HttpWriter http, HttpRequest<T> request,
                                                   Iterator<HttpHeader> headers, Writer<?, ?> part, int step) {
     if (step == 1) {
@@ -137,23 +142,18 @@ final class HttpRequestWriter<T> extends Writer<Object, HttpRequest<T>> {
     }
     if (step == 12 && output.isCont()) {
       output = output.write('\n');
-      return done(request);
+      return Writer.done(request);
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new HttpRequestWriter<T>(http, request, headers, part, step);
   }
 
   static <T> Writer<Object, HttpRequest<T>> write(Output<?> output, HttpWriter http, HttpRequest<T> request) {
-    return write(output, http, request, null, null, 1);
-  }
-
-  @Override
-  public Writer<Object, HttpRequest<T>> pull(Output<?> output) {
-    return write(output, this.http, this.request, this.headers, this.part, this.step);
+    return HttpRequestWriter.write(output, http, request, null, null, 1);
   }
 
 }

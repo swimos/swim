@@ -36,6 +36,11 @@ final class HttpBodyEncoder<T> extends Encoder<Object, HttpMessage<T>> {
     this(message, content, length, 0L);
   }
 
+  @Override
+  public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
+    return HttpBodyEncoder.encode(output, this.message, this.content, this.length, this.offset);
+  }
+
   static <T> Encoder<Object, HttpMessage<T>> encode(OutputBuffer<?> output, HttpMessage<T> message,
                                                     Encoder<?, ?> content, long length, long offset) {
     final int outputStart = output.index();
@@ -55,31 +60,26 @@ final class HttpBodyEncoder<T> extends Encoder<Object, HttpMessage<T>> {
     offset += output.index() - outputStart;
     if (content.isDone()) {
       if (offset < length) {
-        return error(new EncoderException("buffer underflow"));
+        return Encoder.error(new EncoderException("buffer underflow"));
       } else if (offset > length) {
-        return error(new EncoderException("buffer overflow"));
+        return Encoder.error(new EncoderException("buffer overflow"));
       } else {
-        return done(message);
+        return Encoder.done(message);
       }
     } else if (content.isError()) {
       return content.asError();
     }
     if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new HttpBodyEncoder<T>(message, content, length, offset);
   }
 
   static <T> Encoder<Object, HttpMessage<T>> encode(OutputBuffer<?> output, HttpMessage<T> message,
                                                     Encoder<?, ?> content, long length) {
-    return encode(output, message, content, length, 0L);
-  }
-
-  @Override
-  public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
-    return encode(output, this.message, this.content, this.length, this.offset);
+    return HttpBodyEncoder.encode(output, message, content, length, 0L);
   }
 
 }

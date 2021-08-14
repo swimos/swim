@@ -35,13 +35,14 @@ final class UriHostIPv4 extends UriHost {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("UriHost").write('.').write("ipv4").write('(').debug(this.address).write(')');
+    return output;
   }
 
   @Override
-  public void display(Output<?> output) {
-    Uri.writeHost(this.address, output);
+  public <T> Output<T> display(Output<T> output) {
+    return Uri.writeHost(this.address, output);
   }
 
   @Override

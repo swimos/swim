@@ -36,7 +36,86 @@ public final class Recon {
   }
 
   private static ReconParser<Item, Value> structureParser;
+
+  public static ReconParser<Item, Value> structureParser() {
+    if (Recon.structureParser == null) {
+      Recon.structureParser = new ReconStructureParser();
+    }
+    return Recon.structureParser;
+  }
+
   private static ReconWriter<Item, Value> structureWriter;
+
+  public static ReconWriter<Item, Value> structureWriter() {
+    if (Recon.structureWriter == null) {
+      Recon.structureWriter = new ReconStructureWriter();
+    }
+    return Recon.structureWriter;
+  }
+
+  public static Value parse(String recon) {
+    return Recon.structureParser().parseBlockString(recon);
+  }
+
+  public static Parser<Value> parser() {
+    return Recon.structureParser().blockParser();
+  }
+
+  public static int sizeOf(Item item) {
+    return Recon.structureWriter().sizeOfItem(item);
+  }
+
+  public static int sizeOfBlock(Item item) {
+    return Recon.structureWriter().sizeOfBlockItem(item);
+  }
+
+  public static Writer<?, ?> write(Item item, Output<?> output) {
+    return Recon.structureWriter().writeItem(item, output);
+  }
+
+  public static Writer<?, ?> writeBlock(Item item, Output<?> output) {
+    return Recon.structureWriter().writeBlockItem(item, output);
+  }
+
+  public static String toString(Item item) {
+    final Output<String> output = Unicode.stringOutput();
+    Recon.write(item, output);
+    return output.bind();
+  }
+
+  public static String toBlockString(Item item) {
+    final Output<String> output = Unicode.stringOutput();
+    Recon.writeBlock(item, output);
+    return output.bind();
+  }
+
+  public static Data toData(Item item) {
+    final Output<Data> output = Utf8.encodedOutput(Data.output());
+    Recon.write(item, output);
+    return output.bind();
+  }
+
+  public static Data toBlockData(Item item) {
+    final Output<Data> output = Utf8.encodedOutput(Data.output());
+    Recon.writeBlock(item, output);
+    return output.bind();
+  }
+
+  public static <T> Parser<T> formParser(Form<T> form) {
+    return new ReconFormParser<T>(Recon.structureParser(), form);
+  }
+
+  public static <T> Decoder<T> formDecoder(Form<T> form) {
+    return Utf8.decodedParser(Recon.formParser(form));
+  }
+
+  public static <T> Writer<T, T> formWriter(Form<T> form) {
+    return new ReconFormWriter<T>(Recon.structureWriter(), form);
+  }
+
+  public static <T> Encoder<T, T> formEncoder(Form<T> form) {
+    return Utf8.encodedWriter(Recon.formWriter(form));
+  }
 
   static boolean isSpace(int c) {
     return c == 0x20 || c == 0x9;
@@ -47,7 +126,7 @@ public final class Recon {
   }
 
   static boolean isWhitespace(int c) {
-    return isSpace(c) || isNewline(c);
+    return Recon.isSpace(c) || Recon.isNewline(c);
   }
 
   static boolean isIdentStartChar(int c) {
@@ -87,84 +166,6 @@ public final class Recon {
         || c >= 0xf900 && c <= 0xfdcf
         || c >= 0xfdf0 && c <= 0xfffd
         || c >= 0x10000 && c <= 0xeffff;
-  }
-
-  public static ReconParser<Item, Value> structureParser() {
-    if (structureParser == null) {
-      structureParser = new ReconStructureParser();
-    }
-    return structureParser;
-  }
-
-  public static ReconWriter<Item, Value> structureWriter() {
-    if (structureWriter == null) {
-      structureWriter = new ReconStructureWriter();
-    }
-    return structureWriter;
-  }
-
-  public static Value parse(String recon) {
-    return structureParser().parseBlockString(recon);
-  }
-
-  public static Parser<Value> parser() {
-    return structureParser().blockParser();
-  }
-
-  public static int sizeOf(Item item) {
-    return structureWriter().sizeOfItem(item);
-  }
-
-  public static int sizeOfBlock(Item item) {
-    return structureWriter().sizeOfBlockItem(item);
-  }
-
-  public static Writer<?, ?> write(Item item, Output<?> output) {
-    return structureWriter().writeItem(item, output);
-  }
-
-  public static Writer<?, ?> writeBlock(Item item, Output<?> output) {
-    return structureWriter().writeBlockItem(item, output);
-  }
-
-  public static String toString(Item item) {
-    final Output<String> output = Unicode.stringOutput();
-    write(item, output);
-    return output.bind();
-  }
-
-  public static String toBlockString(Item item) {
-    final Output<String> output = Unicode.stringOutput();
-    writeBlock(item, output);
-    return output.bind();
-  }
-
-  public static Data toData(Item item) {
-    final Output<Data> output = Utf8.encodedOutput(Data.output());
-    write(item, output);
-    return output.bind();
-  }
-
-  public static Data toBlockData(Item item) {
-    final Output<Data> output = Utf8.encodedOutput(Data.output());
-    writeBlock(item, output);
-    return output.bind();
-  }
-
-  public static <T> Parser<T> formParser(Form<T> form) {
-    return new ReconFormParser<T>(structureParser(), form);
-  }
-
-  public static <T> Decoder<T> formDecoder(Form<T> form) {
-    return Utf8.decodedParser(formParser(form));
-  }
-
-  public static <T> Writer<T, T> formWriter(Form<T> form) {
-    return new ReconFormWriter<T>(structureWriter(), form);
-  }
-
-  public static <T> Encoder<T, T> formEncoder(Form<T> form) {
-    return Utf8.encodedWriter(formWriter(form));
   }
 
 }

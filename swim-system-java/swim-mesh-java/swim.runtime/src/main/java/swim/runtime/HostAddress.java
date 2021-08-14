@@ -47,12 +47,12 @@ public final class HostAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public HostAddress meshUri(Uri meshUri) {
-    return copy(this.edgeName, meshUri, this.partKey, this.hostUri);
+    return this.copy(this.edgeName, meshUri, this.partKey, this.hostUri);
   }
 
   @Override
   public HostAddress meshUri(String meshUri) {
-    return meshUri(Uri.parse(meshUri));
+    return this.meshUri(Uri.parse(meshUri));
   }
 
   @Override
@@ -62,7 +62,7 @@ public final class HostAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public HostAddress partKey(Value partKey) {
-    return copy(this.edgeName, this.meshUri, partKey, this.hostUri);
+    return this.copy(this.edgeName, this.meshUri, partKey, this.hostUri);
   }
 
   @Override
@@ -72,12 +72,12 @@ public final class HostAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public HostAddress hostUri(Uri hostUri) {
-    return copy(this.edgeName, this.meshUri, this.partKey, hostUri);
+    return this.copy(this.edgeName, this.meshUri, this.partKey, hostUri);
   }
 
   @Override
   public HostAddress hostUri(String hostUri) {
-    return hostUri(Uri.parse(hostUri));
+    return this.hostUri(Uri.parse(hostUri));
   }
 
   HostAddress copy(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
@@ -91,7 +91,7 @@ public final class HostAddress implements EdgeAddressed, MeshAddressed, PartAddr
 
   @Override
   public NodeAddress nodeUri(String nodeUri) {
-    return nodeUri(Uri.parse(nodeUri));
+    return this.nodeUri(Uri.parse(nodeUri));
   }
 
   @Override
@@ -106,21 +106,24 @@ public final class HostAddress implements EdgeAddressed, MeshAddressed, PartAddr
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.hash(HostAddress.class);
+    if (HostAddress.hashSeed == 0) {
+      HostAddress.hashSeed = Murmur3.hash(HostAddress.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(HostAddress.hashSeed,
         this.edgeName.hashCode()), this.meshUri.hashCode()), this.partKey.hashCode()),
         this.hostUri.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("HostAddress").write('.').write("from").write('(')
-        .debug(this.edgeName).write(", ").debug(this.meshUri.toString()).write(", ")
-        .debug(this.partKey).write(", ").debug(this.hostUri.toString()).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("HostAddress").write('.').write("create").write('(')
+                   .debug(this.edgeName).write(", ").debug(this.meshUri.toString()).write(", ")
+                   .debug(this.partKey).write(", ").debug(this.hostUri.toString()).write(')');
+    return output;
   }
 
   @Override
@@ -128,13 +131,11 @@ public final class HostAddress implements EdgeAddressed, MeshAddressed, PartAddr
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static HostAddress from(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
+  public static HostAddress create(String edgeName, Uri meshUri, Value partKey, Uri hostUri) {
     return new HostAddress(edgeName, meshUri, partKey, hostUri);
   }
 
-  public static HostAddress from(String edgeName, String meshUri, Value partKey, String hostUri) {
+  public static HostAddress create(String edgeName, String meshUri, Value partKey, String hostUri) {
     return new HostAddress(edgeName, Uri.parse(meshUri), partKey, Uri.parse(hostUri));
   }
 

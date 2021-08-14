@@ -27,12 +27,11 @@ import swim.util.Murmur3;
 /**
  * A {@link Selector} that, when {@link #evaluate evaluated} against some {@link
  * Interpreter}, yields all of the "children" of the top {@code Item} in the
- * interpreter's frame stack.  A "child" is defined to be a top-level {@link
+ * interpreter's frame stack. A "child" is defined to be a top-level {@link
  * Item} in a {@link Record}; it has no definition for any other type.
  */
 public class ChildrenSelector extends Selector {
 
-  private static int hashSeed;
   final Selector then;
 
   ChildrenSelector(Selector then) {
@@ -134,9 +133,9 @@ public class ChildrenSelector extends Selector {
   @Override
   protected int compareTo(Selector that) {
     if (that instanceof ChildrenSelector) {
-      return compareTo((ChildrenSelector) that);
+      return this.compareTo((ChildrenSelector) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(ChildrenSelector that) {
@@ -154,18 +153,21 @@ public class ChildrenSelector extends Selector {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ChildrenSelector.class);
+    if (ChildrenSelector.hashSeed == 0) {
+      ChildrenSelector.hashSeed = Murmur3.seed(ChildrenSelector.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.then.hashCode()));
+    return Murmur3.mash(Murmur3.mix(ChildrenSelector.hashSeed, this.then.hashCode()));
   }
 
   @Override
-  public void debugThen(Output<?> output) {
+  public <T> Output<T> debugThen(Output<T> output) {
     output = output.write('.').write("children").write('(').write(')');
-    this.then.debugThen(output);
+    output = this.then.debugThen(output);
+    return output;
   }
 
 }

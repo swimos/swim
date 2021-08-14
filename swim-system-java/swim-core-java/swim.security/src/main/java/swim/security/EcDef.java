@@ -27,8 +27,6 @@ import swim.util.Murmur3;
 
 public class EcDef {
 
-  private static int hashSeed;
-  private static Form<EcDef> form;
   protected final String name;
   protected final EcFieldDef field;
   protected final BigInteger a;
@@ -49,19 +47,6 @@ public class EcDef {
 
   public EcDef(EcFieldDef field, BigInteger a, BigInteger b) {
     this(null, field, a, b, null);
-  }
-
-  public static EcDef from(EllipticCurve curve) {
-    return new EcDef(EcFieldDef.from(curve.getField()), curve.getA(),
-        curve.getB(), curve.getSeed());
-  }
-
-  @Kind
-  public static Form<EcDef> form() {
-    if (form == null) {
-      form = new EcForm();
-    }
-    return form;
   }
 
   public final String name() {
@@ -85,7 +70,7 @@ public class EcDef {
   }
 
   public Value toValue() {
-    return form().mold(this).toValue();
+    return EcDef.form().mold(this).toValue();
   }
 
   @Override
@@ -99,13 +84,30 @@ public class EcDef {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(EcDef.class);
+    if (EcDef.hashSeed == 0) {
+      EcDef.hashSeed = Murmur3.seed(EcDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(EcDef.hashSeed,
         this.field.hashCode()), this.a.hashCode()), this.b.hashCode()));
+  }
+
+  public static EcDef from(EllipticCurve curve) {
+    return new EcDef(EcFieldDef.from(curve.getField()), curve.getA(),
+                     curve.getB(), curve.getSeed());
+  }
+
+  private static Form<EcDef> form;
+
+  @Kind
+  public static Form<EcDef> form() {
+    if (EcDef.form == null) {
+      EcDef.form = new EcForm();
+    }
+    return EcDef.form;
   }
 
 }
@@ -125,18 +127,18 @@ final class EcForm extends Form<EcDef> {
   @Override
   public Item mold(EcDef curveDef) {
     final Record header = Record.create(curveDef.seed != null ? 4 : 3)
-        .slot("field", curveDef.field.toValue())
-        .slot("a", Num.from(curveDef.a))
-        .slot("b", Num.from(curveDef.b));
+                                .slot("field", curveDef.field.toValue())
+                                .slot("a", Num.from(curveDef.a))
+                                .slot("b", Num.from(curveDef.b));
     if (curveDef.seed != null) {
       header.slot("seed", Data.wrap(curveDef.seed));
     }
-    return Record.create(1).attr(tag(), header);
+    return Record.create(1).attr(this.tag(), header);
   }
 
   @Override
   public EcDef cast(Item item) {
-    final Value header = item.toValue().header(tag());
+    final Value header = item.toValue().header(this.tag());
     if (header.isDefined()) {
       final EcFieldDef field = EcFieldDef.form().cast(header.get("field"));
       final BigInteger a = header.get("a").integerValue(null);

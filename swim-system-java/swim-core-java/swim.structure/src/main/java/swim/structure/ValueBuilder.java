@@ -19,15 +19,20 @@ import swim.util.Builder;
 
 final class ValueBuilder implements Builder<Item, Value> {
 
-  Record record = null;
-  Value value = null;
+  Record record;
+  Value value;
+
+  ValueBuilder() {
+    this.record = null;
+    this.value = null;
+  }
 
   @Override
   public boolean add(Item item) {
     if (item instanceof Field) {
-      return addField((Field) item);
+      return this.addField((Field) item);
     } else if (item instanceof Value) {
-      return addValue((Value) item);
+      return this.addValue((Value) item);
     } else {
       throw new AssertionError(item);
     }
@@ -36,7 +41,7 @@ final class ValueBuilder implements Builder<Item, Value> {
   @Override
   public boolean addAll(Collection<? extends Item> items) {
     for (Item item : items) {
-      add(item);
+      this.add(item);
     }
     return true;
   }

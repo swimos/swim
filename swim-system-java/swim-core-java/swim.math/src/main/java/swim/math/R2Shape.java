@@ -18,16 +18,6 @@ import swim.structure.Kind;
 
 public abstract class R2Shape implements Shape {
 
-  private static R2Form<R2Shape> shapeForm;
-
-  @Kind
-  public static R2Form<R2Shape> shapeForm() {
-    if (shapeForm == null) {
-      shapeForm = new R2ShapeForm();
-    }
-    return shapeForm;
-  }
-
   public abstract double xMin();
 
   public abstract double yMin();
@@ -39,7 +29,7 @@ public abstract class R2Shape implements Shape {
   @Override
   public boolean contains(Shape shape) {
     if (shape instanceof R2Shape) {
-      return contains((R2Shape) shape);
+      return this.contains((R2Shape) shape);
     } else {
       return false;
     }
@@ -48,7 +38,7 @@ public abstract class R2Shape implements Shape {
   @Override
   public boolean intersects(Shape shape) {
     if (shape instanceof R2Shape) {
-      return intersects((R2Shape) shape);
+      return this.intersects((R2Shape) shape);
     } else {
       return false;
     }
@@ -59,5 +49,15 @@ public abstract class R2Shape implements Shape {
   public abstract boolean intersects(R2Shape shape);
 
   public abstract Z2Shape transform(R2ToZ2Function f);
+
+  private static R2Form<R2Shape> shapeForm;
+
+  @Kind
+  public static R2Form<R2Shape> shapeForm() {
+    if (R2Shape.shapeForm == null) {
+      R2Shape.shapeForm = new R2ShapeForm();
+    }
+    return R2Shape.shapeForm;
+  }
 
 }

@@ -33,7 +33,7 @@ public abstract class AbstractIpService implements IpService, FlowContext {
   @SuppressWarnings("unchecked")
   @Override
   public IpSocket createSocket() {
-    final IpModem<?, ?> modem = createModem();
+    final IpModem<?, ?> modem = this.createModem();
     if (modem != null) {
       return new IpSocketModem<Object, Object>((IpModem<Object, Object>) modem);
     } else {
@@ -47,17 +47,17 @@ public abstract class AbstractIpService implements IpService, FlowContext {
 
   @Override
   public void didBind() {
-    // stub
+    // hook
   }
 
   @Override
   public void didAccept(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didUnbind() {
-    // stub
+    // hook
   }
 
   @Override

@@ -39,25 +39,25 @@ public abstract class DynamicEncoder<I, O> extends Encoder<I, O> {
     Encoder<? super I, ? extends O> encoder = this.encoding;
     if (encoder == null) {
       if (output.isDone()) {
-        return done();
+        return Encoder.done();
       }
-      encoder = doEncode();
+      encoder = this.doEncode();
       this.encoding = encoder;
       if (encoder == null) {
-        return done();
+        return Encoder.done();
       }
     }
     if (encoder != null) {
       encoder = encoder.pull(output);
       if (encoder.isDone()) {
         this.encoding = null;
-        didEncode(encoder.bind());
+        this.didEncode(encoder.bind());
       } else if (encoder.isError()) {
         return encoder.asError();
       }
     }
     if (output.isDone()) {
-      return done();
+      return Encoder.done();
     }
     return this;
   }

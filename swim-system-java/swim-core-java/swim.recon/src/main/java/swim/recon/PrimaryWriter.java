@@ -44,8 +44,8 @@ final class PrimaryWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.items, this.inParens, this.first,
-                 this.item, this.next, this.part, this.step);
+    return PrimaryWriter.write(output, this.recon, this.items, this.inParens, this.first,
+                               this.item, this.next, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, Iterator<I> items) {
@@ -169,23 +169,23 @@ final class PrimaryWriter<I, V> extends Writer<Object, Object> {
       if (inParens) {
         if (output.isCont()) {
           output = output.write(')');
-          return done();
+          return Writer.done();
         }
       } else {
-        return done();
+        return Writer.done();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new PrimaryWriter<I, V>(recon, items, inParens, first, item, next, part, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon,
                                              Iterator<I> items) {
-    return write(output, recon, items, false, true, null, null, null, 1);
+    return PrimaryWriter.write(output, recon, items, false, true, null, null, null, 1);
   }
 
 }

@@ -22,41 +22,12 @@ import swim.util.Murmur3;
 
 public final class UpgradeProtocol extends HttpPart implements Debug {
 
-  private static int hashSeed;
-  private static UpgradeProtocol websocket;
   final String name;
   final String version;
 
   UpgradeProtocol(String name, String version) {
     this.name = name;
     this.version = version;
-  }
-
-  public static UpgradeProtocol websocket() {
-    if (websocket == null) {
-      websocket = new UpgradeProtocol("websocket", "");
-    }
-    return websocket;
-  }
-
-  public static UpgradeProtocol from(String name, String version) {
-    if ("".equals(version)) {
-      return from(name);
-    } else {
-      return new UpgradeProtocol(name, version);
-    }
-  }
-
-  public static UpgradeProtocol from(String name) {
-    if ("websocket".equals(name)) {
-      return websocket();
-    } else {
-      return new UpgradeProtocol(name, "");
-    }
-  }
-
-  public static UpgradeProtocol parse(String string) {
-    return Http.standardParser().parseUpgradeProtocolString(string);
   }
 
   public String name() {
@@ -96,27 +67,59 @@ public final class UpgradeProtocol extends HttpPart implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(UpgradeProtocol.class);
+    if (UpgradeProtocol.hashSeed == 0) {
+      UpgradeProtocol.hashSeed = Murmur3.seed(UpgradeProtocol.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(UpgradeProtocol.hashSeed,
         this.name.hashCode()), this.version.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("UpgradeProtocol").write('.').write("from").write('(').debug(this.name);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("UpgradeProtocol").write('.').write("create").write('(').debug(this.name);
     if (!this.version.isEmpty()) {
       output = output.write(", ").debug(this.version);
     }
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static UpgradeProtocol websocket;
+
+  public static UpgradeProtocol websocket() {
+    if (UpgradeProtocol.websocket == null) {
+      UpgradeProtocol.websocket = new UpgradeProtocol("websocket", "");
+    }
+    return UpgradeProtocol.websocket;
+  }
+
+  public static UpgradeProtocol create(String name, String version) {
+    if ("".equals(version)) {
+      return UpgradeProtocol.create(name);
+    } else {
+      return new UpgradeProtocol(name, version);
+    }
+  }
+
+  public static UpgradeProtocol create(String name) {
+    if ("websocket".equals(name)) {
+      return UpgradeProtocol.websocket();
+    } else {
+      return new UpgradeProtocol(name, "");
+    }
+  }
+
+  public static UpgradeProtocol parse(String string) {
+    return Http.standardParser().parseUpgradeProtocolString(string);
   }
 
 }

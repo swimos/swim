@@ -23,7 +23,7 @@ import swim.util.Murmur3;
 
 /**
  * A {@link Selector} that, when {@link #evaluate evaluated}, evaluates and
- * yields {@code item} against {@code interpreter}.  This allows us to express
+ * yields {@code item} against {@code interpreter}. This allows us to express
  * various selection criteria without having to implement the corresponding
  * dedicated {@code Selectors}.
  * <p>
@@ -40,7 +40,6 @@ import swim.util.Murmur3;
  */
 public final class LiteralSelector extends Selector {
 
-  private static int hashSeed;
   final Item item;
   final Selector then;
 
@@ -110,7 +109,7 @@ public final class LiteralSelector extends Selector {
   }
 
   @Override
-  public Selector andThen(Selector that) {
+  public Selector andThen(Selector then) {
     return new LiteralSelector(this.item, this.then.andThen(then));
   }
 
@@ -127,9 +126,9 @@ public final class LiteralSelector extends Selector {
   @Override
   protected int compareTo(Selector that) {
     if (that instanceof LiteralSelector) {
-      return compareTo((LiteralSelector) that);
+      return this.compareTo((LiteralSelector) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(LiteralSelector that) {
@@ -151,24 +150,27 @@ public final class LiteralSelector extends Selector {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(LiteralSelector.class);
+    if (LiteralSelector.hashSeed == 0) {
+      LiteralSelector.hashSeed = Murmur3.seed(LiteralSelector.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(LiteralSelector.hashSeed,
         this.item.hashCode()), this.then.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Selector").write('.').write("literal").write('(').debug(this.item).write(')');
-    this.then.debugThen(output);
+    output = this.then.debugThen(output);
+    return output;
   }
 
   @Override
-  public void debugThen(Output<?> output) {
-    // nop
+  public <T> Output<T> debugThen(Output<T> output) {
+    return output; // blank
   }
 
 }

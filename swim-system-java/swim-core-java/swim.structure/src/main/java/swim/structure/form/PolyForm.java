@@ -74,25 +74,25 @@ public class PolyForm extends Form<Object> implements Cloneable {
   @Override
   public Item mold(Object object, Item item) {
     if (object != null) {
-      final Form<Object> form = formForClass(object.getClass());
+      final Form<Object> form = this.formForClass(object.getClass());
       if (form != null) {
         return form.mold(object, item);
       } else if (object instanceof String) {
-        return moldString((String) object, item);
+        return this.moldString((String) object, item);
       } else if (object instanceof Number) {
-        return moldNumber((Number) object, item);
+        return this.moldNumber((Number) object, item);
       } else if (object instanceof Character) {
-        return moldCharacter((Character) object, item);
+        return this.moldCharacter((Character) object, item);
       } else if (object instanceof Boolean) {
-        return moldBoolean((Boolean) object, item);
+        return this.moldBoolean((Boolean) object, item);
       } else if (object instanceof ByteBuffer) {
-        return moldByteBuffer((ByteBuffer) object, item);
+        return this.moldByteBuffer((ByteBuffer) object, item);
       } else if (object instanceof Map<?, ?>) {
-        return moldMap((Map<?, ?>) object, item);
+        return this.moldMap((Map<?, ?>) object, item);
       } else if (object instanceof Collection<?>) {
-        return moldCollection((Collection<?>) object, item);
+        return this.moldCollection((Collection<?>) object, item);
       } else if (object instanceof Object[]) {
-        return moldArray((Object[]) object, item);
+        return this.moldArray((Object[]) object, item);
       } else {
         return Item.absent();
       }
@@ -104,25 +104,25 @@ public class PolyForm extends Form<Object> implements Cloneable {
   @Override
   public Item mold(Object object) {
     if (object != null) {
-      final Form<Object> form = formForClass(object.getClass());
+      final Form<Object> form = this.formForClass(object.getClass());
       if (form != null) {
         return form.mold(object);
       } else if (object instanceof String) {
-        return moldString((String) object);
+        return this.moldString((String) object);
       } else if (object instanceof Number) {
-        return moldNumber((Number) object);
+        return this.moldNumber((Number) object);
       } else if (object instanceof Character) {
-        return moldCharacter((Character) object);
+        return this.moldCharacter((Character) object);
       } else if (object instanceof Boolean) {
-        return moldBoolean((Boolean) object);
+        return this.moldBoolean((Boolean) object);
       } else if (object instanceof ByteBuffer) {
-        return moldByteBuffer((ByteBuffer) object);
+        return this.moldByteBuffer((ByteBuffer) object);
       } else if (object instanceof Map<?, ?>) {
-        return moldMap((Map<?, ?>) object);
+        return this.moldMap((Map<?, ?>) object);
       } else if (object instanceof Collection<?>) {
-        return moldCollection((Collection<?>) object);
+        return this.moldCollection((Collection<?>) object);
       } else if (object instanceof Object[]) {
-        return moldArray((Object[]) object);
+        return this.moldArray((Object[]) object);
       } else {
         return Item.absent();
       }
@@ -198,15 +198,15 @@ public class PolyForm extends Form<Object> implements Cloneable {
   @Override
   public Object cast(Item item, Object object) {
     if (item instanceof Record) {
-      return castRecord((Record) item, object);
+      return this.castRecord((Record) item, object);
     } else if (item instanceof Text) {
-      return castText((Text) item);
+      return this.castText((Text) item);
     } else if (item instanceof Data) {
-      return castData((Data) item);
+      return this.castData((Data) item);
     } else if (item instanceof Num) {
-      return castNum((Num) item);
+      return this.castNum((Num) item);
     } else if (item instanceof Bool) {
-      return castBool((Bool) item);
+      return this.castBool((Bool) item);
     }
     return null;
   }
@@ -214,21 +214,21 @@ public class PolyForm extends Form<Object> implements Cloneable {
   @Override
   public Object cast(Item item) {
     if (item instanceof Record) {
-      return castRecord((Record) item);
+      return this.castRecord((Record) item);
     } else if (item instanceof Text) {
-      return castText((Text) item);
+      return this.castText((Text) item);
     } else if (item instanceof Data) {
-      return castData((Data) item);
+      return this.castData((Data) item);
     } else if (item instanceof Num) {
-      return castNum((Num) item);
+      return this.castNum((Num) item);
     } else if (item instanceof Bool) {
-      return castBool((Bool) item);
+      return this.castBool((Bool) item);
     }
     return null;
   }
 
   protected Object castRecord(Record value, Object object) {
-    final Form<Object> form = formForTag(value.tag());
+    final Form<Object> form = this.formForTag(value.tag());
     if (form != null) {
       return form.cast(value, object);
     } else {
@@ -237,7 +237,7 @@ public class PolyForm extends Form<Object> implements Cloneable {
   }
 
   protected Object castRecord(Record value) {
-    final Form<Object> form = formForTag(value.tag());
+    final Form<Object> form = this.formForTag(value.tag());
     if (form != null) {
       return form.cast(value);
     } else {
@@ -302,7 +302,7 @@ public class PolyForm extends Form<Object> implements Cloneable {
       } else if (Collection.class.isAssignableFrom(type)) {
         return (Form<T>) Form.forCollection(type, this);
       } else {
-        Form<T> form = formForClass(type);
+        Form<T> form = this.formForClass(type);
         if (form != null) {
           return form;
         }
@@ -330,11 +330,11 @@ public class PolyForm extends Form<Object> implements Cloneable {
       }
     } else {
       final Class<?> newClass = newForm.type();
-      if (!classForms.containsKey(newClass)) {
+      if (!this.classForms.containsKey(newClass)) {
         final String newTag = newForm.tag();
         if (newTag != null) {
-          classForms = classForms.updated(newClass, newForm);
-          tagForms = tagForms.updated(newTag, newForm);
+          this.classForms = this.classForms.updated(newClass, newForm);
+          this.tagForms = this.tagForms.updated(newTag, newForm);
         }
       }
     }
@@ -343,19 +343,19 @@ public class PolyForm extends Form<Object> implements Cloneable {
 
   public PolyForm addForms(Form<?>... newForms) {
     for (int i = 0, n = newForms.length; i < n; i += 1) {
-      addForm(newForms[i]);
+      this.addForm(newForms[i]);
     }
     return this;
   }
 
   public PolyForm addClass(Class<?> newClass) {
-    if (!classForms.containsKey(newClass)) {
+    if (!this.classForms.containsKey(newClass)) {
       final Form<?> newForm = Form.forClass(newClass);
       if (newForm != null) {
         final String newTag = newForm.tag();
         if (newTag != null) {
-          classForms = classForms.updated(newClass, newForm);
-          tagForms = tagForms.updated(newTag, newForm);
+          this.classForms = this.classForms.updated(newClass, newForm);
+          this.tagForms = this.tagForms.updated(newTag, newForm);
         }
       }
     }
@@ -364,7 +364,7 @@ public class PolyForm extends Form<Object> implements Cloneable {
 
   public PolyForm addClasses(Class<?>... newClasses) {
     for (int i = 0, n = newClasses.length; i < n; i += 1) {
-      addClass(newClasses[i]);
+      this.addClass(newClasses[i]);
     }
     return this;
   }
@@ -376,16 +376,16 @@ public class PolyForm extends Form<Object> implements Cloneable {
         componentType = ((TypeVariable) componentType).getBounds()[0];
       }
       if (componentType instanceof Class<?>) {
-        addClass((Class<?>) componentType);
+        this.addClass((Class<?>) componentType);
       }
     } else if (genericType instanceof ParameterizedType) {
-      addTypes(((ParameterizedType) genericType).getActualTypeArguments());
+      this.addTypes(((ParameterizedType) genericType).getActualTypeArguments());
     } else if (genericType instanceof Class<?>) {
       final Class<?> type = (Class<?>) genericType;
       if (type.isArray()) {
-        addClass(type.getComponentType());
+        this.addClass(type.getComponentType());
       } else {
-        addClass(type);
+        this.addClass(type);
       }
     }
     return this;
@@ -393,31 +393,31 @@ public class PolyForm extends Form<Object> implements Cloneable {
 
   public PolyForm addTypes(Type... newGenericTypes) {
     for (int i = 0, n = newGenericTypes.length; i < n; i += 1) {
-      addType(newGenericTypes[i]);
+      this.addType(newGenericTypes[i]);
     }
     return this;
   }
 
   public <T> ClassForm<T> reflectClassForm(ClassForm<T> classForm) {
-    addForm(classForm);
-    reflectFields(classForm, classForm.type());
+    this.addForm(classForm);
+    this.reflectFields(classForm, classForm.type());
     return classForm;
   }
 
   public <T> ClassForm<T> reflectClassForm(Class<?> type, String tag, T unit) {
     if (!type.isInterface() && (type.getModifiers() & Modifier.ABSTRACT) == 0 && !Form.isBuiltin(type)) {
-      return reflectClassForm(new ClassForm<T>(type, tag, unit));
+      return this.reflectClassForm(new ClassForm<T>(type, tag, unit));
     }
     return null;
   }
 
   public <T> ClassForm<T> reflectClassForm(Class<?> type, String tag) {
-    return reflectClassForm(type, tag, null);
+    return this.reflectClassForm(type, tag, null);
   }
 
   public <T> ClassForm<T> reflectClassForm(Class<?> type) {
-    final String tag = reflectClassTag(type);
-    return reflectClassForm(type, tag, null);
+    final String tag = this.reflectClassTag(type);
+    return this.reflectClassForm(type, tag, null);
   }
 
   @SuppressWarnings("unchecked")
@@ -439,7 +439,7 @@ public class PolyForm extends Form<Object> implements Cloneable {
           try {
             Form<T> form = (Form<T>) field.get(null);
             if (form == null) {
-              form = reflectClassForm(type);
+              form = this.reflectClassForm(type);
               field.set(null, form);
             }
             return form;
@@ -473,14 +473,14 @@ public class PolyForm extends Form<Object> implements Cloneable {
         }
       }
 
-      return reflectClassForm(type);
+      return this.reflectClassForm(type);
     }
     return null;
   }
 
   public <T> Form<T> reflectClassName(String className) {
     try {
-      return reflectClass(Class.forName(className));
+      return this.reflectClass(Class.forName(className));
     } catch (ClassNotFoundException cause) {
       throw new FormException(cause);
     }
@@ -504,7 +504,7 @@ public class PolyForm extends Form<Object> implements Cloneable {
 
       // Close over the generic type of the field.
       final Type fieldType = field.getGenericType();
-      addType(fieldType);
+      this.addType(fieldType);
 
       String name;
       final FieldForm<T> fieldForm;
@@ -514,7 +514,7 @@ public class PolyForm extends Form<Object> implements Cloneable {
         if (name == null || name.length() == 0) {
           name = field.getName();
         }
-        fieldForm = new SlotForm<T>(field, Text.from(name), formForType(fieldType));
+        fieldForm = new SlotForm<T>(field, Text.from(name), this.formForType(fieldType));
         return classForm.putHeader(fieldForm);
       } else {
         final Member member = field.getAnnotation(Member.class);
@@ -522,7 +522,7 @@ public class PolyForm extends Form<Object> implements Cloneable {
         if (name == null || name.length() == 0) {
           name = field.getName();
         }
-        fieldForm = new SlotForm<T>(field, Text.from(name), formForType(fieldType));
+        fieldForm = new SlotForm<T>(field, Text.from(name), this.formForType(fieldType));
         return classForm.putMember(fieldForm);
       }
     }
@@ -531,10 +531,10 @@ public class PolyForm extends Form<Object> implements Cloneable {
 
   public <T> ClassForm<T> reflectFields(ClassForm<T> classForm, Class<?> type) {
     if (type != null) {
-      reflectFields(classForm, type.getSuperclass());
+      this.reflectFields(classForm, type.getSuperclass());
       final Field[] fields = type.getDeclaredFields();
       for (int i = 0, n = fields.length; i < n; i += 1) {
-        reflectField(classForm, fields[i]);
+        this.reflectField(classForm, fields[i]);
       }
     }
     return classForm;

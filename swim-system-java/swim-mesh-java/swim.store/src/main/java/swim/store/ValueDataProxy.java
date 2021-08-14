@@ -84,7 +84,7 @@ public class ValueDataProxy implements ValueDataBinding, ValueDataContext {
 
   @Override
   public <V> ValueData<V> valueClass(Class<V> valueClass) {
-    return valueForm(Form.<V>forClass(valueClass));
+    return this.valueForm(Form.<V>forClass(valueClass));
   }
 
   @Override

@@ -47,7 +47,7 @@ public class MqttSocketService implements IpService, MqttServiceContext {
   @Override
   public IpSocket createSocket() {
     final MqttSocket<?, ?> socket = this.service.createSocket();
-    final MqttSocketModem<?, ?> modem = new MqttSocketModem<>(socket, mqttSettings);
+    final MqttSocketModem<?, ?> modem = new MqttSocketModem<>(socket, this.mqttSettings);
     return new IpSocketModem<>(modem);
   }
 

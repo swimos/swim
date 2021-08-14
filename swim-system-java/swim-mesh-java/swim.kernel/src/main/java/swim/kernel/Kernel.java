@@ -53,18 +53,18 @@ public interface Kernel {
 
   default Service openService(ServiceDef serviceDef, ClassLoader classLoader) {
     final String serviceName = serviceDef.serviceName();
-    Service service = getService(serviceName);
+    Service service = this.getService(serviceName);
     if (service == null) {
-      final ServiceFactory<?> serviceFactory = createServiceFactory(serviceDef, classLoader);
+      final ServiceFactory<?> serviceFactory = this.createServiceFactory(serviceDef, classLoader);
       if (serviceFactory != null) {
-        service = openService(serviceName, serviceFactory);
+        service = this.openService(serviceName, serviceFactory);
       }
     }
     return service;
   }
 
   default Service openService(ServiceDef serviceDef) {
-    return openService(serviceDef, null);
+    return this.openService(serviceDef, null);
   }
 
   Service getService(String serviceName);

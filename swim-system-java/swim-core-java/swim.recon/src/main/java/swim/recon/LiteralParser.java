@@ -35,7 +35,7 @@ final class LiteralParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.valueParser, this.step);
+    return LiteralParser.parse(input, this.recon, this.builder, this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -85,15 +85,15 @@ final class LiteralParser<I, V> extends Parser<V> {
           valueParser = recon.parseSelector(input);
           step = 2;
         } else if (builder == null) {
-          return done(recon.extant());
+          return Parser.done(recon.extant());
         } else {
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       } else if (input.isDone()) {
         if (builder == null) {
-          return done(recon.extant());
+          return Parser.done(recon.extant());
         } else {
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
     }
@@ -106,7 +106,7 @@ final class LiteralParser<I, V> extends Parser<V> {
           builder = recon.valueBuilder();
         }
         builder.add(recon.item(valueParser.bind()));
-        return done(builder.bind());
+        return Parser.done(builder.bind());
       } else if (valueParser.isError()) {
         return valueParser.asError();
       }
@@ -116,7 +116,7 @@ final class LiteralParser<I, V> extends Parser<V> {
         valueParser = valueParser.feed(input);
       }
       if (valueParser.isDone()) {
-        return done(builder.bind());
+        return Parser.done(builder.bind());
       } else if (valueParser.isError()) {
         return valueParser.asError();
       }
@@ -150,22 +150,22 @@ final class LiteralParser<I, V> extends Parser<V> {
             builder = recon.valueBuilder();
           }
           builder.add(recon.item(valueParser.bind()));
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         } else {
-          return error(Diagnostic.expected(')', input));
+          return Parser.error(Diagnostic.expected(')', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected(')', input));
+        return Parser.error(Diagnostic.expected(')', input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new LiteralParser<I, V>(recon, builder, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, 1);
+    return LiteralParser.parse(input, recon, builder, null, 1);
   }
 
 }

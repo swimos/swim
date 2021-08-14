@@ -26,7 +26,7 @@ import swim.structure.func.MathModule;
 public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, Display {
 
   Item() {
-    // stub
+    // sealed
   }
 
   /**
@@ -74,7 +74,7 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
    * not an {@code Attr}.
    * <p>
    * Used to concisely get the name of the discriminating attribute of a
-   * structure.  The {@code tag} can be used to discern the nominal type of a
+   * structure. The {@code tag} can be used to discern the nominal type of a
    * polymorphic structure, similar to an XML element tag.
    */
   public abstract String tag();
@@ -111,7 +111,7 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
    * Returns {@code this} if this {@code Item} is a {@link Record}; returns a
    * {@code Record} containing just this {@code Item}, if this {@code Item} is
    * {@link #isDistinct() distinct}; otherwise returns an empty {@code Record}
-   * if this {@code Item} is {@link Extant} or {@link Absent}.  Facilitates
+   * if this {@code Item} is {@link Extant} or {@link Absent}. Facilitates
    * writing code that treats a bare {@code Value} equivalently to a unary
    * {@code Record}.
    */
@@ -128,7 +128,7 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
    * <p>
    * Used to conditionally get the value of the head {@code Attr} of a
    * structure, if and only if the key string of the head {@code Attr} is equal
-   * to the {@code tag}.  Can be used to check if a structure might conform to
+   * to the {@code tag}. Can be used to check if a structure might conform to
    * a nominal type named {@code tag}, while simultaneously getting the value
    * of the {@code tag} attribute.
    */
@@ -162,7 +162,7 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
 
   /**
    * Returns the {@link Record#flattened() flattened} {@link #tail() tail}
-   * of this {@code Item}.  Used to recursively deconstruct a structure,
+   * of this {@code Item}. Used to recursively deconstruct a structure,
    * terminating with its last {@code Value}, rather than a unary {@code
    * Record} containing its last value, if the structure ends with a {@code
    * Value} member.
@@ -199,7 +199,7 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
    * given {@code key}; otherwise returns {@code false} if this {@code Item} is
    * not a {@code Record}, or if this {@code Item} is a {@code Record}, but has
    * no {@code Field} member with a {@code Text} key whose string value equals
-   * the given {@code key}.  Equivalent to {@link #containsKey(Value)}, but
+   * the given {@code key}. Equivalent to {@link #containsKey(Value)}, but
    * avoids boxing the {@code key} string into a {@code Text} value.
    */
   public abstract boolean containsKey(String key);
@@ -228,7 +228,7 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
    * key}; returns {@link Absent} if this {@code Item} is not a {@link Record},
    * or if this {@code Item} is a {@code Record}, but has no {@code Field}
    * member with a {@code Text} key whose string value equals the given {@code
-   * key}.  Equivalent to {@link #get(Value)}, but avoids boxing the {@code
+   * key}. Equivalent to {@link #get(Value)}, but avoids boxing the {@code
    * key} string into a {@code Text} value.
    */
   public abstract Value get(String key);
@@ -248,7 +248,7 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
    * key}; returns {@link Absent} if this {@code Item} is not a {@link Record},
    * or if this {@code Item} is a {@code Record}, but has no {@code Attr}
    * member with a {@code Text} key whose string value equals the given {@code
-   * key}.  Equivalent to {@link #getAttr(Text)}, but avoids boxing the {@code
+   * key}. Equivalent to {@link #getAttr(Text)}, but avoids boxing the {@code
    * key} string into a {@code Text} value.
    */
   public abstract Value getAttr(String key);
@@ -268,7 +268,7 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
    * key}; returns {@link Absent} if this {@code Item} is not a {@link Record},
    * or if this {@code Item} is a {@code Record}, but has no {@code Slot}
    * member with a {@code Text} key whose string value equals the given {@code
-   * key}.  Equivalent to {@link #getSlot(Value)}, but avoids boxing the {@code
+   * key}. Equivalent to {@link #getSlot(Value)}, but avoids boxing the {@code
    * key} string into a {@code Text} value.
    */
   public abstract Value getSlot(String key);
@@ -311,55 +311,55 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   }
 
   public Record updated(Value key, String value) {
-    return updated(key, Text.from(value));
+    return this.updated(key, Text.from(value));
   }
 
   public Record updated(Value key, int value) {
-    return updated(key, Num.from(value));
+    return this.updated(key, Num.from(value));
   }
 
   public Record updated(Value key, long value) {
-    return updated(key, Num.from(value));
+    return this.updated(key, Num.from(value));
   }
 
   public Record updated(Value key, float value) {
-    return updated(key, Num.from(value));
+    return this.updated(key, Num.from(value));
   }
 
   public Record updated(Value key, double value) {
-    return updated(key, Num.from(value));
+    return this.updated(key, Num.from(value));
   }
 
   public Record updated(Value key, boolean value) {
-    return updated(key, Bool.from(value));
+    return this.updated(key, Bool.from(value));
   }
 
   public Record updated(String key, Value value) {
-    return updated(Text.from(key), value);
+    return this.updated(Text.from(key), value);
   }
 
   public Record updated(String key, String value) {
-    return updated(key, Text.from(value));
+    return this.updated(key, Text.from(value));
   }
 
   public Record updated(String key, int value) {
-    return updated(key, Num.from(value));
+    return this.updated(key, Num.from(value));
   }
 
   public Record updated(String key, long value) {
-    return updated(key, Num.from(value));
+    return this.updated(key, Num.from(value));
   }
 
   public Record updated(String key, float value) {
-    return updated(key, Num.from(value));
+    return this.updated(key, Num.from(value));
   }
 
   public Record updated(String key, double value) {
-    return updated(key, Num.from(value));
+    return this.updated(key, Num.from(value));
   }
 
   public Record updated(String key, boolean value) {
-    return updated(key, Bool.from(value));
+    return this.updated(key, Bool.from(value));
   }
 
   public Record updatedAttr(Text key, Value value) {
@@ -370,55 +370,55 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   }
 
   public Record updatedAttr(Text key, String value) {
-    return updatedAttr(key, Text.from(value));
+    return this.updatedAttr(key, Text.from(value));
   }
 
   public Record updatedAttr(Text key, int value) {
-    return updatedAttr(key, Num.from(value));
+    return this.updatedAttr(key, Num.from(value));
   }
 
   public Record updatedAttr(Text key, long value) {
-    return updatedAttr(key, Num.from(value));
+    return this.updatedAttr(key, Num.from(value));
   }
 
   public Record updatedAttr(Text key, float value) {
-    return updatedAttr(key, Num.from(value));
+    return this.updatedAttr(key, Num.from(value));
   }
 
   public Record updatedAttr(Text key, double value) {
-    return updatedAttr(key, Num.from(value));
+    return this.updatedAttr(key, Num.from(value));
   }
 
   public Record updatedAttr(Text key, boolean value) {
-    return updatedAttr(key, Bool.from(value));
+    return this.updatedAttr(key, Bool.from(value));
   }
 
   public Record updatedAttr(String key, Value value) {
-    return updatedAttr(Text.from(key), value);
+    return this.updatedAttr(Text.from(key), value);
   }
 
   public Record updatedAttr(String key, String value) {
-    return updatedAttr(key, Text.from(value));
+    return this.updatedAttr(key, Text.from(value));
   }
 
   public Record updatedAttr(String key, int value) {
-    return updatedAttr(key, Num.from(value));
+    return this.updatedAttr(key, Num.from(value));
   }
 
   public Record updatedAttr(String key, long value) {
-    return updatedAttr(key, Num.from(value));
+    return this.updatedAttr(key, Num.from(value));
   }
 
   public Record updatedAttr(String key, float value) {
-    return updatedAttr(key, Num.from(value));
+    return this.updatedAttr(key, Num.from(value));
   }
 
   public Record updatedAttr(String key, double value) {
-    return updatedAttr(key, Num.from(value));
+    return this.updatedAttr(key, Num.from(value));
   }
 
   public Record updatedAttr(String key, boolean value) {
-    return updatedAttr(key, Bool.from(value));
+    return this.updatedAttr(key, Bool.from(value));
   }
 
   public Record updatedSlot(Value key, Value value) {
@@ -429,55 +429,55 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   }
 
   public Record updatedSlot(Value key, String value) {
-    return updatedSlot(key, Text.from(value));
+    return this.updatedSlot(key, Text.from(value));
   }
 
   public Record updatedSlot(Value key, int value) {
-    return updatedSlot(key, Num.from(value));
+    return this.updatedSlot(key, Num.from(value));
   }
 
   public Record updatedSlot(Value key, long value) {
-    return updatedSlot(key, Num.from(value));
+    return this.updatedSlot(key, Num.from(value));
   }
 
   public Record updatedSlot(Value key, float value) {
-    return updatedSlot(key, Num.from(value));
+    return this.updatedSlot(key, Num.from(value));
   }
 
   public Record updatedSlot(Value key, double value) {
-    return updatedSlot(key, Num.from(value));
+    return this.updatedSlot(key, Num.from(value));
   }
 
   public Record updatedSlot(Value key, boolean value) {
-    return updatedSlot(key, Bool.from(value));
+    return this.updatedSlot(key, Bool.from(value));
   }
 
   public Record updatedSlot(String key, Value value) {
-    return updatedSlot(Text.from(key), value);
+    return this.updatedSlot(Text.from(key), value);
   }
 
   public Record updatedSlot(String key, String value) {
-    return updatedSlot(key, Text.from(value));
+    return this.updatedSlot(key, Text.from(value));
   }
 
   public Record updatedSlot(String key, int value) {
-    return updatedSlot(key, Num.from(value));
+    return this.updatedSlot(key, Num.from(value));
   }
 
   public Record updatedSlot(String key, long value) {
-    return updatedSlot(key, Num.from(value));
+    return this.updatedSlot(key, Num.from(value));
   }
 
   public Record updatedSlot(String key, float value) {
-    return updatedSlot(key, Num.from(value));
+    return this.updatedSlot(key, Num.from(value));
   }
 
   public Record updatedSlot(String key, double value) {
-    return updatedSlot(key, Num.from(value));
+    return this.updatedSlot(key, Num.from(value));
   }
 
   public Record updatedSlot(String key, boolean value) {
-    return updatedSlot(key, Bool.from(value));
+    return this.updatedSlot(key, Bool.from(value));
   }
 
   public Record appended(Item item) {
@@ -488,27 +488,27 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   }
 
   public Record appended(String item) {
-    return appended(Text.from(item));
+    return this.appended(Text.from(item));
   }
 
   public Record appended(int item) {
-    return appended(Num.from(item));
+    return this.appended(Num.from(item));
   }
 
   public Record appended(long item) {
-    return appended(Num.from(item));
+    return this.appended(Num.from(item));
   }
 
   public Record appended(float item) {
-    return appended(Num.from(item));
+    return this.appended(Num.from(item));
   }
 
   public Record appended(double item) {
-    return appended(Num.from(item));
+    return this.appended(Num.from(item));
   }
 
   public Record appended(boolean item) {
-    return appended(Bool.from(item));
+    return this.appended(Bool.from(item));
   }
 
   public Record appended(Object... items) {
@@ -526,27 +526,27 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   }
 
   public Record prepended(String item) {
-    return prepended(Text.from(item));
+    return this.prepended(Text.from(item));
   }
 
   public Record prepended(int item) {
-    return prepended(Num.from(item));
+    return this.prepended(Num.from(item));
   }
 
   public Record prepended(long item) {
-    return prepended(Num.from(item));
+    return this.prepended(Num.from(item));
   }
 
   public Record prepended(float item) {
-    return prepended(Num.from(item));
+    return this.prepended(Num.from(item));
   }
 
   public Record prepended(double item) {
-    return prepended(Num.from(item));
+    return this.prepended(Num.from(item));
   }
 
   public Record prepended(boolean item) {
-    return prepended(Bool.from(item));
+    return this.prepended(Bool.from(item));
   }
 
   public Record prepended(Object... items) {
@@ -584,27 +584,27 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   public abstract Item bitwiseAnd(Item that);
 
   public Item lt(Item that) {
-    return compareTo(that) < 0 ? Bool.from(true) : Item.absent();
+    return this.compareTo(that) < 0 ? Bool.from(true) : Item.absent();
   }
 
   public Item le(Item that) {
-    return compareTo(that) <= 0 ? Bool.from(true) : Item.absent();
+    return this.compareTo(that) <= 0 ? Bool.from(true) : Item.absent();
   }
 
   public Item eq(Item that) {
-    return equals(that) ? Bool.from(true) : Item.absent();
+    return this.equals(that) ? Bool.from(true) : Item.absent();
   }
 
   public Item ne(Item that) {
-    return !equals(that) ? Bool.from(true) : Item.absent();
+    return !this.equals(that) ? Bool.from(true) : Item.absent();
   }
 
   public Item ge(Item that) {
-    return compareTo(that) >= 0 ? Bool.from(true) : Item.absent();
+    return this.compareTo(that) >= 0 ? Bool.from(true) : Item.absent();
   }
 
   public Item gt(Item that) {
-    return compareTo(that) > 0 ? Bool.from(true) : Item.absent();
+    return this.compareTo(that) > 0 ? Bool.from(true) : Item.absent();
   }
 
   public abstract Item plus(Item that);
@@ -644,11 +644,11 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   }
 
   public Item max(Item that) {
-    return compareTo(that) >= 0 ? this : that;
+    return this.compareTo(that) >= 0 ? this : that;
   }
 
   public Item min(Item that) {
-    return compareTo(that) <= 0 ? this : that;
+    return this.compareTo(that) <= 0 ? this : that;
   }
 
   public Item evaluate(Interpreter interpreter) {
@@ -659,7 +659,7 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
     final Interpreter interpreter = new Interpreter();
     interpreter.pushScope(Item.globalScope());
     interpreter.pushScope(scope);
-    return evaluate(interpreter);
+    return this.evaluate(interpreter);
   }
 
   public Item substitute(Interpreter interpreter) {
@@ -670,7 +670,7 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
     final Interpreter interpreter = new Interpreter();
     interpreter.pushScope(Item.globalScope());
     interpreter.pushScope(scope);
-    return substitute(interpreter);
+    return this.substitute(interpreter);
   }
 
   /**
@@ -901,8 +901,8 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   }
 
   /**
-   * Returns the heterogeneous sort order of this {@code Item}.  Used to impose
-   * a total order on the set of all items.  When comparing two items of
+   * Returns the heterogeneous sort order of this {@code Item}. Used to impose
+   * a total order on the set of all items. When comparing two items of
    * different types, the items order according to their {@code typeOrder}.
    */
   public abstract int typeOrder();
@@ -918,10 +918,10 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   @Override
   public abstract int hashCode();
 
-  public abstract void debug(Output<?> output);
+  public abstract <T> Output<T> debug(Output<T> output);
 
-  public void display(Output<?> output) {
-    debug(output);
+  public <T> Output<T> display(Output<T> output) {
+    return this.debug(output);
   }
 
   public String toString() {
@@ -956,8 +956,8 @@ public abstract class Item implements Comparable<Item>, Iterable<Item>, Debug, D
   public static Item globalScope() {
     if (globalScope == null) {
       globalScope = Record.create(1)
-          .slot("math", MathModule.scope())
-          .commit();
+                          .slot("math", MathModule.scope())
+                          .commit();
     }
     return globalScope;
   }

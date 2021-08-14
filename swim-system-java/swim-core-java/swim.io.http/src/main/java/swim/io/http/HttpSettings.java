@@ -32,47 +32,12 @@ import swim.util.Murmur3;
  */
 public class HttpSettings implements Debug {
 
-  private static int hashSeed;
-  private static HttpSettings standard;
-  private static Form<HttpSettings> form;
   protected final IpSettings ipSettings;
   protected final int maxMessageSize;
 
   public HttpSettings(IpSettings ipSettings, int maxMessageSize) {
     this.ipSettings = ipSettings;
     this.maxMessageSize = maxMessageSize;
-  }
-
-  /**
-   * Returns the default {@code HttpSettings} instance.
-   */
-  public static HttpSettings standard() {
-    if (standard == null) {
-      int maxMessageSize;
-      try {
-        maxMessageSize = Integer.parseInt(System.getProperty("swim.http.max.message.size"));
-      } catch (NumberFormatException error) {
-        maxMessageSize = 16 * 1024 * 1024;
-      }
-
-      standard = new HttpSettings(IpSettings.standard(), maxMessageSize);
-    }
-    return standard;
-  }
-
-  public static HttpSettings from(IpSettings ipSettings) {
-    return standard().ipSettings(ipSettings);
-  }
-
-  /**
-   * Returns the structural {@code Form} of {@code HttpSettings}.
-   */
-  @Kind
-  public static Form<HttpSettings> form() {
-    if (form == null) {
-      form = new HttpSettingsForm();
-    }
-    return form;
   }
 
   /**
@@ -87,7 +52,7 @@ public class HttpSettings implements Debug {
    * {@code ipSettings}.
    */
   public HttpSettings ipSettings(IpSettings ipSettings) {
-    return copy(ipSettings, this.maxMessageSize);
+    return this.copy(ipSettings, this.maxMessageSize);
   }
 
   /**
@@ -102,7 +67,7 @@ public class HttpSettings implements Debug {
    * {@code tcpSettings}.
    */
   public HttpSettings tcpSettings(TcpSettings tcpSettings) {
-    return ipSettings(this.ipSettings.tcpSettings(tcpSettings));
+    return this.ipSettings(this.ipSettings.tcpSettings(tcpSettings));
   }
 
   /**
@@ -117,7 +82,7 @@ public class HttpSettings implements Debug {
    * {@code tlsSettings}.
    */
   public HttpSettings tlsSettings(TlsSettings tlsSettings) {
-    return ipSettings(this.ipSettings.tlsSettings(tlsSettings));
+    return this.ipSettings(this.ipSettings.tlsSettings(tlsSettings));
   }
 
   /**
@@ -133,7 +98,7 @@ public class HttpSettings implements Debug {
    * {@code maxMessageSize} limit on HTTP message + entity sizes.
    */
   public HttpSettings maxMessageSize(int maxMessageSize) {
-    return copy(this.ipSettings, maxMessageSize);
+    return this.copy(this.ipSettings, maxMessageSize);
   }
 
   /**
@@ -149,7 +114,7 @@ public class HttpSettings implements Debug {
    * Returns a structural {@code Value} representing these {@code HttpSettings}.
    */
   public Value toValue() {
-    return form().mold(this).toValue();
+    return HttpSettings.form().mold(this).toValue();
   }
 
   /**
@@ -172,25 +137,64 @@ public class HttpSettings implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(HttpSettings.class);
+    if (HttpSettings.hashSeed == 0) {
+      HttpSettings.hashSeed = Murmur3.seed(HttpSettings.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpSettings.hashSeed,
         this.ipSettings.hashCode()), this.maxMessageSize));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("HttpSettings").write('.').write("standard").write('(').write(')')
-        .write('.').write("ipSettings").write('(').debug(this.ipSettings).write(')')
-        .write('.').write("maxMessageSize").write('(').debug(this.maxMessageSize).write(')');
+                   .write('.').write("ipSettings").write('(').debug(this.ipSettings).write(')')
+                   .write('.').write("maxMessageSize").write('(').debug(this.maxMessageSize).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static HttpSettings standard;
+
+  /**
+   * Returns the default {@code HttpSettings} instance.
+   */
+  public static HttpSettings standard() {
+    if (HttpSettings.standard == null) {
+      int maxMessageSize;
+      try {
+        maxMessageSize = Integer.parseInt(System.getProperty("swim.http.max.message.size"));
+      } catch (NumberFormatException error) {
+        maxMessageSize = 16 * 1024 * 1024;
+      }
+
+      HttpSettings.standard = new HttpSettings(IpSettings.standard(), maxMessageSize);
+    }
+    return HttpSettings.standard;
+  }
+
+  public static HttpSettings create(IpSettings ipSettings) {
+    return HttpSettings.standard().ipSettings(ipSettings);
+  }
+
+  private static Form<HttpSettings> form;
+
+  /**
+   * Returns the structural {@code Form} of {@code HttpSettings}.
+   */
+  @Kind
+  public static Form<HttpSettings> form() {
+    if (HttpSettings.form == null) {
+      HttpSettings.form = new HttpSettingsForm();
+    }
+    return HttpSettings.form;
   }
 
 }

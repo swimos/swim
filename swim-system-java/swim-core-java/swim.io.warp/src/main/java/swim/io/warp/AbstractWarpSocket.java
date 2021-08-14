@@ -53,83 +53,83 @@ public abstract class AbstractWarpSocket implements WarpSocket, IpContext, FlowC
 
   @Override
   public void doRead() {
-    // stub
+    // hook
   }
 
   @Override
   public void didRead(Envelope envelope) {
-    // stub
+    // hook
   }
 
   @Override
   public void didRead(WsControl<?, ?> frame) {
     if (frame instanceof WsPing<?, ?>) {
-      write(WsPong.from(frame.payload()));
+      this.write(WsPong.create(frame.payload()));
     } else if (frame instanceof WsClose<?, ?>) {
-      close();
+      this.close();
     }
   }
 
   @Override
   public void doWrite() {
-    // stub
+    // hook
   }
 
   @Override
   public void didWrite(Envelope envelope) {
-    // stub
+    // hook
   }
 
   @Override
   public void didWrite(WsControl<?, ?> frame) {
     if (frame instanceof WsClose<?, ?>) {
-      close();
+      this.close();
     }
   }
 
   @Override
   public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
-    // stub
+    // hook
   }
 
   @Override
   public void willConnect() {
-    // stub
+    // hook
   }
 
   @Override
   public void didConnect() {
-    // stub
+    // hook
   }
 
   @Override
   public void willSecure() {
-    // stub
+    // hook
   }
 
   @Override
   public void didSecure() {
-    // stub
+    // hook
   }
 
   @Override
   public void willBecome(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didBecome(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didTimeout() {
-    // stub
+    // hook
   }
 
   @Override
   public void didDisconnect() {
-    // stub
+    // hook
   }
 
   @Override

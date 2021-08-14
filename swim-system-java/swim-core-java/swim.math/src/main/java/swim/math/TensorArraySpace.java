@@ -16,14 +16,6 @@ package swim.math;
 
 public abstract class TensorArraySpace<T, V, S> implements TensorSpace<T, S> {
 
-  public static <V, S> TensorArraySpace<V[], V, S> from(Class<V> type, TensorSpace<V, S> next, TensorDims dims) {
-    return new TensorArrayIdentitySpace<V, S>(type, next, dims);
-  }
-
-  public static <V, S> TensorArraySpace<V[], V, S> from(Class<V> type, TensorSpace<V, S> next, int n) {
-    return new TensorArrayIdentitySpace<V, S>(type, next, next.dimensions().by(n));
-  }
-
   public abstract TensorSpace<V, S> next();
 
   public abstract T of(Object... array);
@@ -40,90 +32,98 @@ public abstract class TensorArraySpace<T, V, S> implements TensorSpace<T, S> {
 
   @Override
   public T zero() {
-    final int n = dimensions().size;
+    final int n = this.dimensions().size;
     final Object[] ws = new Object[n];
-    final V zero = next().zero();
+    final V zero = this.next().zero();
     for (int i = 0; i < n; i += 1) {
       ws[i] = zero;
     }
-    return of(ws);
+    return this.of(ws);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public T add(T u, T v) {
-    final Object[] us = toArray(u);
-    final Object[] vs = toArray(v);
+    final Object[] us = this.toArray(u);
+    final Object[] vs = this.toArray(v);
     final int n = us.length;
     if (n != vs.length) {
       throw new DimensionException();
     }
-    final Object[] ws = newArray(n);
-    final TensorSpace<V, S> next = next();
+    final Object[] ws = this.newArray(n);
+    final TensorSpace<V, S> next = this.next();
     for (int i = 0; i < n; i += 1) {
       ws[i] = next.add((V) us[i], (V) vs[i]);
     }
-    return of(ws);
+    return this.of(ws);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public T opposite(T v) {
-    final Object[] vs = toArray(v);
+    final Object[] vs = this.toArray(v);
     final int n = vs.length;
-    final Object[] ws = newArray(n);
-    final TensorSpace<V, S> next = next();
+    final Object[] ws = this.newArray(n);
+    final TensorSpace<V, S> next = this.next();
     for (int i = 0; i < n; i += 1) {
       ws[i] = next.opposite((V) vs[i]);
     }
-    return of(ws);
+    return this.of(ws);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public T subtract(T u, T v) {
-    final Object[] us = toArray(u);
-    final Object[] vs = toArray(v);
+    final Object[] us = this.toArray(u);
+    final Object[] vs = this.toArray(v);
     final int n = us.length;
     if (n != vs.length) {
       throw new DimensionException();
     }
-    final Object[] ws = newArray(n);
-    final TensorSpace<V, S> next = next();
+    final Object[] ws = this.newArray(n);
+    final TensorSpace<V, S> next = this.next();
     for (int i = 0; i < n; i += 1) {
       ws[i] = next.subtract((V) us[i], (V) vs[i]);
     }
-    return of(ws);
+    return this.of(ws);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public T multiply(T u, S a) {
-    final Object[] us = toArray(u);
+    final Object[] us = this.toArray(u);
     final int n = us.length;
-    final Object[] ws = newArray(n);
-    final TensorSpace<V, S> next = next();
+    final Object[] ws = this.newArray(n);
+    final TensorSpace<V, S> next = this.next();
     for (int i = 0; i < n; i += 1) {
       ws[i] = next.multiply((V) us[i], a);
     }
-    return of(ws);
+    return this.of(ws);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public T combine(S a, T u, S b, T v) {
-    final Object[] us = toArray(u);
-    final Object[] vs = toArray(v);
+    final Object[] us = this.toArray(u);
+    final Object[] vs = this.toArray(v);
     final int n = us.length;
     if (n != vs.length) {
       throw new DimensionException();
     }
-    final Object[] ws = newArray(n);
-    final TensorSpace<V, S> next = next();
+    final Object[] ws = this.newArray(n);
+    final TensorSpace<V, S> next = this.next();
     for (int i = 0; i < n; i += 1) {
       ws[i] = next.combine(a, (V) us[i], b, (V) vs[i]);
     }
-    return of(ws);
+    return this.of(ws);
+  }
+
+  public static <V, S> TensorArraySpace<V[], V, S> create(Class<V> type, TensorSpace<V, S> next, TensorDims dims) {
+    return new TensorArrayIdentitySpace<V, S>(type, next, dims);
+  }
+
+  public static <V, S> TensorArraySpace<V[], V, S> create(Class<V> type, TensorSpace<V, S> next, int n) {
+    return new TensorArrayIdentitySpace<V, S>(type, next, next.dimensions().by(n));
   }
 
 }

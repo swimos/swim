@@ -44,7 +44,7 @@ public class SpatialValueMap<K, S, V> implements SpatialMap<K, S, V> {
   }
 
   public <K2> SpatialValueMap<K2, S, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   public Form<V> valueForm() {
@@ -56,7 +56,7 @@ public class SpatialValueMap<K, S, V> implements SpatialMap<K, S, V> {
   }
 
   public <V2> SpatialValueMap<K, S, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override
@@ -166,7 +166,7 @@ public class SpatialValueMap<K, S, V> implements SpatialMap<K, S, V> {
   @SuppressWarnings("unchecked")
   @Override
   public Iterator<Entry<K, S, V>> iterator(S shape) {
-    if (keyForm != Form.forValue() || this.valueForm != Form.forValue()) {
+    if (this.keyForm != Form.forValue() || this.valueForm != Form.forValue()) {
       return new SpatialValueEntryIterator<K, S, V>(this.inner.iterator(shape), this.keyForm, this.valueForm);
     } else {
       return (Iterator<Entry<K, S, V>>) (Iterator<?>) this.inner.iterator(shape);
@@ -176,7 +176,7 @@ public class SpatialValueMap<K, S, V> implements SpatialMap<K, S, V> {
   @SuppressWarnings("unchecked")
   @Override
   public Iterator<Entry<K, S, V>> iterator() {
-    if (keyForm != Form.forValue() || this.valueForm != Form.forValue()) {
+    if (this.keyForm != Form.forValue() || this.valueForm != Form.forValue()) {
       return new SpatialValueEntryIterator<K, S, V>(this.inner.iterator(), this.keyForm, this.valueForm);
     } else {
       return (Iterator<Entry<K, S, V>>) (Iterator<?>) this.inner.iterator();
@@ -185,7 +185,7 @@ public class SpatialValueMap<K, S, V> implements SpatialMap<K, S, V> {
 
   @SuppressWarnings("unchecked")
   public Iterator<K> keyIterator() {
-    if (keyForm != Form.forValue() || this.valueForm != Form.forValue()) {
+    if (this.keyForm != Form.forValue() || this.valueForm != Form.forValue()) {
       return new ValueIterator<K>(this.inner.keyIterator(), this.keyForm);
     } else {
       return (Iterator<K>) this.inner.keyIterator();
@@ -194,7 +194,7 @@ public class SpatialValueMap<K, S, V> implements SpatialMap<K, S, V> {
 
   @SuppressWarnings("unchecked")
   public Iterator<V> valueIterator() {
-    if (keyForm != Form.forValue() || this.valueForm != Form.forValue()) {
+    if (this.keyForm != Form.forValue() || this.valueForm != Form.forValue()) {
       return new ValueIterator<V>(this.inner.valueIterator(), this.valueForm);
     } else {
       return (Iterator<V>) this.inner.valueIterator();
@@ -207,11 +207,11 @@ public class SpatialValueMap<K, S, V> implements SpatialMap<K, S, V> {
       return true;
     } else if (other instanceof SpatialMap<?, ?, ?>) {
       final SpatialMap<?, ?, ?> that = (SpatialMap<?, ?, ?>) other;
-      if (size() != that.size()) {
+      if (this.size() != that.size()) {
         return false;
       }
       try {
-        final Iterator<Entry<K, S, V>> these = iterator();
+        final Iterator<Entry<K, S, V>> these = this.iterator();
         while (these.hasNext()) {
           final Entry<K, S, V> entry = these.next();
           final K keyObject = entry.getKey();
@@ -236,7 +236,7 @@ public class SpatialValueMap<K, S, V> implements SpatialMap<K, S, V> {
 
   @Override
   public int hashCode() {
-    final Iterator<Entry<K, S, V>> these = iterator();
+    final Iterator<Entry<K, S, V>> these = this.iterator();
     int h = 0;
     while (these.hasNext()) {
       h += these.next().hashCode();
@@ -246,7 +246,7 @@ public class SpatialValueMap<K, S, V> implements SpatialMap<K, S, V> {
 
   @Override
   public String toString() {
-    final Iterator<Entry<K, S, V>> these = iterator();
+    final Iterator<Entry<K, S, V>> these = this.iterator();
     if (!these.hasNext()) {
       return "{}";
     }

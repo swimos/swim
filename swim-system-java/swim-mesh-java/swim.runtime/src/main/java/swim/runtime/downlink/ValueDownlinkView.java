@@ -34,7 +34,7 @@ import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 import swim.observable.function.DidSet;
 import swim.observable.function.WillSet;
@@ -50,7 +50,6 @@ import swim.util.Cursor;
 
 public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownlink<V> {
 
-  protected static final int STATEFUL = 1 << 2;
   protected final Form<V> valueForm;
   protected ValueDownlinkModel model;
   protected Outlet<? extends V> input;
@@ -61,9 +60,9 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
                            Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
                            float rate, Value body, int flags, Form<V> valueForm,
                            Object observers) {
-    super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-        body, flags, observers);
+    super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate, body, flags, observers);
     this.valueForm = valueForm;
+    this.model = null;
 
     this.input = null;
     this.outputs = null;
@@ -73,8 +72,9 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   public ValueDownlinkView(CellContext cellContext, Stage stage, Uri meshUri,
                            Uri hostUri, Uri nodeUri, Uri laneUri, float prio,
                            float rate, Value body, Form<V> valueForm) {
-    this(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-        body, KEEP_LINKED | KEEP_SYNCED | STATEFUL, valueForm, null);
+    this(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate, body,
+         WarpDownlinkView.KEEP_LINKED | WarpDownlinkView.KEEP_SYNCED | ValueDownlinkView.STATEFUL,
+         valueForm, null);
   }
 
   @Override
@@ -85,72 +85,72 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   @Override
   public ValueDownlinkView<V> hostUri(Uri hostUri) {
     return new ValueDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        hostUri, this.nodeUri, this.laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        this.valueForm, this.observers);
+                                    hostUri, this.nodeUri, this.laneUri,
+                                    this.prio, this.rate, this.body, this.flags,
+                                    this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> hostUri(String hostUri) {
-    return hostUri(Uri.parse(hostUri));
+    return this.hostUri(Uri.parse(hostUri));
   }
 
   @Override
   public ValueDownlinkView<V> nodeUri(Uri nodeUri) {
     return new ValueDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, nodeUri, this.laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        this.valueForm, this.observers);
+                                    this.hostUri, nodeUri, this.laneUri,
+                                    this.prio, this.rate, this.body, this.flags,
+                                    this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> nodeUri(String nodeUri) {
-    return nodeUri(Uri.parse(nodeUri));
+    return this.nodeUri(Uri.parse(nodeUri));
   }
 
   @Override
   public ValueDownlinkView<V> laneUri(Uri laneUri) {
     return new ValueDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        this.valueForm, this.observers);
+                                    this.hostUri, this.nodeUri, laneUri,
+                                    this.prio, this.rate, this.body, this.flags,
+                                    this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> laneUri(String laneUri) {
-    return laneUri(Uri.parse(laneUri));
+    return this.laneUri(Uri.parse(laneUri));
   }
 
   @Override
   public ValueDownlinkView<V> prio(float prio) {
     return new ValueDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        prio, this.rate, this.body, this.flags,
-        this.valueForm, this.observers);
+                                    this.hostUri, this.nodeUri, this.laneUri,
+                                    prio, this.rate, this.body, this.flags,
+                                    this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> rate(float rate) {
     return new ValueDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        this.prio, rate, this.body, this.flags,
-        this.valueForm, this.observers);
+                                    this.hostUri, this.nodeUri, this.laneUri,
+                                    this.prio, rate, this.body, this.flags,
+                                    this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> body(Value body) {
     return new ValueDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        this.prio, this.rate, body, this.flags,
-        this.valueForm, this.observers);
+                                    this.hostUri, this.nodeUri, this.laneUri,
+                                    this.prio, this.rate, body, this.flags,
+                                    this.valueForm, this.observers);
   }
 
   @Override
   public ValueDownlinkView<V> keepLinked(boolean keepLinked) {
     if (keepLinked) {
-      this.flags |= KEEP_LINKED;
+      this.flags |= WarpDownlinkView.KEEP_LINKED;
     } else {
-      this.flags &= ~KEEP_LINKED;
+      this.flags &= ~WarpDownlinkView.KEEP_LINKED;
     }
     return this;
   }
@@ -158,24 +158,24 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   @Override
   public ValueDownlinkView<V> keepSynced(boolean keepSynced) {
     if (keepSynced) {
-      this.flags |= KEEP_SYNCED;
+      this.flags |= WarpDownlinkView.KEEP_SYNCED;
     } else {
-      this.flags &= ~KEEP_SYNCED;
+      this.flags &= ~WarpDownlinkView.KEEP_SYNCED;
     }
     return this;
   }
 
   @Override
   public final boolean isStateful() {
-    return (this.flags & STATEFUL) != 0;
+    return (this.flags & ValueDownlinkView.STATEFUL) != 0;
   }
 
   @Override
   public ValueDownlinkView<V> isStateful(boolean isStateful) {
     if (isStateful) {
-      this.flags |= STATEFUL;
+      this.flags |= ValueDownlinkView.STATEFUL;
     } else {
-      this.flags &= ~STATEFUL;
+      this.flags &= ~ValueDownlinkView.STATEFUL;
     }
     final ValueDownlinkModel model = this.model;
     if (this.model != null) {
@@ -186,9 +186,9 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
 
   void didSetStateful(boolean isStateful) {
     if (isStateful) {
-      this.flags |= STATEFUL;
+      this.flags |= ValueDownlinkView.STATEFUL;
     } else {
-      this.flags &= ~STATEFUL;
+      this.flags &= ~ValueDownlinkView.STATEFUL;
     }
   }
 
@@ -200,14 +200,14 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   @Override
   public <V2> ValueDownlinkView<V2> valueForm(Form<V2> valueForm) {
     return new ValueDownlinkView<V2>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri,
-        this.prio, this.rate, this.body, this.flags,
-        valueForm, typesafeObservers(this.observers));
+                                     this.hostUri, this.nodeUri, this.laneUri,
+                                     this.prio, this.rate, this.body, this.flags,
+                                     valueForm, this.typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> ValueDownlinkView<V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   protected Object typesafeObservers(Object observers) {
@@ -229,77 +229,77 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
 
   @Override
   public ValueDownlinkView<V> willSet(WillSet<V> willSet) {
-    return observe(willSet);
+    return this.observe(willSet);
   }
 
   @Override
   public ValueDownlinkView<V> didSet(DidSet<V> didSet) {
-    return observe(didSet);
+    return this.observe(didSet);
   }
 
   @Override
   public ValueDownlinkView<V> willReceive(WillReceive willReceive) {
-    return observe(willReceive);
+    return this.observe(willReceive);
   }
 
   @Override
   public ValueDownlinkView<V> didReceive(DidReceive didReceive) {
-    return observe(didReceive);
+    return this.observe(didReceive);
   }
 
   @Override
   public ValueDownlinkView<V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public ValueDownlinkView<V> willLink(WillLink willLink) {
-    return observe(willLink);
+    return this.observe(willLink);
   }
 
   @Override
   public ValueDownlinkView<V> didLink(DidLink didLink) {
-    return observe(didLink);
+    return this.observe(didLink);
   }
 
   @Override
   public ValueDownlinkView<V> willSync(WillSync willSync) {
-    return observe(willSync);
+    return this.observe(willSync);
   }
 
   @Override
   public ValueDownlinkView<V> didSync(DidSync didSync) {
-    return observe(didSync);
+    return this.observe(didSync);
   }
 
   @Override
   public ValueDownlinkView<V> willUnlink(WillUnlink willUnlink) {
-    return observe(willUnlink);
+    return this.observe(willUnlink);
   }
 
   @Override
   public ValueDownlinkView<V> didUnlink(DidUnlink didUnlink) {
-    return observe(didUnlink);
+    return this.observe(didUnlink);
   }
 
   @Override
   public ValueDownlinkView<V> didConnect(DidConnect didConnect) {
-    return observe(didConnect);
+    return this.observe(didConnect);
   }
 
   @Override
   public ValueDownlinkView<V> didDisconnect(DidDisconnect didDisconnect) {
-    return observe(didDisconnect);
+    return this.observe(didDisconnect);
   }
 
   @Override
   public ValueDownlinkView<V> didClose(DidClose didClose) {
-    return observe(didClose);
+    return this.observe(didClose);
   }
 
   @Override
   public ValueDownlinkView<V> didFail(DidFail didFail) {
-    return observe(didFail);
+    return this.observe(didFail);
   }
 
   @SuppressWarnings("unchecked")
@@ -314,8 +314,8 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
           try {
             newValue = ((WillSet<V>) observers).willSet(newValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -331,8 +331,8 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
               try {
                 newValue = ((WillSet<V>) observer).willSet(newValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -360,8 +360,8 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
           try {
             ((DidSet<V>) observers).didSet(newValue, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -377,8 +377,8 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
               try {
                 ((DidSet<V>) observer).didSet(newValue, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -399,6 +399,7 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   }
 
   public void downlinkDidSetValue(Value newValue, Value oldValue) {
+    // hook
   }
 
   public V downlinkWillSet(V newValue) {
@@ -406,14 +407,14 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   }
 
   public void downlinkDidSet(V newValue, V oldValue) {
-    decohere();
-    recohere(0); // TODO: debounce and track version
+    this.decohere();
+    this.recohere(0); // TODO: debounce and track version
   }
 
   @Override
   public ValueDownlinkModel createDownlinkModel() {
     return new ValueDownlinkModel(this.meshUri, this.hostUri, this.nodeUri,
-        this.laneUri, this.prio, this.rate, this.body);
+                                  this.laneUri, this.prio, this.rate, this.body);
   }
 
   @Override
@@ -549,50 +550,50 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
 
   @Override
   public void decohereOutput() {
-    decohere();
+    this.decohere();
   }
 
   @Override
   public void decohereInput() {
-    decohere();
+    this.decohere();
   }
 
   public void decohere() {
     if (this.version >= 0) {
-      willDecohere();
+      this.willDecohere();
       this.version = -1;
-      onDecohere();
+      this.onDecohere();
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         this.outputs[i].decohereOutput();
       }
-      didDecohere();
+      this.didDecohere();
     }
   }
 
   @Override
   public void recohereOutput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   @Override
   public void recohereInput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   public void recohere(int version) {
     if (this.version < 0) {
-      willRecohere(version);
+      this.willRecohere(version);
       this.version = version;
       if (this.input != null) {
         this.input.recohereInput(version);
       }
-      onRecohere(version);
+      this.onRecohere(version);
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         this.outputs[i].recohereOutput(version);
       }
-      didRecohere(version);
+      this.didRecohere(version);
     }
   }
 
@@ -615,12 +616,14 @@ public class ValueDownlinkView<V> extends WarpDownlinkView implements ValueDownl
   protected void onRecohere(int version) {
     if (this.input != null) {
       final V value = this.input.get();
-      set(value);
+      this.set(value);
     }
   }
 
   protected void didRecohere(int version) {
     // hook
   }
+
+  protected static final int STATEFUL = 1 << 2;
 
 }

@@ -23,6 +23,10 @@ import swim.dynamic.java.lang.HostIterable;
 
 public final class HostCollection {
 
+  private HostCollection() {
+    // static
+  }
+
   public static final HostObjectType<Collection<Object>> TYPE;
 
   static {
@@ -30,10 +34,6 @@ public final class HostCollection {
     TYPE = type;
     type.inheritType(HostIterable.TYPE);
     type.addMember(new HostCollectionIsEmpty());
-  }
-
-  private HostCollection() {
-    // static
   }
 
 }

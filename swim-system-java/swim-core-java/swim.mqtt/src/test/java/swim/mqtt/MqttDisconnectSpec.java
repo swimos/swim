@@ -20,10 +20,6 @@ import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttDisconnectSpec {
 
-  public static void assertDecodes(Data data, MqttDisconnect packet) {
-    MqttAssertions.assertDecodesPacket(data, packet);
-  }
-
   @Test
   public void decodeDisconnectPackets() {
     assertDecodes(Data.fromBase16("E000"), MqttDisconnect.packet());
@@ -32,6 +28,10 @@ public class MqttDisconnectSpec {
   @Test
   public void encodeDisconnectPackets() {
     assertEncodes(MqttDisconnect.packet(), Data.fromBase16("E000"));
+  }
+
+  public static void assertDecodes(Data data, MqttDisconnect packet) {
+    MqttAssertions.assertDecodesPacket(data, packet);
   }
 
 }

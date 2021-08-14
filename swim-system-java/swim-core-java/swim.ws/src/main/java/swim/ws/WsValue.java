@@ -23,15 +23,10 @@ import swim.util.Murmur3;
 
 public final class WsValue<T> extends WsData<T> implements Debug {
 
-  private static int hashSeed;
   final T value;
 
   WsValue(T value) {
     this.value = value;
-  }
-
-  public static <T> WsValue<T> from(T value) {
-    return new WsValue<T>(value);
   }
 
   @Override
@@ -75,23 +70,30 @@ public final class WsValue<T> extends WsData<T> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(WsValue.class);
+    if (WsValue.hashSeed == 0) {
+      WsValue.hashSeed = Murmur3.seed(WsValue.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, Murmur3.hash(this.value)));
+    return Murmur3.mash(Murmur3.mix(WsValue.hashSeed, Murmur3.hash(this.value)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("WsValue").write('.').write("from").write('(')
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("WsValue").write('.').write("create").write('(')
         .debug(this.value).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static <T> WsValue<T> create(T value) {
+    return new WsValue<T>(value);
   }
 
 }

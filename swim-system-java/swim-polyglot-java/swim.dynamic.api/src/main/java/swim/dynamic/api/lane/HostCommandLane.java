@@ -24,6 +24,10 @@ import swim.dynamic.api.warp.function.GuestOnCommand;
 
 public final class HostCommandLane {
 
+  private HostCommandLane() {
+    // static
+  }
+
   public static final HostObjectType<CommandLane<Object>> TYPE;
 
   static {
@@ -33,10 +37,6 @@ public final class HostCommandLane {
     type.addMember(new HostCommandLaneObserve());
     type.addMember(new HostCommandLaneUnobserve());
     type.addMember(new HostCommandLaneOnCommand());
-  }
-
-  private HostCommandLane() {
-    // static
   }
 
 }

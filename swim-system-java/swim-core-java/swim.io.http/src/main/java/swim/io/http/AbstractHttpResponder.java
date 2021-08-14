@@ -49,47 +49,47 @@ public abstract class AbstractHttpResponder<T> implements HttpResponder<T>, IpCo
 
   @Override
   public void willRequest(HttpRequest<?> request) {
-    // stub
+    // hook
   }
 
   @Override
   public void didRequest(HttpRequest<T> request) {
-    // stub
+    // hook
   }
 
   @Override
   public void doRespond(HttpRequest<T> request) {
-    // stub
+    // hook
   }
 
   @Override
   public void willRespond(HttpResponse<?> response) {
-    // stub
+    // hook
   }
 
   @Override
   public void didRespond(HttpResponse<?> response) {
-    // stub
+    // hook
   }
 
   @Override
   public void willBecome(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didBecome(IpSocket socket) {
-    // stub
+    // hook
   }
 
   @Override
   public void didTimeout() {
-    // stub
+    // hook
   }
 
   @Override
   public void didDisconnect() {
-    // stub
+    // hook
   }
 
   @Override

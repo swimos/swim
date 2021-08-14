@@ -33,7 +33,7 @@ final class IdentParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.output, this.step);
+    return IdentParser.parse(input, this.recon, this.output, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Output<V> output, int step) {
@@ -49,10 +49,10 @@ final class IdentParser<I, V> extends Parser<V> {
           output = output.write(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("identifier", input));
+          return Parser.error(Diagnostic.expected("identifier", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("identifier", input));
+        return Parser.error(Diagnostic.expected("identifier", input));
       }
     }
     if (step == 2) {
@@ -66,21 +66,21 @@ final class IdentParser<I, V> extends Parser<V> {
         }
       }
       if (!input.isEmpty()) {
-        return done(recon.ident(output.bind()));
+        return Parser.done(recon.ident(output.bind()));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new IdentParser<I, V>(recon, output, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Output<V> output) {
-    return parse(input, recon, output, 1);
+    return IdentParser.parse(input, recon, output, 1);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
-    return parse(input, recon, null, 1);
+    return IdentParser.parse(input, recon, null, 1);
   }
 
 }

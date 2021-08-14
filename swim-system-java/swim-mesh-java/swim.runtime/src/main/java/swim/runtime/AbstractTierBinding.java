@@ -16,44 +16,48 @@ package swim.runtime;
 
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
-public abstract class AbstractTierBinding extends AbstractSwimRef implements TierBinding {
+public abstract class AbstractTierBinding extends AbstractWarpRef implements TierBinding {
 
   protected volatile int status;
+
+  public AbstractTierBinding() {
+    this.status = 0;
+  }
 
   @Override
   public abstract TierContext tierContext();
 
   @Override
   public boolean isClosed() {
-    final int state = (this.status & STATE_MASK);
-    return state == CLOSED_STATE;
+    final int state = (AbstractTierBinding.STATUS.get(this) & AbstractTierBinding.STATE_MASK);
+    return state == AbstractTierBinding.CLOSED_STATE;
   }
 
   @Override
   public boolean isOpened() {
-    final int state = (this.status & STATE_MASK);
-    return state >= OPENED_STATE;
+    final int state = (AbstractTierBinding.STATUS.get(this) & AbstractTierBinding.STATE_MASK);
+    return state >= AbstractTierBinding.OPENED_STATE;
   }
 
   @Override
   public boolean isLoaded() {
-    final int state = (this.status & STATE_MASK);
-    return state >= LOADED_STATE;
+    final int state = (AbstractTierBinding.STATUS.get(this) & AbstractTierBinding.STATE_MASK);
+    return state >= AbstractTierBinding.LOADED_STATE;
   }
 
   @Override
   public boolean isStarted() {
-    final int state = (this.status & STATE_MASK);
-    return state == STARTED_STATE;
+    final int state = (AbstractTierBinding.STATUS.get(this) & AbstractTierBinding.STATE_MASK);
+    return state == AbstractTierBinding.STARTED_STATE;
   }
 
   protected void activate(TierBinding childTier) {
-    final int state = this.status & STATE_MASK;
-    if (state >= STARTING_STATE) {
+    final int state = AbstractTierBinding.STATUS.get(this) & AbstractTierBinding.STATE_MASK;
+    if (state >= AbstractTierBinding.STARTING_STATE) {
       childTier.start();
-    } else if (state >= LOADING_STATE) {
+    } else if (state >= AbstractTierBinding.LOADING_STATE) {
       childTier.load();
-    } else if (state >= OPENING_STATE) {
+    } else if (state >= AbstractTierBinding.OPENING_STATE) {
       childTier.open();
     }
   }
@@ -65,28 +69,28 @@ public abstract class AbstractTierBinding extends AbstractSwimRef implements Tie
     int oldState;
     int newState;
     int oldPhase;
-    final int newPhase = OPENED_PHASE;
+    final int newPhase = AbstractTierBinding.OPENED_PHASE;
     do {
-      oldStatus = this.status;
-      oldState = oldStatus & STATE_MASK;
-      oldPhase = (oldStatus & PHASE_MASK) >>> PHASE_SHIFT;
+      oldStatus = AbstractTierBinding.STATUS.get(this);
+      oldState = oldStatus & AbstractTierBinding.STATE_MASK;
+      oldPhase = (oldStatus & AbstractTierBinding.PHASE_MASK) >>> AbstractTierBinding.PHASE_SHIFT;
       if (newPhase > oldPhase) {
-        if (oldState == CLOSED_STATE) {
-          newState = OPENING_STATE;
+        if (oldState == AbstractTierBinding.CLOSED_STATE) {
+          newState = AbstractTierBinding.OPENING_STATE;
         } else {
           newState = oldState;
         }
-        newStatus = newState & STATE_MASK | (newPhase << PHASE_SHIFT) & PHASE_MASK;
+        newStatus = newState & AbstractTierBinding.STATE_MASK | (newPhase << AbstractTierBinding.PHASE_SHIFT) & AbstractTierBinding.PHASE_MASK;
       } else {
         newState = oldState;
         newStatus = oldStatus;
         break;
       }
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
+    } while (oldStatus != newStatus && !AbstractTierBinding.STATUS.compareAndSet(this, oldStatus, newStatus));
     if (oldState != newState) {
-      if (newState == OPENING_STATE) {
-        willOpen();
-        convergeState();
+      if (newState == AbstractTierBinding.OPENING_STATE) {
+        this.willOpen();
+        this.convergeState();
       }
     }
   }
@@ -98,33 +102,33 @@ public abstract class AbstractTierBinding extends AbstractSwimRef implements Tie
     int oldState;
     int newState;
     int oldPhase;
-    final int newPhase = LOADED_PHASE;
+    final int newPhase = AbstractTierBinding.LOADED_PHASE;
     do {
-      oldStatus = this.status;
-      oldState = oldStatus & STATE_MASK;
-      oldPhase = (oldStatus & PHASE_MASK) >>> PHASE_SHIFT;
+      oldStatus = AbstractTierBinding.STATUS.get(this);
+      oldState = oldStatus & AbstractTierBinding.STATE_MASK;
+      oldPhase = (oldStatus & AbstractTierBinding.PHASE_MASK) >>> AbstractTierBinding.PHASE_SHIFT;
       if (newPhase > oldPhase) {
-        if (oldState == OPENED_STATE) {
-          newState = LOADING_STATE;
-        } else if (oldState == CLOSED_STATE) {
-          newState = OPENING_STATE;
+        if (oldState == AbstractTierBinding.OPENED_STATE) {
+          newState = AbstractTierBinding.LOADING_STATE;
+        } else if (oldState == AbstractTierBinding.CLOSED_STATE) {
+          newState = AbstractTierBinding.OPENING_STATE;
         } else {
           newState = oldState;
         }
-        newStatus = newState & STATE_MASK | (newPhase << PHASE_SHIFT) & PHASE_MASK;
+        newStatus = newState & AbstractTierBinding.STATE_MASK | (newPhase << AbstractTierBinding.PHASE_SHIFT) & AbstractTierBinding.PHASE_MASK;
       } else {
         newState = oldState;
         newStatus = oldStatus;
         break;
       }
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
+    } while (oldStatus != newStatus && !AbstractTierBinding.STATUS.compareAndSet(this, oldStatus, newStatus));
     if (oldState != newState) {
-      if (newState == LOADING_STATE) {
-        willLoad();
-        convergeState();
-      } else if (newState == OPENING_STATE) {
-        willOpen();
-        convergeState();
+      if (newState == AbstractTierBinding.LOADING_STATE) {
+        this.willLoad();
+        this.convergeState();
+      } else if (newState == AbstractTierBinding.OPENING_STATE) {
+        this.willOpen();
+        this.convergeState();
       }
     }
   }
@@ -136,38 +140,38 @@ public abstract class AbstractTierBinding extends AbstractSwimRef implements Tie
     int oldState;
     int newState;
     int oldPhase;
-    final int newPhase = STARTED_PHASE;
+    final int newPhase = AbstractTierBinding.STARTED_PHASE;
     do {
-      oldStatus = this.status;
-      oldState = oldStatus & STATE_MASK;
-      oldPhase = (oldStatus & PHASE_MASK) >>> PHASE_SHIFT;
+      oldStatus = AbstractTierBinding.STATUS.get(this);
+      oldState = oldStatus & AbstractTierBinding.STATE_MASK;
+      oldPhase = (oldStatus & PHASE_MASK) >>> AbstractTierBinding.PHASE_SHIFT;
       if (newPhase > oldPhase) {
-        if (oldState == LOADED_STATE) {
-          newState = STARTING_STATE;
-        } else if (oldState == OPENED_STATE) {
-          newState = LOADING_STATE;
-        } else if (oldState == CLOSED_STATE) {
-          newState = OPENING_STATE;
+        if (oldState == AbstractTierBinding.LOADED_STATE) {
+          newState = AbstractTierBinding.STARTING_STATE;
+        } else if (oldState == AbstractTierBinding.OPENED_STATE) {
+          newState = AbstractTierBinding.LOADING_STATE;
+        } else if (oldState == AbstractTierBinding.CLOSED_STATE) {
+          newState = AbstractTierBinding.OPENING_STATE;
         } else {
           newState = oldState;
         }
-        newStatus = newState & STATE_MASK | (newPhase << PHASE_SHIFT) & PHASE_MASK;
+        newStatus = newState & AbstractTierBinding.STATE_MASK | (newPhase << AbstractTierBinding.PHASE_SHIFT) & PHASE_MASK;
       } else {
         newState = oldState;
         newStatus = oldStatus;
         break;
       }
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
+    } while (oldStatus != newStatus && !AbstractTierBinding.STATUS.compareAndSet(this, oldStatus, newStatus));
     if (oldState != newState) {
-      if (newState == STARTING_STATE) {
-        willStart();
-        convergeState();
-      } else if (newState == LOADING_STATE) {
-        willLoad();
-        convergeState();
-      } else if (newState == OPENING_STATE) {
-        willOpen();
-        convergeState();
+      if (newState == AbstractTierBinding.STARTING_STATE) {
+        this.willStart();
+        this.convergeState();
+      } else if (newState == AbstractTierBinding.LOADING_STATE) {
+        this.willLoad();
+        this.convergeState();
+      } else if (newState == AbstractTierBinding.OPENING_STATE) {
+        this.willOpen();
+        this.convergeState();
       }
     }
   }
@@ -179,28 +183,28 @@ public abstract class AbstractTierBinding extends AbstractSwimRef implements Tie
     int oldState;
     int newState;
     int oldPhase;
-    final int newPhase = LOADED_PHASE;
+    final int newPhase = AbstractTierBinding.LOADED_PHASE;
     do {
-      oldStatus = this.status;
-      oldState = oldStatus & STATE_MASK;
-      oldPhase = (oldStatus & PHASE_MASK) >>> PHASE_SHIFT;
+      oldStatus = AbstractTierBinding.STATUS.get(this);
+      oldState = oldStatus & AbstractTierBinding.STATE_MASK;
+      oldPhase = (oldStatus & PHASE_MASK) >>> AbstractTierBinding.PHASE_SHIFT;
       if (newPhase < oldPhase) {
-        if (oldState == STARTED_STATE) {
-          newState = STOPPING_STATE;
+        if (oldState == AbstractTierBinding.STARTED_STATE) {
+          newState = AbstractTierBinding.STOPPING_STATE;
         } else {
           newState = oldState;
         }
-        newStatus = newState & STATE_MASK | (newPhase << PHASE_SHIFT) & PHASE_MASK;
+        newStatus = newState & AbstractTierBinding.STATE_MASK | (newPhase << AbstractTierBinding.PHASE_SHIFT) & PHASE_MASK;
       } else {
         newState = oldState;
         newStatus = oldStatus;
         break;
       }
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
+    } while (oldStatus != newStatus && !AbstractTierBinding.STATUS.compareAndSet(this, oldStatus, newStatus));
     if (oldState != newState) {
-      if (newState == STOPPING_STATE) {
-        willStop();
-        convergeState();
+      if (newState == AbstractTierBinding.STOPPING_STATE) {
+        this.willStop();
+        this.convergeState();
       }
     }
   }
@@ -212,33 +216,33 @@ public abstract class AbstractTierBinding extends AbstractSwimRef implements Tie
     int oldState;
     int newState;
     int oldPhase;
-    final int newPhase = OPENED_PHASE;
+    final int newPhase = AbstractTierBinding.OPENED_PHASE;
     do {
-      oldStatus = this.status;
-      oldState = oldStatus & STATE_MASK;
-      oldPhase = (oldStatus & PHASE_MASK) >>> PHASE_SHIFT;
+      oldStatus = AbstractTierBinding.STATUS.get(this);
+      oldState = oldStatus & AbstractTierBinding.STATE_MASK;
+      oldPhase = (oldStatus & PHASE_MASK) >>> AbstractTierBinding.PHASE_SHIFT;
       if (newPhase < oldPhase) {
-        if (oldState == LOADED_STATE) {
-          newState = UNLOADING_STATE;
-        } else if (oldState == STARTED_STATE) {
-          newState = STOPPING_STATE;
+        if (oldState == AbstractTierBinding.LOADED_STATE) {
+          newState = AbstractTierBinding.UNLOADING_STATE;
+        } else if (oldState == AbstractTierBinding.STARTED_STATE) {
+          newState = AbstractTierBinding.STOPPING_STATE;
         } else {
           newState = oldState;
         }
-        newStatus = newState & STATE_MASK | (newPhase << PHASE_SHIFT) & PHASE_MASK;
+        newStatus = newState & AbstractTierBinding.STATE_MASK | (newPhase << AbstractTierBinding.PHASE_SHIFT) & PHASE_MASK;
       } else {
         newState = oldState;
         newStatus = oldStatus;
         break;
       }
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
+    } while (oldStatus != newStatus && !AbstractTierBinding.STATUS.compareAndSet(this, oldStatus, newStatus));
     if (oldState != newState) {
-      if (newState == UNLOADING_STATE) {
-        willUnload();
-        convergeState();
-      } else if (newState == STOPPING_STATE) {
-        willStop();
-        convergeState();
+      if (newState == AbstractTierBinding.UNLOADING_STATE) {
+        this.willUnload();
+        this.convergeState();
+      } else if (newState == AbstractTierBinding.STOPPING_STATE) {
+        this.willStop();
+        this.convergeState();
       }
     }
   }
@@ -250,100 +254,98 @@ public abstract class AbstractTierBinding extends AbstractSwimRef implements Tie
     int oldState;
     int newState;
     int oldPhase;
-    final int newPhase = CLOSED_PHASE;
+    final int newPhase = AbstractTierBinding.CLOSED_PHASE;
     do {
-      oldStatus = this.status;
-      oldState = oldStatus & STATE_MASK;
-      oldPhase = (oldStatus & PHASE_MASK) >>> PHASE_SHIFT;
+      oldStatus = AbstractTierBinding.STATUS.get(this);
+      oldState = oldStatus & AbstractTierBinding.STATE_MASK;
+      oldPhase = (oldStatus & PHASE_MASK) >>> AbstractTierBinding.PHASE_SHIFT;
       if (newPhase < oldPhase) {
-        if (oldState == OPENED_STATE) {
-          newState = CLOSING_STATE;
-        } else if (oldState == LOADED_STATE) {
-          newState = UNLOADING_STATE;
-        } else if (oldState == STARTED_STATE) {
-          newState = STOPPING_STATE;
+        if (oldState == AbstractTierBinding.OPENED_STATE) {
+          newState = AbstractTierBinding.CLOSING_STATE;
+        } else if (oldState == AbstractTierBinding.LOADED_STATE) {
+          newState = AbstractTierBinding.UNLOADING_STATE;
+        } else if (oldState == AbstractTierBinding.STARTED_STATE) {
+          newState = AbstractTierBinding.STOPPING_STATE;
         } else {
           newState = oldState;
         }
-        newStatus = newState & STATE_MASK | (newPhase << PHASE_SHIFT) & PHASE_MASK;
+        newStatus = newState & AbstractTierBinding.STATE_MASK | (newPhase << AbstractTierBinding.PHASE_SHIFT) & PHASE_MASK;
       } else {
         newState = oldState;
         newStatus = oldStatus;
         break;
       }
-    } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
+    } while (oldStatus != newStatus && !AbstractTierBinding.STATUS.compareAndSet(this, oldStatus, newStatus));
     if (oldState != newState) {
-      if (newState == CLOSING_STATE) {
-        willClose();
-        convergeState();
-      } else if (newState == UNLOADING_STATE) {
-        willUnload();
-        convergeState();
-      } else if (newState == STOPPING_STATE) {
-        willStop();
-        convergeState();
+      if (newState == AbstractTierBinding.CLOSING_STATE) {
+        this.willClose();
+        this.convergeState();
+      } else if (newState == AbstractTierBinding.UNLOADING_STATE) {
+        this.willUnload();
+        this.convergeState();
+      } else if (newState == AbstractTierBinding.STOPPING_STATE) {
+        this.willStop();
+        this.convergeState();
       }
     }
   }
 
   void convergeState() {
-    call:
-    do {
+    call: do {
       int oldStatus;
       int newStatus;
       int oldState;
       int newState;
-      loop:
-      do {
-        oldStatus = this.status;
-        oldState = oldStatus & STATE_MASK;
-        final int phase = (oldStatus & PHASE_MASK) >>> PHASE_SHIFT;
+      loop: do {
+        oldStatus = AbstractTierBinding.STATUS.get(this);
+        oldState = oldStatus & AbstractTierBinding.STATE_MASK;
+        final int phase = (oldStatus & PHASE_MASK) >>> AbstractTierBinding.PHASE_SHIFT;
         switch (oldState) {
-          case OPENING_STATE:
-            newState = phase > OPENED_PHASE ? LOADING_STATE : phase < OPENED_PHASE ? CLOSING_STATE : OPENED_STATE;
+          case AbstractTierBinding.OPENING_STATE:
+            newState = phase > AbstractTierBinding.OPENED_PHASE ? AbstractTierBinding.LOADING_STATE : phase < AbstractTierBinding.OPENED_PHASE ? AbstractTierBinding.CLOSING_STATE : AbstractTierBinding.OPENED_STATE;
             break;
-          case LOADING_STATE:
-            newState = phase > LOADED_PHASE ? STARTING_STATE : phase < LOADED_PHASE ? UNLOADING_STATE : LOADED_STATE;
+          case AbstractTierBinding.LOADING_STATE:
+            newState = phase > AbstractTierBinding.LOADED_PHASE ? AbstractTierBinding.STARTING_STATE : phase < AbstractTierBinding.LOADED_PHASE ? AbstractTierBinding.UNLOADING_STATE : AbstractTierBinding.LOADED_STATE;
             break;
-          case STARTING_STATE:
-            newState = phase < STARTED_PHASE ? STOPPING_STATE : STARTED_STATE;
+          case AbstractTierBinding.STARTING_STATE:
+            newState = phase < AbstractTierBinding.STARTED_PHASE ? AbstractTierBinding.STOPPING_STATE : AbstractTierBinding.STARTED_STATE;
             break;
-          case STOPPING_STATE:
-            newState = phase < LOADED_PHASE ? UNLOADING_STATE : phase > LOADED_PHASE ? STARTING_STATE : LOADED_STATE;
+          case AbstractTierBinding.STOPPING_STATE:
+            newState = phase < AbstractTierBinding.LOADED_PHASE ? AbstractTierBinding.UNLOADING_STATE : phase > AbstractTierBinding.LOADED_PHASE ? AbstractTierBinding.STARTING_STATE : AbstractTierBinding.LOADED_STATE;
             break;
-          case UNLOADING_STATE:
-            newState = phase < OPENED_PHASE ? CLOSING_STATE : phase > OPENED_PHASE ? LOADING_STATE : OPENED_STATE;
+          case AbstractTierBinding.UNLOADING_STATE:
+            newState = phase < AbstractTierBinding.OPENED_PHASE ? AbstractTierBinding.CLOSING_STATE : phase > AbstractTierBinding.OPENED_PHASE ? AbstractTierBinding.LOADING_STATE : AbstractTierBinding.OPENED_STATE;
             break;
-          case CLOSING_STATE:
-            newState = phase > CLOSED_PHASE ? OPENING_STATE : CLOSED_STATE;
+          case AbstractTierBinding.CLOSING_STATE:
+            newState = phase > AbstractTierBinding.CLOSED_PHASE ? AbstractTierBinding.OPENING_STATE : AbstractTierBinding.CLOSED_STATE;
             break;
           default:
             newState = oldState;
             newStatus = oldStatus;
             break loop;
         }
-        newStatus = oldStatus & ~STATE_MASK | newState & STATE_MASK;
-      } while (oldStatus != newStatus && !STATUS.compareAndSet(this, oldStatus, newStatus));
+        newStatus = oldStatus & ~AbstractTierBinding.STATE_MASK | newState & AbstractTierBinding.STATE_MASK;
+      } while (oldStatus != newStatus && !AbstractTierBinding.STATUS.compareAndSet(this, oldStatus, newStatus));
 
       if (oldState != newState) {
         switch (oldState) {
-          case OPENING_STATE:
-            didOpen();
+          case AbstractTierBinding.OPENING_STATE:
+            this.didOpen();
             break;
-          case LOADING_STATE:
-            didLoad();
+          case AbstractTierBinding.LOADING_STATE:
+            this.didLoad();
             break;
-          case STARTING_STATE:
-            didStart();
+          case AbstractTierBinding.STARTING_STATE:
+            this.didStart();
             break;
-          case STOPPING_STATE:
-            didStop();
+          case AbstractTierBinding.STOPPING_STATE:
+            this.didStop();
             break;
-          case UNLOADING_STATE:
-            didUnload();
+          case AbstractTierBinding.UNLOADING_STATE:
+            this.didUnload();
             break;
-          case CLOSING_STATE:
-            final TierContext tierContext = tierContext();
+          case AbstractTierBinding.CLOSING_STATE:
+            final TierContext tierContext = this.tierContext();
             if (tierContext != null) {
               tierContext.close();
             }
@@ -352,23 +354,23 @@ public abstract class AbstractTierBinding extends AbstractSwimRef implements Tie
         }
 
         switch (newState) {
-          case OPENING_STATE:
-            willOpen();
+          case AbstractTierBinding.OPENING_STATE:
+            this.willOpen();
             continue call;
-          case LOADING_STATE:
-            willLoad();
+          case AbstractTierBinding.LOADING_STATE:
+            this.willLoad();
             continue call;
-          case STARTING_STATE:
-            willStart();
+          case AbstractTierBinding.STARTING_STATE:
+            this.willStart();
             continue call;
-          case STOPPING_STATE:
-            willStop();
+          case AbstractTierBinding.STOPPING_STATE:
+            this.willStop();
             continue call;
-          case UNLOADING_STATE:
-            willUnload();
+          case AbstractTierBinding.UNLOADING_STATE:
+            this.willUnload();
             continue call;
-          case CLOSING_STATE:
-            willClose();
+          case AbstractTierBinding.CLOSING_STATE:
+            this.willClose();
             continue call;
           default:
             break call;
@@ -378,77 +380,77 @@ public abstract class AbstractTierBinding extends AbstractSwimRef implements Tie
   }
 
   protected void willOpen() {
-    final TierContext tierContext = tierContext();
+    final TierContext tierContext = this.tierContext();
     if (tierContext != null) {
       tierContext.willOpen();
     }
   }
 
   protected void didOpen() {
-    final TierContext tierContext = tierContext();
+    final TierContext tierContext = this.tierContext();
     if (tierContext != null) {
       tierContext.didOpen();
     }
   }
 
   protected void willLoad() {
-    final TierContext tierContext = tierContext();
+    final TierContext tierContext = this.tierContext();
     if (tierContext != null) {
       tierContext.willLoad();
     }
   }
 
   protected void didLoad() {
-    final TierContext tierContext = tierContext();
+    final TierContext tierContext = this.tierContext();
     if (tierContext != null) {
       tierContext.didLoad();
     }
   }
 
   protected void willStart() {
-    final TierContext tierContext = tierContext();
+    final TierContext tierContext = this.tierContext();
     if (tierContext != null) {
       tierContext.willStart();
     }
   }
 
   protected void didStart() {
-    final TierContext tierContext = tierContext();
+    final TierContext tierContext = this.tierContext();
     if (tierContext != null) {
       tierContext.didStart();
     }
   }
 
   protected void willStop() {
-    final TierContext tierContext = tierContext();
+    final TierContext tierContext = this.tierContext();
     if (tierContext != null) {
       tierContext.willStop();
     }
   }
 
   protected void didStop() {
-    final TierContext tierContext = tierContext();
+    final TierContext tierContext = this.tierContext();
     if (tierContext != null) {
       tierContext.didStop();
     }
   }
 
   protected void willUnload() {
-    final TierContext tierContext = tierContext();
+    final TierContext tierContext = this.tierContext();
     if (tierContext != null) {
       tierContext.willUnload();
     }
   }
 
   protected void didUnload() {
-    final TierContext tierContext = tierContext();
+    final TierContext tierContext = this.tierContext();
     if (tierContext != null) {
       tierContext.didUnload();
     }
   }
 
   protected void willClose() {
-    final TierContext tierContext = tierContext();
+    final TierContext tierContext = this.tierContext();
     if (tierContext != null) {
       tierContext.willClose();
     }
@@ -456,7 +458,7 @@ public abstract class AbstractTierBinding extends AbstractSwimRef implements Tie
 
   @Override
   public void didClose() {
-    // stub
+    // hook
   }
 
   @Override
@@ -479,7 +481,7 @@ public abstract class AbstractTierBinding extends AbstractSwimRef implements Tie
   protected static final int STARTING_STATE = 11;
   protected static final int STARTED_STATE = 12;
   protected static final int PHASE_SHIFT = 4;
-  protected static final int PHASE_MASK = 0xf << PHASE_SHIFT;
+  protected static final int PHASE_MASK = 0xf << AbstractTierBinding.PHASE_SHIFT;
   protected static final int CLOSED_PHASE = 0;
   protected static final int OPENED_PHASE = 1;
   protected static final int LOADED_PHASE = 2;

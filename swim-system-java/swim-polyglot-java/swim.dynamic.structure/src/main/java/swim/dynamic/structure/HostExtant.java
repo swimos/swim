@@ -20,16 +20,16 @@ import swim.structure.Extant;
 
 public final class HostExtant {
 
+  private HostExtant() {
+    // static
+  }
+
   public static final HostObjectType<Extant> TYPE;
 
   static {
     final JavaHostClassType<Extant> type = new JavaHostClassType<>(Extant.class);
     TYPE = type;
     type.extendType(HostValue.TYPE);
-  }
-
-  private HostExtant() {
-    // static
   }
 
 }

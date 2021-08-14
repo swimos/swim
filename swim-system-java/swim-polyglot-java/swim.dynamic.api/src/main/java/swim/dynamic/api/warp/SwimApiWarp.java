@@ -19,16 +19,16 @@ import swim.dynamic.JavaHostPackage;
 
 public final class SwimApiWarp {
 
+  private SwimApiWarp() {
+    // static
+  }
+
   public static final HostPackage PACKAGE;
 
   static {
     final JavaHostPackage hostPkg = new JavaHostPackage("swim.api.warp");
     PACKAGE = hostPkg;
     hostPkg.addHostType(HostWarpLane.TYPE);
-  }
-
-  private SwimApiWarp() {
-    // static
   }
 
 }

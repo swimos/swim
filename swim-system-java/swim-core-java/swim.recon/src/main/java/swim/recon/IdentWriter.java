@@ -35,14 +35,14 @@ final class IdentWriter extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.ident, this.index);
+    return IdentWriter.write(output, this.ident, this.index);
   }
 
   static Writer<Object, Object> write(Output<?> output, String ident, int index) {
     int c;
     final int length = ident.length();
     if (length == 0) {
-      return error(new WriterException("empty identifier"));
+      return Writer.error(new WriterException("empty identifier"));
     }
     if (index == 0 && output.isCont()) {
       c = ident.codePointAt(0);
@@ -57,22 +57,22 @@ final class IdentWriter extends Writer<Object, Object> {
         output = output.write(c);
         index = ident.offsetByCodePoints(index, 1);
       } else {
-        return error(new WriterException("invalid identifier"));
+        return Writer.error(new WriterException("invalid identifier"));
       }
     }
     if (index >= length) {
-      return done();
+      return Writer.done();
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new IdentWriter(ident, index);
   }
 
   static Writer<Object, Object> write(Output<?> output, String ident) {
-    return write(output, ident, 0);
+    return IdentWriter.write(output, ident, 0);
   }
 
 }

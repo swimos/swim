@@ -56,12 +56,12 @@ final class TensorArrayIdentitySpace<V, S> extends TensorArraySpace<V[], V, S> {
 
   @Override
   public TensorForm<V[]> form(TensorForm<V> next) {
-    return TensorArrayForm.from(next);
+    return TensorArrayForm.create(next);
   }
 
   @Override
   protected Object[] newArray(int length) {
-    return (Object[]) Array.newInstance(type, length);
+    return (Object[]) Array.newInstance(this.type, length);
   }
 
 }

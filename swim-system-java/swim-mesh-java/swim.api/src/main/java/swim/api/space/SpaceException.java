@@ -16,8 +16,6 @@ package swim.api.space;
 
 public class SpaceException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public SpaceException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class SpaceException extends RuntimeException {
   public SpaceException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

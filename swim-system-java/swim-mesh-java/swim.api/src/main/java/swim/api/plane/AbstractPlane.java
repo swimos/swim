@@ -26,7 +26,7 @@ import swim.api.http.HttpDownlink;
 import swim.api.ref.HostRef;
 import swim.api.ref.LaneRef;
 import swim.api.ref.NodeRef;
-import swim.api.ref.SwimRef;
+import swim.api.ref.WarpRef;
 import swim.api.ws.WsDownlink;
 import swim.concurrent.Cont;
 import swim.concurrent.Schedule;
@@ -37,7 +37,7 @@ import swim.uri.UriPattern;
 import swim.util.Log;
 import swim.warp.CommandMessage;
 
-public class AbstractPlane implements Plane, SwimRef, Log {
+public class AbstractPlane implements Plane, WarpRef, Log {
 
   protected final PlaneContext context;
 

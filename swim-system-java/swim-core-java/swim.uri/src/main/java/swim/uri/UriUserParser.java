@@ -42,6 +42,12 @@ final class UriUserParser extends Parser<UriUser> {
     this(uri, null, null, 0, 1);
   }
 
+  @Override
+  public Parser<UriUser> feed(Input input) {
+    return UriUserParser.parse(input, this.uri, this.usernameOutput,
+                               this.passwordOutput, this.c1, this.step);
+  }
+
   static Parser<UriUser> parse(Input input, UriParser uri, Output<String> usernameOutput,
                                Output<String> passwordOutput, int c1, int step) {
     int c = 0;
@@ -66,7 +72,7 @@ final class UriUserParser extends Parser<UriUser> {
           input = input.step();
           step = 2;
         } else if (!input.isEmpty()) {
-          return done(uri.user(usernameOutput.bind(), null));
+          return Parser.done(uri.user(usernameOutput.bind(), null));
         }
       }
       if (step == 2) {
@@ -77,10 +83,10 @@ final class UriUserParser extends Parser<UriUser> {
             c1 = c;
             step = 3;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       if (step == 3) {
@@ -93,10 +99,10 @@ final class UriUserParser extends Parser<UriUser> {
             step = 1;
             continue;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       if (step == 4) {
@@ -116,7 +122,7 @@ final class UriUserParser extends Parser<UriUser> {
           input = input.step();
           step = 5;
         } else if (!input.isEmpty()) {
-          return done(uri.user(usernameOutput.bind(), passwordOutput.bind()));
+          return Parser.done(uri.user(usernameOutput.bind(), passwordOutput.bind()));
         }
       }
       if (step == 5) {
@@ -127,10 +133,10 @@ final class UriUserParser extends Parser<UriUser> {
             c1 = c;
             step = 6;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       if (step == 6) {
@@ -143,27 +149,22 @@ final class UriUserParser extends Parser<UriUser> {
             step = 4;
             continue;
           } else {
-            return error(Diagnostic.expected("hex digit", input));
+            return Parser.error(Diagnostic.expected("hex digit", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("hex digit", input));
+          return Parser.error(Diagnostic.expected("hex digit", input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new UriUserParser(uri, usernameOutput, passwordOutput, c1, step);
   }
 
   static Parser<UriUser> parse(Input input, UriParser uri) {
-    return parse(input, uri, null, null, 0, 1);
-  }
-
-  @Override
-  public Parser<UriUser> feed(Input input) {
-    return parse(input, this.uri, this.usernameOutput, this.passwordOutput, this.c1, this.step);
+    return UriUserParser.parse(input, uri, null, null, 0, 1);
   }
 
 }

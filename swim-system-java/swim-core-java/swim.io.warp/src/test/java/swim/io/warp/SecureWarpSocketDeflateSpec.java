@@ -43,7 +43,7 @@ public class SecureWarpSocketDeflateSpec extends WarpSocketBehaviors {
       @Override
       public void didConnect() {
         super.didConnect();
-        doRequest(upgrade(socket, wsRequest));
+        this.doRequest(this.upgrade(socket, wsRequest));
       }
     };
     return endpoint.connectHttps("127.0.0.1", 23555, client, this.warpSettings.httpSettings());

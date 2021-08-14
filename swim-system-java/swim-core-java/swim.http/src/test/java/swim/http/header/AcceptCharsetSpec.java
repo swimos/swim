@@ -23,50 +23,50 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class AcceptCharsetSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseAcceptCharsetHeaders() {
-    assertParses("Accept-Charset: *", AcceptCharset.from(HttpCharset.star()));
-    assertParses("Accept-Charset: utf-8", AcceptCharset.from(HttpCharset.from("utf-8")));
-    assertParses("Accept-Charset: utf-8;q=0", AcceptCharset.from(HttpCharset.from("utf-8", 0f)));
-    assertParses("Accept-Charset: utf-8; q=0", AcceptCharset.from(HttpCharset.from("utf-8", 0f)));
-    assertParses("Accept-Charset: utf-8 ; q=0", AcceptCharset.from(HttpCharset.from("utf-8", 0f)));
-    assertParses("Accept-Charset: utf-8; q=1", AcceptCharset.from(HttpCharset.from("utf-8", 1f)));
-    assertParses("Accept-Charset: utf-8; q=1.0", AcceptCharset.from(HttpCharset.from("utf-8", 1f)));
-    assertParses("Accept-Charset: utf-8; q=1.00", AcceptCharset.from(HttpCharset.from("utf-8", 1f)));
-    assertParses("Accept-Charset: utf-8; q=1.000", AcceptCharset.from(HttpCharset.from("utf-8", 1f)));
-    assertParses("Accept-Charset: utf-8; q=0.005", AcceptCharset.from(HttpCharset.from("utf-8", 0.005f)));
+    assertParses("Accept-Charset: *", AcceptCharset.create(HttpCharset.star()));
+    assertParses("Accept-Charset: utf-8", AcceptCharset.create(HttpCharset.create("utf-8")));
+    assertParses("Accept-Charset: utf-8;q=0", AcceptCharset.create(HttpCharset.create("utf-8", 0f)));
+    assertParses("Accept-Charset: utf-8; q=0", AcceptCharset.create(HttpCharset.create("utf-8", 0f)));
+    assertParses("Accept-Charset: utf-8 ; q=0", AcceptCharset.create(HttpCharset.create("utf-8", 0f)));
+    assertParses("Accept-Charset: utf-8; q=1", AcceptCharset.create(HttpCharset.create("utf-8", 1f)));
+    assertParses("Accept-Charset: utf-8; q=1.0", AcceptCharset.create(HttpCharset.create("utf-8", 1f)));
+    assertParses("Accept-Charset: utf-8; q=1.00", AcceptCharset.create(HttpCharset.create("utf-8", 1f)));
+    assertParses("Accept-Charset: utf-8; q=1.000", AcceptCharset.create(HttpCharset.create("utf-8", 1f)));
+    assertParses("Accept-Charset: utf-8; q=0.005", AcceptCharset.create(HttpCharset.create("utf-8", 0.005f)));
     assertParses("Accept-Charset: utf-8,iso-8859-1,*",
-        AcceptCharset.from(HttpCharset.from("utf-8"),
-            HttpCharset.from("iso-8859-1"),
-            HttpCharset.star()));
+                 AcceptCharset.create(HttpCharset.create("utf-8"),
+                                      HttpCharset.create("iso-8859-1"),
+                                      HttpCharset.star()));
     assertParses("Accept-Charset: utf-8, iso-8859-1 ,*",
-        AcceptCharset.from(HttpCharset.from("utf-8"),
-            HttpCharset.from("iso-8859-1"),
-            HttpCharset.star()));
+                 AcceptCharset.create(HttpCharset.create("utf-8"),
+                                      HttpCharset.create("iso-8859-1"),
+                                      HttpCharset.star()));
     assertParses("Accept-Charset: utf-8; q=1, iso-8859-1; q=0.5, *; q=0",
-        AcceptCharset.from(HttpCharset.from("utf-8", 1f),
-            HttpCharset.from("iso-8859-1", 0.5f),
-            HttpCharset.from("*", 0f)));
+                 AcceptCharset.create(HttpCharset.create("utf-8", 1f),
+                                      HttpCharset.create("iso-8859-1", 0.5f),
+                                      HttpCharset.create("*", 0f)));
   }
 
   @Test
   public void writeAcceptCharsetHeaders() {
-    assertWrites(AcceptCharset.from(HttpCharset.star()), "Accept-Charset: *");
-    assertWrites(AcceptCharset.from(HttpCharset.from("utf-8")), "Accept-Charset: utf-8");
-    assertWrites(AcceptCharset.from(HttpCharset.from("utf-8", 0f)), "Accept-Charset: utf-8; q=0");
-    assertWrites(AcceptCharset.from(HttpCharset.from("utf-8", 0.005f)), "Accept-Charset: utf-8; q=0.005");
-    assertWrites(AcceptCharset.from(HttpCharset.from("utf-8"),
-        HttpCharset.from("iso-8859-1"),
-        HttpCharset.star()),
-        "Accept-Charset: utf-8, iso-8859-1, *");
-    assertWrites(AcceptCharset.from(HttpCharset.from("utf-8", 1f),
-        HttpCharset.from("iso-8859-1", 0.5f),
-        HttpCharset.from("*", 0f)),
-        "Accept-Charset: utf-8, iso-8859-1; q=0.5, *; q=0");
+    assertWrites(AcceptCharset.create(HttpCharset.star()), "Accept-Charset: *");
+    assertWrites(AcceptCharset.create(HttpCharset.create("utf-8")), "Accept-Charset: utf-8");
+    assertWrites(AcceptCharset.create(HttpCharset.create("utf-8", 0f)), "Accept-Charset: utf-8; q=0");
+    assertWrites(AcceptCharset.create(HttpCharset.create("utf-8", 0.005f)), "Accept-Charset: utf-8; q=0.005");
+    assertWrites(AcceptCharset.create(HttpCharset.create("utf-8"),
+                                      HttpCharset.create("iso-8859-1"),
+                                      HttpCharset.star()),
+                 "Accept-Charset: utf-8, iso-8859-1, *");
+    assertWrites(AcceptCharset.create(HttpCharset.create("utf-8", 1f),
+                                      HttpCharset.create("iso-8859-1", 0.5f),
+                                      HttpCharset.create("*", 0f)),
+                 "Accept-Charset: utf-8, iso-8859-1; q=0.5, *; q=0");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

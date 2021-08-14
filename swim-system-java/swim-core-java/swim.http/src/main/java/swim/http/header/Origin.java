@@ -29,47 +29,10 @@ import swim.util.Murmur3;
 
 public final class Origin extends HttpHeader {
 
-  private static int hashSeed;
-  private static Origin empty;
   final FingerTrieSeq<Uri> origins;
 
   Origin(FingerTrieSeq<Uri> origins) {
     this.origins = origins;
-  }
-
-  public static Origin empty() {
-    if (empty == null) {
-      empty = new Origin(FingerTrieSeq.<Uri>empty());
-    }
-    return empty;
-  }
-
-  public static Origin from(FingerTrieSeq<Uri> origins) {
-    if (origins.isEmpty()) {
-      return empty();
-    } else {
-      return new Origin(origins);
-    }
-  }
-
-  public static Origin from(Uri... origins) {
-    if (origins.length == 0) {
-      return empty();
-    } else {
-      return new Origin(FingerTrieSeq.of(origins));
-    }
-  }
-
-  public static Origin from(String... originStrings) {
-    final Builder<Uri, FingerTrieSeq<Uri>> origins = FingerTrieSeq.builder();
-    for (int i = 0, n = originStrings.length; i < n; i += 1) {
-      origins.add(Uri.parse(originStrings[i]));
-    }
-    return new Origin(origins.bind());
-  }
-
-  public static Parser<Origin> parseHttpValue(Input input, HttpParser http) {
-    return OriginParser.parse(input);
   }
 
   @Override
@@ -106,20 +69,22 @@ public final class Origin extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Origin.class);
+    if (Origin.hashSeed == 0) {
+      Origin.hashSeed = Murmur3.seed(Origin.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.origins.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Origin.hashSeed, this.origins.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Origin").write('.');
     final int n = this.origins.size();
     if (n > 0) {
-      output = output.write("from").write('(').debug(this.origins.head().toString());
+      output = output.write("create").write('(').debug(this.origins.head().toString());
       for (int i = 1; i < n; i += 1) {
         output = output.write(", ").write(this.origins.get(i).toString());
       }
@@ -127,6 +92,48 @@ public final class Origin extends HttpHeader {
     } else {
       output = output.write("empty").write('(').write(')');
     }
+    return output;
+  }
+
+  private static Origin empty;
+
+  public static Origin empty() {
+    if (Origin.empty == null) {
+      Origin.empty = new Origin(FingerTrieSeq.<Uri>empty());
+    }
+    return Origin.empty;
+  }
+
+  public static Origin create(FingerTrieSeq<Uri> origins) {
+    if (origins.isEmpty()) {
+      return Origin.empty();
+    } else {
+      return new Origin(origins);
+    }
+  }
+
+  public static Origin create(Uri... origins) {
+    if (origins.length == 0) {
+      return Origin.empty();
+    } else {
+      return new Origin(FingerTrieSeq.of(origins));
+    }
+  }
+
+  public static Origin create(String... originStrings) {
+    if (originStrings.length == 0) {
+      return Origin.empty();
+    } else {
+      final Builder<Uri, FingerTrieSeq<Uri>> origins = FingerTrieSeq.builder();
+      for (int i = 0, n = originStrings.length; i < n; i += 1) {
+        origins.add(Uri.parse(originStrings[i]));
+      }
+      return new Origin(origins.bind());
+    }
+  }
+
+  public static Parser<Origin> parseHttpValue(Input input, HttpParser http) {
+    return OriginParser.parse(input);
   }
 
 }

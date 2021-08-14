@@ -37,7 +37,9 @@ public class ValueDataModel implements ValueDataBinding, UTreeDelegate {
   public ValueDataModel(Value name, UTreeValue tree) {
     this.name = name;
     this.tree = tree;
-    tree.setTreeDelegate(this);
+    this.dataContext = null;
+    this.storeBinding = null;
+    this.tree.setTreeDelegate(this);
   }
 
   @Override
@@ -63,7 +65,7 @@ public class ValueDataModel implements ValueDataBinding, UTreeDelegate {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapData(Class<T> dataClass) {
-    if (dataClass.isAssignableFrom(getClass())) {
+    if (dataClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -92,7 +94,7 @@ public class ValueDataModel implements ValueDataBinding, UTreeDelegate {
 
   @Override
   public <V2> ValueData<V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override
@@ -138,22 +140,22 @@ public class ValueDataModel implements ValueDataBinding, UTreeDelegate {
 
   @Override
   public void treeDidLoadPage(Page page) {
-    // nop
+    // hook
   }
 
   @Override
   public void treeDidChange(Tree newTree, Tree oldTree) {
-    // nop
+    // hook
   }
 
   @Override
   public void treeDidCommit(Tree newTree, Tree oldTree) {
-    // nop
+    // hook
   }
 
   @Override
   public void treeDidClear(Tree newTree, Tree oldTree) {
-    // nop
+    // hook
   }
 
   @Override

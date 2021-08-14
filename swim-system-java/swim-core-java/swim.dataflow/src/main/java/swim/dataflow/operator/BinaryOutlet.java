@@ -23,37 +23,37 @@ import swim.structure.Value;
 
 public abstract class BinaryOutlet extends AbstractOutlet<Value> {
 
-  final Inlet<Value> operand1Inlet;
-  final Inlet<Value> operand2Inlet;
+  final Inlet<Value> lhsInlet;
+  final Inlet<Value> rhsInlet;
 
   public BinaryOutlet() {
-    this.operand1Inlet = new OutletInlet<Value>(this);
-    this.operand2Inlet = new OutletInlet<Value>(this);
+    this.lhsInlet = new OutletInlet<Value>(this);
+    this.rhsInlet = new OutletInlet<Value>(this);
   }
 
-  public Inlet<Value> operand1Inlet() {
-    return this.operand1Inlet;
+  public Inlet<Value> lhsInlet() {
+    return this.lhsInlet;
   }
 
-  public Inlet<Value> operand2Inlet() {
-    return this.operand2Inlet;
+  public Inlet<Value> rhsInlet() {
+    return this.rhsInlet;
   }
 
   @Override
   public Value get() {
-    final Outlet<? extends Value> operand1Input = this.operand1Inlet.input();
-    final Outlet<? extends Value> operand2Input = this.operand2Inlet.input();
-    if (operand1Input != null && operand2Input != null) {
-      final Value argument1 = operand1Input.get();
-      final Value argument2 = operand2Input.get();
-      if (argument1 != null && argument2 != null) {
-        final Item result = evaluate(argument1, argument2);
+    final Outlet<? extends Value> lhsInput = this.lhsInlet.input();
+    final Outlet<? extends Value> rhsInput = this.rhsInlet.input();
+    if (lhsInput != null && rhsInput != null) {
+      final Value lhs = lhsInput.get();
+      final Value rhs = rhsInput.get();
+      if (lhs != null && rhs != null) {
+        final Item result = this.evaluate(lhs, rhs);
         return result.toValue();
       }
     }
     return Value.absent();
   }
 
-  protected abstract Item evaluate(Value argument1, Value argument2);
+  protected abstract Item evaluate(Value lhs, Value rhs);
 
 }

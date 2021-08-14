@@ -28,7 +28,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.runtime.LaneView;
 import swim.structure.Value;
 import swim.warp.CommandMessage;
@@ -86,8 +86,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
           try {
             ((WillCommand) observers).willCommand(body);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -103,8 +103,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
               try {
                 ((WillCommand) observer).willCommand(body);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -131,8 +131,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
           try {
             ((DidCommand) observers).didCommand(body);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -148,8 +148,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
               try {
                 ((DidCommand) observer).didCommand(body);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -178,8 +178,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
           try {
             ((WillUplink) observers).willUplink(uplink);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -195,8 +195,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
               try {
                 ((WillUplink) observer).willUplink(uplink);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -226,8 +226,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
           try {
             ((DidUplink) observers).didUplink(uplink);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -243,8 +243,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
               try {
                 ((DidUplink) observer).didUplink(uplink);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -272,8 +272,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
           try {
             ((WillEnter) observers).willEnter(identity);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -289,8 +289,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
               try {
                 ((WillEnter) observer).willEnter(identity);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -317,8 +317,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
           try {
             ((DidEnter) observers).didEnter(identity);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -334,8 +334,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
               try {
                 ((DidEnter) observer).didEnter(identity);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -362,8 +362,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
           try {
             ((WillLeave) observers).willLeave(identity);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -379,8 +379,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
               try {
                 ((WillLeave) observer).willLeave(identity);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -407,8 +407,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
           try {
             ((DidLeave) observers).didLeave(identity);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -424,8 +424,8 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
               try {
                 ((DidLeave) observer).didLeave(identity);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -442,35 +442,35 @@ public abstract class WarpLaneView extends LaneView implements WarpLane {
   }
 
   public void laneWillCommand(CommandMessage message) {
-    // stub
+    // hook
   }
 
   public void laneDidCommand(CommandMessage message) {
-    // stub
+    // hook
   }
 
   public void laneWillUplink(WarpUplink uplink) {
-    // stub
+    // hook
   }
 
   public void laneDidUplink(WarpUplink uplink) {
-    // stub
+    // hook
   }
 
   public void laneWillEnter(Identity identity) {
-    // stub
+    // hook
   }
 
   public void laneDidEnter(Identity identity) {
-    // stub
+    // hook
   }
 
   public void laneWillLeave(Identity identity) {
-    // stub
+    // hook
   }
 
   public void laneDidLeave(Identity identity) {
-    // stub
+    // hook
   }
 
 }

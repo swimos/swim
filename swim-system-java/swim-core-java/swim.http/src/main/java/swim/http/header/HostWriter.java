@@ -40,6 +40,11 @@ final class HostWriter extends Writer<Object, Object> {
     this(host, port, null, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return HostWriter.write(output, this.host, this.port, this.part, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, UriHost host, UriPort port,
                                       Writer<?, ?> part, int step) {
     if (step == 1) {
@@ -51,7 +56,7 @@ final class HostWriter extends Writer<Object, Object> {
       if (part.isDone()) {
         part = null;
         if (!port.isDefined()) {
-          return done();
+          return Writer.done();
         } else {
           step = 2;
         }
@@ -70,26 +75,21 @@ final class HostWriter extends Writer<Object, Object> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new HostWriter(host, port, part, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, UriHost host, UriPort port) {
-    return write(output, host, port, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.host, this.port, this.part, this.step);
+    return HostWriter.write(output, host, port, null, 1);
   }
 
 }

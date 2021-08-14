@@ -199,7 +199,7 @@ public class Text extends Value {
   @Override
   public char charValue(char orElse) {
     try {
-      return charValue();
+      return this.charValue();
     } catch (UnsupportedOperationException cause) {
       return orElse;
     }
@@ -230,7 +230,7 @@ public class Text extends Value {
   @Override
   public Value plus(Value that) {
     if (that instanceof Text) {
-      return plus((Text) that);
+      return this.plus((Text) that);
     }
     return super.plus(that);
   }
@@ -259,7 +259,7 @@ public class Text extends Value {
     if (other instanceof Text) {
       return this.value.compareTo(((Text) other).value);
     }
-    return Integer.compare(typeOrder(), other.typeOrder());
+    return Integer.compare(this.typeOrder(), other.typeOrder());
   }
 
   @Override
@@ -267,7 +267,8 @@ public class Text extends Value {
     if (this == other) {
       return true;
     } else if (other instanceof Text) {
-      return this.value.equals(((Text) other).value);
+      final Text that = (Text) other;
+      return this.value.equals(that.value);
     }
     return false;
   }
@@ -280,35 +281,36 @@ public class Text extends Value {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Text").write('.');
     if (this.value.length() == 0) {
       output = output.write("empty").write('(').write(')');
     } else {
       output = output.write("from").write('(').debug(this.value).write(')');
     }
+    return output;
   }
 
   @Override
-  public void display(Output<?> output) {
-    Format.debug(this.value, output);
+  public <T> Output<T> display(Output<T> output) {
+    return Format.debug(this.value, output);
   }
 
   private static Text empty;
 
   public static Text empty() {
-    if (empty == null) {
-      empty = new Text("");
+    if (Text.empty == null) {
+      Text.empty = new Text("");
     }
-    return empty;
+    return Text.empty;
   }
 
   public static Text from(String value) {
     final int n = value.length();
     if (n == 0) {
-      return empty();
+      return Text.empty();
     } else if (n <= 64) {
-      final HashGenCacheMap<String, Text> cache = cache();
+      final HashGenCacheMap<String, Text> cache = Text.cache();
       Text text = cache.get(value);
       if (text == null) {
         text = cache.put(value, new Text(value));

@@ -15,7 +15,7 @@
 package swim.api.downlink;
 
 import swim.api.Downlink;
-import swim.api.ref.SwimRef;
+import swim.api.ref.WarpRef;
 import swim.dataflow.AbstractRecordStreamlet;
 import swim.dataflow.Reifier;
 import swim.streamlet.Inout;
@@ -29,25 +29,29 @@ import swim.structure.Value;
 public class DownlinkStreamlet extends AbstractRecordStreamlet<Value, Value> {
 
   @Inout
-  public final Inoutlet<Value, Value> hostUri = inoutlet();
+  public final Inoutlet<Value, Value> hostUri = this.inoutlet();
   @Inout
-  public final Inoutlet<Value, Value> nodeUri = inoutlet();
+  public final Inoutlet<Value, Value> nodeUri = this.inoutlet();
   @Inout
-  public final Inoutlet<Value, Value> laneUri = inoutlet();
+  public final Inoutlet<Value, Value> laneUri = this.inoutlet();
   @Inout
-  public final Inoutlet<Value, Value> prio = inoutlet();
+  public final Inoutlet<Value, Value> prio = this.inoutlet();
   @Inout
-  public final Inoutlet<Value, Value> rate = inoutlet();
+  public final Inoutlet<Value, Value> rate = this.inoutlet();
   @Inout
-  public final Inoutlet<Value, Value> body = inoutlet();
+  public final Inoutlet<Value, Value> body = this.inoutlet();
   @Inout
-  public final Inoutlet<Value, Value> type = inoutlet();
-  protected final SwimRef swim;
+  public final Inoutlet<Value, Value> type = this.inoutlet();
+
+  protected final WarpRef warp;
+
   @SuppressWarnings("checkstyle:VisibilityModifier")
   @Out
   public Outlet<Value> state;
+
   protected Downlink downlink;
   protected DownlinkRecord downlinkRecord;
+
   protected String inputHostUri;
   protected String inputNodeUri;
   protected String inputLaneUri;
@@ -56,17 +60,13 @@ public class DownlinkStreamlet extends AbstractRecordStreamlet<Value, Value> {
   protected Value inputBody;
   protected String inputType;
 
-  public DownlinkStreamlet(SwimRef swim, StreamletScope<? extends Value> scope) {
+  public DownlinkStreamlet(WarpRef warp, StreamletScope<? extends Value> scope) {
     super(scope);
-    this.swim = swim;
+    this.warp = warp;
   }
 
-  public DownlinkStreamlet(SwimRef swim) {
-    this(swim, null);
-  }
-
-  public static Reifier reifier(SwimRef swim) {
-    return new DownlinkReifier(swim);
+  public DownlinkStreamlet(WarpRef warp) {
+    this(warp, null);
   }
 
   @SuppressWarnings("unchecked")
@@ -110,9 +110,9 @@ public class DownlinkStreamlet extends AbstractRecordStreamlet<Value, Value> {
       this.inputRate = rate;
       this.inputBody = body;
       this.inputType = type;
-      final SwimRef swim = this.swim;
+      final WarpRef warp = this.warp;
       if ("map".equals(type)) {
-        MapDownlink<Value, Value> downlink = swim.downlinkMap();
+        MapDownlink<Value, Value> downlink = warp.downlinkMap();
         if (hostUri != null) {
           downlink = downlink.hostUri(hostUri);
         }
@@ -136,7 +136,7 @@ public class DownlinkStreamlet extends AbstractRecordStreamlet<Value, Value> {
         this.downlink = downlink;
         this.downlinkRecord = new MapDownlinkRecord(downlink);
       } else if ("value".equals(type)) {
-        ValueDownlink<Value> downlink = swim.downlinkValue();
+        ValueDownlink<Value> downlink = warp.downlinkValue();
         if (hostUri != null) {
           downlink = downlink.hostUri(hostUri);
         }
@@ -160,6 +160,10 @@ public class DownlinkStreamlet extends AbstractRecordStreamlet<Value, Value> {
         this.downlink = downlink;
       }
     }
+  }
+
+  public static Reifier reifier(WarpRef warp) {
+    return new DownlinkReifier(warp);
   }
 
 }

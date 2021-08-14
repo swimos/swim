@@ -45,7 +45,7 @@ public final class ValueEntryIterator<K, V> implements Iterator<Map.Entry<K, V>>
   }
 
   public <K2> ValueEntryIterator<K2, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   public Form<V> valueForm() {
@@ -57,7 +57,7 @@ public final class ValueEntryIterator<K, V> implements Iterator<Map.Entry<K, V>>
   }
 
   public <V2> ValueEntryIterator<K, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override

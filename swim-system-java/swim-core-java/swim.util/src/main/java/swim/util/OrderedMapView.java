@@ -32,7 +32,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public boolean isEmpty() {
-    return size() == 0;
+    return this.size() == 0;
   }
 
   @Override
@@ -62,14 +62,14 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public boolean containsKey(Object key) {
-    return (this.fromKey == null || compareKey(this.fromKey, key) >= 0)
-        && (this.toKey == null || compareKey(key, this.toKey) < 0)
+    return (this.fromKey == null || this.compareKey(this.fromKey, key) >= 0)
+        && (this.toKey == null || this.compareKey(key, this.toKey) < 0)
         && this.map.containsKey(key);
   }
 
   @Override
   public boolean containsValue(Object value) {
-    final Cursor<V> cursor = valueIterator();
+    final Cursor<V> cursor = this.valueIterator();
     while (cursor.hasNext()) {
       if (value == null ? cursor.next() == null : value.equals(cursor.next())) {
         return true;
@@ -80,8 +80,8 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public int indexOf(Object key) {
-    if ((this.fromKey == null || compareKey(this.fromKey, key) >= 0)
-        && (this.toKey == null || compareKey(key, this.toKey) < 0)) {
+    if ((this.fromKey == null || this.compareKey(this.fromKey, key) >= 0)
+        && (this.toKey == null || this.compareKey(key, this.toKey) < 0)) {
       int fromIndex;
       if (this.fromKey != null) {
         fromIndex = this.map.indexOf(this.fromKey);
@@ -104,8 +104,8 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public V get(Object key) {
-    if ((this.fromKey == null || compareKey(this.fromKey, key) >= 0)
-        && (this.toKey == null || compareKey(key, this.toKey) < 0)) {
+    if ((this.fromKey == null || this.compareKey(this.fromKey, key) >= 0)
+        && (this.toKey == null || this.compareKey(key, this.toKey) < 0)) {
       return this.map.get(key);
     } else {
       return null;
@@ -114,8 +114,8 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public Entry<K, V> getEntry(Object key) {
-    if ((this.fromKey == null || compareKey(this.fromKey, key) >= 0)
-        && (this.toKey == null || compareKey(key, this.toKey) < 0)) {
+    if ((this.fromKey == null || this.compareKey(this.fromKey, key) >= 0)
+        && (this.toKey == null || this.compareKey(key, this.toKey) < 0)) {
       return this.map.getEntry(key);
     } else {
       return null;
@@ -124,7 +124,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public Entry<K, V> getIndex(int index) {
-    final Cursor<Entry<K, V>> cursor = iterator();
+    final Cursor<Entry<K, V>> cursor = this.iterator();
     int i = 0;
     while (i < index && cursor.hasNext()) {
       cursor.step();
@@ -150,7 +150,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
     } else {
       nextEntry = this.map.firstEntry();
     }
-    if (this.toKey == null || nextEntry != null && compareKey(nextEntry.getKey(), this.toKey) < 0) {
+    if (this.toKey == null || nextEntry != null && this.compareKey(nextEntry.getKey(), this.toKey) < 0) {
       return nextEntry;
     } else {
       return null;
@@ -169,7 +169,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
     } else {
       nextKey = this.map.firstKey();
     }
-    if (this.toKey == null || nextKey != null && compareKey(nextKey, this.toKey) < 0) {
+    if (this.toKey == null || nextKey != null && this.compareKey(nextKey, this.toKey) < 0) {
       return nextKey;
     } else {
       return null;
@@ -178,7 +178,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public V firstValue() {
-    final K firstKey = firstKey();
+    final K firstKey = this.firstKey();
     if (firstKey != null) {
       return this.map.get(firstKey);
     } else {
@@ -194,7 +194,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
     } else {
       previousEntry = this.map.lastEntry();
     }
-    if (this.fromKey == null || previousEntry != null && compareKey(this.fromKey, previousEntry.getKey()) <= 0) {
+    if (this.fromKey == null || previousEntry != null && this.compareKey(this.fromKey, previousEntry.getKey()) <= 0) {
       return previousEntry;
     } else {
       return null;
@@ -209,7 +209,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
     } else {
       previousKey = this.map.lastKey();
     }
-    if (this.fromKey == null || previousKey != null && compareKey(this.fromKey, previousKey) <= 0) {
+    if (this.fromKey == null || previousKey != null && this.compareKey(this.fromKey, previousKey) <= 0) {
       return previousKey;
     } else {
       return null;
@@ -218,7 +218,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public V lastValue() {
-    final K lastKey = lastKey();
+    final K lastKey = this.lastKey();
     if (lastKey != null) {
       return this.map.get(lastKey);
     } else {
@@ -229,7 +229,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
   @Override
   public Entry<K, V> nextEntry(K key) {
     final Entry<K, V> nextEntry = this.map.nextEntry(key);
-    if (nextEntry != null && (this.toKey == null || compareKey(nextEntry.getKey(), this.toKey) < 0)) {
+    if (nextEntry != null && (this.toKey == null || this.compareKey(nextEntry.getKey(), this.toKey) < 0)) {
       return nextEntry;
     } else {
       return null;
@@ -239,7 +239,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
   @Override
   public K nextKey(K key) {
     final K nextKey = this.map.nextKey(key);
-    if (nextKey != null && (this.toKey == null || compareKey(nextKey, this.toKey) < 0)) {
+    if (nextKey != null && (this.toKey == null || this.compareKey(nextKey, this.toKey) < 0)) {
       return nextKey;
     } else {
       return null;
@@ -248,7 +248,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public V nextValue(K key) {
-    final K nextKey = nextKey(key);
+    final K nextKey = this.nextKey(key);
     if (nextKey != null) {
       return this.map.get(nextKey);
     } else {
@@ -259,7 +259,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
   @Override
   public Entry<K, V> previousEntry(K key) {
     final Entry<K, V> previousEntry = this.map.previousEntry(key);
-    if (previousEntry != null && (this.fromKey == null || compareKey(this.fromKey, previousEntry.getKey()) <= 0)) {
+    if (previousEntry != null && (this.fromKey == null || this.compareKey(this.fromKey, previousEntry.getKey()) <= 0)) {
       return previousEntry;
     } else {
       return null;
@@ -269,7 +269,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
   @Override
   public K previousKey(K key) {
     final K previousKey = this.map.previousKey(key);
-    if (previousKey != null && (this.fromKey == null || compareKey(this.fromKey, previousKey) <= 0)) {
+    if (previousKey != null && (this.fromKey == null || this.compareKey(this.fromKey, previousKey) <= 0)) {
       return previousKey;
     } else {
       return null;
@@ -278,7 +278,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public V previousValue(K key) {
-    final K previousKey = previousKey(key);
+    final K previousKey = this.previousKey(key);
     if (previousKey != null) {
       return this.map.get(previousKey);
     } else {
@@ -288,8 +288,8 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public V put(K key, V newValue) {
-    if ((this.fromKey == null || compareKey(this.fromKey, key) <= 0)
-        && (this.toKey == null || compareKey(key, this.toKey) < 0)) {
+    if ((this.fromKey == null || this.compareKey(this.fromKey, key) <= 0)
+        && (this.toKey == null || this.compareKey(key, this.toKey) < 0)) {
       return this.map.put(key, newValue);
     } else {
       throw new IllegalArgumentException(key.toString());
@@ -298,8 +298,8 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public V remove(Object key) {
-    if ((this.fromKey == null || compareKey(this.fromKey, key) <= 0)
-        && (this.toKey == null || compareKey(key, this.toKey) < 0)) {
+    if ((this.fromKey == null || this.compareKey(this.fromKey, key) <= 0)
+        && (this.toKey == null || this.compareKey(key, this.toKey) < 0)) {
       return this.map.remove(key);
     } else {
       return null;
@@ -308,7 +308,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public void clear() {
-    final Cursor<K> cursor = keyIterator();
+    final Cursor<K> cursor = this.keyIterator();
     while (cursor.hasNext()) {
       cursor.step();
       cursor.remove();
@@ -317,7 +317,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public OrderedMap<K, V> headMap(K toKey) {
-    if (compareKey(toKey, this.toKey) > 0) {
+    if (this.compareKey(toKey, this.toKey) > 0) {
       toKey = this.toKey;
     }
     return new OrderedMapView<K, V>(this.map, this.fromKey, toKey);
@@ -325,7 +325,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public OrderedMap<K, V> tailMap(K fromKey) {
-    if (compareKey(fromKey, this.fromKey) < 0) {
+    if (this.compareKey(fromKey, this.fromKey) < 0) {
       fromKey = this.fromKey;
     }
     return new OrderedMapView<K, V>(this.map, fromKey, this.toKey);
@@ -333,10 +333,10 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
 
   @Override
   public OrderedMap<K, V> subMap(K fromKey, K toKey) {
-    if (compareKey(fromKey, this.fromKey) < 0) {
+    if (this.compareKey(fromKey, this.fromKey) < 0) {
       fromKey = this.fromKey;
     }
-    if (compareKey(toKey, this.toKey) > 0) {
+    if (this.compareKey(toKey, this.toKey) > 0) {
       toKey = this.toKey;
     }
     return new OrderedMapView<K, V>(this.map, fromKey, toKey);
@@ -375,11 +375,11 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
       return true;
     } else if (other instanceof Map<?, ?>) {
       final Map<K, V> that = (Map<K, V>) other;
-      if (size() == that.size()) {
+      if (this.size() == that.size()) {
         final Iterator<Entry<K, V>> those = that.entrySet().iterator();
         while (those.hasNext()) {
           final Entry<K, V> entry = those.next();
-          final V value = get(entry.getKey());
+          final V value = this.get(entry.getKey());
           final V v = entry.getValue();
           if (value == null ? v != null : !value.equals(v)) {
             return false;
@@ -394,7 +394,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
   @Override
   public int hashCode() {
     int code = 0;
-    final Iterator<Entry<K, V>> these = iterator();
+    final Iterator<Entry<K, V>> these = this.iterator();
     while (these.hasNext()) {
       code += these.next().hashCode();
     }
@@ -405,7 +405,7 @@ final class OrderedMapView<K, V> implements OrderedMap<K, V> {
   public String toString() {
     final StringBuilder sb = new StringBuilder();
     sb.append('{');
-    final Iterator<Entry<K, V>> these = iterator();
+    final Iterator<Entry<K, V>> these = this.iterator();
     if (these.hasNext()) {
       sb.append(these.next());
       while (these.hasNext()) {

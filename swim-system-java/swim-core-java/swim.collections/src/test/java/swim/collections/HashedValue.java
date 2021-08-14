@@ -25,22 +25,29 @@ public final class HashedValue<T> {
   }
 
   public T get() {
-    return value;
+    return this.value;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public boolean equals(Object other) {
-    return other instanceof HashedValue && value == ((HashedValue) other).value;
+    if (this == other) {
+      return true;
+    } else if (other instanceof HashedValue<?>) {
+      final HashedValue<T> that = (HashedValue<T>) other;
+      return this.value == that.value;
+    }
+    return false;
   }
 
   @Override
   public int hashCode() {
-    return hashCode;
+    return this.hashCode;
   }
 
   @Override
   public String toString() {
-    return value.toString();
+    return this.value.toString();
   }
 
 }

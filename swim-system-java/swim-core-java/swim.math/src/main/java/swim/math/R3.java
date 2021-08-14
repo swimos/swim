@@ -18,19 +18,10 @@ import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
 
-public class R3 implements AffineSpace<PointR3, VectorR3, Double>, VectorSpace<VectorR3, Double>, F3<VectorR3, Double>, Debug {
-
-  private static R3 space;
+public class R3 implements AffineSpace<R3Point, R3Vector, Double>, VectorSpace<R3Vector, Double>, F3<R3Vector, Double>, Debug {
 
   protected R3() {
-    // stub
-  }
-
-  public static R3 space() {
-    if (space == null) {
-      space = new R3();
-    }
-    return space;
+    // singleton
   }
 
   @Override
@@ -49,78 +40,88 @@ public class R3 implements AffineSpace<PointR3, VectorR3, Double>, VectorSpace<V
   }
 
   @Override
-  public final PointR3 origin() {
-    return PointR3.origin();
+  public final R3Point origin() {
+    return R3Point.origin();
   }
 
   @Override
-  public final VectorR3 zero() {
-    return VectorR3.zero();
+  public final R3Vector zero() {
+    return R3Vector.zero();
   }
 
   @Override
-  public final VectorR3 of(Double x, Double y, Double z) {
-    return VectorR3.of(x, y, z);
+  public final R3Vector of(Double x, Double y, Double z) {
+    return new R3Vector(x, y, z);
   }
 
   @Override
-  public final Double getX(VectorR3 v) {
+  public final Double getX(R3Vector v) {
     return v.x;
   }
 
   @Override
-  public final Double getY(VectorR3 v) {
+  public final Double getY(R3Vector v) {
     return v.y;
   }
 
   @Override
-  public final Double getZ(VectorR3 v) {
+  public final Double getZ(R3Vector v) {
     return v.z;
   }
 
   @Override
-  public final VectorR3 add(VectorR3 u, VectorR3 v) {
+  public final R3Vector add(R3Vector u, R3Vector v) {
     return u.plus(v);
   }
 
   @Override
-  public final VectorR3 opposite(VectorR3 v) {
+  public final R3Vector opposite(R3Vector v) {
     return v.opposite();
   }
 
   @Override
-  public final VectorR3 subtract(VectorR3 u, VectorR3 v) {
+  public final R3Vector subtract(R3Vector u, R3Vector v) {
     return u.minus(v);
   }
 
   @Override
-  public final VectorR3 multiply(VectorR3 u, Double a) {
+  public final R3Vector multiply(R3Vector u, Double a) {
     return u.times(a);
   }
 
   @Override
-  public final VectorR3 combine(Double a, VectorR3 u, Double b, VectorR3 v) {
-    return new VectorR3(a * u.x + b * v.x, a * u.y + b * v.y, a * u.z + b * v.z);
+  public final R3Vector combine(Double a, R3Vector u, Double b, R3Vector v) {
+    return new R3Vector(a * u.x + b * v.x, a * u.y + b * v.y, a * u.z + b * v.z);
   }
 
   @Override
-  public final PointR3 translate(PointR3 p, VectorR3 v) {
+  public final R3Point translate(R3Point p, R3Vector v) {
     return p.plus(v);
   }
 
   @Override
-  public final VectorR3 difference(PointR3 p, PointR3 q) {
+  public final R3Vector difference(R3Point p, R3Point q) {
     return p.minus(q);
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.write("R3").write('.').write("space").write('(').write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("R3").write('.').write("space").write('(').write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static R3 space;
+
+  public static R3 space() {
+    if (R3.space == null) {
+      R3.space = new R3();
+    }
+    return R3.space;
   }
 
 }

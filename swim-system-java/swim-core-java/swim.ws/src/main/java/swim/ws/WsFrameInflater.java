@@ -22,7 +22,6 @@ import swim.deflate.Inflate;
 
 final class WsFrameInflater<O> extends Decoder<WsFrame<O>> {
 
-  private static final byte[] EMPTY_BLOCK = {(byte) 0x00, (byte) 0x00, (byte) 0xff, (byte) 0xff};
   final WsDeflateDecoder ws;
   final Decoder<O> content;
   final int finRsvOp;
@@ -50,8 +49,8 @@ final class WsFrameInflater<O> extends Decoder<WsFrame<O>> {
 
   @Override
   public Decoder<WsFrame<O>> feed(InputBuffer input) {
-    return decode(input, this.ws, this.content, this.finRsvOp, this.offset,
-                  this.length, this.maskingKey, this.position, this.step);
+    return WsFrameInflater.decode(input, this.ws, this.content, this.finRsvOp, this.offset,
+                                  this.length, this.maskingKey, this.position, this.step);
   }
 
   @SuppressWarnings("unchecked")
@@ -165,7 +164,7 @@ final class WsFrameInflater<O> extends Decoder<WsFrame<O>> {
           }
         }
       } catch (DeflateException cause) {
-        return error(cause);
+        return Decoder.error(cause);
       } finally {
         ws.inflate.next_out = null;
         ws.inflate.next_out_index = 0;
@@ -179,46 +178,48 @@ final class WsFrameInflater<O> extends Decoder<WsFrame<O>> {
       if (content.isError()) {
         return content.asError();
       } else if (input.index() != base + size) {
-        return error(new DecoderException("undecoded websocket data"));
+        return Decoder.error(new DecoderException("undecoded websocket data"));
       } else if (content.isDone()) {
         if (offset == length) {
           if ((finRsvOp & 0x80) != 0) {
             final int opcode = finRsvOp & 0xf;
             if (opcode < 0x8) { // decoded message
-              return done(ws.message(content.bind()));
+              return Decoder.done(ws.message(content.bind()));
             } else { // decoded control frame
-              return done(ws.control(WsOpcode.from(opcode), content.bind()));
+              return Decoder.done(ws.control(WsOpcode.from(opcode), content.bind()));
             }
           } else {
-            return error(new DecoderException("decoded unfinished websocket message"));
+            return Decoder.error(new DecoderException("decoded unfinished websocket message"));
           }
         } else {
-          return error(new DecoderException("decoded incomplete websocket frame"));
+          return Decoder.error(new DecoderException("decoded incomplete websocket frame"));
         }
       } else if (offset == length) {
         if ((finRsvOp & 0x80) == 0) {
           final int opcode = finRsvOp & 0xf;
           if (opcode < 0x8) { // decoded fragment
-            return done(ws.fragment(WsOpcode.from(opcode), content));
+            return Decoder.done(ws.fragment(WsOpcode.from(opcode), content));
           } else {
-            return error(new DecoderException("decoded fragmented control frame"));
+            return Decoder.error(new DecoderException("decoded fragmented control frame"));
           }
         } else {
-          return error(new DecoderException("undecoded websocket message"));
+          return Decoder.error(new DecoderException("undecoded websocket message"));
         }
       }
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new WsFrameInflater<O>(ws, content, finRsvOp, offset, length,
                                   maskingKey, position, step);
   }
 
   static <O> Decoder<WsFrame<O>> decode(InputBuffer input, WsDeflateDecoder ws, Decoder<O> content) {
-    return decode(input, ws, content, 0, 0L, 0L, null, 0, 1);
+    return WsFrameInflater.decode(input, ws, content, 0, 0L, 0L, null, 0, 1);
   }
+
+  private static final byte[] EMPTY_BLOCK = {(byte) 0x00, (byte) 0x00, (byte) 0xff, (byte) 0xff};
 
 }

@@ -42,7 +42,7 @@ public class WsDeflateDecoder extends WsDecoder implements Cloneable {
 
   @Override
   public <T> Decoder<WsFrame<T>> decodeContinuationFrame(int finRsvOp, Decoder<T> content, InputBuffer input) {
-    if (decompressing) { // compressed
+    if (this.decompressing) { // compressed
       return WsFrameInflater.decode(input, this, content);
     } else { // uncompressed
       return WsFrameDecoder.decode(input, this, content);

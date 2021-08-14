@@ -26,8 +26,6 @@ import swim.util.Murmur3;
 
 public class RsaPrimeDef {
 
-  private static int hashSeed;
-  private static Form<RsaPrimeDef> form;
   protected final BigInteger factor;
   protected final BigInteger exponent;
   protected final BigInteger coefficient;
@@ -40,18 +38,6 @@ public class RsaPrimeDef {
 
   public RsaPrimeDef(BigInteger factor, BigInteger exponent) {
     this(factor, exponent, null);
-  }
-
-  public static RsaPrimeDef from(RSAOtherPrimeInfo info) {
-    return new RsaPrimeDef(info.getPrime(), info.getExponent(), info.getCrtCoefficient());
-  }
-
-  @Kind
-  public static Form<RsaPrimeDef> form() {
-    if (form == null) {
-      form = new RsaPrimeForm();
-    }
-    return form;
   }
 
   public final BigInteger factor() {
@@ -71,7 +57,7 @@ public class RsaPrimeDef {
   }
 
   public Value toValue() {
-    return form().mold(this).toValue();
+    return RsaPrimeDef.form().mold(this).toValue();
   }
 
   @Override
@@ -86,13 +72,29 @@ public class RsaPrimeDef {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(RsaPrimeDef.class);
+    if (RsaPrimeDef.hashSeed == 0) {
+      RsaPrimeDef.hashSeed = Murmur3.seed(RsaPrimeDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(RsaPrimeDef.hashSeed,
         this.factor.hashCode()), this.exponent.hashCode()), Murmur3.hash(this.coefficient)));
+  }
+
+  public static RsaPrimeDef from(RSAOtherPrimeInfo info) {
+    return new RsaPrimeDef(info.getPrime(), info.getExponent(), info.getCrtCoefficient());
+  }
+
+  private static Form<RsaPrimeDef> form;
+
+  @Kind
+  public static Form<RsaPrimeDef> form() {
+    if (RsaPrimeDef.form == null) {
+      RsaPrimeDef.form = new RsaPrimeForm();
+    }
+    return RsaPrimeDef.form;
   }
 
 }
@@ -112,17 +114,17 @@ final class RsaPrimeForm extends Form<RsaPrimeDef> {
   @Override
   public Item mold(RsaPrimeDef primeDef) {
     final Record header = Record.create(primeDef.coefficient != null ? 3 : 2)
-        .slot("factor", Num.from(primeDef.factor))
-        .slot("exponent", Num.from(primeDef.exponent));
+                                .slot("factor", Num.from(primeDef.factor))
+                                .slot("exponent", Num.from(primeDef.exponent));
     if (primeDef.coefficient != null) {
       header.slot("coefficient", Num.from(primeDef.coefficient));
     }
-    return Record.create(1).attr(tag(), header);
+    return Record.create(1).attr(this.tag(), header);
   }
 
   @Override
   public RsaPrimeDef cast(Item item) {
-    final Value header = item.toValue().header(tag());
+    final Value header = item.toValue().header(this.tag());
     if (header.isDefined()) {
       final BigInteger factor = header.get("factor").integerValue(null);
       final BigInteger exponent = header.get("exponent").integerValue(null);

@@ -50,18 +50,18 @@ public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapLink(Class<T> linkClass) {
-    if (linkClass.isAssignableFrom(getClass())) {
+    if (linkClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
-      return linkContext().unwrapLink(linkClass);
+      return this.linkContext().unwrapLink(linkClass);
     }
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <T> T bottomLink(Class<T> linkClass) {
-    T link = linkContext().bottomLink(linkClass);
-    if (link == null && linkClass.isAssignableFrom(getClass())) {
+    T link = this.linkContext().bottomLink(linkClass);
+    if (link == null && linkClass.isAssignableFrom(this.getClass())) {
       link = (T) this;
     }
     return link;
@@ -99,14 +99,14 @@ public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
 
   @Override
   public final Value linkKey() {
-    return linkContext().linkKey();
+    return this.linkContext().linkKey();
   }
 
   @Override
   public DownlinkAddress cellAddressDown() {
-    final CellContext cellContext = cellContext();
+    final CellContext cellContext = this.cellContext();
     final CellAddress cellAddress = cellContext != null ? cellContext.cellAddress() : null;
-    return new DownlinkAddress(cellAddress, linkKey());
+    return new DownlinkAddress(cellAddress, this.linkKey());
   }
 
   @Override
@@ -173,55 +173,55 @@ public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
   }
 
   public boolean isConnected() {
-    return linkContext().isConnectedUp();
+    return this.linkContext().isConnectedUp();
   }
 
   public boolean isRemote() {
-    return linkContext().isRemoteUp();
+    return this.linkContext().isRemoteUp();
   }
 
   public boolean isSecure() {
-    return linkContext().isSecureUp();
+    return this.linkContext().isSecureUp();
   }
 
   public String securityProtocol() {
-    return linkContext().securityProtocolUp();
+    return this.linkContext().securityProtocolUp();
   }
 
   public String cipherSuite() {
-    return linkContext().cipherSuiteUp();
+    return this.linkContext().cipherSuiteUp();
   }
 
   public InetSocketAddress localAddress() {
-    return linkContext().localAddressUp();
+    return this.linkContext().localAddressUp();
   }
 
   public Identity localIdentity() {
-    return linkContext().localIdentityUp();
+    return this.linkContext().localIdentityUp();
   }
 
   public Principal localPrincipal() {
-    return linkContext().localPrincipalUp();
+    return this.linkContext().localPrincipalUp();
   }
 
   public Collection<Certificate> localCertificates() {
-    return linkContext().localCertificatesUp();
+    return this.linkContext().localCertificatesUp();
   }
 
   public InetSocketAddress remoteAddress() {
-    return linkContext().remoteAddressUp();
+    return this.linkContext().remoteAddressUp();
   }
 
   public Identity remoteIdentity() {
-    return linkContext().remoteIdentityUp();
+    return this.linkContext().remoteIdentityUp();
   }
 
   public Principal remotePrincipal() {
-    return linkContext().remotePrincipalUp();
+    return this.linkContext().remotePrincipalUp();
   }
 
   public Collection<Certificate> remoteCertificates() {
-    return linkContext().remoteCertificatesUp();
+    return this.linkContext().remoteCertificatesUp();
   }
 
   @Override
@@ -280,32 +280,32 @@ public abstract class AbstractDownlinkBinding implements LinkBinding, Log {
 
   @Override
   public void trace(Object message) {
-    linkContext().traceUp(message);
+    this.linkContext().traceUp(message);
   }
 
   @Override
   public void debug(Object message) {
-    linkContext().debugUp(message);
+    this.linkContext().debugUp(message);
   }
 
   @Override
   public void info(Object message) {
-    linkContext().infoUp(message);
+    this.linkContext().infoUp(message);
   }
 
   @Override
   public void warn(Object message) {
-    linkContext().warnUp(message);
+    this.linkContext().warnUp(message);
   }
 
   @Override
   public void error(Object message) {
-    linkContext().errorUp(message);
+    this.linkContext().errorUp(message);
   }
 
   @Override
   public void fail(Object message) {
-    linkContext().failUp(message);
+    this.linkContext().failUp(message);
   }
 
 }

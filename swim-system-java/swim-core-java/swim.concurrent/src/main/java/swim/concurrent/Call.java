@@ -16,10 +16,10 @@ package swim.concurrent;
 
 /**
  * Handle used to eventually complete an asynchronous operation by invoking a
- * {@link Cont}inuation.  A {@code Call} abstracts over the execution context
- * in which a {@code Cont}inuation runs.  Think of a {@code Call} as a way to
+ * {@link Cont}inuation. A {@code Call} abstracts over the execution context
+ * in which a {@code Cont}inuation runs. Think of a {@code Call} as a way to
  * asynchronously invoke {@link Cont#bind(Object) Cont.bind(T)}, and {@code
- * Cont#trap(Throwable)}.  Use {@link Stage#call(Cont)} to get a {@code Call}
+ * Cont#trap(Throwable)}. Use {@link Stage#call(Cont)} to get a {@code Call}
  * that asynchronously executes a {@code Cont}inuation on an execution {@code
  * Stage}.
  *
@@ -54,7 +54,7 @@ public interface Call<T> extends Cont<T> {
   /**
    * Tries to complete this {@code Call} with a {@code value}, returning {@code
    * true} if this operation caused the completion of the {@code Call}; returns
-   * {@code false} if this {@code Call} was already completed.  If successful,
+   * {@code false} if this {@code Call} was already completed. If successful,
    * the {@link Cont#bind(Object) bind(T)} method of this {@code Call}'s {@code
    * Cont}inuation will eventually be invoked.
    */
@@ -63,7 +63,7 @@ public interface Call<T> extends Cont<T> {
   /**
    * Tries to complete this {@code Call} with an {@code error}, returning
    * {@code true} if this operation caused the completion of the {@code Call};
-   * returns {@code false} if this {@code Call} was already completed.  If
+   * returns {@code false} if this {@code Call} was already completed. If
    * successful, the {@link Cont#trap(Throwable) trap(Throwable)} method of
    * this {@code Call}'s {@code Cont}inuation will eventually be invoked.
    */

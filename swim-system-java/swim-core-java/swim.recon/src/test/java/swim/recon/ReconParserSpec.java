@@ -30,20 +30,6 @@ import static org.testng.Assert.assertThrows;
 
 public class ReconParserSpec {
 
-  public static void assertParses(String recon, Value expected) {
-    Assertions.assertParses(Recon.structureParser().blockParser(), recon, expected);
-    Assertions.assertParses(Recon.structureParser().blockParser(), " " + recon + " ", expected);
-  }
-
-  public static void assertParseFails(final String recon) {
-    assertThrows(ParserException.class, new ThrowingRunnable() {
-      @Override
-      public void run() throws Throwable {
-        Recon.parse(recon);
-      }
-    });
-  }
-
   @Test
   public void parseEmptyInput() {
     assertParses("", Value.absent());
@@ -426,15 +412,15 @@ public class ReconParserSpec {
   @Test
   public void parseHeterogeneousTopLevelItemsAsRecord() {
     assertParses("  extant:\n  record: {}\n  markup: []\n  \"\"\n  %AA==\n  integer: 0\n  decimal: 0.0\n  true\n  false\n",
-        Record.of(Slot.of("extant"), Slot.of("record", Record.empty()), Slot.of("markup", Record.empty()), "", Data.fromBase64("AA=="),
-            Slot.of("integer", 0), Slot.of("decimal", 0.0), true, false));
+                 Record.of(Slot.of("extant"), Slot.of("record", Record.empty()), Slot.of("markup", Record.empty()), "", Data.fromBase64("AA=="),
+                           Slot.of("integer", 0), Slot.of("decimal", 0.0), true, false));
   }
 
   @Test
   public void parseHeterogeneousItemsInRecord() {
     assertParses("{\n  extant:\n  record: {}\n  markup: []\n  \"\"\n  %AA==\n  integer: 0\n  decimal: 0.0\n  true\n  false\n}",
-        Record.of(Slot.of("extant"), Slot.of("record", Record.empty()), Slot.of("markup", Record.empty()), "", Data.fromBase64("AA=="),
-            Slot.of("integer", 0), Slot.of("decimal", 0.0), true, false));
+                 Record.of(Slot.of("extant"), Slot.of("record", Record.empty()), Slot.of("markup", Record.empty()), "", Data.fromBase64("AA=="),
+                           Slot.of("integer", 0), Slot.of("decimal", 0.0), true, false));
   }
 
   @Test
@@ -504,7 +490,7 @@ public class ReconParserSpec {
   public void parseSingleExtantAttributesWithNamedParameters() {
     assertParses("@hello(name: \"world\")", Record.of(Attr.of("hello", Record.of(Slot.of("name", "world")))));
     assertParses("@hello(name: \"world\", data: %AA==, number: 42, false)",
-        Record.of(Attr.of("hello", Record.of(Slot.of("name", "world"), Slot.of("data", Data.fromBase64("AA==")), Slot.of("number", 42), false))));
+                 Record.of(Attr.of("hello", Record.of(Slot.of("name", "world"), Slot.of("data", Data.fromBase64("AA==")), Slot.of("number", 42), false))));
   }
 
   @Test
@@ -529,7 +515,7 @@ public class ReconParserSpec {
   @Test
   public void parseMultipleExtantAttributesWithComplexParameters() {
     assertParses("@hello(\"world\", 42) @test(name: \"parse\", pending: false)",
-        Record.of(Attr.of("hello", Record.of("world", 42)), Attr.of("test", Record.of(Slot.of("name", "parse"), Slot.of("pending", Bool.from(false))))));
+                 Record.of(Attr.of("hello", Record.of("world", 42)), Attr.of("test", Record.of(Slot.of("name", "parse"), Slot.of("pending", Bool.from(false))))));
   }
 
   @Test
@@ -783,8 +769,9 @@ public class ReconParserSpec {
     assertParses("%AA==@hello%BB==", Record.of(Data.fromBase64("AA=="), Attr.of("hello"), Data.fromBase64("BB==")));
     assertParses("%AAA=@hello()%BBB=", Record.of(Data.fromBase64("AAA="), Attr.of("hello"), Data.fromBase64("BBB=")));
     assertParses("%AAAA@hello(\"world\")%BBBB", Record.of(Data.fromBase64("AAAA"), Attr.of("hello", "world"), Data.fromBase64("BBBB")));
-    assertParses("%ABCDabcd12+/@hello(name: \"world\")%/+21dcbaDCBA", Record.of(Data.fromBase64("ABCDabcd12+/"),
-        Attr.of("hello", Record.of(Slot.of("name", "world"))), Data.fromBase64("/+21dcbaDCBA")));
+    assertParses("%ABCDabcd12+/@hello(name: \"world\")%/+21dcbaDCBA",
+                 Record.of(Data.fromBase64("ABCDabcd12+/"),
+                           Attr.of("hello", Record.of(Slot.of("name", "world"))), Data.fromBase64("/+21dcbaDCBA")));
   }
 
   @Test
@@ -953,6 +940,20 @@ public class ReconParserSpec {
   public void parseTrailingValuesFails() {
     assertParseFails("{}{}");
     assertParseFails("1 2");
+  }
+
+  public static void assertParses(String recon, Value expected) {
+    ReconAssertions.assertParses(Recon.structureParser().blockParser(), recon, expected);
+    ReconAssertions.assertParses(Recon.structureParser().blockParser(), " " + recon + " ", expected);
+  }
+
+  public static void assertParseFails(final String recon) {
+    assertThrows(ParserException.class, new ThrowingRunnable() {
+      @Override
+      public void run() throws Throwable {
+        Recon.parse(recon);
+      }
+    });
   }
 
 }

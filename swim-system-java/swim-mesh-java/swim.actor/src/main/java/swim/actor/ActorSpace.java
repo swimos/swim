@@ -76,26 +76,16 @@ import swim.util.Log;
 
 public class ActorSpace extends AbstractTierBinding implements EdgeContext, PlaneContext, Space {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<ActorSpace, HashTrieMap<String, Plane>> PLANES =
-      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<HashTrieMap<String, Plane>>) (Class<?>) HashTrieMap.class, "planes");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<ActorSpace, HashTrieMap<String, AgentRoute<?>>> AGENT_ROUTES =
-      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<HashTrieMap<String, AgentRoute<?>>>) (Class<?>) HashTrieMap.class, "agentRoutes");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<ActorSpace, UriMapper<AgentFactory<?>>> AGENT_FACTORIES =
-      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<UriMapper<AgentFactory<?>>>) (Class<?>) UriMapper.class, "agentFactories");
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<ActorSpace, HashTrieMap<String, Authenticator>> AUTHENTICATORS =
-      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<HashTrieMap<String, Authenticator>>) (Class<?>) HashTrieMap.class, "authenticators");
   final EdgeAddress edgeAddress;
   final ActorSpaceDef spaceDef;
   final KernelContext kernel;
   final EdgeBinding edge;
+
   Log log;
   PlanePolicy policy;
   Stage stage;
   StoreBinding store;
+
   volatile HashTrieMap<String, Plane> planes;
   volatile HashTrieMap<String, AgentRoute<?>> agentRoutes;
   volatile UriMapper<AgentFactory<?>> agentFactories;
@@ -105,11 +95,15 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     this.edgeAddress = edgeAddress;
     this.spaceDef = spaceDef;
     this.kernel = kernel;
-
-    EdgeBinding edge = createEdge();
+    EdgeBinding edge = this.createEdge();
     edge.setEdgeContext(this);
     edge = edge.edgeWrapper();
     this.edge = edge;
+
+    this.log = null;
+    this.policy = null;
+    this.stage = null;
+    this.store = null;
 
     this.planes = HashTrieMap.empty();
     this.agentRoutes = HashTrieMap.empty();
@@ -134,7 +128,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapEdge(Class<T> edgeClass) {
-    if (edgeClass.isAssignableFrom(getClass())) {
+    if (edgeClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -144,7 +138,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   @SuppressWarnings("unchecked")
   @Override
   public <T> T bottomEdge(Class<T> edgeClass) {
-    if (edgeClass.isAssignableFrom(getClass())) {
+    if (edgeClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -201,35 +195,35 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
 
   @Override
   public Authenticator getAuthenticator(String authenticatorName) {
-    return this.authenticators.get(authenticatorName);
+    return ActorSpace.AUTHENTICATORS.get(this).get(authenticatorName);
   }
 
   @Override
   public void addAuthenticator(String authenticatorName, Authenticator authenticator) {
     final ActorAuthenticator authenticatorContext = new ActorAuthenticator(authenticatorName, authenticator, this.kernel);
-
-    HashTrieMap<String, Authenticator> oldAuthenticators;
-    HashTrieMap<String, Authenticator> newAuthenticators;
     do {
-      oldAuthenticators = this.authenticators;
-      newAuthenticators = oldAuthenticators.updated(authenticatorName, authenticator);
-    } while (!AUTHENTICATORS.compareAndSet(this, oldAuthenticators, newAuthenticators));
+      final HashTrieMap<String, Authenticator> oldAuthenticators = ActorSpace.AUTHENTICATORS.get(this);
+      final HashTrieMap<String, Authenticator> newAuthenticators = oldAuthenticators.updated(authenticatorName, authenticator);
+      if (ActorSpace.AUTHENTICATORS.compareAndSet(this, oldAuthenticators, newAuthenticators)) {
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public Collection<? extends Plane> planes() {
-    return this.planes.values();
+    return ActorSpace.PLANES.get(this).values();
   }
 
   @Override
   public Plane getPlane(String planeName) {
-    return this.planes.get(planeName);
+    return ActorSpace.PLANES.get(this).get(planeName);
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <P extends Plane> P getPlane(Class<? extends P> planeClass) {
-    for (Plane plane : this.planes.values()) {
+    for (Plane plane : ActorSpace.PLANES.get(this).values()) {
       if (planeClass.isAssignableFrom(plane.getClass())) {
         return (P) plane;
       }
@@ -242,15 +236,15 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   public <P extends Plane> P openPlane(String planeName, PlaneFactory<P> planeFactory) {
     P plane = null;
     do {
-      final HashTrieMap<String, Plane> oldPlanes = this.planes;
+      final HashTrieMap<String, Plane> oldPlanes = ActorSpace.PLANES.get(this);
       final Plane oldPlane = oldPlanes.get(planeName);
       if (oldPlane == null) {
         if (plane == null) {
-          plane = createPlane(planeFactory);
+          plane = this.createPlane(planeFactory);
           plane = (P) this.kernel.injectPlane(plane);
         }
         final HashTrieMap<String, Plane> newPlanes = oldPlanes.updated(planeName, plane);
-        if (PLANES.compareAndSet(this, oldPlanes, newPlanes)) {
+        if (ActorSpace.PLANES.compareAndSet(this, oldPlanes, newPlanes)) {
           break;
         }
       } else {
@@ -264,11 +258,11 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   @SuppressWarnings("unchecked")
   @Override
   public <P extends Plane> P openPlane(String planeName, Class<? extends P> planeClass) {
-    Plane plane = getPlane(planeName);
+    Plane plane = this.getPlane(planeName);
     if (plane == null) {
       final PlaneFactory<P> planeFactory = this.kernel.createPlaneFactory(planeClass);
       if (planeFactory != null) {
-        plane = openPlane(planeName, planeFactory);
+        plane = this.openPlane(planeName, planeFactory);
       }
     }
     return (P) plane;
@@ -286,7 +280,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   @SuppressWarnings("unchecked")
   @Override
   public <A extends Agent> AgentRoute<A> getAgentRoute(String routeName) {
-    return (AgentRoute<A>) this.agentRoutes.get(routeName);
+    return (AgentRoute<A>) ActorSpace.AGENT_ROUTES.get(this).get(routeName);
   }
 
   @Override
@@ -299,49 +293,52 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     final AgentRouteContext agentRouteContext = new ActorAgentRoute(routeName, pattern);
     agentRoute.setAgentRouteContext(agentRouteContext);
 
-    HashTrieMap<String, AgentRoute<?>> oldAgentRoutes;
-    HashTrieMap<String, AgentRoute<?>> newAgentRoutes;
     do {
-      oldAgentRoutes = this.agentRoutes;
-      newAgentRoutes = oldAgentRoutes.updated(routeName, agentRoute);
-    } while (oldAgentRoutes != newAgentRoutes && !AGENT_ROUTES.compareAndSet(this, oldAgentRoutes, newAgentRoutes));
+      final HashTrieMap<String, AgentRoute<?>> oldAgentRoutes = ActorSpace.AGENT_ROUTES.get(this);
+      final HashTrieMap<String, AgentRoute<?>> newAgentRoutes = oldAgentRoutes.updated(routeName, agentRoute);
+      if (ActorSpace.AGENT_ROUTES.compareAndSet(this, oldAgentRoutes, newAgentRoutes)) {
+        break;
+      }
+    } while (true);
 
-    UriMapper<AgentFactory<?>> oldAgentFactories;
-    UriMapper<AgentFactory<?>> newAgentFactories;
     do {
-      oldAgentFactories = this.agentFactories;
-      newAgentFactories = oldAgentFactories.updated(pattern, agentRoute);
-    } while (oldAgentFactories != newAgentFactories && !AGENT_FACTORIES.compareAndSet(this, oldAgentFactories, newAgentFactories));
+      final UriMapper<AgentFactory<?>> oldAgentFactories = ActorSpace.AGENT_FACTORIES.get(this);
+      final UriMapper<AgentFactory<?>> newAgentFactories = oldAgentFactories.updated(pattern, agentRoute);
+      if (ActorSpace.AGENT_FACTORIES.compareAndSet(this, oldAgentFactories, newAgentFactories)) {
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public void addAgentRoute(String routeName, String pattern, AgentRoute<?> agentRoute) {
-    addAgentRoute(routeName, UriPattern.parse(pattern), agentRoute);
+    this.addAgentRoute(routeName, UriPattern.parse(pattern), agentRoute);
   }
 
   @Override
   public void removeAgentRoute(String routeName) {
-    HashTrieMap<String, AgentRoute<?>> oldAgentRoutes;
-    HashTrieMap<String, AgentRoute<?>> newAgentRoutes;
     do {
-      oldAgentRoutes = this.agentRoutes;
-      newAgentRoutes = oldAgentRoutes.removed(routeName);
-    } while (oldAgentRoutes != newAgentRoutes && !AGENT_ROUTES.compareAndSet(this, oldAgentRoutes, newAgentRoutes));
-
-    final AgentRoute<?> agentRoute = oldAgentRoutes.get(routeName);
-    if (agentRoute != null) {
-      UriMapper<AgentFactory<?>> oldAgentFactories;
-      UriMapper<AgentFactory<?>> newAgentFactories;
-      do {
-        oldAgentFactories = this.agentFactories;
-        newAgentFactories = oldAgentFactories.removed(agentRoute.pattern());
-      } while (oldAgentFactories != newAgentFactories && !AGENT_FACTORIES.compareAndSet(this, oldAgentFactories, newAgentFactories));
-    }
+      final HashTrieMap<String, AgentRoute<?>> oldAgentRoutes = ActorSpace.AGENT_ROUTES.get(this);
+      final HashTrieMap<String, AgentRoute<?>> newAgentRoutes = oldAgentRoutes.removed(routeName);
+      if (ActorSpace.AGENT_ROUTES.compareAndSet(this, oldAgentRoutes, newAgentRoutes)) {
+        final AgentRoute<?> agentRoute = oldAgentRoutes.get(routeName);
+        if (agentRoute != null) {
+          do {
+            final UriMapper<AgentFactory<?>> oldAgentFactories = ActorSpace.AGENT_FACTORIES.get(this);
+            final UriMapper<AgentFactory<?>> newAgentFactories = oldAgentFactories.removed(agentRoute.pattern());
+            if (ActorSpace.AGENT_FACTORIES.compareAndSet(this, oldAgentFactories, newAgentFactories)) {
+              break;
+            }
+          } while (true);
+        }
+        break;
+      }
+    } while (true);
   }
 
   @Override
   public AgentFactory<?> getAgentFactory(Uri nodeUri) {
-    return this.agentFactories.get(nodeUri);
+    return ActorSpace.AGENT_FACTORIES.get(this).get(nodeUri);
   }
 
   @Override
@@ -363,7 +360,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
       if (nodeDef != null && node instanceof AgentModel) {
         final AgentModel agentModel = (AgentModel) node;
         for (AgentDef agentDef : nodeDef.agentDefs()) {
-          final AgentFactory<?> agentFactory = createAgentFactory(node, agentDef);
+          final AgentFactory<?> agentFactory = this.createAgentFactory(node, agentDef);
           if (agentDef != null) {
             final Value id = agentDef.id();
             final Value props = agentModel.props().concat(agentDef.props());
@@ -371,7 +368,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
           }
         }
       }
-      final AgentFactory<?> agentFactory = this.agentFactories.get(nodeUri);
+      final AgentFactory<?> agentFactory = ActorSpace.AGENT_FACTORIES.get(this).get(nodeUri);
       if (agentFactory != null && node instanceof AgentModel) {
         final AgentModel agentModel = (AgentModel) node;
         final Value id = agentFactory.id(nodeUri);
@@ -396,12 +393,12 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   protected Log openLog() {
     Log log;
     if (this.spaceDef.logDef != null) {
-      log = createLog(this.spaceDef.logDef);
+      log = this.createLog(this.spaceDef.logDef);
     } else {
-      log = createLog(cellAddress());
+      log = this.createLog(this.cellAddress());
     }
     if (log != null) {
-      log = injectLog(log);
+      log = this.injectLog(log);
     }
     return log;
   }
@@ -425,12 +422,12 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   protected PlanePolicy openPolicy() {
     Policy policy;
     if (this.spaceDef.policyDef != null) {
-      policy = createPolicy(this.spaceDef.policyDef);
+      policy = this.createPolicy(this.spaceDef.policyDef);
     } else {
-      policy = createPolicy(cellAddress());
+      policy = this.createPolicy(this.cellAddress());
     }
     if (policy != null) {
-      policy = injectPolicy(policy);
+      policy = this.injectPolicy(policy);
     }
     return (PlanePolicy) policy;
   }
@@ -454,12 +451,12 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   protected Stage openStage() {
     Stage stage;
     if (this.spaceDef.stageDef != null) {
-      stage = createStage(this.spaceDef.stageDef);
+      stage = this.createStage(this.spaceDef.stageDef);
     } else {
-      stage = createStage(cellAddress());
+      stage = this.createStage(this.cellAddress());
     }
     if (stage != null) {
-      stage = injectStage(stage);
+      stage = this.injectStage(stage);
     }
     return stage;
   }
@@ -487,12 +484,12 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   protected StoreBinding openStore() {
     StoreBinding store = null;
     if (this.spaceDef.storeDef != null) {
-      store = createStore(this.spaceDef.storeDef);
+      store = this.createStore(this.spaceDef.storeDef);
     } else {
-      store = createStore(cellAddress());
+      store = this.createStore(this.cellAddress());
     }
     if (store != null) {
-      store = injectStore(store);
+      store = this.injectStore(store);
     }
     return store;
   }
@@ -506,17 +503,17 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   }
 
   protected EdgeBinding createEdge() {
-    final EdgeAddress edgeAddress = cellAddress();
+    final EdgeAddress edgeAddress = this.cellAddress();
     EdgeBinding edge = this.kernel.createEdge(edgeAddress);
     if (edge != null) {
-      edge = injectEdge(edgeAddress, edge);
+      edge = this.injectEdge(edgeAddress, edge);
     }
     return edge;
   }
 
   protected void seedEdge(EdgeBinding edge) {
     for (MeshDef meshDef : this.spaceDef.meshDefs()) {
-      seedMesh(edge, meshDef);
+      this.seedMesh(edge, meshDef);
     }
     if (edge.network() == null) {
       final MeshBinding network = edge.openMesh(Uri.empty());
@@ -530,7 +527,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     final MeshBinding mesh = edge.network();
     if (mesh != null) {
       for (PartDef partDef : this.spaceDef.partDefs()) {
-        seedPart(mesh, partDef);
+        this.seedPart(mesh, partDef);
       }
       for (NodeDef nodeDef : this.spaceDef.nodeDefs()) {
         final Uri nodeUri = nodeDef.nodeUri();
@@ -539,7 +536,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
           if (part != null) {
             final HostBinding host = part.master();
             if (host != null) {
-              seedNode(host, nodeDef);
+              this.seedNode(host, nodeDef);
             }
           }
         }
@@ -557,7 +554,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
           edge.setNetwork(mesh);
         }
         for (PartDef partDef : meshDef.partDefs()) {
-          seedPart(mesh, partDef);
+          this.seedPart(mesh, partDef);
         }
         for (NodeDef nodeDef : meshDef.nodeDefs()) {
           final Uri nodeUri = nodeDef.nodeUri();
@@ -566,7 +563,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
             if (part != null) {
               final HostBinding host = part.master();
               if (host != null) {
-                seedNode(host, nodeDef);
+                this.seedNode(host, nodeDef);
               }
             }
           }
@@ -586,14 +583,14 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
           mesh.setGateway(part);
         }
         for (HostDef hostDef : partDef.hostDefs()) {
-          seedHost(part, hostDef);
+          this.seedHost(part, hostDef);
         }
         for (NodeDef nodeDef : partDef.nodeDefs()) {
           final Uri nodeUri = nodeDef.nodeUri();
           if (nodeUri != null) {
             final HostBinding host = part.master();
             if (host != null) {
-              seedNode(host, nodeDef);
+              this.seedNode(host, nodeDef);
             }
           }
         }
@@ -619,7 +616,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
             host.didBecomeSlave();
           }
           for (NodeDef nodeDef : hostDef.nodeDefs()) {
-            seedNode(host, nodeDef);
+            this.seedNode(host, nodeDef);
           }
         }
       }
@@ -640,7 +637,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
         node = host.openNode(nodeUri, node);
         if (node != null) {
           for (LaneDef laneDef : nodeDef.laneDefs()) {
-            seedLane(node, laneDef);
+            this.seedLane(node, laneDef);
           }
         }
       }
@@ -684,7 +681,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
 
   @Override
   public MeshBinding injectMesh(MeshAddress meshAddress, MeshBinding mesh) {
-    final MeshDef meshDef = getMeshDef(meshAddress);
+    final MeshDef meshDef = this.getMeshDef(meshAddress);
     return new ActorMesh(this.kernel.injectMesh(meshAddress, mesh), meshDef);
   }
 
@@ -753,7 +750,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
     final Uri nodeUri = nodeAddress.nodeUri();
     NodeBinding node = null;
     if (!meshUri.isDefined()) {
-      final AgentFactory<?> agentFactory = this.agentFactories.get(nodeUri);
+      final AgentFactory<?> agentFactory = ActorSpace.AGENT_FACTORIES.get(this).get(nodeUri);
       if (agentFactory != null) {
         final Value props = agentFactory.props(nodeUri);
         node = new AgentModel(props);
@@ -828,7 +825,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   @Override
   public PolicyDirective<Identity> authenticate(Credentials credentials) {
     PolicyDirective<Identity> directive = null;
-    final HashTrieMap<String, Authenticator> authenticators = this.authenticators;
+    final HashTrieMap<String, Authenticator> authenticators = ActorSpace.AUTHENTICATORS.get(this);
     if (!authenticators.isEmpty()) {
       for (Authenticator authenticator : authenticators.values()) {
         directive = authenticator.authenticate(credentials);
@@ -930,7 +927,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
 
   @Override
   public void open() {
-    seedEdge(this.edge);
+    this.seedEdge(this.edge);
     this.edge.open();
   }
 
@@ -962,23 +959,23 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
   @Override
   public void willOpen() {
     if (this.log == null) {
-      this.log = openLog();
+      this.log = this.openLog();
     }
     if (this.policy == null) {
-      this.policy = openPolicy();
+      this.policy = this.openPolicy();
     }
     if (this.stage == null) {
-      this.stage = openStage();
+      this.stage = this.openStage();
     }
     if (this.store == null) {
-      this.store = openStore();
+      this.store = this.openStore();
     }
     this.open();
   }
 
   @Override
   public void didOpen() {
-    // nop
+    // hook
   }
 
   @Override
@@ -988,12 +985,12 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
 
   @Override
   public void didLoad() {
-    // nop
+    // hook
   }
 
   @Override
   public void willStart() {
-    for (Plane plane : this.planes.values()) {
+    for (Plane plane : ActorSpace.PLANES.get(this).values()) {
       plane.willStart();
     }
     this.start();
@@ -1001,14 +998,14 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
 
   @Override
   public void didStart() {
-    for (Plane plane : this.planes.values()) {
+    for (Plane plane : ActorSpace.PLANES.get(this).values()) {
       plane.didStart();
     }
   }
 
   @Override
   public void willStop() {
-    for (Plane plane : this.planes.values()) {
+    for (Plane plane : ActorSpace.PLANES.get(this).values()) {
       plane.willStop();
     }
     this.stop();
@@ -1016,7 +1013,7 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
 
   @Override
   public void didStop() {
-    for (Plane plane : this.planes.values()) {
+    for (Plane plane : ActorSpace.PLANES.get(this).values()) {
       plane.didStop();
     }
   }
@@ -1028,12 +1025,12 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
 
   @Override
   public void didUnload() {
-    // nop
+    // hook
   }
 
   @Override
   public void willClose() {
-    for (Plane plane : this.planes.values()) {
+    for (Plane plane : ActorSpace.PLANES.get(this).values()) {
       plane.willClose();
     }
     this.close();
@@ -1041,20 +1038,33 @@ public class ActorSpace extends AbstractTierBinding implements EdgeContext, Plan
 
   @Override
   public void didClose() {
-    for (Plane plane : this.planes.values()) {
+    for (Plane plane : ActorSpace.PLANES.get(this).values()) {
       plane.didClose();
     }
-    closeStore();
-    closeStage();
-    closePolicy();
-    closeLog();
+    this.closeStore();
+    this.closeStage();
+    this.closePolicy();
+    this.closeLog();
   }
 
   @Override
   public void didFail(Throwable error) {
-    for (Plane plane : this.planes.values()) {
+    for (Plane plane : ActorSpace.PLANES.get(this).values()) {
       plane.didFail(error);
     }
   }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<ActorSpace, HashTrieMap<String, Plane>> PLANES =
+      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<HashTrieMap<String, Plane>>) (Class<?>) HashTrieMap.class, "planes");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<ActorSpace, HashTrieMap<String, AgentRoute<?>>> AGENT_ROUTES =
+      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<HashTrieMap<String, AgentRoute<?>>>) (Class<?>) HashTrieMap.class, "agentRoutes");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<ActorSpace, UriMapper<AgentFactory<?>>> AGENT_FACTORIES =
+      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<UriMapper<AgentFactory<?>>>) (Class<?>) UriMapper.class, "agentFactories");
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<ActorSpace, HashTrieMap<String, Authenticator>> AUTHENTICATORS =
+      AtomicReferenceFieldUpdater.newUpdater(ActorSpace.class, (Class<HashTrieMap<String, Authenticator>>) (Class<?>) HashTrieMap.class, "authenticators");
 
 }

@@ -20,8 +20,8 @@ import swim.structure.Value;
 public final class MinusOutlet extends BinaryOutlet {
 
   @Override
-  protected Item evaluate(Value argument1, Value argument2) {
-    return argument1.minus(argument2);
+  protected Item evaluate(Value lhs, Value rhs) {
+    return lhs.minus(rhs);
   }
 
 }

@@ -37,6 +37,11 @@ final class HttpVersionParser extends Parser<HttpVersion> {
     this(http, 0, 0, 1);
   }
 
+  @Override
+  public Parser<HttpVersion> feed(Input input) {
+    return HttpVersionParser.parse(input, this.http, this.major, this.minor, this.step);
+  }
+
   static Parser<HttpVersion> parse(Input input, HttpParser http, int major, int minor, int step) {
     int c = 0;
     if (step == 1) {
@@ -44,7 +49,7 @@ final class HttpVersionParser extends Parser<HttpVersion> {
         input = input.step();
         step = 2;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected('H', input));
+        return Parser.error(Diagnostic.expected('H', input));
       }
     }
     if (step == 2) {
@@ -52,7 +57,7 @@ final class HttpVersionParser extends Parser<HttpVersion> {
         input = input.step();
         step = 3;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected('T', input));
+        return Parser.error(Diagnostic.expected('T', input));
       }
     }
     if (step == 3) {
@@ -60,7 +65,7 @@ final class HttpVersionParser extends Parser<HttpVersion> {
         input = input.step();
         step = 4;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected('T', input));
+        return Parser.error(Diagnostic.expected('T', input));
       }
     }
     if (step == 4) {
@@ -68,7 +73,7 @@ final class HttpVersionParser extends Parser<HttpVersion> {
         input = input.step();
         step = 5;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected('P', input));
+        return Parser.error(Diagnostic.expected('P', input));
       }
     }
     if (step == 5) {
@@ -76,7 +81,7 @@ final class HttpVersionParser extends Parser<HttpVersion> {
         input = input.step();
         step = 6;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected('/', input));
+        return Parser.error(Diagnostic.expected('/', input));
       }
     }
     if (step == 6) {
@@ -87,10 +92,10 @@ final class HttpVersionParser extends Parser<HttpVersion> {
           major = Base10.decodeDigit(c);
           step = 7;
         } else {
-          return error(Diagnostic.expected("major version", input));
+          return Parser.error(Diagnostic.expected("major version", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("major version", input));
+        return Parser.error(Diagnostic.expected("major version", input));
       }
     }
     if (step == 7) {
@@ -98,7 +103,7 @@ final class HttpVersionParser extends Parser<HttpVersion> {
         input = input.step();
         step = 8;
       } else if (!input.isEmpty()) {
-        return error(Diagnostic.expected('.', input));
+        return Parser.error(Diagnostic.expected('.', input));
       }
     }
     if (step == 8) {
@@ -107,27 +112,22 @@ final class HttpVersionParser extends Parser<HttpVersion> {
         if (Base10.isDigit(c)) {
           input = input.step();
           minor = Base10.decodeDigit(c);
-          return done(http.version(major, minor));
+          return Parser.done(http.version(major, minor));
         } else {
-          return error(Diagnostic.expected("minor version", input));
+          return Parser.error(Diagnostic.expected("minor version", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("minor version", input));
+        return Parser.error(Diagnostic.expected("minor version", input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new HttpVersionParser(http, major, minor, step);
   }
 
   static Parser<HttpVersion> parse(Input input, HttpParser http) {
-    return parse(input, http, 0, 0, 1);
-  }
-
-  @Override
-  public Parser<HttpVersion> feed(Input input) {
-    return parse(input, this.http, this.major, this.minor, this.step);
+    return HttpVersionParser.parse(input, http, 0, 0, 1);
   }
 
 }

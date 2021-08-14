@@ -19,6 +19,10 @@ import swim.dynamic.JavaHostPackage;
 
 public final class SwimApiPlane {
 
+  private SwimApiPlane() {
+    // static
+  }
+
   public static final HostPackage PACKAGE;
 
   static {
@@ -26,10 +30,6 @@ public final class SwimApiPlane {
     PACKAGE = hostPkg;
     hostPkg.addHostType(HostPlane.TYPE);
     hostPkg.addHostType(HostPlaneContext.TYPE);
-  }
-
-  private SwimApiPlane() {
-    // static
   }
 
 }

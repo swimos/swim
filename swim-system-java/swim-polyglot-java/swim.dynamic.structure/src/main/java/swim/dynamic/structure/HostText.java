@@ -20,16 +20,16 @@ import swim.structure.Text;
 
 public final class HostText {
 
+  private HostText() {
+    // static
+  }
+
   public static final HostObjectType<Text> TYPE;
 
   static {
     final JavaHostClassType<Text> type = new JavaHostClassType<>(Text.class);
     TYPE = type;
     type.extendType(HostValue.TYPE);
-  }
-
-  private HostText() {
-    // static
   }
 
 }

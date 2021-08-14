@@ -26,8 +26,6 @@ import swim.uri.Uri;
 
 public abstract class LaneView extends AbstractTierBinding implements Lane {
 
-  static final AtomicReferenceFieldUpdater<LaneView, Object> OBSERVERS =
-      AtomicReferenceFieldUpdater.newUpdater(LaneView.class, Object.class, "observers");
   protected volatile Object observers; // Observer | Observer[]
 
   public LaneView(Object observers) {
@@ -44,14 +42,14 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
   public abstract LaneBinding laneBinding();
 
   public LaneContext laneContext() {
-    return laneBinding().laneContext();
+    return this.laneBinding().laneContext();
   }
 
   public abstract LaneBinding createLaneBinding();
 
   @SuppressWarnings("unchecked")
   public <T> T unwrapLane(Class<T> laneClass) {
-    if (laneClass.isAssignableFrom(getClass())) {
+    if (laneClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -60,7 +58,7 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
 
   @SuppressWarnings("unchecked")
   public <T> T bottomLane(Class<T> laneClass) {
-    if (laneClass.isAssignableFrom(getClass())) {
+    if (laneClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -69,32 +67,32 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
 
   @Override
   public LaneAddress cellAddress() {
-    return laneContext().cellAddress();
+    return this.laneContext().cellAddress();
   }
 
   @Override
   public final String edgeName() {
-    return laneContext().edgeName();
+    return this.laneContext().edgeName();
   }
 
   @Override
   public final Uri meshUri() {
-    return laneContext().meshUri();
+    return this.laneContext().meshUri();
   }
 
   @Override
   public final Uri hostUri() {
-    return laneBinding().hostUri();
+    return this.laneBinding().hostUri();
   }
 
   @Override
   public final Uri nodeUri() {
-    return laneBinding().nodeUri();
+    return this.laneBinding().nodeUri();
   }
 
   @Override
   public final Uri laneUri() {
-    return laneBinding().laneUri();
+    return this.laneBinding().laneUri();
   }
 
   @Override
@@ -103,7 +101,7 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
   @Override
   public LaneView observe(Object newObserver) {
     do {
-      final Object oldObservers = this.observers;
+      final Object oldObservers = LaneView.OBSERVERS.get(this);
       final Object newObservers;
       if (oldObservers == null) {
         newObservers = newObserver;
@@ -120,7 +118,7 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
         newArray[oldCount] = newObserver;
         newObservers = newArray;
       }
-      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
+      if (LaneView.OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
         break;
       }
     } while (true);
@@ -130,7 +128,7 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
   @Override
   public LaneView unobserve(Object oldObserver) {
     do {
-      final Object oldObservers = this.observers;
+      final Object oldObservers = LaneView.OBSERVERS.get(this);
       final Object newObservers;
       if (oldObservers == null) {
         break;
@@ -169,7 +167,7 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
           }
         }
       }
-      if (OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
+      if (LaneView.OBSERVERS.compareAndSet(this, oldObservers, newObservers)) {
         break;
       }
     } while (true);
@@ -177,87 +175,90 @@ public abstract class LaneView extends AbstractTierBinding implements Lane {
   }
 
   public void laneDidFail(Throwable error) {
-    // stub
+    // hook
   }
 
   @Override
   public Policy policy() {
-    return laneContext().policy();
+    return this.laneContext().policy();
   }
 
   @Override
   public Schedule schedule() {
-    return laneContext().schedule();
+    return this.laneContext().schedule();
   }
 
   @Override
   public Stage stage() {
-    return laneContext().stage();
+    return this.laneContext().stage();
   }
 
   @Override
   public StoreBinding store() {
-    return laneContext().store();
+    return this.laneContext().store();
   }
 
   @Override
   public LinkBinding bindDownlink(Downlink downlink) {
-    return laneContext().bindDownlink(downlink);
+    return this.laneContext().bindDownlink(downlink);
   }
 
   @Override
   public void openDownlink(LinkBinding link) {
-    laneContext().openDownlink(link);
+    this.laneContext().openDownlink(link);
   }
 
   @Override
   public void closeDownlink(LinkBinding link) {
-    laneContext().closeDownlink(link);
+    this.laneContext().closeDownlink(link);
   }
 
   @Override
   public void pushDown(Push<?> push) {
-    laneContext().pushDown(push);
+    this.laneContext().pushDown(push);
   }
 
   @Override
   public void reportDown(Metric metric) {
-    laneContext().reportDown(metric);
+    this.laneContext().reportDown(metric);
   }
 
   @Override
   public void openMetaDownlink(LinkBinding downlink, NodeBinding metaDownlink) {
-    laneBinding().openMetaDownlink(downlink, metaDownlink);
+    this.laneBinding().openMetaDownlink(downlink, metaDownlink);
   }
 
   @Override
   public void trace(Object message) {
-    laneBinding().trace(message);
+    this.laneBinding().trace(message);
   }
 
   @Override
   public void debug(Object message) {
-    laneBinding().debug(message);
+    this.laneBinding().debug(message);
   }
 
   @Override
   public void info(Object message) {
-    laneBinding().info(message);
+    this.laneBinding().info(message);
   }
 
   @Override
   public void warn(Object message) {
-    laneBinding().warn(message);
+    this.laneBinding().warn(message);
   }
 
   @Override
   public void error(Object message) {
-    laneBinding().error(message);
+    this.laneBinding().error(message);
   }
 
   @Override
   public void fail(Object message) {
-    laneBinding().fail(message);
+    this.laneBinding().fail(message);
   }
+
+  static final AtomicReferenceFieldUpdater<LaneView, Object> OBSERVERS =
+      AtomicReferenceFieldUpdater.newUpdater(LaneView.class, Object.class, "observers");
 
 }

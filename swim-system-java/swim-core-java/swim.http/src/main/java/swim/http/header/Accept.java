@@ -28,31 +28,10 @@ import swim.util.Murmur3;
 
 public final class Accept extends HttpHeader {
 
-  private static int hashSeed;
   final FingerTrieSeq<MediaRange> mediaRanges;
 
   Accept(FingerTrieSeq<MediaRange> mediaRanges) {
     this.mediaRanges = mediaRanges;
-  }
-
-  public static Accept from(FingerTrieSeq<MediaRange> mediaRanges) {
-    return new Accept(mediaRanges);
-  }
-
-  public static Accept from(MediaRange... mediaRanges) {
-    return new Accept(FingerTrieSeq.of(mediaRanges));
-  }
-
-  public static Accept from(String... mediaRangeStrings) {
-    final Builder<MediaRange, FingerTrieSeq<MediaRange>> mediaRanges = FingerTrieSeq.builder();
-    for (int i = 0, n = mediaRangeStrings.length; i < n; i += 1) {
-      mediaRanges.add(MediaRange.parse(mediaRangeStrings[i]));
-    }
-    return new Accept(mediaRanges.bind());
-  }
-
-  public static Parser<Accept> parseHttpValue(Input input, HttpParser http) {
-    return AcceptParser.parse(input, http);
   }
 
   @Override
@@ -85,25 +64,48 @@ public final class Accept extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Accept.class);
+    if (Accept.hashSeed == 0) {
+      Accept.hashSeed = Murmur3.seed(Accept.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.mediaRanges.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Accept.hashSeed, this.mediaRanges.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("Accept").write('.').write("from").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Accept").write('.').write("create").write('(');
     final int n = this.mediaRanges.size();
     if (n > 0) {
-      output.debug(this.mediaRanges.head());
+      output = output.debug(this.mediaRanges.head());
       for (int i = 1; i < n; i += 1) {
         output = output.write(", ").debug(this.mediaRanges.get(i));
       }
     }
     output = output.write(')');
+    return output;
+  }
+
+  public static Accept create(FingerTrieSeq<MediaRange> mediaRanges) {
+    return new Accept(mediaRanges);
+  }
+
+  public static Accept create(MediaRange... mediaRanges) {
+    return new Accept(FingerTrieSeq.of(mediaRanges));
+  }
+
+  public static Accept create(String... mediaRangeStrings) {
+    final Builder<MediaRange, FingerTrieSeq<MediaRange>> mediaRanges = FingerTrieSeq.builder();
+    for (int i = 0, n = mediaRangeStrings.length; i < n; i += 1) {
+      mediaRanges.add(MediaRange.parse(mediaRangeStrings[i]));
+    }
+    return new Accept(mediaRanges.bind());
+  }
+
+  public static Parser<Accept> parseHttpValue(Input input, HttpParser http) {
+    return AcceptParser.parse(input, http);
   }
 
 }

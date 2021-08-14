@@ -36,7 +36,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidRemoveKey;
 import swim.observable.function.DidUpdateKey;
@@ -51,9 +51,6 @@ import swim.uri.Uri;
 
 public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLane<L, K, V> {
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
   protected final AgentContext agentContext;
   protected Form<L> linkForm;
   protected Form<K> keyForm;
@@ -69,12 +66,14 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
     this.linkForm = linkForm;
     this.keyForm = keyForm;
     this.valueForm = valueForm;
+    this.laneBinding = null;
+    this.dataView = null;
     this.flags = flags;
   }
 
   public JoinMapLaneView(AgentContext agentContext, Form<L> linkForm,
                          Form<K> keyForm, Form<V> valueForm) {
-    this(agentContext, linkForm, keyForm, valueForm, RESIDENT, null);
+    this(agentContext, linkForm, keyForm, valueForm, JoinMapLaneView.RESIDENT, null);
   }
 
   @Override
@@ -104,12 +103,12 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
   @Override
   public <L2> JoinMapLaneView<L2, K, V> linkForm(Form<L2> linkForm) {
     return new JoinMapLaneView<L2, K, V>(this.agentContext, linkForm, this.keyForm, this.valueForm,
-        this.flags, typesafeObservers(this.observers));
+                                         this.flags, this.typesafeObservers(this.observers));
   }
 
   @Override
   public <L2> JoinMapLaneView<L2, K, V> linkClass(Class<L2> linkClass) {
-    return linkForm(Form.<L2>forClass(linkClass));
+    return this.linkForm(Form.<L2>forClass(linkClass));
   }
 
   public void setLinkForm(Form<L> linkForm) {
@@ -118,18 +117,18 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
 
   @Override
   public final Form<K> keyForm() {
-    return keyForm;
+    return this.keyForm;
   }
 
   @Override
   public <K2> JoinMapLaneView<L, K2, V> keyForm(Form<K2> keyForm) {
     return new JoinMapLaneView<L, K2, V>(this.agentContext, this.linkForm, keyForm, this.valueForm,
-        this.flags, typesafeObservers(this.observers));
+                                         this.flags, this.typesafeObservers(this.observers));
   }
 
   @Override
   public <K2> JoinMapLaneView<L, K2, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   public void setKeyForm(Form<K> keyForm) {
@@ -138,18 +137,18 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
 
   @Override
   public final Form<V> valueForm() {
-    return valueForm;
+    return this.valueForm;
   }
 
   @Override
   public <V2> JoinMapLaneView<L, K, V2> valueForm(Form<V2> valueForm) {
     return new JoinMapLaneView<L, K, V2>(this.agentContext, this.linkForm, this.keyForm, valueForm,
-        this.flags, typesafeObservers(this.observers));
+                                         this.flags, this.typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> JoinMapLaneView<L, K, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   public void setValueForm(Form<V> valueForm) {
@@ -163,15 +162,15 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
   }
 
   public final boolean isResident() {
-    return (this.flags & RESIDENT) != 0;
+    return (this.flags & JoinMapLaneView.RESIDENT) != 0;
   }
 
   @Override
   public JoinMapLaneView<L, K, V> isResident(boolean isResident) {
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= JoinMapLaneView.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~JoinMapLaneView.RESIDENT;
     }
     final JoinMapLaneModel laneBinding = this.laneBinding;
     if (laneBinding != null) {
@@ -182,22 +181,22 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
 
   void didSetResident(boolean isResident) {
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= JoinMapLaneView.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~JoinMapLaneView.RESIDENT;
     }
   }
 
   public final boolean isTransient() {
-    return (this.flags & TRANSIENT) != 0;
+    return (this.flags & JoinMapLaneView.TRANSIENT) != 0;
   }
 
   @Override
   public JoinMapLaneView<L, K, V> isTransient(boolean isTransient) {
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= JoinMapLaneView.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~JoinMapLaneView.TRANSIENT;
     }
     final JoinMapLaneModel laneBinding = this.laneBinding;
     if (laneBinding != null) {
@@ -208,9 +207,9 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
 
   void didSetTransient(boolean isTransient) {
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= JoinMapLaneView.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~JoinMapLaneView.TRANSIENT;
     }
   }
 
@@ -239,82 +238,82 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
 
   @Override
   public JoinMapLaneView<L, K, V> willDownlink(WillDownlinkMap<L> willDownlink) {
-    return observe(willDownlink);
+    return this.observe(willDownlink);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> didDownlink(DidDownlinkMap<L> didDownlink) {
-    return observe(didDownlink);
+    return this.observe(didDownlink);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> willUpdate(WillUpdateKey<K, V> willUpdate) {
-    return observe(willUpdate);
+    return this.observe(willUpdate);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> didUpdate(DidUpdateKey<K, V> didUpdate) {
-    return observe(didUpdate);
+    return this.observe(didUpdate);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> willRemove(WillRemoveKey<K> willRemove) {
-    return observe(willRemove);
+    return this.observe(willRemove);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> didRemove(DidRemoveKey<K, V> didRemove) {
-    return observe(didRemove);
+    return this.observe(didRemove);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> willClear(WillClear willClear) {
-    return observe(willClear);
+    return this.observe(willClear);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> didClear(DidClear didClear) {
-    return observe(didClear);
+    return this.observe(didClear);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> didCommand(DidCommand didCommand) {
-    return observe(didCommand);
+    return this.observe(didCommand);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> willUplink(WillUplink willUplink) {
-    return observe(willUplink);
+    return this.observe(willUplink);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> didUplink(DidUplink didUplink) {
-    return observe(didUplink);
+    return this.observe(didUplink);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> willEnter(WillEnter willEnter) {
-    return observe(willEnter);
+    return this.observe(willEnter);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> didEnter(DidEnter didEnter) {
-    return observe(didEnter);
+    return this.observe(didEnter);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> willLeave(WillLeave willLeave) {
-    return observe(willLeave);
+    return this.observe(willLeave);
   }
 
   @Override
   public JoinMapLaneView<L, K, V> didLeave(DidLeave didLeave) {
-    return observe(didLeave);
+    return this.observe(didLeave);
   }
 
   @SuppressWarnings("unchecked")
@@ -331,8 +330,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
           try {
             newValue = ((WillUpdateKey<K, V>) observers).willUpdate(key, newValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -348,8 +347,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
               try {
                 newValue = ((WillUpdateKey<K, V>) observer).willUpdate(key, newValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -380,8 +379,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
           try {
             ((DidUpdateKey<K, V>) observers).didUpdate(key, newValue, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -397,8 +396,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
               try {
                 ((DidUpdateKey<K, V>) observer).didUpdate(key, newValue, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -429,8 +428,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
           try {
             ((WillRemoveKey<K>) observers).willRemove(key);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -446,8 +445,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
               try {
                 ((WillRemoveKey<K>) observer).willRemove(key);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -478,8 +477,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
           try {
             ((DidRemoveKey<K, V>) observers).didRemove(key, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -495,8 +494,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
               try {
                 ((DidRemoveKey<K, V>) observer).didRemove(key, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -526,8 +525,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
           try {
             ((WillClear) observers).willClear();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -543,8 +542,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
               try {
                 ((WillClear) observer).willClear();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -574,8 +573,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
           try {
             ((DidClear) observers).didClear();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -591,8 +590,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
               try {
                 ((DidClear) observer).didClear();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -621,8 +620,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
           try {
             downlink = ((WillDownlinkMap<L>) observers).willDownlink(key, downlink);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -638,8 +637,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
               try {
                 downlink = ((WillDownlinkMap<L>) observer).willDownlink(key, downlink);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -667,8 +666,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
           try {
             ((DidDownlinkMap<L>) observers).didDownlink(key, downlink);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -684,8 +683,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
               try {
                 ((DidDownlinkMap<L>) observer).didDownlink(key, downlink);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -706,6 +705,7 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
   }
 
   public void laneDidDownlink(K key, MapDownlink<K, V> downlink) {
+    // hook
   }
 
   public V laneWillUpdate(K key, V newValue) {
@@ -713,26 +713,32 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
   }
 
   public void laneDidUpdate(K key, V newValue, V oldValue) {
+    // hook
   }
 
   public void laneWillRemove(K key) {
+    // hook
   }
 
   public void laneDidRemove(K key, V oldValue) {
+    // hook
   }
 
   public void laneWillClear() {
+    // hook
   }
 
   public void laneDidClear() {
+    // hook
   }
 
   @Override
   public MapDownlink<K, V> downlink(L key) {
     final LaneContext laneContext = this.laneBinding.laneContext();
-    return new JoinMapLaneDownlink<K, V>(laneContext, laneContext.stage(),
-        this.laneBinding, this.linkForm.mold(key).toValue(), this.laneBinding.meshUri(), Uri.empty(),
-        Uri.empty(), Uri.empty(), 0.0f, 0.0f, Value.absent(), this.keyForm, this.valueForm);
+    return new JoinMapLaneDownlink<K, V>(laneContext, laneContext.stage(), this.laneBinding,
+                                         this.linkForm.mold(key).toValue(), this.laneBinding.meshUri(),
+                                         Uri.empty(), Uri.empty(), Uri.empty(), 0.0f, 0.0f,
+                                         Value.absent(), this.keyForm, this.valueForm);
   }
 
   @Override
@@ -828,5 +834,8 @@ public class JoinMapLaneView<L, K, V> extends WarpLaneView implements JoinMapLan
   public Iterator<Map.Entry<L, MapDownlink<?, ?>>> downlinkIterator() {
     return (Iterator<Map.Entry<L, MapDownlink<?, ?>>>) (Iterator<?>) this.laneBinding.downlinks.iterator();
   }
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
 
 }

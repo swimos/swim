@@ -16,25 +16,26 @@ package swim.http;
 
 public final class Http {
 
-  private static HttpParser standardParser;
-  private static HttpWriter standardWriter;
-
   private Http() {
-    // stub
+    // static
   }
+
+  private static HttpParser standardParser;
 
   public static HttpParser standardParser() {
-    if (standardParser == null) {
-      standardParser = new HttpParser();
+    if (Http.standardParser == null) {
+      Http.standardParser = new HttpParser();
     }
-    return standardParser;
+    return Http.standardParser;
   }
 
+  private static HttpWriter standardWriter;
+
   public static HttpWriter standardWriter() {
-    if (standardWriter == null) {
-      standardWriter = new HttpWriter();
+    if (Http.standardWriter == null) {
+      Http.standardWriter = new HttpWriter();
     }
-    return standardWriter;
+    return Http.standardWriter;
   }
 
   public static boolean isSpace(int c) {
@@ -54,7 +55,7 @@ public final class Http {
   }
 
   public static boolean isPhraseChar(int c) {
-    return isSpace(c) || isVisibleChar(c);
+    return Http.isSpace(c) || Http.isVisibleChar(c);
   }
 
   public static boolean isTokenChar(int c) {
@@ -98,7 +99,7 @@ public final class Http {
       return false;
     }
     for (int i = 0; i < n; i += 1) {
-      if (!isTokenChar(token.charAt(i))) {
+      if (!Http.isTokenChar(token.charAt(i))) {
         return false;
       }
     }

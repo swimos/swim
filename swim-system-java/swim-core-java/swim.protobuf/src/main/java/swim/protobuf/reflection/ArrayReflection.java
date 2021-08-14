@@ -65,16 +65,6 @@ final class ArrayReflectionBuilder<I> implements Builder<I, Object> {
     this.length = 0;
   }
 
-  static int expand(int n) {
-    n = Math.max(8, n) - 1;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
-    return n + 1;
-  }
-
   @Override
   public boolean add(I newItem) {
     final Object oldArray = this.array;
@@ -134,6 +124,16 @@ final class ArrayReflectionBuilder<I> implements Builder<I, Object> {
       array = Array.newInstance(this.itemClass, 0);
     }
     return array;
+  }
+
+  static int expand(int n) {
+    n = Math.max(8, n) - 1;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    return n + 1;
   }
 
 }

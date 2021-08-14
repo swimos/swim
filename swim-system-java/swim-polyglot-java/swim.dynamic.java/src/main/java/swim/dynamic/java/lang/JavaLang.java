@@ -19,6 +19,10 @@ import swim.dynamic.JavaHostPackage;
 
 public final class JavaLang {
 
+  private JavaLang() {
+    // static
+  }
+
   public static final HostPackage PACKAGE;
 
   static {
@@ -28,10 +32,6 @@ public final class JavaLang {
     hostPkg.addHostType(HostThrowable.TYPE);
     hostPkg.addHostType(HostComparable.TYPE);
     hostPkg.addHostType(HostIterable.TYPE);
-  }
-
-  private JavaLang() {
-    // static
   }
 
 }

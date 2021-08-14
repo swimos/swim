@@ -23,7 +23,6 @@ import swim.util.Murmur3;
 
 public final class Product extends HttpPart implements Debug {
 
-  private static int hashSeed;
   final String name;
   final String version;
   final FingerTrieSeq<String> comments;
@@ -40,26 +39,6 @@ public final class Product extends HttpPart implements Debug {
 
   Product(String name) {
     this(name, null, FingerTrieSeq.<String>empty());
-  }
-
-  public static Product from(String name, String version, FingerTrieSeq<String> comments) {
-    return new Product(name, version, comments);
-  }
-
-  public static Product from(String name, String version, String... comments) {
-    return new Product(name, version, FingerTrieSeq.of(comments));
-  }
-
-  public static Product from(String name, String version) {
-    return new Product(name, version);
-  }
-
-  public static Product from(String name) {
-    return new Product(name);
-  }
-
-  public static Product parse(String string) {
-    return Http.standardParser().parseProductString(string);
   }
 
   public String name() {
@@ -105,18 +84,20 @@ public final class Product extends HttpPart implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Product.class);
+    if (Product.hashSeed == 0) {
+      Product.hashSeed = Murmur3.seed(Product.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Product.hashSeed,
         this.name.hashCode()), Murmur3.hash(this.version)), this.comments.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("Product").write('.').write("from").write('(').debug(this.name);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Product").write('.').write("create").write('(').debug(this.name);
     if (this.version != null) {
       output = output.write(", ").debug(this.version);
     }
@@ -124,11 +105,32 @@ public final class Product extends HttpPart implements Debug {
     for (String comment : this.comments) {
       output = output.write('.').write("comment").write('(').debug(comment).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static Product create(String name, String version, FingerTrieSeq<String> comments) {
+    return new Product(name, version, comments);
+  }
+
+  public static Product create(String name, String version, String... comments) {
+    return new Product(name, version, FingerTrieSeq.of(comments));
+  }
+
+  public static Product create(String name, String version) {
+    return new Product(name, version);
+  }
+
+  public static Product create(String name) {
+    return new Product(name);
+  }
+
+  public static Product parse(String string) {
+    return Http.standardParser().parseProductString(string);
   }
 
 }

@@ -45,6 +45,12 @@ final class MqttUnsubscribeDecoder extends Decoder<MqttUnsubscribe> {
     this(mqtt, 0, 0, FingerTrieSeq.<String>empty(), null, 0, 1);
   }
 
+  @Override
+  public Decoder<MqttUnsubscribe> feed(InputBuffer input) {
+    return MqttUnsubscribeDecoder.decode(input, this.mqtt, this.packetFlags, this.packetId,
+                                         this.topicNames, this.topicName, this.remaining, this.step);
+  }
+
   static Decoder<MqttUnsubscribe> decode(InputBuffer input, MqttDecoder mqtt, int packetFlags,
                                          int packetId, FingerTrieSeq<String> topicNames,
                                          Decoder<String> topicName, int remaining, int step) {
@@ -63,7 +69,7 @@ final class MqttUnsubscribeDecoder extends Decoder<MqttUnsubscribe> {
       } else if (step < 5) {
         step += 1;
       } else {
-        return error(new MqttException("packet length too long"));
+        return Decoder.error(new MqttException("packet length too long"));
       }
     }
     if (step == 6 && remaining > 0 && input.isCont()) {
@@ -110,27 +116,21 @@ final class MqttUnsubscribeDecoder extends Decoder<MqttUnsubscribe> {
       }
     }
     if (step == 9 && remaining == 0) {
-      return done(mqtt.unsubscribe(packetFlags, packetId, topicNames));
+      return Decoder.done(mqtt.unsubscribe(packetFlags, packetId, topicNames));
     }
     if (remaining < 0) {
-      return error(new MqttException("packet length too short"));
+      return Decoder.error(new MqttException("packet length too short"));
     } else if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new MqttUnsubscribeDecoder(mqtt, packetFlags, packetId, topicNames,
-        topicName, remaining, step);
+                                      topicName, remaining, step);
   }
 
   static Decoder<MqttUnsubscribe> decode(InputBuffer input, MqttDecoder mqtt) {
-    return decode(input, mqtt, 0, 0, FingerTrieSeq.<String>empty(), null, 0, 1);
-  }
-
-  @Override
-  public Decoder<MqttUnsubscribe> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.packetFlags, this.packetId,
-        this.topicNames, this.topicName, this.remaining, this.step);
+    return MqttUnsubscribeDecoder.decode(input, mqtt, 0, 0, FingerTrieSeq.<String>empty(), null, 0, 1);
   }
 
 }

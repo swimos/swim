@@ -27,8 +27,7 @@ public class ByteBufferFormSpec {
   private static final ByteBuffer BB;
 
   static {
-    BB = ByteBuffer.allocate(8)
-        .putInt(0xCAFEBABE).putShort((short) 3).putShort((short) 45);
+    BB = ByteBuffer.allocate(8).putInt(0xCAFEBABE).putShort((short) 3).putShort((short) 45);
     BB.rewind();
   }
 

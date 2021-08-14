@@ -32,6 +32,7 @@ public abstract class HttpProxy implements HttpBinding, HttpContext {
 
   public HttpProxy(HttpBinding linkBinding) {
     this.linkBinding = linkBinding;
+    this.linkContext = null;
   }
 
   public final HttpBinding linkBinding() {
@@ -67,7 +68,7 @@ public abstract class HttpProxy implements HttpBinding, HttpContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapLink(Class<T> linkClass) {
-    if (linkClass.isAssignableFrom(getClass())) {
+    if (linkClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.linkContext.unwrapLink(linkClass);
@@ -78,7 +79,7 @@ public abstract class HttpProxy implements HttpBinding, HttpContext {
   @Override
   public <T> T bottomLink(Class<T> linkClass) {
     T link = this.linkContext.bottomLink(linkClass);
-    if (link == null && linkClass.isAssignableFrom(getClass())) {
+    if (link == null && linkClass.isAssignableFrom(this.getClass())) {
       link = (T) this;
     }
     return link;

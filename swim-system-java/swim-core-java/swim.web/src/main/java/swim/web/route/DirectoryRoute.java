@@ -46,7 +46,7 @@ public final class DirectoryRoute implements WebRoute {
     if (path.isRelativeTo(this.directory)) {
       try {
         final HttpBody<Object> body = HttpBody.fromFile(path.toString());
-        final HttpResponse<Object> response = HttpResponse.from(HttpStatus.OK).content(body);
+        final HttpResponse<Object> response = HttpResponse.create(HttpStatus.OK).content(body);
         return request.respond(response);
       } catch (IOException error) {
         return request.reject();

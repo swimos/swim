@@ -39,7 +39,7 @@ public abstract class UnaryOutlet extends AbstractOutlet<Value> {
     if (operandInput != null) {
       final Value argument = operandInput.get();
       if (argument != null) {
-        final Item result = evaluate(argument);
+        final Item result = this.evaluate(argument);
         return result.toValue();
       }
     }

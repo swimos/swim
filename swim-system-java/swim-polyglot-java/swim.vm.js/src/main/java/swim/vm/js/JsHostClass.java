@@ -37,9 +37,9 @@ public class JsHostClass implements ProxyObject, ProxyInstantiable {
 
   @Override
   public boolean hasMember(String key) {
-    if ("prototype".equals(key)) {
+    if ("__proto__".equals(key)) {
       return true;
-    } else if ("__proto__".equals(key)) {
+    } else if ("prototype".equals(key)) {
       return true;
     } else {
       final HostStaticMember staticMember = this.type.getStaticMember(this.bridge, key);
@@ -49,29 +49,30 @@ public class JsHostClass implements ProxyObject, ProxyInstantiable {
 
   @Override
   public Object getMember(String key) {
-    if ("prototype".equals(key)) {
-      return this.bridge.hostTypeToGuestPrototype(this.type);
-    } else if ("__proto__".equals(key)) {
-      return this.bridge.guestFunctionPrototype();
+    final Object guestMember;
+    if ("__proto__".equals(key)) {
+      guestMember = this.bridge.guestFunctionPrototype();
+    } else if ("prototype".equals(key)) {
+      guestMember = this.bridge.hostTypeToGuestPrototype(this.type);
     } else {
       final HostStaticMember staticMember = this.type.getStaticMember(this.bridge, key);
       if (staticMember instanceof HostStaticField) {
         final Object hostValue = ((HostStaticField) staticMember).get(this.bridge);
-        return this.bridge.hostToGuest(hostValue);
+        guestMember = this.bridge.hostToGuest(hostValue);
       } else if (staticMember instanceof HostStaticMethod) {
-        return this.bridge.hostStaticMethodToGuestStaticMethod((HostStaticMethod) staticMember);
+        guestMember = this.bridge.hostStaticMethodToGuestStaticMethod((HostStaticMethod) staticMember);
       } else {
-        return null;
+        guestMember = null;
       }
     }
+    return guestMember;
   }
 
   @Override
   public void putMember(String key, Value guestValue) {
-    System.out.println("HsHostClass.putMember key: " + key + "; guestValue: " + guestValue);
-    if ("prototype".equals(key)) {
+    if ("__proto__".equals(key)) {
       throw new UnsupportedOperationException();
-    } else if ("__proto__".equals(key)) {
+    } else if ("prototype".equals(key)) {
       throw new UnsupportedOperationException();
     } else {
       final HostStaticMember staticMember = this.type.getStaticMember(this.bridge, key);
@@ -109,8 +110,8 @@ public class JsHostClass implements ProxyObject, ProxyInstantiable {
       staticMemberKeys[i] = staticMember.key();
       i += 1;
     }
-    staticMemberKeys[i] = "constructor";
-    staticMemberKeys[i + 1] = "__proto__";
+    staticMemberKeys[i] = "__proto__";
+    staticMemberKeys[i + 1] = "prototype";
     return new VmProxyArray(staticMemberKeys);
   }
 

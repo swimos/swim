@@ -36,7 +36,7 @@ final class FilterSelectorWriter<I, V> extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.recon, this.predicate, this.then, this.part, this.step);
+    return FilterSelectorWriter.write(output, this.recon, this.predicate, this.then, this.part, this.step);
   }
 
   static <I, V> int sizeOf(ReconWriter<I, V> recon, V predicate, V then) {
@@ -84,19 +84,19 @@ final class FilterSelectorWriter<I, V> extends Writer<Object, Object> {
       return (Writer<Object, Object>) recon.writeThen(then, output);
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new FilterSelectorWriter<I, V>(recon, predicate, then, part, step);
   }
 
   static <I, V> Writer<Object, Object> write(Output<?> output, ReconWriter<I, V> recon, V predicate, V then) {
-    return write(output, recon, predicate, then, null, 1);
+    return FilterSelectorWriter.write(output, recon, predicate, then, null, 1);
   }
 
   static <I, V> Writer<Object, Object> writeThen(Output<?> output, ReconWriter<I, V> recon, V predicate, V then) {
-    return write(output, recon, predicate, then, null, 2);
+    return FilterSelectorWriter.write(output, recon, predicate, then, null, 2);
   }
 
 }

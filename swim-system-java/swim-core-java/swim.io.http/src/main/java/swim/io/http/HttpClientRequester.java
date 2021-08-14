@@ -29,11 +29,6 @@ import swim.io.IpSocket;
 
 public class HttpClientRequester<T> implements HttpRequesterContext {
 
-  static final int REQUESTING = 1 << 0;
-  static final int REQUESTED = 1 << 1;
-  @SuppressWarnings("unchecked")
-  static final AtomicIntegerFieldUpdater<HttpClientRequester<?>> STATUS =
-      AtomicIntegerFieldUpdater.newUpdater((Class<HttpClientRequester<?>>) (Class<?>) HttpClientRequester.class, "status");
   protected final HttpClientModem modem;
   protected final HttpRequester<T> requester;
   volatile HttpRequest<?> request;
@@ -42,6 +37,8 @@ public class HttpClientRequester<T> implements HttpRequesterContext {
   public HttpClientRequester(HttpClientModem modem, HttpRequester<T> requester) {
     this.modem = modem;
     this.requester = requester;
+    this.request = null;
+    this.status = 0;
   }
 
   @Override
@@ -128,11 +125,11 @@ public class HttpClientRequester<T> implements HttpRequesterContext {
   public void writeRequest(HttpRequest<?> request) {
     this.request = request;
     do {
-      final int oldStatus = STATUS.get(this);
-      if ((oldStatus & REQUESTED) == 0) {
-        final int newStatus = oldStatus | REQUESTED;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          if ((newStatus & REQUESTING) != 0) {
+      final int oldStatus = HttpClientRequester.STATUS.get(this);
+      if ((oldStatus & HttpClientRequester.REQUESTED) == 0) {
+        final int newStatus = oldStatus | HttpClientRequester.REQUESTED;
+        if (HttpClientRequester.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+          if ((newStatus & HttpClientRequester.REQUESTING) != 0) {
             this.modem.doWriteRequest(request);
           }
           break;
@@ -169,11 +166,11 @@ public class HttpClientRequester<T> implements HttpRequesterContext {
   void doRequest() {
     this.requester.doRequest();
     do {
-      final int oldStatus = STATUS.get(this);
-      if ((oldStatus & REQUESTING) == 0) {
-        final int newStatus = oldStatus | REQUESTING;
-        if (STATUS.compareAndSet(this, oldStatus, newStatus)) {
-          if ((newStatus & REQUESTED) != 0) {
+      final int oldStatus = HttpClientRequester.STATUS.get(this);
+      if ((oldStatus & HttpClientRequester.REQUESTING) == 0) {
+        final int newStatus = oldStatus | HttpClientRequester.REQUESTING;
+        if (HttpClientRequester.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+          if ((newStatus & HttpClientRequester.REQUESTED) != 0) {
             this.modem.doWriteRequest(this.request);
           }
           break;
@@ -211,5 +208,12 @@ public class HttpClientRequester<T> implements HttpRequesterContext {
   void didFail(Throwable error) {
     this.requester.didFail(error);
   }
+
+  static final int REQUESTING = 1 << 0;
+  static final int REQUESTED = 1 << 1;
+
+  @SuppressWarnings("unchecked")
+  static final AtomicIntegerFieldUpdater<HttpClientRequester<?>> STATUS =
+      AtomicIntegerFieldUpdater.newUpdater((Class<HttpClientRequester<?>>) (Class<?>) HttpClientRequester.class, "status");
 
 }

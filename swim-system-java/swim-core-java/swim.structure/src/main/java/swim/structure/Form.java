@@ -57,6 +57,85 @@ import swim.structure.form.ValueForm;
  */
 public abstract class Form<T> {
 
+  /**
+   * Returns the key of the tag attribute that distinguishes structures of this
+   * {@code Form}; returns {@code null} if this {@code Form} has no
+   * distinguishing tag attribute. Used to accelerate distrcrimination of
+   * polymorphic structural types with nominal type hints.
+   */
+  public String tag() {
+    return null;
+  }
+
+  /**
+   * Returns a version of this {@code Form} that requires a head {@link Attr}
+   * with the given {@code tag} name.
+   */
+  public Form<T> tag(String tag) {
+    if (tag != null) {
+      return new TagForm<T>(tag, this);
+    } else {
+      return this;
+    }
+  }
+
+  /**
+   * Returns a default–possibly {@code null}–value of type {@code T}. Used
+   * as the fallback return value when {@link Item#coerce(Form) coercing} an
+   * invalid structural value.
+   */
+  public T unit() {
+    return null;
+  }
+
+  /**
+   * Returns a version of this {@code Form} with the given {@code unit} value.
+   */
+  public Form<T> unit(T unit) {
+    if (unit != null) {
+      return new UnitForm<T>(unit, this);
+    } else {
+      return this;
+    }
+  }
+
+  /**
+   * Returns the reified {@code Class} of type {@code T}.
+   */
+  public abstract Class<?> type();
+
+  /**
+   * Converts a nominally typed Java {@code object} into its structurally typed
+   * equivalent based on the provided prototype {@code item}. The passed-in
+   * {@code item} is assumed to be non-{@code null}. The returned {@code Item}
+   * must never be {@code null}.
+   */
+  public Item mold(T object, Item item) {
+    return item.concat(this.mold(object));
+  }
+
+  /**
+   * Converts a nominally typed Java {@code object} into its structurally typed
+   * equivalent. The returned {@code Item} must never be {@code null}.
+   */
+  public abstract Item mold(T object);
+
+  /**
+   * Converts a structurally typed {@code item} into a nominally typed Java
+   * object based on the provided prototype {@code object}. The passed-in
+   * {@code item} is assumed to be non-{@code null}. The passed-in prototype
+   * {@code object} may be {@code null}.
+   */
+  public T cast(Item item, T object) {
+    return this.cast(item);
+  }
+
+  /**
+   * Converts a structurally typed {@code item} into a nominally typed Java
+   * object. The passed-in {@code item} is assumed to be non-{@code null}.
+   */
+  public abstract T cast(Item item);
+
   private static Form<Byte> byteForm;
   private static Form<Short> shortForm;
   private static Form<Integer> integerForm;
@@ -76,140 +155,140 @@ public abstract class Form<T> {
    * Utility method to receive a singleton {@link ByteForm}.
    */
   public static Form<Byte> forByte() {
-    if (byteForm == null) {
-      byteForm = new ByteForm((byte) 0);
+    if (Form.byteForm == null) {
+      Form.byteForm = new ByteForm((byte) 0);
     }
-    return byteForm;
+    return Form.byteForm;
   }
 
   /**
    * Utility method to receive a singleton {@link ShortForm}.
    */
   public static Form<Short> forShort() {
-    if (shortForm == null) {
-      shortForm = new ShortForm((short) 0);
+    if (Form.shortForm == null) {
+      Form.shortForm = new ShortForm((short) 0);
     }
-    return shortForm;
+    return Form.shortForm;
   }
 
   /**
    * Utility method to receive a singleton {@link IntegerForm}.
    */
   public static Form<Integer> forInteger() {
-    if (integerForm == null) {
-      integerForm = new IntegerForm(0);
+    if (Form.integerForm == null) {
+      Form.integerForm = new IntegerForm(0);
     }
-    return integerForm;
+    return Form.integerForm;
   }
 
   /**
    * Utility method to receive a singleton {@link LongForm}.
    */
   public static Form<Long> forLong() {
-    if (longForm == null) {
-      longForm = new LongForm(0L);
+    if (Form.longForm == null) {
+      Form.longForm = new LongForm(0L);
     }
-    return longForm;
+    return Form.longForm;
   }
 
   /**
    * Utility method to receive a singleton {@link FloatForm}.
    */
   public static Form<Float> forFloat() {
-    if (floatForm == null) {
-      floatForm = new FloatForm(0.0f);
+    if (Form.floatForm == null) {
+      Form.floatForm = new FloatForm(0.0f);
     }
-    return floatForm;
+    return Form.floatForm;
   }
 
   /**
    * Utility method to receive a singleton {@link DoubleForm}.
    */
   public static Form<Double> forDouble() {
-    if (doubleForm == null) {
-      doubleForm = new DoubleForm(0.0);
+    if (Form.doubleForm == null) {
+      Form.doubleForm = new DoubleForm(0.0);
     }
-    return doubleForm;
+    return Form.doubleForm;
   }
 
   /**
    * Utility method to receive a singleton {@link CharacterForm}.
    */
   public static Form<Character> forCharacter() {
-    if (characterForm == null) {
-      characterForm = new CharacterForm('\0');
+    if (Form.characterForm == null) {
+      Form.characterForm = new CharacterForm('\0');
     }
-    return characterForm;
+    return Form.characterForm;
   }
 
   /**
    * Utility method to receive a singleton {@link BooleanForm}.
    */
   public static Form<Boolean> forBoolean() {
-    if (booleanForm == null) {
-      booleanForm = new BooleanForm(false);
+    if (Form.booleanForm == null) {
+      Form.booleanForm = new BooleanForm(false);
     }
-    return booleanForm;
+    return Form.booleanForm;
   }
 
   /**
    * Utility method to receive a singleton {@link BigIntegerForm}.
    */
   public static final Form<BigInteger> forBigInteger() {
-    if (bigIntegerForm == null) {
-      bigIntegerForm = new BigIntegerForm(BigInteger.ZERO);
+    if (Form.bigIntegerForm == null) {
+      Form.bigIntegerForm = new BigIntegerForm(BigInteger.ZERO);
     }
-    return bigIntegerForm;
+    return Form.bigIntegerForm;
   }
 
   /**
    * Utility method to receive a singleton {@link NumberForm}.
    */
   public static Form<Number> forNumber() {
-    if (numberForm == null) {
-      numberForm = new NumberForm(Integer.valueOf(0));
+    if (Form.numberForm == null) {
+      Form.numberForm = new NumberForm(Integer.valueOf(0));
     }
-    return numberForm;
+    return Form.numberForm;
   }
 
   /**
    * Utility method to receive a singleton {@link StringForm}.
    */
   public static Form<String> forString() {
-    if (stringForm == null) {
-      stringForm = new StringForm("");
+    if (Form.stringForm == null) {
+      Form.stringForm = new StringForm("");
     }
-    return stringForm;
+    return Form.stringForm;
   }
 
   /**
    * Utility method to receive a singleton {@link ByteBufferForm}.
    */
   public static Form<ByteBuffer> forByteBuffer() {
-    if (byteBufferForm == null) {
-      byteBufferForm = new ByteBufferForm();
+    if (Form.byteBufferForm == null) {
+      Form.byteBufferForm = new ByteBufferForm();
     }
-    return byteBufferForm;
+    return Form.byteBufferForm;
   }
 
   /**
    * Utility method to receive a singleton {@link ItemForm}.
    */
   public static Form<Item> forItem() {
-    if (itemForm == null) {
-      itemForm = new ItemForm(Item.absent());
+    if (Form.itemForm == null) {
+      Form.itemForm = new ItemForm(Item.absent());
     }
-    return itemForm;
+    return Form.itemForm;
   }
 
   /**
    * Utility method to receive a singleton {@link ValueForm}.
    */
   public static Form<Value> forValue() {
-    if (valueForm == null) {
-      valueForm = new ValueForm(Value.absent());
+    if (Form.valueForm == null) {
+      Form.valueForm = new ValueForm(Value.absent());
     }
-    return valueForm;
+    return Form.valueForm;
   }
 
   /**
@@ -242,7 +321,7 @@ public abstract class Form<T> {
    * collection is of type {@link java.util.List List&lt;T&gt;}.
    */
   public static <T> Form<List<T>> forList(Form<T> form) {
-    return forCollection(List.class, form);
+    return Form.forCollection(List.class, form);
   }
 
   /**
@@ -250,7 +329,7 @@ public abstract class Form<T> {
    * collection is of type {@link java.util.Set List&lt;T&gt;}.
    */
   public static <T> Form<Set<T>> forSet(Form<T> form) {
-    return forCollection(Set.class, form);
+    return Form.forCollection(Set.class, form);
   }
 
   /**
@@ -274,7 +353,7 @@ public abstract class Form<T> {
    * Utility method to construct a {@link MapForm}.
    */
   public static <K, V> Form<Map<K, V>> forMap(Form<K> keyForm, Form<V> valForm) {
-    return forMap(Map.class, keyForm, valForm);
+    return Form.forMap(Map.class, keyForm, valForm);
   }
 
   /**
@@ -297,31 +376,31 @@ public abstract class Form<T> {
   @SuppressWarnings("unchecked")
   public static <T> Form<T> forBuiltin(Class<?> type) {
     if (type == String.class) {
-      return (Form<T>) forString();
+      return (Form<T>) Form.forString();
     } else if (type == Byte.class || type == Byte.TYPE) {
-      return (Form<T>) forByte();
+      return (Form<T>) Form.forByte();
     } else if (type == Short.class || type == Short.TYPE) {
-      return (Form<T>) forShort();
+      return (Form<T>) Form.forShort();
     } else if (type == Integer.class || type == Integer.TYPE) {
-      return (Form<T>) forInteger();
+      return (Form<T>) Form.forInteger();
     } else if (type == Long.class || type == Long.TYPE) {
-      return (Form<T>) forLong();
+      return (Form<T>) Form.forLong();
     } else if (type == Float.class || type == Float.TYPE) {
-      return (Form<T>) forFloat();
+      return (Form<T>) Form.forFloat();
     } else if (type == Double.class || type == Double.TYPE) {
-      return (Form<T>) forDouble();
+      return (Form<T>) Form.forDouble();
     } else if (type == Character.class || type == Character.TYPE) {
-      return (Form<T>) forCharacter();
+      return (Form<T>) Form.forCharacter();
     } else if (type == Boolean.class || type == Boolean.TYPE) {
-      return (Form<T>) forBoolean();
+      return (Form<T>) Form.forBoolean();
     } else if (type == BigInteger.class) {
-      return (Form<T>) forBigInteger();
+      return (Form<T>) Form.forBigInteger();
     } else if (type == ByteBuffer.class) {
-      return (Form<T>) forByteBuffer();
+      return (Form<T>) Form.forByteBuffer();
     } else if (Value.class.isAssignableFrom(type)) {
-      return (Form<T>) forValue();
+      return (Form<T>) Form.forValue();
     } else if (Item.class.isAssignableFrom(type)) {
-      return (Form<T>) forItem();
+      return (Form<T>) Form.forItem();
     } else {
       return null;
     }
@@ -335,9 +414,9 @@ public abstract class Form<T> {
   public static <T> Form<T> forClass(Class<?> type, PolyForm scope) {
     if (type.isArray()) {
       final Class<?> componentType = type.getComponentType();
-      return forArray(componentType, forClass(componentType));
+      return Form.forArray(componentType, Form.forClass(componentType));
     } else {
-      Form<T> form = forBuiltin(type);
+      Form<T> form = Form.forBuiltin(type);
       if (form != null) {
         return form;
       }
@@ -357,86 +436,7 @@ public abstract class Form<T> {
    * to {@link swim.structure.form.ClassForm} constructions whenever possible.
    */
   public static <T> Form<T> forClass(Class<?> type) {
-    return forClass(type, null);
+    return Form.forClass(type, null);
   }
-
-  /**
-   * Returns the key of the tag attribute that distinguishes structures of this
-   * {@code Form}; returns {@code null} if this {@code Form} has no
-   * distinguishing tag attribute.  Used to accelerate distrcrimination of
-   * polymorphic structural types with nominal type hints.
-   */
-  public String tag() {
-    return null;
-  }
-
-  /**
-   * Returns a version of this {@code Form} that requires a head {@link Attr}
-   * with the given {@code tag} name.
-   */
-  public Form<T> tag(String tag) {
-    if (tag != null) {
-      return new TagForm<T>(tag, this);
-    } else {
-      return this;
-    }
-  }
-
-  /**
-   * Returns a default–possibly {@code null}–value of type {@code T}.  Used
-   * as the fallback return value when {@link Item#coerce(Form) coercing} an
-   * invalid structural value.
-   */
-  public T unit() {
-    return null;
-  }
-
-  /**
-   * Returns a version of this {@code Form} with the given {@code unit} value.
-   */
-  public Form<T> unit(T unit) {
-    if (unit != null) {
-      return new UnitForm<T>(unit, this);
-    } else {
-      return this;
-    }
-  }
-
-  /**
-   * Returns the reified {@code Class} of type {@code T}.
-   */
-  public abstract Class<?> type();
-
-  /**
-   * Converts a nominally typed Java {@code object} into its structurally typed
-   * equivalent based on the provided prototype {@code item}.  The passed-in
-   * {@code item} is assumed to be non-{@code null}.  The returned {@code Item}
-   * must never be {@code null}.
-   */
-  public Item mold(T object, Item item) {
-    return item.concat(mold(object));
-  }
-
-  /**
-   * Converts a nominally typed Java {@code object} into its structurally typed
-   * equivalent.  The returned {@code Item} must never be {@code null}.
-   */
-  public abstract Item mold(T object);
-
-  /**
-   * Converts a structurally typed {@code item} into a nominally typed Java
-   * object based on the provided prototype {@code object}.  The passed-in
-   * {@code item} is assumed to be non-{@code null}.  The passed-in prototype
-   * {@code object} may be {@code null}.
-   */
-  public T cast(Item item, T object) {
-    return cast(item);
-  }
-
-  /**
-   * Converts a structurally typed {@code item} into a nominally typed Java
-   * object.  The passed-in {@code item} is assumed to be non-{@code null}.
-   */
-  public abstract T cast(Item item);
 
 }

@@ -43,45 +43,6 @@ public enum WsOpcode implements Debug {
     this.code = code;
   }
 
-  public static WsOpcode from(int code) {
-    switch (code) {
-      case 0x0:
-        return CONTINUATION;
-      case 0x1:
-        return TEXT;
-      case 0x2:
-        return BINARY;
-      case 0x3:
-        return RESERVED_3;
-      case 0x4:
-        return RESERVED_4;
-      case 0x5:
-        return RESERVED_5;
-      case 0x6:
-        return RESERVED_6;
-      case 0x7:
-        return RESERVED_7;
-      case 0x8:
-        return CLOSE;
-      case 0x9:
-        return PING;
-      case 0xa:
-        return PONG;
-      case 0xb:
-        return RESERVED_B;
-      case 0xc:
-        return RESERVED_C;
-      case 0xd:
-        return RESERVED_D;
-      case 0xe:
-        return RESERVED_E;
-      case 0xf:
-        return RESERVED_F;
-      default:
-        return INVALID;
-    }
-  }
-
   public boolean isValid() {
     return this.code >= 0;
   }
@@ -123,8 +84,31 @@ public enum WsOpcode implements Debug {
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("WsOpcode").write('.').write(name());
+    return output;
+  }
+
+  public static WsOpcode from(int code) {
+    switch (code) {
+      case 0x0: return WsOpcode.CONTINUATION;
+      case 0x1: return WsOpcode.TEXT;
+      case 0x2: return WsOpcode.BINARY;
+      case 0x3: return WsOpcode.RESERVED_3;
+      case 0x4: return WsOpcode.RESERVED_4;
+      case 0x5: return WsOpcode.RESERVED_5;
+      case 0x6: return WsOpcode.RESERVED_6;
+      case 0x7: return WsOpcode.RESERVED_7;
+      case 0x8: return WsOpcode.CLOSE;
+      case 0x9: return WsOpcode.PING;
+      case 0xa: return WsOpcode.PONG;
+      case 0xb: return WsOpcode.RESERVED_B;
+      case 0xc: return WsOpcode.RESERVED_C;
+      case 0xd: return WsOpcode.RESERVED_D;
+      case 0xe: return WsOpcode.RESERVED_E;
+      case 0xf: return WsOpcode.RESERVED_F;
+      default: return WsOpcode.INVALID;
+    }
   }
 
 }

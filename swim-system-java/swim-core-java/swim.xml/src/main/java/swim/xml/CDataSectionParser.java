@@ -31,6 +31,11 @@ final class CDataSectionParser extends Parser<Object> {
     this.step = step;
   }
 
+  @Override
+  public Parser<Object> feed(Input input) {
+    return CDataSectionParser.parse(input, this.xml, this.output, this.step);
+  }
+
   static Parser<Object> parse(Input input, XmlParser<?, ?> xml, Output<?> output, int step) {
     int c = 0;
     while (step >= 1 && step <= 9) {
@@ -40,10 +45,10 @@ final class CDataSectionParser extends Parser<Object> {
           step += 1;
           continue;
         } else {
-          return error(Diagnostic.expected("<![CDATA[".charAt(step - 1), input));
+          return Parser.error(Diagnostic.expected("<![CDATA[".charAt(step - 1), input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("<![CDATA[".charAt(step - 1), input));
+        return Parser.error(Diagnostic.expected("<![CDATA[".charAt(step - 1), input));
       }
       break;
     }
@@ -63,10 +68,10 @@ final class CDataSectionParser extends Parser<Object> {
             input = input.step();
             step = 11;
           } else {
-            return error(Diagnostic.unexpected(input));
+            return Parser.error(Diagnostic.unexpected(input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 11) {
@@ -81,7 +86,7 @@ final class CDataSectionParser extends Parser<Object> {
             continue;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 12) {
@@ -97,28 +102,23 @@ final class CDataSectionParser extends Parser<Object> {
             continue;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new CDataSectionParser(xml, output, step);
   }
 
   static Parser<Object> parse(Input input, XmlParser<?, ?> xml, Output<?> output) {
-    return parse(input, xml, output, 1);
+    return CDataSectionParser.parse(input, xml, output, 1);
   }
 
   static Parser<Object> parseRest(Input input, XmlParser<?, ?> xml, Output<?> output) {
-    return parse(input, xml, output, 3);
-  }
-
-  @Override
-  public Parser<Object> feed(Input input) {
-    return parse(input, this.xml, this.output, this.step);
+    return CDataSectionParser.parse(input, xml, output, 3);
   }
 
 }

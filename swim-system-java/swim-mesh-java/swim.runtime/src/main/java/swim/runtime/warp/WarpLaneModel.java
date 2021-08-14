@@ -21,7 +21,6 @@ import swim.api.auth.Identity;
 import swim.api.warp.WarpUplink;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.runtime.LaneModel;
 import swim.runtime.LaneRelay;
 import swim.runtime.LinkBinding;
@@ -35,6 +34,285 @@ import swim.structure.Value;
 import swim.warp.CommandMessage;
 
 public abstract class WarpLaneModel<View extends WarpLaneView, U extends WarpUplinkModem> extends LaneModel<View, U> {
+
+  volatile long execDelta;
+  volatile long execTime;
+  volatile int commandDelta;
+  volatile int downlinkOpenDelta;
+  volatile int downlinkOpenCount;
+  volatile int downlinkCloseDelta;
+  volatile int downlinkCloseCount;
+  volatile long downlinkExecDelta;
+  volatile long downlinkExecRate;
+  volatile int downlinkEventDelta;
+  volatile int downlinkEventRate;
+  volatile long downlinkEventCount;
+  volatile int downlinkCommandDelta;
+  volatile int downlinkCommandRate;
+  volatile long downlinkCommandCount;
+  volatile int uplinkOpenDelta;
+  volatile int uplinkOpenCount;
+  volatile int uplinkCloseDelta;
+  volatile int uplinkCloseCount;
+  volatile int uplinkEventDelta;
+  volatile int uplinkEventRate;
+  volatile long uplinkEventCount;
+  volatile int uplinkCommandDelta;
+  volatile int uplinkCommandRate;
+  volatile long uplinkCommandCount;
+  volatile long lastReportTime;
+
+  public WarpLaneModel() {
+    this.execDelta = 0L;
+    this.execTime = 0L;
+    this.commandDelta = 0;
+    this.downlinkOpenDelta = 0;
+    this.downlinkOpenCount = 0;
+    this.downlinkCloseDelta = 0;
+    this.downlinkCloseCount = 0;
+    this.downlinkExecDelta = 0L;
+    this.downlinkExecRate = 0L;
+    this.downlinkEventDelta = 0;
+    this.downlinkEventRate = 0;
+    this.downlinkEventCount = 0L;
+    this.downlinkCommandDelta = 0;
+    this.downlinkCommandRate = 0;
+    this.downlinkCommandCount = 0L;
+    this.uplinkOpenDelta = 0;
+    this.uplinkOpenCount = 0;
+    this.uplinkCloseDelta = 0;
+    this.uplinkCloseCount = 0;
+    this.uplinkEventDelta = 0;
+    this.uplinkEventRate = 0;
+    this.uplinkEventCount = 0L;
+    this.uplinkCommandDelta = 0;
+    this.uplinkCommandRate = 0;
+    this.uplinkCommandCount = 0L;
+    this.lastReportTime = 0L;
+  }
+
+  @Override
+  protected U createUplink(LinkBinding link) {
+    if (link instanceof WarpBinding) {
+      return this.createWarpUplink((WarpBinding) link);
+    }
+    return null;
+  }
+
+  protected abstract U createWarpUplink(WarpBinding link);
+
+  @SuppressWarnings("unchecked")
+  public void cueDown() {
+    FingerTrieSeq<U> uplinks;
+    FingerTrieSeq<Value> closedLinks = FingerTrieSeq.empty();
+    do {
+      uplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) LaneModel.UPLINKS.get(this);
+      for (int i = 0, n = uplinks.size(); i < n; i += 1) {
+        final U uplink = uplinks.get(i);
+        if (uplink.isConnected()) {
+          uplink.cueDown();
+        } else {
+          closedLinks = closedLinks.appended(uplink.linkKey());
+        }
+      }
+    } while (uplinks != LaneModel.UPLINKS.get(this));
+
+    for (Value linkKey : closedLinks) {
+      this.closeUplink(linkKey);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public void sendDown(Value body) {
+    FingerTrieSeq<U> uplinks;
+    FingerTrieSeq<Value> closedLinks = FingerTrieSeq.empty();
+    do {
+      uplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) LaneModel.UPLINKS.get(this);
+      for (int i = 0, n = uplinks.size(); i < n; i += 1) {
+        final U uplink = uplinks.get(i);
+        if (uplink.isConnected()) {
+          uplink.sendDown(body);
+        } else {
+          closedLinks = closedLinks.appended(uplink.linkKey());
+        }
+      }
+    } while (uplinks != LaneModel.UPLINKS.get(this));
+
+    for (Value linkKey : closedLinks) {
+      this.closeUplink(linkKey);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public void pushUp(Push<?> push) {
+    final Object message = push.message();
+    if (message instanceof CommandMessage) {
+      this.onCommand((Push<CommandMessage>) push);
+    } else {
+      push.trap(new LaneException("unsupported message: " + message));
+    }
+  }
+
+  @Override
+  public void pushUpCommand(Push<CommandMessage> push) {
+    this.onCommand(push);
+    WarpLaneModel.COMMAND_DELTA.incrementAndGet(this);
+    this.didUpdateMetrics();
+  }
+
+  protected void onCommand(Push<CommandMessage> push) {
+    new WarpLaneRelayOnCommand<View>(this, push.message(), push.cont()).run();
+  }
+
+  @Override
+  protected void didOpenUplink(U uplink) {
+    new WarpLaneRelayDidUplink<View>(this, uplink).run();
+    WarpLaneModel.UPLINK_OPEN_DELTA.incrementAndGet(this);
+    this.flushMetrics();
+  }
+
+  @Override
+  protected void didCloseUplink(U uplink) {
+    WarpLaneModel.UPLINK_CLOSE_DELTA.incrementAndGet(this);
+    this.flushMetrics();
+  }
+
+  protected void didEnter(Identity identity) {
+    new WarpLaneRelayDidEnter<View>(this, identity).run();
+  }
+
+  protected void didLeave(Identity identity) {
+    new WarpLaneRelayDidLeave<View>(this, identity).run();
+  }
+
+  @Override
+  public void didClose() {
+    super.didClose();
+    this.flushMetrics();
+  }
+
+  @Override
+  public void reportDown(Metric metric) {
+    if (metric instanceof WarpUplinkProfile) {
+      this.accumulateWarpUplinkProfile((WarpUplinkProfile) metric);
+    } else if (metric instanceof WarpDownlinkProfile) {
+      this.accumulateWarpDownlinkProfile((WarpDownlinkProfile) metric);
+    } else {
+      super.reportDown(metric);
+    }
+  }
+
+  @Override
+  public void accumulateExecTime(long execDelta) {
+    WarpLaneModel.EXEC_DELTA.addAndGet(this, execDelta);
+    this.didUpdateMetrics();
+  }
+
+  protected void accumulateWarpUplinkProfile(WarpUplinkProfile profile) {
+    WarpLaneModel.UPLINK_EVENT_DELTA.addAndGet(this, profile.eventDelta());
+    WarpLaneModel.UPLINK_EVENT_RATE.addAndGet(this, profile.eventRate());
+    WarpLaneModel.UPLINK_COMMAND_DELTA.addAndGet(this, profile.commandDelta());
+    WarpLaneModel.UPLINK_COMMAND_RATE.addAndGet(this, profile.commandRate());
+    this.didUpdateMetrics();
+  }
+
+  protected void accumulateWarpDownlinkProfile(WarpDownlinkProfile profile) {
+    WarpLaneModel.DOWNLINK_OPEN_DELTA.addAndGet(this, profile.openDelta());
+    WarpLaneModel.DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.closeDelta());
+    WarpLaneModel.DOWNLINK_EXEC_DELTA.addAndGet(this, profile.execDelta());
+    WarpLaneModel.DOWNLINK_EXEC_RATE.addAndGet(this, profile.execRate());
+    WarpLaneModel.DOWNLINK_EVENT_DELTA.addAndGet(this, profile.eventDelta());
+    WarpLaneModel.DOWNLINK_EVENT_RATE.addAndGet(this, profile.eventRate());
+    WarpLaneModel.DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.commandDelta());
+    WarpLaneModel.DOWNLINK_COMMAND_RATE.addAndGet(this, profile.commandRate());
+    this.didUpdateMetrics();
+  }
+
+  protected void didUpdateMetrics() {
+    do {
+      final long oldReportTime = WarpLaneModel.LAST_REPORT_TIME.get(this);
+      final long newReportTime = System.currentTimeMillis();
+      final long dt = newReportTime - oldReportTime;
+      if (dt >= Metric.REPORT_INTERVAL) {
+        if (WarpLaneModel.LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
+          try {
+            this.reportMetrics(dt);
+          } catch (Throwable error) {
+            if (Cont.isNonFatal(error)) {
+              this.didFail(error);
+            } else {
+              throw error;
+            }
+          }
+          break;
+        }
+      } else {
+        break;
+      }
+    } while (true);
+  }
+
+  protected void flushMetrics() {
+    final long newReportTime = System.currentTimeMillis();
+    final long oldReportTime = WarpLaneModel.LAST_REPORT_TIME.getAndSet(this, newReportTime);
+    final long dt = newReportTime - oldReportTime;
+    try {
+      this.reportMetrics(dt);
+    } catch (Throwable error) {
+      if (Cont.isNonFatal(error)) {
+        this.didFail(error);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  protected void reportMetrics(long dt) {
+    final WarpLaneProfile profile = this.collectProfile(dt);
+    this.laneContext.reportDown(profile);
+  }
+
+  protected WarpLaneProfile collectProfile(long dt) {
+    final int commandDelta = WarpLaneModel.COMMAND_DELTA.getAndSet(this, 0);
+    final int commandRate = (int) Math.ceil((1000.0 * (double) commandDelta) / (double) dt);
+
+    final int downlinkOpenDelta = WarpLaneModel.DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
+    final int downlinkOpenCount = WarpLaneModel.DOWNLINK_OPEN_COUNT.addAndGet(this, downlinkOpenDelta);
+    final int downlinkCloseDelta = WarpLaneModel.DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final int downlinkCloseCount = WarpLaneModel.DOWNLINK_CLOSE_COUNT.addAndGet(this, downlinkCloseDelta);
+    final long downlinkExecDelta = WarpLaneModel.DOWNLINK_EXEC_DELTA.getAndSet(this, 0L);
+    final long downlinkExecRate = WarpLaneModel.DOWNLINK_EXEC_RATE.getAndSet(this, 0L);
+    final int downlinkEventDelta = WarpLaneModel.DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int downlinkEventRate = WarpLaneModel.DOWNLINK_EVENT_RATE.getAndSet(this, 0);
+    final long downlinkEventCount = WarpLaneModel.DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
+    final int downlinkCommandDelta = WarpLaneModel.DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
+    final int downlinkCommandRate = WarpLaneModel.DOWNLINK_COMMAND_RATE.getAndSet(this, 0);
+    final long downlinkCommandCount = WarpLaneModel.DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
+
+    final int uplinkOpenDelta = WarpLaneModel.UPLINK_OPEN_DELTA.getAndSet(this, 0);
+    final int uplinkOpenCount = WarpLaneModel.UPLINK_OPEN_COUNT.addAndGet(this, uplinkOpenDelta);
+    final int uplinkCloseDelta = WarpLaneModel.UPLINK_CLOSE_DELTA.getAndSet(this, 0);
+    final int uplinkCloseCount = WarpLaneModel.UPLINK_CLOSE_COUNT.addAndGet(this, uplinkCloseDelta);
+    final int uplinkEventDelta = WarpLaneModel.UPLINK_EVENT_DELTA.getAndSet(this, 0);
+    final int uplinkEventRate = WarpLaneModel.UPLINK_EVENT_RATE.getAndSet(this, 0);
+    final long uplinkEventCount = WarpLaneModel.UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
+    final int uplinkCommandDelta = WarpLaneModel.UPLINK_COMMAND_DELTA.getAndSet(this, 0) + commandDelta;
+    final int uplinkCommandRate = WarpLaneModel.UPLINK_COMMAND_RATE.getAndSet(this, 0) + commandRate;
+    final long uplinkCommandCount = WarpLaneModel.UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
+
+    final long execDelta = WarpLaneModel.EXEC_DELTA.getAndSet(this, 0L) + downlinkExecDelta;
+    final long execRate = (long) Math.ceil((1000.0 * (double) execDelta) / (double) dt) + downlinkExecRate;
+    final long execTime = WarpLaneModel.EXEC_TIME.addAndGet(this, execDelta);
+
+    return new WarpLaneProfile(this.cellAddress(), execDelta, execRate, execTime,
+                               downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
+                               downlinkEventDelta, downlinkEventRate, downlinkEventCount,
+                               downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
+                               uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
+                               uplinkEventDelta, uplinkEventRate, uplinkEventCount,
+                               uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
+  }
 
   @SuppressWarnings("unchecked")
   protected static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> EXEC_DELTA =
@@ -114,255 +392,6 @@ public abstract class WarpLaneModel<View extends WarpLaneView, U extends WarpUpl
   @SuppressWarnings("unchecked")
   static final AtomicLongFieldUpdater<WarpLaneModel<?, ?>> LAST_REPORT_TIME =
       AtomicLongFieldUpdater.newUpdater((Class<WarpLaneModel<?, ?>>) (Class<?>) WarpLaneModel.class, "lastReportTime");
-  volatile long execDelta;
-  volatile long execTime;
-  volatile int commandDelta;
-  volatile int downlinkOpenDelta;
-  volatile int downlinkOpenCount;
-  volatile int downlinkCloseDelta;
-  volatile int downlinkCloseCount;
-  volatile long downlinkExecDelta;
-  volatile long downlinkExecRate;
-  volatile int downlinkEventDelta;
-  volatile int downlinkEventRate;
-  volatile long downlinkEventCount;
-  volatile int downlinkCommandDelta;
-  volatile int downlinkCommandRate;
-  volatile long downlinkCommandCount;
-  volatile int uplinkOpenDelta;
-  volatile int uplinkOpenCount;
-  volatile int uplinkCloseDelta;
-  volatile int uplinkCloseCount;
-  volatile int uplinkEventDelta;
-  volatile int uplinkEventRate;
-  volatile long uplinkEventCount;
-  volatile int uplinkCommandDelta;
-  volatile int uplinkCommandRate;
-  volatile long uplinkCommandCount;
-  volatile long lastReportTime;
-
-  @Override
-  protected U createUplink(LinkBinding link) {
-    if (link instanceof WarpBinding) {
-      return createWarpUplink((WarpBinding) link);
-    }
-    return null;
-  }
-
-  protected abstract U createWarpUplink(WarpBinding link);
-
-  @SuppressWarnings("unchecked")
-  public void cueDown() {
-    FingerTrieSeq<U> uplinks;
-    FingerTrieSeq<Value> closedLinks = FingerTrieSeq.empty();
-    do {
-      uplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) this.uplinks;
-      for (int i = 0, n = uplinks.size(); i < n; i += 1) {
-        final U uplink = uplinks.get(i);
-        if (uplink.isConnected()) {
-          uplink.cueDown();
-        } else {
-          closedLinks = closedLinks.appended(uplink.linkKey());
-        }
-      }
-    } while (uplinks != this.uplinks);
-
-    for (Value linkKey : closedLinks) {
-      closeUplink(linkKey);
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  public void sendDown(Value body) {
-    FingerTrieSeq<U> uplinks;
-    FingerTrieSeq<Value> closedLinks = FingerTrieSeq.empty();
-    do {
-      uplinks = (FingerTrieSeq<U>) (FingerTrieSeq<?>) this.uplinks;
-      for (int i = 0, n = uplinks.size(); i < n; i += 1) {
-        final U uplink = uplinks.get(i);
-        if (uplink.isConnected()) {
-          uplink.sendDown(body);
-        } else {
-          closedLinks = closedLinks.appended(uplink.linkKey());
-        }
-      }
-    } while (uplinks != this.uplinks);
-
-    for (Value linkKey : closedLinks) {
-      closeUplink(linkKey);
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  public void pushUp(Push<?> push) {
-    final Object message = push.message();
-    if (message instanceof CommandMessage) {
-      onCommand((Push<CommandMessage>) push);
-    } else {
-      push.trap(new LaneException("unsupported message: " + message));
-    }
-  }
-
-  @Override
-  public void pushUpCommand(Push<CommandMessage> push) {
-    onCommand(push);
-    COMMAND_DELTA.incrementAndGet(this);
-    didUpdateMetrics();
-  }
-
-  protected void onCommand(Push<CommandMessage> push) {
-    new WarpLaneRelayOnCommand<View>(this, push.message(), push.cont()).run();
-  }
-
-  @Override
-  protected void didOpenUplink(U uplink) {
-    new WarpLaneRelayDidUplink<View>(this, uplink).run();
-    UPLINK_OPEN_DELTA.incrementAndGet(this);
-    flushMetrics();
-  }
-
-  @Override
-  protected void didCloseUplink(U uplink) {
-    UPLINK_CLOSE_DELTA.incrementAndGet(this);
-    flushMetrics();
-  }
-
-  protected void didEnter(Identity identity) {
-    new WarpLaneRelayDidEnter<View>(this, identity).run();
-  }
-
-  protected void didLeave(Identity identity) {
-    new WarpLaneRelayDidLeave<View>(this, identity).run();
-  }
-
-  @Override
-  public void didClose() {
-    super.didClose();
-    flushMetrics();
-  }
-
-  @Override
-  public void reportDown(Metric metric) {
-    if (metric instanceof WarpUplinkProfile) {
-      accumulateWarpUplinkProfile((WarpUplinkProfile) metric);
-    } else if (metric instanceof WarpDownlinkProfile) {
-      accumulateWarpDownlinkProfile((WarpDownlinkProfile) metric);
-    } else {
-      super.reportDown(metric);
-    }
-  }
-
-  @Override
-  public void accumulateExecTime(long execDelta) {
-    EXEC_DELTA.addAndGet(this, execDelta);
-    didUpdateMetrics();
-  }
-
-  protected void accumulateWarpUplinkProfile(WarpUplinkProfile profile) {
-    UPLINK_EVENT_DELTA.addAndGet(this, profile.eventDelta());
-    UPLINK_EVENT_RATE.addAndGet(this, profile.eventRate());
-    UPLINK_COMMAND_DELTA.addAndGet(this, profile.commandDelta());
-    UPLINK_COMMAND_RATE.addAndGet(this, profile.commandRate());
-    didUpdateMetrics();
-  }
-
-  protected void accumulateWarpDownlinkProfile(WarpDownlinkProfile profile) {
-    DOWNLINK_OPEN_DELTA.addAndGet(this, profile.openDelta());
-    DOWNLINK_CLOSE_DELTA.addAndGet(this, profile.closeDelta());
-    DOWNLINK_EXEC_DELTA.addAndGet(this, profile.execDelta());
-    DOWNLINK_EXEC_RATE.addAndGet(this, profile.execRate());
-    DOWNLINK_EVENT_DELTA.addAndGet(this, profile.eventDelta());
-    DOWNLINK_EVENT_RATE.addAndGet(this, profile.eventRate());
-    DOWNLINK_COMMAND_DELTA.addAndGet(this, profile.commandDelta());
-    DOWNLINK_COMMAND_RATE.addAndGet(this, profile.commandRate());
-    didUpdateMetrics();
-  }
-
-  protected void didUpdateMetrics() {
-    do {
-      final long oldReportTime = this.lastReportTime;
-      final long newReportTime = System.currentTimeMillis();
-      final long dt = newReportTime - oldReportTime;
-      if (dt >= Metric.REPORT_INTERVAL) {
-        if (LAST_REPORT_TIME.compareAndSet(this, oldReportTime, newReportTime)) {
-          try {
-            reportMetrics(dt);
-          } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              didFail(error);
-            } else {
-              throw error;
-            }
-          }
-          break;
-        }
-      } else {
-        break;
-      }
-    } while (true);
-  }
-
-  protected void flushMetrics() {
-    final long newReportTime = System.currentTimeMillis();
-    final long oldReportTime = LAST_REPORT_TIME.getAndSet(this, newReportTime);
-    final long dt = newReportTime - oldReportTime;
-    try {
-      reportMetrics(dt);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        didFail(error);
-      } else {
-        throw error;
-      }
-    }
-  }
-
-  protected void reportMetrics(long dt) {
-    final WarpLaneProfile profile = collectProfile(dt);
-    this.laneContext.reportDown(profile);
-  }
-
-  protected WarpLaneProfile collectProfile(long dt) {
-    final int commandDelta = COMMAND_DELTA.getAndSet(this, 0);
-    final int commandRate = (int) Math.ceil((1000.0 * (double) commandDelta) / (double) dt);
-
-    final int downlinkOpenDelta = DOWNLINK_OPEN_DELTA.getAndSet(this, 0);
-    final int downlinkOpenCount = DOWNLINK_OPEN_COUNT.addAndGet(this, downlinkOpenDelta);
-    final int downlinkCloseDelta = DOWNLINK_CLOSE_DELTA.getAndSet(this, 0);
-    final int downlinkCloseCount = DOWNLINK_CLOSE_COUNT.addAndGet(this, downlinkCloseDelta);
-    final long downlinkExecDelta = DOWNLINK_EXEC_DELTA.getAndSet(this, 0L);
-    final long downlinkExecRate = DOWNLINK_EXEC_RATE.getAndSet(this, 0L);
-    final int downlinkEventDelta = DOWNLINK_EVENT_DELTA.getAndSet(this, 0);
-    final int downlinkEventRate = DOWNLINK_EVENT_RATE.getAndSet(this, 0);
-    final long downlinkEventCount = DOWNLINK_EVENT_COUNT.addAndGet(this, (long) downlinkEventDelta);
-    final int downlinkCommandDelta = DOWNLINK_COMMAND_DELTA.getAndSet(this, 0);
-    final int downlinkCommandRate = DOWNLINK_COMMAND_RATE.getAndSet(this, 0);
-    final long downlinkCommandCount = DOWNLINK_COMMAND_COUNT.addAndGet(this, (long) downlinkCommandDelta);
-
-    final int uplinkOpenDelta = UPLINK_OPEN_DELTA.getAndSet(this, 0);
-    final int uplinkOpenCount = UPLINK_OPEN_COUNT.addAndGet(this, uplinkOpenDelta);
-    final int uplinkCloseDelta = UPLINK_CLOSE_DELTA.getAndSet(this, 0);
-    final int uplinkCloseCount = UPLINK_CLOSE_COUNT.addAndGet(this, uplinkCloseDelta);
-    final int uplinkEventDelta = UPLINK_EVENT_DELTA.getAndSet(this, 0);
-    final int uplinkEventRate = UPLINK_EVENT_RATE.getAndSet(this, 0);
-    final long uplinkEventCount = UPLINK_EVENT_COUNT.addAndGet(this, (long) uplinkEventDelta);
-    final int uplinkCommandDelta = UPLINK_COMMAND_DELTA.getAndSet(this, 0) + commandDelta;
-    final int uplinkCommandRate = UPLINK_COMMAND_RATE.getAndSet(this, 0) + commandRate;
-    final long uplinkCommandCount = UPLINK_COMMAND_COUNT.addAndGet(this, (long) uplinkCommandDelta);
-
-    final long execDelta = EXEC_DELTA.getAndSet(this, 0L) + downlinkExecDelta;
-    final long execRate = (long) Math.ceil((1000.0 * (double) execDelta) / (double) dt) + downlinkExecRate;
-    final long execTime = EXEC_TIME.addAndGet(this, execDelta);
-
-    return new WarpLaneProfile(cellAddress(), execDelta, execRate, execTime,
-        downlinkOpenDelta, downlinkOpenCount, downlinkCloseDelta, downlinkCloseCount,
-        downlinkEventDelta, downlinkEventRate, downlinkEventCount,
-        downlinkCommandDelta, downlinkCommandRate, downlinkCommandCount,
-        uplinkOpenDelta, uplinkOpenCount, uplinkCloseDelta, uplinkCloseCount,
-        uplinkEventDelta, uplinkEventRate, uplinkEventCount,
-        uplinkCommandDelta, uplinkCommandRate, uplinkCommandCount);
-  }
 
 }
 
@@ -400,7 +429,7 @@ final class WarpLaneRelayOnCommand<View extends WarpLaneView> extends LaneRelay<
       try {
         this.cont.bind(this.message);
       } catch (Throwable error) {
-        if (Conts.isNonFatal(error)) {
+        if (Cont.isNonFatal(error)) {
           this.cont.trap(error);
         } else {
           throw error;

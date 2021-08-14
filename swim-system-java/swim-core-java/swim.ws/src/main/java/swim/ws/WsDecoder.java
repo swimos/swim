@@ -32,30 +32,26 @@ public abstract class WsDecoder {
 
   public <P, T> WsFrame<T> control(WsOpcode opcode, P payload) {
     switch (opcode) {
-      case CLOSE:
-        return close(payload);
-      case PING:
-        return ping(payload);
-      case PONG:
-        return pong(payload);
-      default:
-        throw new IllegalArgumentException(opcode.toString());
+      case CLOSE: return this.close(payload);
+      case PING: return this.ping(payload);
+      case PONG: return this.pong(payload);
+      default: throw new IllegalArgumentException(opcode.toString());
     }
   }
 
   @SuppressWarnings("unchecked")
   public <P, T> WsFrame<T> close(P payload) {
-    return (WsFrame<T>) WsClose.from(payload);
+    return (WsFrame<T>) WsClose.create(payload);
   }
 
   @SuppressWarnings("unchecked")
   public <P, T> WsFrame<T> ping(P payload) {
-    return (WsFrame<T>) WsPing.from(payload);
+    return (WsFrame<T>) WsPing.create(payload);
   }
 
   @SuppressWarnings("unchecked")
   public <P, T> WsFrame<T> pong(P payload) {
-    return (WsFrame<T>) WsPong.from(payload);
+    return (WsFrame<T>) WsPong.create(payload);
   }
 
   public <T> Decoder<T> continuationDecoder(Decoder<T> content) {
@@ -93,20 +89,13 @@ public abstract class WsDecoder {
   public <T> Decoder<WsFrame<T>> decodeFrame(int finRsvOp, Decoder<T> content, InputBuffer input) {
     final int opcode = finRsvOp & 0xf;
     switch (opcode) {
-      case 0x0:
-        return decodeContinuationFrame(finRsvOp, continuationDecoder(content), input);
-      case 0x1:
-        return decodeTextFrame(finRsvOp, textDecoder(content), input);
-      case 0x2:
-        return decodeBinaryFrame(finRsvOp, binaryDecoder(content), input);
-      case 0x8:
-        return decodeCloseFrame(finRsvOp, closeDecoder(content), input);
-      case 0x9:
-        return decodePingFrame(finRsvOp, pingDecoder(content), input);
-      case 0xa:
-        return decodePongFrame(finRsvOp, pongDecoder(content), input);
-      default:
-        return Decoder.error(new DecoderException("reserved opcode: " + WsOpcode.from(opcode)));
+      case 0x0: return this.decodeContinuationFrame(finRsvOp, this.continuationDecoder(content), input);
+      case 0x1: return this.decodeTextFrame(finRsvOp, this.textDecoder(content), input);
+      case 0x2: return this.decodeBinaryFrame(finRsvOp, this.binaryDecoder(content), input);
+      case 0x8: return this.decodeCloseFrame(finRsvOp, this.closeDecoder(content), input);
+      case 0x9: return this.decodePingFrame(finRsvOp, this.pingDecoder(content), input);
+      case 0xa: return this.decodePongFrame(finRsvOp, this.pongDecoder(content), input);
+      default: return Decoder.error(new DecoderException("reserved opcode: " + WsOpcode.from(opcode)));
     }
   }
 

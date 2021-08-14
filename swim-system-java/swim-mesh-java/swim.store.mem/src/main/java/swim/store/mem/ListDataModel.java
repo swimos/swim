@@ -39,6 +39,8 @@ public class ListDataModel implements ListDataBinding {
   public ListDataModel(Value name, STreeList<Value> tree) {
     this.name = name;
     this.tree = tree;
+    this.dataContext = null;
+    this.storeBinding = null;
   }
 
   @Override
@@ -64,7 +66,7 @@ public class ListDataModel implements ListDataBinding {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapData(Class<T> dataClass) {
-    if (dataClass.isAssignableFrom(getClass())) {
+    if (dataClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -92,7 +94,7 @@ public class ListDataModel implements ListDataBinding {
 
   @Override
   public <V2> ListData<V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override
@@ -167,8 +169,8 @@ public class ListDataModel implements ListDataBinding {
 
   @Override
   public boolean addAll(Collection<? extends Value> values) {
-    for (Value v : values) {
-      v.commit();
+    for (Value value : values) {
+      value.commit();
     }
     return this.tree.addAll(values);
   }

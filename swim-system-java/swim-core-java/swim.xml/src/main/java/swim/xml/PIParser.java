@@ -33,6 +33,11 @@ final class PIParser<I> extends Parser<I> {
     this.step = step;
   }
 
+  @Override
+  public Parser<I> feed(Input input) {
+    return PIParser.parse(input, this.xml, this.targetParser, this.output, this.step);
+  }
+
   static <I> Parser<I> parse(Input input, XmlParser<I, ?> xml, Parser<String> targetParser,
                              Output<I> output, int step) {
     int c = 0;
@@ -42,10 +47,10 @@ final class PIParser<I> extends Parser<I> {
           input = input.step();
           step = 2;
         } else {
-          return error(Diagnostic.expected('<', input));
+          return Parser.error(Diagnostic.expected('<', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('<', input));
+        return Parser.error(Diagnostic.expected('<', input));
       }
     }
     if (step == 2) {
@@ -54,10 +59,10 @@ final class PIParser<I> extends Parser<I> {
           input = input.step();
           step = 3;
         } else {
-          return error(Diagnostic.expected('?', input));
+          return Parser.error(Diagnostic.expected('?', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('?', input));
+        return Parser.error(Diagnostic.expected('?', input));
       }
     }
     if (step == 3) {
@@ -71,7 +76,7 @@ final class PIParser<I> extends Parser<I> {
         if (!"xml".equalsIgnoreCase(target)) {
           return xml.parsePITargetRest(input, target);
         } else {
-          return error(Diagnostic.message("illegal processing instruction target: " + target, input));
+          return Parser.error(Diagnostic.message("illegal processing instruction target: " + target, input));
         }
       } else if (targetParser.isError()) {
         return targetParser.asError();
@@ -86,10 +91,10 @@ final class PIParser<I> extends Parser<I> {
           }
           step = 5;
         } else {
-          return error(Diagnostic.expected("space", input));
+          return Parser.error(Diagnostic.expected("space", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("space", input));
+        return Parser.error(Diagnostic.expected("space", input));
       }
     }
     do {
@@ -108,10 +113,10 @@ final class PIParser<I> extends Parser<I> {
             input = input.step();
             step = 6;
           } else {
-            return error(Diagnostic.unexpected(input));
+            return Parser.error(Diagnostic.unexpected(input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         } else {
           break;
         }
@@ -128,7 +133,7 @@ final class PIParser<I> extends Parser<I> {
             continue;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         } else {
           break;
         }
@@ -136,26 +141,21 @@ final class PIParser<I> extends Parser<I> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new PIParser<I>(xml, targetParser, output, step);
   }
 
   static <I> Parser<I> parse(Input input, XmlParser<I, ?> xml) {
-    return parse(input, xml, null, null, 1);
+    return PIParser.parse(input, xml, null, null, 1);
   }
 
   static <I> Parser<I> parseRest(Input input, XmlParser<I, ?> xml) {
-    return parse(input, xml, null, null, 3);
+    return PIParser.parse(input, xml, null, null, 3);
   }
 
   static <I> Parser<I> parseTargetRest(Input input, XmlParser<I, ?> xml, String target) {
-    return parse(input, xml, done(target), null, 4);
-  }
-
-  @Override
-  public Parser<I> feed(Input input) {
-    return parse(input, this.xml, this.targetParser, this.output, this.step);
+    return PIParser.parse(input, xml, done(target), null, 4);
   }
 
 }

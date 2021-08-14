@@ -28,31 +28,10 @@ import swim.util.Murmur3;
 
 public final class Allow extends HttpHeader {
 
-  private static int hashSeed;
   final FingerTrieSeq<HttpMethod> methods;
 
   Allow(FingerTrieSeq<HttpMethod> methods) {
     this.methods = methods;
-  }
-
-  public static Allow from(FingerTrieSeq<HttpMethod> methods) {
-    return new Allow(methods);
-  }
-
-  public static Allow from(HttpMethod... methods) {
-    return new Allow(FingerTrieSeq.of(methods));
-  }
-
-  public static Allow from(String... methodStrings) {
-    final Builder<HttpMethod, FingerTrieSeq<HttpMethod>> methods = FingerTrieSeq.builder();
-    for (int i = 0, n = methodStrings.length; i < n; i += 1) {
-      methods.add(HttpMethod.parseHttp(methodStrings[i]));
-    }
-    return new Allow(methods.bind());
-  }
-
-  public static Parser<Allow> parseHttpValue(Input input, HttpParser http) {
-    return AllowParser.parse(input, http);
   }
 
   @Override
@@ -90,25 +69,48 @@ public final class Allow extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Allow.class);
+    if (Allow.hashSeed == 0) {
+      Allow.hashSeed = Murmur3.seed(Allow.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.methods.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Allow.hashSeed, this.methods.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("Allow").write('.').write("from").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Allow").write('.').write("create").write('(');
     final int n = this.methods.size();
     if (n > 0) {
-      output.debug(this.methods.head());
+      output = output.debug(this.methods.head());
       for (int i = 1; i < n; i += 1) {
-        output.debug(", ").debug(this.methods.get(i));
+        output = output.debug(", ").debug(this.methods.get(i));
       }
     }
     output = output.write(')');
+    return output;
+  }
+
+  public static Allow create(FingerTrieSeq<HttpMethod> methods) {
+    return new Allow(methods);
+  }
+
+  public static Allow create(HttpMethod... methods) {
+    return new Allow(FingerTrieSeq.of(methods));
+  }
+
+  public static Allow create(String... methodStrings) {
+    final Builder<HttpMethod, FingerTrieSeq<HttpMethod>> methods = FingerTrieSeq.builder();
+    for (int i = 0, n = methodStrings.length; i < n; i += 1) {
+      methods.add(HttpMethod.parseHttp(methodStrings[i]));
+    }
+    return new Allow(methods.bind());
+  }
+
+  public static Parser<Allow> parseHttpValue(Input input, HttpParser http) {
+    return AllowParser.parse(input, http);
   }
 
 }

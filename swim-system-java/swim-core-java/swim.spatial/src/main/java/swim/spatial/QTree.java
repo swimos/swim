@@ -24,9 +24,8 @@ import swim.util.Murmur3;
 
 public class QTree<K, S, V> extends QTreeContext<K, S, V> implements SpatialMap<K, S, V>, Comparator<QTreeEntry<K, S, V>>, Cloneable, Debug {
 
-  private static int hashSeed;
   final Z2Form<S> shapeForm;
-  QTreePage<K, S, V> root;
+  final QTreePage<K, S, V> root;
 
   protected QTree(Z2Form<S> shapeForm, QTreePage<K, S, V> root) {
     this.shapeForm = shapeForm;
@@ -35,10 +34,6 @@ public class QTree<K, S, V> extends QTreeContext<K, S, V> implements SpatialMap<
 
   public QTree(Z2Form<S> shapeForm) {
     this(shapeForm, QTreePage.<K, S, V>empty());
-  }
-
-  public static <K, S, V> QTree<K, S, V> empty(Z2Form<S> shapeForm) {
-    return new QTree<K, S, V>(shapeForm);
   }
 
   @Override
@@ -103,59 +98,22 @@ public class QTree<K, S, V> extends QTreeContext<K, S, V> implements SpatialMap<
 
   @Override
   public V put(K key, S shape, V newValue) {
-    final Z2Form<S> shapeForm = this.shapeForm;
-    final long x = BitInterval.span(shapeForm.getXMin(shape), shapeForm.getXMax(shape));
-    final long y = BitInterval.span(shapeForm.getYMin(shape), shapeForm.getYMax(shape));
-    final QTreePage<K, S, V> oldRoot = this.root;
-    final QTreePage<K, S, V> newRoot = oldRoot.updated(key, shape, x, y, newValue, this)
-        .balanced(this);
-    if (oldRoot != newRoot) {
-      this.root = newRoot;
-      return oldRoot.get(key, x, y, this);
-    } else {
-      return null;
-    }
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public V move(K key, S oldShape, S newShape, V newValue) {
-    final Z2Form<S> shapeForm = this.shapeForm;
-    final long oldX = BitInterval.span(shapeForm.getXMin(oldShape), shapeForm.getXMax(oldShape));
-    final long oldY = BitInterval.span(shapeForm.getYMin(oldShape), shapeForm.getYMax(oldShape));
-    final long newX = BitInterval.span(shapeForm.getXMin(newShape), shapeForm.getXMax(newShape));
-    final long newY = BitInterval.span(shapeForm.getYMin(newShape), shapeForm.getYMax(newShape));
-    final QTreePage<K, S, V> oldRoot = this.root;
-    final QTreePage<K, S, V> newRoot = oldRoot.removed(key, oldX, oldY, this)
-        .balanced(this)
-        .updated(key, newShape, newX, newY, newValue, this)
-        .balanced(this);
-    if (oldRoot != newRoot) {
-      this.root = newRoot;
-      return oldRoot.get(key, oldX, oldY, this);
-    } else {
-      return null;
-    }
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public V remove(K key, S shape) {
-    final Z2Form<S> shapeForm = this.shapeForm;
-    final long x = BitInterval.span(shapeForm.getXMin(shape), shapeForm.getXMax(shape));
-    final long y = BitInterval.span(shapeForm.getYMin(shape), shapeForm.getYMax(shape));
-    final QTreePage<K, S, V> oldRoot = this.root;
-    final QTreePage<K, S, V> newRoot = oldRoot.removed(key, x, y, this)
-        .balanced(this);
-    if (oldRoot != newRoot) {
-      this.root = newRoot;
-      return oldRoot.get(key, x, y, this);
-    } else {
-      return null;
-    }
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public void clear() {
-    this.root = QTreePage.empty();
+    throw new UnsupportedOperationException();
   }
 
   public QTree<K, S, V> updated(K key, S shape, V newValue) {
@@ -168,7 +126,7 @@ public class QTree<K, S, V> extends QTreeContext<K, S, V> implements SpatialMap<
       if (newRoot.span() > oldRoot.span()) {
         newRoot = newRoot.balanced(this);
       }
-      return copy(newRoot);
+      return this.copy(newRoot);
     } else {
       return this;
     }
@@ -182,14 +140,14 @@ public class QTree<K, S, V> extends QTreeContext<K, S, V> implements SpatialMap<
     QTreePage<K, S, V> newRoot = oldRoot.removed(key, x, y, this);
     if (oldRoot != newRoot) {
       newRoot = newRoot.balanced(this);
-      return copy(newRoot);
+      return this.copy(newRoot);
     } else {
       return this;
     }
   }
 
   @Override
-  public Cursor<Entry<K, S, V>> iterator(S shape) {
+  public Cursor<SpatialMap.Entry<K, S, V>> iterator(S shape) {
     final Z2Form<S> shapeForm = this.shapeForm;
     final long x = BitInterval.span(shapeForm.getXMin(shape), shapeForm.getXMax(shape));
     final long y = BitInterval.span(shapeForm.getYMin(shape), shapeForm.getYMax(shape));
@@ -198,8 +156,8 @@ public class QTree<K, S, V> extends QTreeContext<K, S, V> implements SpatialMap<
 
   @SuppressWarnings("unchecked")
   @Override
-  public Cursor<Entry<K, S, V>> iterator() {
-    return (Cursor<Entry<K, S, V>>) (Cursor<?>) this.root.cursor();
+  public Cursor<SpatialMap.Entry<K, S, V>> iterator() {
+    return (Cursor<SpatialMap.Entry<K, S, V>>) (Cursor<?>) this.root.cursor();
   }
 
   @Override
@@ -214,7 +172,7 @@ public class QTree<K, S, V> extends QTreeContext<K, S, V> implements SpatialMap<
 
   @Override
   public QTree<K, S, V> clone() {
-    return copy(this.root);
+    return this.copy(this.root);
   }
 
   protected QTree<K, S, V> copy(QTreePage<K, S, V> root) {
@@ -228,11 +186,11 @@ public class QTree<K, S, V> extends QTreeContext<K, S, V> implements SpatialMap<
       return true;
     } else if (other instanceof QTree<?, ?, ?>) {
       final QTree<K, S, V> that = (QTree<K, S, V>) other;
-      if (size() == that.size()) {
-        final Cursor<Entry<K, S, V>> those = that.iterator();
+      if (this.size() == that.size()) {
+        final Cursor<SpatialMap.Entry<K, S, V>> those = that.iterator();
         while (those.hasNext()) {
-          final Entry<K, S, V> entry = those.next();
-          final V value = get(entry.getKey());
+          final SpatialMap.Entry<K, S, V> entry = those.next();
+          final V value = this.get(entry.getKey());
           final V v = entry.getValue();
           if (value == null ? v != null : !value.equals(v)) {
             return false;
@@ -244,17 +202,19 @@ public class QTree<K, S, V> extends QTreeContext<K, S, V> implements SpatialMap<
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(QTree.class);
+    if (QTree.hashSeed == 0) {
+      QTree.hashSeed = Murmur3.seed(QTree.class);
     }
     int a = 0;
     int b = 0;
     int c = 1;
-    final Cursor<Entry<K, S, V>> these = iterator();
+    final Cursor<SpatialMap.Entry<K, S, V>> these = this.iterator();
     while (these.hasNext()) {
-      final Entry<K, S, V> entry = these.next();
+      final SpatialMap.Entry<K, S, V> entry = these.next();
       final int h = Murmur3.mix(Murmur3.hash(entry.getKey()), Murmur3.hash(entry.getValue()));
       a ^= h;
       b += h;
@@ -262,24 +222,29 @@ public class QTree<K, S, V> extends QTreeContext<K, S, V> implements SpatialMap<
         c *= h;
       }
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed, a), b), c));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(QTree.hashSeed, a), b), c));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("QTree").write('.').write("empty").write('(')
-        .debug(this.shapeForm).write(')');
-    for (Entry<K, S, V> entry : this) {
+                   .debug(this.shapeForm).write(')');
+    for (SpatialMap.Entry<K, S, V> entry : this) {
       output = output.write('.').write("updated").write('(')
-          .debug(entry.getKey()).write(", ")
-          .debug(entry.getShape()).write(", ")
-          .debug(entry.getValue()).write(')');
+                     .debug(entry.getKey()).write(", ")
+                     .debug(entry.getShape()).write(", ")
+                     .debug(entry.getValue()).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static <K, S, V> QTree<K, S, V> empty(Z2Form<S> shapeForm) {
+    return new QTree<K, S, V>(shapeForm);
   }
 
 }

@@ -23,7 +23,6 @@ import swim.util.Murmur3;
 
 public class DbStoreDef implements StoreDef, Debug {
 
-  private static int hashSeed;
   protected final String storeName;
   protected final String path;
   protected final StoreSettings settings;
@@ -40,7 +39,7 @@ public class DbStoreDef implements StoreDef, Debug {
   }
 
   public DbStoreDef storeName(String storeName) {
-    return copy(storeName, this.path, this.settings);
+    return this.copy(storeName, this.path, this.settings);
   }
 
   public final String path() {
@@ -48,7 +47,7 @@ public class DbStoreDef implements StoreDef, Debug {
   }
 
   public DbStoreDef path(String path) {
-    return copy(this.storeName, path, this.settings);
+    return this.copy(this.storeName, path, this.settings);
   }
 
   public final StoreSettings settings() {
@@ -56,7 +55,7 @@ public class DbStoreDef implements StoreDef, Debug {
   }
 
   public DbStoreDef settings(StoreSettings settings) {
-    return copy(this.storeName, this.path, settings);
+    return this.copy(this.storeName, this.path, settings);
   }
 
   protected DbStoreDef copy(String storeName, String path, StoreSettings settings) {
@@ -75,20 +74,23 @@ public class DbStoreDef implements StoreDef, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(DbStoreDef.class);
+    if (DbStoreDef.hashSeed == 0) {
+      DbStoreDef.hashSeed = Murmur3.seed(DbStoreDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(DbStoreDef.hashSeed,
         Murmur3.hash(this.storeName)), this.path.hashCode()), this.settings.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("new").write(' ').write("DbStoreDef").write('(')
-        .debug(this.storeName).write(", ").debug(this.path).write(", ")
-        .debug(this.settings).write(')');
+                   .debug(this.storeName).write(", ").debug(this.path).write(", ")
+                   .debug(this.settings).write(')');
+    return output;
   }
 
   @Override

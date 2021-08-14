@@ -26,11 +26,11 @@ public abstract class BTreeContext<K, V> {
   }
 
   protected boolean pageShouldSplit(BTreePage<K, V, ?> page) {
-    return page.arity() > pageSplitSize();
+    return page.arity() > this.pageSplitSize();
   }
 
   protected boolean pageShouldMerge(BTreePage<K, V, ?> page) {
-    return page.arity() < pageSplitSize() >>> 1;
+    return page.arity() < this.pageSplitSize() >>> 1;
   }
 
 }

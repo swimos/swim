@@ -35,47 +35,49 @@ public class JsHostPrototype implements ProxyObject {
 
   @Override
   public boolean hasMember(String key) {
-    if ("constructor".equals(key)) {
+    if ("__proto__".equals(key)) {
       return true;
-    } else if ("__proto__".equals(key)) {
+    } else if ("constructor".equals(key)) {
       return true;
     } else {
-      final HostMember<?> member = this.type.getMember(this.bridge, null, key);
-      return member != null;
+      final HostMember<?> hostMember = this.type.getMember(this.bridge, null, key);
+      return hostMember != null;
     }
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public Object getMember(String key) {
-    if ("constructor".equals(key)) {
-      return this.bridge.hostTypeToGuestType(this.type);
-    } else if ("__proto__".equals(key)) {
-      return this.bridge.hostTypeToGuestPrototype(this.type.superType());
+    final Object guestMember;
+    if ("__proto__".equals(key)) {
+      guestMember = this.bridge.hostTypeToGuestPrototype(this.type.superType());
+    } else if ("constructor".equals(key)) {
+      guestMember = this.bridge.hostTypeToGuestType(this.type);
     } else {
-      final HostMember<?> member = this.type.getMember(this.bridge, null, key);
-      if (member instanceof HostField<?>) {
-        final Object hostValue = ((HostField<?>) member).get(this.bridge, null);
-        return this.bridge.hostToGuest(hostValue);
-      } else if (member instanceof HostMethod<?>) {
-        return this.bridge.hostMethodToGuestMethod((HostMethod<Object>) member, null);
+      final HostMember<?> hostMember = this.type.getMember(this.bridge, null, key);
+      if (hostMember instanceof HostField<?>) {
+        final Object hostValue = ((HostField<?>) hostMember).get(this.bridge, null);
+        guestMember = this.bridge.hostToGuest(hostValue);
+      } else if (hostMember instanceof HostMethod<?>) {
+        guestMember = this.bridge.hostMethodToGuestMethod((HostMethod<Object>) hostMember, null);
       } else {
-        return null;
+        guestMember = null;
       }
     }
+    return guestMember;
   }
 
   @Override
   public void putMember(String key, Value guestValue) {
-    if ("constructor".equals(key)) {
+    if ("__proto__".equals(key)) {
       throw new UnsupportedOperationException();
-    } else if ("__proto__".equals(key)) {
+    } else if ("constructor".equals(key)) {
       throw new UnsupportedOperationException();
     } else {
-      final HostMember<?> member = this.type.getMember(this.bridge, null, key);
-      if (member instanceof HostField<?>) {
+      final HostMember<?> hostMember = this.type.getMember(this.bridge, null, key);
+      if (hostMember instanceof HostField<?>) {
         final Object hostValue = this.bridge.guestToHost(guestValue);
-        ((HostField<?>) member).set(this.bridge, null, hostValue);
+        ((HostField<?>) hostMember).set(this.bridge, null, hostValue);
       } else {
         throw new UnsupportedOperationException();
       }
@@ -84,14 +86,14 @@ public class JsHostPrototype implements ProxyObject {
 
   @Override
   public boolean removeMember(String key) {
-    if ("constructor".equals(key)) {
+    if ("__proto__".equals(key)) {
       throw new UnsupportedOperationException();
-    } else if ("__proto__".equals(key)) {
+    } else if ("constructor".equals(key)) {
       throw new UnsupportedOperationException();
     } else {
-      final HostMember<?> member = this.type.getMember(this.bridge, null, key);
-      if (member instanceof HostField<?>) {
-        return ((HostField<?>) member).remove(this.bridge, null);
+      final HostMember<?> hostMember = this.type.getMember(this.bridge, null, key);
+      if (hostMember instanceof HostField<?>) {
+        return ((HostField<?>) hostMember).remove(this.bridge, null);
       } else {
         throw new UnsupportedOperationException();
       }
@@ -100,15 +102,15 @@ public class JsHostPrototype implements ProxyObject {
 
   @Override
   public Object getMemberKeys() {
-    final Collection<? extends HostMember<?>> members = this.type.members(this.bridge, null);
-    final String[] memberKeys = new String[members.size() + 2];
+    final Collection<? extends HostMember<?>> hostMembers = this.type.members(this.bridge, null);
+    final String[] memberKeys = new String[hostMembers.size() + 2];
     int i = 0;
-    for (HostMember<?> member : members) {
-      memberKeys[i] = member.key();
+    for (HostMember<?> hostMember : hostMembers) {
+      memberKeys[i] = hostMember.key();
       i += 1;
     }
-    memberKeys[i] = "constructor";
-    memberKeys[i + 1] = "__proto__";
+    memberKeys[i] = "__proto__";
+    memberKeys[i + 1] = "constructor";
     return new VmProxyArray(memberKeys);
   }
 

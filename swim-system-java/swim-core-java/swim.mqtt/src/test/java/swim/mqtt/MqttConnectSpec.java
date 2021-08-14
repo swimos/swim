@@ -20,150 +20,150 @@ import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttConnectSpec {
 
-  public static void assertDecodes(Data data, MqttConnect packet) {
-    MqttAssertions.assertDecodesPacket(data, packet);
-  }
-
   @Test
   public void decodeConnectPacketsWithClientIds() {
     assertDecodes(Data.fromBase16("101000044D51545404020000000474657374"),
-        MqttConnect.from("test"));
+                  MqttConnect.create("test"));
   }
 
   @Test
   public void encodeConnectPacketsWithClientIds() {
-    assertEncodes(MqttConnect.from("test"),
-        Data.fromBase16("101000044D51545404020000000474657374"));
+    assertEncodes(MqttConnect.create("test"),
+                  Data.fromBase16("101000044D51545404020000000474657374"));
   }
 
   @Test
   public void decodeConnectPacketsWithCleanSession() {
     assertDecodes(Data.fromBase16("100C00044D515454040000000000"),
-        MqttConnect.from("").cleanSession(false));
+                  MqttConnect.create("").cleanSession(false));
     assertDecodes(Data.fromBase16("100C00044D515454040200000000"),
-        MqttConnect.from("").cleanSession(true));
+                  MqttConnect.create("").cleanSession(true));
   }
 
   @Test
   public void encodeConnectPacketsWithCleanSession() {
-    assertEncodes(MqttConnect.from("").cleanSession(false),
-        Data.fromBase16("100C00044D515454040000000000"));
-    assertEncodes(MqttConnect.from("").cleanSession(true),
-        Data.fromBase16("100C00044D515454040200000000"));
+    assertEncodes(MqttConnect.create("").cleanSession(false),
+                  Data.fromBase16("100C00044D515454040000000000"));
+    assertEncodes(MqttConnect.create("").cleanSession(true),
+                  Data.fromBase16("100C00044D515454040200000000"));
   }
 
   @Test
   public void decodeConnectPacketsWithKeepAlive() {
     assertDecodes(Data.fromBase16("100C00044D51545404020E100000"),
-        MqttConnect.from("").keepAlive(3600));
+                  MqttConnect.create("").keepAlive(3600));
   }
 
   @Test
   public void encodeConnectPacketsWithKeepAlive() {
-    assertEncodes(MqttConnect.from("").keepAlive(3600),
-        Data.fromBase16("100C00044D51545404020E100000"));
+    assertEncodes(MqttConnect.create("").keepAlive(3600),
+                  Data.fromBase16("100C00044D51545404020E100000"));
   }
 
   @Test
   public void decodeConnectPacketsWithWillTopicAndMessage() {
     assertDecodes(Data.fromBase16("101600044D515454040600000000000468656C7000027F81"),
-        MqttConnect.from("").willTopic("help").willMessage(Data.fromBase16("7F81")));
+                  MqttConnect.create("").willTopic("help").willMessage(Data.fromBase16("7F81")));
   }
 
   @Test
   public void encodeConnectPacketsWithWillTopicAndMessage() {
-    assertEncodes(MqttConnect.from("").willTopic("help").willMessage(Data.fromBase16("7F81")),
-        Data.fromBase16("101600044D515454040600000000000468656C7000027F81"));
+    assertEncodes(MqttConnect.create("").willTopic("help").willMessage(Data.fromBase16("7F81")),
+                  Data.fromBase16("101600044D515454040600000000000468656C7000027F81"));
   }
 
   @Test
   public void decodeConnectPacketsWithWillQoS() {
     assertDecodes(Data.fromBase16("101600044D515454040E00000000000468656C7000027F81"),
-        MqttConnect.from("").willTopic("help").willMessage(Data.fromBase16("7F81"))
-            .willQoS(MqttQoS.AT_LEAST_ONCE));
+                  MqttConnect.create("").willTopic("help").willMessage(Data.fromBase16("7F81"))
+                             .willQoS(MqttQoS.AT_LEAST_ONCE));
     assertDecodes(Data.fromBase16("101600044D515454040600000000000468656C7000027F81"),
-        MqttConnect.from("").willTopic("help").willMessage(Data.fromBase16("7F81"))
-            .willQoS(MqttQoS.AT_MOST_ONCE));
+                  MqttConnect.create("").willTopic("help").willMessage(Data.fromBase16("7F81"))
+                             .willQoS(MqttQoS.AT_MOST_ONCE));
     assertDecodes(Data.fromBase16("101600044D515454041600000000000468656C7000027F81"),
-        MqttConnect.from("").willTopic("help").willMessage(Data.fromBase16("7F81"))
-            .willQoS(MqttQoS.EXACTLY_ONCE));
+                  MqttConnect.create("").willTopic("help").willMessage(Data.fromBase16("7F81"))
+                             .willQoS(MqttQoS.EXACTLY_ONCE));
   }
 
   @Test
   public void encodeConnectPacketsWithWillQoS() {
-    assertEncodes(MqttConnect.from("").willTopic("help").willMessage(Data.fromBase16("7F81"))
-            .willQoS(MqttQoS.AT_LEAST_ONCE),
-        Data.fromBase16("101600044D515454040E00000000000468656C7000027F81"));
-    assertEncodes(MqttConnect.from("").willTopic("help").willMessage(Data.fromBase16("7F81"))
-            .willQoS(MqttQoS.AT_MOST_ONCE),
-        Data.fromBase16("101600044D515454040600000000000468656C7000027F81"));
-    assertEncodes(MqttConnect.from("").willTopic("help").willMessage(Data.fromBase16("7F81"))
-            .willQoS(MqttQoS.EXACTLY_ONCE),
-        Data.fromBase16("101600044D515454041600000000000468656C7000027F81"));
+    assertEncodes(MqttConnect.create("").willTopic("help").willMessage(Data.fromBase16("7F81"))
+                             .willQoS(MqttQoS.AT_LEAST_ONCE),
+                  Data.fromBase16("101600044D515454040E00000000000468656C7000027F81"));
+    assertEncodes(MqttConnect.create("").willTopic("help").willMessage(Data.fromBase16("7F81"))
+                              .willQoS(MqttQoS.AT_MOST_ONCE),
+                  Data.fromBase16("101600044D515454040600000000000468656C7000027F81"));
+    assertEncodes(MqttConnect.create("").willTopic("help").willMessage(Data.fromBase16("7F81"))
+                             .willQoS(MqttQoS.EXACTLY_ONCE),
+                  Data.fromBase16("101600044D515454041600000000000468656C7000027F81"));
   }
 
   @Test
   public void decodeConnectPacketsWithWillRetain() {
     assertDecodes(Data.fromBase16("101600044D515454042600000000000468656C7000027F81"),
-        MqttConnect.from("").willTopic("help").willMessage(Data.fromBase16("7F81"))
-            .willRetain(true));
+                  MqttConnect.create("").willTopic("help").willMessage(Data.fromBase16("7F81"))
+                             .willRetain(true));
   }
 
   @Test
   public void encodeConnectPacketsWithWillRetain() {
-    assertEncodes(MqttConnect.from("").willTopic("help").willMessage(Data.fromBase16("7F81"))
-            .willRetain(true),
-        Data.fromBase16("101600044D515454042600000000000468656C7000027F81"));
+    assertEncodes(MqttConnect.create("").willTopic("help").willMessage(Data.fromBase16("7F81"))
+                             .willRetain(true),
+                  Data.fromBase16("101600044D515454042600000000000468656C7000027F81"));
   }
 
   @Test
   public void decodeConnectPacketsWithUsername() {
     assertDecodes(Data.fromBase16("101100044D5154540482000000000003626F62"),
-        MqttConnect.from("").username("bob"));
+                  MqttConnect.create("").username("bob"));
   }
 
   @Test
   public void encodeConnectPacketsWithUsername() {
-    assertEncodes(MqttConnect.from("").username("bob"),
-        Data.fromBase16("101100044D5154540482000000000003626F62"));
+    assertEncodes(MqttConnect.create("").username("bob"),
+                  Data.fromBase16("101100044D5154540482000000000003626F62"));
   }
 
   @Test
   public void decodeConnectPacketsWithPassword() {
     assertDecodes(Data.fromBase16("101600044D51545404420000000000080123456789ABCDEF"),
-        MqttConnect.from("").password(Data.fromBase16("0123456789ABCDEF")));
+                  MqttConnect.create("").password(Data.fromBase16("0123456789ABCDEF")));
   }
 
   @Test
   public void encodeConnectPacketsWithPassword() {
-    assertEncodes(MqttConnect.from("").password(Data.fromBase16("0123456789ABCDEF")),
-        Data.fromBase16("101600044D51545404420000000000080123456789ABCDEF"));
+    assertEncodes(MqttConnect.create("").password(Data.fromBase16("0123456789ABCDEF")),
+                  Data.fromBase16("101600044D51545404420000000000080123456789ABCDEF"));
   }
 
   @Test
   public void decodeConnectPackets() {
     assertDecodes(Data.fromBase16("102400044D51545404F60E10000474657374000468656C7000027F810003626F620003ABCDEF"),
-        MqttConnect.from("test")
-            .keepAlive(3600)
-            .willTopic("help")
-            .willMessage(Data.fromBase16("7F81"))
-            .willQoS(MqttQoS.EXACTLY_ONCE)
-            .willRetain(true)
-            .username("bob")
-            .password(Data.fromBase16("ABCDEF")));
+                  MqttConnect.create("test")
+                             .keepAlive(3600)
+                             .willTopic("help")
+                             .willMessage(Data.fromBase16("7F81"))
+                             .willQoS(MqttQoS.EXACTLY_ONCE)
+                             .willRetain(true)
+                             .username("bob")
+                             .password(Data.fromBase16("ABCDEF")));
   }
 
   @Test
   public void encodeConnectPackets() {
-    assertEncodes(MqttConnect.from("test")
-            .keepAlive(3600)
-            .willTopic("help")
-            .willMessage(Data.fromBase16("7F81"))
-            .willQoS(MqttQoS.EXACTLY_ONCE)
-            .willRetain(true)
-            .username("bob")
-            .password(Data.fromBase16("ABCDEF")),
-        Data.fromBase16("102400044D51545404F60E10000474657374000468656C7000027F810003626F620003ABCDEF"));
+    assertEncodes(MqttConnect.create("test")
+                             .keepAlive(3600)
+                             .willTopic("help")
+                             .willMessage(Data.fromBase16("7F81"))
+                             .willQoS(MqttQoS.EXACTLY_ONCE)
+                             .willRetain(true)
+                             .username("bob")
+                             .password(Data.fromBase16("ABCDEF")),
+                  Data.fromBase16("102400044D51545404F60E10000474657374000468656C7000027F810003626F620003ABCDEF"));
+  }
+
+  public static void assertDecodes(Data data, MqttConnect packet) {
+    MqttAssertions.assertDecodesPacket(data, packet);
   }
 
 }

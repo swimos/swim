@@ -106,9 +106,9 @@ public class VmBridge extends Bridge {
       Class<?> hostClass = hostValue.getClass();
       if (hostClass.isArray()) {
         // TODO: bridge array types
-      } else if (!isNativeHostClass(hostClass)) {
+      } else if (!this.isNativeHostClass(hostClass)) {
         do {
-          final HostType<?> hostType = getHostType(hostClass);
+          final HostType<?> hostType = this.getHostType(hostClass);
           if (hostType != null && !hostType.isBuiltin()) {
             return (HostType<? super T>) hostType;
           }
@@ -118,7 +118,7 @@ public class VmBridge extends Bridge {
         // TODO: dynamically merge implemented interfaces
         final Class<?>[] interfaces = hostValue.getClass().getInterfaces();
         for (int i = 0, n = interfaces.length; i < n; i += 1) {
-          final HostType<?> hostType = getHostType(interfaces[i]);
+          final HostType<?> hostType = this.getHostType(interfaces[i]);
           if (hostType != null && !hostType.isBuiltin()) {
             return (HostType<? super T>) hostType;
           }
@@ -146,9 +146,9 @@ public class VmBridge extends Bridge {
     } else if (hostValue instanceof GuestWrapper) {
       guestValue = ((GuestWrapper) hostValue).unwrap();
     } else {
-      final HostType<? super Object> hostType = hostType(hostValue);
+      final HostType<? super Object> hostType = this.hostType(hostValue);
       if (hostType != null) {
-        guestValue = hostTypedValueToGuestProxy(hostType, hostValue);
+        guestValue = this.hostTypedValueToGuestProxy(hostType, hostValue);
       } else if (hostValue instanceof Object[]) {
         guestValue = new VmBridgeArray(this, (Object[]) hostValue);
       } else {
@@ -206,10 +206,10 @@ public class VmBridge extends Bridge {
       final int arity = hostArguments.length;
       final Object[] guestArguments = new Object[arity];
       for (int i = 0; i < arity; i += 1) {
-        guestArguments[i] = hostToGuest(hostArguments[i]);
+        guestArguments[i] = this.hostToGuest(hostArguments[i]);
       }
       final Object guestResult = ((Value) guestFunction).execute(guestArguments);
-      final Object hostResult = guestToHost(guestResult);
+      final Object hostResult = this.guestToHost(guestResult);
       return hostResult;
     } else {
       throw new UnsupportedOperationException();
@@ -222,7 +222,7 @@ public class VmBridge extends Bridge {
       final int arity = hostArguments.length;
       final Object[] guestArguments = new Object[arity];
       for (int i = 0; i < arity; i += 1) {
-        guestArguments[i] = hostToGuest(hostArguments[i]);
+        guestArguments[i] = this.hostToGuest(hostArguments[i]);
       }
       ((Value) guestFunction).executeVoid(guestArguments);
     } else {
@@ -241,10 +241,10 @@ public class VmBridge extends Bridge {
       final int arity = hostArguments.length;
       final Object[] guestArguments = new Object[arity];
       for (int i = 0; i < arity; i += 1) {
-        guestArguments[i] = hostToGuest(hostArguments[i]);
+        guestArguments[i] = this.hostToGuest(hostArguments[i]);
       }
       final Object guestResult = ((Value) guestObject).invokeMember(member, guestArguments);
-      final Object hostResult = guestToHost(guestResult);
+      final Object hostResult = this.guestToHost(guestResult);
       return hostResult;
     } else {
       throw new UnsupportedOperationException();

@@ -37,7 +37,7 @@ import swim.api.warp.function.WillLink;
 import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.concurrent.Stage;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
@@ -63,23 +63,23 @@ import swim.uri.Uri;
 
 public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlink<V> {
 
-  protected static final int STATEFUL = 1 << 2;
   protected final Form<V> valueForm;
   protected ListDownlinkModel model;
 
   public ListDownlinkView(CellContext cellContext, Stage stage, Uri meshUri,
                           Uri hostUri, Uri nodeUri, Uri laneUri, float prio, float rate, Value body,
                           int flags, Form<V> valueForm, Object observers) {
-    super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-        body, flags, observers);
+    super(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate, body, flags, observers);
     this.valueForm = valueForm;
+    this.model = null;
   }
 
   public ListDownlinkView(CellContext cellContext, Stage stage, Uri meshUri,
                           Uri hostUri, Uri nodeUri, Uri laneUri, float prio, float rate,
                           Value body, Form<V> valueForm) {
-    this(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate,
-        body, KEEP_LINKED | KEEP_SYNCED | STATEFUL, valueForm, null);
+    this(cellContext, stage, meshUri, hostUri, nodeUri, laneUri, prio, rate, body,
+         WarpDownlinkView.KEEP_LINKED | WarpDownlinkView.KEEP_SYNCED | ListDownlinkView.STATEFUL,
+         valueForm, null);
   }
 
   @Override
@@ -90,72 +90,72 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public ListDownlinkView<V> hostUri(Uri hostUri) {
     return new ListDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        hostUri, this.nodeUri, this.laneUri, this.prio,
-        this.rate, this.body, this.flags, this.valueForm,
-        this.observers);
+                                   hostUri, this.nodeUri, this.laneUri, this.prio,
+                                   this.rate, this.body, this.flags, this.valueForm,
+                                   this.observers);
   }
 
   @Override
   public ListDownlinkView<V> hostUri(String hostUri) {
-    return hostUri(Uri.parse(hostUri));
+    return this.hostUri(Uri.parse(hostUri));
   }
 
   @Override
   public ListDownlinkView<V> nodeUri(Uri nodeUri) {
     return new ListDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, nodeUri, this.laneUri, this.prio,
-        this.rate, this.body, this.flags, this.valueForm,
-        this.observers);
+                                   this.hostUri, nodeUri, this.laneUri, this.prio,
+                                   this.rate, this.body, this.flags, this.valueForm,
+                                   this.observers);
   }
 
   @Override
   public ListDownlinkView<V> nodeUri(String nodeUri) {
-    return nodeUri(Uri.parse(nodeUri));
+    return this.nodeUri(Uri.parse(nodeUri));
   }
 
   @Override
   public ListDownlinkView<V> laneUri(Uri laneUri) {
     return new ListDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, laneUri, this.prio,
-        this.rate, this.body, this.flags, this.valueForm,
-        this.observers);
+                                   this.hostUri, this.nodeUri, laneUri, this.prio,
+                                   this.rate, this.body, this.flags, this.valueForm,
+                                   this.observers);
   }
 
   @Override
   public ListDownlinkView<V> laneUri(String laneUri) {
-    return laneUri(Uri.parse(laneUri));
+    return this.laneUri(Uri.parse(laneUri));
   }
 
   @Override
   public ListDownlinkView<V> prio(float prio) {
     return new ListDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri, prio,
-        this.rate, this.body, this.flags, this.valueForm,
-        this.observers);
+                                   this.hostUri, this.nodeUri, this.laneUri, prio,
+                                   this.rate, this.body, this.flags, this.valueForm,
+                                   this.observers);
   }
 
   @Override
   public ListDownlinkView<V> rate(float rate) {
     return new ListDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri, this.prio,
-        rate, this.body, this.flags, this.valueForm,
-        this.observers);
+                                   this.hostUri, this.nodeUri, this.laneUri, this.prio,
+                                   rate, this.body, this.flags, this.valueForm,
+                                   this.observers);
   }
 
   @Override
   public ListDownlinkView<V> body(Value body) {
     return new ListDownlinkView<V>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri, this.prio,
-        this.rate, body, this.flags, this.valueForm,
-        this.observers);
+                                   this.hostUri, this.nodeUri, this.laneUri, this.prio,
+                                   this.rate, body, this.flags, this.valueForm,
+                                   this.observers);
   }
 
   @Override
   public ListDownlinkView<V> keepLinked(boolean keepLinked) {
     if (keepLinked) {
-      this.flags |= KEEP_LINKED;
+      this.flags |= WarpDownlinkView.KEEP_LINKED;
     } else {
-      this.flags &= ~KEEP_LINKED;
+      this.flags &= ~WarpDownlinkView.KEEP_LINKED;
     }
     return this;
   }
@@ -163,24 +163,24 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public ListDownlinkView<V> keepSynced(boolean keepSynced) {
     if (keepSynced) {
-      this.flags |= KEEP_SYNCED;
+      this.flags |= WarpDownlinkView.KEEP_SYNCED;
     } else {
-      this.flags &= ~KEEP_SYNCED;
+      this.flags &= ~WarpDownlinkView.KEEP_SYNCED;
     }
     return this;
   }
 
   @Override
   public final boolean isStateful() {
-    return (this.flags & STATEFUL) != 0;
+    return (this.flags & ListDownlinkView.STATEFUL) != 0;
   }
 
   @Override
   public ListDownlinkView<V> isStateful(boolean isStateful) {
     if (isStateful) {
-      this.flags |= STATEFUL;
+      this.flags |= ListDownlinkView.STATEFUL;
     } else {
-      this.flags &= ~STATEFUL;
+      this.flags &= ~ListDownlinkView.STATEFUL;
     }
     final ListDownlinkModel model = this.model;
     if (model != null) {
@@ -191,9 +191,9 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
 
   void didSetStateful(boolean isStateful) {
     if (isStateful) {
-      this.flags |= STATEFUL;
+      this.flags |= ListDownlinkView.STATEFUL;
     } else {
-      this.flags &= ~STATEFUL;
+      this.flags &= ~ListDownlinkView.STATEFUL;
     }
   }
 
@@ -205,14 +205,14 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public <V2> ListDownlinkView<V2> valueForm(Form<V2> valueForm) {
     return new ListDownlinkView<V2>(this.cellContext, this.stage, this.meshUri,
-        this.hostUri, this.nodeUri, this.laneUri, this.prio,
-        this.rate, this.body, this.flags, valueForm,
-        typesafeObservers(this.observers));
+                                    this.hostUri, this.nodeUri, this.laneUri, this.prio,
+                                    this.rate, this.body, this.flags, valueForm,
+                                    this.typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> ListDownlinkView<V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   protected Object typesafeObservers(Object observers) {
@@ -236,127 +236,127 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
 
   @Override
   public ListDownlink<V> willMove(WillMoveIndex<V> willMove) {
-    return observe(willMove);
+    return this.observe(willMove);
   }
 
   @Override
   public ListDownlink<V> didMove(DidMoveIndex<V> didMove) {
-    return observe(didMove);
+    return this.observe(didMove);
   }
 
   @Override
   public ListDownlinkView<V> willUpdate(WillUpdateIndex<V> willUpdate) {
-    return observe(willUpdate);
+    return this.observe(willUpdate);
   }
 
   @Override
   public ListDownlinkView<V> didUpdate(DidUpdateIndex<V> didUpdate) {
-    return observe(didUpdate);
+    return this.observe(didUpdate);
   }
 
   @Override
   public ListDownlinkView<V> willRemove(WillRemoveIndex willRemove) {
-    return observe(willRemove);
+    return this.observe(willRemove);
   }
 
   @Override
   public ListDownlinkView<V> didRemove(DidRemoveIndex<V> didRemove) {
-    return observe(didRemove);
+    return this.observe(didRemove);
   }
 
   @Override
   public ListDownlinkView<V> willDrop(WillDrop willDrop) {
-    return observe(willDrop);
+    return this.observe(willDrop);
   }
 
   @Override
   public ListDownlinkView<V> didDrop(DidDrop didDrop) {
-    return observe(didDrop);
+    return this.observe(didDrop);
   }
 
   @Override
   public ListDownlinkView<V> willTake(WillTake willTake) {
-    return observe(willTake);
+    return this.observe(willTake);
   }
 
   @Override
   public ListDownlinkView<V> didTake(DidTake didTake) {
-    return observe(didTake);
+    return this.observe(didTake);
   }
 
   @Override
   public ListDownlinkView<V> willClear(WillClear willClear) {
-    return observe(willClear);
+    return this.observe(willClear);
   }
 
   @Override
   public ListDownlinkView<V> didClear(DidClear didClear) {
-    return observe(didClear);
+    return this.observe(didClear);
   }
 
   @Override
   public ListDownlinkView<V> willReceive(WillReceive willReceive) {
-    return observe(willReceive);
+    return this.observe(willReceive);
   }
 
   @Override
   public ListDownlinkView<V> didReceive(DidReceive didReceive) {
-    return observe(didReceive);
+    return this.observe(didReceive);
   }
 
   @Override
   public ListDownlinkView<V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public ListDownlinkView<V> willLink(WillLink willLink) {
-    return observe(willLink);
+    return this.observe(willLink);
   }
 
   @Override
   public ListDownlinkView<V> didLink(DidLink didLink) {
-    return observe(didLink);
+    return this.observe(didLink);
   }
 
   @Override
   public ListDownlinkView<V> willSync(WillSync willSync) {
-    return observe(willSync);
+    return this.observe(willSync);
   }
 
   @Override
   public ListDownlinkView<V> didSync(DidSync didSync) {
-    return observe(didSync);
+    return this.observe(didSync);
   }
 
   @Override
   public ListDownlinkView<V> willUnlink(WillUnlink willUnlink) {
-    return observe(willUnlink);
+    return this.observe(willUnlink);
   }
 
   @Override
   public ListDownlinkView<V> didUnlink(DidUnlink didUnlink) {
-    return observe(didUnlink);
+    return this.observe(didUnlink);
   }
 
   @Override
   public ListDownlinkView<V> didConnect(DidConnect didConnect) {
-    return observe(didConnect);
+    return this.observe(didConnect);
   }
 
   @Override
   public ListDownlinkView<V> didDisconnect(DidDisconnect didDisconnect) {
-    return observe(didDisconnect);
+    return this.observe(didDisconnect);
   }
 
   @Override
   public ListDownlinkView<V> didClose(DidClose didClose) {
-    return observe(didClose);
+    return this.observe(didClose);
   }
 
   @Override
   public ListDownlinkView<V> didFail(DidFail didFail) {
-    return observe(didFail);
+    return this.observe(didFail);
   }
 
   @SuppressWarnings("unchecked")
@@ -371,8 +371,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
           try {
             newValue = ((WillUpdateIndex<V>) observers).willUpdate(index, newValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -388,8 +388,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
               try {
                 newValue = ((WillUpdateIndex<V>) observer).willUpdate(index, newValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -417,8 +417,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
           try {
             ((DidUpdateIndex<V>) observers).didUpdate(index, newValue, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -434,8 +434,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
               try {
                 ((DidUpdateIndex<V>) observer).didUpdate(index, newValue, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -463,8 +463,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
           try {
             ((WillMoveIndex<V>) observers).willMove(fromIndex, toIndex, value);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -480,8 +480,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
               try {
                 ((WillMoveIndex<V>) observer).willMove(fromIndex, toIndex, value);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -509,8 +509,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
           try {
             ((DidMoveIndex<V>) observers).didMove(fromIndex, toIndex, value);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -526,8 +526,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
               try {
                 ((DidMoveIndex<V>) observer).didMove(fromIndex, toIndex, value);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -554,8 +554,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
           try {
             ((WillRemoveIndex) observers).willRemove(index);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -571,8 +571,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
               try {
                 ((WillRemoveIndex) observer).willRemove(index);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -600,8 +600,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
           try {
             ((DidRemoveIndex<V>) observers).didRemove(index, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -617,8 +617,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
               try {
                 ((DidRemoveIndex<V>) observer).didRemove(index, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -645,8 +645,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
           try {
             ((WillDrop) observers).willDrop(lower);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -662,8 +662,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
               try {
                 ((WillDrop) observer).willDrop(lower);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -690,8 +690,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
           try {
             ((DidDrop) observers).didDrop(lower);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -707,8 +707,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
               try {
                 ((DidDrop) observer).didDrop(lower);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -735,8 +735,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
           try {
             ((WillTake) observers).willTake(upper);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -752,8 +752,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
               try {
                 ((WillTake) observer).willTake(upper);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -780,8 +780,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
           try {
             ((DidTake) observers).didTake(upper);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -797,8 +797,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
               try {
                 ((DidTake) observer).didTake(upper);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -825,8 +825,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
           try {
             ((WillClear) observers).willClear();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -842,8 +842,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
               try {
                 ((WillClear) observer).willClear();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -870,8 +870,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
           try {
             ((DidClear) observers).didClear();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -887,8 +887,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
               try {
                 ((DidClear) observer).didClear();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -909,6 +909,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   }
 
   public void downlinkDidInsertValue(int index, Value newValue) {
+    // hook
   }
 
   public V downlinkWillInsert(int index, V newValue) {
@@ -916,6 +917,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   }
 
   public void downlinkDidInsert(int index, V newValue) {
+    // hook
   }
 
   public Value downlinkWillUpdateValue(int index, Value newValue) {
@@ -923,6 +925,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   }
 
   public void downlinkDidUpdateValue(int index, Value newValue, Value oldValue) {
+    // hook
   }
 
   public V downlinkWillUpdate(int index, V newValue) {
@@ -930,54 +933,69 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   }
 
   public void downlinkDidUpdate(int index, V newValue, V oldValue) {
+    // hook
   }
 
   public void downlinkWillMoveValue(int fromIndex, int toIndex, Value value) {
+    // hook
   }
 
   public void downlinkDidMoveValue(int fromIndex, int toIndex, Value value) {
+    // hook
   }
 
   public void downlinkWillMove(int fromIndex, int toIndex, V value) {
+    // hook
   }
 
   public void downlinkDidMove(int fromIndex, int toIndex, V value) {
+    // hook
   }
 
   public void downlinkWillRemoveValue(int index) {
+    // hook
   }
 
   public void downlinkDidRemoveValue(int index, Value oldValue) {
+    // hook
   }
 
   public void downlinkWillRemove(int index) {
+    // hook
   }
 
   public void downlinkDidRemove(int index, V oldValue) {
+    // hook
   }
 
   public void downlinkWillDrop(int lower) {
+    // hook
   }
 
   public void downlinkDidDrop(int lower) {
+    // hook
   }
 
   public void downlinkWillTake(int upper) {
+    // hook
   }
 
   public void downlinkDidTake(int upper) {
+    // hook
   }
 
   public void downlinkWillClear() {
+    // hook
   }
 
   public void downlinkDidClear() {
+    // hook
   }
 
   @Override
   public ListDownlinkModel createDownlinkModel() {
     return new ListDownlinkModel(this.meshUri, this.hostUri, this.nodeUri,
-        this.laneUri, this.prio, this.rate, this.body);
+                                 this.laneUri, this.prio, this.rate, this.body);
   }
 
   @Override
@@ -1018,7 +1036,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @SuppressWarnings("unchecked")
   @Override
   public V get(int index) {
-    return get(index, null);
+    return this.get(index, null);
   }
 
   @Override
@@ -1109,12 +1127,12 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
 
   @Override
   public boolean add(V v) {
-    return this.model.add(this, size(), v);
+    return this.model.add(this, this.size(), v);
   }
 
   @Override
   public boolean remove(Object o) {
-    final int index = indexOf(o);
+    final int index = this.indexOf(o);
     if (index != -1) {
       final V oldObject = this.model.remove(this, index);
       return oldObject != null && oldObject != this.valueForm.unit(); // TODO?
@@ -1125,7 +1143,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public boolean containsAll(Collection<?> elements) {
     for (Object element : elements) {
-      if (!contains(element)) {
+      if (!this.contains(element)) {
         return false;
       }
     }
@@ -1136,7 +1154,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   public boolean addAll(Collection<? extends V> elements) {
     boolean added = false;
     for (V element : elements) {
-      added = added || add(element);
+      added = this.add(element) || added;
     }
     return added;
   }
@@ -1144,7 +1162,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   @Override
   public boolean addAll(int index, Collection<? extends V> elements) {
     for (V element : elements) {
-      add(index, element);
+      this.add(index, element);
     }
     return elements.isEmpty();
   }
@@ -1153,7 +1171,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   public boolean removeAll(Collection<?> elements) {
     boolean removed = false;
     for (Object element : elements) {
-      removed = removed || remove(element);
+      removed = this.remove(element) || removed;
     }
     return removed;
   }
@@ -1163,7 +1181,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
     boolean modified = false;
     for (Object element : elements) {
       if (!elements.contains(element)) {
-        modified = modified || remove(element);
+        modified = this.remove(element) || modified;
       }
     }
     return modified;
@@ -1207,7 +1225,7 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
 
   @Override
   public boolean add(V element, Object key) {
-    return this.model.add(this, size(), element, key);
+    return this.model.add(this, this.size(), element, key);
   }
 
   @Override
@@ -1239,6 +1257,8 @@ public class ListDownlinkView<V> extends WarpDownlinkView implements ListDownlin
   public ListIterator<Map.Entry<Object, V>> entryIterator() {
     return new ListDownlinkViewEntryIterator<V>(this.model.entryIterator(), this.valueForm);
   }
+
+  protected static final int STATEFUL = 1 << 2;
 
 }
 
@@ -1273,11 +1293,11 @@ final class ListDownlinkViewEntry<V> implements Map.Entry<Object, V> {
       return true;
     } else if (other instanceof Map.Entry<?, ?>) {
       final Map.Entry<?, ?> that = (Map.Entry<?, ?>) other;
-      final Object key = getKey();
+      final Object key = this.getKey();
       if (key == null ? that.getKey() != null : !key.equals(that.getKey())) {
         return false;
       }
-      final V value = getValue();
+      final V value = this.getValue();
       if (value == null ? that.getValue() != null : !value.equals(that.getValue())) {
         return false;
       }
@@ -1288,15 +1308,15 @@ final class ListDownlinkViewEntry<V> implements Map.Entry<Object, V> {
 
   @Override
   public int hashCode() {
-    final Object key = getKey();
-    final V value = getValue();
+    final Object key = this.getKey();
+    final V value = this.getValue();
     return (key == null ? 0 : key.hashCode())
-        ^ (value == null ? 0 : value.hashCode());
+         ^ (value == null ? 0 : value.hashCode());
   }
 
   @Override
   public String toString() {
-    return new StringBuilder().append(getKey()).append('=').append(getValue()).toString();
+    return new StringBuilder().append(this.getKey()).append('=').append(this.getValue()).toString();
   }
 
 }

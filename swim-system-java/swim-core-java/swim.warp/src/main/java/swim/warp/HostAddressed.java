@@ -59,7 +59,7 @@ public abstract class HostAddressed extends Envelope {
   public boolean equals(Object other) {
     if (this == other) {
       return true;
-    } else if (other != null && getClass() == other.getClass()) {
+    } else if (other != null && this.getClass() == other.getClass()) {
       final HostAddressed that = (HostAddressed) other;
       return this.body.equals(that.body);
     }
@@ -68,16 +68,17 @@ public abstract class HostAddressed extends Envelope {
 
   @Override
   public int hashCode() {
-    return Murmur3.mash(Murmur3.mix(Murmur3.seed(getClass()), this.body.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Murmur3.seed(this.getClass()), this.body.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("new").write(' ').write(getClass().getSimpleName()).write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("new").write(' ').write(this.getClass().getSimpleName()).write('(');
     if (this.body.isDefined()) {
       output = output.debug(this.body);
     }
     output = output.write(')');
+    return output;
   }
 
 }

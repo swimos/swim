@@ -94,7 +94,7 @@ final class Utf8EncodedOutput<T> extends Output<T> {
         }
         index += 1;
       } else {
-        return error(new OutputException("unable to flush buffered code units"));
+        return Output.error(new OutputException("unable to flush buffered code units"));
       }
     }
     if (c >= 0 && c <= 0x7f) { // U+0000..U+007F
@@ -118,9 +118,9 @@ final class Utf8EncodedOutput<T> extends Output<T> {
       index = 0;
     } else { // surrogate or invalid code point
       if (this.errorMode.isFatal()) {
-        return error(new OutputException("invalid code point: U+" + Integer.toHexString(c)));
+        return Output.error(new OutputException("invalid code point: U+" + Integer.toHexString(c)));
       } else {
-        return write(this.errorMode.replacementChar());
+        return this.write(this.errorMode.replacementChar());
       }
     }
     do {
@@ -181,7 +181,7 @@ final class Utf8EncodedOutput<T> extends Output<T> {
         }
         index += 1;
       } else {
-        return error(new OutputException("unable to flush buffered code units"));
+        return Output.error(new OutputException("unable to flush buffered code units"));
       }
     }
     this.index = index;
@@ -216,7 +216,7 @@ final class Utf8EncodedOutput<T> extends Output<T> {
   @Override
   public Output<T> clone() {
     return new Utf8EncodedOutput<T>(this.output.clone(), this.errorMode,
-        this.c2, this.c3, this.c4, this.index);
+                                    this.c2, this.c3, this.c4, this.index);
   }
 
 }

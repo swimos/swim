@@ -35,6 +35,7 @@ public class NodeProxy implements NodeBinding, NodeContext {
 
   public NodeProxy(NodeBinding nodeBinding) {
     this.nodeBinding = nodeBinding;
+    this.nodeContext = null;
   }
 
   @Override
@@ -70,7 +71,7 @@ public class NodeProxy implements NodeBinding, NodeContext {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapNode(Class<T> nodeClass) {
-    if (nodeClass.isAssignableFrom(getClass())) {
+    if (nodeClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return this.nodeContext.unwrapNode(nodeClass);
@@ -81,7 +82,7 @@ public class NodeProxy implements NodeBinding, NodeContext {
   @Override
   public <T> T bottomNode(Class<T> nodeClass) {
     T node = this.nodeContext.bottomNode(nodeClass);
-    if (node == null && nodeClass.isAssignableFrom(getClass())) {
+    if (node == null && nodeClass.isAssignableFrom(this.getClass())) {
       node = (T) this;
     }
     return node;

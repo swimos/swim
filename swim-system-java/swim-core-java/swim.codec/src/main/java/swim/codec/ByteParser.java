@@ -22,23 +22,6 @@ final class ByteParser<O> extends Parser<O> {
     this.output = output;
   }
 
-  static <O> Parser<O> parse(Input input, Output<O> output) {
-    while (input.isCont() && output.isCont()) {
-      output = output.write(input.head());
-      input = input.step();
-    }
-    if (input.isDone()) {
-      return done(output.bind());
-    } else if (input.isError()) {
-      return error(input.trap());
-    } else if (output.isDone()) {
-      return error(new ParserException("incomplete"));
-    } else if (output.isError()) {
-      return error(output.trap());
-    }
-    return new ByteParser<O>(output);
-  }
-
   @Override
   public Parser<O> feed(Input input) {
     Output<O> output = this.output;
@@ -47,15 +30,32 @@ final class ByteParser<O> extends Parser<O> {
       input = input.step();
     }
     if (input.isDone()) {
-      return done(output.bind());
+      return Parser.done(output.bind());
     } else if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     } else if (output.isDone()) {
-      return error(new ParserException("incomplete"));
+      return Parser.error(new ParserException("incomplete"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Parser.error(output.trap());
     }
     return this;
+  }
+
+  static <O> Parser<O> parse(Input input, Output<O> output) {
+    while (input.isCont() && output.isCont()) {
+      output = output.write(input.head());
+      input = input.step();
+    }
+    if (input.isDone()) {
+      return Parser.done(output.bind());
+    } else if (input.isError()) {
+      return Parser.error(input.trap());
+    } else if (output.isDone()) {
+      return Parser.error(new ParserException("incomplete"));
+    } else if (output.isError()) {
+      return Parser.error(output.trap());
+    }
+    return new ByteParser<O>(output);
   }
 
 }

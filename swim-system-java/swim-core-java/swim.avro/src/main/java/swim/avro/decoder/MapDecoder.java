@@ -55,6 +55,12 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
     this(avro, type, null, 0L, 0L, 0L, 0, null, null, 1);
   }
 
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return MapDecoder.decode(input, this.avro, this.type, this.builder, this.count, this.blockSize,
+                             this.keyLength, this.shift, this.keyParser, this.valueDecoder, this.step);
+  }
+
   static <K, V, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroMapType<K, V, T> type,
                                      PairBuilder<K, V, T> builder, long count, long blockSize,
                                      long keyLength, int shift, Parser<K> keyParser,
@@ -67,7 +73,7 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
             input = input.step();
             count |= (long) (b & 0x7f) << shift;
           } else {
-            return error(new DecoderException("map count overflow"));
+            return Decoder.error(new DecoderException("map count overflow"));
           }
           if ((b & 0x80) == 0) {
             count = (count >>> 1) ^ (count << 63 >> 63);
@@ -84,7 +90,7 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
               if (builder == null) {
                 builder = type.mapBuilder();
               }
-              return done(builder.bind());
+              return Decoder.done(builder.bind());
             }
           }
           shift += 7;
@@ -97,7 +103,7 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
             input = input.step();
             blockSize |= (long) (b & 0x7f) << shift;
           } else {
-            return error(new DecoderException("map block size overflow"));
+            return Decoder.error(new DecoderException("map block size overflow"));
           }
           if ((b & 0x80) == 0) {
             blockSize = (blockSize >>> 1) ^ (blockSize << 63 >> 63);
@@ -115,7 +121,7 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
             input = input.step();
             keyLength |= (long) (b & 0x7f) << shift;
           } else {
-            return error(new DecoderException("key length overflow"));
+            return Decoder.error(new DecoderException("key length overflow"));
           }
           if ((b & 0x80) == 0) {
             keyLength = (keyLength >>> 1) ^ (keyLength << 63 >> 63);
@@ -151,7 +157,7 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
           if (keyLength == 0L) {
             step = 5;
           } else {
-            return error(new DecoderException("unconsumed input"));
+            return Decoder.error(new DecoderException("unconsumed input"));
           }
         } else if (keyParser.isError()) {
           return keyParser.asError();
@@ -185,22 +191,16 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
       break;
     } while (true);
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new MapDecoder<K, V, T>(avro, type, builder, count, blockSize, keyLength,
                                    shift, keyParser, valueDecoder, step);
   }
 
   static <K, V, T> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroMapType<K, V, T> type) {
-    return decode(input, avro, type, null, 0L, 0L, 0L, 0, null, null, 1);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.avro, this.type, this.builder, this.count, this.blockSize,
-        this.keyLength, this.shift, this.keyParser, this.valueDecoder, this.step);
+    return MapDecoder.decode(input, avro, type, null, 0L, 0L, 0L, 0, null, null, 1);
   }
 
 }

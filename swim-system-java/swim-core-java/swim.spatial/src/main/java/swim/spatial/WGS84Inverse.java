@@ -19,31 +19,31 @@ import swim.math.Z2ToR2Operator;
 
 final class WGS84Inverse implements Z2ToR2Operator {
 
-  static double transformX(long x) {
-    return round(((double) x / (double) 0x7fffffffffffffffL) * 360.0 - 180.0);
-  }
-
-  static double transformY(long y) {
-    return round(((double) y / (double) 0x7fffffffffffffffL) * 180.0 - 90.0);
-  }
-
-  static double round(double value) {
-    return (double) Math.round(value * 100000000.0) / 100000000.0;
-  }
-
   @Override
   public double transformX(long x, long y) {
-    return transformX(x);
+    return WGS84Inverse.transformX(x);
   }
 
   @Override
   public double transformY(long x, long y) {
-    return transformY(y);
+    return WGS84Inverse.transformY(y);
   }
 
   @Override
   public R2ToZ2Operator inverse() {
     return GeoProjection.wgs84();
+  }
+
+  static double transformX(long x) {
+    return WGS84Inverse.round(((double) x / (double) 0x7fffffffffffffffL) * 360.0 - 180.0);
+  }
+
+  static double transformY(long y) {
+    return WGS84Inverse.round(((double) y / (double) 0x7fffffffffffffffL) * 180.0 - 90.0);
+  }
+
+  static double round(double value) {
+    return (double) Math.round(value * 100000000.0) / 100000000.0;
   }
 
 }

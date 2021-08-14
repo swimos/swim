@@ -43,6 +43,12 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<T, R, C>> {
     this(csv, header, null, 0, -1, 1);
   }
 
+  @Override
+  public Parser<CsvHeader<T, R, C>> feed(Input input) {
+    return HeaderParser.parse(input, this.csv, this.header, this.nameParser,
+                              this.index, this.head, this.step);
+  }
+
   static <T, R, C> Parser<CsvHeader<T, R, C>> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header,
                                                     Parser<String> nameParser, int index, int head, int step) {
     int c = 0;
@@ -84,7 +90,7 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<T, R, C>> {
           head = ((CsvQuotedInput) cellInput).next();
         }
         if (head == -4) {
-          return error(Diagnostic.expected('"', input));
+          return Parser.error(Diagnostic.expected('"', input));
         } else if (nameParser.isDone()) {
           header = header.col(index, nameParser.bind());
           nameParser = null;
@@ -105,27 +111,22 @@ final class HeaderParser<T, R, C> extends Parser<CsvHeader<T, R, C>> {
             step = 1;
             continue;
           } else {
-            return error(Diagnostic.expected("delimiter or line break", input));
+            return Parser.error(Diagnostic.expected("delimiter or line break", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("delimiter", input));
+          return Parser.error(Diagnostic.expected("delimiter", input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new HeaderParser<T, R, C>(csv, header, nameParser, index, head, step);
   }
 
   static <T, R, C> Parser<CsvHeader<T, R, C>> parse(Input input, CsvParser csv, CsvHeader<T, R, C> header) {
-    return parse(input, csv, header, null, 0, -1, 1);
-  }
-
-  @Override
-  public Parser<CsvHeader<T, R, C>> feed(Input input) {
-    return parse(input, this.csv, this.header, this.nameParser, this.index, this.head, this.step);
+    return HeaderParser.parse(input, csv, header, null, 0, -1, 1);
   }
 
 }

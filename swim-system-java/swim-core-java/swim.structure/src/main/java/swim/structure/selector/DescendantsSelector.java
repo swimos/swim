@@ -27,13 +27,12 @@ import swim.util.Murmur3;
 /**
  * A {@link Selector} that, when {@link #evaluate evaluated} against some {@link
  * Interpreter} {@code stack}, yields all of the "descendants" of the top {@code
- * Item} in {@code stack}.  A "descendant" is recursively defined to be a {@link
+ * Item} in {@code stack}. A "descendant" is recursively defined to be a {@link
  * Record Record's} {@link ChildrenSelector children} and their descendants;
  * it has no definition for any other type.
  */
 public class DescendantsSelector extends Selector {
 
-  private static int hashSeed;
   final Selector then;
 
   DescendantsSelector(Selector then) {
@@ -69,7 +68,7 @@ public class DescendantsSelector extends Selector {
           // If the child was not selected:
           if (selected == null) {
             // Recursively select the child's children.
-            forSelected(interpreter, callback);
+            this.forSelected(interpreter, callback);
           }
           // Pop the child off of the scope stack.
           interpreter.popScope();
@@ -102,7 +101,7 @@ public class DescendantsSelector extends Selector {
           // If the child was not removed:
           if (newChild.isDefined()) {
             // Recursively transform the child's children.
-            newChild = mapSelected(interpreter, transform);
+            newChild = this.mapSelected(interpreter, transform);
           }
           // Pop the child off the scope stack.
           interpreter.popScope();
@@ -149,9 +148,9 @@ public class DescendantsSelector extends Selector {
   @Override
   protected int compareTo(Selector that) {
     if (that instanceof DescendantsSelector) {
-      return compareTo((DescendantsSelector) that);
+      return this.compareTo((DescendantsSelector) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(DescendantsSelector that) {
@@ -169,18 +168,21 @@ public class DescendantsSelector extends Selector {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(DescendantsSelector.class);
+    if (DescendantsSelector.hashSeed == 0) {
+      DescendantsSelector.hashSeed = Murmur3.seed(DescendantsSelector.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.then.hashCode()));
+    return Murmur3.mash(Murmur3.mix(DescendantsSelector.hashSeed, this.then.hashCode()));
   }
 
   @Override
-  public void debugThen(Output<?> output) {
+  public <T> Output<T> debugThen(Output<T> output) {
     output = output.write('.').write("descendants").write('(').write(')');
-    this.then.debugThen(output);
+    output = this.then.debugThen(output);
+    return output;
   }
 
 }

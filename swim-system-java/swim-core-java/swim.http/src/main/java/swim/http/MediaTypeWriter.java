@@ -43,6 +43,12 @@ final class MediaTypeWriter extends Writer<Object, Object> {
     this(http, type, subtype, params, null, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return MediaTypeWriter.write(output, this.http, this.type, this.subtype,
+                                 this.params, this.part, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String type,
                                       String subtype, HashTrieMap<String, String> params,
                                       Writer<?, ?> part, int step) {
@@ -74,7 +80,7 @@ final class MediaTypeWriter extends Writer<Object, Object> {
         if (!params.isEmpty()) {
           step = 4;
         } else {
-          return done();
+          return Writer.done();
         }
       } else if (part.isError()) {
         return part.asError();
@@ -87,27 +93,22 @@ final class MediaTypeWriter extends Writer<Object, Object> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done();
+        return Writer.done();
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new MediaTypeWriter(http, type, subtype, params, part, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, String type,
                                       String subtype, HashTrieMap<String, String> params) {
-    return write(output, http, type, subtype, params, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.type, this.subtype, this.params, this.part, this.step);
+    return MediaTypeWriter.write(output, http, type, subtype, params, null, 1);
   }
 
 }

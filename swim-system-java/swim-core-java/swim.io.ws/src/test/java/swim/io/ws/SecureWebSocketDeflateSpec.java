@@ -42,7 +42,7 @@ public class SecureWebSocketDeflateSpec extends WebSocketBehaviors {
       @Override
       public void didConnect() {
         super.didConnect();
-        doRequest(upgrade(socket, wsRequest));
+        this.doRequest(this.upgrade(socket, wsRequest));
       }
     };
     return endpoint.connectHttps("127.0.0.1", 33553, client, this.wsSettings.httpSettings());

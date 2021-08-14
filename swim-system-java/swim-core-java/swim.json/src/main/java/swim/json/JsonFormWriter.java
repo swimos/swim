@@ -38,10 +38,20 @@ final class JsonFormWriter<T> extends Writer<T, T> {
     this(json, form, null, null);
   }
 
+  @Override
+  public Writer<T, T> feed(T object) {
+    return new JsonFormWriter<T>(this.json, this.form, object, null);
+  }
+
+  @Override
+  public Writer<T, T> pull(Output<?> output) {
+    return JsonFormWriter.write(output, this.json, this.form, this.object, this.part);
+  }
+
   static <T> Writer<T, T> write(Output<?> output, JsonWriter<Item, Value> json,
                                 Form<T> form, T object, Writer<?, ?> part) {
     if (output == null) {
-      return done();
+      return Writer.done();
     }
     if (part == null) {
       final Value value = form.mold(object).toValue();
@@ -50,7 +60,7 @@ final class JsonFormWriter<T> extends Writer<T, T> {
       part = part.pull(output);
     }
     if (part.isDone()) {
-      return done(object);
+      return Writer.done(object);
     } else if (part.isError()) {
       return part.asError();
     }
@@ -59,17 +69,7 @@ final class JsonFormWriter<T> extends Writer<T, T> {
 
   static <T> Writer<T, T> write(Output<T> output, JsonWriter<Item, Value> json,
                                 Form<T> form, T object) {
-    return write(output, json, form, object, null);
-  }
-
-  @Override
-  public Writer<T, T> feed(T object) {
-    return new JsonFormWriter<T>(json, form, object, null);
-  }
-
-  @Override
-  public Writer<T, T> pull(Output<?> output) {
-    return write(output, this.json, this.form, this.object, this.part);
+    return JsonFormWriter.write(output, json, form, object, null);
   }
 
 }

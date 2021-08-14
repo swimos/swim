@@ -31,11 +31,66 @@ import swim.structure.Value;
  */
 public final class Json {
 
-  private static JsonParser<Item, Value> structureParser;
-  private static JsonWriter<Item, Value> structureWriter;
-
   private Json() {
     // static
+  }
+
+  private static JsonParser<Item, Value> structureParser;
+
+  public static JsonParser<Item, Value> structureParser() {
+    if (Json.structureParser == null) {
+      Json.structureParser = new JsonStructureParser();
+    }
+    return Json.structureParser;
+  }
+
+  private static JsonWriter<Item, Value> structureWriter;
+
+  public static JsonWriter<Item, Value> structureWriter() {
+    if (Json.structureWriter == null) {
+      Json.structureWriter = new JsonStructureWriter();
+    }
+    return Json.structureWriter;
+  }
+
+  public static Value parse(String json) {
+    return Json.structureParser().parseValueString(json);
+  }
+
+  public static Parser<Value> parser() {
+    return Json.structureParser().valueParser();
+  }
+
+  public static Writer<?, ?> write(Item item, Output<?> output) {
+    return Json.structureWriter().writeItem(item, output);
+  }
+
+  public static String toString(Item item) {
+    final Output<String> output = Unicode.stringOutput();
+    Json.write(item, output);
+    return output.bind();
+  }
+
+  public static Data toData(Item item) {
+    final Output<Data> output = Utf8.encodedOutput(Data.output());
+    Json.write(item, output);
+    return output.bind();
+  }
+
+  public static <T> Parser<T> formParser(Form<T> form) {
+    return new JsonFormParser<T>(Json.structureParser(), form);
+  }
+
+  public static <T> Decoder<T> formDecoder(Form<T> form) {
+    return Utf8.decodedParser(Json.formParser(form));
+  }
+
+  public static <T> Writer<T, T> formWriter(Form<T> form) {
+    return new JsonFormWriter<T>(Json.structureWriter(), form);
+  }
+
+  public static <T> Encoder<T, T> formEncoder(Form<T> form) {
+    return Utf8.encodedWriter(Json.formWriter(form));
   }
 
   static boolean isSpace(int c) {
@@ -47,7 +102,7 @@ public final class Json {
   }
 
   static boolean isWhitespace(int c) {
-    return isSpace(c) || isNewline(c);
+    return Json.isSpace(c) || Json.isNewline(c);
   }
 
   static boolean isIdentStartChar(int c) {
@@ -87,60 +142,6 @@ public final class Json {
         || c >= 0xf900 && c <= 0xfdcf
         || c >= 0xfdf0 && c <= 0xfffd
         || c >= 0x10000 && c <= 0xeffff;
-  }
-
-  public static JsonParser<Item, Value> structureParser() {
-    if (structureParser == null) {
-      structureParser = new JsonStructureParser();
-    }
-    return structureParser;
-  }
-
-  public static JsonWriter<Item, Value> structureWriter() {
-    if (structureWriter == null) {
-      structureWriter = new JsonStructureWriter();
-    }
-    return structureWriter;
-  }
-
-  public static Value parse(String json) {
-    return structureParser().parseValueString(json);
-  }
-
-  public static Parser<Value> parser() {
-    return structureParser().valueParser();
-  }
-
-  public static Writer<?, ?> write(Item item, Output<?> output) {
-    return structureWriter().writeItem(item, output);
-  }
-
-  public static String toString(Item item) {
-    final Output<String> output = Unicode.stringOutput();
-    write(item, output);
-    return output.bind();
-  }
-
-  public static Data toData(Item item) {
-    final Output<Data> output = Utf8.encodedOutput(Data.output());
-    write(item, output);
-    return output.bind();
-  }
-
-  public static <T> Parser<T> formParser(Form<T> form) {
-    return new JsonFormParser<T>(structureParser(), form);
-  }
-
-  public static <T> Decoder<T> formDecoder(Form<T> form) {
-    return Utf8.decodedParser(formParser(form));
-  }
-
-  public static <T> Writer<T, T> formWriter(Form<T> form) {
-    return new JsonFormWriter<T>(structureWriter(), form);
-  }
-
-  public static <T> Encoder<T, T> formEncoder(Form<T> form) {
-    return Utf8.encodedWriter(formWriter(form));
   }
 
 }

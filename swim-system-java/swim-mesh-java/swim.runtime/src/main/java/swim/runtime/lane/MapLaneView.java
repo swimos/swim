@@ -35,7 +35,7 @@ import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
 import swim.collections.HashTrieMap;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
 import swim.observable.function.DidRemoveKey;
@@ -60,15 +60,13 @@ import swim.util.OrderedMapCursor;
 
 public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
   protected final AgentContext agentContext;
   protected Form<K> keyForm;
   protected Form<V> valueForm;
-  protected int flags;
   protected MapLaneModel laneBinding;
   protected MapData<K, V> dataView;
+  protected int flags;
+
   protected MapOutlet<K, V, ? extends Map<K, V>> input;
   protected HashTrieMap<K, KeyEffect> effects;
   protected HashTrieMap<K, KeyOutlet<K, V>> outlets;
@@ -81,6 +79,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
     this.agentContext = agentContext;
     this.keyForm = keyForm;
     this.valueForm = valueForm;
+    this.laneBinding = null;
+    this.dataView = null;
     this.flags = flags;
 
     this.input = null;
@@ -121,12 +121,12 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
   @Override
   public <K2> MapLaneView<K2, V> keyForm(Form<K2> keyForm) {
     return new MapLaneView<K2, V>(this.agentContext, keyForm, this.valueForm,
-        this.flags, typesafeObservers(this.observers));
+                                  this.flags, this.typesafeObservers(this.observers));
   }
 
   @Override
   public <K2> MapLaneView<K2, V> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   public void setKeyForm(Form<K> keyForm) {
@@ -141,12 +141,12 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
   @Override
   public <V2> MapLaneView<K, V2> valueForm(Form<V2> valueForm) {
     return new MapLaneView<K, V2>(this.agentContext, this.keyForm, valueForm,
-        this.flags, typesafeObservers(this.observers));
+                                  this.flags, this.typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> MapLaneView<K, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   public void setValueForm(Form<V> valueForm) {
@@ -160,15 +160,15 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
   }
 
   public final boolean isResident() {
-    return (this.flags & RESIDENT) != 0;
+    return (this.flags & MapLaneView.RESIDENT) != 0;
   }
 
   @Override
   public MapLaneView<K, V> isResident(boolean isResident) {
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= MapLaneView.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~MapLaneView.RESIDENT;
     }
     final MapLaneModel laneBinding = this.laneBinding;
     if (laneBinding != null) {
@@ -179,22 +179,22 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
 
   void didSetResident(boolean isResident) {
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= MapLaneView.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~MapLaneView.RESIDENT;
     }
   }
 
   public final boolean isTransient() {
-    return (this.flags & TRANSIENT) != 0;
+    return (this.flags & MapLaneView.TRANSIENT) != 0;
   }
 
   @Override
   public MapLaneView<K, V> isTransient(boolean isTransient) {
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= MapLaneView.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~MapLaneView.TRANSIENT;
     }
     final MapLaneModel laneBinding = this.laneBinding;
     if (laneBinding != null) {
@@ -205,9 +205,9 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
 
   void didSetTransient(boolean isTransient) {
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= MapLaneView.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~MapLaneView.TRANSIENT;
     }
   }
 
@@ -236,92 +236,92 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
 
   @Override
   public MapLaneView<K, V> willUpdate(WillUpdateKey<K, V> willUpdate) {
-    return observe(willUpdate);
+    return this.observe(willUpdate);
   }
 
   @Override
   public MapLaneView<K, V> didUpdate(DidUpdateKey<K, V> didUpdate) {
-    return observe(didUpdate);
+    return this.observe(didUpdate);
   }
 
   @Override
   public MapLaneView<K, V> willRemove(WillRemoveKey<K> willRemove) {
-    return observe(willRemove);
+    return this.observe(willRemove);
   }
 
   @Override
   public MapLaneView<K, V> didRemove(DidRemoveKey<K, V> didRemove) {
-    return observe(didRemove);
+    return this.observe(didRemove);
   }
 
   @Override
   public MapLaneView<K, V> willDrop(WillDrop willDrop) {
-    return observe(willDrop);
+    return this.observe(willDrop);
   }
 
   @Override
   public MapLaneView<K, V> didDrop(DidDrop didDrop) {
-    return observe(didDrop);
+    return this.observe(didDrop);
   }
 
   @Override
   public MapLaneView<K, V> willTake(WillTake willTake) {
-    return observe(willTake);
+    return this.observe(willTake);
   }
 
   @Override
   public MapLaneView<K, V> didTake(DidTake didTake) {
-    return observe(didTake);
+    return this.observe(didTake);
   }
 
   @Override
   public MapLaneView<K, V> willClear(WillClear willClear) {
-    return observe(willClear);
+    return this.observe(willClear);
   }
 
   @Override
   public MapLaneView<K, V> didClear(DidClear didClear) {
-    return observe(didClear);
+    return this.observe(didClear);
   }
 
   @Override
   public MapLaneView<K, V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public MapLaneView<K, V> didCommand(DidCommand didCommand) {
-    return observe(didCommand);
+    return this.observe(didCommand);
   }
 
   @Override
   public MapLaneView<K, V> willUplink(WillUplink willUplink) {
-    return observe(willUplink);
+    return this.observe(willUplink);
   }
 
   @Override
   public MapLaneView<K, V> didUplink(DidUplink didUplink) {
-    return observe(didUplink);
+    return this.observe(didUplink);
   }
 
   @Override
   public MapLaneView<K, V> willEnter(WillEnter willEnter) {
-    return observe(willEnter);
+    return this.observe(willEnter);
   }
 
   @Override
   public MapLaneView<K, V> didEnter(DidEnter didEnter) {
-    return observe(didEnter);
+    return this.observe(didEnter);
   }
 
   @Override
   public MapLaneView<K, V> willLeave(WillLeave willLeave) {
-    return observe(willLeave);
+    return this.observe(willLeave);
   }
 
   @Override
   public MapLaneView<K, V> didLeave(DidLeave didLeave) {
-    return observe(didLeave);
+    return this.observe(didLeave);
   }
 
   @SuppressWarnings("unchecked")
@@ -338,8 +338,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
           try {
             newValue = ((WillUpdateKey<K, V>) observers).willUpdate(key, newValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -355,8 +355,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
               try {
                 newValue = ((WillUpdateKey<K, V>) observer).willUpdate(key, newValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -387,8 +387,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
           try {
             ((DidUpdateKey<K, V>) observers).didUpdate(key, newValue, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -404,8 +404,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
               try {
                 ((DidUpdateKey<K, V>) observer).didUpdate(key, newValue, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -436,8 +436,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
           try {
             ((WillRemoveKey<K>) observers).willRemove(key);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -453,8 +453,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
               try {
                 ((WillRemoveKey<K>) observer).willRemove(key);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -485,8 +485,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
           try {
             ((DidRemoveKey<K, V>) observers).didRemove(key, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -502,8 +502,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
               try {
                 ((DidRemoveKey<K, V>) observer).didRemove(key, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -533,8 +533,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
           try {
             ((WillDrop) observers).willDrop(lower);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -550,8 +550,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
               try {
                 ((WillDrop) observer).willDrop(lower);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -581,8 +581,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
           try {
             ((DidDrop) observers).didDrop(lower);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -598,8 +598,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
               try {
                 ((DidDrop) observer).didDrop(lower);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -629,8 +629,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
           try {
             ((WillTake) observers).willTake(upper);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -646,8 +646,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
               try {
                 ((WillTake) observer).willTake(upper);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -677,8 +677,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
           try {
             ((DidTake) observers).didTake(upper);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -694,8 +694,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
               try {
                 ((DidTake) observer).didTake(upper);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -725,8 +725,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
           try {
             ((WillClear) observers).willClear();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -742,8 +742,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
               try {
                 ((WillClear) observer).willClear();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -773,8 +773,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
           try {
             ((DidClear) observers).didClear();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -790,8 +790,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
               try {
                 ((DidClear) observer).didClear();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -813,34 +813,41 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
   }
 
   public void laneDidUpdate(K key, V newValue, V oldValue) {
-    decohereInputKey(key, KeyEffect.UPDATE);
-    recohereInputKey(key, 0); // TODO: debounce and track version
+    this.decohereInputKey(key, KeyEffect.UPDATE);
+    this.recohereInputKey(key, 0); // TODO: debounce and track version
   }
 
   public void laneWillRemove(K key) {
+    // hook
   }
 
   public void laneDidRemove(K key, V oldValue) {
-    decohereInputKey(key, KeyEffect.REMOVE);
-    recohereInputKey(key, 0); // TODO: debounce and track version
+    this.decohereInputKey(key, KeyEffect.REMOVE);
+    this.recohereInputKey(key, 0); // TODO: debounce and track version
   }
 
   public void laneWillDrop(int lower) {
+    // hook
   }
 
   public void laneDidDrop(int lower) {
+    // hook
   }
 
   public void laneWillTake(int upper) {
+    // hook
   }
 
   public void laneDidTake(int upper) {
+    // hook
   }
 
   public void laneWillClear() {
+    // hook
   }
 
   public void laneDidClear() {
+    // hook
   }
 
   @Override
@@ -958,11 +965,11 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
   @SuppressWarnings("unchecked")
   @Override
   public V remove(Object key) {
-    final Class<?> keyType = keyForm.type();
+    final Class<?> keyType = this.keyForm.type();
     if (keyType == null || keyType.isInstance(key)) {
       return this.laneBinding.remove(this, (K) key);
     }
-    return valueForm.unit();
+    return this.valueForm.unit();
   }
 
   @Override
@@ -1049,7 +1056,7 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
   @Override
   public void bindInput(Outlet<? extends Map<K, V>> input) {
     if (input instanceof MapOutlet<?, ?, ?>) {
-      bindInput((MapOutlet<K, V, ? extends Map<K, V>>) input);
+      this.bindInput((MapOutlet<K, V, ? extends Map<K, V>>) input);
     } else {
       throw new IllegalArgumentException(input.toString());
     }
@@ -1176,22 +1183,22 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
 
   @Override
   public void decohereOutputKey(K key, KeyEffect effect) {
-    decohereKey(key, effect);
+    this.decohereKey(key, effect);
   }
 
   @Override
   public void decohereInputKey(K key, KeyEffect effect) {
-    decohereKey(key, effect);
+    this.decohereKey(key, effect);
   }
 
   @SuppressWarnings("unchecked")
   public void decohereKey(K key, KeyEffect effect) {
     final HashTrieMap<K, KeyEffect> oldEffects = this.effects;
     if (oldEffects.get(key) != effect) {
-      willDecohereKey(key, effect);
+      this.willDecohereKey(key, effect);
       this.effects = oldEffects.updated(key, effect);
       this.version = -1;
-      onDecohereKey(key, effect);
+      this.onDecohereKey(key, effect);
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         final Inlet<?> output = this.outputs[i];
@@ -1205,25 +1212,25 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
       if (outlet != null) {
         outlet.decohereInput();
       }
-      didDecohereKey(key, effect);
+      this.didDecohereKey(key, effect);
     }
   }
 
   @Override
   public void decohereOutput() {
-    decohere();
+    this.decohere();
   }
 
   @Override
   public void decohereInput() {
-    decohere();
+    this.decohere();
   }
 
   public void decohere() {
     if (this.version >= 0) {
-      willDecohere();
+      this.willDecohere();
       this.version = -1;
-      onDecohere();
+      this.onDecohere();
       final int n = this.outputs != null ? this.outputs.length : 0;
       for (int i = 0; i < n; i += 1) {
         this.outputs[i].decohereOutput();
@@ -1232,18 +1239,18 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
       while (outlets.hasNext()) {
         outlets.next().decohereInput();
       }
-      didDecohere();
+      this.didDecohere();
     }
   }
 
   @Override
   public void recohereOutputKey(K key, int version) {
-    recohereKey(key, version);
+    this.recohereKey(key, version);
   }
 
   @Override
   public void recohereInputKey(K key, int version) {
-    recohereKey(key, version);
+    this.recohereKey(key, version);
   }
 
   @SuppressWarnings("unchecked")
@@ -1252,12 +1259,12 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
       final HashTrieMap<K, KeyEffect> oldEffects = this.effects;
       final KeyEffect effect = oldEffects.get(key);
       if (effect != null) {
-        willRecohereKey(key, effect, version);
+        this.willRecohereKey(key, effect, version);
         this.effects = oldEffects.removed(key);
         if (this.input != null) {
           this.input.recohereInputKey(key, version);
         }
-        onRecohereKey(key, effect, version);
+        this.onRecohereKey(key, effect, version);
         for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
           final Inlet<?> output = this.outputs[i];
           if (output instanceof MapInlet<?, ?, ?>) {
@@ -1268,34 +1275,34 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
         if (outlet != null) {
           outlet.recohereInput(version);
         }
-        didRecohereKey(key, effect, version);
+        this.didRecohereKey(key, effect, version);
       }
     }
   }
 
   @Override
   public void recohereOutput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   @Override
   public void recohereInput(int version) {
-    recohere(version);
+    this.recohere(version);
   }
 
   public void recohere(int version) {
     if (this.version < 0) {
-      willRecohere(version);
+      this.willRecohere(version);
       final Iterator<K> keys = this.effects.keyIterator();
       while (keys.hasNext()) {
-        recohereKey(keys.next(), version);
+        this.recohereKey(keys.next(), version);
       }
       this.version = version;
-      onRecohere(version);
+      this.onRecohere(version);
       for (int i = 0, n = this.outputs != null ? this.outputs.length : 0; i < n; i += 1) {
         this.outputs[i].recohereOutput(version);
       }
-      didRecohere(version);
+      this.didRecohere(version);
     }
   }
 
@@ -1332,14 +1339,14 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
       if (this.input != null) {
         final V value = this.input.get(key);
         if (value != null) {
-          put(key, value);
+          this.put(key, value);
         } else {
-          remove(key);
+          this.remove(key);
         }
       }
     } else if (effect == KeyEffect.REMOVE) {
-      if (containsKey(key)) {
-        remove(key);
+      if (this.containsKey(key)) {
+        this.remove(key);
       }
     }
   }
@@ -1359,5 +1366,8 @@ public class MapLaneView<K, V> extends WarpLaneView implements MapLane<K, V> {
   protected void didRecohere(int version) {
     // hook
   }
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
 
 }

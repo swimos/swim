@@ -27,27 +27,27 @@ final class BooleanDecoder<T> extends Decoder<T> {
     this.type = type;
   }
 
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return BooleanDecoder.decode(input, this.type);
+  }
+
   static <T> Decoder<T> decode(InputBuffer input, AvroBooleanType<T> type) {
     if (input.isCont()) {
       final int b = input.head();
       if (b == 0 || b == 1) {
         input = input.step();
-        return done(type.cast(b != 0));
+        return Decoder.done(type.cast(b != 0));
       } else {
-        return error(new DecoderException("invalid boolean value: " + b));
+        return Decoder.error(new DecoderException("invalid boolean value: " + b));
       }
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new BooleanDecoder<T>(type);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type);
   }
 
 }

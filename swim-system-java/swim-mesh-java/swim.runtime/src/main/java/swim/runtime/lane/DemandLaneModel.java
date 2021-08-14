@@ -15,6 +15,7 @@
 package swim.runtime.lane;
 
 import swim.api.warp.WarpUplink;
+import swim.runtime.LaneModel;
 import swim.runtime.LaneView;
 import swim.runtime.WarpBinding;
 import swim.runtime.warp.WarpLaneModel;
@@ -29,7 +30,7 @@ public class DemandLaneModel extends WarpLaneModel<DemandLaneView<?>, DemandLane
 
   @Override
   protected DemandLaneUplink createWarpUplink(WarpBinding link) {
-    return new DemandLaneUplink(this, link, createUplinkAddress(link));
+    return new DemandLaneUplink(this, link, this.createUplinkAddress(link));
   }
 
   @Override
@@ -38,7 +39,7 @@ public class DemandLaneModel extends WarpLaneModel<DemandLaneView<?>, DemandLane
   }
 
   Value nextDownCue(WarpUplink uplink) {
-    final Object views = this.views;
+    final Object views = LaneModel.VIEWS.get(this);
     if (views instanceof DemandLaneView<?>) {
       return ((DemandLaneView<?>) views).nextDownCue(uplink);
     } else if (views instanceof LaneView[]) {

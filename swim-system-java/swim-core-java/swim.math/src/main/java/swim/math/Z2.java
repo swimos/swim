@@ -18,19 +18,10 @@ import swim.codec.Debug;
 import swim.codec.Format;
 import swim.codec.Output;
 
-public class Z2 implements F2<VectorZ2, Long>, Debug {
-
-  private static Z2 module;
+public class Z2 implements F2<Z2Vector, Long>, Debug {
 
   protected Z2() {
-    // stub
-  }
-
-  public static Z2 module() {
-    if (module == null) {
-      module = new Z2();
-    }
-    return module;
+    // singleton
   }
 
   @Override
@@ -39,58 +30,68 @@ public class Z2 implements F2<VectorZ2, Long>, Debug {
   }
 
   @Override
-  public final VectorZ2 zero() {
-    return VectorZ2.zero();
+  public final Z2Vector zero() {
+    return Z2Vector.zero();
   }
 
   @Override
-  public final VectorZ2 of(Long x, Long y) {
-    return VectorZ2.of(x, y);
+  public final Z2Vector of(Long x, Long y) {
+    return new Z2Vector(x, y);
   }
 
   @Override
-  public final Long getX(VectorZ2 v) {
+  public final Long getX(Z2Vector v) {
     return v.x;
   }
 
   @Override
-  public final Long getY(VectorZ2 v) {
+  public final Long getY(Z2Vector v) {
     return v.y;
   }
 
   @Override
-  public final VectorZ2 add(VectorZ2 u, VectorZ2 v) {
+  public final Z2Vector add(Z2Vector u, Z2Vector v) {
     return u.plus(v);
   }
 
   @Override
-  public final VectorZ2 opposite(VectorZ2 v) {
+  public final Z2Vector opposite(Z2Vector v) {
     return v.opposite();
   }
 
   @Override
-  public final VectorZ2 subtract(VectorZ2 u, VectorZ2 v) {
+  public final Z2Vector subtract(Z2Vector u, Z2Vector v) {
     return u.minus(v);
   }
 
   @Override
-  public final VectorZ2 multiply(VectorZ2 u, Long a) {
+  public final Z2Vector multiply(Z2Vector u, Long a) {
     return u.times(a);
   }
 
   @Override
-  public final VectorZ2 combine(Long a, VectorZ2 u, Long b, VectorZ2 v) {
-    return new VectorZ2(a * u.x + b * v.x, a * u.y + b * v.y);
+  public final Z2Vector combine(Long a, Z2Vector u, Long b, Z2Vector v) {
+    return new Z2Vector(a * u.x + b * v.x, a * u.y + b * v.y);
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.write("Z2").write('.').write("module").write('(').write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Z2").write('.').write("module").write('(').write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static Z2 module;
+
+  public static Z2 module() {
+    if (Z2.module == null) {
+      Z2.module = new Z2();
+    }
+    return Z2.module;
   }
 
 }

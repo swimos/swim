@@ -20,7 +20,7 @@ import swim.codec.OutputBuffer;
 public abstract class WsFrame<T> {
 
   WsFrame() {
-    // stub
+    // sealed
   }
 
   public abstract boolean isDefined();

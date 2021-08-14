@@ -32,6 +32,11 @@ final class JsonWebSignatureWriter extends Writer<Object, JsonWebSignature> {
     this.step = step;
   }
 
+  @Override
+  public Writer<Object, JsonWebSignature> pull(Output<?> output) {
+    return JsonWebSignatureWriter.write(output, this.jws, this.part, this.step);
+  }
+
   static Writer<Object, JsonWebSignature> write(Output<?> output, JsonWebSignature jws,
                                                 Writer<?, ?> part, int step) {
     if (step == 1) {
@@ -58,26 +63,21 @@ final class JsonWebSignatureWriter extends Writer<Object, JsonWebSignature> {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return done(jws);
+        return Writer.done(jws);
       } else if (part.isError()) {
         return part.asError();
       }
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new JsonWebSignatureWriter(jws, part, step);
   }
 
   static Writer<Object, JsonWebSignature> write(Output<?> output, JsonWebSignature jws) {
-    return write(output, jws, null, 1);
-  }
-
-  @Override
-  public Writer<Object, JsonWebSignature> pull(Output<?> output) {
-    return write(output, jws, part, step);
+    return JsonWebSignatureWriter.write(output, jws, null, 1);
   }
 
 }

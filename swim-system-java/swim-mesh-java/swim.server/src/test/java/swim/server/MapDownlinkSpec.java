@@ -61,21 +61,21 @@ public class MapDownlinkSpec {
 
   @BeforeMethod
   public void setupResources() {
-    kernel = ServerLoader.loadServerStack();
-    plane = kernel.openSpace(ActorSpaceDef.fromName("test")).openPlane("test", TestMapPlane.class);
+    this.kernel = ServerLoader.loadServerStack();
+    this.plane = this.kernel.openSpace(ActorSpaceDef.fromName("test")).openPlane("test", TestMapPlane.class);
 
-    kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
-    kernel.start();
+    this.kernel.openService(WebServiceDef.standard().port(53556).spaceName("test"));
+    this.kernel.start();
   }
 
   @AfterMethod
   public void closeResources() {
-    kernel.stop();
+    this.kernel.stop();
   }
 
   private MapDownlink<String, String> getDownlink(final String nodeUri, final String laneUri, final Object observer) {
     final CountDownLatch didSyncLatch = new CountDownLatch(1);
-    final MapDownlink<String, String> downlink = plane.downlinkMap()
+    final MapDownlink<String, String> downlink = this.plane.downlinkMap()
         .keyClass(String.class)
         .valueClass(String.class)
         .hostUri("warp://localhost:53556")
@@ -142,8 +142,8 @@ public class MapDownlinkSpec {
 
     }
 
-    final MapDownlink<String, String> mapLink = getDownlink("/map/words", "map", new MapLinkController());
-    final MapDownlink<String, String> readOnlyMapLink = getDownlink("/map/words", "map", new ReadOnlyMapLinkController());
+    final MapDownlink<String, String> mapLink = this.getDownlink("/map/words", "map", new MapLinkController());
+    final MapDownlink<String, String> readOnlyMapLink = this.getDownlink("/map/words", "map", new ReadOnlyMapLinkController());
 
     mapLink.put("a", "indefinite article");
     mapLink.put("the", "definite article");
@@ -210,8 +210,8 @@ public class MapDownlinkSpec {
 
     }
 
-    final MapDownlink<String, String> mapLink = getDownlink("/map/words", "map", new MapLinkController());
-    final MapDownlink<String, String> readOnlyMapLink = getDownlink("/map/words", "map", new ReadOnlyMapLinkController());
+    final MapDownlink<String, String> mapLink = this.getDownlink("/map/words", "map", new MapLinkController());
+    final MapDownlink<String, String> readOnlyMapLink = this.getDownlink("/map/words", "map", new ReadOnlyMapLinkController());
 
     mapLink.put("a", "indefinite article");
     mapLink.put("the", "definite article");
@@ -285,8 +285,8 @@ public class MapDownlinkSpec {
 
     }
 
-    final MapDownlink<String, String> mapLink = getDownlink("/map/words", "map", new MapLinkController());
-    final MapDownlink<String, String> readOnlyMapLink = getDownlink("/map/words", "map", new ReadOnlyMapLinkController());
+    final MapDownlink<String, String> mapLink = this.getDownlink("/map/words", "map", new MapLinkController());
+    final MapDownlink<String, String> readOnlyMapLink = this.getDownlink("/map/words", "map", new ReadOnlyMapLinkController());
 
     mapLink.put("a", "indefinite article");
     mapLink.put("the", "definite article");
@@ -353,8 +353,8 @@ public class MapDownlinkSpec {
 
     }
 
-    final MapDownlink<String, String> mapLink = getDownlink("/map/words", "map", new MapLinkController());
-    final MapDownlink<String, String> readOnlyMapLink = getDownlink("/map/words", "map", new ReadOnlyMapLinkController());
+    final MapDownlink<String, String> mapLink = this.getDownlink("/map/words", "map", new MapLinkController());
+    final MapDownlink<String, String> readOnlyMapLink = this.getDownlink("/map/words", "map", new ReadOnlyMapLinkController());
 
 
     mapLink.put("a", "alpha");
@@ -436,8 +436,8 @@ public class MapDownlinkSpec {
 
     }
 
-    final MapDownlink<String, String> mapLink = getDownlink("/map/words", "map", new MapLinkController());
-    final MapDownlink<String, String> readOnlyMapLink = getDownlink("/map/words", "map", new ReadOnlyMapLinkController());
+    final MapDownlink<String, String> mapLink = this.getDownlink("/map/words", "map", new MapLinkController());
+    final MapDownlink<String, String> readOnlyMapLink = this.getDownlink("/map/words", "map", new ReadOnlyMapLinkController());
 
     mapLink.put("a", "alpha");
     mapLink.put("b", "bravo");
@@ -484,8 +484,8 @@ public class MapDownlinkSpec {
 
     }
 
-    final MapDownlink<String, String> mapLink = getDownlink("/map/words", "map", new MapLinkController());
-    final MapDownlink<Value, Value> mapLink1 = plane.downlinkMap()
+    final MapDownlink<String, String> mapLink = this.getDownlink("/map/words", "map", new MapLinkController());
+    final MapDownlink<Value, Value> mapLink1 = this.plane.downlinkMap()
         .hostUri("warp://localhost:53556")
         .nodeUri("/map/words")
         .laneUri("map")
@@ -503,27 +503,27 @@ public class MapDownlinkSpec {
     assertEquals(mapLink.size(), 2);
     assertEquals(mapLink1.size(), 2);
 
-    final HashTrieMap<String, String> expected = HashTrieMap.of("a", "indefinite article").updated("the", "definite article");
-    verifyMapLaneKeySet(mapLink.keySet(), String.class, expected.keySet());
-    verifyMapLaneEntrySet(mapLink.entrySet(), String.class, String.class, expected);
-    verifyMapLaneValuesSet(mapLink.values(), String.class, expected.values());
+    final HashTrieMap<String, String> expected = HashTrieMap.<String, String>empty().updated("a", "indefinite article").updated("the", "definite article");
+    this.verifyMapLaneKeySet(mapLink.keySet(), String.class, expected.keySet());
+    this.verifyMapLaneEntrySet(mapLink.entrySet(), String.class, String.class, expected);
+    this.verifyMapLaneValuesSet(mapLink.values(), String.class, expected.values());
 
-    verifyMapLaneKeySet(mapLink1.keySet(), Value.class, expected.keySet());
-    verifyMapLaneEntrySet(mapLink1.entrySet(), Value.class, Value.class, expected);
-    verifyMapLaneValuesSet(mapLink1.values(), Value.class, expected.values());
+    this.verifyMapLaneKeySet(mapLink1.keySet(), Value.class, expected.keySet());
+    this.verifyMapLaneEntrySet(mapLink1.entrySet(), Value.class, Value.class, expected);
+    this.verifyMapLaneValuesSet(mapLink1.values(), Value.class, expected.values());
   }
 
   private <K, V> void verifyMapLaneValuesSet(Collection<V> values, Class<?> valueClass, Collection<String> expectedValues) {
     assertEquals(values.size(), expectedValues.size());
     for (V value : values) {
-      assertTrue(valueClass.isAssignableFrom(value.getClass()), ""
-          + "Actual Class: " + value.getClass().getName() + ". Expected class: " + valueClass.getName());
+      assertTrue(valueClass.isAssignableFrom(value.getClass()),
+                 "Actual Class: " + value.getClass().getName() + ". Expected class: " + valueClass.getName());
       if (value instanceof String) {
         assertTrue(expectedValues.contains(value),
-            "Expected values does not contain " + value);
+                   "Expected values does not contain " + value);
       } else if (value instanceof Value) {
         assertTrue(expectedValues.contains(((Value) value).stringValue()),
-            "Expected values does not contain " + ((Value) value).stringValue());
+                   "Expected values does not contain " + ((Value) value).stringValue());
       }
     }
   }
@@ -537,9 +537,9 @@ public class MapDownlinkSpec {
       final K key = entry.getKey();
       final V value = entry.getValue();
       assertTrue(keyClass.isAssignableFrom(key.getClass()),
-          "Actual Class: " + key.getClass().getName() + ". Expected class: " + keyClass.getName());
+                 "Actual Class: " + key.getClass().getName() + ". Expected class: " + keyClass.getName());
       assertTrue(valueClass.isAssignableFrom(value.getClass()),
-          "Actual Class: " + value.getClass().getName() + ". Expected class: " + valueClass.getName());
+                 "Actual Class: " + value.getClass().getName() + ". Expected class: " + valueClass.getName());
       if (key instanceof String) {
         if (value instanceof String) {
           assertEquals(value, expected.get(key));
@@ -562,13 +562,13 @@ public class MapDownlinkSpec {
     while (keyIterator.hasNext()) {
       final K key = keyIterator.next();
       assertTrue(keyClass.isAssignableFrom(key.getClass()),
-          "Actual Class: " + key.getClass().getName() + ". Expected class: " + keyClass.getName());
+                 "Actual Class: " + key.getClass().getName() + ". Expected class: " + keyClass.getName());
       if (key instanceof String) {
         assertTrue(expectedKeys.contains(key),
-            "Expected keys does not contain " + key);
+                   "Expected keys does not contain " + key);
       } else if (key instanceof Value) {
         assertTrue(expectedKeys.contains(((Value) key).stringValue()),
-            "Expected keys does not contain " + ((Value) key).stringValue());
+                   "Expected keys does not contain " + ((Value) key).stringValue());
       }
     }
   }

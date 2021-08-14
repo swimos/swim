@@ -43,9 +43,6 @@ import swim.util.Murmur3;
  */
 public class TlsSettings implements Debug {
 
-  private static int hashSeed;
-  private static TlsSettings standard;
-  private static Form<TlsSettings> form;
   protected final SSLContext sslContext;
   protected final ClientAuth clientAuth;
   protected final Collection<String> cipherSuites;
@@ -58,6 +55,168 @@ public class TlsSettings implements Debug {
     this.clientAuth = clientAuth;
     this.cipherSuites = cipherSuites;
     this.protocols = protocols;
+  }
+
+  /**
+   * Returns the factory used to create secure sockets.
+   */
+  public final SSLContext sslContext() {
+    return this.sslContext;
+  }
+
+  /**
+   * Returns a copy of these {@code TlsSettings} configured with the given
+   * {@code sslContext} for creating secure sockets.
+   */
+  public TlsSettings sslContext(SSLContext sslContext) {
+    return this.copy(sslContext, this.clientAuth, this.cipherSuites, this.protocols);
+  }
+
+  /**
+   * Returns the authentication requirement for incoming connections.
+   */
+  public final ClientAuth clientAuth() {
+    return this.clientAuth;
+  }
+
+  /**
+   * Returns a copy of these {@code TlsSettings} configured with the given
+   * {@code clientAuth} authentication requirement for incoming connections.
+   */
+  public TlsSettings clientAuth(ClientAuth clientAuth) {
+    return this.copy(this.sslContext, clientAuth, this.cipherSuites, this.protocols);
+  }
+
+  /**
+   * Returns the set of permitted cipher suites for secure socket connections,
+   * or {@code null} if the system defaults should be used.
+   */
+  public final Collection<String> cipherSuites() {
+    return this.cipherSuites;
+  }
+
+  /**
+   * Returns a copy of these {@code TlsSettings} configured with the given set
+   * of {@code cipherSuites}; {@code cipherSuites} may be {@code null} if the
+   * system defaults should be used.
+   */
+  public TlsSettings cipherSuites(Collection<String> cipherSuites) {
+    return this.copy(this.sslContext, this.clientAuth, cipherSuites, this.protocols);
+  }
+
+  /**
+   * Returns the set of permitted secure socket layer protocols, or {@code
+   * null} if the system defaults should be used.
+   */
+  public final Collection<String> protocols() {
+    return this.protocols;
+  }
+
+  /**
+   * Returns a copy of these {@code TlsSettings} configured with the given set
+   * of {@code protocols}; {@code protocols} may be {@code null} if the system
+   * defaults should be used.
+   */
+  public TlsSettings protocols(Collection<String> protocols) {
+    return this.copy(this.sslContext, this.clientAuth, this.cipherSuites, protocols);
+  }
+
+  /**
+   * Returns a new {@code TlsSettings} instance with the given options.
+   * Subclasses may override this method to ensure the proper class is
+   * instantiated when updating settings.
+   */
+  protected TlsSettings copy(SSLContext sslContext, ClientAuth clientAuth,
+                             Collection<String> cipherSuites,
+                             Collection<String> protocols) {
+    return new TlsSettings(sslContext, clientAuth, cipherSuites, protocols);
+  }
+
+  /**
+   * Returns a structural {@code Value} representing these {@code TlsSettings}.
+   */
+  public Value toValue() {
+    return TlsSettings.form().mold(this).toValue();
+  }
+
+  /**
+   * Returns {@code true} if these {@code TlsSettings} can possibly equal some
+   * {@code other} object.
+   */
+  public boolean canEqual(Object other) {
+    return other instanceof TlsSettings;
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (this == other) {
+      return true;
+    } else if (other instanceof TlsSettings) {
+      final TlsSettings that = (TlsSettings) other;
+      return that.canEqual(this)
+          && (this.sslContext == null ? that.sslContext == null : this.sslContext.equals(that.sslContext))
+          && this.clientAuth.equals(that.clientAuth)
+          && (this.cipherSuites == null ? that.cipherSuites == null : this.cipherSuites.equals(that.cipherSuites))
+          && (this.protocols == null ? that.protocols == null : this.protocols.equals(that.protocols));
+    }
+    return false;
+  }
+
+  private static int hashSeed;
+
+  @Override
+  public int hashCode() {
+    if (TlsSettings.hashSeed == 0) {
+      TlsSettings.hashSeed = Murmur3.seed(TlsSettings.class);
+    }
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(TlsSettings.hashSeed,
+        Murmur3.hash(this.sslContext)), this.clientAuth.hashCode()),
+        Murmur3.hash(this.cipherSuites)), Murmur3.hash(this.protocols)));
+  }
+
+  @Override
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("TlsSettings").write('.').write("standard").write('(').write(')')
+                   .write('.').write("sslContext").write('(').debug(this.sslContext).write(')')
+                   .write('.').write("clientAuth").write('(').debug(this.clientAuth).write(')')
+                   .write('.').write("cipherSuites").write('(').debug(this.cipherSuites).write(')')
+                   .write('.').write("protocols").write('(').debug(this.protocols).write(')');
+    return output;
+  }
+
+  @Override
+  public String toString() {
+    return Format.debug(this);
+  }
+
+  private static TlsSettings standard;
+
+  /**
+   * Returns the default {@code TlsSettings} instance.
+   */
+  public static TlsSettings standard() {
+    if (TlsSettings.standard == null) {
+      ClientAuth clientAuth;
+      try {
+        clientAuth = ClientAuth.from(System.getProperty("swim.tls.client.auth"));
+      } catch (IllegalArgumentException swallow) {
+        clientAuth = ClientAuth.NONE;
+      }
+      FingerTrieSeq<String> cipherSuites;
+      try {
+        cipherSuites = FingerTrieSeq.of(System.getProperty("swim.tls.ciphersuites").split(","));
+      } catch (NullPointerException cause) {
+        cipherSuites = null;
+      }
+      FingerTrieSeq<String> protocols;
+      try {
+        protocols = FingerTrieSeq.of(System.getProperty("swim.tls.protocols").split(","));
+      } catch (NullPointerException cause) {
+        protocols = null;
+      }
+      TlsSettings.standard = TlsSettings.create(clientAuth, cipherSuites, protocols);
+    }
+    return TlsSettings.standard;
   }
 
   public static TlsSettings create(ClientAuth clientAuth,
@@ -79,52 +238,13 @@ public class TlsSettings implements Debug {
       } else {
         sslContext = SSLContext.getInstance(tlsProtocol);
       }
-      final KeyManager[] keyManagers = loadKeyManagers();
-      final TrustManager[] trustManagers = loadTrustManagers();
+      final KeyManager[] keyManagers = TlsSettings.loadKeyManagers();
+      final TrustManager[] trustManagers = TlsSettings.loadTrustManagers();
       sslContext.init(keyManagers, trustManagers, random);
       return new TlsSettings(sslContext, clientAuth, cipherSuites, protocols);
     } catch (GeneralSecurityException cause) {
       return null;
     }
-  }
-
-  /**
-   * Returns the default {@code TlsSettings} instance.
-   */
-  public static TlsSettings standard() {
-    if (standard == null) {
-      ClientAuth clientAuth;
-      try {
-        clientAuth = ClientAuth.from(System.getProperty("swim.tls.client.auth"));
-      } catch (IllegalArgumentException swallow) {
-        clientAuth = ClientAuth.NONE;
-      }
-      FingerTrieSeq<String> cipherSuites;
-      try {
-        cipherSuites = FingerTrieSeq.of(System.getProperty("swim.tls.ciphersuites").split(","));
-      } catch (NullPointerException cause) {
-        cipherSuites = null;
-      }
-      FingerTrieSeq<String> protocols;
-      try {
-        protocols = FingerTrieSeq.of(System.getProperty("swim.tls.protocols").split(","));
-      } catch (NullPointerException cause) {
-        protocols = null;
-      }
-      standard = create(clientAuth, cipherSuites, protocols);
-    }
-    return standard;
-  }
-
-  /**
-   * Returns the structural {@code Form} of {@code TlsSettings}.
-   */
-  @Kind
-  public static Form<TlsSettings> form() {
-    if (form == null) {
-      form = new TlsSettingsForm();
-    }
-    return form;
   }
 
   static KeyManager[] loadKeyManagers() {
@@ -217,133 +337,17 @@ public class TlsSettings implements Debug {
     return null;
   }
 
-  /**
-   * Returns the factory used to create secure sockets.
-   */
-  public final SSLContext sslContext() {
-    return this.sslContext;
-  }
+  private static Form<TlsSettings> form;
 
   /**
-   * Returns a copy of these {@code TlsSettings} configured with the given
-   * {@code sslContext} for creating secure sockets.
+   * Returns the structural {@code Form} of {@code TlsSettings}.
    */
-  public TlsSettings sslContext(SSLContext sslContext) {
-    return copy(sslContext, this.clientAuth, this.cipherSuites, this.protocols);
-  }
-
-  /**
-   * Returns the authentication requirement for incoming connections.
-   */
-  public final ClientAuth clientAuth() {
-    return this.clientAuth;
-  }
-
-  /**
-   * Returns a copy of these {@code TlsSettings} configured with the given
-   * {@code clientAuth} authentication requirement for incoming connections.
-   */
-  public TlsSettings clientAuth(ClientAuth clientAuth) {
-    return copy(this.sslContext, clientAuth, this.cipherSuites, this.protocols);
-  }
-
-  /**
-   * Returns the set of permitted cipher suites for secure socket connections,
-   * or {@code null} if the system defaults should be used.
-   */
-  public final Collection<String> cipherSuites() {
-    return this.cipherSuites;
-  }
-
-  /**
-   * Returns a copy of these {@code TlsSettings} configured with the given set
-   * of {@code cipherSuites}; {@code cipherSuites} may be {@code null} if the
-   * system defaults should be used.
-   */
-  public TlsSettings cipherSuites(Collection<String> cipherSuites) {
-    return copy(this.sslContext, this.clientAuth, cipherSuites, this.protocols);
-  }
-
-  /**
-   * Returns the set of permitted secure socket layer protocols, or {@code
-   * null} if the system defaults should be used.
-   */
-  public final Collection<String> protocols() {
-    return this.protocols;
-  }
-
-  /**
-   * Returns a copy of these {@code TlsSettings} configured with the given set
-   * of {@code protocols}; {@code protocols} may be {@code null} if the system
-   * defaults should be used.
-   */
-  public TlsSettings protocols(Collection<String> protocols) {
-    return copy(this.sslContext, this.clientAuth, this.cipherSuites, protocols);
-  }
-
-  /**
-   * Returns a new {@code TlsSettings} instance with the given options.
-   * Subclasses may override this method to ensure the proper class is
-   * instantiated when updating settings.
-   */
-  protected TlsSettings copy(SSLContext sslContext, ClientAuth clientAuth,
-                             Collection<String> cipherSuites,
-                             Collection<String> protocols) {
-    return new TlsSettings(sslContext, clientAuth, cipherSuites, protocols);
-  }
-
-  /**
-   * Returns a structural {@code Value} representing these {@code TlsSettings}.
-   */
-  public Value toValue() {
-    return form().mold(this).toValue();
-  }
-
-  /**
-   * Returns {@code true} if these {@code TlsSettings} can possibly equal some
-   * {@code other} object.
-   */
-  public boolean canEqual(Object other) {
-    return other instanceof TlsSettings;
-  }
-
-  @Override
-  public boolean equals(Object other) {
-    if (this == other) {
-      return true;
-    } else if (other instanceof TlsSettings) {
-      final TlsSettings that = (TlsSettings) other;
-      return that.canEqual(this)
-          && (this.sslContext == null ? that.sslContext == null : this.sslContext.equals(that.sslContext))
-          && this.clientAuth.equals(that.clientAuth)
-          && (this.cipherSuites == null ? that.cipherSuites == null : this.cipherSuites.equals(that.cipherSuites))
-          && (this.protocols == null ? that.protocols == null : this.protocols.equals(that.protocols));
+  @Kind
+  public static Form<TlsSettings> form() {
+    if (TlsSettings.form == null) {
+      TlsSettings.form = new TlsSettingsForm();
     }
-    return false;
-  }
-
-  @Override
-  public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(TlsSettings.class);
-    }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
-        Murmur3.hash(this.sslContext)), this.clientAuth.hashCode()),
-        Murmur3.hash(this.cipherSuites)), Murmur3.hash(this.protocols)));
-  }
-
-  @Override
-  public void debug(Output<?> output) {
-    output = output.write("TlsSettings").write('.').write("standard").write('(').write(')')
-        .write('.').write("sslContext").write('(').debug(this.sslContext).write(')')
-        .write('.').write("clientAuth").write('(').debug(this.clientAuth).write(')')
-        .write('.').write("cipherSuites").write('(').debug(this.cipherSuites).write(')')
-        .write('.').write("protocols").write('(').debug(this.protocols).write(')');
-  }
-
-  @Override
-  public String toString() {
-    return Format.debug(this);
+    return TlsSettings.form;
   }
 
 }
@@ -363,10 +367,9 @@ final class TlsSettingsForm extends Form<TlsSettings> {
   @Override
   public Item mold(TlsSettings settings) {
     if (settings != null) {
-      final Record header = Record.create(2)
-          .slot("protocol", settings.sslContext.getProtocol())
-          .slot("provider", settings.sslContext.getProvider().getName());
-      final Record record = Record.create(4).attr(tag(), header);
+      final Record header = Record.create(2).slot("protocol", settings.sslContext.getProtocol())
+                                            .slot("provider", settings.sslContext.getProvider().getName());
+      final Record record = Record.create(4).attr(this.tag(), header);
 
       if (settings.clientAuth != ClientAuth.NONE) {
         record.slot("clientAuth", ClientAuth.form().mold(settings.clientAuth).toValue());
@@ -397,7 +400,7 @@ final class TlsSettingsForm extends Form<TlsSettings> {
   @Override
   public TlsSettings cast(Item item) {
     final Value value = item.toValue();
-    final Value header = value.getAttr(tag());
+    final Value header = value.getAttr(this.tag());
     if (header.isDefined()) {
       final String tlsProtocol = header.get("protocol").stringValue(System.getProperty("swim.tls.protocol", "TLS"));
       final String tlsProvider = header.get("provider").stringValue(System.getProperty("swim.tls.provider"));
@@ -406,7 +409,7 @@ final class TlsSettingsForm extends Form<TlsSettings> {
       KeyManager[] keyManagers = TlsSettings.loadKeyManagers();
       TrustManager[] trustManagers = TlsSettings.loadTrustManagers();
       for (Item member : value) {
-        final KeyManagerFactory keyManagerFactory = castKeyManagerFactory(member.toValue());
+        final KeyManagerFactory keyManagerFactory = this.castKeyManagerFactory(member.toValue());
         if (keyManagerFactory != null) {
           if (keyManagers == null) {
             keyManagers = keyManagerFactory.getKeyManagers();
@@ -421,7 +424,7 @@ final class TlsSettingsForm extends Form<TlsSettings> {
           }
         }
 
-        final TrustManagerFactory trustManagerFactory = castTrustManagerFactory(member.toValue());
+        final TrustManagerFactory trustManagerFactory = this.castTrustManagerFactory(member.toValue());
         if (trustManagerFactory != null) {
           if (trustManagers == null) {
             trustManagers = trustManagerFactory.getTrustManagers();

@@ -22,7 +22,6 @@ import swim.util.Murmur3;
 
 public class JavaPlaneDef implements PlaneDef, Debug {
 
-  private static int hashSeed;
   final String planeName;
   final String className;
 
@@ -31,21 +30,13 @@ public class JavaPlaneDef implements PlaneDef, Debug {
     this.className = className;
   }
 
-  public static JavaPlaneDef from(String planeName, String className) {
-    return new JavaPlaneDef(planeName, className);
-  }
-
-  public static JavaPlaneDef fromClassName(String className) {
-    return new JavaPlaneDef(className, className);
-  }
-
   @Override
   public final String planeName() {
     return this.planeName;
   }
 
   public JavaPlaneDef planeName(String planeName) {
-    return copy(planeName, this.className);
+    return this.copy(planeName, this.className);
   }
 
   public final String className() {
@@ -53,7 +44,7 @@ public class JavaPlaneDef implements PlaneDef, Debug {
   }
 
   public JavaPlaneDef className(String className) {
-    return copy(this.planeName, className);
+    return this.copy(this.planeName, className);
   }
 
   protected JavaPlaneDef copy(String planeName, String className) {
@@ -72,24 +63,35 @@ public class JavaPlaneDef implements PlaneDef, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(JavaPlaneDef.class);
+    if (JavaPlaneDef.hashSeed == 0) {
+      JavaPlaneDef.hashSeed = Murmur3.seed(JavaPlaneDef.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(JavaPlaneDef.hashSeed,
         Murmur3.hash(this.planeName)), Murmur3.hash(this.className)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("JavaPlaneDef").write('.').write("from").write('(')
-        .debug(this.planeName).write(", ").debug(this.className).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("JavaPlaneDef").write('.').write("create").write('(')
+                   .debug(this.planeName).write(", ").debug(this.className).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static JavaPlaneDef create(String planeName, String className) {
+    return new JavaPlaneDef(planeName, className);
+  }
+
+  public static JavaPlaneDef fromClassName(String className) {
+    return new JavaPlaneDef(className, className);
   }
 
 }

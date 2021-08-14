@@ -37,34 +37,33 @@ final class VarintDecoder<T> extends Decoder<T> {
 
   @Override
   public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.value, this.shift);
+    return VarintDecoder.decode(input, this.type, this.value, this.shift);
   }
 
-  static <T> Decoder<T> decode(InputBuffer input, ProtobufVarintType<T> type,
-                               long value, int shift) {
+  static <T> Decoder<T> decode(InputBuffer input, ProtobufVarintType<T> type, long value, int shift) {
     while (input.isCont()) {
       final int b = input.head();
       if (shift < 64) {
         input = input.step();
         value |= (long) (b & 0x7f) << shift;
       } else {
-        return error(new DecoderException("varint overflow"));
+        return Decoder.error(new DecoderException("varint overflow"));
       }
       if ((b & 0x80) == 0) {
-        return done(type.cast(value));
+        return Decoder.done(type.cast(value));
       }
       shift += 7;
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new VarintDecoder<T>(type, value, shift);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, ProtobufVarintType<T> type) {
-    return decode(input, type, 0L, 0);
+    return VarintDecoder.decode(input, type, 0L, 0);
   }
 
 }

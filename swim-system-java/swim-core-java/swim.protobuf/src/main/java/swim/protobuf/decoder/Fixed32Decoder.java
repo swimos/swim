@@ -37,29 +37,28 @@ final class Fixed32Decoder<T> extends Decoder<T> {
 
   @Override
   public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.value, this.shift);
+    return Fixed32Decoder.decode(input, this.type, this.value, this.shift);
   }
 
-  static <T> Decoder<T> decode(InputBuffer input, ProtobufFixed32Type<T> type,
-                               int value, int shift) {
+  static <T> Decoder<T> decode(InputBuffer input, ProtobufFixed32Type<T> type, int value, int shift) {
     while (input.isCont()) {
       value |= input.head() << shift;
       input = input.step();
       shift += 8;
       if (shift == 32) {
-        return done(type.cast(value));
+        return Decoder.done(type.cast(value));
       }
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new Fixed32Decoder<T>(type, value, shift);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, ProtobufFixed32Type<T> type) {
-    return decode(input, type, 0, 0);
+    return Fixed32Decoder.decode(input, type, 0, 0);
   }
 
 }

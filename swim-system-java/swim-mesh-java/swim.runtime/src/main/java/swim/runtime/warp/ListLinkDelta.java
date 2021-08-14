@@ -24,6 +24,8 @@ public abstract class ListLinkDelta {
     // sealed
   }
 
+  public abstract Value toValue();
+
   public static ListLinkDelta update(int index, Value key, Value value) {
     return new ListLinkDeltaUpdate(index, key, value);
   }
@@ -48,8 +50,6 @@ public abstract class ListLinkDelta {
     return new ListLinkDeltaClear();
   }
 
-  public abstract Value toValue();
-
 }
 
 final class ListLinkDeltaUpdate extends ListLinkDelta {
@@ -67,7 +67,7 @@ final class ListLinkDeltaUpdate extends ListLinkDelta {
   @Override
   public Value toValue() {
     final Record header = Record.create(2).slot("index", this.index)
-        .slot("key", this.key);
+                                          .slot("key", this.key);
     return Attr.of("update", header).concat(this.value);
   }
 
@@ -86,7 +86,7 @@ final class ListLinkDeltaRemove extends ListLinkDelta {
   @Override
   public Value toValue() {
     final Record header = Record.create(2).slot("index", this.index)
-        .slot("key", this.key);
+                                          .slot("key", this.key);
     return Record.create(1).attr("remove", header);
   }
 
@@ -107,8 +107,8 @@ final class ListLinkDeltaMove extends ListLinkDelta {
   @Override
   public Value toValue() {
     final Record header = Record.create(3).slot("from", this.fromIndex)
-        .slot("to", this.toIndex)
-        .slot("key", this.key);
+                                          .slot("to", this.toIndex)
+                                          .slot("key", this.key);
     return Record.create(1).attr("move", header);
   }
 

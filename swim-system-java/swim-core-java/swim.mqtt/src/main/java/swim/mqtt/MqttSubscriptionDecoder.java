@@ -34,6 +34,11 @@ final class MqttSubscriptionDecoder extends Decoder<MqttSubscription> {
     this(mqtt, null, 1);
   }
 
+  @Override
+  public Decoder<MqttSubscription> feed(InputBuffer input) {
+    return MqttSubscriptionDecoder.decode(input, this.mqtt, this.topicName, this.step);
+  }
+
   static Decoder<MqttSubscription> decode(InputBuffer input, MqttDecoder mqtt,
                                           Decoder<String> topicName, int step) {
     if (step == 1) {
@@ -51,23 +56,18 @@ final class MqttSubscriptionDecoder extends Decoder<MqttSubscription> {
     if (step == 2 && input.isCont()) {
       final int flags = input.head();
       input = input.step();
-      return done(mqtt.subscription(topicName.bind(), flags));
+      return Decoder.done(mqtt.subscription(topicName.bind(), flags));
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new MqttSubscriptionDecoder(mqtt, topicName, step);
   }
 
   static Decoder<MqttSubscription> decode(InputBuffer input, MqttDecoder mqtt) {
-    return decode(input, mqtt, null, 1);
-  }
-
-  @Override
-  public Decoder<MqttSubscription> feed(InputBuffer input) {
-    return decode(input, this.mqtt, this.topicName, this.step);
+    return MqttSubscriptionDecoder.decode(input, mqtt, null, 1);
   }
 
 }

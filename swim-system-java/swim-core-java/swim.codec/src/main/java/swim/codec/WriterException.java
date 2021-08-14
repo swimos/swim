@@ -19,8 +19,6 @@ package swim.codec;
  */
 public class WriterException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public WriterException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -36,5 +34,7 @@ public class WriterException extends RuntimeException {
   public WriterException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

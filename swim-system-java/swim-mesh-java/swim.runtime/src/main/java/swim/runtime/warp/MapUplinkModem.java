@@ -24,9 +24,6 @@ import swim.structure.Value;
 
 public abstract class MapUplinkModem extends WarpUplinkModem {
 
-  @SuppressWarnings("unchecked")
-  static final AtomicReferenceFieldUpdater<MapUplinkModem, HashTrieSet<Value>> KEY_QUEUE =
-      AtomicReferenceFieldUpdater.newUpdater(MapUplinkModem.class, (Class<HashTrieSet<Value>>) (Class<?>) HashTrieSet.class, "keyQueue");
   final ConcurrentLinkedQueue<Value> downQueue;
   volatile Iterator<Value> syncQueue;
   volatile HashTrieSet<Value> keyQueue;
@@ -35,7 +32,9 @@ public abstract class MapUplinkModem extends WarpUplinkModem {
   public MapUplinkModem(WarpBinding linkBinding, UplinkAddress uplinkAddress) {
     super(linkBinding, uplinkAddress);
     this.downQueue = new ConcurrentLinkedQueue<Value>();
+    this.syncQueue = null;
     this.keyQueue = HashTrieSet.empty();
+    this.lastKey = null;
   }
 
   @Override
@@ -54,11 +53,11 @@ public abstract class MapUplinkModem extends WarpUplinkModem {
 
   public void cueDownKey(Value key) {
     do {
-      final HashTrieSet<Value> oldKeyQueue = this.keyQueue;
+      final HashTrieSet<Value> oldKeyQueue = MapUplinkModem.KEY_QUEUE.get(this);
       final HashTrieSet<Value> newKeyQueue = oldKeyQueue.added(key);
       if (oldKeyQueue != newKeyQueue) {
-        if (KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue)) {
-          cueDown();
+        if (MapUplinkModem.KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue)) {
+          this.cueDown();
           break;
         }
       } else {
@@ -75,7 +74,7 @@ public abstract class MapUplinkModem extends WarpUplinkModem {
     if (syncQueue != null) {
       if (syncQueue.hasNext()) {
         final Value key = syncQueue.next();
-        return nextDownKey(key);
+        return this.nextDownKey(key);
       } else {
         this.syncQueue = null;
         return null;
@@ -86,29 +85,32 @@ public abstract class MapUplinkModem extends WarpUplinkModem {
 
   @Override
   protected Value nextDownCue() {
-    HashTrieSet<Value> oldKeyQueue;
-    HashTrieSet<Value> newKeyQueue;
-    Value key;
     do {
-      oldKeyQueue = this.keyQueue;
-      key = oldKeyQueue.next(this.lastKey);
-      newKeyQueue = oldKeyQueue.removed(key);
-    } while (oldKeyQueue != newKeyQueue && !KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue));
-    if (key != null) {
-      this.lastKey = key;
-      if (!newKeyQueue.isEmpty()) {
-        do {
-          final int oldStatus = this.status;
-          final int newStatus = oldStatus | CUED_DOWN;
-          if (oldStatus == newStatus || STATUS.compareAndSet(this, oldStatus, newStatus)) {
-            break;
+      final HashTrieSet<Value> oldKeyQueue = MapUplinkModem.KEY_QUEUE.get(this);
+      final Value key = oldKeyQueue.next(this.lastKey);
+      final HashTrieSet<Value> newKeyQueue = oldKeyQueue.removed(key);
+      if (MapUplinkModem.KEY_QUEUE.compareAndSet(this, oldKeyQueue, newKeyQueue)) {
+        if (key != null) {
+          this.lastKey = key;
+          if (!newKeyQueue.isEmpty()) {
+            do {
+              final int oldStatus = WarpUplinkModem.STATUS.get(this);
+              final int newStatus = oldStatus | WarpUplinkModem.CUED_DOWN;
+              if (WarpUplinkModem.STATUS.compareAndSet(this, oldStatus, newStatus)) {
+                break;
+              }
+            } while (true);
           }
-        } while (true);
+          return this.nextDownKey(key);
+        } else {
+          return null;
+        }
       }
-      return nextDownKey(key);
-    } else {
-      return null;
-    }
+    } while (true);
   }
+
+  @SuppressWarnings("unchecked")
+  static final AtomicReferenceFieldUpdater<MapUplinkModem, HashTrieSet<Value>> KEY_QUEUE =
+      AtomicReferenceFieldUpdater.newUpdater(MapUplinkModem.class, (Class<HashTrieSet<Value>>) (Class<?>) HashTrieSet.class, "keyQueue");
 
 }

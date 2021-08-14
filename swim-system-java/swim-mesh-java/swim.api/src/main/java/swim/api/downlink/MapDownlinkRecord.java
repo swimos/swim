@@ -27,9 +27,7 @@ import swim.structure.Slot;
 import swim.structure.Text;
 import swim.structure.Value;
 
-public class MapDownlinkRecord extends DownlinkRecord
-    implements DidUpdateKey<Value, Value>, DidRemoveKey<Value, Value>,
-    DidDrop, DidTake, DidClear {
+public class MapDownlinkRecord extends DownlinkRecord implements DidUpdateKey<Value, Value>, DidRemoveKey<Value, Value>, DidDrop, DidTake, DidClear {
 
   protected final MapDownlink<Value, Value> downlink;
 
@@ -95,12 +93,12 @@ public class MapDownlinkRecord extends DownlinkRecord
 
   @Override
   public Value getSlot(Value key) {
-    return get(key);
+    return this.get(key);
   }
 
   @Override
   public Value getSlot(String key) {
-    return get(key);
+    return this.get(key);
   }
 
   @Override
@@ -145,12 +143,12 @@ public class MapDownlinkRecord extends DownlinkRecord
 
   @Override
   public Value putSlot(Value key, Value newValue) {
-    return put(key, newValue);
+    return this.put(key, newValue);
   }
 
   @Override
   public Value putSlot(String key, Value newValue) {
-    return put(key, newValue);
+    return this.put(key, newValue);
   }
 
   @Override

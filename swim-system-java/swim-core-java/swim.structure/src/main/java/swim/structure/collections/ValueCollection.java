@@ -38,7 +38,7 @@ public class ValueCollection<T> extends ValueIterable<T> implements Collection<T
 
   @Override
   public <T2> ValueCollection<T2> valueClass(Class<T2> valueClass) {
-    return valueForm(Form.<T2>forClass(valueClass));
+    return this.valueForm(Form.<T2>forClass(valueClass));
   }
 
   @Override
@@ -66,7 +66,7 @@ public class ValueCollection<T> extends ValueIterable<T> implements Collection<T
   public boolean containsAll(Collection<?> objects) {
     final Iterator<?> those = objects.iterator();
     while (those.hasNext()) {
-      if (!contains(those.next())) {
+      if (!this.contains(those.next())) {
         return false;
       }
     }

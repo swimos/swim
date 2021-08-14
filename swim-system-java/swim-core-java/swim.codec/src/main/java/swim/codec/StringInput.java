@@ -97,7 +97,7 @@ final class StringInput extends Input {
       return this;
     } else {
       final Throwable error = new InputException("invalid step");
-      return Input.error(error, this.id, mark(), this.settings);
+      return Input.error(error, this.id, this.mark(), this.settings);
     }
   }
 
@@ -113,7 +113,7 @@ final class StringInput extends Input {
         return this;
       } else {
         final Throwable error = new InputException("invalid seek to " + mark);
-        return Input.error(error, this.id, mark(), this.settings);
+        return Input.error(error, this.id, this.mark(), this.settings);
       }
     } else {
       this.offset = 0L;
@@ -174,7 +174,7 @@ final class StringInput extends Input {
   @Override
   public Input clone() {
     return new StringInput(this.string, this.id, this.offset, this.line,
-        this.column, this.settings, this.index, this.isPart);
+                           this.column, this.settings, this.index, this.isPart);
   }
 
 }

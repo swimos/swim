@@ -40,7 +40,7 @@ public final class ServerLoader {
   }
 
   public static Kernel loadServer() {
-    return loadServer(KernelLoader.class.getClassLoader());
+    return ServerLoader.loadServer(KernelLoader.class.getClassLoader());
   }
 
   public static Kernel loadServer(ClassLoader classLoader) {
@@ -53,8 +53,8 @@ public final class ServerLoader {
         kernelConfig = Value.absent();
       }
       final Kernel kernel = loadServerStack(classLoader, kernelConfig);
-      loadSpaces(kernel, kernelConfig, classLoader);
-      loadServices(kernel, kernelConfig, classLoader);
+      ServerLoader.loadSpaces(kernel, kernelConfig, classLoader);
+      ServerLoader.loadServices(kernel, kernelConfig, classLoader);
       return kernel;
     } catch (IOException cause) {
       throw new KernelException(cause);
@@ -62,16 +62,16 @@ public final class ServerLoader {
   }
 
   public static Kernel loadServerStack() {
-    return loadServerStack(KernelLoader.class.getClassLoader());
+    return ServerLoader.loadServerStack(KernelLoader.class.getClassLoader());
   }
 
   public static Kernel loadServerStack(ClassLoader classLoader) {
-    return injectServerStack(classLoader, null);
+    return ServerLoader.injectServerStack(classLoader, null);
   }
 
   public static Kernel loadServerStack(ClassLoader classLoader, Value kernelConfig) {
     Kernel kernel = KernelLoader.loadKernelStack(classLoader, kernelConfig);
-    kernel = injectServerStack(classLoader, kernel);
+    kernel = ServerLoader.injectServerStack(classLoader, kernel);
     return kernel;
   }
 

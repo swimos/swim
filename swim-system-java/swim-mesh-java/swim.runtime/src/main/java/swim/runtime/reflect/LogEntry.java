@@ -24,13 +24,6 @@ import swim.uri.Uri;
 
 public class LogEntry {
 
-  public static final Uri TRACE_LOG_URI = Uri.parse("traceLog");
-  public static final Uri DEBUG_LOG_URI = Uri.parse("debugLog");
-  public static final Uri INFO_LOG_URI = Uri.parse("infoLog");
-  public static final Uri WARN_LOG_URI = Uri.parse("warnLog");
-  public static final Uri ERROR_LOG_URI = Uri.parse("errorLog");
-  public static final Uri FAIL_LOG_URI = Uri.parse("failLog");
-  private static Form<LogEntry> form;
   protected final String tag;
   protected final long time;
   protected final Uri nodeUri;
@@ -43,118 +36,6 @@ public class LogEntry {
     this.nodeUri = nodeUri;
     this.laneUri = laneUri;
     this.message = message;
-  }
-
-  public static LogEntry message(String tag, Uri nodeUri, Uri laneUri, Object message) {
-    final long time = System.currentTimeMillis();
-    return new LogEntry(tag, time, nodeUri, laneUri, Value.fromObject(message));
-  }
-
-  public static LogEntry trace(Uri nodeUri, Uri laneUri, Object message) {
-    return message("trace", nodeUri, laneUri, message);
-  }
-
-  public static LogEntry trace(Uri nodeUri, Object message) {
-    return message("trace", nodeUri, Uri.empty(), message);
-  }
-
-  public static LogEntry trace(Object message) {
-    return message("trace", Uri.empty(), Uri.empty(), message);
-  }
-
-  public static LogEntry debug(Uri nodeUri, Uri laneUri, Object message) {
-    return message("debug", nodeUri, laneUri, message);
-  }
-
-  public static LogEntry debug(Uri nodeUri, Object message) {
-    return message("debug", nodeUri, Uri.empty(), message);
-  }
-
-  public static LogEntry debug(Object message) {
-    return message("debug", Uri.empty(), Uri.empty(), message);
-  }
-
-  public static LogEntry info(Uri nodeUri, Uri laneUri, Object message) {
-    return message("info", nodeUri, laneUri, message);
-  }
-
-  public static LogEntry info(Uri nodeUri, Object message) {
-    return message("info", nodeUri, Uri.empty(), message);
-  }
-
-  public static LogEntry info(Object message) {
-    return message("info", Uri.empty(), Uri.empty(), message);
-  }
-
-  public static LogEntry warn(Uri nodeUri, Uri laneUri, Object message) {
-    return message("warn", nodeUri, laneUri, message);
-  }
-
-  public static LogEntry warn(Uri nodeUri, Object message) {
-    return message("warn", nodeUri, Uri.empty(), message);
-  }
-
-  public static LogEntry warn(Object message) {
-    return message("warn", Uri.empty(), Uri.empty(), message);
-  }
-
-  public static LogEntry error(Uri nodeUri, Uri laneUri, Object message) {
-    return message("error", nodeUri, laneUri, message);
-  }
-
-  public static LogEntry error(Uri nodeUri, Object message) {
-    return message("error", nodeUri, Uri.empty(), message);
-  }
-
-  public static LogEntry error(Object message) {
-    return message("error", Uri.empty(), Uri.empty(), message);
-  }
-
-  public static LogEntry fail(Uri nodeUri, Uri laneUri, Object message) {
-    return message("fail", nodeUri, laneUri, message instanceof Throwable ? moldException((Throwable) message) : message);
-  }
-
-  public static LogEntry fail(Uri nodeUri, Object message) {
-    return message("fail", nodeUri, Uri.empty(), message instanceof Throwable ? moldException((Throwable) message) : message);
-  }
-
-  public static LogEntry fail(Object message) {
-    return message("fail", Uri.empty(), Uri.empty(), message instanceof Throwable ? moldException((Throwable) message) : message);
-  }
-
-  @Kind
-  public static Form<LogEntry> form() {
-    if (form == null) {
-      form = new LogEntryForm();
-    }
-    return form;
-  }
-
-  static Value moldException(Throwable cause) {
-    final StackTraceElement[] frames = cause.getStackTrace();
-    final int frameCount = frames.length;
-    final Record record = Record.create(1 + frameCount)
-        .attr("exception", cause.getMessage());
-    for (int i = 0; i < frameCount; i += 1) {
-      record.item(moldStackFrame(frames[i]));
-    }
-    return record;
-  }
-
-  static Value moldStackFrame(StackTraceElement frame) {
-    final Record header = Record.create(4)
-        .slot("class", frame.getClassName())
-        .slot("method", frame.getMethodName());
-    if (frame.isNativeMethod()) {
-      header.slot("native", true);
-    }
-    if (frame.getFileName() != null) {
-      header.slot("file", frame.getFileName());
-    }
-    if (frame.getLineNumber() >= 0) {
-      header.slot("line", frame.getLineNumber());
-    }
-    return Record.create(1).attr("at", header);
   }
 
   public final String tag() {
@@ -174,7 +55,126 @@ public class LogEntry {
   }
 
   public Value toValue() {
-    return form().mold(this).toValue();
+    return LogEntry.form().mold(this).toValue();
+  }
+
+  public static final Uri TRACE_LOG_URI = Uri.parse("traceLog");
+  public static final Uri DEBUG_LOG_URI = Uri.parse("debugLog");
+  public static final Uri INFO_LOG_URI = Uri.parse("infoLog");
+  public static final Uri WARN_LOG_URI = Uri.parse("warnLog");
+  public static final Uri ERROR_LOG_URI = Uri.parse("errorLog");
+  public static final Uri FAIL_LOG_URI = Uri.parse("failLog");
+
+  public static LogEntry message(String tag, Uri nodeUri, Uri laneUri, Object message) {
+    final long time = System.currentTimeMillis();
+    return new LogEntry(tag, time, nodeUri, laneUri, Value.fromObject(message));
+  }
+
+  public static LogEntry trace(Uri nodeUri, Uri laneUri, Object message) {
+    return LogEntry.message("trace", nodeUri, laneUri, message);
+  }
+
+  public static LogEntry trace(Uri nodeUri, Object message) {
+    return LogEntry.message("trace", nodeUri, Uri.empty(), message);
+  }
+
+  public static LogEntry trace(Object message) {
+    return LogEntry.message("trace", Uri.empty(), Uri.empty(), message);
+  }
+
+  public static LogEntry debug(Uri nodeUri, Uri laneUri, Object message) {
+    return LogEntry.message("debug", nodeUri, laneUri, message);
+  }
+
+  public static LogEntry debug(Uri nodeUri, Object message) {
+    return LogEntry.message("debug", nodeUri, Uri.empty(), message);
+  }
+
+  public static LogEntry debug(Object message) {
+    return LogEntry.message("debug", Uri.empty(), Uri.empty(), message);
+  }
+
+  public static LogEntry info(Uri nodeUri, Uri laneUri, Object message) {
+    return LogEntry.message("info", nodeUri, laneUri, message);
+  }
+
+  public static LogEntry info(Uri nodeUri, Object message) {
+    return LogEntry.message("info", nodeUri, Uri.empty(), message);
+  }
+
+  public static LogEntry info(Object message) {
+    return LogEntry.message("info", Uri.empty(), Uri.empty(), message);
+  }
+
+  public static LogEntry warn(Uri nodeUri, Uri laneUri, Object message) {
+    return LogEntry.message("warn", nodeUri, laneUri, message);
+  }
+
+  public static LogEntry warn(Uri nodeUri, Object message) {
+    return LogEntry.message("warn", nodeUri, Uri.empty(), message);
+  }
+
+  public static LogEntry warn(Object message) {
+    return LogEntry.message("warn", Uri.empty(), Uri.empty(), message);
+  }
+
+  public static LogEntry error(Uri nodeUri, Uri laneUri, Object message) {
+    return LogEntry.message("error", nodeUri, laneUri, message);
+  }
+
+  public static LogEntry error(Uri nodeUri, Object message) {
+    return LogEntry.message("error", nodeUri, Uri.empty(), message);
+  }
+
+  public static LogEntry error(Object message) {
+    return LogEntry.message("error", Uri.empty(), Uri.empty(), message);
+  }
+
+  public static LogEntry fail(Uri nodeUri, Uri laneUri, Object message) {
+    return LogEntry.message("fail", nodeUri, laneUri, message instanceof Throwable ? LogEntry.moldException((Throwable) message) : message);
+  }
+
+  public static LogEntry fail(Uri nodeUri, Object message) {
+    return LogEntry.message("fail", nodeUri, Uri.empty(), message instanceof Throwable ? LogEntry.moldException((Throwable) message) : message);
+  }
+
+  public static LogEntry fail(Object message) {
+    return LogEntry.message("fail", Uri.empty(), Uri.empty(), message instanceof Throwable ? LogEntry.moldException((Throwable) message) : message);
+  }
+
+  static Value moldException(Throwable cause) {
+    final StackTraceElement[] frames = cause.getStackTrace();
+    final int frameCount = frames.length;
+    final Record record = Record.create(1 + frameCount).attr("exception", cause.getMessage());
+    for (int i = 0; i < frameCount; i += 1) {
+      record.item(LogEntry.moldStackFrame(frames[i]));
+    }
+    return record;
+  }
+
+  static Value moldStackFrame(StackTraceElement frame) {
+    final Record header = Record.create(4).slot("class", frame.getClassName())
+                                          .slot("method", frame.getMethodName());
+    if (frame.isNativeMethod()) {
+      header.slot("native", true);
+    }
+    if (frame.getFileName() != null) {
+      header.slot("file", frame.getFileName());
+    }
+    if (frame.getLineNumber() >= 0) {
+      header.slot("line", frame.getLineNumber());
+    }
+    return Record.create(1).attr("at", header);
+  }
+
+  private static Form<LogEntry> form;
+
+  @Kind
+  public static Form<LogEntry> form() {
+    if (LogEntry.form == null) {
+      LogEntry.form = new LogEntryForm();
+    }
+    return LogEntry.form;
   }
 
 }

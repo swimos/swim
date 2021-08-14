@@ -32,10 +32,15 @@ final class TokenWriter extends Writer<Object, String> {
     this(token, 0);
   }
 
+  @Override
+  public Writer<Object, String> pull(Output<?> output) {
+    return TokenWriter.write(output, this.token, this.index);
+  }
+
   static Writer<Object, String> write(Output<?> output, String token, int index) {
     final int length = token.length();
     if (length == 0) {
-      return error(new HttpException("empty token"));
+      return Writer.error(new HttpException("empty token"));
     }
     while (index < length && output.isCont()) {
       final int c = token.codePointAt(index);
@@ -43,26 +48,21 @@ final class TokenWriter extends Writer<Object, String> {
         output = output.write(c);
         index = token.offsetByCodePoints(index, 1);
       } else {
-        return error(new HttpException("invalid token: " + token));
+        return Writer.error(new HttpException("invalid token: " + token));
       }
     }
     if (index >= length) {
-      return done();
+      return Writer.done();
     } else if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new TokenWriter(token, index);
   }
 
   static Writer<Object, String> write(Output<?> output, String token) {
-    return write(output, token, 0);
-  }
-
-  @Override
-  public Writer<Object, String> pull(Output<?> output) {
-    return write(output, this.token, this.index);
+    return TokenWriter.write(output, token, 0);
   }
 
 }

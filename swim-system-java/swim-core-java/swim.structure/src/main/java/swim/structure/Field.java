@@ -16,14 +16,11 @@ package swim.structure;
 
 import java.math.BigInteger;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 
 public abstract class Field extends Item implements Map.Entry<Value, Value> {
 
-  volatile int flags;
-
   Field() {
-    // stub
+    // sealed
   }
 
   /**
@@ -60,12 +57,12 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
   public abstract Value key();
 
   /**
-   * Returns the key component of this {@code Field}.  Equivalent to {@link
+   * Returns the key component of this {@code Field}. Equivalent to {@link
    * #key()}.
    */
   @Override
   public Value getKey() {
-    return key();
+    return this.key();
   }
 
   /**
@@ -74,12 +71,12 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
   public abstract Value value();
 
   /**
-   * Returns the value component of this {@code Field}.  Equivalent to {@link
+   * Returns the value component of this {@code Field}. Equivalent to {@link
    * #value()}.
    */
   @Override
   public Value getValue() {
-    return value();
+    return this.value();
   }
 
   /**
@@ -97,12 +94,12 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
   public abstract Field updatedValue(Value value);
 
   /**
-   * Returns the value component of this {@code Field}.  Equivalent to {@link
+   * Returns the value component of this {@code Field}. Equivalent to {@link
    * #value()}.
    */
   @Override
   public Value toValue() {
-    return value();
+    return this.value();
   }
 
   /**
@@ -120,7 +117,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final Value target() {
-    return value();
+    return this.value();
   }
 
   /**
@@ -339,7 +336,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
   @Override
   public Item conditional(Item thenTerm, Item elseTerm) {
     if (thenTerm instanceof Field && elseTerm instanceof Field) {
-      return conditional((Field) thenTerm, (Field) elseTerm);
+      return this.conditional((Field) thenTerm, (Field) elseTerm);
     }
     return thenTerm;
   }
@@ -351,7 +348,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
   @Override
   public Item or(Item that) {
     if (that instanceof Field) {
-      return or((Field) that);
+      return this.or((Field) that);
     }
     return this;
   }
@@ -363,7 +360,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
   @Override
   public Item and(Item that) {
     if (that instanceof Field) {
-      return and((Field) that);
+      return this.and((Field) that);
     }
     return that;
   }
@@ -386,7 +383,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final String stringValue() {
-    return getValue().stringValue();
+    return this.getValue().stringValue();
   }
 
   /**
@@ -396,7 +393,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final String stringValue(String orElse) {
-    return getValue().stringValue(orElse);
+    return this.getValue().stringValue(orElse);
   }
 
   /**
@@ -408,7 +405,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final byte byteValue() {
-    return getValue().byteValue();
+    return this.getValue().byteValue();
   }
 
   /**
@@ -418,7 +415,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final byte byteValue(byte orElse) {
-    return getValue().byteValue(orElse);
+    return this.getValue().byteValue(orElse);
   }
 
   /**
@@ -430,7 +427,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final short shortValue() {
-    return getValue().shortValue();
+    return this.getValue().shortValue();
   }
 
   /**
@@ -440,7 +437,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final short shortValue(short orElse) {
-    return getValue().shortValue(orElse);
+    return this.getValue().shortValue(orElse);
   }
 
   /**
@@ -452,7 +449,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final int intValue() {
-    return getValue().intValue();
+    return this.getValue().intValue();
   }
 
   /**
@@ -462,7 +459,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final int intValue(int orElse) {
-    return getValue().intValue(orElse);
+    return this.getValue().intValue(orElse);
   }
 
   /**
@@ -474,7 +471,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final long longValue() {
-    return getValue().longValue();
+    return this.getValue().longValue();
   }
 
   /**
@@ -484,7 +481,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final long longValue(long orElse) {
-    return getValue().longValue(orElse);
+    return this.getValue().longValue(orElse);
   }
 
   /**
@@ -496,7 +493,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final float floatValue() {
-    return getValue().floatValue();
+    return this.getValue().floatValue();
   }
 
   /**
@@ -506,7 +503,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final float floatValue(float orElse) {
-    return getValue().floatValue(orElse);
+    return this.getValue().floatValue(orElse);
   }
 
   /**
@@ -518,7 +515,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final double doubleValue() {
-    return getValue().doubleValue();
+    return this.getValue().doubleValue();
   }
 
   /**
@@ -528,7 +525,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final double doubleValue(double orElse) {
-    return getValue().doubleValue(orElse);
+    return this.getValue().doubleValue(orElse);
   }
 
   /**
@@ -540,7 +537,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final BigInteger integerValue() {
-    return getValue().integerValue();
+    return this.getValue().integerValue();
   }
 
   /**
@@ -550,7 +547,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final BigInteger integerValue(BigInteger orElse) {
-    return getValue().integerValue(orElse);
+    return this.getValue().integerValue(orElse);
   }
 
   /**
@@ -562,7 +559,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final Number numberValue() {
-    return getValue().numberValue();
+    return this.getValue().numberValue();
   }
 
   /**
@@ -572,7 +569,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final Number numberValue(Number orElse) {
-    return getValue().numberValue(orElse);
+    return this.getValue().numberValue(orElse);
   }
 
   /**
@@ -584,7 +581,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final char charValue() {
-    return getValue().charValue();
+    return this.getValue().charValue();
   }
 
   /**
@@ -594,7 +591,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final char charValue(char orElse) {
-    return getValue().charValue(orElse);
+    return this.getValue().charValue(orElse);
   }
 
   /**
@@ -606,7 +603,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final boolean booleanValue() {
-    return getValue().booleanValue();
+    return this.getValue().booleanValue();
   }
 
   /**
@@ -616,7 +613,7 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
    */
   @Override
   public final boolean booleanValue(boolean orElse) {
-    return getValue().booleanValue(orElse);
+    return this.getValue().booleanValue(orElse);
   }
 
   @Override
@@ -635,10 +632,5 @@ public abstract class Field extends Item implements Map.Entry<Value, Value> {
       throw new IllegalArgumentException(object.toString());
     }
   }
-
-  static final int IMMUTABLE = 1 << 0;
-
-  static final AtomicIntegerFieldUpdater<Field> FLAGS =
-      AtomicIntegerFieldUpdater.newUpdater(Field.class, "flags");
 
 }

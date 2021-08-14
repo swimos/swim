@@ -16,8 +16,6 @@ package swim.api.agent;
 
 public class AgentException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public AgentException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class AgentException extends RuntimeException {
   public AgentException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

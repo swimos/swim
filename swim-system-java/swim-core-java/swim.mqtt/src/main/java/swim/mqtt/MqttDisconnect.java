@@ -23,27 +23,10 @@ import swim.util.Murmur3;
 
 public final class MqttDisconnect extends MqttPacket<Object> implements Debug {
 
-  private static int hashSeed;
-  private static MqttDisconnect packet;
   final int packetFlags;
 
   MqttDisconnect(int packetFlags) {
     this.packetFlags = packetFlags;
-  }
-
-  public static MqttDisconnect packet() {
-    if (packet == null) {
-      packet = new MqttDisconnect(0);
-    }
-    return packet;
-  }
-
-  public static MqttDisconnect from(int packetFlags) {
-    if (packetFlags == 0) {
-      return packet();
-    } else {
-      return new MqttDisconnect(packetFlags);
-    }
   }
 
   @Override
@@ -86,25 +69,45 @@ public final class MqttDisconnect extends MqttPacket<Object> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttDisconnect.class);
+    if (MqttDisconnect.hashSeed == 0) {
+      MqttDisconnect.hashSeed = Murmur3.seed(MqttDisconnect.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.packetFlags));
+    return Murmur3.mash(Murmur3.mix(MqttDisconnect.hashSeed, this.packetFlags));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("MqttDisconnect").write('.').write("packet").write('(').write(')');
     if (this.packetFlags != 0) {
       output = output.write('.').write("packetFlags").write('(').debug(this.packetFlags).write(')');
     }
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static MqttDisconnect packet;
+
+  public static MqttDisconnect packet() {
+    if (MqttDisconnect.packet == null) {
+      MqttDisconnect.packet = new MqttDisconnect(0);
+    }
+    return MqttDisconnect.packet;
+  }
+
+  public static MqttDisconnect create(int packetFlags) {
+    if (packetFlags == 0) {
+      return MqttDisconnect.packet();
+    } else {
+      return new MqttDisconnect(packetFlags);
+    }
   }
 
 }

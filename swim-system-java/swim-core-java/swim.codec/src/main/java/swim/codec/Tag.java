@@ -15,9 +15,9 @@
 package swim.codec;
 
 /**
- * Description of a source location.  Tags are used to annotate input sources,
- * particularly for {@link Diagnostic diagnostic} purposes.  A {@link Mark} tag
- * annotates a source position.  A {@link Span} tag annotate a source range.
+ * Description of a source location. Tags are used to annotate input sources,
+ * particularly for {@link Diagnostic diagnostic} purposes. A {@link Mark} tag
+ * annotates a source position. A {@link Span} tag annotate a source range.
  *
  * @see Diagnostic
  */

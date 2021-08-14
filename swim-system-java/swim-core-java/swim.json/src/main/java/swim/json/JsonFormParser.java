@@ -36,6 +36,11 @@ final class JsonFormParser<T> extends Parser<T> {
     this(json, form, null);
   }
 
+  @Override
+  public Parser<T> feed(Input input) {
+    return JsonFormParser.parse(input, this.json, this.form, this.parser);
+  }
+
   static <T> Parser<T> parse(Input input, JsonParser<Item, Value> json,
                              Form<T> form, Parser<Value> parser) {
     if (parser == null) {
@@ -45,7 +50,7 @@ final class JsonFormParser<T> extends Parser<T> {
     }
     if (parser.isDone()) {
       final Value value = parser.bind();
-      return done(form.cast(value));
+      return Parser.done(form.cast(value));
     } else if (parser.isError()) {
       return parser.asError();
     }
@@ -53,12 +58,7 @@ final class JsonFormParser<T> extends Parser<T> {
   }
 
   static <T> Parser<T> parse(Input input, JsonParser<Item, Value> json, Form<T> form) {
-    return parse(input, json, form, null);
-  }
-
-  @Override
-  public Parser<T> feed(Input input) {
-    return parse(input, this.json, this.form, this.parser);
+    return JsonFormParser.parse(input, json, form, null);
   }
 
 }

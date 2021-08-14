@@ -39,27 +39,6 @@ import static org.testng.Assert.assertTrue;
 
 public class JsonWriterSpec {
 
-  public static void assertWrites(Item item, byte... expected) {
-    for (int i = 0, n = expected.length; i <= n; i += 1) {
-      final byte[] actual = new byte[n];
-      OutputBuffer<?> buffer = Binary.outputBuffer(actual);
-      buffer = buffer.limit(i);
-      Writer<?, ?> writer = Json.write(item, Utf8.decodedOutput(buffer).isPart(true));
-      buffer = buffer.limit(buffer.capacity());
-      writer = writer.pull(Utf8.decodedOutput(buffer).isPart(false));
-      if (writer.isError()) {
-        throw new TestException(writer.trap());
-      }
-      assertFalse(writer.isCont());
-      assertTrue(writer.isDone());
-      assertEquals(actual, expected);
-    }
-  }
-
-  public static void assertWrites(Item item, String expected) {
-    assertWrites(item, expected.getBytes(Charset.forName("UTF-8")));
-  }
-
   @Test
   public void writeAbsent() {
     assertWrites(Value.absent(), "undefined");
@@ -104,7 +83,7 @@ public class JsonWriterSpec {
     assertWrites(Data.fromBase64("AA=="), "\"AA==\"");
     assertWrites(Data.fromBase64("ABCDabcd12/+"), "\"ABCDabcd12/+\"");
     assertWrites(Data.fromBase64("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+"),
-        "\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+\"");
+                                 "\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/+\"");
   }
 
   @Test
@@ -162,7 +141,7 @@ public class JsonWriterSpec {
   public void writeRecordsWithNonStringKeys() {
     assertWrites(Record.of(Slot.of(Num.from(1), "a")), "{\"$0\":{\"$key\":1,\"$value\":\"a\"}}");
     assertWrites(Record.of(Slot.of(Num.from(1), "a"), Slot.of(Record.empty(), "b")),
-        "{\"$0\":{\"$key\":1,\"$value\":\"a\"},\"$1\":{\"$key\":[],\"$value\":\"b\"}}");
+                 "{\"$0\":{\"$key\":1,\"$value\":\"a\"},\"$1\":{\"$key\":[],\"$value\":\"b\"}}");
   }
 
   @Test
@@ -178,7 +157,7 @@ public class JsonWriterSpec {
   @Test
   public void writeNestedRecords() {
     assertWrites(Record.of(1, Record.of(Attr.of("b", 2), 3), Slot.of("d", 4)),
-        "{\"$0\":1,\"$1\":{\"@b\":2,\"$1\":3},\"d\":4}");
+                 "{\"$0\":1,\"$1\":{\"@b\":2,\"$1\":3},\"d\":4}");
   }
 
   @Test
@@ -195,6 +174,27 @@ public class JsonWriterSpec {
 
     entry = new AbstractMap.SimpleEntry<>(13, "bar");
     assertWrites(Field.of(entry), "{\"$key\":13,\"$value\":\"bar\"}");
+  }
+
+  public static void assertWrites(Item item, byte... expected) {
+    for (int i = 0, n = expected.length; i <= n; i += 1) {
+      final byte[] actual = new byte[n];
+      OutputBuffer<?> buffer = Binary.outputBuffer(actual);
+      buffer = buffer.limit(i);
+      Writer<?, ?> writer = Json.write(item, Utf8.decodedOutput(buffer).isPart(true));
+      buffer = buffer.limit(buffer.capacity());
+      writer = writer.pull(Utf8.decodedOutput(buffer).isPart(false));
+      if (writer.isError()) {
+        throw new TestException(writer.trap());
+      }
+      assertFalse(writer.isCont());
+      assertTrue(writer.isDone());
+      assertEquals(actual, expected);
+    }
+  }
+
+  public static void assertWrites(Item item, String expected) {
+    assertWrites(item, expected.getBytes(Charset.forName("UTF-8")));
   }
 
 }

@@ -81,7 +81,7 @@ final class STreePageRefCursor implements Cursor<Slot> {
 
   @Override
   public long nextIndexLong() {
-    return (long) nextIndex();
+    return (long) this.nextIndex();
   }
 
   @Override
@@ -112,7 +112,7 @@ final class STreePageRefCursor implements Cursor<Slot> {
 
   @Override
   public long previousIndexLong() {
-    return (long) previousIndex();
+    return (long) this.previousIndex();
   }
 
   @Override

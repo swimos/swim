@@ -52,7 +52,7 @@ abstract class STreeNodeCursor implements Cursor<Slot> {
         final STreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex + 1;
         } else {
           return true;
@@ -75,7 +75,7 @@ abstract class STreeNodeCursor implements Cursor<Slot> {
         final STreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex + 1;
         } else {
           throw new NoSuchElementException();
@@ -99,7 +99,7 @@ abstract class STreeNodeCursor implements Cursor<Slot> {
         final STreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex + 1;
         } else {
           throw new UnsupportedOperationException();
@@ -128,7 +128,7 @@ abstract class STreeNodeCursor implements Cursor<Slot> {
           final long childSpan = childRef.span;
           this.childIndex = childIndex + 1;
           if (childSpan < count) {
-            this.childCursor = childCursor(childRef);
+            this.childCursor = this.childCursor(childRef);
             if (count > 0L) {
               this.index += count;
               this.childCursor.skip(count);
@@ -160,7 +160,7 @@ abstract class STreeNodeCursor implements Cursor<Slot> {
         final STreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex + 1;
         } else {
           return false;
@@ -189,7 +189,7 @@ abstract class STreeNodeCursor implements Cursor<Slot> {
         final STreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex + 1;
         } else {
           throw new NoSuchElementException();
@@ -212,7 +212,7 @@ abstract class STreeNodeCursor implements Cursor<Slot> {
         final STreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex - 1;
         if (childIndex >= 0) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex;
         } else {
           return false;
@@ -241,7 +241,7 @@ abstract class STreeNodeCursor implements Cursor<Slot> {
         final STreePageRef[] childRefs = this.page.childRefs;
         final int childIndex = this.childIndex - 1;
         if (childIndex < childRefs.length) {
-          this.childCursor = childCursor(childRefs[childIndex]);
+          this.childCursor = this.childCursor(childRefs[childIndex]);
           this.childIndex = childIndex;
         } else {
           throw new NoSuchElementException();
@@ -253,8 +253,8 @@ abstract class STreeNodeCursor implements Cursor<Slot> {
   @Override
   public void load() throws InterruptedException {
     final Sync<Page> syncPage = new Sync<Page>();
-    page.pageRef.loadTreeAsync(false, syncPage);
-    syncPage.await(page.pageRef.settings().pageLoadTimeout);
+    this.page.pageRef.loadTreeAsync(false, syncPage);
+    syncPage.await(this.page.pageRef.settings().pageLoadTimeout);
   }
 
 }

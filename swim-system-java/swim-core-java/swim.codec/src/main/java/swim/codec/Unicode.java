@@ -27,7 +27,7 @@ package swim.codec;
 public final class Unicode {
 
   private Unicode() {
-    // nop
+    // static
   }
 
   public static Input stringInput(String string) {
@@ -47,7 +47,7 @@ public final class Unicode {
 
   /**
    * Returns a new {@code Output} that writes Unicode code points to the given
-   * string {@code builder}.  The returned {@code Output} accepts an unbounded
+   * string {@code builder}. The returned {@code Output} accepts an unbounded
    * number of code points, remaining permanently in the <em>cont</em> state,
    * and {@link Output#bind() binds} a {@code String} containing all written
    * code points.
@@ -58,7 +58,7 @@ public final class Unicode {
 
   /**
    * Returns a new {@code Output} that appends Unicode code points to the given
-   * {@code string}, using the given output {@code settings}.  The returned
+   * {@code string}, using the given output {@code settings}. The returned
    * {@code Output} accepts an unbounded number of code points, remaining
    * permanently in the <em>cont</em> state, and {@link Output#bind() binds}
    * a {@code String} containing the given {@code string}, and all appended
@@ -70,7 +70,7 @@ public final class Unicode {
 
   /**
    * Returns a new {@code Output} that appends Unicode code points to the given
-   * {@code string}.  The returned {@code Output} accepts an unbounded number
+   * {@code string}. The returned {@code Output} accepts an unbounded number
    * of code points, remaining permanently in the <em>cont</em> state, and
    * {@link Output#bind() binds} a {@code String} containing the given {@code
    * string}, and all appended code points.
@@ -89,7 +89,7 @@ public final class Unicode {
 
   /**
    * Returns a new {@code Output} that buffers Unicode code points, using the
-   * given output {@code settings}.  The returned {@code Output} accepts an
+   * given output {@code settings}. The returned {@code Output} accepts an
    * unbounded number of code points, remaining permanently in the <em>cont</em>
    * state, and {@link Output#bind() binds} a {@code String} containing all
    * written code points.

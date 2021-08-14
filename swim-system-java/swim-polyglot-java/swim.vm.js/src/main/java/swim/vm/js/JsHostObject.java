@@ -46,26 +46,28 @@ public class JsHostObject<T> extends VmHostProxy<T> implements ProxyObject {
     if ("__proto__".equals(key)) {
       return true;
     } else {
-      final HostMember<? super T> member = this.type.getMember(this.bridge, this.self, key);
-      return member != null;
+      final HostMember<? super T> hostMember = this.type.getMember(this.bridge, this.self, key);
+      return hostMember != null;
     }
   }
 
   @Override
   public Object getMember(String key) {
+    final Object guestMember;
     if ("__proto__".equals(key)) {
-      return this.bridge.hostTypeToGuestPrototype(this.type);
+      guestMember = this.bridge.hostTypeToGuestPrototype(this.type);
     } else {
-      final HostMember<? super T> member = this.type.getMember(this.bridge, this.self, key);
-      if (member instanceof HostField<?>) {
-        final Object hostValue = ((HostField<? super T>) member).get(this.bridge, this.self);
-        return this.bridge.hostToGuest(hostValue);
-      } else if (member instanceof HostMethod<?>) {
-        return this.bridge.hostMethodToGuestMethod((HostMethod<? super T>) member, this.self);
+      final HostMember<? super T> hostMember = this.type.getMember(this.bridge, this.self, key);
+      if (hostMember instanceof HostField<?>) {
+        final Object hostValue = ((HostField<? super T>) hostMember).get(this.bridge, this.self);
+        guestMember = this.bridge.hostToGuest(hostValue);
+      } else if (hostMember instanceof HostMethod<?>) {
+        guestMember = this.bridge.hostMethodToGuestMethod((HostMethod<? super T>) hostMember, this.self);
       } else {
-        return null;
+        guestMember = null;
       }
     }
+    return guestMember;
   }
 
   @Override
@@ -73,10 +75,10 @@ public class JsHostObject<T> extends VmHostProxy<T> implements ProxyObject {
     if ("__proto__".equals(key)) {
       throw new UnsupportedOperationException();
     } else {
-      final HostMember<? super T> member = this.type.getMember(this.bridge, this.self, key);
-      if (member instanceof HostField<?>) {
+      final HostMember<? super T> hostMember = this.type.getMember(this.bridge, this.self, key);
+      if (hostMember instanceof HostField<?>) {
         final Object hostValue = this.bridge.guestToHost(guestValue);
-        ((HostField<? super T>) member).set(this.bridge, this.self, hostValue);
+        ((HostField<? super T>) hostMember).set(this.bridge, this.self, hostValue);
       } else {
         throw new UnsupportedOperationException();
       }
@@ -88,9 +90,9 @@ public class JsHostObject<T> extends VmHostProxy<T> implements ProxyObject {
     if ("__proto__".equals(key)) {
       throw new UnsupportedOperationException();
     } else {
-      final HostMember<? super T> member = this.type.getMember(this.bridge, this.self, key);
-      if (member instanceof HostField<?>) {
-        return ((HostField<? super T>) member).remove(this.bridge, this.self);
+      final HostMember<? super T> hostMember = this.type.getMember(this.bridge, this.self, key);
+      if (hostMember instanceof HostField<?>) {
+        return ((HostField<? super T>) hostMember).remove(this.bridge, this.self);
       } else {
         throw new UnsupportedOperationException();
       }
@@ -99,11 +101,11 @@ public class JsHostObject<T> extends VmHostProxy<T> implements ProxyObject {
 
   @Override
   public Object getMemberKeys() {
-    final Collection<? extends HostMember<? super T>> members = this.type.members(this.bridge, this.self);
-    final String[] memberKeys = new String[members.size() + 1];
+    final Collection<? extends HostMember<? super T>> hostMembers = this.type.members(this.bridge, this.self);
+    final String[] memberKeys = new String[hostMembers.size() + 1];
     int i = 0;
-    for (HostMember<? super T> member : members) {
-      memberKeys[i] = member.key();
+    for (HostMember<? super T> hostMember : hostMembers) {
+      memberKeys[i] = hostMember.key();
       i += 1;
     }
     memberKeys[i] = "__proto__";

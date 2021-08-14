@@ -22,41 +22,12 @@ import swim.util.Murmur3;
 
 public final class HttpCharset extends HttpPart implements Debug {
 
-  private static int hashSeed;
-  private static HttpCharset star;
   final String name;
   final float weight;
 
   HttpCharset(String name, float weight) {
     this.name = name;
     this.weight = weight;
-  }
-
-  public static HttpCharset star() {
-    if (star == null) {
-      star = new HttpCharset("*", 1f);
-    }
-    return star;
-  }
-
-  public static HttpCharset from(String name, float weight) {
-    if (weight == 1f) {
-      return from(name);
-    } else {
-      return new HttpCharset(name, weight);
-    }
-  }
-
-  public static HttpCharset from(String name) {
-    if ("*".equals(name)) {
-      return star();
-    } else {
-      return new HttpCharset(name, 1f);
-    }
-  }
-
-  public static HttpCharset parse(String string) {
-    return Http.standardParser().parseCharsetString(string);
   }
 
   public boolean isStar() {
@@ -75,7 +46,7 @@ public final class HttpCharset extends HttpPart implements Debug {
     if (this.weight == weight) {
       return this;
     } else {
-      return from(this.name, weight);
+      return HttpCharset.create(this.name, weight);
     }
   }
 
@@ -108,27 +79,59 @@ public final class HttpCharset extends HttpPart implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(HttpCharset.class);
+    if (HttpCharset.hashSeed == 0) {
+      HttpCharset.hashSeed = Murmur3.seed(HttpCharset.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpCharset.hashSeed,
         this.name.hashCode()), Murmur3.hash(this.weight)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("HttpCharset").write('.').write("from").write('(').debug(this.name);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("HttpCharset").write('.').write("create").write('(').debug(this.name);
     if (this.weight != 1f) {
       output = output.write(", ").debug(this.weight);
     }
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static HttpCharset star;
+
+  public static HttpCharset star() {
+    if (HttpCharset.star == null) {
+      HttpCharset.star = new HttpCharset("*", 1f);
+    }
+    return HttpCharset.star;
+  }
+
+  public static HttpCharset create(String name, float weight) {
+    if (weight == 1f) {
+      return HttpCharset.create(name);
+    } else {
+      return new HttpCharset(name, weight);
+    }
+  }
+
+  public static HttpCharset create(String name) {
+    if ("*".equals(name)) {
+      return HttpCharset.star();
+    } else {
+      return new HttpCharset(name, 1f);
+    }
+  }
+
+  public static HttpCharset parse(String string) {
+    return Http.standardParser().parseCharsetString(string);
   }
 
 }

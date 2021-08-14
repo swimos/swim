@@ -22,115 +22,6 @@ import java.nio.channels.ReadableByteChannel;
  */
 public abstract class OutputBuffer<T> extends Output<T> {
 
-  private static OutputBuffer<Object> full;
-  private static OutputBuffer<Object> done;
-
-  /**
-   * Returns an {@code OutputBuffer} in the <em>full</em> state, that binds a
-   * {@code null} result.
-   */
-  @SuppressWarnings("unchecked")
-  public static <T> OutputBuffer<T> full() {
-    if (full == null) {
-      full = new OutputBufferFull<Object>(null, OutputSettings.standard());
-    }
-    return (OutputBuffer<T>) full;
-  }
-
-  /**
-   * Returns an {@code OutputBuffer} in the <em>full</em> state, with the given
-   * {@code settings}.
-   */
-  public static <T> OutputBuffer<T> full(OutputSettings settings) {
-    if (settings == OutputSettings.standard()) {
-      return full();
-    }
-    return new OutputBufferFull<T>(null, settings);
-  }
-
-  /**
-   * Returns an {@code OutputBuffer} in the <em>full</em> state, that binds the
-   * given {@code value}.
-   */
-  public static <T> OutputBuffer<T> full(T value) {
-    if (value == null) {
-      return full();
-    }
-    return new OutputBufferFull<T>(value, OutputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code OutputBuffer} in the <em>full</em> state, that binds the
-   * given {@code value}, with the given {@code settings}.
-   */
-  public static <T> OutputBuffer<T> full(T value, OutputSettings settings) {
-    if (value == null && settings == OutputSettings.standard()) {
-      return full();
-    }
-    return new OutputBufferFull<T>(value, settings);
-  }
-
-  /**
-   * Returns an {@code OutputBuffer} in the <em>done</em> state, that binds a
-   * {@code null} result.
-   */
-  @SuppressWarnings("unchecked")
-  public static <T> OutputBuffer<T> done() {
-    if (done == null) {
-      done = new OutputBufferDone<Object>(null, OutputSettings.standard());
-    }
-    return (OutputBuffer<T>) done;
-  }
-
-  /**
-   * Returns an {@code OutputBuffer} in the <em>done</em> state, with the given
-   * {@code settings}.
-   */
-  public static <T> OutputBuffer<T> done(OutputSettings settings) {
-    if (settings == OutputSettings.standard()) {
-      return done();
-    }
-    return new OutputBufferDone<T>(null, settings);
-  }
-
-  /**
-   * Returns an {@code OutputBuffer} in the <em>done</em> state, that binds the
-   * given {@code value}.
-   */
-  public static <T> OutputBuffer<T> done(T value) {
-    if (value == null) {
-      return done();
-    }
-    return new OutputBufferDone<T>(value, OutputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code OutputBuffer} in the <em>done</em> state, that binds the
-   * given {@code value}, with the given {@code settings}.
-   */
-  public static <T> OutputBuffer<T> done(T value, OutputSettings settings) {
-    if (value == null && settings == OutputSettings.standard()) {
-      return done();
-    }
-    return new OutputBufferDone<T>(value, settings);
-  }
-
-  /**
-   * Returns an {@code OutputBuffer} in the <em>error</em> state, with the
-   * given output {@code error}.
-   */
-  public static <T> OutputBuffer<T> error(Throwable error) {
-    return new OutputBufferError<T>(error, OutputSettings.standard());
-  }
-
-  /**
-   * Returns an {@code OutputBuffer} in the <em>error</em> state, with the
-   * given output {@code error} and {@code settings}.
-   */
-  public static <T> OutputBuffer<T> error(Throwable error, OutputSettings settings) {
-    return new OutputBufferError<T>(error, settings);
-  }
-
   public abstract OutputBuffer<T> isPart(boolean isPart);
 
   public abstract int index();
@@ -172,24 +63,32 @@ public abstract class OutputBuffer<T> extends Output<T> {
 
   @Override
   public OutputBuffer<T> writeln(String string) {
-    return write(string).writeln();
+    return this.write(string).writeln();
   }
 
   @Override
   public OutputBuffer<T> writeln() {
-    return write(settings().lineSeparator());
+    return this.write(settings().lineSeparator());
   }
 
   @Override
   public OutputBuffer<T> display(Object object) {
-    Format.display(object, this);
-    return this;
+    final Output<T> output = Format.display(object, this);
+    if (output instanceof OutputBuffer) {
+      return (OutputBuffer<T>) output;
+    } else {
+      return OutputBuffer.error(output.trap());
+    }
   }
 
   @Override
   public OutputBuffer<T> debug(Object object) {
-    Format.debug(object, this);
-    return this;
+    final Output<T> output = Format.debug(object, this);
+    if (output instanceof OutputBuffer) {
+      return (OutputBuffer<T>) output;
+    } else {
+      return OutputBuffer.error(output.trap());
+    }
   }
 
   public abstract OutputBuffer<T> move(int fromIndex, int toIndex, int length);
@@ -212,6 +111,116 @@ public abstract class OutputBuffer<T> extends Output<T> {
   @Override
   public OutputBuffer<T> clone() {
     throw new UnsupportedOperationException();
+  }
+
+  private static OutputBuffer<Object> full;
+
+  /**
+   * Returns an {@code OutputBuffer} in the <em>full</em> state, that binds a
+   * {@code null} result.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> OutputBuffer<T> full() {
+    if (OutputBuffer.full == null) {
+      OutputBuffer.full = new OutputBufferFull<Object>(null, OutputSettings.standard());
+    }
+    return (OutputBuffer<T>) OutputBuffer.full;
+  }
+
+  /**
+   * Returns an {@code OutputBuffer} in the <em>full</em> state, with the given
+   * {@code settings}.
+   */
+  public static <T> OutputBuffer<T> full(OutputSettings settings) {
+    if (settings == OutputSettings.standard()) {
+      return OutputBuffer.full();
+    }
+    return new OutputBufferFull<T>(null, settings);
+  }
+
+  /**
+   * Returns an {@code OutputBuffer} in the <em>full</em> state, that binds the
+   * given {@code value}.
+   */
+  public static <T> OutputBuffer<T> full(T value) {
+    if (value == null) {
+      return OutputBuffer.full();
+    }
+    return new OutputBufferFull<T>(value, OutputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code OutputBuffer} in the <em>full</em> state, that binds the
+   * given {@code value}, with the given {@code settings}.
+   */
+  public static <T> OutputBuffer<T> full(T value, OutputSettings settings) {
+    if (value == null && settings == OutputSettings.standard()) {
+      return OutputBuffer.full();
+    }
+    return new OutputBufferFull<T>(value, settings);
+  }
+
+  private static OutputBuffer<Object> done;
+
+  /**
+   * Returns an {@code OutputBuffer} in the <em>done</em> state, that binds a
+   * {@code null} result.
+   */
+  @SuppressWarnings("unchecked")
+  public static <T> OutputBuffer<T> done() {
+    if (OutputBuffer.done == null) {
+      OutputBuffer.done = new OutputBufferDone<Object>(null, OutputSettings.standard());
+    }
+    return (OutputBuffer<T>) OutputBuffer.done;
+  }
+
+  /**
+   * Returns an {@code OutputBuffer} in the <em>done</em> state, with the given
+   * {@code settings}.
+   */
+  public static <T> OutputBuffer<T> done(OutputSettings settings) {
+    if (settings == OutputSettings.standard()) {
+      return OutputBuffer.done();
+    }
+    return new OutputBufferDone<T>(null, settings);
+  }
+
+  /**
+   * Returns an {@code OutputBuffer} in the <em>done</em> state, that binds the
+   * given {@code value}.
+   */
+  public static <T> OutputBuffer<T> done(T value) {
+    if (value == null) {
+      return OutputBuffer.done();
+    }
+    return new OutputBufferDone<T>(value, OutputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code OutputBuffer} in the <em>done</em> state, that binds the
+   * given {@code value}, with the given {@code settings}.
+   */
+  public static <T> OutputBuffer<T> done(T value, OutputSettings settings) {
+    if (value == null && settings == OutputSettings.standard()) {
+      return OutputBuffer.done();
+    }
+    return new OutputBufferDone<T>(value, settings);
+  }
+
+  /**
+   * Returns an {@code OutputBuffer} in the <em>error</em> state, with the
+   * given output {@code error}.
+   */
+  public static <T> OutputBuffer<T> error(Throwable error) {
+    return new OutputBufferError<T>(error, OutputSettings.standard());
+  }
+
+  /**
+   * Returns an {@code OutputBuffer} in the <em>error</em> state, with the
+   * given output {@code error} and {@code settings}.
+   */
+  public static <T> OutputBuffer<T> error(Throwable error, OutputSettings settings) {
+    return new OutputBufferError<T>(error, settings);
   }
 
 }

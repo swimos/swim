@@ -21,31 +21,10 @@ import swim.util.Murmur3;
 
 public class InterpreterSettings implements Debug {
 
-  public static final int MAX_SCOPE_DEPTH;
-  private static InterpreterSettings standard;
-  private static int hashSeed;
-
-  static {
-    int maxScopeDepth;
-    try {
-      maxScopeDepth = Integer.parseInt(System.getProperty("swim.structure.interpreter.max.scope.depth"));
-    } catch (NumberFormatException e) {
-      maxScopeDepth = 1024;
-    }
-    MAX_SCOPE_DEPTH = maxScopeDepth;
-  }
-
   protected final int maxScopeDepth;
 
   public InterpreterSettings(int maxScopeDepth) {
     this.maxScopeDepth = maxScopeDepth;
-  }
-
-  public static InterpreterSettings standard() {
-    if (standard == null) {
-      standard = new InterpreterSettings(MAX_SCOPE_DEPTH);
-    }
-    return standard;
   }
 
   public final int maxScopeDepth() {
@@ -53,7 +32,7 @@ public class InterpreterSettings implements Debug {
   }
 
   public InterpreterSettings maxScopeDepth(int maxScopeDepth) {
-    return copy(maxScopeDepth);
+    return this.copy(maxScopeDepth);
   }
 
   protected InterpreterSettings copy(int maxScopeDepth) {
@@ -75,23 +54,47 @@ public class InterpreterSettings implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(InterpreterSettings.class);
+    if (InterpreterSettings.hashSeed == 0) {
+      InterpreterSettings.hashSeed = Murmur3.seed(InterpreterSettings.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.maxScopeDepth));
+    return Murmur3.mash(Murmur3.mix(InterpreterSettings.hashSeed, this.maxScopeDepth));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("new").write(' ').write("InterpreterSettings").write('(')
-        .debug(this.maxScopeDepth).write(')');
+                   .debug(this.maxScopeDepth).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static final int MAX_SCOPE_DEPTH;
+
+  private static InterpreterSettings standard;
+
+  public static InterpreterSettings standard() {
+    if (InterpreterSettings.standard == null) {
+      InterpreterSettings.standard = new InterpreterSettings(InterpreterSettings.MAX_SCOPE_DEPTH);
+    }
+    return InterpreterSettings.standard;
+  }
+
+  static {
+    int maxScopeDepth;
+    try {
+      maxScopeDepth = Integer.parseInt(System.getProperty("swim.structure.interpreter.max.scope.depth"));
+    } catch (NumberFormatException e) {
+      maxScopeDepth = 1024;
+    }
+    MAX_SCOPE_DEPTH = maxScopeDepth;
   }
 
 }

@@ -26,47 +26,10 @@ import swim.util.Murmur3;
 
 public final class Connection extends HttpHeader {
 
-  private static int hashSeed;
-  private static Connection close;
-  private static Connection upgrade;
   final FingerTrieSeq<String> options;
 
   Connection(FingerTrieSeq<String> options) {
     this.options = options;
-  }
-
-  public static Connection close() {
-    if (close == null) {
-      close = new Connection(FingerTrieSeq.of("close"));
-    }
-    return close;
-  }
-
-  public static Connection upgrade() {
-    if (upgrade == null) {
-      upgrade = new Connection(FingerTrieSeq.of("Upgrade"));
-    }
-    return upgrade;
-  }
-
-  public static Connection from(FingerTrieSeq<String> options) {
-    if (options.size() == 1) {
-      final String option = options.head();
-      if ("close".equals(option)) {
-        return close();
-      } else if ("Upgrade".equals(option)) {
-        return upgrade();
-      }
-    }
-    return new Connection(options);
-  }
-
-  public static Connection from(String... options) {
-    return from(FingerTrieSeq.of(options));
-  }
-
-  public static Parser<Connection> parseHttpValue(Input input, HttpParser http) {
-    return ConnectionParser.parse(input, http);
   }
 
   @Override
@@ -114,25 +77,66 @@ public final class Connection extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Connection.class);
+    if (Connection.hashSeed == 0) {
+      Connection.hashSeed = Murmur3.seed(Connection.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.options.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Connection.hashSeed, this.options.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("Connection").write('.').write("from").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Connection").write('.').write("create").write('(');
     final int n = this.options.size();
     if (n > 0) {
-      output.debug(this.options.head());
+      output = output.debug(this.options.head());
       for (int i = 1; i < n; i += 1) {
         output = output.write(", ").write(this.options.get(i));
       }
     }
     output = output.write(')');
+    return output;
+  }
+
+  private static Connection close;
+
+  public static Connection close() {
+    if (Connection.close == null) {
+      Connection.close = new Connection(FingerTrieSeq.of("close"));
+    }
+    return Connection.close;
+  }
+
+  private static Connection upgrade;
+
+  public static Connection upgrade() {
+    if (Connection.upgrade == null) {
+      Connection.upgrade = new Connection(FingerTrieSeq.of("Upgrade"));
+    }
+    return Connection.upgrade;
+  }
+
+  public static Connection create(FingerTrieSeq<String> options) {
+    if (options.size() == 1) {
+      final String option = options.head();
+      if ("close".equals(option)) {
+        return Connection.close();
+      } else if ("Upgrade".equals(option)) {
+        return Connection.upgrade();
+      }
+    }
+    return new Connection(options);
+  }
+
+  public static Connection create(String... options) {
+    return create(FingerTrieSeq.of(options));
+  }
+
+  public static Parser<Connection> parseHttpValue(Input input, HttpParser http) {
+    return ConnectionParser.parse(input, http);
   }
 
 }

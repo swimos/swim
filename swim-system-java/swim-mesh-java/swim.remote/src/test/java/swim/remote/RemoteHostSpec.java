@@ -83,9 +83,9 @@ public class RemoteHostSpec {
     final AbstractWarpServer server = new AbstractWarpServer() {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
-        final WsRequest wsRequest = WsRequest.from(httpRequest);
+        final WsRequest wsRequest = WsRequest.create(httpRequest);
         final WsResponse wsResponse = wsRequest.accept(wsSettings);
-        return upgrade(serverHost, wsResponse);
+        return this.upgrade(serverHost, wsResponse);
       }
     };
     final AbstractHttpService service = new AbstractHttpService() {
@@ -142,8 +142,8 @@ public class RemoteHostSpec {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
-        pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), clientToServerCommand.nodeUri(),
-                                  clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
+        this.pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), clientToServerCommand.nodeUri(),
+                                       clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
         clientPush.countDown();
       }
 
@@ -162,8 +162,8 @@ public class RemoteHostSpec {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
-        pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), serverToClientCommand.nodeUri(),
-                                  serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
+        this.pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), serverToClientCommand.nodeUri(),
+                                       serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
         serverPush.countDown();
       }
     };
@@ -177,10 +177,10 @@ public class RemoteHostSpec {
     final AbstractWarpServer server = new AbstractWarpServer() {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
-        final WsRequest wsRequest = WsRequest.from(httpRequest);
+        final WsRequest wsRequest = WsRequest.create(httpRequest);
         assertNotNull(wsRequest);
         final WsResponse wsResponse = wsRequest.accept(wsSettings);
-        return upgrade(serverHost, wsResponse);
+        return this.upgrade(serverHost, wsResponse);
       }
     };
     final AbstractHttpService service = new AbstractHttpService() {
@@ -252,19 +252,19 @@ public class RemoteHostSpec {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
-        if (attempt < failedAttempts) {
-          attempt += 1;
-          throw new RuntimeException("FORCED FAILURE " + attempt + " of " + failedAttempts);
+        if (this.attempt < failedAttempts) {
+          this.attempt += 1;
+          throw new RuntimeException("FORCED FAILURE " + this.attempt + " of " + failedAttempts);
         } else {
-          pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), clientToServerCommand.nodeUri(),
-                                    clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
+          this.pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), clientToServerCommand.nodeUri(),
+                                         clientToServerCommand.laneUri(), 0.0f, null, clientToServerCommand, null));
           clientPush.countDown();
         }
       }
 
       @Override
       protected void reconnect() {
-        if (attempt <= failedAttempts) {
+        if (this.attempt <= failedAttempts) {
           super.reconnect();
         } else {
           // prevent reconnect
@@ -281,8 +281,8 @@ public class RemoteHostSpec {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         super.didUpgrade(httpRequest, httpResponse);
-        pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), serverToClientCommand.nodeUri(),
-                                  serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
+        this.pushUp(new Push<Envelope>(Uri.empty(), Uri.empty(), serverToClientCommand.nodeUri(),
+                                       serverToClientCommand.laneUri(), 0.0f, null, serverToClientCommand, null));
         serverPush.countDown();
       }
     };
@@ -296,11 +296,11 @@ public class RemoteHostSpec {
     final AbstractWarpServer server = new AbstractWarpServer() {
       @Override
       public HttpResponder<?> doRequest(HttpRequest<?> httpRequest) {
-        final WsRequest wsRequest = WsRequest.from(httpRequest);
+        final WsRequest wsRequest = WsRequest.create(httpRequest);
         assertNotNull(wsRequest);
 
         final WsResponse wsResponse = wsRequest.accept(wsSettings);
-        return upgrade(serverHost, wsResponse);
+        return this.upgrade(serverHost, wsResponse);
       }
     };
     final AbstractHttpService service = new AbstractHttpService() {

@@ -23,6 +23,10 @@ import swim.dynamic.java.lang.HostObject;
 
 public final class HostPlane {
 
+  private HostPlane() {
+    // static
+  }
+
   public static final HostObjectType<Plane> TYPE;
 
   static {
@@ -30,10 +34,6 @@ public final class HostPlane {
     TYPE = type;
     type.inheritType(HostObject.TYPE);
     type.addMember(new HostPlanePlaneContext());
-  }
-
-  private HostPlane() {
-    // static
   }
 
 }

@@ -27,8 +27,8 @@ final class RecordParser<I, V> extends Parser<V> {
   final Parser<V> valueParser;
   final int step;
 
-  RecordParser(ReconParser<I, V> recon, Builder<I, V> builder, Parser<V> keyParser,
-               Parser<V> valueParser, int step) {
+  RecordParser(ReconParser<I, V> recon, Builder<I, V> builder,
+               Parser<V> keyParser, Parser<V> valueParser, int step) {
     this.recon = recon;
     this.builder = builder;
     this.keyParser = keyParser;
@@ -38,7 +38,8 @@ final class RecordParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.builder, this.keyParser, this.valueParser, this.step);
+    return RecordParser.parse(input, this.recon, this.builder, this.keyParser,
+                              this.valueParser, this.step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder,
@@ -51,10 +52,10 @@ final class RecordParser<I, V> extends Parser<V> {
           input = input.step();
           step = 2;
         } else {
-          return error(Diagnostic.expected('{', input));
+          return Parser.error(Diagnostic.expected('{', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('{', input));
+        return Parser.error(Diagnostic.expected('{', input));
       }
     }
     block:
@@ -74,7 +75,7 @@ final class RecordParser<I, V> extends Parser<V> {
           }
           if (c == '}') {
             input = input.step();
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           } else if (c == '#') {
             input = input.step();
             step = 8;
@@ -82,7 +83,7 @@ final class RecordParser<I, V> extends Parser<V> {
             step = 3;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected('}', input));
+          return Parser.error(Diagnostic.expected('}', input));
         }
       }
       if (step == 3) {
@@ -117,7 +118,7 @@ final class RecordParser<I, V> extends Parser<V> {
             step = 7;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected('}', input));
+          return Parser.error(Diagnostic.expected('}', input));
         }
       }
       if (step == 5) {
@@ -128,7 +129,7 @@ final class RecordParser<I, V> extends Parser<V> {
           step = 6;
         } else if (input.isDone()) {
           builder.add(recon.slot(keyParser.bind()));
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         }
       }
       if (step == 6) {
@@ -166,12 +167,12 @@ final class RecordParser<I, V> extends Parser<V> {
             step = 8;
           } else if (c == '}') {
             input = input.step();
-            return done(builder.bind());
+            return Parser.done(builder.bind());
           } else {
-            return error(Diagnostic.expected("'}', ';', ',', or newline", input));
+            return Parser.error(Diagnostic.expected("'}', ';', ',', or newline", input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected('}', input));
+          return Parser.error(Diagnostic.expected('}', input));
         }
       }
       if (step == 8) {
@@ -192,17 +193,17 @@ final class RecordParser<I, V> extends Parser<V> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new RecordParser<I, V>(recon, builder, keyParser, valueParser, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Builder<I, V> builder) {
-    return parse(input, recon, builder, null, null, 1);
+    return RecordParser.parse(input, recon, builder, null, null, 1);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
-    return parse(input, recon, null, null, null, 1);
+    return RecordParser.parse(input, recon, null, null, null, 1);
   }
 
 }

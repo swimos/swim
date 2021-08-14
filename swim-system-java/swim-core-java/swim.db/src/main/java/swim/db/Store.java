@@ -23,7 +23,7 @@ public abstract class Store {
   public abstract StoreContext storeContext();
 
   public StoreSettings settings() {
-    return storeContext().settings;
+    return this.storeContext().settings;
   }
 
   public abstract Database database();
@@ -56,8 +56,8 @@ public abstract class Store {
 
   public Database openDatabase() throws InterruptedException {
     final Sync<Database> syncDatabase = new Sync<Database>();
-    openDatabaseAsync(syncDatabase);
-    return syncDatabase.await(settings().databaseOpenTimeout);
+    this.openDatabaseAsync(syncDatabase);
+    return syncDatabase.await(this.settings().databaseOpenTimeout);
   }
 
   public abstract PageLoader openPageLoader(TreeDelegate treeDelegate, boolean isResident);
@@ -69,67 +69,67 @@ public abstract class Store {
   public abstract Zone shiftZone();
 
   boolean pageShouldSplit(Database database, Page page) {
-    return storeContext().pageShouldSplit(this, database, page);
+    return this.storeContext().pageShouldSplit(this, database, page);
   }
 
   boolean pageShouldMerge(Database database, Page page) {
-    return storeContext().pageShouldMerge(this, database, page);
+    return this.storeContext().pageShouldMerge(this, database, page);
   }
 
   void hitPage(Database database, Page page) {
-    storeContext().hitPage(this, database, page);
+    this.storeContext().hitPage(this, database, page);
   }
 
   void treeDidOpen(Database database, Tree tree) {
-    storeContext().treeDidOpen(this, database, tree);
+    this.storeContext().treeDidOpen(this, database, tree);
   }
 
   void treeDidClose(Database database, Tree tree) {
-    storeContext().treeDidClose(this, database, tree);
+    this.storeContext().treeDidClose(this, database, tree);
   }
 
   void treeDidChange(Database database, Tree newTree, Tree oldTree) {
-    storeContext().treeDidChange(this, database, newTree, oldTree);
+    this.storeContext().treeDidChange(this, database, newTree, oldTree);
   }
 
   void databaseWillOpen(Database database) {
-    storeContext().databaseWillOpen(this, database);
+    this.storeContext().databaseWillOpen(this, database);
   }
 
   void databaseDidOpen(Database database) {
-    storeContext().databaseDidOpen(this, database);
+    this.storeContext().databaseDidOpen(this, database);
   }
 
   void databaseWillClose(Database database) {
-    storeContext().databaseWillClose(this, database);
+    this.storeContext().databaseWillClose(this, database);
   }
 
   void databaseDidClose(Database database) {
-    storeContext().databaseDidClose(this, database);
+    this.storeContext().databaseDidClose(this, database);
   }
 
   Commit databaseWillCommit(Database database, Commit commit) {
-    return storeContext().databaseWillCommit(this, database, commit);
+    return this.storeContext().databaseWillCommit(this, database, commit);
   }
 
   void databaseDidCommit(Database database, Chunk chunk) {
-    storeContext().databaseDidCommit(this, database, chunk);
+    this.storeContext().databaseDidCommit(this, database, chunk);
   }
 
   void databaseCommitDidFail(Database database, Throwable error) {
-    storeContext().databaseCommitDidFail(this, database, error);
+    this.storeContext().databaseCommitDidFail(this, database, error);
   }
 
   Compact databaseWillCompact(Database database, Compact compact) {
-    return storeContext().databaseWillCompact(this, database, compact);
+    return this.storeContext().databaseWillCompact(this, database, compact);
   }
 
   void databaseDidCompact(Database database, Compact compact) {
-    storeContext().databaseDidCompact(this, database, compact);
+    this.storeContext().databaseDidCompact(this, database, compact);
   }
 
   void databaseCompactDidFail(Database database, Throwable error) {
-    storeContext().databaseCompactDidFail(this, database, error);
+    this.storeContext().databaseCompactDidFail(this, database, error);
   }
 
 }

@@ -28,31 +28,10 @@ import swim.util.Murmur3;
 
 public final class Server extends HttpHeader {
 
-  private static int hashSeed;
   final FingerTrieSeq<Product> products;
 
   Server(FingerTrieSeq<Product> products) {
     this.products = products;
-  }
-
-  public static Server from(FingerTrieSeq<Product> products) {
-    return new Server(products);
-  }
-
-  public static Server from(Product... products) {
-    return new Server(FingerTrieSeq.of(products));
-  }
-
-  public static Server from(String... productStrings) {
-    final Builder<Product, FingerTrieSeq<Product>> products = FingerTrieSeq.builder();
-    for (int i = 0, n = productStrings.length; i < n; i += 1) {
-      products.add(Product.parse(productStrings[i]));
-    }
-    return new Server(products.bind());
-  }
-
-  public static Parser<Server> parseHttpValue(Input input, HttpParser http) {
-    return ServerParser.parse(input, http);
   }
 
   @Override
@@ -85,25 +64,48 @@ public final class Server extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Server.class);
+    if (Server.hashSeed == 0) {
+      Server.hashSeed = Murmur3.seed(Server.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.products.hashCode()));
+    return Murmur3.mash(Murmur3.mix(Server.hashSeed, this.products.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("Server").write('.').write("from").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("Server").write('.').write("create").write('(');
     final int n = this.products.size();
     if (n > 0) {
-      output.debug(this.products.head());
+      output = output.debug(this.products.head());
       for (int i = 1; i < n; i += 1) {
         output = output.write(", ").debug(this.products.get(i));
       }
     }
     output = output.write(')');
+    return output;
+  }
+
+  public static Server create(FingerTrieSeq<Product> products) {
+    return new Server(products);
+  }
+
+  public static Server create(Product... products) {
+    return new Server(FingerTrieSeq.of(products));
+  }
+
+  public static Server create(String... productStrings) {
+    final Builder<Product, FingerTrieSeq<Product>> products = FingerTrieSeq.builder();
+    for (int i = 0, n = productStrings.length; i < n; i += 1) {
+      products.add(Product.parse(productStrings[i]));
+    }
+    return new Server(products.bind());
+  }
+
+  public static Parser<Server> parseHttpValue(Input input, HttpParser http) {
+    return ServerParser.parse(input, http);
   }
 
 }

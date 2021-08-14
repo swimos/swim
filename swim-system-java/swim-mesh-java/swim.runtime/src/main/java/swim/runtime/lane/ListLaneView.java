@@ -34,7 +34,7 @@ import swim.api.warp.function.WillCommand;
 import swim.api.warp.function.WillEnter;
 import swim.api.warp.function.WillLeave;
 import swim.api.warp.function.WillUplink;
-import swim.concurrent.Conts;
+import swim.concurrent.Cont;
 import swim.observable.function.DidClear;
 import swim.observable.function.DidDrop;
 import swim.observable.function.DidMoveIndex;
@@ -53,19 +53,18 @@ import swim.util.KeyedList;
 
 public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
 
-  static final int RESIDENT = 1 << 0;
-  static final int TRANSIENT = 1 << 1;
-  static final int SIGNED = 1 << 2;
   protected final AgentContext agentContext;
   protected Form<V> valueForm;
-  protected int flags;
   protected ListLaneModel laneBinding;
   protected ListData<V> dataView;
+  protected int flags;
 
   ListLaneView(AgentContext agentContext, Form<V> valueForm, int flags, Object observers) {
     super(observers);
     this.agentContext = agentContext;
     this.valueForm = valueForm;
+    this.laneBinding = null;
+    this.dataView = null;
     this.flags = flags;
   }
 
@@ -100,12 +99,12 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
   @Override
   public <V2> ListLaneView<V2> valueForm(Form<V2> valueForm) {
     return new ListLaneView<V2>(this.agentContext, valueForm, this.flags,
-        typesafeObservers(this.observers));
+                                this.typesafeObservers(this.observers));
   }
 
   @Override
   public <V2> ListLaneView<V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   public void setValueForm(Form<V> valueForm) {
@@ -120,15 +119,15 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
   }
 
   public final boolean isResident() {
-    return (this.flags & RESIDENT) != 0;
+    return (this.flags & ListLaneView.RESIDENT) != 0;
   }
 
   @Override
   public ListLaneView<V> isResident(boolean isResident) {
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= ListLaneView.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~ListLaneView.RESIDENT;
     }
     final ListLaneModel laneBinding = this.laneBinding;
     if (laneBinding != null) {
@@ -139,22 +138,22 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
 
   void didSetResident(boolean isResident) {
     if (isResident) {
-      this.flags |= RESIDENT;
+      this.flags |= ListLaneView.RESIDENT;
     } else {
-      this.flags &= ~RESIDENT;
+      this.flags &= ~ListLaneView.RESIDENT;
     }
   }
 
   public final boolean isTransient() {
-    return (this.flags & TRANSIENT) != 0;
+    return (this.flags & ListLaneView.TRANSIENT) != 0;
   }
 
   @Override
   public ListLaneView<V> isTransient(boolean isTransient) {
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= ListLaneView.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~ListLaneView.TRANSIENT;
     }
     final ListLaneModel laneBinding = this.laneBinding;
     if (laneBinding != null) {
@@ -165,9 +164,9 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
 
   void didSetTransient(boolean isTransient) {
     if (isTransient) {
-      this.flags |= TRANSIENT;
+      this.flags |= ListLaneView.TRANSIENT;
     } else {
-      this.flags &= ~TRANSIENT;
+      this.flags &= ~ListLaneView.TRANSIENT;
     }
   }
 
@@ -196,102 +195,102 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
 
   @Override
   public ListLaneView<V> willUpdate(WillUpdateIndex<V> willUpdate) {
-    return observe(willUpdate);
+    return this.observe(willUpdate);
   }
 
   @Override
   public ListLaneView<V> didUpdate(DidUpdateIndex<V> didUpdate) {
-    return observe(didUpdate);
+    return this.observe(didUpdate);
   }
 
   @Override
   public ListLaneView<V> willMove(WillMoveIndex<V> willMove) {
-    return observe(willMove);
+    return this.observe(willMove);
   }
 
   @Override
   public ListLaneView<V> didMove(DidMoveIndex<V> didMove) {
-    return observe(didMove);
+    return this.observe(didMove);
   }
 
   @Override
   public ListLaneView<V> willRemove(WillRemoveIndex willRemove) {
-    return observe(willRemove);
+    return this.observe(willRemove);
   }
 
   @Override
   public ListLaneView<V> didRemove(DidRemoveIndex<V> didRemove) {
-    return observe(didRemove);
+    return this.observe(didRemove);
   }
 
   @Override
   public ListLaneView<V> willDrop(WillDrop willDrop) {
-    return observe(willDrop);
+    return this.observe(willDrop);
   }
 
   @Override
   public ListLaneView<V> didDrop(DidDrop didDrop) {
-    return observe(didDrop);
+    return this.observe(didDrop);
   }
 
   @Override
   public ListLaneView<V> willTake(WillTake willTake) {
-    return observe(willTake);
+    return this.observe(willTake);
   }
 
   @Override
   public ListLaneView<V> didTake(DidTake didTake) {
-    return observe(didTake);
+    return this.observe(didTake);
   }
 
   @Override
   public ListLaneView<V> willClear(WillClear willClear) {
-    return observe(willClear);
+    return this.observe(willClear);
   }
 
   @Override
   public ListLaneView<V> didClear(DidClear didClear) {
-    return observe(didClear);
+    return this.observe(didClear);
   }
 
   @Override
   public ListLaneView<V> willCommand(WillCommand willCommand) {
-    return observe(willCommand);
+    return this.observe(willCommand);
   }
 
   @Override
   public ListLaneView<V> didCommand(DidCommand didCommand) {
-    return observe(didCommand);
+    return this.observe(didCommand);
   }
 
   @Override
   public ListLaneView<V> willUplink(WillUplink willUplink) {
-    return observe(willUplink);
+    return this.observe(willUplink);
   }
 
   @Override
   public ListLaneView<V> didUplink(DidUplink didUplink) {
-    return observe(didUplink);
+    return this.observe(didUplink);
   }
 
   @Override
   public ListLaneView<V> willEnter(WillEnter willEnter) {
-    return observe(willEnter);
+    return this.observe(willEnter);
   }
 
   @Override
   public ListLaneView<V> didEnter(DidEnter didEnter) {
-    return observe(didEnter);
+    return this.observe(didEnter);
   }
 
   @Override
   public ListLaneView<V> willLeave(WillLeave willLeave) {
-    return observe(willLeave);
+    return this.observe(willLeave);
   }
 
   @Override
   public ListLaneView<V> didLeave(DidLeave didLeave) {
-    return observe(didLeave);
+    return this.observe(didLeave);
   }
 
   @SuppressWarnings("unchecked")
@@ -308,8 +307,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
           try {
             newValue = ((WillUpdateIndex<V>) observers).willUpdate(index, newValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -325,8 +324,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
               try {
                 newValue = ((WillUpdateIndex<V>) observer).willUpdate(index, newValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -357,8 +356,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
           try {
             ((DidUpdateIndex<V>) observers).didUpdate(index, newValue, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -374,8 +373,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
               try {
                 ((DidUpdateIndex<V>) observer).didUpdate(index, newValue, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -406,8 +405,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
           try {
             ((WillMoveIndex<V>) observers).willMove(fromIndex, toIndex, value);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -423,8 +422,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
               try {
                 ((WillMoveIndex<V>) observer).willMove(fromIndex, toIndex, value);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -455,8 +454,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
           try {
             ((DidMoveIndex<V>) observers).didMove(fromIndex, toIndex, value);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -472,8 +471,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
               try {
                 ((DidMoveIndex<V>) observer).didMove(fromIndex, toIndex, value);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -503,8 +502,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
           try {
             ((WillRemoveIndex) observers).willRemove(index);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -520,8 +519,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
               try {
                 ((WillRemoveIndex) observer).willRemove(index);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -552,8 +551,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
           try {
             ((DidRemoveIndex<V>) observers).didRemove(index, oldValue);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -569,8 +568,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
               try {
                 ((DidRemoveIndex<V>) observer).didRemove(index, oldValue);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -600,8 +599,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
           try {
             ((WillDrop) observers).willDrop(lower);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -617,8 +616,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
               try {
                 ((WillDrop) observer).willDrop(lower);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -648,8 +647,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
           try {
             ((DidDrop) observers).didDrop(lower);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -665,8 +664,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
               try {
                 ((DidDrop) observer).didDrop(lower);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -696,8 +695,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
           try {
             ((WillTake) observers).willTake(upper);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -713,8 +712,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
               try {
                 ((WillTake) observer).willTake(upper);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -744,8 +743,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
           try {
             ((DidTake) observers).didTake(upper);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -761,8 +760,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
               try {
                 ((DidTake) observer).didTake(upper);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -792,8 +791,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
           try {
             ((WillClear) observers).willClear();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -809,8 +808,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
               try {
                 ((WillClear) observer).willClear();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -840,8 +839,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
           try {
             ((DidClear) observers).didClear();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              laneDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.laneDidFail(error);
             }
             throw error;
           }
@@ -857,8 +856,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
               try {
                 ((DidClear) observer).didClear();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  laneDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.laneDidFail(error);
                 }
                 throw error;
               }
@@ -880,6 +879,7 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
   }
 
   public void laneDidInsert(int index, V newValue) {
+    // hook
   }
 
   public V laneWillUpdate(int index, V newValue) {
@@ -887,37 +887,47 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
   }
 
   public void laneDidUpdate(int index, V newValue, V oldValue) {
+    // hook
   }
 
   public void laneWillMove(int fromIndex, int toIndex, V value) {
-
+    // hook
   }
 
   public void laneDidMove(int fromIndex, int toIndex, V value) {
+    // hook
   }
 
   public void laneWillRemove(int index) {
+    // hook
   }
 
   public void laneDidRemove(int index, V oldValue) {
+    // hook
   }
 
   public void laneWillDrop(int lower) {
+    // hook
   }
 
   public void laneDidDrop(int lower) {
+    // hook
   }
 
   public void laneWillTake(int upper) {
+    // hook
   }
 
   public void laneDidTake(int upper) {
+    // hook
   }
 
   public void laneWillClear() {
+    // hook
   }
 
   public void laneDidClear() {
+    // hook
   }
 
   @Override
@@ -947,12 +957,12 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
 
   @Override
   public boolean add(V v) {
-    return this.laneBinding.add(this, size(), v);
+    return this.laneBinding.add(this, this.size(), v);
   }
 
   @Override
   public boolean remove(Object o) {
-    final int index = indexOf(o);
+    final int index = this.indexOf(o);
     if (index != -1) {
       final V oldObject = this.laneBinding.remove(this, index);
       return oldObject != null && oldObject != this.valueForm.unit(); // TODO
@@ -969,30 +979,33 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
   public boolean addAll(Collection<? extends V> elements) {
     boolean added = false;
     for (V element : elements) {
-      added = added || add(element);
+      added = this.add(element) || added;
     }
     return added;
   }
 
   @Override
   public boolean addAll(int index, Collection<? extends V> elements) {
+    boolean added = false;
     int position = index;
     for (V element : elements) {
-      add(position++, element);
+      this.add(position, element);
+      added = true;
+      position += 1;
     }
-    return elements.isEmpty();
+    return added;
   }
 
   @Override
   public boolean removeAll(Collection<?> elements) {
-    boolean didRemove = false;
+    boolean removed = false;
     for (Object element : elements) {
-      final int index = indexOf(element);
+      final int index = this.indexOf(element);
       if (index != -1) {
-        didRemove = didRemove || remove(element);
+        removed = this.remove(element) || removed;
       }
     }
-    return didRemove;
+    return removed;
   }
 
   @Override
@@ -1000,7 +1013,7 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
     boolean modified = false;
     for (Object element : elements) {
       if (!elements.contains(element)) {
-        modified = modified || remove(element);
+        modified = this.remove(element) || modified;
       }
     }
     return modified;
@@ -1098,7 +1111,7 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
 
   @Override
   public boolean add(V element, Object key) {
-    return this.laneBinding.add(this, size(), element, key);
+    return this.laneBinding.add(this, this.size(), element, key);
   }
 
   @Override
@@ -1130,5 +1143,8 @@ public class ListLaneView<V> extends WarpLaneView implements ListLane<V> {
   public ListIterator<Map.Entry<Object, V>> entryIterator() {
     return this.dataView.entryIterator();
   }
+
+  static final int RESIDENT = 1 << 0;
+  static final int TRANSIENT = 1 << 1;
 
 }

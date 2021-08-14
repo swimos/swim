@@ -16,7 +16,7 @@ package swim.io;
 
 /**
  * Network listener context that manages asynchronous I/O operations for a
- * non-blocking NIO server socket channel.  An {@code IpServiceContext} is
+ * non-blocking NIO server socket channel. An {@code IpServiceContext} is
  * implicitly bound to an {@link IpService}, providing the {@code IpService}
  * with the ability to modify its {@link FlowControl} state, and to unbind
  * the network listener.

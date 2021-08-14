@@ -20,56 +20,56 @@ import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttConnAckSpec {
 
-  public static void assertDecodes(Data data, MqttConnAck packet) {
-    MqttAssertions.assertDecodesPacket(data, packet);
-  }
-
   @Test
   public void decodeConnAckPacketsWithConnectStatus() {
     assertDecodes(Data.fromBase16("20020000"),
-        MqttConnAck.from(MqttConnStatus.ACCEPTED));
+                  MqttConnAck.create(MqttConnStatus.ACCEPTED));
     assertDecodes(Data.fromBase16("20020001"),
-        MqttConnAck.from(MqttConnStatus.UNACCEPTABLE_PROTOCOL_VERSION));
+                  MqttConnAck.create(MqttConnStatus.UNACCEPTABLE_PROTOCOL_VERSION));
     assertDecodes(Data.fromBase16("20020002"),
-        MqttConnAck.from(MqttConnStatus.IDENTIFIER_REJECTED));
+                  MqttConnAck.create(MqttConnStatus.IDENTIFIER_REJECTED));
     assertDecodes(Data.fromBase16("20020003"),
-        MqttConnAck.from(MqttConnStatus.SERVER_UNAVAILABLE));
+                  MqttConnAck.create(MqttConnStatus.SERVER_UNAVAILABLE));
     assertDecodes(Data.fromBase16("20020004"),
-        MqttConnAck.from(MqttConnStatus.BAD_USERNAME_OR_PASSWORD));
+                  MqttConnAck.create(MqttConnStatus.BAD_USERNAME_OR_PASSWORD));
     assertDecodes(Data.fromBase16("20020005"),
-        MqttConnAck.from(MqttConnStatus.NOT_AUTHORIZED));
+                  MqttConnAck.create(MqttConnStatus.NOT_AUTHORIZED));
   }
 
   @Test
   public void encodeConnAckPacketsWithConnectStatus() {
-    assertEncodes(MqttConnAck.from(MqttConnStatus.ACCEPTED),
-        Data.fromBase16("20020000"));
-    assertEncodes(MqttConnAck.from(MqttConnStatus.UNACCEPTABLE_PROTOCOL_VERSION),
-        Data.fromBase16("20020001"));
-    assertEncodes(MqttConnAck.from(MqttConnStatus.IDENTIFIER_REJECTED),
-        Data.fromBase16("20020002"));
-    assertEncodes(MqttConnAck.from(MqttConnStatus.SERVER_UNAVAILABLE),
-        Data.fromBase16("20020003"));
-    assertEncodes(MqttConnAck.from(MqttConnStatus.BAD_USERNAME_OR_PASSWORD),
-        Data.fromBase16("20020004"));
-    assertEncodes(MqttConnAck.from(MqttConnStatus.NOT_AUTHORIZED),
-        Data.fromBase16("20020005"));
+    assertEncodes(MqttConnAck.create(MqttConnStatus.ACCEPTED),
+                  Data.fromBase16("20020000"));
+    assertEncodes(MqttConnAck.create(MqttConnStatus.UNACCEPTABLE_PROTOCOL_VERSION),
+                  Data.fromBase16("20020001"));
+    assertEncodes(MqttConnAck.create(MqttConnStatus.IDENTIFIER_REJECTED),
+                  Data.fromBase16("20020002"));
+    assertEncodes(MqttConnAck.create(MqttConnStatus.SERVER_UNAVAILABLE),
+                  Data.fromBase16("20020003"));
+    assertEncodes(MqttConnAck.create(MqttConnStatus.BAD_USERNAME_OR_PASSWORD),
+                  Data.fromBase16("20020004"));
+    assertEncodes(MqttConnAck.create(MqttConnStatus.NOT_AUTHORIZED),
+                  Data.fromBase16("20020005"));
   }
 
   @Test
   public void decodeConnAckPacketsWithSessionPresent() {
     assertDecodes(Data.fromBase16("20020000"),
-        MqttConnAck.accepted().sessionPresent(false));
+                  MqttConnAck.accepted().sessionPresent(false));
     assertDecodes(Data.fromBase16("20020100"),
-        MqttConnAck.accepted().sessionPresent(true));
+                  MqttConnAck.accepted().sessionPresent(true));
   }
 
   @Test
   public void encodeConnAckPacketsWithSessionPresent() {
     assertEncodes(MqttConnAck.accepted().sessionPresent(false),
-        Data.fromBase16("20020000"));
+                  Data.fromBase16("20020000"));
     assertEncodes(MqttConnAck.accepted().sessionPresent(true),
-        Data.fromBase16("20020100"));
+                  Data.fromBase16("20020100"));
+  }
+
+  public static void assertDecodes(Data data, MqttConnAck packet) {
+    MqttAssertions.assertDecodesPacket(data, packet);
   }
 
 }

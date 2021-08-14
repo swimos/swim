@@ -69,7 +69,7 @@ public class WsUpgradeRequester extends AbstractHttpRequester<Object> {
 
   @Override
   public void doRequest() {
-    writeRequest(this.wsRequest.httpRequest());
+    this.writeRequest(this.wsRequest.httpRequest());
   }
 
   @Override
@@ -77,8 +77,8 @@ public class WsUpgradeRequester extends AbstractHttpRequester<Object> {
     final WsResponse wsResponse = this.wsRequest.accept(httpResponse, this.wsSettings);
     if (wsResponse != null) {
       final WsEngine engine = wsResponse.clientEngine(this.wsSettings);
-      final IpSocket socket = createSocket(engine);
-      become(socket);
+      final IpSocket socket = this.createSocket(engine);
+      this.become(socket);
       this.webSocket.didConnect();
       this.webSocket.didUpgrade(this.wsRequest.httpRequest(), httpResponse);
     } else {

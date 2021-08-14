@@ -20,17 +20,8 @@ import swim.codec.Output;
 
 public class R implements AffineSpace<Double, Double, Double>, VectorSpace<Double, Double>, RealField<Double>, Debug {
 
-  private static R field;
-
   protected R() {
-    // stub
-  }
-
-  public static R field() {
-    if (field == null) {
-      field = new R();
-    }
-    return field;
+    // singleton
   }
 
   @Override
@@ -229,13 +220,23 @@ public class R implements AffineSpace<Double, Double, Double>, VectorSpace<Doubl
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output.write('R').write('.').write("field").write('(').write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static R field;
+
+  public static R field() {
+    if (R.field == null) {
+      R.field = new R();
+    }
+    return R.field;
   }
 
 }

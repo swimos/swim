@@ -17,7 +17,6 @@ package swim.db;
 import swim.codec.Output;
 import swim.codec.Unicode;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.recon.Recon;
 import swim.structure.Num;
 import swim.structure.Record;
@@ -28,7 +27,6 @@ import swim.util.OrderedMapCursor;
 
 public final class BTreeLeaf extends BTreePage {
 
-  static final Slot[] EMPTY_SLOTS = new Slot[0];
   final BTreePageRef pageRef;
   final long version;
   final Slot[] slots;
@@ -37,45 +35,6 @@ public final class BTreeLeaf extends BTreePage {
     this.pageRef = pageRef;
     this.version = version;
     this.slots = slots;
-  }
-
-  public static BTreeLeaf create(PageContext context, int stem, long version,
-                                 int zone, long base, Value fold, Slot[] slots) {
-    final BTreePageRef pageRef = new BTreePageRef(context, PageType.LEAF, stem, zone,
-        zone, base, slots.length, fold);
-    final BTreeLeaf page = new BTreeLeaf(pageRef, version, slots);
-    pageRef.page = page;
-    return page;
-  }
-
-  public static BTreeLeaf create(PageContext context, int stem, long version,
-                                 Value fold, Slot[] slots) {
-    return create(context, stem, version, 0, 0L, fold, slots);
-  }
-
-  public static BTreeLeaf empty(PageContext context, int stem, long version) {
-    return create(context, stem, version, 0, 0L, Value.absent(), EMPTY_SLOTS);
-  }
-
-  public static BTreeLeaf fromValue(BTreePageRef pageRef, Value value) {
-    Throwable cause = null;
-    try {
-      final Value header = value.header("bleaf");
-      final long version = header.get("v").longValue();
-      final Record tail = value.tail();
-      final Slot[] slots = new Slot[tail.size()];
-      tail.toArray(slots);
-      return new BTreeLeaf(pageRef, version, slots);
-    } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
-        cause = error;
-      } else {
-        throw error;
-      }
-    }
-    final Output<String> message = Unicode.stringOutput("Malformed bleaf: ");
-    Recon.write(value, message);
-    throw new StoreException(message.bind(), cause);
   }
 
   @Override
@@ -163,12 +122,12 @@ public final class BTreeLeaf extends BTreePage {
 
   @Override
   public long indexOf(Value key) {
-    return (long) lookup(key);
+    return (long) this.lookup(key);
   }
 
   @Override
   public boolean containsKey(Value key) {
-    return lookup(key) >= 0;
+    return this.lookup(key) >= 0;
   }
 
   @Override
@@ -184,7 +143,7 @@ public final class BTreeLeaf extends BTreePage {
 
   @Override
   public Value get(Value key) {
-    final int x = lookup(key);
+    final int x = this.lookup(key);
     if (x >= 0) {
       return this.slots[x].value();
     } else {
@@ -194,7 +153,7 @@ public final class BTreeLeaf extends BTreePage {
 
   @Override
   public Slot getEntry(Value key) {
-    final int x = lookup(key);
+    final int x = this.lookup(key);
     if (x >= 0) {
       return this.slots[x];
     } else {
@@ -213,7 +172,7 @@ public final class BTreeLeaf extends BTreePage {
 
   @Override
   public Slot firstEntry(Value key) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x >= 0) {
       return this.slots[x];
     } else {
@@ -246,7 +205,7 @@ public final class BTreeLeaf extends BTreePage {
 
   @Override
   public Slot nextEntry(Value key) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x >= 0) {
       x += 1;
     } else {
@@ -261,7 +220,7 @@ public final class BTreeLeaf extends BTreePage {
 
   @Override
   public Slot previousEntry(Value key) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x >= 0) {
       x -= 1;
     } else {
@@ -276,12 +235,12 @@ public final class BTreeLeaf extends BTreePage {
 
   @Override
   public BTreePage updated(Value key, Value newValue, long newVersion) {
-    int x = lookup(key);
+    int x = this.lookup(key);
     if (x >= 0) {
-      return updatedSlot(x, key, newValue, newVersion);
+      return this.updatedSlot(x, key, newValue, newVersion);
     } else {
       x = -(x + 1);
-      return insertedSlot(x, key, newValue, newVersion);
+      return this.insertedSlot(x, key, newValue, newVersion);
     }
   }
 
@@ -293,7 +252,7 @@ public final class BTreeLeaf extends BTreePage {
       final Slot[] newSlots = new Slot[n];
       System.arraycopy(oldSlots, 0, newSlots, 0, n);
       newSlots[x] = Slot.of(key, newValue).commit();
-      return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+      return BTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
     } else {
       return this;
     }
@@ -306,17 +265,17 @@ public final class BTreeLeaf extends BTreePage {
     System.arraycopy(oldSlots, 0, newSlots, 0, x);
     newSlots[x] = Slot.of(key, newValue).commit();
     System.arraycopy(oldSlots, x, newSlots, x + 1, n - (x + 1));
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    return BTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   @Override
   public BTreeLeaf removed(Value key, long newVersion) {
-    final int x = lookup(key);
+    final int x = this.lookup(key);
     if (x >= 0) {
       if (this.slots.length > 1) {
-        return removedSlot(x, newVersion);
+        return this.removedSlot(x, newVersion);
       } else {
-        return empty(this.pageRef.context, this.pageRef.stem, newVersion);
+        return BTreeLeaf.empty(this.pageRef.context, this.pageRef.stem, newVersion);
       }
     } else {
       return this;
@@ -329,7 +288,7 @@ public final class BTreeLeaf extends BTreePage {
     final Slot[] newSlots = new Slot[n];
     System.arraycopy(oldSlots, 0, newSlots, 0, x);
     System.arraycopy(oldSlots, x + 1, newSlots, x, n - x);
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    return BTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   @Override
@@ -342,9 +301,9 @@ public final class BTreeLeaf extends BTreePage {
         final int n = k - x;
         final Slot[] newSlots = new Slot[n];
         System.arraycopy(oldSlots, x, newSlots, 0, n);
-        return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+        return BTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
       } else {
-        return empty(this.pageRef.context, this.pageRef.stem, newVersion);
+        return BTreeLeaf.empty(this.pageRef.context, this.pageRef.stem, newVersion);
       }
     } else {
       return this;
@@ -359,9 +318,9 @@ public final class BTreeLeaf extends BTreePage {
         final int n = (int) upper;
         final Slot[] newSlots = new Slot[n];
         System.arraycopy(oldSlots, 0, newSlots, 0, n);
-        return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+        return BTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
       } else {
-        return empty(this.pageRef.context, this.pageRef.stem, newVersion);
+        return BTreeLeaf.empty(this.pageRef.context, this.pageRef.stem, newVersion);
       }
     } else {
       return this;
@@ -373,7 +332,7 @@ public final class BTreeLeaf extends BTreePage {
     final int n = this.slots.length;
     if (n > 1 && this.pageRef.context.pageShouldSplit(this)) {
       final int x = n >>> 1;
-      return split(x, newVersion);
+      return this.split(x, newVersion);
     } else {
       return this;
     }
@@ -382,8 +341,8 @@ public final class BTreeLeaf extends BTreePage {
   @Override
   public BTreeNode split(int x, long newVersion) {
     final BTreePageRef[] newChildRefs = new BTreePageRef[2];
-    final BTreeLeaf newLeftPage = splitLeft(x, newVersion);
-    final BTreeLeaf newRightPage = splitRight(x, newVersion);
+    final BTreeLeaf newLeftPage = this.splitLeft(x, newVersion);
+    final BTreeLeaf newRightPage = this.splitRight(x, newVersion);
     newChildRefs[0] = newLeftPage.pageRef();
     newChildRefs[1] = newRightPage.pageRef();
 
@@ -391,7 +350,7 @@ public final class BTreeLeaf extends BTreePage {
     newKnotKeys[0] = newRightPage.minKey();
 
     return BTreeNode.create(this.pageRef.context, this.pageRef.stem, newVersion,
-        this.slots.length, Value.absent(), newChildRefs, newKnotKeys);
+                            this.slots.length, Value.absent(), newChildRefs, newKnotKeys);
   }
 
   @Override
@@ -399,7 +358,7 @@ public final class BTreeLeaf extends BTreePage {
     final Slot[] oldSlots = this.slots;
     final Slot[] newSlots = new Slot[x];
     System.arraycopy(oldSlots, 0, newSlots, 0, x);
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    return BTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   @Override
@@ -408,7 +367,7 @@ public final class BTreeLeaf extends BTreePage {
     final int y = oldSlots.length - x;
     final Slot[] newSlots = new Slot[y];
     System.arraycopy(oldSlots, x, newSlots, 0, y);
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
+    return BTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, Value.absent(), newSlots);
   }
 
   @Override
@@ -454,15 +413,14 @@ public final class BTreeLeaf extends BTreePage {
 
   @Override
   public Value toHeader() {
-    final Record header = Record.create(2)
-        .slot("stem", this.pageRef.stem)
-        .slot("v", this.version);
+    final Record header = Record.create(2).slot("stem", this.pageRef.stem)
+                                          .slot("v", this.version);
     return Record.create(1).attr("bleaf", header);
   }
 
   @Override
   public Value toValue() {
-    final Record record = (Record) toHeader();
+    final Record record = (Record) this.toHeader();
     final Slot[] slots = this.slots;
     for (int i = 0, n = slots.length; i < n; i += 1) {
       record.add(slots[i]);
@@ -478,14 +436,14 @@ public final class BTreeLeaf extends BTreePage {
     for (int i = 0, n = slots.length; i < n; i += 1) {
       fold = accumulator.combine(fold, slots[i].value());
     }
-    return create(this.pageRef.context, this.pageRef.stem, newVersion, fold, slots);
+    return BTreeLeaf.create(this.pageRef.context, this.pageRef.stem, newVersion, fold, slots);
   }
 
   @Override
   public BTreeLeaf evacuated(int post, long version) {
     final int oldPost = this.pageRef.post;
     if (oldPost != 0 && oldPost < post) {
-      return create(this.pageRef.context, this.pageRef.stem, version, this.pageRef.fold, this.slots);
+      return BTreeLeaf.create(this.pageRef.context, this.pageRef.stem, version, this.pageRef.fold, this.slots);
     } else {
       return this;
     }
@@ -493,18 +451,18 @@ public final class BTreeLeaf extends BTreePage {
 
   @Override
   public BTreeLeaf committed(int zone, long base, long version) {
-    return create(this.pageRef.context, this.pageRef.stem, version, zone, base, this.pageRef.fold, this.slots);
+    return BTreeLeaf.create(this.pageRef.context, this.pageRef.stem, version, zone, base, this.pageRef.fold, this.slots);
   }
 
   @Override
   public BTreeLeaf uncommitted(long version) {
-    return create(this.pageRef.context, this.pageRef.stem, version, this.pageRef.fold, this.slots);
+    return BTreeLeaf.create(this.pageRef.context, this.pageRef.stem, version, this.pageRef.fold, this.slots);
   }
 
   @Override
   public void writePage(Output<?> output) {
-    Recon.write(toHeader(), output);
-    writePageContent(output);
+    Recon.write(this.toHeader(), output);
+    this.writePageContent(output);
     output.write('\n');
   }
 
@@ -524,16 +482,16 @@ public final class BTreeLeaf extends BTreePage {
 
   @Override
   public void writeDiff(Output<?> output) {
-    writePage(output);
+    this.writePage(output);
   }
 
   @Override
   public void loadTreeAsync(PageLoader pageLoader, Cont<Page> cont) {
     try {
       // Call continuation on fresh stack
-      this.pageRef.context.stage().execute(Conts.async(cont, this));
+      this.pageRef.context.stage().execute(Cont.async(cont, this));
     } catch (Throwable cause) {
-      if (Conts.isNonFatal(cause)) {
+      if (Cont.isNonFatal(cause)) {
         cont.trap(cause);
       } else {
         throw cause;
@@ -553,24 +511,65 @@ public final class BTreeLeaf extends BTreePage {
 
   @Override
   public OrderedMapCursor<Value, Value> depthCursor(int maxDepth) {
-    return cursor();
+    return this.cursor();
   }
 
   @Override
   public OrderedMapCursor<Value, Value> deltaCursor(long sinceVersion) {
-    if (sinceVersion <= version) {
-      return cursor();
+    if (sinceVersion <= this.version) {
+      return this.cursor();
     } else {
-      return new BTreeLeafCursor(EMPTY_SLOTS, 0, 0);
+      return new BTreeLeafCursor(BTreeLeaf.EMPTY_SLOTS, 0, 0);
     }
   }
 
   @Override
   public String toString() {
-    final Output<String> output = Unicode.stringOutput(pageSize() - 1); // ignore trailing '\n'
-    Recon.write(toHeader(), output);
-    writePageContent(output);
+    final Output<String> output = Unicode.stringOutput(this.pageSize() - 1); // ignore trailing '\n'
+    Recon.write(this.toHeader(), output);
+    this.writePageContent(output);
     return output.bind();
+  }
+
+  static final Slot[] EMPTY_SLOTS = new Slot[0];
+
+  public static BTreeLeaf create(PageContext context, int stem, long version,
+                                 int zone, long base, Value fold, Slot[] slots) {
+    final BTreePageRef pageRef = new BTreePageRef(context, PageType.LEAF, stem, zone,
+                                                  zone, base, slots.length, fold);
+    final BTreeLeaf page = new BTreeLeaf(pageRef, version, slots);
+    pageRef.page = page;
+    return page;
+  }
+
+  public static BTreeLeaf create(PageContext context, int stem, long version,
+                                 Value fold, Slot[] slots) {
+    return BTreeLeaf.create(context, stem, version, 0, 0L, fold, slots);
+  }
+
+  public static BTreeLeaf empty(PageContext context, int stem, long version) {
+    return BTreeLeaf.create(context, stem, version, 0, 0L, Value.absent(), BTreeLeaf.EMPTY_SLOTS);
+  }
+
+  public static BTreeLeaf fromValue(BTreePageRef pageRef, Value value) {
+    Throwable cause = null;
+    try {
+      final Value header = value.header("bleaf");
+      final long version = header.get("v").longValue();
+      final Record tail = value.tail();
+      final Slot[] slots = new Slot[tail.size()];
+      tail.toArray(slots);
+      return new BTreeLeaf(pageRef, version, slots);
+    } catch (Throwable error) {
+      if (Cont.isNonFatal(error)) {
+        cause = error;
+      } else {
+        throw error;
+      }
+    }
+    final Output<String> message = Unicode.stringOutput("Malformed bleaf: ");
+    Recon.write(value, message);
+    throw new StoreException(message.bind(), cause);
   }
 
 }

@@ -17,7 +17,7 @@ package swim.concurrent;
 /**
  * Stateful {@link TaskFunction} to invoke as a sequential process on a
  * concurrent execution {@link Stage}, with lifecycle callbacks, and a {@link
- * TaskContext} for self-management.  Use {@link Stage#task(TaskFunction)} to
+ * TaskContext} for self-management. Use {@link Stage#task(TaskFunction)} to
  * bind a new {@code Task} to a {@code Stage}, and invoke {@link TaskRef#cue()}
  * to schedule the concurrent execution of the sequential task.
  *
@@ -33,19 +33,19 @@ package swim.concurrent;
 public interface Task extends TaskFunction {
 
   /**
-   * Returns the context used to managed this {@code Task}.  Returns {@code
+   * Returns the context used to managed this {@code Task}. Returns {@code
    * null} if this {@code Task} is not bound to a {@link Stage}.
    */
   TaskContext taskContext();
 
   /**
-   * Sets the context used to managed this {@code Task}.  A {@code
+   * Sets the context used to managed this {@code Task}. A {@code
    * TaskContext} is assigned when binding this {@code Task} to a {@link Stage}.
    */
   void setTaskContext(TaskContext taskContext);
 
   /**
-   * Executes this sequential process.  Only one thread at a time will execute
+   * Executes this sequential process. Only one thread at a time will execute
    * {@code runTask} for this {@code Task}.
    */
   @Override
@@ -54,7 +54,7 @@ public interface Task extends TaskFunction {
   /**
    * Returns {@code true} if this {@code Task} might block its thread of
    * execution when running; returns {@code false} if this {@code Task} will
-   * never block.  Used by the execution {@code Stage} to prevent thread
+   * never block. Used by the execution {@code Stage} to prevent thread
    * starvation when concurrently running many blocking tasks.
    */
   boolean taskWillBlock();

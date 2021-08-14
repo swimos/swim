@@ -20,20 +20,20 @@ import static swim.mqtt.MqttAssertions.assertEncodes;
 
 public class MqttPubCompSpec {
 
-  public static void assertDecodes(Data data, MqttPubComp packet) {
-    MqttAssertions.assertDecodesPacket(data, packet);
-  }
-
   @Test
   public void decodePubCompPackets() {
-    assertDecodes(Data.fromBase16("70020000"), MqttPubComp.from(0x0000));
-    assertDecodes(Data.fromBase16("70027E96"), MqttPubComp.from(0x7E96));
+    assertDecodes(Data.fromBase16("70020000"), MqttPubComp.create(0x0000));
+    assertDecodes(Data.fromBase16("70027E96"), MqttPubComp.create(0x7E96));
   }
 
   @Test
   public void encodePubCompPackets() {
-    assertEncodes(MqttPubComp.from(0x0000), Data.fromBase16("70020000"));
-    assertEncodes(MqttPubComp.from(0x7E96), Data.fromBase16("70027E96"));
+    assertEncodes(MqttPubComp.create(0x0000), Data.fromBase16("70020000"));
+    assertEncodes(MqttPubComp.create(0x7E96), Data.fromBase16("70027E96"));
+  }
+
+  public static void assertDecodes(Data data, MqttPubComp packet) {
+    MqttAssertions.assertDecodesPacket(data, packet);
   }
 
 }

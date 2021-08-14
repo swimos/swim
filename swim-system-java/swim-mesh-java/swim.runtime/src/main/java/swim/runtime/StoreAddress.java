@@ -32,7 +32,7 @@ public final class StoreAddress implements CellAddress, Debug {
   }
 
   public StoreAddress storeName(String storeName) {
-    return copy(storeName);
+    return this.copy(storeName);
   }
 
   StoreAddress copy(String storeName) {
@@ -50,18 +50,21 @@ public final class StoreAddress implements CellAddress, Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.hash(StoreAddress.class);
+    if (StoreAddress.hashSeed == 0) {
+      StoreAddress.hashSeed = Murmur3.hash(StoreAddress.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.storeName.hashCode()));
+    return Murmur3.mash(Murmur3.mix(StoreAddress.hashSeed, this.storeName.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("StoreAddress").write('.').write("from").write('(')
-        .debug(this.storeName).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("StoreAddress").write('.').write("create").write('(')
+                   .debug(this.storeName).write(')');
+    return output;
   }
 
   @Override
@@ -69,9 +72,7 @@ public final class StoreAddress implements CellAddress, Debug {
     return Format.debug(this);
   }
 
-  private static int hashSeed;
-
-  public static StoreAddress from(String storeName) {
+  public static StoreAddress create(String storeName) {
     return new StoreAddress(storeName);
   }
 

@@ -31,7 +31,6 @@ import swim.api.warp.function.WillReceive;
 import swim.api.warp.function.WillSync;
 import swim.api.warp.function.WillUnlink;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Stage;
 import swim.runtime.CellContext;
 import swim.runtime.DownlinkView;
@@ -48,8 +47,6 @@ import swim.warp.UnlinkedResponse;
 
 public abstract class WarpDownlinkView extends DownlinkView implements WarpDownlink {
 
-  protected static final int KEEP_LINKED = 1 << 0;
-  protected static final int KEEP_SYNCED = 1 << 1;
   protected final Uri meshUri;
   protected final Uri hostUri;
   protected final Uri nodeUri;
@@ -139,7 +136,7 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
 
   @Override
   public final boolean keepLinked() {
-    return (this.flags & KEEP_LINKED) != 0;
+    return (this.flags & WarpDownlinkView.KEEP_LINKED) != 0;
   }
 
   @Override
@@ -147,7 +144,7 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
 
   @Override
   public final boolean keepSynced() {
-    return (this.flags & KEEP_SYNCED) != 0;
+    return (this.flags & WarpDownlinkView.KEEP_SYNCED) != 0;
   }
 
   @Override
@@ -215,8 +212,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
           try {
             ((WillReceive) observers).willReceive(body);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -232,8 +229,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
               try {
                 ((WillReceive) observer).willReceive(body);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -260,8 +257,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
           try {
             ((DidReceive) observers).didReceive(body);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -277,8 +274,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
               try {
                 ((DidReceive) observer).didReceive(body);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -305,8 +302,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
           try {
             ((WillCommand) observers).willCommand(body);
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -322,8 +319,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
               try {
                 ((WillCommand) observer).willCommand(body);
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -350,8 +347,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
           try {
             ((WillLink) observers).willLink();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -367,8 +364,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
               try {
                 ((WillLink) observer).willLink();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -395,8 +392,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
           try {
             ((DidLink) observers).didLink();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -412,8 +409,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
               try {
                 ((DidLink) observer).didLink();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -440,8 +437,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
           try {
             ((WillSync) observers).willSync();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -457,8 +454,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
               try {
                 ((WillSync) observer).willSync();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -485,8 +482,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
           try {
             ((DidSync) observers).didSync();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -502,8 +499,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
               try {
                 ((DidSync) observer).didSync();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -530,8 +527,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
           try {
             ((WillUnlink) observers).willUnlink();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -547,8 +544,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
               try {
                 ((WillUnlink) observer).willUnlink();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -575,8 +572,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
           try {
             ((DidUnlink) observers).didUnlink();
           } catch (Throwable error) {
-            if (Conts.isNonFatal(error)) {
-              downlinkDidFail(error);
+            if (Cont.isNonFatal(error)) {
+              this.downlinkDidFail(error);
             }
             throw error;
           }
@@ -592,8 +589,8 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
               try {
                 ((DidUnlink) observer).didUnlink();
               } catch (Throwable error) {
-                if (Conts.isNonFatal(error)) {
-                  downlinkDidFail(error);
+                if (Cont.isNonFatal(error)) {
+                  this.downlinkDidFail(error);
                 }
                 throw error;
               }
@@ -610,39 +607,39 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
   }
 
   public void downlinkWillReceive(EventMessage message) {
-    // stub
+    // hook
   }
 
   public void downlinkDidReceive(EventMessage message) {
-    // stub
+    // hook
   }
 
   public void downlinkWillCommand(CommandMessage message) {
-    // stub
+    // hook
   }
 
   public void downlinkWillLink(LinkRequest request) {
-    // stub
+    // hook
   }
 
   public void downlinkDidLink(LinkedResponse response) {
-    // stub
+    // hook
   }
 
   public void downlinkWillSync(SyncRequest request) {
-    // stub
+    // hook
   }
 
   public void downlinkDidSync(SyncedResponse response) {
-    // stub
+    // hook
   }
 
   public void downlinkWillUnlink(UnlinkRequest request) {
-    // stub
+    // hook
   }
 
   public void downlinkDidUnlink(UnlinkedResponse response) {
-    // stub
+    // hook
   }
 
   @Override
@@ -653,22 +650,25 @@ public abstract class WarpDownlinkView extends DownlinkView implements WarpDownl
 
   @Override
   public void command(float prio, Value body, Cont<CommandMessage> cont) {
-    downlinkModel().command(prio, body, cont);
+    this.downlinkModel().command(prio, body, cont);
   }
 
   @Override
   public void command(Value body, Cont<CommandMessage> cont) {
-    downlinkModel().command(body, cont);
+    this.downlinkModel().command(body, cont);
   }
 
   @Override
   public void command(float prio, Value body) {
-    downlinkModel().command(prio, body);
+    this.downlinkModel().command(prio, body);
   }
 
   @Override
   public void command(Value body) {
-    downlinkModel().command(body);
+    this.downlinkModel().command(body);
   }
+
+  protected static final int KEEP_LINKED = 1 << 0;
+  protected static final int KEEP_SYNCED = 1 << 1;
 
 }

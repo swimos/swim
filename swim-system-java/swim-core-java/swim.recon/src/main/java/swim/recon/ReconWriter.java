@@ -101,25 +101,25 @@ public abstract class ReconWriter<I, V> {
   }
 
   public int sizeOfBlock(I item) {
-    final Iterator<I> items = items(item);
+    final Iterator<I> items = this.items(item);
     if (items.hasNext()) {
-      return BlockWriter.sizeOf(this, items, isBlockSafe(items(item)), false);
+      return BlockWriter.sizeOf(this, items, this.isBlockSafe(this.items(item)), false);
     } else {
       return 2; // "{}"
     }
   }
 
   public Writer<?, ?> writeBlock(I item, Output<?> output) {
-    final Iterator<I> items = items(item);
+    final Iterator<I> items = this.items(item);
     if (items.hasNext()) {
-      return BlockWriter.write(output, this, items, isBlockSafe(items(item)), false);
+      return BlockWriter.write(output, this, items, this.isBlockSafe(this.items(item)), false);
     } else {
       return Unicode.writeString("{}", output);
     }
   }
 
   public int sizeOfRecord(I item) {
-    final Iterator<I> items = items(item);
+    final Iterator<I> items = this.items(item);
     if (items.hasNext()) {
       return BlockWriter.sizeOf(this, items, false, false);
     } else {
@@ -128,7 +128,7 @@ public abstract class ReconWriter<I, V> {
   }
 
   public Writer<?, ?> writeRecord(I item, Output<?> output) {
-    final Iterator<I> items = items(item);
+    final Iterator<I> items = this.items(item);
     if (items.hasNext()) {
       return BlockWriter.write(output, this, items, false, false);
     } else {
@@ -137,32 +137,32 @@ public abstract class ReconWriter<I, V> {
   }
 
   public int sizeOfPrimary(V value) {
-    if (isRecord(item(value))) {
-      final Iterator<I> items = items(item(value));
+    if (this.isRecord(this.item(value))) {
+      final Iterator<I> items = this.items(this.item(value));
       if (items.hasNext()) {
         return PrimaryWriter.sizeOf(this, items);
       }
-    } else if (!isExtant(item(value))) {
-      return sizeOfValue(value);
+    } else if (!this.isExtant(this.item(value))) {
+      return this.sizeOfValue(value);
     }
     return 2; // "()"
   }
 
   public Writer<?, ?> writePrimary(V value, Output<?> output) {
-    if (isRecord(item(value))) {
-      final Iterator<I> items = items(item(value));
+    if (this.isRecord(this.item(value))) {
+      final Iterator<I> items = this.items(this.item(value));
       if (items.hasNext()) {
         return PrimaryWriter.write(output, this, items);
       }
-    } else if (!isExtant(item(value))) {
-      return writeValue(value, output);
+    } else if (!this.isExtant(this.item(value))) {
+      return this.writeValue(value, output);
     }
     return Unicode.writeString("()", output);
   }
 
   public boolean isBlockSafe(Iterator<I> items) {
     while (items.hasNext()) {
-      if (isAttr(items.next())) {
+      if (this.isAttr(items.next())) {
         return false;
       }
     }
@@ -170,11 +170,11 @@ public abstract class ReconWriter<I, V> {
   }
 
   public boolean isMarkupSafe(Iterator<I> items) {
-    if (!items.hasNext() || !isAttr(items.next())) {
+    if (!items.hasNext() || !this.isAttr(items.next())) {
       return false;
     }
     while (items.hasNext()) {
-      if (isAttr(items.next())) {
+      if (this.isAttr(items.next())) {
         return false;
       }
     }
@@ -182,11 +182,11 @@ public abstract class ReconWriter<I, V> {
   }
 
   public int sizeOfMarkupText(I item) {
-    return sizeOfMarkupText(string(item));
+    return this.sizeOfMarkupText(this.string(item));
   }
 
   public Writer<?, ?> writeMarkupText(I item, Output<?> output) {
-    return writeMarkupText(string(item), output);
+    return this.writeMarkupText(this.string(item), output);
   }
 
   public int sizeOfMarkupText(String text) {
@@ -210,7 +210,7 @@ public abstract class ReconWriter<I, V> {
   }
 
   public boolean isIdent(I item) {
-    return isIdent(string(item));
+    return this.isIdent(this.string(item));
   }
 
   public boolean isIdent(String value) {
@@ -227,7 +227,7 @@ public abstract class ReconWriter<I, V> {
   }
 
   public int sizeOfText(String value) {
-    if (isIdent(value)) {
+    if (this.isIdent(value)) {
       return IdentWriter.sizeOf(value);
     } else {
       return StringWriter.sizeOf(value);
@@ -235,7 +235,7 @@ public abstract class ReconWriter<I, V> {
   }
 
   public Writer<?, ?> writeText(String value, Output<?> output) {
-    if (isIdent(value)) {
+    if (this.isIdent(value)) {
       return IdentWriter.write(output, value);
     } else {
       return StringWriter.write(output, value);

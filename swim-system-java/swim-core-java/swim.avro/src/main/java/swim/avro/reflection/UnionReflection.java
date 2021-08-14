@@ -26,10 +26,6 @@ final class UnionReflection<T> extends AvroUnionType<T> {
     this.variants = variants;
   }
 
-  static <T> UnionReflection<T> empty() {
-    return new UnionReflection<T>(FingerTrieSeq.empty());
-  }
-
   @Override
   public int variantCount() {
     return this.variants.size();
@@ -43,6 +39,10 @@ final class UnionReflection<T> extends AvroUnionType<T> {
   @Override
   public AvroUnionType<T> variant(AvroType<? extends T> variant) {
     return new UnionReflection<T>(this.variants.appended(variant));
+  }
+
+  static <T> UnionReflection<T> empty() {
+    return new UnionReflection<T>(FingerTrieSeq.empty());
   }
 
 }

@@ -21,6 +21,10 @@ import swim.dynamic.JavaHostBuiltinType;
 
 public final class HostObject {
 
+  private HostObject() {
+    // static
+  }
+
   public static final HostObjectType<Object> TYPE;
 
   static {
@@ -29,10 +33,6 @@ public final class HostObject {
     type.addMember(new HostObjectEquals());
     type.addMember(new HostObjectHashCode());
     type.addMember(new HostObjectToString());
-  }
-
-  private HostObject() {
-    // static
   }
 
 }
@@ -74,7 +74,11 @@ final class HostObjectToString implements HostMethod<Object> {
 
   @Override
   public Object invoke(Bridge bridge, Object object, Object... arguments) {
-    return object.toString();
+    if (object != null) {
+      return object.toString();
+    } else {
+      return "null";
+    }
   }
 
 }

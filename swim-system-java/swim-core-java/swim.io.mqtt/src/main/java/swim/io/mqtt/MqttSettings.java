@@ -29,9 +29,6 @@ import swim.util.Murmur3;
 
 public class MqttSettings implements Debug {
 
-  private static int hashSeed;
-  private static MqttSettings standard;
-  private static Form<MqttSettings> form;
   protected final IpSettings ipSettings;
   protected final int maxPayloadSize;
 
@@ -40,38 +37,12 @@ public class MqttSettings implements Debug {
     this.maxPayloadSize = maxPayloadSize;
   }
 
-  public static MqttSettings standard() {
-    if (standard == null) {
-      int maxPayloadSize;
-      try {
-        maxPayloadSize = Integer.parseInt(System.getProperty("swim.mqtt.max.payload.size"));
-      } catch (NumberFormatException error) {
-        maxPayloadSize = 16 * 1024 * 1024;
-      }
-
-      standard = new MqttSettings(IpSettings.standard(), maxPayloadSize);
-    }
-    return standard;
-  }
-
-  public static MqttSettings from(IpSettings ipSettings) {
-    return standard().ipSettings(ipSettings);
-  }
-
-  @Kind
-  public static Form<MqttSettings> form() {
-    if (form == null) {
-      form = new MqttSettingsForm();
-    }
-    return form;
-  }
-
   public final IpSettings ipSettings() {
     return this.ipSettings;
   }
 
   public MqttSettings ipSettings(IpSettings ipSettings) {
-    return copy(ipSettings, this.maxPayloadSize);
+    return this.copy(ipSettings, this.maxPayloadSize);
   }
 
   public final TlsSettings tlsSettings() {
@@ -79,7 +50,7 @@ public class MqttSettings implements Debug {
   }
 
   public MqttSettings tlsSettings(TlsSettings tlsSettings) {
-    return ipSettings(this.ipSettings.tlsSettings(tlsSettings));
+    return this.ipSettings(this.ipSettings.tlsSettings(tlsSettings));
   }
 
   public final TcpSettings tcpSettings() {
@@ -87,7 +58,7 @@ public class MqttSettings implements Debug {
   }
 
   public MqttSettings tcpSettings(TcpSettings tcpSettings) {
-    return ipSettings(this.ipSettings.tcpSettings(tcpSettings));
+    return this.ipSettings(this.ipSettings.tcpSettings(tcpSettings));
   }
 
   public final int maxPayloadSize() {
@@ -95,7 +66,7 @@ public class MqttSettings implements Debug {
   }
 
   public MqttSettings maxPayloadSize(int maxPayloadSize) {
-    return copy(this.ipSettings, maxPayloadSize);
+    return this.copy(this.ipSettings, maxPayloadSize);
   }
 
   protected MqttSettings copy(IpSettings ipSettings, int maxPayloadSize) {
@@ -103,7 +74,7 @@ public class MqttSettings implements Debug {
   }
 
   public Value toValue() {
-    return form().mold(this).toValue();
+    return MqttSettings.form().mold(this).toValue();
   }
 
   @Override
@@ -118,25 +89,58 @@ public class MqttSettings implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttSettings.class);
+    if (MqttSettings.hashSeed == 0) {
+      MqttSettings.hashSeed = Murmur3.seed(MqttSettings.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(MqttSettings.hashSeed,
         this.ipSettings.hashCode()), this.maxPayloadSize));
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("MqttSettings").write('.').write("standard").write('(').write(')')
-        .write('.').write("ipSettings").write('(').debug(this.ipSettings).write(')')
-        .write('.').write("maxPayloadSize").write('(').debug(this.maxPayloadSize).write(')');
+                   .write('.').write("ipSettings").write('(').debug(this.ipSettings).write(')')
+                   .write('.').write("maxPayloadSize").write('(').debug(this.maxPayloadSize).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static MqttSettings standard;
+
+  public static MqttSettings standard() {
+    if (MqttSettings.standard == null) {
+      int maxPayloadSize;
+      try {
+        maxPayloadSize = Integer.parseInt(System.getProperty("swim.mqtt.max.payload.size"));
+      } catch (NumberFormatException error) {
+        maxPayloadSize = 16 * 1024 * 1024;
+      }
+
+      MqttSettings.standard = new MqttSettings(IpSettings.standard(), maxPayloadSize);
+    }
+    return MqttSettings.standard;
+  }
+
+  public static MqttSettings create(IpSettings ipSettings) {
+    return MqttSettings.standard().ipSettings(ipSettings);
+  }
+
+  private static Form<MqttSettings> form;
+
+  @Kind
+  public static Form<MqttSettings> form() {
+    if (MqttSettings.form == null) {
+      MqttSettings.form = new MqttSettingsForm();
+    }
+    return MqttSettings.form;
   }
 
 }

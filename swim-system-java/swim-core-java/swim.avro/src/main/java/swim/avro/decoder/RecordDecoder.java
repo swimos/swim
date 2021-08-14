@@ -41,6 +41,12 @@ final class RecordDecoder<T, R> extends Decoder<T> {
     this(avro, type, null, null, 0);
   }
 
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return RecordDecoder.decode(input, this.avro, this.type, this.record,
+                                this.valueDecoder, this.fieldIndex);
+  }
+
   @SuppressWarnings("unchecked")
   static <T, R> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroRecordType<T, R> type,
                                   R record, Decoder<?> valueDecoder, int fieldIndex) {
@@ -51,13 +57,13 @@ final class RecordDecoder<T, R> extends Decoder<T> {
           if (fieldType != null) {
             valueDecoder = avro.decodeType(fieldType.valueType(), input);
           } else {
-            return error(new DecoderException("unknown field: " + fieldIndex));
+            return Decoder.error(new DecoderException("unknown field: " + fieldIndex));
           }
         } else {
           if (record == null) {
             record = type.create();
           }
-          return done(type.cast(record));
+          return Decoder.done(type.cast(record));
         }
       }
       while (valueDecoder.isCont() && !input.isEmpty()) {
@@ -78,20 +84,15 @@ final class RecordDecoder<T, R> extends Decoder<T> {
       break;
     } while (true);
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new RecordDecoder<T, R>(avro, type, record, valueDecoder, fieldIndex);
   }
 
   static <T, R> Decoder<T> decode(InputBuffer input, AvroDecoder avro, AvroRecordType<T, R> type) {
-    return decode(input, avro, type, null, null, 0);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.avro, this.type, this.record, this.valueDecoder, this.fieldIndex);
+    return RecordDecoder.decode(input, avro, type, null, null, 0);
   }
 
 }

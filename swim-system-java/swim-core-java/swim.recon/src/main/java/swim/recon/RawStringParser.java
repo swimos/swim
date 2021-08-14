@@ -35,11 +35,11 @@ final class RawStringParser<I, V> extends Parser<V> {
 
   @Override
   public Parser<V> feed(Input input) {
-    return parse(input, this.recon, this.output, this.count, this.step);
+    return RawStringParser.parse(input, this.recon, this.output, this.count, this.step);
   }
 
-  static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Output<V> output,
-                                int count, int step) {
+  static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon,
+                                Output<V> output, int count, int step) {
     int c = 0;
     if (step == 1) {
       while (input.isCont()) {
@@ -55,7 +55,7 @@ final class RawStringParser<I, V> extends Parser<V> {
         count = 1;
         step = 2;
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("raw string", input));
+        return Parser.error(Diagnostic.expected("raw string", input));
       }
     }
     if (step == 2) {
@@ -71,7 +71,7 @@ final class RawStringParser<I, V> extends Parser<V> {
           step = 4;
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("raw string", input));
+        return Parser.error(Diagnostic.expected("raw string", input));
       }
     }
     if (step == 3) {
@@ -87,13 +87,13 @@ final class RawStringParser<I, V> extends Parser<V> {
           if (output == null) {
             output = recon.textOutput();
           }
-          return done(output.bind());
+          return Parser.done(output.bind());
         }
       } else if (input.isDone()) {
         if (output == null) {
           output = recon.textOutput();
         }
-        return done(output.bind());
+        return Parser.done(output.bind());
       }
     }
     do {
@@ -114,15 +114,15 @@ final class RawStringParser<I, V> extends Parser<V> {
           } else if (c == '`') {
             input = input.step();
             if (count == 1) {
-              return done(output.bind());
+              return Parser.done(output.bind());
             } else {
               step = 6;
             }
           } else {
-            return error(Diagnostic.expected('`', input));
+            return Parser.error(Diagnostic.expected('`', input));
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.expected('`', input));
+          return Parser.error(Diagnostic.expected('`', input));
         }
       }
       if (step == 5) {
@@ -136,7 +136,7 @@ final class RawStringParser<I, V> extends Parser<V> {
           step = 4;
           continue;
         } else if (input.isDone()) {
-          return error(Diagnostic.expected("escape character", input));
+          return Parser.error(Diagnostic.expected("escape character", input));
         }
       }
       if (step == 6) {
@@ -150,7 +150,7 @@ final class RawStringParser<I, V> extends Parser<V> {
             continue;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.message("unclosed raw string", input));
+          return Parser.error(Diagnostic.message("unclosed raw string", input));
         }
       }
       if (step == 7) {
@@ -165,23 +165,23 @@ final class RawStringParser<I, V> extends Parser<V> {
             continue;
           }
         } else if (input.isDone()) {
-          return error(Diagnostic.message("unclosed raw string", input));
+          return Parser.error(Diagnostic.message("unclosed raw string", input));
         }
       }
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new RawStringParser<I, V>(recon, output, count, step);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon) {
-    return parse(input, recon, null, 0, 1);
+    return RawStringParser.parse(input, recon, null, 0, 1);
   }
 
   static <I, V> Parser<V> parse(Input input, ReconParser<I, V> recon, Output<V> output) {
-    return parse(input, recon, output, 0, 1);
+    return RawStringParser.parse(input, recon, output, 0, 1);
   }
 
 }

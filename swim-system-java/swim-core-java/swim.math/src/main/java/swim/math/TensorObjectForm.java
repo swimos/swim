@@ -44,7 +44,7 @@ final class TensorObjectForm extends TensorForm<Tensor> {
   @Override
   public Item mold(Tensor tensor) {
     if (tensor != null) {
-      return Tensor.mold(tag(), tensor);
+      return Tensor.mold(this.tag(), tensor);
     } else {
       return Item.extant();
     }
@@ -52,18 +52,18 @@ final class TensorObjectForm extends TensorForm<Tensor> {
 
   @Override
   public Tensor cast(Item item) {
-    return Tensor.cast(tag(), item.toValue(), this.dims, this.prec);
+    return Tensor.cast(this.tag(), item.toValue(), this.dims, this.prec);
   }
 
   @Override
   public Tensor fromTensor(TensorDims ud, float[] us, int ui) {
     if (this.prec.isDouble()) {
       final double[] ws = new double[this.dims.size * this.dims.stride];
-      Tensor.copy(ud, us, ui, dims, ws, 0);
+      Tensor.copy(ud, us, ui, this.dims, ws, 0);
       return new Tensor(this.dims, us);
     } else if (this.prec.isSingle()) {
       final float[] ws = new float[this.dims.size * this.dims.stride];
-      Tensor.copy(ud, us, ui, dims, ws, 0);
+      Tensor.copy(ud, us, ui, this.dims, ws, 0);
       return new Tensor(this.dims, us);
     } else {
       throw new AssertionError();
@@ -109,22 +109,22 @@ final class TensorObjectForm extends TensorForm<Tensor> {
 
   @Override
   public Item moldTensor(TensorDims ud, float[] us, int ui) {
-    return Tensor.mold(tag(), ud, us, ui);
+    return Tensor.mold(this.tag(), ud, us, ui);
   }
 
   @Override
   public Item moldTensor(TensorDims ud, double[] us, int ui) {
-    return Tensor.mold(tag(), ud, us, ui);
+    return Tensor.mold(this.tag(), ud, us, ui);
   }
 
   @Override
   public void castTensor(Item item, TensorDims wd, float[] ws, int wi) {
-    Tensor.cast(tag(), item.toValue(), wd, ws, wi);
+    Tensor.cast(this.tag(), item.toValue(), wd, ws, wi);
   }
 
   @Override
   public void castTensor(Item item, TensorDims wd, double[] ws, int wi) {
-    Tensor.cast(tag(), item.toValue(), wd, ws, wi);
+    Tensor.cast(this.tag(), item.toValue(), wd, ws, wi);
   }
 
 }

@@ -16,8 +16,6 @@ package swim.runtime;
 
 public class EdgeException extends RuntimeException {
 
-  private static final long serialVersionUID = 1L;
-
   public EdgeException(String message, Throwable cause) {
     super(message, cause);
   }
@@ -33,5 +31,7 @@ public class EdgeException extends RuntimeException {
   public EdgeException() {
     super();
   }
+
+  private static final long serialVersionUID = 1L;
 
 }

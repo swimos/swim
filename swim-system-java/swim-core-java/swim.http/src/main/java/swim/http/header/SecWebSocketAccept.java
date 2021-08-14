@@ -29,28 +29,10 @@ import swim.util.Murmur3;
 
 public final class SecWebSocketAccept extends HttpHeader {
 
-  private static int hashSeed;
   final byte[] digest;
 
   SecWebSocketAccept(byte[] digest) {
     this.digest = digest;
-  }
-
-  public static SecWebSocketAccept from(byte[] digest) {
-    return new SecWebSocketAccept(digest);
-  }
-
-  public static SecWebSocketAccept from(String digestString) {
-    final Input input = Unicode.stringInput(digestString);
-    Parser<byte[]> parser = Base64.standard().parseByteArray(input);
-    if (input.isCont() && !parser.isError()) {
-      parser = Parser.error(Diagnostic.unexpected(input));
-    }
-    return new SecWebSocketAccept(parser.bind());
-  }
-
-  public static Parser<SecWebSocketAccept> parseHttpValue(Input input, HttpParser http) {
-    return SecWebSocketAcceptParser.parse(input);
   }
 
   @Override
@@ -83,19 +65,39 @@ public final class SecWebSocketAccept extends HttpHeader {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(SecWebSocketAccept.class);
+    if (SecWebSocketAccept.hashSeed == 0) {
+      SecWebSocketAccept.hashSeed = Murmur3.seed(SecWebSocketAccept.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, Arrays.hashCode(this.digest)));
+    return Murmur3.mash(Murmur3.mix(SecWebSocketAccept.hashSeed, Arrays.hashCode(this.digest)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("SecWebSocketAccept").write('.').write("from").write('(').write('"');
-    Base64.standard().writeByteArray(this.digest, output);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("SecWebSocketAccept").write('.').write("create").write('(').write('"');
+    Base64.standard().writeByteArray(this.digest, output).bind();
     output = output.write('"').write(')');
+    return output;
+  }
+
+  public static SecWebSocketAccept create(byte[] digest) {
+    return new SecWebSocketAccept(digest);
+  }
+
+  public static SecWebSocketAccept create(String digestString) {
+    final Input input = Unicode.stringInput(digestString);
+    Parser<byte[]> parser = Base64.standard().parseByteArray(input);
+    if (input.isCont() && !parser.isError()) {
+      parser = Parser.error(Diagnostic.unexpected(input));
+    }
+    return new SecWebSocketAccept(parser.bind());
+  }
+
+  public static Parser<SecWebSocketAccept> parseHttpValue(Input input, HttpParser http) {
+    return SecWebSocketAcceptParser.parse(input);
   }
 
 }

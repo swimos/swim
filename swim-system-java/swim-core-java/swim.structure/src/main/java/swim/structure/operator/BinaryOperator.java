@@ -23,16 +23,16 @@ import swim.structure.Operator;
  */
 public abstract class BinaryOperator extends Operator {
 
-  final Item operand1;
-  final Item operand2;
+  final Item lhs;
+  final Item rhs;
 
-  public BinaryOperator(Item operand1, Item operand2) {
-    this.operand1 = operand1.commit();
-    this.operand2 = operand2.commit();
+  public BinaryOperator(Item lhs, Item rhs) {
+    this.lhs = lhs.commit();
+    this.rhs = rhs.commit();
   }
 
-  public final Item operand1() {
-    return this.operand1;
+  public final Item lhs() {
+    return this.lhs;
   }
 
   /**
@@ -41,13 +41,13 @@ public abstract class BinaryOperator extends Operator {
    */
   public abstract String operator();
 
-  public final Item operand2() {
-    return this.operand2;
+  public final Item rhs() {
+    return this.rhs;
   }
 
   @Override
   public boolean isConstant() {
-    return this.operand1.isConstant() && this.operand2.isConstant();
+    return this.lhs.isConstant() && this.rhs.isConstant();
   }
 
 }

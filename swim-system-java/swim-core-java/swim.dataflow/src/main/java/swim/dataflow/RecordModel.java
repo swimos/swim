@@ -42,31 +42,6 @@ public class RecordModel extends AbstractRecordOutlet {
     this(Record.create());
   }
 
-  public static RecordModel from(Record record) {
-    final RecordModel model = new RecordModel();
-    model.materialize(record);
-    model.compile(record);
-    return model;
-  }
-
-  public static RecordModel of() {
-    return new RecordModel();
-  }
-
-  public static RecordModel of(Object object) {
-    return from(Record.of(object));
-  }
-
-  public static RecordModel of(Object... objects) {
-    return from(Record.of(objects));
-  }
-
-  public static RecordModel globalScope() {
-    final RecordModel model = new RecordModel();
-    model.materializeField(Slot.of("math", MathModule.scope().branch()));
-    return model;
-  }
-
   @Override
   public boolean isEmpty() {
     return this.state.isEmpty();
@@ -102,7 +77,7 @@ public class RecordModel extends AbstractRecordOutlet {
     if (this.state.containsKey(key)) {
       return true;
     } else {
-      final StreamletScope<? extends Value> scope = streamletScope();
+      final StreamletScope<? extends Value> scope = this.streamletScope();
       return scope instanceof Record ? ((Record) scope).containsKey(key) : false;
     }
   }
@@ -126,7 +101,7 @@ public class RecordModel extends AbstractRecordOutlet {
   public Value get(Value key) {
     Value value = this.state.get(key);
     if (!value.isDefined()) {
-      final StreamletScope<? extends Value> scope = streamletScope();
+      final StreamletScope<? extends Value> scope = this.streamletScope();
       if (scope instanceof Record) {
         value = ((Record) scope).get(key);
       }
@@ -138,7 +113,7 @@ public class RecordModel extends AbstractRecordOutlet {
   public Value getAttr(Text key) {
     Value value = this.state.getAttr(key);
     if (!value.isDefined()) {
-      final StreamletScope<? extends Value> scope = streamletScope();
+      final StreamletScope<? extends Value> scope = this.streamletScope();
       if (scope instanceof Record) {
         value = ((Record) scope).getAttr(key);
       }
@@ -150,7 +125,7 @@ public class RecordModel extends AbstractRecordOutlet {
   public Value getSlot(Value key) {
     Value value = this.state.getSlot(key);
     if (!value.isDefined()) {
-      final StreamletScope<? extends Value> scope = streamletScope();
+      final StreamletScope<? extends Value> scope = this.streamletScope();
       if (scope instanceof Record) {
         value = ((Record) scope).getSlot(key);
       }
@@ -162,7 +137,7 @@ public class RecordModel extends AbstractRecordOutlet {
   public Field getField(Value key) {
     Field field = this.state.getField(key);
     if (field == null) {
-      final StreamletScope<? extends Value> scope = streamletScope();
+      final StreamletScope<? extends Value> scope = this.streamletScope();
       if (scope instanceof Record) {
         field = ((Record) scope).getField(key);
       }
@@ -192,7 +167,7 @@ public class RecordModel extends AbstractRecordOutlet {
   public Value put(Value key, Value newValue) {
     final Value oldValue;
     if (!this.state.containsKey(key)) {
-      final StreamletScope<? extends Value> scope = streamletScope();
+      final StreamletScope<? extends Value> scope = this.streamletScope();
       if (scope instanceof Record && ((Record) scope).containsKey(key)) {
         oldValue = ((Record) scope).put(key, newValue);
       } else {
@@ -201,20 +176,20 @@ public class RecordModel extends AbstractRecordOutlet {
     } else {
       oldValue = this.state.put(key, newValue);
     }
-    decohereInputKey(key, KeyEffect.UPDATE);
+    this.decohereInputKey(key, KeyEffect.UPDATE);
     return oldValue;
   }
 
   @Override
   public Value put(String key, Value newValue) {
-    return put(Text.from(key), newValue);
+    return this.put(Text.from(key), newValue);
   }
 
   @Override
   public Value putAttr(Text key, Value newValue) {
     final Value oldValue;
     if (!this.state.containsKey(key)) {
-      final StreamletScope<? extends Value> scope = streamletScope();
+      final StreamletScope<? extends Value> scope = this.streamletScope();
       if (scope instanceof Record && ((Record) scope).containsKey(key)) {
         oldValue = ((Record) scope).putAttr(key, newValue);
       } else {
@@ -223,20 +198,20 @@ public class RecordModel extends AbstractRecordOutlet {
     } else {
       oldValue = this.state.putAttr(key, newValue);
     }
-    decohereInputKey(key, KeyEffect.UPDATE);
+    this.decohereInputKey(key, KeyEffect.UPDATE);
     return oldValue;
   }
 
   @Override
   public Value putAttr(String key, Value newValue) {
-    return putAttr(Text.from(key), newValue);
+    return this.putAttr(Text.from(key), newValue);
   }
 
   @Override
   public Value putSlot(Value key, Value newValue) {
     final Value oldValue;
     if (!this.state.containsKey(key)) {
-      final StreamletScope<? extends Value> scope = streamletScope();
+      final StreamletScope<? extends Value> scope = this.streamletScope();
       if (scope instanceof Record && ((Record) scope).containsKey(key)) {
         oldValue = ((Record) scope).putSlot(key, newValue);
       } else {
@@ -245,13 +220,13 @@ public class RecordModel extends AbstractRecordOutlet {
     } else {
       oldValue = this.state.putSlot(key, newValue);
     }
-    decohereInputKey(key, KeyEffect.UPDATE);
+    this.decohereInputKey(key, KeyEffect.UPDATE);
     return oldValue;
   }
 
   @Override
   public Value putSlot(String key, Value newValue) {
-    return putSlot(Text.from(key), newValue);
+    return this.putSlot(Text.from(key), newValue);
   }
 
   @Override
@@ -259,17 +234,17 @@ public class RecordModel extends AbstractRecordOutlet {
     final Item oldItem = this.state.setItem(index, newItem);
     if (oldItem instanceof Field && newItem instanceof Field) {
       if (oldItem.key().equals(newItem.key())) {
-        decohereInputKey(oldItem.key(), KeyEffect.UPDATE);
+        this.decohereInputKey(oldItem.key(), KeyEffect.UPDATE);
       } else {
-        decohereInputKey(oldItem.key(), KeyEffect.REMOVE);
-        decohereInputKey(newItem.key(), KeyEffect.UPDATE);
+        this.decohereInputKey(oldItem.key(), KeyEffect.REMOVE);
+        this.decohereInputKey(newItem.key(), KeyEffect.UPDATE);
       }
     } else if (oldItem instanceof Field) {
-      decohereInputKey(oldItem.key(), KeyEffect.REMOVE);
+      this.decohereInputKey(oldItem.key(), KeyEffect.REMOVE);
     } else if (newItem instanceof Field) {
-      decohereInputKey(newItem.key(), KeyEffect.UPDATE);
+      this.decohereInputKey(newItem.key(), KeyEffect.UPDATE);
     } else {
-      decohereInput();
+      this.decohereInput();
     }
     return oldItem;
   }
@@ -278,7 +253,7 @@ public class RecordModel extends AbstractRecordOutlet {
   public boolean add(Item item) {
     this.state.add(item);
     if (item instanceof Field) {
-      decohereInputKey(item.key(), KeyEffect.UPDATE);
+      this.decohereInputKey(item.key(), KeyEffect.UPDATE);
     }
     return true;
   }
@@ -287,7 +262,7 @@ public class RecordModel extends AbstractRecordOutlet {
   public void add(int index, Item item) {
     this.state.add(index, item);
     if (item instanceof Field) {
-      decohereInputKey(item.key(), KeyEffect.UPDATE);
+      this.decohereInputKey(item.key(), KeyEffect.UPDATE);
     }
   }
 
@@ -296,7 +271,7 @@ public class RecordModel extends AbstractRecordOutlet {
   public Item remove(int index) {
     final Item oldItem = this.state.remove(index);
     if (oldItem instanceof Field) {
-      decohereInputKey(oldItem.key(), KeyEffect.REMOVE);
+      this.decohereInputKey(oldItem.key(), KeyEffect.REMOVE);
     }
     return oldItem;
   }
@@ -307,7 +282,7 @@ public class RecordModel extends AbstractRecordOutlet {
     this.state.clear();
     for (Item oldItem : oldState) {
       if (oldItem instanceof Field) {
-        decohereInputKey(oldItem.key(), KeyEffect.REMOVE);
+        this.decohereInputKey(oldItem.key(), KeyEffect.REMOVE);
       }
     }
   }
@@ -342,15 +317,15 @@ public class RecordModel extends AbstractRecordOutlet {
 
   public void materialize(Record record) {
     for (Item item : record) {
-      materializeItem(item);
+      this.materializeItem(item);
     }
   }
 
   public void materializeItem(Item item) {
     if (item instanceof Field) {
-      materializeField((Field) item);
+      this.materializeField((Field) item);
     } else {
-      materializeValue((Value) item);
+      this.materializeValue((Value) item);
     }
   }
 
@@ -388,16 +363,16 @@ public class RecordModel extends AbstractRecordOutlet {
   public void compile(Record record) {
     int index = 0;
     for (Item item : record) {
-      compileItem(item, index);
+      this.compileItem(item, index);
       index += 1;
     }
   }
 
   public void compileItem(Item item, int index) {
     if (item instanceof Field) {
-      compileField((Field) item, index);
+      this.compileField((Field) item, index);
     } else {
-      compileValue((Value) item, index);
+      this.compileValue((Value) item, index);
     }
   }
 
@@ -411,21 +386,21 @@ public class RecordModel extends AbstractRecordOutlet {
         // Lexically bind nested streamlet.
         ((RecordStreamlet) value).compile();
         // Decohere nested scope key.
-        decohereInputKey(key, KeyEffect.UPDATE);
+        this.decohereInputKey(key, KeyEffect.UPDATE);
       } else if (value instanceof Record) {
         // Recursively compile nested scope.
         ((RecordModel) this.state.getItem(index).toValue()).compile((Record) value);
         // Decohere nested scope key.
-        decohereInputKey(key, KeyEffect.UPDATE);
+        this.decohereInputKey(key, KeyEffect.UPDATE);
       } else {
         // Set placeholder value.
         field.setValue(Value.extant());
         // Bind dynamic value updater.
-        bindValue(key, value);
+        this.bindValue(key, value);
       }
     } else {
       // Decohere constant key.
-      decohereInputKey(key, KeyEffect.UPDATE);
+      this.decohereInputKey(key, KeyEffect.UPDATE);
     }
   }
 
@@ -445,25 +420,50 @@ public class RecordModel extends AbstractRecordOutlet {
   public void reify(Reifier reifier) {
     int index = 0;
     for (Item oldItem : this) {
-      final Item newItem = reifyItem(oldItem, reifier);
+      final Item newItem = this.reifyItem(oldItem, reifier);
       if (oldItem != newItem) {
-        setItem(index, newItem);
+        this.setItem(index, newItem);
       }
       index += 1;
     }
   }
 
   public void reify() {
-    reify(Reifier.system());
+    this.reify(Reifier.system());
   }
 
   public Item reifyItem(Item item, Reifier reifier) {
-    final StreamletScope<? extends Value> scope = streamletScope();
+    final StreamletScope<? extends Value> scope = this.streamletScope();
     if (scope instanceof RecordModel) {
       return ((RecordModel) scope).reifyItem(item, reifier);
     } else {
       return item;
     }
+  }
+
+  public static RecordModel create(Record record) {
+    final RecordModel model = new RecordModel();
+    model.materialize(record);
+    model.compile(record);
+    return model;
+  }
+
+  public static RecordModel of() {
+    return new RecordModel();
+  }
+
+  public static RecordModel of(Object object) {
+    return RecordModel.create(Record.of(object));
+  }
+
+  public static RecordModel of(Object... objects) {
+    return RecordModel.create(Record.of(objects));
+  }
+
+  public static RecordModel globalScope() {
+    final RecordModel model = new RecordModel();
+    model.materializeField(Slot.of("math", MathModule.scope().branch()));
+    return model;
   }
 
 }

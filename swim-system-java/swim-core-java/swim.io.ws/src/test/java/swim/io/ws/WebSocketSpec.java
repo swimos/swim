@@ -42,7 +42,7 @@ public class WebSocketSpec extends WebSocketBehaviors {
       @Override
       public void didConnect() {
         super.didConnect();
-        doRequest(upgrade(socket, wsRequest));
+        this.doRequest(this.upgrade(socket, wsRequest));
       }
     };
     return endpoint.connectHttp("127.0.0.1", 33556, client, this.wsSettings.httpSettings());

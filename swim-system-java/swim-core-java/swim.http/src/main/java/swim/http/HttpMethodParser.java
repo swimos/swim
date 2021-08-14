@@ -34,6 +34,11 @@ final class HttpMethodParser extends Parser<HttpMethod> {
     this(http, null, 1);
   }
 
+  @Override
+  public Parser<HttpMethod> feed(Input input) {
+    return HttpMethodParser.parse(input, this.http, this.name, this.step);
+  }
+
   static Parser<HttpMethod> parse(Input input, HttpParser http, StringBuilder name, int step) {
     int c = 0;
     if (step == 1) {
@@ -45,10 +50,10 @@ final class HttpMethodParser extends Parser<HttpMethod> {
           name.appendCodePoint(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("HTTP method", input));
+          return Parser.error(Diagnostic.expected("HTTP method", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("HTTP method", input));
+        return Parser.error(Diagnostic.expected("HTTP method", input));
       }
     }
     if (step == 2) {
@@ -62,22 +67,17 @@ final class HttpMethodParser extends Parser<HttpMethod> {
         }
       }
       if (!input.isEmpty()) {
-        return done(http.method(name.toString()));
+        return Parser.done(http.method(name.toString()));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new HttpMethodParser(http, name, step);
   }
 
   static Parser<HttpMethod> parse(Input input, HttpParser http) {
-    return parse(input, http, null, 1);
-  }
-
-  @Override
-  public Parser<HttpMethod> feed(Input input) {
-    return parse(input, this.http, this.name, this.step);
+    return HttpMethodParser.parse(input, http, null, 1);
   }
 
 }

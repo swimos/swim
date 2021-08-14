@@ -17,7 +17,7 @@ package swim.api.agent;
 import swim.api.Lane;
 import swim.api.Link;
 import swim.api.lane.LaneFactory;
-import swim.api.ref.SwimRef;
+import swim.api.ref.WarpRef;
 import swim.api.store.Store;
 import swim.collections.FingerTrieSeq;
 import swim.concurrent.Schedule;
@@ -31,7 +31,7 @@ import swim.util.Log;
  * Lane} and {@code Store} creation mechanisms, logging, and scheduling to some
  * {@link Agent}.
  */
-public interface AgentContext extends SwimRef, LaneFactory, Store, Log {
+public interface AgentContext extends WarpRef, LaneFactory, Store, Log {
 
   /**
    * The {@code hostUri} of the {@code Agent} managed by this {@code
@@ -50,7 +50,7 @@ public interface AgentContext extends SwimRef, LaneFactory, Store, Log {
   /**
    * A {@link swim.structure.Record} that maps every dynamic property in
    * {@link #nodeUri()}, as defined by {@link AgentRoute#pattern()}, to its
-   * value.  An empty result indicates that {@code nodeUri} contains no
+   * value. An empty result indicates that {@code nodeUri} contains no
    * dynamic components.
    */
   Value props();

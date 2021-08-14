@@ -49,11 +49,11 @@ public abstract class JsonWriter<I, V> {
   }
 
   public Writer<?, ?> writeArray(I item, Output<?> output) {
-    return ArrayWriter.write(output, this, items(item));
+    return ArrayWriter.write(output, this, this.items(item));
   }
 
   public Writer<?, ?> writeObject(I item, Output<?> output) {
-    return ObjectWriter.write(output, this, items(item));
+    return ObjectWriter.write(output, this, this.items(item));
   }
 
   public Writer<?, ?> writeData(ByteBuffer value, Output<?> output) {

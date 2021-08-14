@@ -15,9 +15,9 @@
 package swim.codec;
 
 /**
- * Type that can output a developer readable debug string.  {@code Debug}
+ * Type that can output a developer readable debug string. {@code Debug}
  * implementations may use {@link Output#settings()} to tailor the format of
- * their debug strings.  For example, debug strings may be stylized when
+ * their debug strings. For example, debug strings may be stylized when
  * {@link OutputSettings#isStyled()} returns {@code true}.
  */
 public interface Debug {
@@ -26,9 +26,10 @@ public interface Debug {
    * Writes a developer readable, debug-formatted string representation of this
    * object to {@code output}.
    *
+   * @return the continuation of the {@code output}.
    * @throws OutputException if the {@code output} exits the <em>cont</em>
    *                         state before the full debug string has been written.
    */
-  void debug(Output<?> output);
+  <T> Output<T> debug(Output<T> output);
 
 }

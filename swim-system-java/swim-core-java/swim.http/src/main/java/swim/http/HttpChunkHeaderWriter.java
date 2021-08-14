@@ -41,6 +41,11 @@ final class HttpChunkHeaderWriter extends Writer<Object, Object> {
     this(http, size, extensions, null, 1);
   }
 
+  @Override
+  public Writer<Object, Object> pull(Output<?> output) {
+    return HttpChunkHeaderWriter.write(output, this.http, this.size, this.extensions, this.part, this.step);
+  }
+
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, long size,
                                       Iterator<ChunkExtension> extensions,
                                       Writer<?, ?> part, int step) {
@@ -88,24 +93,19 @@ final class HttpChunkHeaderWriter extends Writer<Object, Object> {
     }
     if (step == 5 && output.isCont()) {
       output = output.write('\n');
-      return done();
+      return Writer.done();
     }
     if (output.isDone()) {
-      return error(new WriterException("truncated"));
+      return Writer.error(new WriterException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Writer.error(output.trap());
     }
     return new HttpChunkHeaderWriter(http, size, extensions, part, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http, long size,
                                       Iterator<ChunkExtension> extensions) {
-    return write(output, http, size, extensions, null, 1);
-  }
-
-  @Override
-  public Writer<Object, Object> pull(Output<?> output) {
-    return write(output, this.http, this.size, this.extensions, this.part, this.step);
+    return HttpChunkHeaderWriter.write(output, http, size, extensions, null, 1);
   }
 
 }

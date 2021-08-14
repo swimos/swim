@@ -23,6 +23,10 @@ import swim.dynamic.api.warp.HostWarpLane;
 
 public final class HostSupplyLane {
 
+  private HostSupplyLane() {
+    // static
+  }
+
   public static final HostObjectType<SupplyLane<Object>> TYPE;
 
   static {
@@ -32,10 +36,6 @@ public final class HostSupplyLane {
     type.addMember(new HostSupplyLaneObserve());
     type.addMember(new HostSupplyLaneUnobserve());
     type.addMember(new HostSupplyLanePush());
-  }
-
-  private HostSupplyLane() {
-    // static
   }
 
 }

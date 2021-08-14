@@ -41,6 +41,11 @@ final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
     this(http, null, null, null, 1);
   }
 
+  @Override
+  public Parser<WebSocketExtension> feed(Input input) {
+    return WebSocketExtensionParser.parse(input, this.http, this.name, this.param, this.params, this.step);
+  }
+
   static Parser<WebSocketExtension> parse(Input input, HttpParser http, StringBuilder name, Parser<WebSocketParam> param,
                                           Builder<WebSocketParam, FingerTrieSeq<WebSocketParam>> params, int step) {
     int c = 0;
@@ -55,10 +60,10 @@ final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
           name.appendCodePoint(c);
           step = 2;
         } else {
-          return error(Diagnostic.expected("websocket extension", input));
+          return Parser.error(Diagnostic.expected("websocket extension", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("websocket extension", input));
+        return Parser.error(Diagnostic.expected("websocket extension", input));
       }
     }
     if (step == 2) {
@@ -92,7 +97,7 @@ final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
           input = input.step();
           step = 4;
         } else if (!input.isEmpty()) {
-          return done(http.webSocketExtension(name.toString(), params != null ? params.bind() : FingerTrieSeq.<WebSocketParam>empty()));
+          return Parser.done(http.webSocketExtension(name.toString(), params != null ? params.bind() : FingerTrieSeq.<WebSocketParam>empty()));
         }
       }
       if (step == 4) {
@@ -126,18 +131,13 @@ final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new WebSocketExtensionParser(http, name, param, params, step);
   }
 
   static Parser<WebSocketExtension> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, null, 1);
-  }
-
-  @Override
-  public Parser<WebSocketExtension> feed(Input input) {
-    return parse(input, this.http, this.name, this.param, this.params, this.step);
+    return WebSocketExtensionParser.parse(input, http, null, null, null, 1);
   }
 
 }

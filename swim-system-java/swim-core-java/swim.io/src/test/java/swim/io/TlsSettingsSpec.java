@@ -32,15 +32,15 @@ public class TlsSettingsSpec {
   public void decodesTlsSettings() {
     final TlsSettings settings = TlsSettings.form().cast(
         Record.of(Attr.of("tls", Record.of(Slot.of("protocol", "TLS"))),
-            Slot.of("clientAuth", "need"),
-            Slot.of("cipherSuites", Record.of("ECDHE-ECDSA-AES128-GCM-SHA256", "ECDHE-RSA-AES128-GCM-SHA256")),
-            Slot.of("protocols", Record.of("TLSv1.1", "TLSv1.2")),
-            Record.of(Attr.of("keyStore", Record.of(Slot.of("type", "jks"))),
-                Slot.of("resource", "keystore.jks"),
-                Slot.of("password", "default")),
-            Record.of(Attr.of("trustStore", Record.of(Slot.of("type", "jks"))),
-                Slot.of("resource", "cacerts.jks"),
-                Slot.of("password", "default"))));
+                  Slot.of("clientAuth", "need"),
+                  Slot.of("cipherSuites", Record.of("ECDHE-ECDSA-AES128-GCM-SHA256", "ECDHE-RSA-AES128-GCM-SHA256")),
+                  Slot.of("protocols", Record.of("TLSv1.1", "TLSv1.2")),
+                  Record.of(Attr.of("keyStore", Record.of(Slot.of("type", "jks"))),
+                            Slot.of("resource", "keystore.jks"),
+                            Slot.of("password", "default")),
+                  Record.of(Attr.of("trustStore", Record.of(Slot.of("type", "jks"))),
+                            Slot.of("resource", "cacerts.jks"),
+                            Slot.of("password", "default"))));
 
     assertEquals(settings.clientAuth(), ClientAuth.NEED);
     assertEquals(settings.cipherSuites(), Arrays.asList(new String[] {"ECDHE-ECDSA-AES128-GCM-SHA256", "ECDHE-RSA-AES128-GCM-SHA256"}));

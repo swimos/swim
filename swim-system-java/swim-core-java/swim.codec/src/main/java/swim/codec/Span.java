@@ -23,28 +23,12 @@ import swim.util.Murmur3;
  */
 public final class Span extends Tag {
 
-  private static int hashSeed;
   final Mark start;
   final Mark end;
 
   Span(Mark start, Mark end) {
     this.start = start;
     this.end = end;
-  }
-
-  /**
-   * Returns a new {@code Span} representing the closed interval between the
-   * given {@code start} and {@code end} marks.
-   */
-  public static Span from(Mark start, Mark end) {
-    start = Objects.requireNonNull(start);
-    end = Objects.requireNonNull(end);
-    if (start.offset > end.offset) {
-      final Mark tmp = start;
-      start = end;
-      end = tmp;
-    }
-    return new Span(start, end);
   }
 
   @Override
@@ -103,44 +87,63 @@ public final class Span extends Tag {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(Span.class);
+    if (Span.hashSeed == 0) {
+      Span.hashSeed = Murmur3.seed(Span.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Span.hashSeed,
         this.start.hashCode()), this.end.hashCode()));
   }
 
   @Override
-  public void display(Output<?> output) {
+  public <T> Output<T> display(Output<T> output) {
     if (this.start.note != null) {
       output = output.write(this.start.note).write(": ");
     }
-    Format.displayInt(this.start.line, output);
+    output = Format.displayInt(this.start.line, output);
     output = output.write(':');
-    Format.displayInt(this.start.column, output);
+    output = Format.displayInt(this.start.column, output);
     output = output.write('-');
-    Format.displayInt(this.end.line, output);
+    output = Format.displayInt(this.end.line, output);
     output = output.write(':');
-    Format.displayInt(this.end.column, output);
+    output = Format.displayInt(this.end.column, output);
     if (this.end.note != null) {
       output = output.write(": ").write(this.end.note);
     }
+    return output;
   }
 
   @Override
-  public void debug(Output<?> output) {
+  public <T> Output<T> debug(Output<T> output) {
     output = output.write("Span").write('.').write("from").write('(');
-    this.start.debug(output);
+    output = this.start.debug(output);
     output = output.write(", ");
-    this.end.debug(output);
+    output = this.end.debug(output);
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.display(this);
+  }
+
+  /**
+   * Returns a new {@code Span} representing the closed interval between the
+   * given {@code start} and {@code end} marks.
+   */
+  public static Span from(Mark start, Mark end) {
+    start = Objects.requireNonNull(start);
+    end = Objects.requireNonNull(end);
+    if (start.offset > end.offset) {
+      final Mark tmp = start;
+      start = end;
+      end = tmp;
+    }
+    return new Span(start, end);
   }
 
 }

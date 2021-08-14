@@ -22,7 +22,6 @@ import swim.util.Murmur3;
 
 final class UriConstantMapping<T> extends UriTerminalMapper<T> {
 
-  private static int hashSeed;
   final Uri key;
   final T value;
 
@@ -82,12 +81,14 @@ final class UriConstantMapping<T> extends UriTerminalMapper<T> {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(UriConstantMapping.class);
+    if (UriConstantMapping.hashSeed == 0) {
+      UriConstantMapping.hashSeed = Murmur3.seed(UriConstantMapping.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.value.hashCode()));
+    return Murmur3.mash(Murmur3.mix(UriConstantMapping.hashSeed, this.value.hashCode()));
   }
 
 }
@@ -113,9 +114,9 @@ final class UriConstantMappingIterator<T> implements Iterator<Map.Entry<Uri, T>>
     if (key == null) {
       throw new NoSuchElementException();
     }
-    final Map.Entry<Uri, T> entry = new AbstractMap.SimpleImmutableEntry<Uri, T>(key, value);
+    final Map.Entry<Uri, T> entry = new AbstractMap.SimpleImmutableEntry<Uri, T>(key, this.value);
     this.key = null;
-    value = null;
+    this.value = null;
     return entry;
   }
 

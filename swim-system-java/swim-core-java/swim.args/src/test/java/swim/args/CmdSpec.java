@@ -21,7 +21,7 @@ public class CmdSpec {
 
   @Test
   public void parseCmd() {
-    final Cmd cmd = Cmd.of("test").cmd("exec");
+    final Cmd cmd = Cmd.create("test").cmd("exec");
     final String[] str = new String[] {"test"};
     final Cmd run = cmd.clone().parse(str);
     assertEquals(run.name(), "test");
@@ -29,7 +29,7 @@ public class CmdSpec {
 
   @Test
   public void parseSubcmd() {
-    final Cmd cmd = Cmd.of("test").cmd("exec");
+    final Cmd cmd = Cmd.create("test").cmd("exec");
     final String[] params = new String[] {"test", "exec"};
     final Cmd run = cmd.clone().parse(params);
     assertEquals(run.name(), "exec");
@@ -37,7 +37,7 @@ public class CmdSpec {
 
   @Test
   public void parseOpt() {
-    final Cmd cmd = Cmd.of("test").opt("arg");
+    final Cmd cmd = Cmd.create("test").opt("arg");
     final String[] params = new String[] {"test", "--arg"};
     final Cmd run = cmd.clone().parse(params);
     assertEquals(run.getOpt("arg").defs(), 1);
@@ -45,7 +45,7 @@ public class CmdSpec {
 
   @Test
   public void parseOpts() {
-    final Cmd cmd = Cmd.of("test").opt("arg1").opt("arg2");
+    final Cmd cmd = Cmd.create("test").opt("arg1").opt("arg2");
     final String[] params = new String[] {"test", "--arg2", "--arg1"};
     final Cmd run = cmd.clone().parse(params);
     assertEquals(run.getOpt("arg1").defs(), 1);
@@ -54,7 +54,7 @@ public class CmdSpec {
 
   @Test
   public void parseFlag() {
-    final Cmd cmd = Cmd.of("test").opt(Opt.of("arg", 'a'));
+    final Cmd cmd = Cmd.create("test").opt(Opt.create("arg", 'a'));
     final String[] params = new String[] {"test", "-a"};
     final Cmd run = cmd.clone().parse(params);
     assertEquals(run.getOpt("arg").defs(), 1);
@@ -62,7 +62,7 @@ public class CmdSpec {
 
   @Test
   public void parseFlags() {
-    final Cmd cmd = Cmd.of("test").opt(Opt.of("arg1", 'a')).opt(Opt.of("arg2", 'b'));
+    final Cmd cmd = Cmd.create("test").opt(Opt.create("arg1", 'a')).opt(Opt.create("arg2", 'b'));
     final String[] params = new String[] {"test", "-ba"};
     final Cmd run = cmd.clone().parse(params);
     assertEquals(run.getOpt("arg1").defs(), 1);
@@ -71,7 +71,7 @@ public class CmdSpec {
 
   @Test
   public void parseOptArg() {
-    final Cmd cmd = Cmd.of("test").opt(Opt.of("arg").arg("value"));
+    final Cmd cmd = Cmd.create("test").opt(Opt.create("arg").arg("value"));
     final String[] params = new String[] {"test", "--arg", "value"};
     final Cmd run = cmd.clone().parse(params);
     assertEquals(run.getOpt("arg").defs(), 1);
@@ -80,7 +80,7 @@ public class CmdSpec {
 
   @Test
   public void parseFlagArg() {
-    final Cmd cmd = Cmd.of("test").opt(Opt.of("arg", 'a').arg("value"));
+    final Cmd cmd = Cmd.create("test").opt(Opt.create("arg", 'a').arg("value"));
     final String[] params = new String[] {"test", "-a", "value"};
     final Cmd run = cmd.clone().parse(params);
     assertEquals(run.getOpt("arg").defs(), 1);
@@ -89,7 +89,7 @@ public class CmdSpec {
 
   @Test
   public void parseCmdArg() {
-    final Cmd cmd = Cmd.of("test").arg(Arg.of("path"));
+    final Cmd cmd = Cmd.create("test").arg(Arg.create("path"));
     final String[] params = new String[] {"test", "value"};
     final Cmd run = cmd.clone().parse(params);
     assertEquals(run.getArg(0).value(), "value");
@@ -98,15 +98,15 @@ public class CmdSpec {
 
   @Test
   public void testDefaultHelpCmd() {
-    final Cmd cmd = Cmd.of("test")
-        .cmd(Cmd.of("data").desc("access data")
-            .cmd(Cmd.of("load").arg(Arg.of("file")).desc("load data").helpCmd())
-            .cmd(Cmd.of("store").desc("store data"))
-            .helpCmd()
-            .opt(Opt.of("help").flag('h').desc("show help"))
-            .opt(Opt.of("file").flag('f').desc("output file").arg("path"))
-            .opt(Opt.of("force").desc("overwrite existing file")))
-        .helpCmd();
+    final Cmd cmd = Cmd.create("test")
+                       .cmd(Cmd.create("data").desc("access data")
+                               .cmd(Cmd.create("load").arg(Arg.create("file")).desc("load data").helpCmd())
+                               .cmd(Cmd.create("store").desc("store data"))
+                               .helpCmd()
+                               .opt(Opt.create("help").flag('h').desc("show help"))
+                               .opt(Opt.create("file").flag('f').desc("output file").arg("path"))
+                               .opt(Opt.create("force").desc("overwrite existing file")))
+                       .helpCmd();
     final String[] params = new String[] {"test"};
     final Cmd run = cmd.clone().parse(params);
     run.run();
@@ -114,15 +114,15 @@ public class CmdSpec {
 
   @Test
   public void testHelpCmd() {
-    final Cmd cmd = Cmd.of("test")
-        .cmd(Cmd.of("data").desc("access data")
-            .cmd(Cmd.of("load").arg(Arg.of("file")).desc("load data").helpCmd())
-            .cmd(Cmd.of("store").desc("store data"))
-            .helpCmd()
-            .opt(Opt.of("help").flag('h').desc("show help"))
-            .opt(Opt.of("file").flag('f').desc("output file").arg("path"))
-            .opt(Opt.of("force").desc("overwrite existing file")))
-        .helpCmd();
+    final Cmd cmd = Cmd.create("test")
+                       .cmd(Cmd.create("data").desc("access data")
+                               .cmd(Cmd.create("load").arg(Arg.create("file")).desc("load data").helpCmd())
+                               .cmd(Cmd.create("store").desc("store data"))
+                               .helpCmd()
+                               .opt(Opt.create("help").flag('h').desc("show help"))
+                               .opt(Opt.create("file").flag('f').desc("output file").arg("path"))
+                               .opt(Opt.create("force").desc("overwrite existing file")))
+                       .helpCmd();
     final String[] params = new String[] {"test", "help"};
     final Cmd run = cmd.clone().parse(params);
     run.run();
@@ -130,14 +130,14 @@ public class CmdSpec {
 
   @Test
   public void testHelpSubcmd() {
-    final Cmd cmd = Cmd.of("test")
-        .cmd(Cmd.of("data").desc("access data")
-            .cmd(Cmd.of("load").arg(Arg.of("file")).desc("load data").helpCmd())
-            .cmd(Cmd.of("store").desc("store data"))
-            .helpCmd()
-            .opt(Opt.of("file").flag('f').desc("output file").arg("path"))
-            .opt(Opt.of("force").desc("overwrite existing file")))
-        .helpCmd();
+    final Cmd cmd = Cmd.create("test")
+                       .cmd(Cmd.create("data").desc("access data")
+                               .cmd(Cmd.create("load").arg(Arg.create("file")).desc("load data").helpCmd())
+                               .cmd(Cmd.create("store").desc("store data"))
+                               .helpCmd()
+                               .opt(Opt.create("file").flag('f').desc("output file").arg("path"))
+                               .opt(Opt.create("force").desc("overwrite existing file")))
+                       .helpCmd();
     final String[] params = new String[] {"test", "data", "help"};
     final Cmd run = cmd.clone().parse(params);
     run.run();
@@ -145,14 +145,14 @@ public class CmdSpec {
 
   @Test
   public void testHelpCmdArg() {
-    final Cmd cmd = Cmd.of("test")
-        .cmd(Cmd.of("data").desc("access data")
-            .cmd(Cmd.of("load").arg(Arg.of("file")).desc("load data").helpCmd())
-            .cmd(Cmd.of("store").desc("store data"))
-            .helpCmd()
-            .opt(Opt.of("file").flag('f').desc("output file").arg("path"))
-            .opt(Opt.of("force").desc("overwrite existing file")))
-        .helpCmd();
+    final Cmd cmd = Cmd.create("test")
+                       .cmd(Cmd.create("data").desc("access data")
+                               .cmd(Cmd.create("load").arg(Arg.create("file")).desc("load data").helpCmd())
+                               .cmd(Cmd.create("store").desc("store data"))
+                               .helpCmd()
+                               .opt(Opt.create("file").flag('f').desc("output file").arg("path"))
+                               .opt(Opt.create("force").desc("overwrite existing file")))
+                       .helpCmd();
     final String[] params = new String[] {"test", "data", "load", "help"};
     final Cmd run = cmd.clone().parse(params);
     run.run();

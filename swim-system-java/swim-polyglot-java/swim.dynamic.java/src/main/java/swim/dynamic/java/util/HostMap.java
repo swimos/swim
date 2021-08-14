@@ -24,6 +24,10 @@ import swim.dynamic.java.lang.HostObject;
 
 public final class HostMap {
 
+  private HostMap() {
+    // static
+  }
+
   public static final HostObjectType<Map<Object, Object>> TYPE;
 
   static {
@@ -34,10 +38,6 @@ public final class HostMap {
     type.addMember(new HostMapSize());
     type.addSpecializedMember("js", new HostMapJsHas());
     type.addUnspecializedMember(new HostMapContainsKey());
-  }
-
-  private HostMap() {
-    // static
   }
 
 }

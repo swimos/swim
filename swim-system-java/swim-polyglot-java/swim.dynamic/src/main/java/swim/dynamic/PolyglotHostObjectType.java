@@ -138,7 +138,7 @@ public class PolyglotHostObjectType<T> extends AbstractHostObjectType<T> {
     }
     this.superType = (HostType<? super T>) superType;
     this.baseTypes = FingerTrieSeq.from((List<HostType<? super T>>) (List<?>) superType.baseTypes())
-        .appended((HostType<? super T>) superType);
+                                  .appended((HostType<? super T>) superType);
   }
 
   @SuppressWarnings("unchecked")

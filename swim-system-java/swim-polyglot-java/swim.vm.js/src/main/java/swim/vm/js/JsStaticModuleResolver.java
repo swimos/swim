@@ -46,21 +46,21 @@ public class JsStaticModuleResolver implements JsModuleResolver {
 
   protected String processModuleSource(UriPath moduleId, String source) {
     final StringBuilder sourceBuilder = new StringBuilder();
-    prefixModuleSource(moduleId, sourceBuilder);
+    this.prefixModuleSource(moduleId, sourceBuilder);
     sourceBuilder.append(source);
-    suffixModuleSource(moduleId, sourceBuilder);
+    this.suffixModuleSource(moduleId, sourceBuilder);
     return sourceBuilder.toString();
   }
 
   public void defineModuleSource(UriPath moduleId, String source) {
-    source = processModuleSource(moduleId, source);
+    source = this.processModuleSource(moduleId, source);
     final String moduleName = moduleId.toString();
     final Source moduleSource = Source.newBuilder("js", source, moduleName).buildLiteral();
     this.moduleSources = this.moduleSources.updated(moduleId, moduleSource);
   }
 
   public void defineModuleSource(String moduleId, String source) {
-    defineModuleSource(UriPath.parse(moduleId), source);
+    this.defineModuleSource(UriPath.parse(moduleId), source);
   }
 
 }

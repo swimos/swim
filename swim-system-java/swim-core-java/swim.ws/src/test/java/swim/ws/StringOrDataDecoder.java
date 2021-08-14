@@ -28,10 +28,8 @@ final class StringOrDataDecoder extends Decoder<Object> {
     if (condition instanceof WsOpcode) {
       final WsOpcode opcode = (WsOpcode) condition;
       switch (opcode) {
-        case TEXT:
-          return (Decoder<Object>) (Decoder<?>) Utf8.stringParser();
-        case BINARY:
-          return (Decoder<Object>) (Decoder<?>) Binary.outputParser(Data.output());
+        case TEXT: return (Decoder<Object>) (Decoder<?>) Utf8.stringParser();
+        case BINARY: return (Decoder<Object>) (Decoder<?>) Binary.outputParser(Data.output());
         default:
       }
     }

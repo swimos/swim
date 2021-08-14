@@ -21,7 +21,6 @@ import swim.util.Murmur3;
 
 final class UriSchemeMapping<T> extends UriSchemeMapper<T> {
 
-  private static int hashSeed;
   final HashTrieMap<String, UriAuthorityMapper<T>> table;
 
   UriSchemeMapping(HashTrieMap<String, UriAuthorityMapper<T>> table) {
@@ -95,7 +94,7 @@ final class UriSchemeMapping<T> extends UriSchemeMapper<T> {
   @Override
   UriSchemeMapper<T> merged(UriSchemeMapper<T> that) {
     if (that instanceof UriSchemeMapping<?>) {
-      return merged((UriSchemeMapping<T>) that);
+      return this.merged((UriSchemeMapping<T>) that);
     } else {
       return that;
     }
@@ -146,7 +145,7 @@ final class UriSchemeMapping<T> extends UriSchemeMapper<T> {
   @Override
   UriSchemeMapper<T> unmerged(UriSchemeMapper<T> that) {
     if (that instanceof UriSchemeMapping<?>) {
-      return unmerged((UriSchemeMapping<T>) that);
+      return this.unmerged((UriSchemeMapping<T>) that);
     } else {
       return this;
     }
@@ -178,12 +177,14 @@ final class UriSchemeMapping<T> extends UriSchemeMapper<T> {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(UriSchemeMapping.class);
+    if (UriSchemeMapping.hashSeed == 0) {
+      UriSchemeMapping.hashSeed = Murmur3.seed(UriSchemeMapping.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.table.hashCode()));
+    return Murmur3.mash(Murmur3.mix(UriSchemeMapping.hashSeed, this.table.hashCode()));
   }
 
 }

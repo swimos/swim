@@ -36,6 +36,8 @@ public class SpatialDataModel<S> implements SpatialDataBinding<S> {
   public SpatialDataModel(Value name, QTreeMap<Value, S, Value> tree) {
     this.name = name;
     this.tree = tree;
+    this.dataContext = null;
+    this.storeBinding = null;
   }
 
   @Override
@@ -61,7 +63,7 @@ public class SpatialDataModel<S> implements SpatialDataBinding<S> {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapData(Class<T> dataClass) {
-    if (dataClass.isAssignableFrom(getClass())) {
+    if (dataClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -89,7 +91,7 @@ public class SpatialDataModel<S> implements SpatialDataBinding<S> {
 
   @Override
   public <K2> SpatialData<K2, S, Value> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   @Override
@@ -114,7 +116,7 @@ public class SpatialDataModel<S> implements SpatialDataBinding<S> {
 
   @Override
   public <V2> SpatialData<Value, S, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override

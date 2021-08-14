@@ -38,10 +38,10 @@ public abstract class SupplyDownlinkModem<View extends WarpDownlinkView> extends
 
   @Override
   protected void queueUp(Value body, Cont<CommandMessage> cont) {
-    final Uri hostUri = hostUri();
-    final Uri nodeUri = nodeUri();
-    final Uri laneUri = laneUri();
-    final float prio = prio();
+    final Uri hostUri = this.hostUri();
+    final Uri nodeUri = this.nodeUri();
+    final Uri laneUri = this.laneUri();
+    final float prio = this.prio();
     final CommandMessage message = new CommandMessage(nodeUri, laneUri, body);
     this.upQueue.add(new Push<CommandMessage>(Uri.empty(), hostUri, nodeUri, laneUri,
                                               prio, null, message, cont));

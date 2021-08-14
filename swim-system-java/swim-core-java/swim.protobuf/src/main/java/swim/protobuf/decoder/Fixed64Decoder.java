@@ -37,29 +37,28 @@ final class Fixed64Decoder<T> extends Decoder<T> {
 
   @Override
   public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.value, this.shift);
+    return Fixed64Decoder.decode(input, this.type, this.value, this.shift);
   }
 
-  static <T> Decoder<T> decode(InputBuffer input, ProtobufFixed64Type<T> type,
-                               long value, int shift) {
+  static <T> Decoder<T> decode(InputBuffer input, ProtobufFixed64Type<T> type, long value, int shift) {
     while (input.isCont()) {
       value |= (long) input.head() << shift;
       input = input.step();
       shift += 8;
       if (shift == 64) {
-        return done(type.cast(value));
+        return Decoder.done(type.cast(value));
       }
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new Fixed64Decoder<T>(type, value, shift);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, ProtobufFixed64Type<T> type) {
-    return decode(input, type, 0L, 0);
+    return Fixed64Decoder.decode(input, type, 0L, 0);
   }
 
 }

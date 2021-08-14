@@ -23,50 +23,50 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class AcceptLanguageSpec {
 
-  public void assertParses(String string, HttpHeader header) {
-    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
-  }
-
   @Test
   public void parseAcceptLanguageHeaders() {
-    assertParses("Accept-Language: *", AcceptLanguage.from(LanguageRange.star()));
-    assertParses("Accept-Language: en-US", AcceptLanguage.from(LanguageRange.from("en", "US")));
-    assertParses("Accept-Language: en-US;q=0", AcceptLanguage.from(LanguageRange.from("en", "US", 0f)));
-    assertParses("Accept-Language: en-US; q=0", AcceptLanguage.from(LanguageRange.from("en", "US", 0f)));
-    assertParses("Accept-Language: en-US ; q=0", AcceptLanguage.from(LanguageRange.from("en", "US", 0f)));
-    assertParses("Accept-Language: en-US; q=1", AcceptLanguage.from(LanguageRange.from("en", "US", 1f)));
-    assertParses("Accept-Language: en-US; q=1.0", AcceptLanguage.from(LanguageRange.from("en", "US", 1f)));
-    assertParses("Accept-Language: en-US; q=1.00", AcceptLanguage.from(LanguageRange.from("en", "US", 1f)));
-    assertParses("Accept-Language: en-US; q=1.000", AcceptLanguage.from(LanguageRange.from("en", "US", 1f)));
-    assertParses("Accept-Language: en-US; q=0.005", AcceptLanguage.from(LanguageRange.from("en", "US", 0.005f)));
+    assertParses("Accept-Language: *", AcceptLanguage.create(LanguageRange.star()));
+    assertParses("Accept-Language: en-US", AcceptLanguage.create(LanguageRange.create("en", "US")));
+    assertParses("Accept-Language: en-US;q=0", AcceptLanguage.create(LanguageRange.create("en", "US", 0f)));
+    assertParses("Accept-Language: en-US; q=0", AcceptLanguage.create(LanguageRange.create("en", "US", 0f)));
+    assertParses("Accept-Language: en-US ; q=0", AcceptLanguage.create(LanguageRange.create("en", "US", 0f)));
+    assertParses("Accept-Language: en-US; q=1", AcceptLanguage.create(LanguageRange.create("en", "US", 1f)));
+    assertParses("Accept-Language: en-US; q=1.0", AcceptLanguage.create(LanguageRange.create("en", "US", 1f)));
+    assertParses("Accept-Language: en-US; q=1.00", AcceptLanguage.create(LanguageRange.create("en", "US", 1f)));
+    assertParses("Accept-Language: en-US; q=1.000", AcceptLanguage.create(LanguageRange.create("en", "US", 1f)));
+    assertParses("Accept-Language: en-US; q=0.005", AcceptLanguage.create(LanguageRange.create("en", "US", 0.005f)));
     assertParses("Accept-Language: en-US,en-UK,*",
-        AcceptLanguage.from(LanguageRange.from("en", "US"),
-            LanguageRange.from("en", "UK"),
-            LanguageRange.star()));
+                 AcceptLanguage.create(LanguageRange.create("en", "US"),
+                                       LanguageRange.create("en", "UK"),
+                                       LanguageRange.star()));
     assertParses("Accept-Language: en-US, en-UK ,*",
-        AcceptLanguage.from(LanguageRange.from("en", "US"),
-            LanguageRange.from("en", "UK"),
-            LanguageRange.star()));
+                 AcceptLanguage.create(LanguageRange.create("en", "US"),
+                                       LanguageRange.create("en", "UK"),
+                                       LanguageRange.star()));
     assertParses("Accept-Language: en-US; q=1, en-UK; q=0.5, *; q=0",
-        AcceptLanguage.from(LanguageRange.from("en", "US", 1f),
-            LanguageRange.from("en", "UK", 0.5f),
-            LanguageRange.from("*", 0f)));
+                 AcceptLanguage.create(LanguageRange.create("en", "US", 1f),
+                                       LanguageRange.create("en", "UK", 0.5f),
+                                       LanguageRange.create("*", 0f)));
   }
 
   @Test
   public void writeAcceptLanguageHeaders() {
-    assertWrites(AcceptLanguage.from(LanguageRange.star()), "Accept-Language: *");
-    assertWrites(AcceptLanguage.from(LanguageRange.from("en", "US")), "Accept-Language: en-US");
-    assertWrites(AcceptLanguage.from(LanguageRange.from("en", "US", 0f)), "Accept-Language: en-US; q=0");
-    assertWrites(AcceptLanguage.from(LanguageRange.from("en", "US", 0.005f)), "Accept-Language: en-US; q=0.005");
-    assertWrites(AcceptLanguage.from(LanguageRange.from("en", "US"),
-        LanguageRange.from("en", "UK"),
-        LanguageRange.star()),
-        "Accept-Language: en-US, en-UK, *");
-    assertWrites(AcceptLanguage.from(LanguageRange.from("en", "US", 1f),
-        LanguageRange.from("en", "UK", 0.5f),
-        LanguageRange.from("*", 0f)),
-        "Accept-Language: en-US, en-UK; q=0.5, *; q=0");
+    assertWrites(AcceptLanguage.create(LanguageRange.star()), "Accept-Language: *");
+    assertWrites(AcceptLanguage.create(LanguageRange.create("en", "US")), "Accept-Language: en-US");
+    assertWrites(AcceptLanguage.create(LanguageRange.create("en", "US", 0f)), "Accept-Language: en-US; q=0");
+    assertWrites(AcceptLanguage.create(LanguageRange.create("en", "US", 0.005f)), "Accept-Language: en-US; q=0.005");
+    assertWrites(AcceptLanguage.create(LanguageRange.create("en", "US"),
+                                       LanguageRange.create("en", "UK"),
+                                       LanguageRange.star()),
+                 "Accept-Language: en-US, en-UK, *");
+    assertWrites(AcceptLanguage.create(LanguageRange.create("en", "US", 1f),
+                                       LanguageRange.create("en", "UK", 0.5f),
+                                       LanguageRange.create("*", 0f)),
+                 "Accept-Language: en-US, en-UK; q=0.5, *; q=0");
+  }
+
+  public static void assertParses(String string, HttpHeader header) {
+    HttpAssertions.assertParses(Http.standardParser().headerParser(), string, header);
   }
 
 }

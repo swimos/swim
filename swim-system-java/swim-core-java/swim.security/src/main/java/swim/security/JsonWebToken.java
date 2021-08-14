@@ -23,14 +23,12 @@ import swim.collections.FingerTrieSeq;
 import swim.json.Json;
 import swim.structure.Item;
 import swim.structure.Record;
-import swim.structure.Slot;
 import swim.structure.Value;
 import swim.util.Builder;
 import swim.util.Murmur3;
 
 public class JsonWebToken implements Debug {
 
-  private static int hashSeed;
   protected final Value value;
 
   public JsonWebToken(Value value) {
@@ -39,14 +37,6 @@ public class JsonWebToken implements Debug {
 
   public JsonWebToken() {
     this(Value.absent());
-  }
-
-  public static JsonWebToken from(Value value) {
-    return new JsonWebToken(value);
-  }
-
-  public static JsonWebToken parse(String json) {
-    return new JsonWebToken(Json.parse(json));
   }
 
   public Value get(String name) {
@@ -58,7 +48,7 @@ public class JsonWebToken implements Debug {
   }
 
   public JsonWebToken issuer(String issuer) {
-    return copy(this.value.updatedSlot("iss", issuer));
+    return this.copy(this.value.updatedSlot("iss", issuer));
   }
 
   public String subject() {
@@ -66,7 +56,7 @@ public class JsonWebToken implements Debug {
   }
 
   public JsonWebToken subject(String subject) {
-    return copy(this.value.updatedSlot("sub", subject));
+    return this.copy(this.value.updatedSlot("sub", subject));
   }
 
   public String audience() {
@@ -74,7 +64,7 @@ public class JsonWebToken implements Debug {
   }
 
   public JsonWebToken audience(String audience) {
-    return copy(this.value.updatedSlot("aud", audience));
+    return this.copy(this.value.updatedSlot("aud", audience));
   }
 
   public FingerTrieSeq<String> audiences() {
@@ -89,7 +79,7 @@ public class JsonWebToken implements Debug {
   }
 
   public JsonWebToken audiences(String... audiences) {
-    return copy(this.value.updatedSlot("aud", Record.of((Object[]) audiences)));
+    return this.copy(this.value.updatedSlot("aud", Record.of((Object[]) audiences)));
   }
 
   public long expiration() {
@@ -97,7 +87,7 @@ public class JsonWebToken implements Debug {
   }
 
   public JsonWebToken expiration(long expiration) {
-    return copy(this.value.updatedSlot("exp", expiration));
+    return this.copy(this.value.updatedSlot("exp", expiration));
   }
 
   public long notBefore() {
@@ -105,7 +95,7 @@ public class JsonWebToken implements Debug {
   }
 
   public JsonWebToken notBefore(long notBefore) {
-    return copy(this.value.updatedSlot("nbf", notBefore));
+    return this.copy(this.value.updatedSlot("nbf", notBefore));
   }
 
   public long issuedAt() {
@@ -113,7 +103,7 @@ public class JsonWebToken implements Debug {
   }
 
   public JsonWebToken issuedAt(long issuedAt) {
-    return copy(this.value.updatedSlot("iat", issuedAt));
+    return this.copy(this.value.updatedSlot("iat", issuedAt));
   }
 
   public String jwtId() {
@@ -121,19 +111,19 @@ public class JsonWebToken implements Debug {
   }
 
   public JsonWebToken jwtId(String jwtId) {
-    return copy(this.value.updatedSlot("jti", jwtId));
+    return this.copy(this.value.updatedSlot("jti", jwtId));
   }
 
   public Record joseHeader() {
-    return Record.of(Slot.of("typ", "JWT"));
+    return Record.create(1).slot("typ", "JWT");
   }
 
   public JsonWebSignature mac(Key symmetricKey) {
-    return JsonWebSignature.mac(symmetricKey, joseHeader(), Json.toData(this.value));
+    return JsonWebSignature.mac(symmetricKey, this.joseHeader(), Json.toData(this.value));
   }
 
   public JsonWebSignature sign(PrivateKey privateKey) {
-    return JsonWebSignature.sign(privateKey, joseHeader(), Json.toData(this.value));
+    return JsonWebSignature.sign(privateKey, this.joseHeader(), Json.toData(this.value));
   }
 
   public final Value toValue() {
@@ -159,23 +149,34 @@ public class JsonWebToken implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(JsonWebToken.class);
+    if (JsonWebToken.hashSeed == 0) {
+      JsonWebToken.hashSeed = Murmur3.seed(JsonWebToken.class);
     }
-    return Murmur3.mash(Murmur3.mix(hashSeed, this.value.hashCode()));
+    return Murmur3.mash(Murmur3.mix(JsonWebToken.hashSeed, this.value.hashCode()));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output.write(getClass().getSimpleName()).write('.').write("from").write('(')
-        .debug(this.value).write(')');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write(this.getClass().getSimpleName()).write('.').write("from").write('(')
+                   .debug(this.value).write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  public static JsonWebToken from(Value value) {
+    return new JsonWebToken(value);
+  }
+
+  public static JsonWebToken parse(String json) {
+    return new JsonWebToken(Json.parse(json));
   }
 
 }

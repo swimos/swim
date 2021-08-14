@@ -28,13 +28,13 @@ public abstract class BridgeFunc extends Func {
   @Override
   public int compareTo(Item other) {
     if (other instanceof BridgeFunc) {
-      return compareTo((BridgeFunc) other);
+      return this.compareTo((BridgeFunc) other);
     }
-    return Integer.compare(typeOrder(), other.typeOrder());
+    return Integer.compare(this.typeOrder(), other.typeOrder());
   }
 
   int compareTo(BridgeFunc that) {
-    return getClass().getName().compareTo(that.getClass().getName());
+    return this.getClass().getName().compareTo(that.getClass().getName());
   }
 
   @Override
@@ -48,8 +48,9 @@ public abstract class BridgeFunc extends Func {
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write(getClass().getName()).write('@').write(Integer.toHexString(hashCode()));
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write(this.getClass().getName()).write('@').write(Integer.toHexString(this.hashCode()));
+    return output;
   }
 
 }

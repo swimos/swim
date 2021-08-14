@@ -28,19 +28,37 @@ import swim.util.Murmur3;
 /**
  * A {@link Selector} that, when {@link #evaluate evaluated}, searches all
  * variables in its evaluation scope and yields the most recent {@link Value}
- * that corresponds to {@code key}.  Note that {@code key} itself can be an
+ * that corresponds to {@code key}. Note that {@code key} itself can be an
  * {@link Expression}, in which case it will be {@code evaluated} against {@code
  * stack} prior to any concrete selection logic.
  */
 public final class GetSelector extends Selector {
 
-  private static int hashSeed;
   final Value key;
   final Selector then;
 
   public GetSelector(Value key, Selector then) {
     this.key = key.commit();
     this.then = then;
+  }
+
+  public Value accessor() {
+    return this.key;
+  }
+
+  @Override
+  public Selector then() {
+    return this.then;
+  }
+
+  @Override
+  public <T> T forSelected(Interpreter interpreter, Selectee<T> callback) {
+    interpreter.willSelect(this);
+    // Evaluate the key, in case it's dynamic.
+    final Value key = this.key.evaluate(interpreter).toValue();
+    final T selected = GetSelector.forSelected(key, this.then, interpreter, callback);
+    interpreter.didSelect(this, selected);
+    return selected;
   }
 
   private static <T> T forSelected(Value key, Selector then, Interpreter interpreter, Selectee<T> callback) {
@@ -64,55 +82,11 @@ public final class GetSelector extends Selector {
         field = null;
       }
       if (field == null && selected == null) {
-        forSelected(key, then, interpreter, callback);
+        GetSelector.forSelected(key, then, interpreter, callback);
       }
       // Push the current selection back onto the stack.
       interpreter.pushScope(scope);
     }
-    return selected;
-  }
-
-  private static Item substitute(Value key, Selector then, Interpreter interpreter) {
-    Item selected = null;
-    if (interpreter.scopeDepth() != 0) {
-      // Pop the next selection off of the stack to take it out of scope.
-      final Value scope = interpreter.popScope().toValue();
-      final Field field;
-      // Only records can have members.
-      if (scope instanceof Record) {
-        field = scope.getField(key);
-        if (field != null) {
-          // Substitute the field value.
-          selected = field.toValue().substitute(interpreter);
-        }
-      } else {
-        field = null;
-      }
-      if (field != null && selected != null) {
-        substitute(key, then, interpreter);
-      }
-      // Push the current selection back onto the stack.
-      interpreter.pushScope(scope);
-    }
-    return selected;
-  }
-
-  public Value accessor() {
-    return this.key;
-  }
-
-  @Override
-  public Selector then() {
-    return this.then;
-  }
-
-  @Override
-  public <T> T forSelected(Interpreter interpreter, Selectee<T> callback) {
-    interpreter.willSelect(this);
-    // Evaluate the key, in case it's dynamic.
-    final Value key = this.key.evaluate(interpreter).toValue();
-    final T selected = forSelected(key, this.then, interpreter, callback);
-    interpreter.didSelect(this, selected);
     return selected;
   }
 
@@ -167,7 +141,7 @@ public final class GetSelector extends Selector {
   public Item substitute(Interpreter interpreter) {
     // Evaluate the key, in case it's dynamic.
     final Value key = this.key.evaluate(interpreter).toValue();
-    final Item value = substitute(key, this.then, interpreter);
+    final Item value = GetSelector.substitute(key, this.then, interpreter);
     if (value != null) {
       return value;
     }
@@ -176,6 +150,31 @@ public final class GetSelector extends Selector {
       then = this.then;
     }
     return new GetSelector(this.key, (Selector) then);
+  }
+
+  private static Item substitute(Value key, Selector then, Interpreter interpreter) {
+    Item selected = null;
+    if (interpreter.scopeDepth() != 0) {
+      // Pop the next selection off of the stack to take it out of scope.
+      final Value scope = interpreter.popScope().toValue();
+      final Field field;
+      // Only records can have members.
+      if (scope instanceof Record) {
+        field = scope.getField(key);
+        if (field != null) {
+          // Substitute the field value.
+          selected = field.toValue().substitute(interpreter);
+        }
+      } else {
+        field = null;
+      }
+      if (field != null && selected != null) {
+        GetSelector.substitute(key, then, interpreter);
+      }
+      // Push the current selection back onto the stack.
+      interpreter.pushScope(scope);
+    }
+    return selected;
   }
 
   @Override
@@ -191,9 +190,9 @@ public final class GetSelector extends Selector {
   @Override
   protected int compareTo(Selector that) {
     if (that instanceof GetSelector) {
-      return compareTo((GetSelector) that);
+      return this.compareTo((GetSelector) that);
     }
-    return Integer.compare(typeOrder(), that.typeOrder());
+    return Integer.compare(this.typeOrder(), that.typeOrder());
   }
 
   int compareTo(GetSelector that) {
@@ -210,24 +209,27 @@ public final class GetSelector extends Selector {
       return true;
     } else if (other instanceof GetSelector) {
       final GetSelector that = (GetSelector) other;
-      return key.equals(that.key) && then.equals(that.then);
+      return this.key.equals(that.key) && this.then.equals(that.then);
     }
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(GetSelector.class);
+    if (GetSelector.hashSeed == 0) {
+      GetSelector.hashSeed = Murmur3.seed(GetSelector.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(GetSelector.hashSeed,
         this.key.hashCode()), this.then.hashCode()));
   }
 
   @Override
-  public void debugThen(Output<?> output) {
+  public <T> Output<T> debugThen(Output<T> output) {
     output = output.write('.').write("get").write('(').debug(this.key).write(')');
-    this.then.debugThen(output);
+    output = this.then.debugThen(output);
+    return output;
   }
 
 }

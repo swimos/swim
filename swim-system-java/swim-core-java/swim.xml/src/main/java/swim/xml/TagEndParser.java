@@ -33,6 +33,11 @@ final class TagEndParser<I, V> extends Parser<V> {
     this.step = step;
   }
 
+  @Override
+  public Parser<V> feed(Input input) {
+    return TagEndParser.parse(input, this.xml, this.tag, this.builder, this.step);
+  }
+
   static <I, V> Parser<V> parse(Input input, XmlParser<I, V> xml, String tag,
                                 Builder<I, V> builder, int step) {
     int c = 0;
@@ -43,10 +48,10 @@ final class TagEndParser<I, V> extends Parser<V> {
           input = input.step();
           step = 2;
         } else {
-          return error(Diagnostic.expected('<', input));
+          return Parser.error(Diagnostic.expected('<', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('<', input));
+        return Parser.error(Diagnostic.expected('<', input));
       }
     }
     if (step == 2) {
@@ -56,10 +61,10 @@ final class TagEndParser<I, V> extends Parser<V> {
           input = input.step();
           step = 3;
         } else {
-          return error(Diagnostic.expected('/', input));
+          return Parser.error(Diagnostic.expected('/', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('/', input));
+        return Parser.error(Diagnostic.expected('/', input));
       }
     }
     while (step >= 3 && step - 3 < tag.length()) {
@@ -69,10 +74,10 @@ final class TagEndParser<I, V> extends Parser<V> {
           step = 3 + tag.offsetByCodePoints(step - 3, 1);
           continue;
         } else {
-          return error(Diagnostic.expected("</" + tag + ">", input));
+          return Parser.error(Diagnostic.expected("</" + tag + ">", input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected("</" + tag + ">", input));
+        return Parser.error(Diagnostic.expected("</" + tag + ">", input));
       }
       break;
     }
@@ -88,31 +93,26 @@ final class TagEndParser<I, V> extends Parser<V> {
       if (input.isCont()) {
         if (c == '>') {
           input = input.step();
-          return done(builder.bind());
+          return Parser.done(builder.bind());
         } else {
-          return error(Diagnostic.expected('>', input));
+          return Parser.error(Diagnostic.expected('>', input));
         }
       } else if (input.isDone()) {
-        return error(Diagnostic.expected('>', input));
+        return Parser.error(Diagnostic.expected('>', input));
       }
     }
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new TagEndParser<I, V>(xml, tag, builder, step);
   }
 
   static <I, V> Parser<V> parse(Input input, XmlParser<I, V> xml, String tag, Builder<I, V> builder) {
-    return parse(input, xml, tag, builder, 1);
+    return TagEndParser.parse(input, xml, tag, builder, 1);
   }
 
   static <I, V> Parser<V> parseRest(Input input, XmlParser<I, V> xml, String tag, Builder<I, V> builder) {
-    return parse(input, xml, tag, builder, 3);
-  }
-
-  @Override
-  public Parser<V> feed(Input input) {
-    return parse(input, this.xml, this.tag, this.builder, this.step);
+    return TagEndParser.parse(input, xml, tag, builder, 3);
   }
 
 }

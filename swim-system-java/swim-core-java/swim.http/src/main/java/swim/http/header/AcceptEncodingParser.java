@@ -42,6 +42,11 @@ final class AcceptEncodingParser extends Parser<AcceptEncoding> {
     this(http, null, null, 1);
   }
 
+  @Override
+  public Parser<AcceptEncoding> feed(Input input) {
+    return AcceptEncodingParser.parse(input, this.http, this.coding, this.codings, this.step);
+  }
+
   static Parser<AcceptEncoding> parse(Input input, HttpParser http, Parser<ContentCoding> coding,
                                       Builder<ContentCoding, FingerTrieSeq<ContentCoding>> codings, int step) {
     int c = 0;
@@ -76,7 +81,7 @@ final class AcceptEncodingParser extends Parser<AcceptEncoding> {
           input = input.step();
           step = 3;
         } else if (!input.isEmpty()) {
-          return done(AcceptEncoding.from(codings.bind()));
+          return Parser.done(AcceptEncoding.create(codings.bind()));
         }
       }
       if (step == 3) {
@@ -91,7 +96,7 @@ final class AcceptEncodingParser extends Parser<AcceptEncoding> {
         if (input.isCont()) {
           step = 4;
         } else if (input.isDone()) {
-          return error(Diagnostic.unexpected(input));
+          return Parser.error(Diagnostic.unexpected(input));
         }
       }
       if (step == 4) {
@@ -112,18 +117,13 @@ final class AcceptEncodingParser extends Parser<AcceptEncoding> {
       break;
     } while (true);
     if (input.isError()) {
-      return error(input.trap());
+      return Parser.error(input.trap());
     }
     return new AcceptEncodingParser(http, coding, codings, step);
   }
 
   static Parser<AcceptEncoding> parse(Input input, HttpParser http) {
-    return parse(input, http, null, null, 1);
-  }
-
-  @Override
-  public Parser<AcceptEncoding> feed(Input input) {
-    return parse(input, this.http, this.coding, this.codings, this.step);
+    return AcceptEncodingParser.parse(input, http, null, null, 1);
   }
 
 }

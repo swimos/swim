@@ -25,53 +25,24 @@ import swim.util.Murmur3;
 
 final class ArrayMap<K, V> implements Debug {
 
-  private static int hashSeed;
-  private static ArrayMap<Object, Object> empty;
   final Object[] slots;
 
   ArrayMap(Object[] slots) {
     this.slots = slots;
   }
 
-  ArrayMap(K key, V value) {
-    slots = new Object[2];
-    slots[0] = key;
-    slots[1] = value;
-  }
-
-  ArrayMap(K key0, V value0, K key1, V value1) {
-    slots = new Object[4];
-    slots[0] = key0;
-    slots[1] = value0;
-    slots[2] = key1;
-    slots[3] = value1;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <K, V> ArrayMap<K, V> empty() {
-    if (empty == null) {
-      empty = new ArrayMap<Object, Object>(new Object[0]);
-    }
-    return (ArrayMap<K, V>) empty;
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <K, V> ArrayMap<K, V> of(K key, V value) {
-    return new ArrayMap<K, V>(key, value);
-  }
-
   public boolean isEmpty() {
-    return slots.length == 0;
+    return this.slots.length == 0;
   }
 
   public int size() {
-    return slots.length >> 1;
+    return this.slots.length >> 1;
   }
 
   public boolean containsKey(Object key) {
-    final int n = slots.length;
+    final int n = this.slots.length;
     for (int i = 0; i < n; i += 2) {
-      if (key.equals(slots[i])) {
+      if (key.equals(this.slots[i])) {
         return true;
       }
     }
@@ -79,9 +50,9 @@ final class ArrayMap<K, V> implements Debug {
   }
 
   public boolean containsValue(Object value) {
-    final int n = slots.length;
+    final int n = this.slots.length;
     for (int i = 0; i < n; i += 2) {
-      final Object v = slots[i + 1];
+      final Object v = this.slots[i + 1];
       if (value == null ? v == null : value.equals(v)) {
         return true;
       }
@@ -91,8 +62,8 @@ final class ArrayMap<K, V> implements Debug {
 
   @SuppressWarnings("unchecked")
   public Map.Entry<K, V> head() {
-    if (slots.length > 1) {
-      return new AbstractMap.SimpleImmutableEntry<K, V>((K) slots[0], (V) slots[1]);
+    if (this.slots.length > 1) {
+      return new AbstractMap.SimpleImmutableEntry<K, V>((K) this.slots[0], (V) this.slots[1]);
     } else {
       return null;
     }
@@ -100,8 +71,8 @@ final class ArrayMap<K, V> implements Debug {
 
   @SuppressWarnings("unchecked")
   public K headKey() {
-    if (slots.length > 1) {
-      return (K) slots[0];
+    if (this.slots.length > 1) {
+      return (K) this.slots[0];
     } else {
       return null;
     }
@@ -109,8 +80,8 @@ final class ArrayMap<K, V> implements Debug {
 
   @SuppressWarnings("unchecked")
   public V headValue() {
-    if (slots.length > 1) {
-      return (V) slots[1];
+    if (this.slots.length > 1) {
+      return (V) this.slots[1];
     } else {
       return null;
     }
@@ -118,13 +89,13 @@ final class ArrayMap<K, V> implements Debug {
 
   @SuppressWarnings("unchecked")
   public Map.Entry<K, V> next(Object key) {
-    final int n = slots.length;
+    final int n = this.slots.length;
     if (n > 1 && key == null) {
-      return new AbstractMap.SimpleImmutableEntry<K, V>((K) slots[0], (V) slots[1]);
+      return new AbstractMap.SimpleImmutableEntry<K, V>((K) this.slots[0], (V) this.slots[1]);
     }
     for (int i = 0; i < n; i += 2) {
-      if (key.equals(slots[i]) && i + 3 < n) {
-        return new AbstractMap.SimpleImmutableEntry<K, V>((K) slots[i + 2], (V) slots[i + 3]);
+      if (key.equals(this.slots[i]) && i + 3 < n) {
+        return new AbstractMap.SimpleImmutableEntry<K, V>((K) this.slots[i + 2], (V) this.slots[i + 3]);
       }
     }
     return null;
@@ -132,13 +103,13 @@ final class ArrayMap<K, V> implements Debug {
 
   @SuppressWarnings("unchecked")
   public K nextKey(Object key) {
-    final int n = slots.length;
+    final int n = this.slots.length;
     if (n > 1 && key == null) {
-      return (K) slots[0];
+      return (K) this.slots[0];
     }
     for (int i = 0; i < n; i += 2) {
-      if (key.equals(slots[i]) && i + 3 < n) {
-        return (K) slots[i + 2];
+      if (key.equals(this.slots[i]) && i + 3 < n) {
+        return (K) this.slots[i + 2];
       }
     }
     return null;
@@ -146,13 +117,13 @@ final class ArrayMap<K, V> implements Debug {
 
   @SuppressWarnings("unchecked")
   public V nextValue(Object key) {
-    final int n = slots.length;
+    final int n = this.slots.length;
     if (n > 1 && key == null) {
-      return (V) slots[1];
+      return (V) this.slots[1];
     }
     for (int i = 0; i < n; i += 2) {
-      if (key.equals(slots[i]) && i + 3 < n) {
-        return (V) slots[i + 3];
+      if (key.equals(this.slots[i]) && i + 3 < n) {
+        return (V) this.slots[i + 3];
       }
     }
     return null;
@@ -160,25 +131,26 @@ final class ArrayMap<K, V> implements Debug {
 
   @SuppressWarnings("unchecked")
   public V get(Object key) {
-    final int n = slots.length;
+    final int n = this.slots.length;
     for (int i = 0; i < n; i += 2) {
-      if (key.equals(slots[i])) {
-        return (V) slots[i + 1];
+      if (key.equals(this.slots[i])) {
+        return (V) this.slots[i + 1];
       }
     }
     return null;
   }
 
   public ArrayMap<K, V> updated(K key, V value) {
-    final int n = slots.length;
+    final Object[] oldSlots = this.slots;
+    final int n = oldSlots.length;
     for (int i = 0; i < n; i += 2) {
-      if (key.equals(slots[i])) {
-        final Object v = slots[i + 1];
+      if (key.equals(oldSlots[i])) {
+        final Object v = oldSlots[i + 1];
         if (value == null ? v == null : value.equals(v)) {
           return this;
         } else {
           final Object[] newSlots = new Object[n];
-          System.arraycopy(slots, 0, newSlots, 0, n);
+          System.arraycopy(oldSlots, 0, newSlots, 0, n);
           newSlots[i] = key;
           newSlots[i + 1] = value;
           return new ArrayMap<K, V>(newSlots);
@@ -186,22 +158,23 @@ final class ArrayMap<K, V> implements Debug {
       }
     }
     final Object[] newSlots = new Object[n + 2];
-    System.arraycopy(slots, 0, newSlots, 0, n);
+    System.arraycopy(oldSlots, 0, newSlots, 0, n);
     newSlots[n] = key;
     newSlots[n + 1] = value;
     return new ArrayMap<K, V>(newSlots);
   }
 
   public ArrayMap<K, V> removed(Object key) {
-    final int n = slots.length;
+    final Object[] oldSlots = this.slots;
+    final int n = oldSlots.length;
     for (int i = 0; i < n; i += 1) {
-      if (key.equals(slots[i])) {
+      if (key.equals(oldSlots[i])) {
         if (n == 2) {
           return empty();
         } else {
           final Object[] newSlots = new Object[n - 2];
-          System.arraycopy(slots, 0, newSlots, 0, i);
-          System.arraycopy(slots, i + 2, newSlots, i, (n - 2) - i);
+          System.arraycopy(oldSlots, 0, newSlots, 0, i);
+          System.arraycopy(oldSlots, i + 2, newSlots, i, (n - 2) - i);
           return new ArrayMap<K, V>(newSlots);
         }
       }
@@ -210,31 +183,31 @@ final class ArrayMap<K, V> implements Debug {
   }
 
   boolean isUnary() {
-    return slots.length == 2;
+    return this.slots.length == 2;
   }
 
   @SuppressWarnings("unchecked")
   K unaryKey() {
-    return (K) slots[0];
+    return (K) this.slots[0];
   }
 
   @SuppressWarnings("unchecked")
   V unaryValue() {
-    return (V) slots[1];
+    return (V) this.slots[1];
   }
 
   @SuppressWarnings("unchecked")
   K keyAt(int index) {
-    return (K) slots[index << 1];
+    return (K) this.slots[index << 1];
   }
 
   @SuppressWarnings("unchecked")
   V valueAt(int index) {
-    return (V) slots[(index << 1) + 1];
+    return (V) this.slots[(index << 1) + 1];
   }
 
   public Iterator<Map.Entry<K, V>> iterator() {
-    return new ArrayMapIterator<K, V>(slots);
+    return new ArrayMapIterator<K, V>(this.slots);
   }
 
   @SuppressWarnings("unchecked")
@@ -244,11 +217,11 @@ final class ArrayMap<K, V> implements Debug {
       return true;
     } else if (other instanceof ArrayMap<?, ?>) {
       final ArrayMap<K, V> that = (ArrayMap<K, V>) other;
-      if (size() == that.size()) {
+      if (this.size() == that.size()) {
         final Iterator<Map.Entry<K, V>> those = that.iterator();
         while (those.hasNext()) {
           final Map.Entry<K, V> entry = those.next();
-          final V value = get(entry.getKey());
+          final V value = this.get(entry.getKey());
           final V v = entry.getValue();
           if (value == null ? v != null : !value.equals(v)) {
             return false;
@@ -260,15 +233,17 @@ final class ArrayMap<K, V> implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(ArrayMap.class);
+    if (ArrayMap.hashSeed == 0) {
+      ArrayMap.hashSeed = Murmur3.seed(ArrayMap.class);
     }
     int a = 0;
     int b = 0;
     int c = 1;
-    final Iterator<Map.Entry<K, V>> these = iterator();
+    final Iterator<Map.Entry<K, V>> these = this.iterator();
     while (these.hasNext()) {
       final Map.Entry<K, V> entry = these.next();
       final int h = Murmur3.mix(Murmur3.hash(entry.getKey()), Murmur3.hash(entry.getValue()));
@@ -278,31 +253,34 @@ final class ArrayMap<K, V> implements Debug {
         c *= h;
       }
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed, a), b), c));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(ArrayMap.hashSeed, a), b), c));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("ArrayMap").write('.');
-    final Iterator<Map.Entry<K, V>> these = iterator();
-    if (these.hasNext()) {
-      Map.Entry<K, V> entry = these.next();
-      output = output.write("of").write('(')
-          .debug(entry.getKey()).write(", ").debug(entry.getValue());
-      while (these.hasNext()) {
-        entry = these.next();
-        output = output.write(')').write('.').write("put").write('(')
-            .debug(entry.getKey()).write(", ").debug(entry.getValue());
-      }
-    } else {
-      output = output.write("empty").write('(');
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("ArrayMap").write('.').write("empty").write('(').write(')');
+    final Iterator<Map.Entry<K, V>> these = this.iterator();
+    while (these.hasNext()) {
+      final Map.Entry<K, V> entry = these.next();
+      output = output.write('.').write("updated").write('(').debug(entry.getKey())
+                     .write(", ").debug(entry.getValue()).write(')');
     }
-    output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static ArrayMap<Object, Object> empty;
+
+  @SuppressWarnings("unchecked")
+  public static <K, V> ArrayMap<K, V> empty() {
+    if (ArrayMap.empty == null) {
+      ArrayMap.empty = new ArrayMap<Object, Object>(new Object[0]);
+    }
+    return (ArrayMap<K, V>) ArrayMap.empty;
   }
 
 }
@@ -318,18 +296,19 @@ final class ArrayMapIterator<K, V> implements Iterator<Map.Entry<K, V>> {
 
   @Override
   public boolean hasNext() {
-    return index < slots.length;
+    return this.index + 1 < this.slots.length;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public Map.Entry<K, V> next() {
-    if (index >= slots.length) {
+    final int index = this.index;
+    if (index + 1 >= this.slots.length) {
       throw new NoSuchElementException();
     }
-    final K key = (K) slots[index];
-    final V value = (V) slots[index + 1];
-    index += 2;
+    final K key = (K) this.slots[index];
+    final V value = (V) this.slots[index + 1];
+    this.index = index + 2;
     return new AbstractMap.SimpleImmutableEntry<K, V>(key, value);
   }
 

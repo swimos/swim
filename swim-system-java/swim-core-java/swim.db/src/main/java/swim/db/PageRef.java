@@ -16,7 +16,6 @@ package swim.db;
 
 import swim.codec.Output;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.recon.Recon;
 import swim.structure.Value;
 import swim.util.Cursor;
@@ -26,7 +25,7 @@ public abstract class PageRef {
   public abstract PageContext pageContext();
 
   public StoreSettings settings() {
-    return pageContext().settings();
+    return this.pageContext().settings();
   }
 
   public abstract PageType pageType();
@@ -90,7 +89,7 @@ public abstract class PageRef {
   public abstract Cursor<? extends Object> cursor();
 
   public String toDebugString() {
-    return "stem: " + stem() + ", pageRef: " + Recon.toString(toValue());
+    return "stem: " + this.stem() + ", pageRef: " + Recon.toString(this.toValue());
   }
 
   static final class LoadPage implements Cont<Page> {
@@ -108,7 +107,7 @@ public abstract class PageRef {
       try {
         this.cont.bind(page);
       } catch (Throwable cause) {
-        if (Conts.isNonFatal(cause)) {
+        if (Cont.isNonFatal(cause)) {
           this.cont.trap(cause);
         } else {
           throw cause;
@@ -142,11 +141,11 @@ public abstract class PageRef {
     @Override
     public void bind(Page page) {
       try {
-        final Cont<Page> andThen = Conts.constant(this.cont, page);
+        final Cont<Page> andThen = Cont.constant(this.cont, page);
         page.loadTreeAsync(this.pageLoader, andThen);
       } catch (Throwable cause) {
-        if (Conts.isNonFatal(cause)) {
-          trap(cause);
+        if (Cont.isNonFatal(cause)) {
+          this.trap(cause);
         } else {
           throw cause;
         }

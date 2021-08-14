@@ -36,8 +36,8 @@ public final class MetaMeshAgent extends AgentNode {
 
   @Override
   protected void openUnknownUplink(Uri laneUri, LinkBinding link) {
-    if (NODES_URI.equals(laneUri)) {
-      link.setNodeUri(META_HOST_URI);
+    if (MetaMeshAgent.NODES_URI.equals(laneUri)) {
+      link.setNodeUri(MetaMeshAgent.META_HOST_URI);
       this.host().openUplink(link);
     } else {
       super.openUnknownUplink(laneUri, link);

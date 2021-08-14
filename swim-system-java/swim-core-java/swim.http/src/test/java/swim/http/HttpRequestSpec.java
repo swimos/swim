@@ -28,88 +28,88 @@ import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpRequestSpec {
 
-  public static <T> void assertParses(String string, HttpRequest<T> request) {
-    HttpAssertions.assertParses(Http.standardParser().<T>requestParser(), string, request);
-  }
-
   @Test
   public void parseRequestsWithNoHeaders() {
     assertParses("GET / HTTP/1.0\r\n"
-            + "\r\n",
-        HttpRequest.from(HttpMethod.GET, Uri.parse("/"), HttpVersion.HTTP_1_0));
+               + "\r\n",
+                 HttpRequest.create(HttpMethod.GET, Uri.parse("/"), HttpVersion.HTTP_1_0));
   }
 
   @Test
   public void parseRequestsWithASingleHeader() {
     assertParses("HEAD /path HTTP/1.1\r\n"
-            + "Key: Value\r\n"
-            + "\r\n",
-        HttpRequest.head(Uri.parse("/path"), RawHeader.from("Key", "Value")));
+               + "Key: Value\r\n"
+               + "\r\n",
+                 HttpRequest.head(Uri.parse("/path"), RawHeader.create("Key", "Value")));
     assertParses("HEAD /path HTTP/1.1\r\n"
-            + "Host: example.com\r\n"
-            + "\r\n",
-        HttpRequest.head(Uri.parse("/path"), Host.from("example.com")));
+               + "Host: example.com\r\n"
+               + "\r\n",
+                 HttpRequest.head(Uri.parse("/path"), Host.create("example.com")));
   }
 
   @Test
   public void parseRequestsWithMultipleHeaders() {
     assertParses("GET /chat HTTP/1.1\r\n"
-            + "Host: example.com\r\n"
-            + "Upgrade: websocket\r\n"
-            + "Connection: Upgrade\r\n"
-            + "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
-            + "Origin: http://example.com\r\n"
-            + "Sec-WebSocket-Protocol: chat, superchat\r\n"
-            + "Sec-WebSocket-Version: 13\r\n"
-            + "\r\n",
-        HttpRequest.get(Uri.parse("/chat"),
-            Host.from("example.com"),
-            Upgrade.from("websocket"),
-            Connection.from("Upgrade"),
-            SecWebSocketKey.from("dGhlIHNhbXBsZSBub25jZQ=="),
-            Origin.from("http://example.com"),
-            SecWebSocketProtocol.from("chat", "superchat"),
-            SecWebSocketVersion.from(13)));
+               + "Host: example.com\r\n"
+               + "Upgrade: websocket\r\n"
+               + "Connection: Upgrade\r\n"
+               + "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
+               + "Origin: http://example.com\r\n"
+               + "Sec-WebSocket-Protocol: chat, superchat\r\n"
+               + "Sec-WebSocket-Version: 13\r\n"
+               + "\r\n",
+                 HttpRequest.get(Uri.parse("/chat"),
+                                 Host.create("example.com"),
+                                 Upgrade.create("websocket"),
+                                 Connection.create("Upgrade"),
+                                 SecWebSocketKey.create("dGhlIHNhbXBsZSBub25jZQ=="),
+                                 Origin.create("http://example.com"),
+                                 SecWebSocketProtocol.create("chat", "superchat"),
+                                 SecWebSocketVersion.create(13)));
   }
 
   @Test
   public void writeRequestsWithNoHeaders() {
-    assertWrites(HttpRequest.from(HttpMethod.GET, Uri.parse("/"), HttpVersion.HTTP_1_0),
-        "GET / HTTP/1.0\r\n"
-            + "\r\n");
+    assertWrites(HttpRequest.create(HttpMethod.GET, Uri.parse("/"), HttpVersion.HTTP_1_0),
+                 "GET / HTTP/1.0\r\n"
+               + "\r\n");
   }
 
   @Test
   public void writeRequestsWithASingleHeader() {
-    assertWrites(HttpRequest.head(Uri.parse("/path"), RawHeader.from("Key", "Value")),
-        "HEAD /path HTTP/1.1\r\n"
-            + "Key: Value\r\n"
-            + "\r\n");
-    assertWrites(HttpRequest.head(Uri.parse("/path"), Host.from("example.com")),
-        "HEAD /path HTTP/1.1\r\n"
-            + "Host: example.com\r\n"
-            + "\r\n");
+    assertWrites(HttpRequest.head(Uri.parse("/path"), RawHeader.create("Key", "Value")),
+                 "HEAD /path HTTP/1.1\r\n"
+               + "Key: Value\r\n"
+               + "\r\n");
+    assertWrites(HttpRequest.head(Uri.parse("/path"), Host.create("example.com")),
+                 "HEAD /path HTTP/1.1\r\n"
+               + "Host: example.com\r\n"
+               + "\r\n");
   }
 
   @Test
   public void writeRequestsWithMultipleHeaders() {
     assertWrites(HttpRequest.get(Uri.parse("/chat"),
-        Host.from("example.com"),
-        Upgrade.from("websocket"),
-        Connection.from("Upgrade"),
-        SecWebSocketKey.from("dGhlIHNhbXBsZSBub25jZQ=="),
-        Origin.from("http://example.com"),
-        SecWebSocketProtocol.from("chat", "superchat"),
-        SecWebSocketVersion.from(13)),
-        "GET /chat HTTP/1.1\r\n"
-            + "Host: example.com\r\n"
-            + "Upgrade: websocket\r\n"
-            + "Connection: Upgrade\r\n"
-            + "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
-            + "Origin: http://example.com\r\n"
-            + "Sec-WebSocket-Protocol: chat, superchat\r\n"
-            + "Sec-WebSocket-Version: 13\r\n"
-            + "\r\n");
+                                 Host.create("example.com"),
+                                 Upgrade.create("websocket"),
+                                 Connection.create("Upgrade"),
+                                 SecWebSocketKey.create("dGhlIHNhbXBsZSBub25jZQ=="),
+                                 Origin.create("http://example.com"),
+                                 SecWebSocketProtocol.create("chat", "superchat"),
+                                 SecWebSocketVersion.create(13)),
+                 "GET /chat HTTP/1.1\r\n"
+               + "Host: example.com\r\n"
+               + "Upgrade: websocket\r\n"
+               + "Connection: Upgrade\r\n"
+               + "Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==\r\n"
+               + "Origin: http://example.com\r\n"
+               + "Sec-WebSocket-Protocol: chat, superchat\r\n"
+               + "Sec-WebSocket-Version: 13\r\n"
+               + "\r\n");
+  }
+
+  public static <T> void assertParses(String string, HttpRequest<T> request) {
+    HttpAssertions.assertParses(Http.standardParser().<T>requestParser(), string, request);
   }
 
 }

@@ -37,8 +37,8 @@ public abstract class Zone {
 
   public Database openDatabase() throws InterruptedException {
     final Sync<Database> syncDatabase = new Sync<Database>();
-    openDatabaseAsync(syncDatabase);
-    return syncDatabase.await(settings().databaseOpenTimeout);
+    this.openDatabaseAsync(syncDatabase);
+    return syncDatabase.await(this.settings().databaseOpenTimeout);
   }
 
   public abstract Chunk commitAndWriteChunk(Commit commit);

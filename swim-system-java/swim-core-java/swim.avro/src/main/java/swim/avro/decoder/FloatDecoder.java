@@ -35,6 +35,11 @@ final class FloatDecoder<T> extends Decoder<T> {
     this(type, 0, 0);
   }
 
+  @Override
+  public Decoder<T> feed(InputBuffer input) {
+    return FloatDecoder.decode(input, this.type, this.value, this.shift);
+  }
+
   static <T> Decoder<T> decode(InputBuffer input, AvroFloatType<T> type,
                                int value, int shift) {
     while (input.isCont()) {
@@ -42,24 +47,19 @@ final class FloatDecoder<T> extends Decoder<T> {
       input = input.step();
       shift += 8;
       if (shift == 32) {
-        return done(type.cast(Float.intBitsToFloat(value)));
+        return Decoder.done(type.cast(Float.intBitsToFloat(value)));
       }
     }
     if (input.isDone()) {
-      return error(new DecoderException("incomplete"));
+      return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
-      return error(input.trap());
+      return Decoder.error(input.trap());
     }
     return new FloatDecoder<T>(type, value, shift);
   }
 
   static <T> Decoder<T> decode(InputBuffer input, AvroFloatType<T> type) {
-    return decode(input, type, 0, 0);
-  }
-
-  @Override
-  public Decoder<T> feed(InputBuffer input) {
-    return decode(input, this.type, this.value, this.shift);
+    return FloatDecoder.decode(input, type, 0, 0);
   }
 
 }

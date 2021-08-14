@@ -13,7 +13,7 @@ ext.jvmVersion = (javaVersion[0] as Integer) > 1 ? javaVersion[0] as Integer : j
 repositories {
   mavenCentral()
   maven {
-    url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
   }
 }
 

@@ -18,16 +18,6 @@ import swim.structure.Kind;
 
 public abstract class Z3Shape implements Shape {
 
-  private static Z3Form<Z3Shape> shapeForm;
-
-  @Kind
-  public static Z3Form<Z3Shape> shapeForm() {
-    if (shapeForm == null) {
-      shapeForm = new Z3ShapeForm();
-    }
-    return shapeForm;
-  }
-
   public abstract long xMin();
 
   public abstract long yMin();
@@ -43,7 +33,7 @@ public abstract class Z3Shape implements Shape {
   @Override
   public boolean contains(Shape shape) {
     if (shape instanceof Z3Shape) {
-      return contains((Z3Shape) shape);
+      return this.contains((Z3Shape) shape);
     } else {
       return false;
     }
@@ -52,7 +42,7 @@ public abstract class Z3Shape implements Shape {
   @Override
   public boolean intersects(Shape shape) {
     if (shape instanceof Z3Shape) {
-      return intersects((Z3Shape) shape);
+      return this.intersects((Z3Shape) shape);
     } else {
       return false;
     }
@@ -63,5 +53,15 @@ public abstract class Z3Shape implements Shape {
   public abstract boolean intersects(Z3Shape shape);
 
   public abstract R3Shape transform(Z3ToR3Function f);
+
+  private static Z3Form<Z3Shape> shapeForm;
+
+  @Kind
+  public static Z3Form<Z3Shape> shapeForm() {
+    if (Z3Shape.shapeForm == null) {
+      Z3Shape.shapeForm = new Z3ShapeForm();
+    }
+    return Z3Shape.shapeForm;
+  }
 
 }

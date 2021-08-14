@@ -50,15 +50,15 @@ public class JsAgentFactory extends AbstractAgentRoute<JsAgent> {
 
   protected Context createAgentJsContext(AgentContext agentContext) {
     return Context.newBuilder("js")
-        .engine(this.jsKernel.jsEngine())
-        // TODO: .in(...)
-        // TODO: .out(...)
-        // TODO: .err(...)
-        // TODO: .logHandler(...)
-        // TODO: .fileSystem(...)
-        // TODO: .processHandler(...)
-        // TODO: .serverTransport(...)
-        .build();
+                  .engine(this.jsKernel.jsEngine())
+                  // TODO: .in(...)
+                  // TODO: .out(...)
+                  // TODO: .err(...)
+                  // TODO: .logHandler(...)
+                  // TODO: .fileSystem(...)
+                  // TODO: .processHandler(...)
+                  // TODO: .serverTransport(...)
+                  .build();
   }
 
   protected JsBridge createAgentJsBridge(AgentContext agentContext, Context jsContext) {
@@ -70,7 +70,7 @@ public class JsAgentFactory extends AbstractAgentRoute<JsAgent> {
   }
 
   protected JsModule requireAgentModule(AgentContext agentContext, JsModuleSystem moduleSystem) {
-    return moduleSystem.requireModule(basePath(), this.agentDef.modulePath());
+    return moduleSystem.requireModule(this.basePath(), this.agentDef.modulePath());
   }
 
   protected org.graalvm.polyglot.Value createGuestAgent(AgentContext agentContext, JsBridge jsBridge, JsModule agentModule) {
@@ -90,11 +90,11 @@ public class JsAgentFactory extends AbstractAgentRoute<JsAgent> {
 
   @Override
   public JsAgent createAgent(AgentContext agentContext) {
-    final Context jsContext = createAgentJsContext(agentContext);
-    final JsBridge jsBridge = createAgentJsBridge(agentContext, jsContext);
-    final JsModuleSystem moduleSystem = createAgentModuleSystem(agentContext, jsContext, jsBridge);
-    final JsModule module = requireAgentModule(agentContext, moduleSystem);
-    final org.graalvm.polyglot.Value guest = createGuestAgent(agentContext, jsBridge, module);
+    final Context jsContext = this.createAgentJsContext(agentContext);
+    final JsBridge jsBridge = this.createAgentJsBridge(agentContext, jsContext);
+    final JsModuleSystem moduleSystem = this.createAgentModuleSystem(agentContext, jsContext, jsBridge);
+    final JsModule module = this.requireAgentModule(agentContext, moduleSystem);
+    final org.graalvm.polyglot.Value guest = this.createGuestAgent(agentContext, jsBridge, module);
     return new JsAgent(agentContext, jsBridge, module, guest);
   }
 

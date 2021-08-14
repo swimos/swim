@@ -23,26 +23,12 @@ import swim.util.Murmur3;
 
 public final class MqttSubscription extends MqttPart implements Debug {
 
-  static final int QOS_MASK = 0x03;
-  private static int hashSeed;
   final String topicName;
   final int flags;
 
   MqttSubscription(String topicName, int flags) {
     this.topicName = topicName;
     this.flags = flags;
-  }
-
-  public static MqttSubscription from(String topicName, int flags) {
-    return new MqttSubscription(topicName, flags);
-  }
-
-  public static MqttSubscription from(String topicName, MqttQoS qos) {
-    return new MqttSubscription(topicName, qos.code);
-  }
-
-  public static MqttSubscription from(String topicName) {
-    return new MqttSubscription(topicName, 0);
   }
 
   public String topicName() {
@@ -58,11 +44,11 @@ public final class MqttSubscription extends MqttPart implements Debug {
   }
 
   public MqttQoS qos() {
-    return MqttQoS.from(this.flags & QOS_MASK);
+    return MqttQoS.from(this.flags & MqttSubscription.QOS_MASK);
   }
 
   public MqttSubscription qos(MqttQoS qos) {
-    final int flags = this.flags & ~QOS_MASK | qos.code;
+    final int flags = this.flags & ~MqttSubscription.QOS_MASK | qos.code;
     return new MqttSubscription(this.topicName, flags);
   }
 
@@ -91,26 +77,44 @@ public final class MqttSubscription extends MqttPart implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(MqttSubscription.class);
+    if (MqttSubscription.hashSeed == 0) {
+      MqttSubscription.hashSeed = Murmur3.seed(MqttSubscription.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(hashSeed, this.topicName.hashCode()), this.flags));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(MqttSubscription.hashSeed,
+        this.topicName.hashCode()), this.flags));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("MqttSubscription").write('.').write("from").write('(').debug(this.topicName);
-    if ((this.flags & QOS_MASK) != 0) {
-      output = output.write(", ").debug(qos());
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("MqttSubscription").write('.').write("create").write('(').debug(this.topicName);
+    if ((this.flags & MqttSubscription.QOS_MASK) != 0) {
+      output = output.write(", ").debug(this.qos());
     }
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  static final int QOS_MASK = 0x03;
+
+  public static MqttSubscription create(String topicName, int flags) {
+    return new MqttSubscription(topicName, flags);
+  }
+
+  public static MqttSubscription create(String topicName, MqttQoS qos) {
+    return new MqttSubscription(topicName, qos.code);
+  }
+
+  public static MqttSubscription create(String topicName) {
+    return new MqttSubscription(topicName, 0);
   }
 
 }

@@ -29,12 +29,12 @@ public abstract class RecordStreamlet<I extends Value, O extends Value> extends 
   }
 
   public void compile() {
-    AbstractRecordStreamlet.compileInlets(getClass(), this);
+    AbstractRecordStreamlet.compileInlets(this.getClass(), this);
   }
 
   @SuppressWarnings("unchecked")
   public void compileInlet(Inlet<I> inlet, String name) {
-    final StreamletScope<? extends O> scope = streamletScope();
+    final StreamletScope<? extends O> scope = this.streamletScope();
     if (scope != null) {
       final Outlet<? extends O> input = scope.outlet(name);
       if (input != null) {

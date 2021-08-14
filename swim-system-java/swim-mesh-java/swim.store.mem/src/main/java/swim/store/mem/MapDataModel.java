@@ -40,6 +40,8 @@ public class MapDataModel implements MapDataBinding {
   public MapDataModel(Value name, BTreeMap<Value, Value, Value> tree) {
     this.name = name;
     this.tree = tree;
+    this.dataContext = null;
+    this.storeBinding = null;
   }
 
   @Override
@@ -65,7 +67,7 @@ public class MapDataModel implements MapDataBinding {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T unwrapData(Class<T> dataClass) {
-    if (dataClass.isAssignableFrom(getClass())) {
+    if (dataClass.isAssignableFrom(this.getClass())) {
       return (T) this;
     } else {
       return null;
@@ -93,7 +95,7 @@ public class MapDataModel implements MapDataBinding {
 
   @Override
   public <K2> MapData<K2, Value> keyClass(Class<K2> keyClass) {
-    return keyForm(Form.<K2>forClass(keyClass));
+    return this.keyForm(Form.<K2>forClass(keyClass));
   }
 
   @Override
@@ -108,7 +110,7 @@ public class MapDataModel implements MapDataBinding {
 
   @Override
   public <V2> MapData<Value, V2> valueClass(Class<V2> valueClass) {
-    return valueForm(Form.<V2>forClass(valueClass));
+    return this.valueForm(Form.<V2>forClass(valueClass));
   }
 
   @Override

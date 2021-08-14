@@ -16,7 +16,6 @@ package swim.db;
 
 import swim.codec.Output;
 import swim.concurrent.Cont;
-import swim.concurrent.Conts;
 import swim.concurrent.Sync;
 import swim.structure.Value;
 import swim.util.Cursor;
@@ -116,10 +115,20 @@ public final class UTree extends Tree {
   public UTree updated(Value newValue, long newVersion, int newPost) {
     final UTreePage oldRoot = this.rootRef.page();
     final UTreePage newRoot = oldRoot.updated(newValue, newVersion)
-        .evacuated(newPost, newVersion);
+                                     .evacuated(newPost, newVersion);
     if (oldRoot != newRoot) {
       return new UTree(this.treeContext, newRoot.pageRef(), this.seed,
-          this.isResident, this.isTransient);
+                       this.isResident, this.isTransient);
+    } else {
+      return this;
+    }
+  }
+
+  public UTree cleared(long newVersion) {
+    if (!this.rootRef.isEmpty()) {
+      final UTreePage newRoot = UTreePage.empty(this.treeContext, this.seed.stem, newVersion);
+      return new UTree(this.treeContext, newRoot.pageRef(), this.seed,
+                       this.isResident, this.isTransient);
     } else {
       return this;
     }
@@ -183,10 +192,10 @@ public final class UTree extends Tree {
   @Override
   public void loadAsync(Cont<Tree> cont) {
     try {
-      final Cont<Page> andThen = Conts.constant(cont, this);
+      final Cont<Page> andThen = Cont.constant(cont, this);
       this.rootRef.loadTreeAsync(this.isResident, andThen);
     } catch (Throwable error) {
-      if (Conts.isNonFatal(error)) {
+      if (Cont.isNonFatal(error)) {
         cont.trap(new StoreException(this.rootRef.toDebugString(), error));
       } else {
         throw error;
@@ -197,7 +206,7 @@ public final class UTree extends Tree {
   @Override
   public UTree load() throws InterruptedException {
     final Sync<Tree> syncTree = new Sync<Tree>();
-    loadAsync(syncTree);
+    this.loadAsync(syncTree);
     return (UTree) syncTree.await(settings().treeLoadTimeout);
   }
 

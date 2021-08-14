@@ -22,8 +22,6 @@ import swim.util.Murmur3;
 
 public final class LanguageRange extends HttpPart implements Debug {
 
-  private static int hashSeed;
-  private static LanguageRange star;
   final String tag;
   final String subtag;
   final float weight;
@@ -44,49 +42,6 @@ public final class LanguageRange extends HttpPart implements Debug {
 
   LanguageRange(String tag) {
     this(tag, null, 1f);
-  }
-
-  public static LanguageRange star() {
-    if (star == null) {
-      star = new LanguageRange("*");
-    }
-    return star;
-  }
-
-  public static LanguageRange from(String tag, String subtag, float weight) {
-    if (weight == 1f) {
-      return from(tag, subtag);
-    } else {
-      return new LanguageRange(tag, subtag, weight);
-    }
-  }
-
-  public static LanguageRange from(String tag, String subtag) {
-    if (subtag == null) {
-      return from(tag);
-    } else {
-      return new LanguageRange(tag, subtag);
-    }
-  }
-
-  public static LanguageRange from(String tag, float weight) {
-    if (weight == 1f) {
-      return from(tag);
-    } else {
-      return new LanguageRange(tag, weight);
-    }
-  }
-
-  public static LanguageRange from(String tag) {
-    if ("*".equals(tag)) {
-      return star();
-    } else {
-      return new LanguageRange(tag);
-    }
-  }
-
-  public static LanguageRange parse(String string) {
-    return Http.standardParser().parseLanguageRangeString(string);
   }
 
   public String tag() {
@@ -128,18 +83,20 @@ public final class LanguageRange extends HttpPart implements Debug {
     return false;
   }
 
+  private static int hashSeed;
+
   @Override
   public int hashCode() {
-    if (hashSeed == 0) {
-      hashSeed = Murmur3.seed(LanguageRange.class);
+    if (LanguageRange.hashSeed == 0) {
+      LanguageRange.hashSeed = Murmur3.seed(LanguageRange.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(hashSeed,
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(LanguageRange.hashSeed,
         this.tag.hashCode()), Murmur3.hash(this.subtag)), Murmur3.hash(this.weight)));
   }
 
   @Override
-  public void debug(Output<?> output) {
-    output = output.write("LanguageRange").write('.').write("from").write('(').debug(this.tag);
+  public <T> Output<T> debug(Output<T> output) {
+    output = output.write("LanguageRange").write('.').write("create").write('(').debug(this.tag);
     if (this.subtag != null) {
       output = output.write(", ").debug(this.subtag);
     }
@@ -147,11 +104,57 @@ public final class LanguageRange extends HttpPart implements Debug {
       output = output.write(", ").debug(this.weight);
     }
     output = output.write(')');
+    return output;
   }
 
   @Override
   public String toString() {
     return Format.debug(this);
+  }
+
+  private static LanguageRange star;
+
+  public static LanguageRange star() {
+    if (LanguageRange.star == null) {
+      LanguageRange.star = new LanguageRange("*");
+    }
+    return LanguageRange.star;
+  }
+
+  public static LanguageRange create(String tag, String subtag, float weight) {
+    if (weight == 1f) {
+      return LanguageRange.create(tag, subtag);
+    } else {
+      return new LanguageRange(tag, subtag, weight);
+    }
+  }
+
+  public static LanguageRange create(String tag, String subtag) {
+    if (subtag == null) {
+      return LanguageRange.create(tag);
+    } else {
+      return new LanguageRange(tag, subtag);
+    }
+  }
+
+  public static LanguageRange create(String tag, float weight) {
+    if (weight == 1f) {
+      return LanguageRange.create(tag);
+    } else {
+      return new LanguageRange(tag, weight);
+    }
+  }
+
+  public static LanguageRange create(String tag) {
+    if ("*".equals(tag)) {
+      return LanguageRange.star();
+    } else {
+      return new LanguageRange(tag);
+    }
+  }
+
+  public static LanguageRange parse(String string) {
+    return Http.standardParser().parseLanguageRangeString(string);
   }
 
 }

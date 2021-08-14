@@ -34,12 +34,12 @@ final class OrderedMapViewCursor<K, V> implements OrderedMapCursor<K, V> {
 
   @Override
   public boolean isEmpty() {
-    return this.cursor.isEmpty() || this.toKey != null && compareKey(this.cursor.nextKey(), this.toKey) >= 0;
+    return this.cursor.isEmpty() || this.toKey != null && this.compareKey(this.cursor.nextKey(), this.toKey) >= 0;
   }
 
   @Override
   public Map.Entry<K, V> head() {
-    if (!isEmpty()) {
+    if (!this.isEmpty()) {
       return this.cursor.head();
     } else {
       throw new NoSuchElementException();
@@ -48,7 +48,7 @@ final class OrderedMapViewCursor<K, V> implements OrderedMapCursor<K, V> {
 
   @Override
   public void step() {
-    if (!isEmpty()) {
+    if (!this.isEmpty()) {
       this.cursor.step();
     } else {
       throw new UnsupportedOperationException();
@@ -62,7 +62,7 @@ final class OrderedMapViewCursor<K, V> implements OrderedMapCursor<K, V> {
 
   @Override
   public boolean hasNext() {
-    return this.cursor.hasNext() && (this.toKey == null || compareKey(this.cursor.nextKey(), this.toKey) < 0);
+    return this.cursor.hasNext() && (this.toKey == null || this.compareKey(this.cursor.nextKey(), this.toKey) < 0);
   }
 
   @Override
@@ -74,7 +74,7 @@ final class OrderedMapViewCursor<K, V> implements OrderedMapCursor<K, V> {
   public K nextKey() {
     if (this.cursor.hasNext()) {
       final K nextKey = this.cursor.nextKey();
-      if (this.toKey == null || compareKey(nextKey, this.toKey) < 0) {
+      if (this.toKey == null || this.compareKey(nextKey, this.toKey) < 0) {
         return nextKey;
       }
     }
@@ -83,7 +83,7 @@ final class OrderedMapViewCursor<K, V> implements OrderedMapCursor<K, V> {
 
   @Override
   public Map.Entry<K, V> next() {
-    if (hasNext()) {
+    if (this.hasNext()) {
       return this.cursor.next();
     } else {
       throw new NoSuchElementException();
@@ -92,7 +92,7 @@ final class OrderedMapViewCursor<K, V> implements OrderedMapCursor<K, V> {
 
   @Override
   public boolean hasPrevious() {
-    return this.cursor.hasPrevious() && (this.fromKey == null || compareKey(this.fromKey, this.cursor.previousKey()) <= 0);
+    return this.cursor.hasPrevious() && (this.fromKey == null || this.compareKey(this.fromKey, this.cursor.previousKey()) <= 0);
   }
 
   @Override
@@ -104,7 +104,7 @@ final class OrderedMapViewCursor<K, V> implements OrderedMapCursor<K, V> {
   public K previousKey() {
     if (this.cursor.hasPrevious()) {
       final K previousKey = this.cursor.previousKey();
-      if (this.fromKey == null || compareKey(this.fromKey, previousKey) <= 0) {
+      if (this.fromKey == null || this.compareKey(this.fromKey, previousKey) <= 0) {
         return previousKey;
       }
     }
@@ -113,7 +113,7 @@ final class OrderedMapViewCursor<K, V> implements OrderedMapCursor<K, V> {
 
   @Override
   public Map.Entry<K, V> previous() {
-    if (hasPrevious()) {
+    if (this.hasPrevious()) {
       return this.cursor.previous();
     } else {
       throw new NoSuchElementException();

@@ -24,14 +24,6 @@ final class OutputWriter<I, O> extends Writer<I, O> {
     this.writer = writer;
   }
 
-  static <I, O> Writer<I, O> write(Output<?> output, Writer<I, O> writer) {
-    writer = writer.pull(output);
-    if (!writer.isCont()) {
-      return writer;
-    }
-    return new OutputWriter<I, O>(output, writer);
-  }
-
   @Override
   public Writer<I, O> feed(I input) {
     return new OutputWriter<I, O>(this.output, this.writer.feed(input));
@@ -42,7 +34,7 @@ final class OutputWriter<I, O> extends Writer<I, O> {
     if (this.output != null) {
       output = this.output.fork(output);
     }
-    return write(output, this.writer);
+    return OutputWriter.write(output, this.writer);
   }
 
   @Override
@@ -58,6 +50,14 @@ final class OutputWriter<I, O> extends Writer<I, O> {
   @Override
   public Throwable trap() {
     return this.writer.trap();
+  }
+
+  static <I, O> Writer<I, O> write(Output<?> output, Writer<I, O> writer) {
+    writer = writer.pull(output);
+    if (!writer.isCont()) {
+      return writer;
+    }
+    return new OutputWriter<I, O>(output, writer);
   }
 
 }

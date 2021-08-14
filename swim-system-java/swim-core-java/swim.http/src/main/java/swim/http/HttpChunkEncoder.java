@@ -41,6 +41,11 @@ final class HttpChunkEncoder extends Encoder<Object, Object> {
     this(http, header, content, null, 1);
   }
 
+  @Override
+  public Encoder<Object, Object> pull(OutputBuffer<?> output) {
+    return HttpChunkEncoder.encode(output, this.http, this.header, this.content, this.part, this.step);
+  }
+
   static Encoder<Object, Object> encode(OutputBuffer<?> output, HttpWriter http, HttpChunkHeader header,
                                         Encoder<?, ?> content, Writer<?, ?> part, int step) {
     if (step == 1) {
@@ -53,7 +58,7 @@ final class HttpChunkEncoder extends Encoder<Object, Object> {
         part = null;
         step = 2;
       } else if (part.isError()) {
-        return error(part.trap());
+        return Encoder.error(part.trap());
       }
     }
     if (step == 2) {
@@ -70,24 +75,19 @@ final class HttpChunkEncoder extends Encoder<Object, Object> {
     }
     if (step == 4 && output.isCont()) {
       output = output.write('\n');
-      return done();
+      return Encoder.done();
     }
     if (output.isDone()) {
-      return error(new EncoderException("truncated"));
+      return Encoder.error(new EncoderException("truncated"));
     } else if (output.isError()) {
-      return error(output.trap());
+      return Encoder.error(output.trap());
     }
     return new HttpChunkEncoder(http, header, content, part, step);
   }
 
   static Encoder<Object, Object> encode(OutputBuffer<?> output, HttpWriter http,
                                         HttpChunkHeader header, Encoder<?, ?> content) {
-    return encode(output, http, header, content, null, 1);
-  }
-
-  @Override
-  public Encoder<Object, Object> pull(OutputBuffer<?> output) {
-    return encode(output, this.http, this.header, this.content, this.part, this.step);
+    return HttpChunkEncoder.encode(output, http, header, content, null, 1);
   }
 
 }

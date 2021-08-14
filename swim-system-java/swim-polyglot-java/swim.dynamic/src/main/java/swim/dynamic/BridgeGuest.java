@@ -15,7 +15,7 @@
 package swim.dynamic;
 
 /**
- * A host object that wraps a guest value and its dynamic bridge.  Used as a
+ * A host object that wraps a guest value and its dynamic bridge. Used as a
  * base class for strongly typed host objects that wrap guest values, such as
  * host functional interface implementations that invoke guest functions.
  */

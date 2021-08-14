@@ -21,9 +21,6 @@ import swim.uri.Uri;
 
 public final class UnlinkRequest extends LaneAddressed {
 
-  @Kind
-  public static final Form<UnlinkRequest> FORM = new UnlinkRequestForm();
-
   public UnlinkRequest(Uri nodeUri, Uri laneUri, Value body) {
     super(nodeUri, laneUri, body);
   }
@@ -47,7 +44,7 @@ public final class UnlinkRequest extends LaneAddressed {
 
   @Override
   public Form<UnlinkRequest> form() {
-    return FORM;
+    return UnlinkRequest.FORM;
   }
 
   @Override
@@ -65,6 +62,9 @@ public final class UnlinkRequest extends LaneAddressed {
     return new UnlinkRequest(this.nodeUri, this.laneUri, body);
   }
 
+  @Kind
+  public static final Form<UnlinkRequest> FORM = new UnlinkRequestForm();
+
 }
 
 final class UnlinkRequestForm extends LaneAddressedForm<UnlinkRequest> {
@@ -80,7 +80,7 @@ final class UnlinkRequestForm extends LaneAddressedForm<UnlinkRequest> {
   }
 
   @Override
-  public UnlinkRequest from(Uri nodeUri, Uri laneUri, Value body) {
+  public UnlinkRequest create(Uri nodeUri, Uri laneUri, Value body) {
     return new UnlinkRequest(nodeUri, laneUri, body);
   }
 

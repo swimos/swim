@@ -43,7 +43,7 @@ final class AvroNamespaceBuilder implements Builder<String, AvroNamespace> {
     if (size == 0) {
       this.first = tail;
     } else {
-      dealias(size - 1).setTail(tail);
+      this.dealias(size - 1).setTail(tail);
     }
     this.last = tail;
     this.size = size + 1;
@@ -57,11 +57,11 @@ final class AvroNamespaceBuilder implements Builder<String, AvroNamespace> {
       throw new NullPointerException();
     }
     if (components instanceof AvroNamespace) {
-      return addNamespace((AvroNamespace) components);
+      return this.addNamespace((AvroNamespace) components);
     } else {
       boolean modified = false;
       for (String component : components) {
-        modified = add(component) || modified;
+        modified = this.add(component) || modified;
       }
       return modified;
     }
@@ -79,7 +79,7 @@ final class AvroNamespaceBuilder implements Builder<String, AvroNamespace> {
       if (size == 0) {
         this.first = namespace;
       } else {
-        dealias(size - 1).setTail(namespace);
+        this.dealias(size - 1).setTail(namespace);
       }
       size += 1;
       do {
