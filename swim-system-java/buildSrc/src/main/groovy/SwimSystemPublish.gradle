@@ -44,7 +44,7 @@ publishing {
     if (project.hasProperty('swimUsername') && project.hasProperty('swimPassword')) {
       maven {
         def releasesRepositoryUrl = 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
-        def snapshotsRepositoryUrl = 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+        def snapshotsRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
         name = 'Sonatype'
         url = isReleaseVersion ? releasesRepositoryUrl : snapshotsRepositoryUrl
         credentials {
