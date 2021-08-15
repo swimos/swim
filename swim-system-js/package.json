@@ -1,6 +1,6 @@
 {
   "name": "@swim/system",
-  "version": "3.11.0-dev.20210702",
+  "version": "3.11.0",
   "description": "Swim System TypeScript Implementation",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js",
   "author": "Chris Sachs <chris@swimos.org>",

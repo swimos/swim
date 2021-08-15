@@ -1,6 +1,6 @@
 {
   "name": "@swim/build",
-  "version": "3.11.0-dev.20210702",
+  "version": "3.11.0",
   "description": "Swim build tool",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/build",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -25,9 +25,9 @@
     "typescript": "4.3"
   },
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210702",
-    "@swim/codec": "3.11.0-dev.20210702",
-    "@swim/args": "3.11.0-dev.20210702"
+    "@swim/util": "3.11.0",
+    "@swim/codec": "3.11.0",
+    "@swim/args": "3.11.0"
   },
   "scripts": {
     "compile": "tsc -b",

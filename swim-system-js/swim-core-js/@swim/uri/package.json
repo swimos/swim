@@ -1,6 +1,6 @@
 {
   "name": "@swim/uri",
-  "version": "3.11.0-dev.20210702",
+  "version": "3.11.0",
   "description": "Rich object model for working with Uniform Resource Identifiers and URI subcomponents, including an efficient and safe codec for parsing and writing compliant URI strings",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-system-js/swim-core-js/@swim/uri",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -16,9 +16,9 @@
     "uri"
   ],
   "dependencies": {
-    "@swim/util": "3.11.0-dev.20210702",
-    "@swim/codec": "3.11.0-dev.20210702",
-    "@swim/mapping": "3.11.0-dev.20210702",
-    "@swim/structure": "3.11.0-dev.20210702"
+    "@swim/util": "3.11.0",
+    "@swim/codec": "3.11.0",
+    "@swim/mapping": "3.11.0",
+    "@swim/structure": "3.11.0"
   }
 }
