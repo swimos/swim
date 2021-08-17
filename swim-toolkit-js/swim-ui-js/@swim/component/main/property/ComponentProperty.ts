@@ -44,6 +44,7 @@ export interface ComponentPropertyInit<T, U = never> {
   updateFlags?: ComponentFlags;
   willSetState?(newState: T, oldState: T): void;
   didSetState?(newState: T, oldState: T): void;
+  equalState?(newState: T, oldState: T): boolean;
   fromAny?(value: T | U): T;
   initState?(): T | U;
 }
@@ -162,6 +163,8 @@ export interface ComponentProperty<C extends Component, T, U = never> {
   updateSubProperties(newState: T, oldState: T): void;
 
   updateFlags?: ComponentFlags;
+
+  equalState(newState: T, oldState: T): boolean;
 
   fromAny(value: T | U): T;
 
@@ -433,7 +436,7 @@ ComponentProperty.prototype.setState = function <T, U>(this: ComponentProperty<C
 ComponentProperty.prototype.setOwnState = function <T, U>(this: ComponentProperty<Component, T, U>, newState: T | U): void {
   newState = this.fromAny(newState);
   const oldState = this.state;
-  if (!Equals(newState, oldState)) {
+  if (!this.equalState(newState, oldState)) {
     this.willSetState(newState, oldState);
     Object.defineProperty(this, "ownState", {
       value: newState,
@@ -561,6 +564,10 @@ ComponentProperty.prototype.updateSubProperties = function <T>(this: ComponentPr
       subProperty.revise();
     }
   }
+};
+
+ComponentProperty.prototype.equalState = function <T>(this: ComponentProperty<Component, T>, newState: T, oldState: T): boolean {
+  return Equals(newState, oldState);
 };
 
 ComponentProperty.prototype.fromAny = function <T, U>(this: ComponentProperty<Component, T, U>, value: T | U): T {

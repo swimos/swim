@@ -90,7 +90,7 @@ export abstract class Animator<T> implements AnimationTrack {
     if (arguments.length === 1) {
       oldValue = this.value;
     }
-    if (!Equals(newValue, oldValue)) {
+    if (!this.equalState(newValue, oldValue)) {
       this.willSetValue(newValue, oldValue!);
       Object.defineProperty(this, "ownValue", {
         value: newValue,
@@ -118,7 +118,7 @@ export abstract class Animator<T> implements AnimationTrack {
   /** @hidden */
   setIntermediateValue(newValue: T, newState?: T): void {
     const oldState = arguments.length > 1 ? this.state : void 0;
-    const stateChanged = arguments.length > 1 && !Equals(newState, oldState);
+    const stateChanged = arguments.length > 1 && !this.equalState(newState!, oldState);
     if (stateChanged) {
       this.willSetState(newState!, oldState!);
       Object.defineProperty(this, "ownState", {
@@ -193,7 +193,7 @@ export abstract class Animator<T> implements AnimationTrack {
     const oldState = this.state;
     if (!this.isDefined(oldState)) {
       this.setImmediateState(newState, oldState);
-    } else if (!Equals(newState, oldState)) {
+    } else if (!this.equalState(newState, oldState)) {
       if (timing === void 0 || timing === false) {
         timing = false;
       } else if (timing === true) {
@@ -493,7 +493,7 @@ export abstract class Animator<T> implements AnimationTrack {
 
       if ((this.animatorFlags & Animator.DivergedFlag) !== 0) {
         this.setAnimatorFlags(this.animatorFlags & ~Animator.DivergedFlag);
-        if (!Equals(this.state, oldValue)) {
+        if (!this.equalState(this.state, oldValue)) {
           timing = timing.withDomain(t, t + timing.duration);
         } else {
           timing = timing.withDomain(t - timing.duration, t);
@@ -532,6 +532,10 @@ export abstract class Animator<T> implements AnimationTrack {
 
   onInterrupt(value: T): void {
     // hook
+  }
+
+  equalState(newState: T, oldState: T | undefined): boolean {
+    return Equals(newState, oldState);
   }
 
   /** @hidden */

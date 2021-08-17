@@ -59,6 +59,7 @@ export interface ViewAnimatorInit<T, U = never> {
   onBegin?(value: T): void;
   onEnd?(value: T): void;
   onInterrupt?(value: T): void;
+  equalState?(newState: T, oldState: T): boolean;
   fromAny?(value: T | U): T;
   initState?(): T | U;
 }

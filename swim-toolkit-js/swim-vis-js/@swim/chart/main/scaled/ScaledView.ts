@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Equivalent, Values} from "@swim/util";
+import {Equals, Equivalent, Arrays, Values} from "@swim/util";
 import {
   Domain,
   Range,
@@ -399,13 +399,13 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       const yRange = this.yRange();
       if (yMin instanceof Domain || typeof yMin === "string") {
         if (yRange !== null) {
-          this.yScale.setBaseScale(yMin as Domain<Y> | string, LinearRange(yRange[1], yRange[0]), timing);
+          this.yScale.setBaseScale(yMin as Domain<Y> | string, yRange, timing);
         } else {
           this.yScale.setBaseDomain(yMin as Domain<Y>| string, timing);
         }
       } else {
         if (yRange !== null) {
-          this.yScale.setBaseScale(yMin as Y, yMax as Y, yRange[1], yRange[0], timing);
+          this.yScale.setBaseScale(yMin as Y, yMax as Y, yRange[0], yRange[1], timing);
         } else {
           this.yScale.setBaseDomain(yMin as Y, yMax as Y, timing);
         }
@@ -658,12 +658,12 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     if (yDataDomain !== null) {
       let yDataDomainPaddedMin = yDataDomain[0];
       let yDataDomainPaddedMax = yDataDomain[1];
-      const xDomainPadding = this.xDomainPadding.state;
-      if (typeof xDomainPadding[0] !== "boolean") {
-        yDataDomainPaddedMin = (+yDataDomainPaddedMin - +xDomainPadding[0]) as unknown as Y;
+      const yDomainPadding = this.yDomainPadding.state;
+      if (typeof yDomainPadding[0] !== "boolean") {
+        yDataDomainPaddedMin = (+yDataDomainPaddedMin - +yDomainPadding[0]) as unknown as Y;
       }
-      if (typeof xDomainPadding[1] !== "boolean") {
-        yDataDomainPaddedMax = (+yDataDomainPaddedMax + +xDomainPadding[1]) as unknown as Y;
+      if (typeof yDomainPadding[1] !== "boolean") {
+        yDataDomainPaddedMax = (+yDataDomainPaddedMax + +yDomainPadding[1]) as unknown as Y;
       }
       yDataDomainPadded = Domain(yDataDomainPaddedMin, yDataDomainPaddedMax);
     } else {
@@ -677,6 +677,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     initState(): readonly [X | boolean, X | boolean] {
       return [true, true];
     },
+    equalState(newXDomainBounds: readonly [X | boolean, X | boolean], oldXDomainBounds: readonly [X | boolean, X | boolean]): boolean {
+      return Arrays.equal(newXDomainBounds, oldXDomainBounds);
+    },
   })
   readonly xDomainBounds!: ViewProperty<this, readonly [X | boolean, X | boolean]>
 
@@ -684,6 +687,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     updateFlags: View.NeedsLayout,
     initState(): readonly [Y | boolean, Y | boolean] {
       return [true, true];
+    },
+    equalState(newYDomainBounds: readonly [Y | boolean, Y | boolean], oldYDomainBounds: readonly [Y | boolean, Y | boolean]): boolean {
+      return Arrays.equal(newYDomainBounds, oldYDomainBounds);
     },
   })
   readonly yDomainBounds!: ViewProperty<this, readonly [Y | boolean, Y | boolean]>
@@ -693,6 +699,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     initState(): readonly [number | boolean, number | boolean] {
       return [true, true];
     },
+    equalState(newXZoomBounds: readonly [number | boolean, number | boolean], oldXZoomBounds: readonly [number | boolean, number | boolean]): boolean {
+      return Arrays.equal(newXZoomBounds, oldXZoomBounds);
+    },
   })
   readonly xZoomBounds!: ViewProperty<this, readonly [number | boolean, number | boolean]>
 
@@ -700,6 +709,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     updateFlags: View.NeedsLayout,
     initState(): readonly [number | boolean, number | boolean] {
       return [true, true];
+    },
+    equalState(newYDomainBounds: readonly [number | boolean, number | boolean], oldYDomainBounds: readonly [number | boolean, number | boolean]): boolean {
+      return Arrays.equal(newYDomainBounds, oldYDomainBounds);
     },
   })
   readonly yZoomBounds!: ViewProperty<this, readonly [number | boolean, number | boolean]>
@@ -709,6 +721,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     initState(): readonly [X | boolean, X | boolean] {
       return [false, false];
     },
+    equalState(newXDomainPadding: readonly [X | boolean, X | boolean], oldXDomainPadding: readonly [X | boolean, X | boolean]): boolean {
+      return Arrays.equal(newXDomainPadding, oldXDomainPadding);
+    },
   })
   readonly xDomainPadding!: ViewProperty<this, readonly [X | boolean, X | boolean]>
 
@@ -716,6 +731,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     updateFlags: View.NeedsLayout,
     initState(): readonly [Y | boolean, Y | boolean] {
       return [false, false];
+    },
+    equalState(newYDomainPadding: readonly [Y | boolean, Y | boolean], oldYDomainPadding: readonly [Y | boolean, Y | boolean]): boolean {
+      return Arrays.equal(newYDomainPadding, oldYDomainPadding);
     },
   })
   readonly yDomainPadding!: ViewProperty<this, readonly [Y | boolean, Y | boolean]>
@@ -775,6 +793,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       this.owner.onSetXRangePadding(newXRangePadding, oldXRangePadding);
       this.owner.didSetXRangePadding(newXRangePadding, oldXRangePadding);
     },
+    equalState(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): boolean {
+      return Arrays.equal(newXRangePadding, oldXRangePadding);
+    },
   })
   readonly xRangePadding!: ViewProperty<this, readonly [number, number]>
 
@@ -833,6 +854,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       this.owner.onSetYRangePadding(newYRangePadding, oldYRangePadding);
       this.owner.didSetYRangePadding(newYRangePadding, oldYRangePadding);
     },
+    equalState(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): boolean {
+      return Arrays.equal(newYRangePadding, oldYRangePadding);
+    },
   })
   readonly yRangePadding!: ViewProperty<this, readonly [number, number]>
 
@@ -840,6 +864,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     type: Object,
     initState(): readonly [number, number] {
       return [1.0, 0.5];
+    },
+    equalState(newFitAlign: readonly [number, number], oldFitAlign: readonly [number, number]): boolean {
+      return Arrays.equal(newFitAlign, oldFitAlign);
     },
     fromAny(value: readonly [number, number] | number): readonly [number, number] {
       if (typeof value === "number") {

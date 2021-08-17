@@ -45,6 +45,7 @@ export interface ViewPropertyInit<T, U = never> {
   updateFlags?: ViewFlags;
   willSetState?(newState: T, oldState: T): void;
   didSetState?(newState: T, oldState: T): void;
+  equalState?(newState: T, oldState: T): boolean;
   fromAny?(value: T | U): T;
   initState?(): T | U;
 }
@@ -163,6 +164,8 @@ export interface ViewProperty<V extends View, T, U = never> {
   updateSubProperties(newState: T, oldState: T): void;
 
   updateFlags?: ViewFlags;
+
+  equalState(newState: T, oldState: T): boolean;
 
   fromAny(value: T | U): T;
 
@@ -438,7 +441,7 @@ ViewProperty.prototype.setState = function <T, U>(this: ViewProperty<View, T, U>
 ViewProperty.prototype.setOwnState = function <T, U>(this: ViewProperty<View, T, U>, newState: T | U): void {
   newState = this.fromAny(newState);
   const oldState = this.state;
-  if (!Equals(newState, oldState)) {
+  if (!this.equalState(newState, oldState)) {
     this.willSetState(newState, oldState);
     Object.defineProperty(this, "ownState", {
       value: newState,
@@ -566,6 +569,10 @@ ViewProperty.prototype.updateSubProperties = function <T>(this: ViewProperty<Vie
       subProperty.change();
     }
   }
+};
+
+ViewProperty.prototype.equalState = function <T>(this: ViewProperty<View, T>, newState: T, oldState: T): boolean {
+  return Equals(newState, oldState);
 };
 
 ViewProperty.prototype.fromAny = function <T, U>(this: ViewProperty<View, T, U>, value: T | U): T {

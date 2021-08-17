@@ -44,6 +44,7 @@ export interface ModelPropertyInit<T, U = never> {
   updateFlags?: ModelFlags;
   willSetState?(newState: T, oldState: T): void;
   didSetState?(newState: T, oldState: T): void;
+  equalState?(newState: T, oldState: T): boolean;
   fromAny?(value: T | U): T;
   initState?(): T | U;
 }
@@ -162,6 +163,8 @@ export interface ModelProperty<M extends Model, T, U = never> {
   updateSubProperties(newState: T, oldState: T): void;
 
   updateFlags?: ModelFlags;
+
+  equalState(newState: T, oldState: T): boolean;
 
   fromAny(value: T | U): T;
 
@@ -433,7 +436,7 @@ ModelProperty.prototype.setState = function <T, U>(this: ModelProperty<Model, T,
 ModelProperty.prototype.setOwnState = function <T, U>(this: ModelProperty<Model, T, U>, newState: T | U): void {
   newState = this.fromAny(newState);
   const oldState = this.state;
-  if (!Equals(newState, oldState)) {
+  if (!this.equalState(newState, oldState)) {
     this.willSetState(newState, oldState);
     Object.defineProperty(this, "ownState", {
       value: newState,
@@ -561,6 +564,10 @@ ModelProperty.prototype.updateSubProperties = function <T>(this: ModelProperty<M
       subProperty.mutate();
     }
   }
+};
+
+ModelProperty.prototype.equalState = function <T>(this: ModelProperty<Model, T>, newState: T, oldState: T): boolean {
+  return Equals(newState, oldState);
 };
 
 ModelProperty.prototype.fromAny = function <T, U>(this: ModelProperty<Model, T, U>, value: T | U): T {

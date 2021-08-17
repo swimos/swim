@@ -207,7 +207,7 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
     const yRangePadding = this.yRangePadding.state;
     const yRangeMin = yRangePadding[0];
     const yRangeMax = this.viewFrame.height - gutterBottom - gutterTop - yRangePadding[1];
-    return LinearRange(yRangeMin, yRangeMax);
+    return LinearRange(yRangeMax, yRangeMin);
   }
 
   protected createGraph(): GraphView<X, Y> | null {
