@@ -642,7 +642,7 @@ const toolkit = [
 ];
 
 export default {
-  version: "3.11.0",
+  version: "3.11.1",
   projects: core.concat(mesh).concat(system).concat(ui).concat(ux).concat(vis).concat(maps).concat(toolkit),
   gaID: "UA-79441805-2",
 };

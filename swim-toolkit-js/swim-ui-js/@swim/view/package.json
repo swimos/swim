@@ -1,6 +1,6 @@
 {
   "name": "@swim/view",
-  "version": "3.11.0",
+  "version": "3.11.1",
   "description": "Unified HTML, SVG, and Canvas view hierarchy, with integrated controller architecture, animated procedural styling, and constraint-based layouts",
   "homepage": "https://github.com/swimos/swim/tree/master/swim-toolkit-js/swim-ui-js/@swim/view",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,14 +11,14 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "3.11.0",
-    "@swim/codec": "3.11.0",
-    "@swim/mapping": "3.11.0",
-    "@swim/constraint": "3.11.0",
-    "@swim/structure": "3.11.0",
-    "@swim/math": "3.11.0",
-    "@swim/time": "3.11.0",
-    "@swim/style": "3.11.0",
-    "@swim/theme": "3.11.0"
+    "@swim/util": "3.11.1",
+    "@swim/codec": "3.11.1",
+    "@swim/mapping": "3.11.1",
+    "@swim/constraint": "3.11.1",
+    "@swim/structure": "3.11.1",
+    "@swim/math": "3.11.1",
+    "@swim/time": "3.11.1",
+    "@swim/style": "3.11.1",
+    "@swim/theme": "3.11.1"
   }
 }
