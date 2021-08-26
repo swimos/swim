@@ -1,0 +1,46 @@
+name: Swim TypeScript SDK
+
+on:
+  push:
+    branches:
+    - main
+    paths:
+     - 'swim-js/**'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: swim-js/swim-toolkit-js
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - name: Install runtime dependencies
+      run: |
+        npm install
+      working-directory: swim-js/swim-runtime-js
+    - name: Install toolkit dependencies
+      run: |
+        npm install
+    - name: Compile SDK
+      run: |
+        node bin/build.js compile -p core,host,runtime,ui,ux,vis,maps,toolkit
+    - name: Generate API docs
+      run: |
+        node bin/build.js doc -p toolkit
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_DOCS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_DOCS_SECRET_ACCESS_KEY }}
+        aws-region: us-west-1
+    - name: Publish latest API docs
+      run: |
+        aws s3 sync @swim/toolkit/doc s3://docs.swimos.org/js/4.x
+        aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_DOCS_CLOUDFRONT_DISTRIBUTION_ID }} --paths '/js/4.x/*'
