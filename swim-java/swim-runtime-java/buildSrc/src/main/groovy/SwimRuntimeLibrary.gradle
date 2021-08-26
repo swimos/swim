@@ -16,7 +16,7 @@ ext.compilerArgs = ['-Xlint:all', '-Xlint:-requires-automatic']
 repositories {
   mavenCentral()
   maven {
-    url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+    url 'https://oss.sonatype.org/content/repositories/snapshots/'
   }
 }
 

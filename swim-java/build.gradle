@@ -1,5 +1,6 @@
 plugins {
-  id 'SwimOS'
+  id 'SwimOSFramework'
+  id 'SwimOSPublish'
 }
 
 description = 'SwimOS'
