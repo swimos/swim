@@ -1,0 +1,38 @@
+{
+  "name": "@swim/runtime",
+  "version": "4.0.0-dev.20210826",
+  "description": "Swim Runtime",
+  "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "private": true,
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "13",
+    "@types/eslint": "7",
+    "@types/node": "16",
+    "@types/prismjs": "1",
+    "@types/ws": "7",
+    "@typescript-eslint/eslint-plugin": "4",
+    "@typescript-eslint/parser": "4",
+    "eslint": "7",
+    "prismjs": "1.24",
+    "rollup": "2.56",
+    "rollup-plugin-sourcemaps": "0.6",
+    "terser": "5",
+    "tslib": "2",
+    "typedoc": "0.21",
+    "typescript": "4.3",
+    "ws": ">= 7.4.6"
+  },
+  "scripts": {
+    "postinstall": "cd ./swim-core-js/@swim/build && npm run compile && npm run bundle",
+    "build": "./bin/build.js",
+    "compile": "./bin/build.js compile",
+    "test": "./bin/build.js compile --test",
+    "doc": "./bin/build.js doc",
+    "watch": "./bin/build.js watch",
+    "clean": "./bin/build.js clean && cd ./swim-core-js/@swim/build && npm run compile && npm run bundle",
+    "help": "./bin/build.js help"
+  }
+}

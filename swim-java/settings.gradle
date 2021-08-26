@@ -1,0 +1,5 @@
+apply from: 'swim-runtime-java/framework.gradle'
+
+rootProject.name = 'swim'
+
+includeSwimRuntime(file("${rootDir}/swim-runtime-java"))

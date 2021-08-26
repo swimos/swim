@@ -1,0 +1,53 @@
+{
+  "name": "@swim/ux",
+  "version": "4.0.0-dev.20210826",
+  "description": "Swim UX TypeScript Framework",
+  "homepage": "https://github.com/swimos/swim",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2021 Swim Inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "private": true,
+  "devDependencies": {
+    "@swim/util": "4.0.0-dev.20210826",
+    "@swim/codec": "4.0.0-dev.20210826",
+    "@swim/args": "4.0.0-dev.20210826",
+    "@swim/build": "4.0.0-dev.20210826",
+    "@swim/unit": "4.0.0-dev.20210826",
+    "@swim/mapping": "4.0.0-dev.20210826",
+    "@swim/constraint": "4.0.0-dev.20210826",
+    "@swim/structure": "4.0.0-dev.20210826",
+    "@swim/math": "4.0.0-dev.20210826",
+    "@swim/time": "4.0.0-dev.20210826",
+
+    "@swim/model": "4.0.0-dev.20210826",
+    "@swim/style": "4.0.0-dev.20210826",
+    "@swim/theme": "4.0.0-dev.20210826",
+    "@swim/view": "4.0.0-dev.20210826",
+    "@swim/dom": "4.0.0-dev.20210826",
+    "@swim/graphics": "4.0.0-dev.20210826",
+    "@swim/component": "4.0.0-dev.20210826",
+
+    "@rollup/plugin-node-resolve": "13",
+    "@types/eslint": "7",
+    "@types/node": "16",
+    "@typescript-eslint/eslint-plugin": "4",
+    "@typescript-eslint/parser": "4",
+    "eslint": "7",
+    "rollup": "2.56",
+    "rollup-plugin-sourcemaps": "0.6",
+    "terser": "5",
+    "tslib": "2",
+    "typedoc": "0.21",
+    "typescript": "4.3"
+  },
+  "scripts": {
+    "build": "./bin/build.js",
+    "compile": "./bin/build.js compile",
+    "test": "./bin/build.js compile --test",
+    "doc": "./bin/build.js doc",
+    "watch": "./bin/build.js watch",
+    "clean": "./bin/build.js clean",
+    "help": "./bin/build.js help"
+  }
+}

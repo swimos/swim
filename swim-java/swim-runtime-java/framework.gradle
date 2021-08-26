@@ -1,0 +1,16 @@
+apply from: 'swim-core-java/framework.gradle'
+apply from: 'swim-host-java/framework.gradle'
+apply from: 'swim-polyglot-java/framework.gradle'
+
+ext.includeSwimRuntime = { frameworkDir ->
+  gradle.ext.swimRuntimeDir = frameworkDir
+
+  if (!frameworkDir.equals(rootProject.projectDir)) {
+    include 'swim-runtime'
+    project(':swim-runtime').projectDir = frameworkDir
+  }
+
+  includeSwimCore(file("${frameworkDir}/swim-core-java"))
+  includeSwimHost(file("${frameworkDir}/swim-host-java"))
+  includeSwimPolyglot(file("${frameworkDir}/swim-polyglot-java"))
+}

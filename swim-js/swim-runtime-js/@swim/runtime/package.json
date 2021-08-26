@@ -1,0 +1,17 @@
+{
+  "name": "@swim/runtime",
+  "version": "4.0.0-dev.20210826",
+  "description": "Framework for building massively real-time streaming WARP client applications",
+  "homepage": "https://github.com/swimos/swim",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2021 Swim Inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "dist/main/swim-runtime.js",
+  "module": "lib/main/index.js",
+  "types": "lib/main/index.d.ts",
+  "dependencies": {
+    "@swim/core": "4.0.0-dev.20210826",
+    "@swim/host": "4.0.0-dev.20210826"
+  }
+}

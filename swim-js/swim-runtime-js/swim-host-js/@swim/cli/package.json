@@ -1,0 +1,43 @@
+{
+  "name": "@swim/cli",
+  "version": "4.0.0-dev.20210826",
+  "description": "Command line client for linking to Web Agent lanes over the WARP protocol",
+  "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-host-js/@swim/cli",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2021 Swim Inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "dist/main/swim-cli.js",
+  "module": "lib/main/index.js",
+  "types": "lib/main/index.d.ts",
+  "keywords": [
+    "cli",
+    "client",
+    "protocol",
+    "recon",
+    "swim",
+    "warp",
+    "webagent",
+    "websocket"
+  ],
+  "devDependencies": {
+    "@swim/util": "4.0.0-dev.20210826",
+    "@swim/codec": "4.0.0-dev.20210826",
+    "@swim/args": "4.0.0-dev.20210826",
+    "@swim/mapping": "4.0.0-dev.20210826",
+    "@swim/collections": "4.0.0-dev.20210826",
+    "@swim/structure": "4.0.0-dev.20210826",
+    "@swim/streamlet": "4.0.0-dev.20210826",
+    "@swim/dataflow": "4.0.0-dev.20210826",
+    "@swim/recon": "4.0.0-dev.20210826",
+    "@swim/uri": "4.0.0-dev.20210826",
+    "@swim/warp": "4.0.0-dev.20210826",
+    "@swim/client": "4.0.0-dev.20210826"
+  },
+  "dependencies": {
+    "ws": ">= 7.4.6"
+  },
+  "bin": {
+    "swim-cli": "./dist/main/swim-cli.js"
+  }
+}

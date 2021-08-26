@@ -1,5 +1,0 @@
-apply from: 'framework.gradle'
-
-rootProject.name = 'swim-system'
-
-includeSwimSystem(rootDir)

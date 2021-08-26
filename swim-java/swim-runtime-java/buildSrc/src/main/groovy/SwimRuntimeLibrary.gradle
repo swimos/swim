@@ -1,0 +1,105 @@
+plugins {
+  id 'java-library'
+  id 'checkstyle'
+}
+
+group = 'org.swimos'
+version = property('swim.version')
+ext.homepage = 'https://github.com/swimos/swim'
+ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
+
+def javaVersion = System.getProperty('java.version').split('\\.')
+ext.jvmVersion = (javaVersion[0] as Integer) > 1 ? javaVersion[0] as Integer : javaVersion[1] as Integer
+
+ext.compilerArgs = ['-Xlint:all', '-Xlint:-requires-automatic']
+
+repositories {
+  mavenCentral()
+  maven {
+    url 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+  }
+}
+
+dependencies {
+  testImplementation 'org.testng:testng:7.4.0'
+}
+
+tasks.named('compileJava') {
+  options.javaModuleVersion = provider { project.version }
+}
+
+compileJava {
+  options.compilerArgs += compilerArgs
+  options.encoding = 'UTF-8'
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
+}
+
+compileTestJava {
+  options.compilerArgs += compilerArgs
+  options.encoding = 'UTF-8'
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
+}
+
+test {
+  useTestNG() {
+    // Run `gradle -Pslow test` to include slow tests.
+    if (!project.hasProperty('slow')) {
+      excludeGroups 'slow'
+    }
+    // Run `gradle -Pbenchmark test` to include benchmark tests.
+    if (!project.hasProperty('benchmark')) {
+      excludeGroups 'benchmark'
+    }
+  }
+
+  scanForTestClasses = false
+  include '**/*Spec.class'
+
+  maxHeapSize = '1024m'
+
+  testLogging {
+    events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+    exceptionFormat 'full'
+    displayGranularity = 4
+  }
+
+  outputs.upToDateWhen { false }
+}
+
+checkstyle {
+  // Enforce checkstyle and fail the build if there are any violations
+  if (project.hasProperty('enforceCheckstyle')) {
+    ignoreFailures = false
+    maxWarnings = 0
+  }
+
+  configFile = new File(gradle.swimRuntimeDir, 'checkstyle.xml')
+  toolVersion "8.41.1"
+
+  checkstyleMain {
+    source = sourceSets.main.allJava
+    exclude '*module-info*'
+  }
+
+  checkstyleTest {
+    source = sourceSets.test.allJava
+    exclude '*module-info*'
+  }
+}
+
+javadoc {
+  options.addBooleanOption('Xdoclint:all,-missing', true)
+  options.charSet = 'UTF-8'
+  options.encoding = 'UTF-8'
+  options.addBooleanOption('html5', true)
+  options.links += ["https://docs.oracle.com/en/java/javase/" + jvmVersion + "/docs/api/"]
+}
+
+jar {
+  manifest {
+    attributes('Implementation-Title': project.name,
+               'Implementation-Version': archiveVersion)
+  }
+}

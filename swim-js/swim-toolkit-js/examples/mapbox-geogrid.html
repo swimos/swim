@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim GeoGrid</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <link rel="stylesheet" href="https://api.tiles.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.css">
+  </head>
+  <body swim-theme style="width: 100vw; height: 100vh; margin: 0;">
+    <script src="../../swim-runtime-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-runtime-js/swim-host-js/@swim/host/dist/main/swim-host.js"></script>
+    <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
+    <script src="../swim-maps-js/@swim/maps/dist/main/swim-maps.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.js"></script>
+    <script>
+
+mapboxgl.accessToken = "pk.eyJ1Ijoic3dpbWl0IiwiYSI6ImNqY2c3NXZkYzFoa2QycXQ1eXl1Mnd6M3EifQ.qpRE7xC08AyZfxJ56LoN7w";
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+class ExampleMapboxComponent extends swim.MapComponent {
+  createMapView(containerView) {
+    const map = new mapboxgl.Map({
+      container: containerView.node,
+      style: "mapbox://styles/mapbox/dark-v10",
+      center: {lng: 0, lat: 0},
+      zoom: 1,
+    });
+    return new swim.MapboxView(map);
+  }
+  initMapView(mapView) {
+    super.initMapView(mapView);
+    mapView.modifyMood(swim.Feel.default, [[swim.Feel.primary, 1]]);
+  }
+  initCanvasView(canvasView) {
+    super.initCanvasView(canvasView);
+    canvasView.pointerEventsEnabled(true).touchAction("manipulation");
+  }
+  createLayer(layerTrait) {
+    if (layerTrait instanceof ExampleGridTrait) {
+      return new ExampleGridComponent(swim.GeoTile.root());
+    } else {
+      return super.createLayer(layerTrait);
+    }
+  }
+}
+
+class ExampleGridComponent extends swim.GeoGridComponent {
+  initGeoView(layerView) {
+    super.initGeoView(layerView);
+    layerView.gridOutlineColor("#008f11");
+  }
+  projectGeoView(viewContext, layerView) {
+    super.projectGeoView(viewContext, layerView);
+  }
+  createTile(tileTrait) {
+    return new ExampleGridComponent(tileTrait.geoTile);
+  }
+  initTileView(tileView) {
+    super.initTileView(tileView);
+  }
+}
+
+class ExampleGridTrait extends swim.GeoGridTrait {
+  constructor(geoTile) {
+    super(geoTile);
+    const tileId = geoTile.x + "," + geoTile.y + "," + geoTile.z;
+    this.vehiclesDownlink.nodeUri(swim.Uri.path(swim.UriPath.of("/", "map", "/", tileId)));
+  }
+  createTileTrait(geoTile) {
+    return new ExampleGridTrait(geoTile);
+  }
+  onStartConsuming() {
+    super.onStartConsuming();
+    console.log("onStartConsuming " + this.geoTile);
+  }
+  onStopConsuming() {
+    super.onStopConsuming();
+    console.log("onStopConsuming " + this.geoTile);
+  }
+}
+swim.ModelMapDownlink({
+  consume: true,
+  laneUri: "vehicles",
+  didUpdate(key, value) {
+    console.log(this.nodeUri() + " updateVehicle " + key.toAny() + ":", value.toAny());
+  },
+})(ExampleGridTrait.prototype, "vehiclesDownlink")
+
+const layerModel = new swim.CompoundModel();
+const layerTrait = new ExampleGridTrait(swim.GeoTile.root());
+layerModel.setTrait("layer", layerTrait);
+
+const mapModel = new swim.CompoundModel();
+mapModel.warpRef.setState(swim.client.hostRef("warps://transit.swim.services"));
+mapModel.mount();
+const mapTrait = new swim.MapTrait();
+mapModel.setTrait("map", mapTrait);
+mapModel.appendChildModel(layerModel, "layer");
+
+const mapComponent = new ExampleMapboxComponent();
+mapComponent.mount();
+mapComponent.map.setTrait(mapTrait);
+mapComponent.container.setView(bodyView);
+
+    </script>
+  </body>
+</html>

@@ -7,13 +7,3 @@
 # ignore hidden macOS files
 .DS_Store
 *.DS_Store
-
-# ignore folders
-build
-node_modules
-
-# ignore files
-out
-package-lock.json
-yarn.lock
-*~

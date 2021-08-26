@@ -1,0 +1,14 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Swim authenticator runtime'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime-java/swim-host-java/swim.auth'
+ext.moduleName = 'swim.auth'
+
+dependencies {
+  api group: 'org.swimos', name: 'swim-security', version: project.version
+  api group: 'org.swimos', name: 'swim-io-http', version: project.version
+  api project(':swim-kernel')
+}

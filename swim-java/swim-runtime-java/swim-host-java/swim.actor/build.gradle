@@ -1,0 +1,13 @@
+plugins {
+  id 'SwimRuntimeLibrary'
+  id 'SwimRuntimePublish'
+}
+
+description = 'Swim actor system'
+ext.homepage = 'https://github.com/swimos/swim/tree/main/swim-java/swim-runtime-java/swim-host-java/swim.actor'
+ext.moduleName = 'swim.actor'
+
+dependencies {
+  api project(':swim-system')
+  api project(':swim-kernel')
+}

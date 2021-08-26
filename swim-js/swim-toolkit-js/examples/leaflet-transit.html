@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Transit Map</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+  </head>
+  <body swim-theme style="width: 100vw; height: 100vh; margin: 0;">
+    <script src="../../swim-runtime-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-runtime-js/swim-host-js/@swim/host/dist/main/swim-host.js"></script>
+    <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
+    <script src="../swim-maps-js/@swim/maps/dist/main/swim-maps.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+
+const VEHICLE_COLOR = swim.Color.parse("#00a6ed");
+const RIPPLE_COLOR = swim.Color.parse("#efefef");
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+const containerView = bodyView.append("div").display("relative").width("100%").height("100%");
+
+const map = L.map(containerView.node, {
+  center: {lng: -118, lat: 33.95},
+  zoom: 9.7,
+});
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: "&copy; <a href=\"https://openstreetmap.org/copyright\">OpenStreetMap contributors</a>",
+}).addTo(map);
+
+const mapView = new swim.LeafletView(map);
+mapView.container.setView(containerView);
+
+const layerView = mapView.append(swim.GeoTreeView);
+//layerView.treeOutlineColor("#008f11");
+
+const vehicleIcon = swim.VectorIcon.create(24, 24, "M12.289,0.001C17.561,0.021,21.845,0.641,21.996,4.771L22,5L22,17.655C22,18.697,21.542,19.629,20.862,20.312L20.713,20.455L20.713,22.7C20.713,23.35,20.22,23.924,19.593,23.993L19.466,24L18.218,24C17.569,24,17.066,23.467,17.006,22.828L17,22.7L17,21.438L7,21.438L7,22.7C7,23.35,6.503,23.924,5.871,23.993L5.743,24L4.495,24C3.852,24,3.318,23.467,3.254,22.828L3.248,22.7L3.248,20.455C2.537,19.807,2.066,18.902,2.006,17.877L2,17.655L2,5C2,0.664,6.343,0.022,11.711,0.001L12.289,0.001ZM6.5,15C5.395,15,4.5,15.895,4.5,17C4.5,18.105,5.395,19,6.5,19C7.605,19,8.5,18.105,8.5,17C8.5,15.895,7.605,15,6.5,15ZM17.5,15C16.395,15,15.5,15.895,15.5,17C15.5,18.105,16.395,19,17.5,19C18.605,19,19.5,18.105,19.5,17C19.5,15.895,18.605,15,17.5,15ZM19.5,5L4.5,5L4.5,11L19.5,11L19.5,5Z");
+
+const vehiclesLink = swim.downlinkMap()
+    .hostUri("warp://transit.swim.services")
+    .nodeUri("/state/US/S-CA")
+    .laneUri("vehicles")
+    .didUpdate(function (key, value) {
+      key = key.stringValue();
+      const lng = value.get("longitude").numberValue(0);
+      const lat = value.get("latitude").numberValue(0);
+      const timing = swim.Easing.linear.withDuration(10000);
+
+      let vehicleView = layerView.getChildView(key);
+      if (vehicleView !== null) {
+        vehicleView.geoCenter([lng, lat], timing);
+        vehicleView.ripple({
+          color: RIPPLE_COLOR,
+          opacity: 0.25,
+          timing: 2000,
+        });
+      } else {
+        //vehicleView = new swim.GeoCircleView().geoCenter([lng, lat]).radius(5).fill(VEHICLE_COLOR);
+        vehicleView = new swim.GeoIconView()
+            .geoCenter([lng, lat])
+            .iconWidth(10)
+            .iconHeight(10)
+            .iconColor(VEHICLE_COLOR)
+            .graphics(vehicleIcon);
+        layerView.setChildView(key, vehicleView);
+      }
+    })
+    .open();
+
+    </script>
+  </body>
+</html>

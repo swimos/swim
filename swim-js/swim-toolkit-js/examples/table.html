@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Swim Table View</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+      html, body {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+  <body swim-theme style="display: flex; width: 100vw; height: 100vh; margin: 0;">
+    <script src="../../swim-runtime-js/swim-core-js/@swim/core/dist/main/swim-core.js"></script>
+    <script src="../../swim-runtime-js/swim-host-js/@swim/host/dist/main/swim-host.js"></script>
+    <script src="../swim-ui-js/@swim/ui/dist/main/swim-ui.js"></script>
+    <script src="../swim-ux-js/@swim/ux/dist/main/swim-ux.js"></script>
+    <script>
+
+const bodyView = swim.HtmlView.fromNode(document.body);
+
+const containerView = swim.HtmlView.create("div")
+  .position("relative")
+  .flexGrow(1)
+  .userSelect("none");
+
+containerView.addViewObserver({
+  viewWillResize(viewContext, view) {
+    if (viewContext.viewIdiom === "desktop") {
+      view.margin(60);
+    } else {
+      view.margin(0);
+    }
+  },
+});
+
+bodyView.append(containerView);
+
+const tableLayout = swim.TableLayout.fromAny({
+  cols: [
+    {
+      key: "icon",
+      shrink: 0,
+      basis: 80,
+    },
+    {
+      key: "name",
+      grow: 1,
+      basis: 240,
+      textColor: swim.Look.mutedColor,
+    },
+    {
+      key: "kpi1",
+      optional: true,
+      basis: 120,
+    },
+    {
+      key: "kpi2",
+      optional: true,
+      basis: 120,
+    },
+    {
+      key: "accessory",
+      shrink: 0,
+      basis: 60,
+    },
+  ],
+});
+
+const tableView = swim.TableView.create();
+tableView.layout.setState(tableLayout);
+
+function createRowView(i) {
+  const rowView = swim.RowView.create();
+  const nameCell = rowView.append(swim.CellView, "name");
+  nameCell.content.setView("Row " + i);
+  const kpi1Cell = rowView.append(swim.CellView, "kpi1");
+  kpi1Cell.content.setView("" + i);
+  const kpi2Cell = rowView.append(swim.CellView, "kpi2");
+  kpi2Cell.content.setView("" + -i);
+  return rowView;
+}
+for (let i = 1; i <= 100; i += 1) {
+  tableView.appendChildView(createRowView(i));
+}
+
+containerView.appendChildView(tableView);
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "name": "@swim/build",
+  "version": "4.0.0-dev.20210826",
+  "description": "Swim build tool",
+  "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/build",
+  "author": "Chris Sachs <chris@swimos.org>",
+  "copyright": "2015-2021 Swim Inc.",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/swimos/swim.git",
+  "main": "dist/main/swim-build.js",
+  "module": "lib/main/index.js",
+  "types": "lib/main/index.d.ts",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "13",
+    "@types/eslint": "7",
+    "@types/node": "16",
+    "@typescript-eslint/eslint-plugin": "4",
+    "@typescript-eslint/parser": "4",
+    "eslint": "7",
+    "rollup": "2.56",
+    "rollup-plugin-sourcemaps": "0.6",
+    "terser": "5",
+    "tslib": "2",
+    "typedoc": "0.21",
+    "typescript": "4.3"
+  },
+  "dependencies": {
+    "@swim/util": "4.0.0-dev.20210826",
+    "@swim/codec": "4.0.0-dev.20210826",
+    "@swim/args": "4.0.0-dev.20210826"
+  },
+  "scripts": {
+    "compile": "tsc -b",
+    "bundle": "rollup -c"
+  },
+  "bin": {
+    "swim-build": "./dist/main/swim-build.js"
+  }
+}
