@@ -273,7 +273,7 @@ public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<Str
   @Override
   public abstract <T> Output<T> display(Output<T> output);
 
-  static <T> Output<T> display(UriQuery query, Output<T> output) {
+  static <T> Output<T> display(Output<T> output, UriQuery query) {
     boolean first = true;
     while (!query.isEmpty()) {
       if (!first) {
@@ -283,10 +283,10 @@ public abstract class UriQuery extends UriPart implements Iterable<Map.Entry<Str
       }
       final String key = query.key();
       if (key != null) {
-        output = Uri.writeParam(key, output);
+        output = Uri.writeParam(output, key);
         output = output.write('=');
       }
-      output = Uri.writeQuery(query.value(), output);
+      output = Uri.writeQuery(output, query.value());
       query = query.tail();
     }
     return output;

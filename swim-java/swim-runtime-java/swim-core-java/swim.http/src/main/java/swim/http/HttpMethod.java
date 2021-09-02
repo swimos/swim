@@ -39,7 +39,7 @@ public final class HttpMethod extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeMethod(this.name, output);
+    return http.writeMethod(output, this.name);
   }
 
   @Override

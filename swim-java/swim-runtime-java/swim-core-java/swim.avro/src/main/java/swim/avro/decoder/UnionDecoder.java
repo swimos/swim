@@ -58,7 +58,7 @@ final class UnionDecoder<T> extends Decoder<T> {
         variant = (variant >>> 1) ^ (variant << 31 >> 31);
         if (0 <= variant && variant < type.variantCount()) {
           final AvroType<T> variantType = (AvroType<T>) type.getVariant(variant);
-          return avro.decodeType(variantType, input);
+          return avro.decodeType(input, variantType);
         } else {
           return Decoder.error(new DecoderException("unknown union variant: " + variant));
         }

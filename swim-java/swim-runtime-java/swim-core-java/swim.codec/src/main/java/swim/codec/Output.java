@@ -172,7 +172,7 @@ public abstract class Output<T> {
    * this} {@code Output} should be replaced by the returned {@code Output}.
    */
   public Output<T> display(Object object) {
-    return Format.display(object, this);
+    return Format.display(this, object);
   }
 
   /**
@@ -184,7 +184,7 @@ public abstract class Output<T> {
    * this} {@code Output} should be replaced by the returned {@code Output}.
    */
   public Output<T> debug(Object object) {
-    return Format.debug(object, this);
+    return Format.debug(this, object);
   }
 
   /**

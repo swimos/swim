@@ -67,7 +67,7 @@ public final class LanguageRange extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeLanguageRange(this.tag, this.subtag, this.weight, output);
+    return http.writeLanguageRange(output, this.tag, this.subtag, this.weight);
   }
 
   @Override

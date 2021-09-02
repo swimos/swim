@@ -24,13 +24,13 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
 
   final WsDeflateEncoder ws;
   final WsFrame<O> frame;
-  final Encoder<?, ?> content;
+  final Encoder<?, ?> payloadEncoder;
   final long offset;
 
-  WsFrameDeflater(WsDeflateEncoder ws, WsFrame<O> frame, Encoder<?, ?> content, long offset) {
+  WsFrameDeflater(WsDeflateEncoder ws, WsFrame<O> frame, Encoder<?, ?> payloadEncoder, long offset) {
     this.ws = ws;
     this.frame = frame;
-    this.content = content;
+    this.payloadEncoder = payloadEncoder;
     this.offset = offset;
   }
 
@@ -40,12 +40,12 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
 
   @Override
   public Encoder<Object, WsFrame<O>> pull(OutputBuffer<?> output) {
-    return WsFrameDeflater.encode(output, this.ws, this.frame, this.content, this.offset);
+    return WsFrameDeflater.encode(output, this.ws, this.frame, this.payloadEncoder, this.offset);
   }
 
   @SuppressWarnings("unchecked")
   static <O> Encoder<Object, WsFrame<O>> encode(OutputBuffer<?> output, WsDeflateEncoder ws,
-                                                WsFrame<O> frame, Encoder<?, ?> content, long offset) {
+                                                WsFrame<O> frame, Encoder<?, ?> payloadEncoder, long offset) {
     final boolean isMasked = ws.isMasked();
     final int outputSize = output.remaining();
     final int maskSize = isMasked ? 4 : 0;
@@ -55,10 +55,10 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
       // prepare output buffer for payload
       final int outputBase = output.index();
       final int maxPayloadBase = outputBase + maxHeaderSize;
-      if (content == null) {
-        ((Deflate<Object>) ws.deflate).input = (Encoder<?, Object>) frame.contentEncoder(ws);
+      if (payloadEncoder == null) {
+        ((Deflate<Object>) ws.deflate).input = (Encoder<?, Object>) frame.payloadEncoder(ws);
       } else {
-        ((Deflate<Object>) ws.deflate).input = (Encoder<?, Object>) content;
+        ((Deflate<Object>) ws.deflate).input = (Encoder<?, Object>) payloadEncoder;
       }
       ws.deflate.next_out = output.array();
       ws.deflate.next_out_index = output.arrayOffset() + maxPayloadBase;
@@ -67,24 +67,24 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
       try {
         // deflate payload
         final boolean needsMore = ws.deflate.deflate(ws.flush);
-        content = ws.deflate.input;
-        final boolean eof = content.isDone() && !needsMore;
+        payloadEncoder = ws.deflate.input;
+        final boolean eof = payloadEncoder.isDone() && !needsMore;
         final int payloadSize = ws.deflate.next_out_index - (output.arrayOffset() + maxPayloadBase) - (eof ? 4 : 0);
         final int headerSize = (payloadSize <= 125 ? 2 : payloadSize <= 65535 ? 4 : 10) + maskSize;
 
         // encode header
-        final WsOpcode opcode = frame.opcode();
+        final WsOpcode frameType = frame.frameType();
         final int finRsvOp;
         if (eof) {
           if (offset == 0L) {
-            finRsvOp = 0xc0 | opcode.code;
+            finRsvOp = 0xc0 | frameType.code;
           } else {
             finRsvOp = 0x80;
           }
-        } else if (content.isError()) {
-          return content.asError();
+        } else if (payloadEncoder.isError()) {
+          return payloadEncoder.asError();
         } else if (offset == 0L) {
-          finRsvOp = 0x40 | opcode.code;
+          finRsvOp = 0x40 | frameType.code;
         } else {
           finRsvOp = 0x00;
         }
@@ -145,7 +145,7 @@ final class WsFrameDeflater<O> extends Encoder<Object, WsFrame<O>> {
     } else if (output.isError()) {
       return Encoder.error(output.trap());
     }
-    return new WsFrameDeflater<O>(ws, frame, content, offset);
+    return new WsFrameDeflater<O>(ws, frame, payloadEncoder, offset);
   }
 
   static <O> Encoder<Object, WsFrame<O>> encode(OutputBuffer<?> output, WsDeflateEncoder ws, WsFrame<O> frame) {

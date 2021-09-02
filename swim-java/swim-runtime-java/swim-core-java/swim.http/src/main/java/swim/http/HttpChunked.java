@@ -27,39 +27,34 @@ import swim.codec.InputBuffer;
 import swim.codec.Output;
 import swim.codec.OutputBuffer;
 import swim.collections.FingerTrieSeq;
-import swim.http.header.ContentType;
-import swim.http.header.TransferEncoding;
+import swim.http.header.ContentTypeHeader;
+import swim.http.header.TransferEncodingHeader;
 import swim.util.Murmur3;
 
-public final class HttpChunked<T> extends HttpEntity<T> implements Debug {
+public final class HttpChunked<T> extends HttpPayload<T> implements Debug {
 
-  final T value;
-  final Encoder<?, ?> content;
+  final T payloadValue;
+  final Encoder<?, ?> payloadEncoder;
   final MediaType mediaType;
 
-  HttpChunked(T value, Encoder<?, ?> content, MediaType mediaType) {
-    this.value = value;
-    this.content = content;
+  HttpChunked(T payloadValue, Encoder<?, ?> payloadEncoder, MediaType mediaType) {
+    this.payloadValue = payloadValue;
+    this.payloadEncoder = payloadEncoder;
     this.mediaType = mediaType;
   }
 
   @Override
   public boolean isDefined() {
-    return this.value != null;
+    return this.payloadValue != null;
   }
 
   @Override
   public T get() {
-    return this.value;
+    return this.payloadValue;
   }
 
-  public Encoder<?, ?> content() {
-    return this.content;
-  }
-
-  @Override
-  public long length() {
-    return -1L;
+  public Encoder<?, ?> payloadEncoder() {
+    return this.payloadEncoder;
   }
 
   @Override
@@ -69,28 +64,28 @@ public final class HttpChunked<T> extends HttpEntity<T> implements Debug {
 
   @Override
   public FingerTrieSeq<TransferCoding> transferCodings() {
-    return TransferEncoding.chunked().codings();
+    return TransferEncodingHeader.chunked().codings();
   }
 
   @Override
   public FingerTrieSeq<HttpHeader> headers() {
     FingerTrieSeq<HttpHeader> headers = FingerTrieSeq.empty();
     if (this.mediaType != null) {
-      headers = headers.appended(ContentType.create(this.mediaType));
+      headers = headers.appended(ContentTypeHeader.create(this.mediaType));
     }
-    headers = headers.appended(TransferEncoding.chunked());
+    headers = headers.appended(TransferEncodingHeader.chunked());
     return headers;
   }
 
   @Override
   public <T2> Encoder<?, HttpMessage<T2>> httpEncoder(HttpMessage<T2> message, HttpWriter http) {
-    return http.chunkedEncoder(message, this.content);
+    return http.chunkedEncoder(message, this.payloadEncoder);
   }
 
   @Override
-  public <T2> Encoder<?, HttpMessage<T2>> encodeHttp(HttpMessage<T2> message,
-                                                     OutputBuffer<?> output, HttpWriter http) {
-    return http.encodeChunked(message, this.content, output);
+  public <T2> Encoder<?, HttpMessage<T2>> encodeHttp(OutputBuffer<?> output,
+                                                     HttpMessage<T2> message, HttpWriter http) {
+    return http.encodeChunked(output, message, this.payloadEncoder);
   }
 
   @Override
@@ -99,8 +94,7 @@ public final class HttpChunked<T> extends HttpEntity<T> implements Debug {
       return true;
     } else if (other instanceof HttpChunked<?>) {
       final HttpChunked<?> that = (HttpChunked<?>) other;
-      return (this.value == null ? that.value == null : this.value.equals(that.value))
-          && this.content.equals(that.content)
+      return (this.payloadValue == null ? that.payloadValue == null : this.payloadValue.equals(that.payloadValue))
           && (this.mediaType == null ? that.mediaType == null : this.mediaType.equals(that.mediaType));
     }
     return false;
@@ -111,17 +105,17 @@ public final class HttpChunked<T> extends HttpEntity<T> implements Debug {
     if (HttpChunked.hashSeed == 0) {
       HttpChunked.hashSeed = Murmur3.seed(HttpChunked.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(HttpChunked.hashSeed,
-        Murmur3.hash(this.value)), this.content.hashCode()), Murmur3.hash(this.mediaType)));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpChunked.hashSeed,
+        Murmur3.hash(this.payloadValue)), Murmur3.hash(this.mediaType)));
   }
 
   @Override
   public <T> Output<T> debug(Output<T> output) {
     output = output.write("HttpChunked").write('.').write("create").write('(');
-    if (this.value != null) {
-      output.debug(this.value).write(", ");
+    if (this.payloadValue != null) {
+      output.debug(this.payloadValue).write(", ");
     }
-    output.debug(this.content);
+    output.debug(this.payloadEncoder);
     if (this.mediaType != null) {
       output = output.write(", ").debug(this.mediaType);
     }
@@ -136,20 +130,20 @@ public final class HttpChunked<T> extends HttpEntity<T> implements Debug {
 
   private static int hashSeed;
 
-  public static <T> HttpChunked<T> create(T value, Encoder<?, T> content, MediaType mediaType) {
-    return new HttpChunked<T>(value, content, mediaType);
+  public static <T> HttpChunked<T> create(T payloadValue, Encoder<?, T> payloadEncoder, MediaType mediaType) {
+    return new HttpChunked<T>(payloadValue, payloadEncoder, mediaType);
   }
 
-  public static <T> HttpChunked<T> create(T value, Encoder<?, T> content) {
-    return new HttpChunked<T>(value, content, null);
+  public static <T> HttpChunked<T> create(T payloadValue, Encoder<?, T> payloadEncoder) {
+    return new HttpChunked<T>(payloadValue, payloadEncoder, null);
   }
 
-  public static <T> HttpChunked<T> create(Encoder<?, T> content, MediaType mediaType) {
-    return new HttpChunked<T>(null, content, mediaType);
+  public static <T> HttpChunked<T> create(Encoder<?, T> payloadEncoder, MediaType mediaType) {
+    return new HttpChunked<T>(null, payloadEncoder, mediaType);
   }
 
-  public static <T> HttpChunked<T> create(Encoder<?, T> content) {
-    return new HttpChunked<T>(null, content, null);
+  public static <T> HttpChunked<T> create(Encoder<?, T> payloadEncoder) {
+    return new HttpChunked<T>(null, payloadEncoder, null);
   }
 
   public static <T> HttpChunked<T> fromFile(String path, MediaType mediaType) throws IOException {
@@ -161,13 +155,13 @@ public final class HttpChunked<T> extends HttpEntity<T> implements Debug {
     return HttpChunked.fromFile(path, MediaType.forPath(path));
   }
 
-  public static <T> Decoder<HttpMessage<T>> httpDecoder(HttpMessage<?> message, Decoder<T> content) {
-    return Http.standardParser().chunkedDecoder(message, content);
+  public static <T> Decoder<HttpMessage<T>> httpDecoder(HttpMessage<?> message, Decoder<T> payloadDecoder) {
+    return Http.standardParser().chunkedDecoder(message, payloadDecoder);
   }
 
-  public static <T> Decoder<HttpMessage<T>> decodeHttp(HttpMessage<?> message, Decoder<T> content,
-                                                       InputBuffer input) {
-    return Http.standardParser().decodeChunked(message, content, input);
+  public static <T> Decoder<HttpMessage<T>> decodeHttp(InputBuffer input, HttpMessage<?> message,
+                                                       Decoder<T> payloadDecoder) {
+    return Http.standardParser().decodeChunked(input, message, payloadDecoder);
   }
 
 }

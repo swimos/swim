@@ -45,7 +45,7 @@ final class HttpHeaderWriter extends Writer<Object, Object> {
                                       HttpHeader header, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = http.writeToken(header.name(), output);
+        part = http.writeToken(output, header.name());
       } else {
         part = part.pull(output);
       }
@@ -70,7 +70,7 @@ final class HttpHeaderWriter extends Writer<Object, Object> {
     }
     if (step == 4) {
       if (part == null) {
-        part = http.writeHeaderValue(header, output);
+        part = http.writeHeaderValue(output, header);
       } else {
         part = part.pull(output);
       }

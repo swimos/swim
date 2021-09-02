@@ -41,7 +41,7 @@ final class JsonWebSignatureWriter extends Writer<Object, JsonWebSignature> {
                                                 Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = Binary.writeByteBuffer(jws.signingInput.asByteBuffer(), output);
+        part = Binary.writeByteBuffer(output, jws.signingInput.asByteBuffer());
       } else {
         part = part.pull(output);
       }
@@ -58,7 +58,7 @@ final class JsonWebSignatureWriter extends Writer<Object, JsonWebSignature> {
     }
     if (step == 3) {
       if (part == null) {
-        part = Base64.urlUnpadded().writeByteBuffer(jws.signatureData.asByteBuffer(), output);
+        part = Base64.urlUnpadded().writeByteBuffer(output, jws.signatureData.asByteBuffer());
       } else {
         part = part.pull(output);
       }

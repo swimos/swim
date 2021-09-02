@@ -21,7 +21,7 @@ import swim.codec.Output;
 import swim.codec.OutputBuffer;
 import swim.util.Murmur3;
 
-public final class MqttSubscription extends MqttPart implements Debug {
+public final class MqttSubscription implements Debug {
 
   final String topicName;
   final int flags;
@@ -56,14 +56,20 @@ public final class MqttSubscription extends MqttPart implements Debug {
     return mqtt.sizeOfSubscription(this);
   }
 
-  @Override
   public Encoder<?, MqttSubscription> mqttEncoder(MqttEncoder mqtt) {
     return mqtt.subscriptionEncoder(this);
   }
 
-  @Override
+  public Encoder<?, ?> mqttEncoder() {
+    return this.mqttEncoder(Mqtt.standardEncoder());
+  }
+
   public Encoder<?, MqttSubscription> encodeMqtt(OutputBuffer<?> output, MqttEncoder mqtt) {
-    return mqtt.encodeSubscription(this, output);
+    return mqtt.encodeSubscription(output, this);
+  }
+
+  public Encoder<?, ?> encodeMqtt(OutputBuffer<?> output) {
+    return this.encodeMqtt(output, Mqtt.standardEncoder());
   }
 
   @Override

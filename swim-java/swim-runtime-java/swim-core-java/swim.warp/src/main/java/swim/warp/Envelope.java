@@ -57,11 +57,11 @@ public abstract class Envelope implements Debug {
   }
 
   public Writer<?, ?> reconWriter() {
-    return Recon.write(this.toValue(), Output.full());
+    return Recon.write(Output.full(), this.toValue());
   }
 
   public Writer<?, ?> writeRecon(Output<?> output) {
-    return Recon.write(this.toValue(), output);
+    return Recon.write(output, this.toValue());
   }
 
   public String toRecon() {

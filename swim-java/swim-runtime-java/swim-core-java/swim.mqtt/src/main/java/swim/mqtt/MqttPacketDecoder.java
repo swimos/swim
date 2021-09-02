@@ -20,24 +20,25 @@ import swim.codec.InputBuffer;
 final class MqttPacketDecoder<T> extends Decoder<MqttPacket<T>> {
 
   final MqttDecoder mqtt;
-  final Decoder<T> content;
+  final Decoder<T> payloadDecoder;
 
-  MqttPacketDecoder(MqttDecoder mqtt, Decoder<T> content) {
+  MqttPacketDecoder(MqttDecoder mqtt, Decoder<T> payloadDecoder) {
     this.mqtt = mqtt;
-    this.content = content;
+    this.payloadDecoder = payloadDecoder;
   }
 
   @Override
   public Decoder<MqttPacket<T>> feed(InputBuffer input) {
-    return MqttPacketDecoder.decode(input, this.mqtt, this.content);
+    return MqttPacketDecoder.decode(input, this.mqtt, this.payloadDecoder);
   }
 
-  static <T> Decoder<MqttPacket<T>> decode(InputBuffer input, MqttDecoder mqtt, Decoder<T> content) {
+  static <T> Decoder<MqttPacket<T>> decode(InputBuffer input, MqttDecoder mqtt,
+                                           Decoder<T> payloadDecoder) {
     if (input.isCont()) {
       final int packetType = (input.head() & 0xf0) >>> 4;
-      return mqtt.decodePacketType(packetType, content, input);
+      return mqtt.decodePacketType(input, packetType, payloadDecoder);
     }
-    return new MqttPacketDecoder<T>(mqtt, content);
+    return new MqttPacketDecoder<T>(mqtt, payloadDecoder);
   }
 
 }

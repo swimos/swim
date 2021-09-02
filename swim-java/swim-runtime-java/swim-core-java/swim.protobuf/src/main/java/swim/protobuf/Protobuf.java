@@ -38,16 +38,16 @@ public final class Protobuf {
     return Protobuf.decoder;
   }
 
-  public static <T> Decoder<T> decodeType(ProtobufType<T> type, InputBuffer input) {
-    return Protobuf.decoder().decodeType(type, input);
+  public static <T> Decoder<T> decodeType(InputBuffer input, ProtobufType<T> type) {
+    return Protobuf.decoder().decodeType(input, type);
   }
 
   public static <T> Decoder<T> typeDecoder(ProtobufType<T> type) {
     return Protobuf.decoder().typeDecoder(type);
   }
 
-  public static <T> Decoder<T> decodePayload(ProtobufMessageType<T, ?> type, InputBuffer input) {
-    return Protobuf.decoder().decodePayload(type, input);
+  public static <T> Decoder<T> decodePayload(InputBuffer input, ProtobufMessageType<T, ?> type) {
+    return Protobuf.decoder().decodePayload(input, type);
   }
 
   public static <T> Decoder<T> payloadDecoder(ProtobufMessageType<T, ?> type) {

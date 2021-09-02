@@ -31,13 +31,13 @@ public final class Format {
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> display(Object object, Output<T> output) {
+  public static <T> Output<T> display(Output<T> output, Object object) {
     if (object == null) {
       output = output.write("null");
     } else if (object instanceof Integer) {
-      output = Format.displayInt(((Integer) object).intValue(), output);
+      output = Format.displayInt(output, ((Integer) object).intValue());
     } else if (object instanceof Long) {
-      output = Format.displayLong(((Long) object).longValue(), output);
+      output = Format.displayLong(output, ((Long) object).longValue());
     } else if (object instanceof Display) {
       output = ((Display) object).display(output);
     } else {
@@ -91,19 +91,19 @@ public final class Format {
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> debug(Object object, Output<T> output) {
+  public static <T> Output<T> debug(Output<T> output, Object object) {
     if (object == null) {
       output = output.write("null");
     } else if (object instanceof Integer) {
-      output = Format.debugInt(((Integer) object).intValue(), output);
+      output = Format.debugInt(output, ((Integer) object).intValue());
     } else if (object instanceof Long) {
-      output = Format.debugLong(((Long) object).longValue(), output);
+      output = Format.debugLong(output, ((Long) object).longValue());
     } else if (object instanceof Float) {
-      output = Format.debugFloat(((Float) object).floatValue(), output);
+      output = Format.debugFloat(output, ((Float) object).floatValue());
     } else if (object instanceof Character) {
-      output = Format.debugChar((int) ((Character) object).charValue(), output);
+      output = Format.debugChar(output, (int) ((Character) object).charValue());
     } else if (object instanceof String) {
-      output = Format.debugString((String) object, output);
+      output = Format.debugString(output, (String) object);
     } else if (object instanceof Debug) {
       output = ((Debug) object).debug(output);
     } else {
@@ -129,23 +129,23 @@ public final class Format {
       return "null";
     } else if (object instanceof Integer) {
       output = Unicode.stringOutput(settings);
-      output = Format.debugInt(((Integer) object).intValue(), output);
+      output = Format.debugInt(output, ((Integer) object).intValue());
       return output.bind();
     } else if (object instanceof Long) {
       output = Unicode.stringOutput(settings);
-      output = Format.debugLong(((Long) object).longValue(), output);
+      output = Format.debugLong(output, ((Long) object).longValue());
       return output.bind();
     } else if (object instanceof Float) {
       output = Unicode.stringOutput(settings);
-      output = Format.debugFloat(((Float) object).floatValue(), output);
+      output = Format.debugFloat(output, ((Float) object).floatValue());
       return output.bind();
     } else if (object instanceof Character) {
       output = Unicode.stringOutput(settings);
-      output = Format.debugChar((int) ((Character) object).charValue(), output);
+      output = Format.debugChar(output, (int) ((Character) object).charValue());
       return output.bind();
     } else if (object instanceof String) {
       output = Unicode.stringOutput(settings);
-      output = Format.debugString((String) object, output);
+      output = Format.debugString(output, (String) object);
       return output.bind();
     } else if (object instanceof Debug) {
       output = Unicode.stringOutput(settings);
@@ -174,7 +174,7 @@ public final class Format {
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> displayInt(int value, Output<T> output) {
+  public static <T> Output<T> displayInt(Output<T> output, int value) {
     if (value < 0) {
       output = output.write('-');
     }
@@ -204,7 +204,7 @@ public final class Format {
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> displayLong(long value, Output<T> output) {
+  public static <T> Output<T> displayLong(Output<T> output, long value) {
     if (value < 0L) {
       output = output.write('-');
     }
@@ -234,7 +234,7 @@ public final class Format {
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> displayFloat(float value, Output<T> output) {
+  public static <T> Output<T> displayFloat(Output<T> output, float value) {
     output = output.write(Float.toString(value)).write('f');
     return output;
   }
@@ -245,7 +245,7 @@ public final class Format {
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> displayDouble(double value, Output<T> output) {
+  public static <T> Output<T> displayDouble(Output<T> output, double value) {
     output = output.write(Double.toString(value));
     return output;
   }
@@ -256,8 +256,8 @@ public final class Format {
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> debugInt(int value, Output<T> output) {
-    output = Format.displayInt(value, output);
+  public static <T> Output<T> debugInt(Output<T> output, int value) {
+    output = Format.displayInt(output, value);
     return output;
   }
 
@@ -267,8 +267,8 @@ public final class Format {
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> debugLong(long value, Output<T> output) {
-    output = Format.displayLong(value, output);
+  public static <T> Output<T> debugLong(Output<T> output, long value) {
+    output = Format.displayLong(output, value);
     output = output.write('L');
     return output;
   }
@@ -279,7 +279,7 @@ public final class Format {
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> debugFloat(float value, Output<T> output) {
+  public static <T> Output<T> debugFloat(Output<T> output, float value) {
     output = output.write(Float.toString(value)).write('f');
     return output;
   }
@@ -290,20 +290,20 @@ public final class Format {
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> debugDouble(double value, Output<T> output) {
+  public static <T> Output<T> debugDouble(Output<T> output, double value) {
     output = output.write(Double.toString(value));
     return output;
   }
 
   /**
    * Writes the code points of the Java character literal for the given
-   * {@code character} to {@code output}.
+   * {@code value} to {@code output}.
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> debugChar(int character, Output<T> output) {
+  public static <T> Output<T> debugChar(Output<T> output, int value) {
     output = output.write('\'');
-    switch (character) {
+    switch (value) {
       case '\b':
         output = output.write('\\').write('b');
         break;
@@ -329,15 +329,14 @@ public final class Format {
         output = output.write('\\').write('\\');
         break;
       default:
-        if (character >= 0x0000 && character <= 0x001f
-            || character >= 0x007f && character <= 0x009f) {
+        if (value >= 0x0000 && value <= 0x001f || value >= 0x007f && value <= 0x009f) {
           output = output.write('\\').write('u')
-                         .write(Format.encodeHex(character >>> 12 & 0xf))
-                         .write(Format.encodeHex(character >>> 8 & 0xf))
-                         .write(Format.encodeHex(character >>> 4 & 0xf))
-                         .write(Format.encodeHex(character & 0xf));
+                         .write(Format.encodeHex(value >>> 12 & 0xf))
+                         .write(Format.encodeHex(value >>> 8 & 0xf))
+                         .write(Format.encodeHex(value >>> 4 & 0xf))
+                         .write(Format.encodeHex(value & 0xf));
         } else {
-          output = output.write(character);
+          output = output.write(value);
         }
     }
     output = output.write('\'');
@@ -346,15 +345,15 @@ public final class Format {
 
   /**
    * Writes the code points of the Java string literal for the given
-   * {@code string} to {@code output}.
+   * {@code value} to {@code output}.
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> debugString(String string, Output<T> output) {
+  public static <T> Output<T> debugString(Output<T> output, String value) {
     output = output.write('\"');
-    final int n = string.length();
-    for (int i = 0; i < n; i = string.offsetByCodePoints(i, 1)) {
-      final int c = string.codePointAt(i);
+    final int n = value.length();
+    for (int i = 0; i < n; i = value.offsetByCodePoints(i, 1)) {
+      final int c = value.codePointAt(i);
       switch (c) {
         case '\b':
           output = output.write('\\').write('b');

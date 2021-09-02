@@ -275,7 +275,7 @@ final class NumF64 extends Num {
 
   @Override
   public <T> Output<T> display(Output<T> output) {
-    output = Format.debugDouble(this.value, output);
+    output = Format.debugDouble(output, this.value);
     return output;
   }
 

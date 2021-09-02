@@ -56,8 +56,8 @@ public final class RawHeader extends HttpHeader {
   }
 
   @Override
-  public Writer<?, ?> writeHttpValue(Output<?> output, HttpWriter http) {
-    return http.writeField(this.value, output);
+  public Writer<?, ?> writeHeaderValue(Output<?> output, HttpWriter http) {
+    return http.writeField(output, this.value);
   }
 
   @Override
@@ -97,8 +97,8 @@ public final class RawHeader extends HttpHeader {
     return new RawHeader(name.toLowerCase(), name, value);
   }
 
-  public static Parser<RawHeader> parseHttpValue(Input input, HttpParser http,
-                                                 String lowerCaseName, String name) {
+  public static Parser<RawHeader> parseHeaderValue(Input input, HttpParser http,
+                                                   String lowerCaseName, String name) {
     return RawHeaderParser.parse(input, lowerCaseName, name);
   }
 

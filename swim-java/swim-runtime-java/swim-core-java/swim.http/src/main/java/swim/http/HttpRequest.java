@@ -31,20 +31,20 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
   final Uri uri;
   final HttpVersion version;
   final FingerTrieSeq<HttpHeader> headers;
-  final HttpEntity<T> entity;
+  final HttpPayload<T> payload;
 
   HttpRequest(HttpMethod method, Uri uri, HttpVersion version,
-              FingerTrieSeq<HttpHeader> headers, HttpEntity<T> entity) {
+              FingerTrieSeq<HttpHeader> headers, HttpPayload<T> payload) {
     this.method = method;
     this.uri = uri;
     this.version = version;
     this.headers = headers;
-    this.entity = entity;
+    this.payload = payload;
   }
 
   HttpRequest(HttpMethod method, Uri uri, HttpVersion version,
               FingerTrieSeq<HttpHeader> headers) {
-    this(method, uri, version, headers, HttpEntity.<T>empty());
+    this(method, uri, version, headers, HttpPayload.<T>empty());
   }
 
   public HttpMethod method() {
@@ -52,7 +52,7 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
   }
 
   public HttpRequest<T> method(HttpMethod method) {
-    return HttpRequest.create(method, this.uri, this.version, this.headers, this.entity);
+    return HttpRequest.create(method, this.uri, this.version, this.headers, this.payload);
   }
 
   public Uri uri() {
@@ -60,7 +60,7 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
   }
 
   public HttpRequest<T> uri(Uri uri) {
-    return HttpRequest.create(this.method, uri, this.version, this.headers, this.entity);
+    return HttpRequest.create(this.method, uri, this.version, this.headers, this.payload);
   }
 
   @Override
@@ -69,7 +69,7 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
   }
 
   public HttpRequest<T> version(HttpVersion version) {
-    return HttpRequest.create(this.method, this.uri, version, this.headers, this.entity);
+    return HttpRequest.create(this.method, this.uri, version, this.headers, this.payload);
   }
 
   @Override
@@ -79,7 +79,7 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
 
   @Override
   public HttpRequest<T> headers(FingerTrieSeq<HttpHeader> headers) {
-    return HttpRequest.create(this.method, this.uri, this.version, headers, this.entity);
+    return HttpRequest.create(this.method, this.uri, this.version, headers, this.payload);
   }
 
   @Override
@@ -92,7 +92,7 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
     final FingerTrieSeq<HttpHeader> oldHeaders = this.headers;
     final FingerTrieSeq<HttpHeader> headers = oldHeaders.appended(newHeaders);
     if (oldHeaders != headers) {
-      return HttpRequest.create(this.method, this.uri, this.version, headers, this.entity);
+      return HttpRequest.create(this.method, this.uri, this.version, headers, this.payload);
     } else {
       return this;
     }
@@ -108,7 +108,7 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
     final FingerTrieSeq<HttpHeader> oldHeaders = this.headers;
     final FingerTrieSeq<HttpHeader> headers = oldHeaders.appended(newHeader);
     if (oldHeaders != headers) {
-      return HttpRequest.create(this.method, this.uri, this.version, headers, this.entity);
+      return HttpRequest.create(this.method, this.uri, this.version, headers, this.payload);
     } else {
       return this;
     }
@@ -119,7 +119,7 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
     final FingerTrieSeq<HttpHeader> oldHeaders = this.headers;
     final FingerTrieSeq<HttpHeader> headers = HttpMessage.updatedHeaders(oldHeaders, newHeaders);
     if (oldHeaders != headers) {
-      return HttpRequest.create(this.method, this.uri, this.version, headers, this.entity);
+      return HttpRequest.create(this.method, this.uri, this.version, headers, this.payload);
     } else {
       return this;
     }
@@ -135,26 +135,26 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
     final FingerTrieSeq<HttpHeader> oldHeaders = this.headers;
     final FingerTrieSeq<HttpHeader> headers = HttpMessage.updatedHeaders(oldHeaders, newHeader);
     if (oldHeaders != headers) {
-      return HttpRequest.create(this.method, this.uri, this.version, headers, this.entity);
+      return HttpRequest.create(this.method, this.uri, this.version, headers, this.payload);
     } else {
       return this;
     }
   }
 
   @Override
-  public HttpEntity<T> entity() {
-    return this.entity;
+  public HttpPayload<T> payload() {
+    return this.payload;
   }
 
   @Override
-  public <T2> HttpRequest<T2> entity(HttpEntity<T2> entity) {
-    return HttpRequest.create(this.method, this.uri, this.version, this.headers, entity);
+  public <T2> HttpRequest<T2> payload(HttpPayload<T2> payload) {
+    return HttpRequest.create(this.method, this.uri, this.version, this.headers, payload);
   }
 
   @Override
-  public <T2> HttpRequest<T2> content(HttpEntity<T2> entity) {
-    final FingerTrieSeq<HttpHeader> headers = HttpMessage.updatedHeaders(this.headers, entity.headers());
-    return HttpRequest.create(this.method, this.uri, this.version, headers, entity);
+  public <T2> HttpRequest<T2> content(HttpPayload<T2> payload) {
+    final FingerTrieSeq<HttpHeader> headers = HttpMessage.updatedHeaders(this.headers, payload.headers());
+    return HttpRequest.create(this.method, this.uri, this.version, headers, payload);
   }
 
   @Override
@@ -169,8 +169,8 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T2> Decoder<HttpRequest<T2>> entityDecoder(Decoder<T2> contentDecoder) {
-    return (Decoder<HttpRequest<T2>>) super.entityDecoder(contentDecoder);
+  public <T2> Decoder<HttpRequest<T2>> payloadDecoder(Decoder<T2> contentDecoder) {
+    return (Decoder<HttpRequest<T2>>) super.payloadDecoder(contentDecoder);
   }
 
   @SuppressWarnings("unchecked")
@@ -209,7 +209,7 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
 
   @Override
   public Writer<?, HttpRequest<T>> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeRequest(this, output);
+    return http.writeRequest(output, this);
   }
 
   @Override
@@ -225,7 +225,7 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
       final HttpRequest<?> that = (HttpRequest<?>) other;
       return this.method.equals(that.method) && this.uri.equals(that.uri)
           && this.version.equals(that.version) && this.headers.equals(that.headers)
-          && this.entity.equals(that.entity);
+          && this.payload.equals(that.payload);
     }
     return false;
   }
@@ -239,7 +239,7 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(
         HttpRequest.hashSeed, this.method.hashCode()), this.uri.hashCode()),
-        this.version.hashCode()), this.headers.hashCode()), this.entity.hashCode()));
+        this.version.hashCode()), this.headers.hashCode()), this.payload.hashCode()));
   }
 
   @Override
@@ -250,8 +250,8 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
       output = output.write(", ").debug(header);
     }
     output = output.write(')');
-    if (this.entity.isDefined()) {
-      output = output.write('.').write("entity").write('(').debug(this.entity).write(')');
+    if (this.payload.isDefined()) {
+      output = output.write('.').write("payload").write('(').debug(this.payload).write(')');
     }
     return output;
   }
@@ -262,8 +262,8 @@ public final class HttpRequest<T> extends HttpMessage<T> implements Debug {
   }
 
   public static <T> HttpRequest<T> create(HttpMethod method, Uri uri, HttpVersion version,
-                                          FingerTrieSeq<HttpHeader> headers, HttpEntity<T> entity) {
-    return new HttpRequest<T>(method, uri, version, headers, entity);
+                                          FingerTrieSeq<HttpHeader> headers, HttpPayload<T> payload) {
+    return new HttpRequest<T>(method, uri, version, headers, payload);
   }
 
   public static <T> HttpRequest<T> create(HttpMethod method, Uri uri, HttpVersion version,

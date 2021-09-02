@@ -44,28 +44,29 @@ public class BodyParserSpec {
                  Record.of(Record.of(Slot.of("a", 1), Slot.of("b", Record.of(Slot.of("c", 2), Slot.of("d", 3))), Slot.of("e", 4)),
                            Record.of(Slot.of("a", 5), Slot.of("b", Record.of(Slot.of("c", 6), Slot.of("d", 7))), Slot.of("e", 8))),
                  CsvStructure.header(CsvStructure.numberCol("a"),
-                                     CsvStructure.parsedCol("b", Csv.rowParser('^', CsvStructure.header(CsvStructure.numberCol("c"),
-                                                                                                        CsvStructure.numberCol("d")))),
+                                     CsvStructure.parsedCol("b", Csv.rowParser(CsvStructure.header(CsvStructure.numberCol("c"),
+                                                                                                   CsvStructure.numberCol("d")),
+                                                                               '^')),
                                      CsvStructure.numberCol("e")));
   }
 
   public static void assertParses(String csvString, Record expected, CsvHeader<Record, Value, Item> header) {
-    assertParses(',', csvString, expected, header);
+    assertParses(csvString, expected, header, ',');
   }
 
-  public static void assertParses(int delimiter, String csvString, Record expected, CsvHeader<Record, Value, Item> header) {
-    CsvAssertions.assertParses(Csv.bodyParser(delimiter, header), csvString, expected);
+  public static void assertParses(String csvString, Record expected, CsvHeader<Record, Value, Item> header, int delimiter) {
+    CsvAssertions.assertParses(Csv.bodyParser(header, delimiter), csvString, expected);
   }
 
   public static void assertParseFails(final String csvString, CsvHeader<Record, Value, Item> header) {
-    assertParseFails(',', csvString, header);
+    assertParseFails(csvString, header, ',');
   }
 
-  public static void assertParseFails(final int delimiter, final String csvString, CsvHeader<Record, Value, Item> header) {
+  public static void assertParseFails(final String csvString, CsvHeader<Record, Value, Item> header, final int delimiter) {
     assertThrows(ParserException.class, new ThrowingRunnable() {
       @Override
       public void run() throws Throwable {
-        Csv.parseBody(delimiter, csvString, header);
+        Csv.parseBody(csvString, header, delimiter);
       }
     });
   }

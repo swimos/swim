@@ -60,7 +60,7 @@ public final class HttpChunk implements Debug {
 
   public Encoder<?, ?> encodeHttp(OutputBuffer<?> output, HttpWriter http) {
     if (this.header.isEmpty()) {
-      return Utf8.writeEncoded(this.header.httpWriter(http), output);
+      return Utf8.writeEncoded(output, this.header.httpWriter(http));
     } else {
       return HttpChunkEncoder.encode(output, http, this.header, this.content);
     }

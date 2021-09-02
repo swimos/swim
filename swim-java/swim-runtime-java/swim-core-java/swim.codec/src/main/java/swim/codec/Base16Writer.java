@@ -18,48 +18,41 @@ import java.nio.ByteBuffer;
 
 final class Base16Writer extends Writer<Object, Object> {
 
+  final Base16 base16;
   final Object value;
   final ByteBuffer input;
-  final Base16 base16;
   final int index;
   final int limit;
   final int step;
 
-  Base16Writer(Object value, ByteBuffer input, Base16 base16, int index, int limit, int step) {
+  Base16Writer(Base16 base16, Object value, ByteBuffer input,
+               int index, int limit, int step) {
+    this.base16 = base16;
     this.value = value;
     this.input = input;
-    this.base16 = base16;
     this.index = index;
     this.limit = limit;
     this.step = step;
   }
 
-  Base16Writer(Object value, ByteBuffer input, Base16 base16) {
-    this(value, input, base16, input.position(), input.limit(), 1);
+  Base16Writer(Base16 base16, Object value, ByteBuffer input) {
+    this(base16, value, input, input.position(), input.limit(), 1);
   }
 
-  Base16Writer(ByteBuffer input, Base16 base16) {
-    this(null, input, base16);
-  }
-
-  Base16Writer(Object value, byte[] input, Base16 base16) {
-    this(value, ByteBuffer.wrap(input), base16);
-  }
-
-  Base16Writer(byte[] input, Base16 base16) {
-    this(null, ByteBuffer.wrap(input), base16);
+  Base16Writer(Base16 base16, Object value, byte[] input) {
+    this(base16, value, ByteBuffer.wrap(input));
   }
 
   Base16Writer(Base16 base16) {
-    this(null, null, base16, 0, 0, 1);
+    this(base16, null, null, 0, 0, 1);
   }
 
   @Override
   public Writer<Object, Object> feed(Object value) {
     if (value instanceof ByteBuffer) {
-      return new Base16Writer((ByteBuffer) value, this.base16);
+      return new Base16Writer(this.base16, null, (ByteBuffer) value);
     } else if (value instanceof byte[]) {
-      return new Base16Writer((byte[]) value, this.base16);
+      return new Base16Writer(this.base16, null, (byte[]) value);
     } else {
       throw new IllegalArgumentException(value.toString());
     }
@@ -67,12 +60,12 @@ final class Base16Writer extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return Base16Writer.write(output, this.value, this.input, this.base16,
+    return Base16Writer.write(output, this.base16, this.value, this.input,
                               this.index, this.limit, this.step);
   }
 
-  static Writer<Object, Object> write(Output<?> output, Object value, ByteBuffer input,
-                                      Base16 base16, int index, int limit, int step) {
+  static Writer<Object, Object> write(Output<?> output, Base16 base16, Object value,
+                                      ByteBuffer input, int index, int limit, int step) {
     while (index < limit) {
       final int x = input.get(index) & 0xff;
       if (step == 1 && output.isCont()) {
@@ -92,23 +85,15 @@ final class Base16Writer extends Writer<Object, Object> {
     } else if (output.isError()) {
       return Writer.error(output.trap());
     }
-    return new Base16Writer(value, input, base16, index, limit, step);
+    return new Base16Writer(base16, value, input, index, limit, step);
   }
 
-  static Writer<?, ?> write(Output<?> output, Object value, ByteBuffer input, Base16 base16) {
-    return Base16Writer.write(output, value, input, base16, input.position(), input.limit(), 1);
+  static Writer<?, ?> write(Output<?> output, Base16 base16, Object value, ByteBuffer input) {
+    return Base16Writer.write(output, base16, value, input, input.position(), input.limit(), 1);
   }
 
-  static Writer<?, ?> write(Output<?> output, ByteBuffer input, Base16 base16) {
-    return Base16Writer.write(output, null, input, base16);
-  }
-
-  static Writer<?, ?> write(Output<?> output, Object value, byte[] input, Base16 base16) {
-    return Base16Writer.write(output, value, ByteBuffer.wrap(input), base16);
-  }
-
-  static Writer<?, ?> write(Output<?> output, byte[] input, Base16 base16) {
-    return Base16Writer.write(output, null, ByteBuffer.wrap(input), base16);
+  static Writer<?, ?> write(Output<?> output, Base16 base16, Object value, byte[] input) {
+    return Base16Writer.write(output, base16, value, ByteBuffer.wrap(input));
   }
 
 }

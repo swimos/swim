@@ -107,7 +107,7 @@ final class ArrayDecoder<I, T> extends Decoder<T> {
       }
       if (step == 3) {
         if (itemDecoder == null) {
-          itemDecoder = avro.decodeType(type.itemType(), input);
+          itemDecoder = avro.decodeType(input, type.itemType());
           count -= 1;
         }
         while (itemDecoder.isCont() && !input.isEmpty()) {

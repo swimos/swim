@@ -68,7 +68,7 @@ public class HttpLaneSpec {
       @Override
       public void didRespond(HttpResponse<String> response) {
         System.out.println("client didRespond: " + Format.debug(response.toHttp()));
-        assertEquals(response.entity().get(), "Hello, world!");
+        assertEquals(response.payload().get(), "Hello, world!");
         clientResponse.countDown();
       }
     };
@@ -116,7 +116,7 @@ public class HttpLaneSpec {
       @Override
       public HttpResponse<?> doRespond(HttpRequest<Object> request) {
         System.out.println("lane doRespond: " + Format.debug(request.toHttp()));
-        assertEquals(request.entity().get(), "Hello, Swim!");
+        assertEquals(request.payload().get(), "Hello, Swim!");
         return HttpResponse.create(HttpStatus.OK).body("Hello, world!");
       }
 

@@ -21,12 +21,12 @@ import swim.codec.InputBuffer;
 final class MqttSubscriptionDecoder extends Decoder<MqttSubscription> {
 
   final MqttDecoder mqtt;
-  final Decoder<String> topicName;
+  final Decoder<String> topicNameDecoder;
   final int step;
 
-  MqttSubscriptionDecoder(MqttDecoder mqtt, Decoder<String> topicName, int step) {
+  MqttSubscriptionDecoder(MqttDecoder mqtt, Decoder<String> topicNameDecoder, int step) {
     this.mqtt = mqtt;
-    this.topicName = topicName;
+    this.topicNameDecoder = topicNameDecoder;
     this.step = step;
   }
 
@@ -36,34 +36,34 @@ final class MqttSubscriptionDecoder extends Decoder<MqttSubscription> {
 
   @Override
   public Decoder<MqttSubscription> feed(InputBuffer input) {
-    return MqttSubscriptionDecoder.decode(input, this.mqtt, this.topicName, this.step);
+    return MqttSubscriptionDecoder.decode(input, this.mqtt, this.topicNameDecoder, this.step);
   }
 
   static Decoder<MqttSubscription> decode(InputBuffer input, MqttDecoder mqtt,
-                                          Decoder<String> topicName, int step) {
+                                          Decoder<String> topicNameDecoder, int step) {
     if (step == 1) {
-      if (topicName == null) {
-        topicName = mqtt.decodeString(input);
+      if (topicNameDecoder == null) {
+        topicNameDecoder = mqtt.decodeString(input);
       } else {
-        topicName = topicName.feed(input);
+        topicNameDecoder = topicNameDecoder.feed(input);
       }
-      if (topicName.isDone()) {
+      if (topicNameDecoder.isDone()) {
         step = 2;
-      } else if (topicName.isError()) {
-        return topicName.asError();
+      } else if (topicNameDecoder.isError()) {
+        return topicNameDecoder.asError();
       }
     }
     if (step == 2 && input.isCont()) {
       final int flags = input.head();
       input = input.step();
-      return Decoder.done(mqtt.subscription(topicName.bind(), flags));
+      return Decoder.done(mqtt.subscription(topicNameDecoder.bind(), flags));
     }
     if (input.isDone()) {
       return Decoder.error(new DecoderException("incomplete"));
     } else if (input.isError()) {
       return Decoder.error(input.trap());
     }
-    return new MqttSubscriptionDecoder(mqtt, topicName, step);
+    return new MqttSubscriptionDecoder(mqtt, topicNameDecoder, step);
   }
 
   static Decoder<MqttSubscription> decode(InputBuffer input, MqttDecoder mqtt) {

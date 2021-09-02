@@ -17,82 +17,85 @@ package swim.http;
 import swim.codec.Decoder;
 import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
-import swim.http.header.ContentType;
+import swim.http.header.ContentTypeHeader;
 
 final class HttpBodyDecoder<T> extends Decoder<HttpMessage<T>> {
 
   final HttpMessage<?> message;
-  final Decoder<T> content;
-  final long length;
+  final Decoder<T> payloadDecoder;
+  final long contentLength;
   final long offset;
 
-  HttpBodyDecoder(HttpMessage<?> message, Decoder<T> content, long length, long offset) {
+  HttpBodyDecoder(HttpMessage<?> message, Decoder<T> payloadDecoder,
+                  long contentLength, long offset) {
     this.message = message;
-    this.content = content;
-    this.length = length;
+    this.payloadDecoder = payloadDecoder;
+    this.contentLength = contentLength;
     this.offset = offset;
   }
 
-  HttpBodyDecoder(HttpMessage<?> message, Decoder<T> content, long length) {
-    this(message, content, length, 0L);
+  HttpBodyDecoder(HttpMessage<?> message, Decoder<T> payloadDecoder, long contentLength) {
+    this(message, payloadDecoder, contentLength, 0L);
   }
 
   @Override
   public Decoder<HttpMessage<T>> feed(InputBuffer input) {
-    return HttpBodyDecoder.decode(input, this.message, this.content, this.length, this.offset);
+    return HttpBodyDecoder.decode(input, this.message, this.payloadDecoder,
+                                  this.contentLength, this.offset);
   }
 
   static <T> Decoder<HttpMessage<T>> decode(InputBuffer input, HttpMessage<?> message,
-                                            Decoder<T> content, long length, long offset) {
+                                            Decoder<T> payloadDecoder,
+                                            long contentLength, long offset) {
     final int inputStart = input.index();
     final int inputLimit = input.limit();
     int inputRemaining = inputLimit - inputStart;
-    long outputRemaining = length - offset;
+    long outputRemaining = contentLength - offset;
     final boolean inputPart = input.isPart();
     if (outputRemaining <= inputRemaining) {
       input = input.limit(inputStart + (int) outputRemaining).isPart(false);
-      content = content.feed(input);
+      payloadDecoder = payloadDecoder.feed(input);
       input = input.limit(inputLimit);
     } else {
       input = input.isPart(true);
-      content = content.feed(input);
+      payloadDecoder = payloadDecoder.feed(input);
     }
     input = input.isPart(inputPart);
     final int inputEnd = input.index();
     offset += inputEnd - inputStart;
     inputRemaining = inputLimit - inputEnd;
-    outputRemaining = length - offset;
-    if (content.isDone() && inputRemaining > 0 && outputRemaining > 0L) {
+    outputRemaining = contentLength - offset;
+    if (payloadDecoder.isDone() && inputRemaining > 0 && outputRemaining > 0L) {
       // Consume excess input.
       final int inputExcess = (int) Math.min((long) inputRemaining, outputRemaining);
       input = input.index(inputEnd + inputExcess);
       offset += inputExcess;
     }
-    if (content.isDone()) {
-      if (offset < length) {
+    if (payloadDecoder.isDone()) {
+      if (offset < contentLength) {
         return Decoder.error(new DecoderException("buffer underflow"));
-      } else if (offset > length) {
+      } else if (offset > contentLength) {
         return Decoder.error(new DecoderException("buffer overflow"));
       } else {
         final MediaType mediaType;
-        final ContentType contentType = message.getHeader(ContentType.class);
+        final ContentTypeHeader contentType = message.getHeader(ContentTypeHeader.class);
         if (contentType != null) {
           mediaType = contentType.mediaType();
         } else {
           mediaType = null;
         }
-        final HttpValue<T> entity = HttpValue.create(content.bind(), mediaType);
-        return Decoder.done(message.entity(entity));
+        final HttpValue<T> payload = HttpValue.create(payloadDecoder.bind(), mediaType);
+        return Decoder.done(message.payload(payload));
       }
-    } else if (content.isError()) {
-      return content.asError();
+    } else if (payloadDecoder.isError()) {
+      return payloadDecoder.asError();
     }
-    return new HttpBodyDecoder<T>(message, content, length, offset);
+    return new HttpBodyDecoder<T>(message, payloadDecoder, contentLength, offset);
   }
 
   static <T> Decoder<HttpMessage<T>> decode(InputBuffer input, HttpMessage<?> message,
-                                            Decoder<T> content, long length) {
-    return HttpBodyDecoder.decode(input, message, content, length, 0L);
+                                            Decoder<T> payloadDecoder, long contentLength) {
+    return HttpBodyDecoder.decode(input, message, payloadDecoder, contentLength, 0L);
   }
 
 }

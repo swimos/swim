@@ -145,7 +145,7 @@ public class JsNodeModuleResolver implements JsModuleResolver {
     FileInputStream packageInput = null;
     try {
       packageInput = new FileInputStream(packagePath.toString());
-      return Utf8.read(Json.structureParser().objectParser(), packageInput);
+      return Utf8.read(packageInput, Json.structureParser().objectParser());
     } catch (IOException cause) {
       throw new JsModuleException(cause);
     } finally {
@@ -174,7 +174,7 @@ public class JsNodeModuleResolver implements JsModuleResolver {
       sourceInput = new FileInputStream(moduleName.toString());
       final StringBuilder sourceBuilder = new StringBuilder();
       this.prefixModuleSource(moduleId, sourceBuilder);
-      final Decoder<String> sourceDecoder = Utf8.decode(Unicode.stringParser(sourceBuilder), sourceInput);
+      final Decoder<String> sourceDecoder = Utf8.decode(sourceInput, Unicode.stringParser(sourceBuilder));
       if (sourceDecoder.isDone()) {
         this.suffixModuleSource(moduleId, sourceBuilder);
         final String source = sourceBuilder.toString();

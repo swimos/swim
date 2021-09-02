@@ -68,7 +68,7 @@ public final class Product extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeProduct(this.name, this.version, this.comments.iterator(), output);
+    return http.writeProduct(output, this.name, this.version, this.comments.iterator());
   }
 
   @Override

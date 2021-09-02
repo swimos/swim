@@ -473,12 +473,12 @@ public abstract class UriPath extends UriPart implements Collection<String>, Com
   @Override
   public abstract <T> Output<T> display(Output<T> output);
 
-  static <T> Output<T> display(UriPath path, Output<T> output) {
+  static <T> Output<T> display(Output<T> output, UriPath path) {
     while (!path.isEmpty()) {
       if (path.isAbsolute()) {
         output = output.write('/');
       } else {
-        output = Uri.writePathSegment(path.head(), output);
+        output = Uri.writePathSegment(output, path.head());
       }
       path = path.tail();
     }

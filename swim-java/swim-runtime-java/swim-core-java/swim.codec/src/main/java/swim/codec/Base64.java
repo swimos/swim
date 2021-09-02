@@ -67,7 +67,7 @@ public abstract class Base64 {
     } else {
       Output<String> message = Unicode.stringOutput();
       message = message.write("Invalid base-64 digit: ");
-      message = Format.debugChar(c, message);
+      message = Format.debugChar(message, c);
       throw new IllegalArgumentException(message.bind());
     }
   }
@@ -87,7 +87,7 @@ public abstract class Base64 {
    *
    * @return the continuation of the {@code output}.
    */
-  public <T> Output<T> writeQuantum(int c1, int c2, int c3, int c4, Output<T> output) {
+  public <T> Output<T> writeQuantum(Output<T> output, int c1, int c2, int c3, int c4) {
     final int x = this.decodeDigit(c1);
     final int y = this.decodeDigit(c2);
     if (c3 != '=') {
@@ -114,7 +114,7 @@ public abstract class Base64 {
    * and writes the decoded bytes to {@code output}.
    */
   public <O> Parser<O> parser(Output<O> output) {
-    return new Base64Parser<O>(output, this);
+    return new Base64Parser<O>(this, output);
   }
 
   /**
@@ -123,7 +123,7 @@ public abstract class Base64 {
    * that knows how to parse any additional input.
    */
   public <O> Parser<O> parse(Input input, Output<O> output) {
-    return Base64Parser.parse(input, output, this);
+    return Base64Parser.parse(input, this, output);
   }
 
   /**
@@ -134,7 +134,7 @@ public abstract class Base64 {
    * base-64 data.
    */
   public Parser<byte[]> parseByteArray(Input input) {
-    return Base64Parser.parse(input, Binary.byteArrayOutput(), this);
+    return Base64Parser.parse(input, this, Binary.byteArrayOutput());
   }
 
   /**
@@ -145,7 +145,7 @@ public abstract class Base64 {
    * base-64 data.
    */
   public Parser<ByteBuffer> parseByteBuffer(Input input) {
-    return Base64Parser.parse(input, Binary.byteBufferOutput(), this);
+    return Base64Parser.parse(input, this, Binary.byteBufferOutput());
   }
 
   /**
@@ -164,7 +164,7 @@ public abstract class Base64 {
    */
   @SuppressWarnings("unchecked")
   public Writer<?, byte[]> byteArrayWriter(byte[] input) {
-    return (Writer<?, byte[]>) (Writer<?, ?>) new Base64Writer(input, input, this);
+    return (Writer<?, byte[]>) (Writer<?, ?>) new Base64Writer(this, input, input);
   }
 
   /**
@@ -183,7 +183,7 @@ public abstract class Base64 {
    */
   @SuppressWarnings("unchecked")
   public Writer<?, ByteBuffer> byteBufferWriter(ByteBuffer input) {
-    return (Writer<?, ByteBuffer>) (Writer<?, ?>) new Base64Writer(input, input, this);
+    return (Writer<?, ByteBuffer>) (Writer<?, ?>) new Base64Writer(this, input, input);
   }
 
   /**
@@ -191,8 +191,8 @@ public abstract class Base64 {
    * to the {@code output}, returning a {@code Writer} continuation that knows
    * how to write any remaining output that couldn't be immediately generated.
    */
-  public Writer<?, ?> writeByteArray(byte[] input, Output<?> output) {
-    return Base64Writer.write(output, input, this);
+  public Writer<?, ?> writeByteArray(Output<?> output, byte[] input) {
+    return Base64Writer.write(output, this, null, input);
   }
 
   /**
@@ -200,8 +200,8 @@ public abstract class Base64 {
    * to the {@code output}, returning a {@code Writer} continuation that knows
    * how to write any remaining output that couldn't be immediately generated.
    */
-  public Writer<?, ?> writeByteBuffer(ByteBuffer input, Output<?> output) {
-    return Base64Writer.write(output, input, this);
+  public Writer<?, ?> writeByteBuffer(Output<?> output, ByteBuffer input) {
+    return Base64Writer.write(output, this, null, input);
   }
 
   private static Base64 standard;

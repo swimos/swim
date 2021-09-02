@@ -22,13 +22,13 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
 
   final WsEncoder ws;
   final WsFrame<O> frame;
-  final Encoder<?, ?> content;
+  final Encoder<?, ?> payloadEncoder;
   final long offset;
 
-  WsFrameEncoder(WsEncoder ws, WsFrame<O> frame, Encoder<?, ?> content, long offset) {
+  WsFrameEncoder(WsEncoder ws, WsFrame<O> frame, Encoder<?, ?> payloadEncoder, long offset) {
     this.ws = ws;
     this.frame = frame;
-    this.content = content;
+    this.payloadEncoder = payloadEncoder;
     this.offset = offset;
   }
 
@@ -38,18 +38,18 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
 
   @Override
   public Encoder<Object, WsFrame<O>> pull(OutputBuffer<?> output) {
-    return WsFrameEncoder.encode(output, this.ws, this.frame, this.content, this.offset);
+    return WsFrameEncoder.encode(output, this.ws, this.frame, this.payloadEncoder, this.offset);
   }
 
-  static <O> Encoder<Object, WsFrame<O>> encode(OutputBuffer<?> output, WsEncoder ws,
-                                                WsFrame<O> frame, Encoder<?, ?> content, long offset) {
+  static <O> Encoder<Object, WsFrame<O>> encode(OutputBuffer<?> output, WsEncoder ws, WsFrame<O> frame,
+                                                Encoder<?, ?> payloadEncoder, long offset) {
     final boolean isMasked = ws.isMasked();
     final int outputSize = output.remaining();
     final int maskSize = isMasked ? 4 : 0;
     final int maxHeaderSize = (outputSize <= 127 ? 2 : outputSize <= 65539 ? 4 : 10) + maskSize;
-    final WsOpcode opcode = frame.opcode();
+    final WsOpcode frameType = frame.frameType();
 
-    if (outputSize >= maxHeaderSize + (opcode.isControl() ? 0 : ws.minDataFrameBufferSize())) {
+    if (outputSize >= maxHeaderSize + (frameType.isControl() ? 0 : ws.minDataFrameBufferSize())) {
       // prepare output buffer for payload
       final int outputBase = output.index();
       final int maxPayloadBase = outputBase + maxHeaderSize;
@@ -57,10 +57,10 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
 
       // encode payload
       final Encoder<?, ?> nextContent;
-      if (content == null) {
-        nextContent = frame.encodeContent(output, ws);
+      if (payloadEncoder == null) {
+        nextContent = frame.payloadEncoder(ws).pull(output);
       } else {
-        nextContent = content.pull(output);
+        nextContent = payloadEncoder.pull(output);
       }
       final int payloadSize = output.index() - maxPayloadBase;
       final int headerSize = (payloadSize <= 125 ? 2 : payloadSize <= 65535 ? 4 : 10) + maskSize;
@@ -69,21 +69,21 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
       final int finRsvOp;
       if (nextContent.isDone()) {
         if (offset == 0L) {
-          finRsvOp = 0x80 | opcode.code;
+          finRsvOp = 0x80 | frameType.code;
         } else {
           finRsvOp = 0x80;
         }
       } else if (nextContent.isError()) {
         return nextContent.asError();
       } else if (offset == 0L) {
-        finRsvOp = opcode.code;
+        finRsvOp = frameType.code;
       } else {
         finRsvOp = 0x00;
       }
       output = output.index(outputBase);
-      if (!opcode.isControl() || (finRsvOp & 0x80) != 0) {
+      if (!frameType.isControl() || (finRsvOp & 0x80) != 0) {
         // not a fragmented control frame
-        content = nextContent;
+        payloadEncoder = nextContent;
         output = output.write(finRsvOp);
         if (payloadSize < 126) {
           output = output.write(isMasked ? 0x80 | payloadSize : payloadSize);
@@ -123,7 +123,7 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
         offset += payloadSize;
         output = output.index(outputBase + headerSize + payloadSize);
 
-        if (content.isDone()) {
+        if (payloadEncoder.isDone()) {
           return Encoder.done(frame);
         }
       }
@@ -133,7 +133,7 @@ final class WsFrameEncoder<O> extends Encoder<Object, WsFrame<O>> {
     } else if (output.isError()) {
       return Encoder.error(output.trap());
     }
-    return new WsFrameEncoder<O>(ws, frame, content, offset);
+    return new WsFrameEncoder<O>(ws, frame, payloadEncoder, offset);
   }
 
   static <O> Encoder<Object, WsFrame<O>> encode(OutputBuffer<?> output, WsEncoder ws, WsFrame<O> frame) {

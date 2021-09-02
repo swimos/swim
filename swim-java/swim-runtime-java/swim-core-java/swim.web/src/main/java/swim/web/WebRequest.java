@@ -15,9 +15,9 @@
 package swim.web;
 
 import swim.collections.FingerTrieSeq;
-import swim.http.HttpEntity;
 import swim.http.HttpHeader;
 import swim.http.HttpMethod;
+import swim.http.HttpPayload;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpVersion;
@@ -70,8 +70,8 @@ public abstract class WebRequest {
     return this.httpRequest().getHeader(headerClass);
   }
 
-  public HttpEntity<?> httpEntity() {
-    return this.httpRequest().entity();
+  public HttpPayload<?> httpPayload() {
+    return this.httpRequest().payload();
   }
 
   public abstract UriPath routePath();

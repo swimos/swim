@@ -24,7 +24,7 @@ import swim.concurrent.Theater;
 import swim.io.IpServiceRef;
 import swim.io.IpSocketRef;
 import swim.mqtt.MqttPacket;
-import swim.mqtt.MqttPublish;
+import swim.mqtt.MqttPublishPacket;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -96,19 +96,19 @@ public abstract class MqttSocketBehaviors {
       @Override
       public void didConnect() {
         this.read(Utf8.stringParser());
-        this.write(MqttPublish.create("test").payload("@clientToServer"));
+        this.write(MqttPublishPacket.create("test").payload("@clientToServer"));
       }
 
       @Override
       public void didRead(MqttPacket<? extends String> packet) {
-        assertTrue(packet instanceof MqttPublish<?>);
-        assertEquals(((MqttPublish<? extends String>) packet).payload().get(), "@serverToClient");
+        assertTrue(packet instanceof MqttPublishPacket<?>);
+        assertEquals(((MqttPublishPacket<? extends String>) packet).payloadValue(), "@serverToClient");
         clientRead.countDown();
       }
 
       @Override
       public void didWrite(MqttPacket<? extends String> packet) {
-        assertEquals(((MqttPublish<? extends String>) packet).payload().get(), "@clientToServer");
+        assertEquals(((MqttPublishPacket<? extends String>) packet).payloadValue(), "@clientToServer");
         clientWrite.countDown();
       }
     };
@@ -116,19 +116,19 @@ public abstract class MqttSocketBehaviors {
       @Override
       public void didConnect() {
         this.read(Utf8.stringParser());
-        this.write(MqttPublish.create("test").payload("@serverToClient"));
+        this.write(MqttPublishPacket.create("test").payload("@serverToClient"));
       }
 
       @Override
       public void didRead(MqttPacket<? extends String> packet) {
-        assertTrue(packet instanceof MqttPublish<?>);
-        assertEquals(((MqttPublish<? extends String>) packet).payload().get(), "@clientToServer");
+        assertTrue(packet instanceof MqttPublishPacket<?>);
+        assertEquals(((MqttPublishPacket<? extends String>) packet).payloadValue(), "@clientToServer");
         serverRead.countDown();
       }
 
       @Override
       public void didWrite(MqttPacket<? extends String> packet) {
-        assertEquals(((MqttPublish<? extends String>) packet).payload().get(), "@serverToClient");
+        assertEquals(((MqttPublishPacket<? extends String>) packet).payloadValue(), "@serverToClient");
         serverWrite.countDown();
       }
     };
@@ -182,7 +182,7 @@ public abstract class MqttSocketBehaviors {
             public void didConnect() {
               t0.compareAndSet(0L, System.currentTimeMillis());
               this.read(Utf8.stringParser());
-              this.write(MqttPublish.create("test").payload(payload));
+              this.write(MqttPublishPacket.create("test").payload(payload));
             }
 
             @Override
@@ -205,7 +205,7 @@ public abstract class MqttSocketBehaviors {
                 }
                 count.incrementAndGet();
               }
-              this.write(MqttPublish.create("test").payload(payload));
+              this.write(MqttPublishPacket.create("test").payload(payload));
             }
 
             @Override

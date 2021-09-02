@@ -52,15 +52,15 @@ abstract class DerEncoder<V> {
     }
   }
 
-  public Encoder<?, ?> encode(V value, OutputBuffer<?> output) {
+  public Encoder<?, ?> encode(OutputBuffer<?> output, V value) {
     final int tag = this.tagOf(value);
     if (this.isSequence(value)) {
       final int length = this.sizeOfSequence(this.iterator(value));
-      return this.encodeSequence(tag, length, this.iterator(value), output);
+      return this.encodeSequence(output, tag, length, this.iterator(value));
     } else {
       final int length = this.sizeOfPrimitive(value);
       final Encoder<?, ?> data = this.primitiveEncoder(length, value);
-      return this.encodeValue(tag, length, data, output);
+      return this.encodeValue(output, tag, length, data);
     }
   }
 
@@ -72,7 +72,7 @@ abstract class DerEncoder<V> {
     return new DerValueEncoder<V>(this, tag, length, data);
   }
 
-  public Encoder<?, ?> encodeValue(int tag, int length, Encoder<?, ?> data, OutputBuffer<?> output) {
+  public Encoder<?, ?> encodeValue(OutputBuffer<?> output, int tag, int length, Encoder<?, ?> data) {
     return DerValueEncoder.encode(output, this, tag, length, data);
   }
 
@@ -88,7 +88,7 @@ abstract class DerEncoder<V> {
     return new DerSequenceEncoder<V>(this, tag, length, elements);
   }
 
-  public Encoder<?, ?> encodeSequence(int tag, int length, Iterator<V> elements, OutputBuffer<?> output) {
+  public Encoder<?, ?> encodeSequence(OutputBuffer<?> output, int tag, int length, Iterator<V> elements) {
     return DerSequenceEncoder.encode(output, this, tag, length, elements);
   }
 

@@ -23,14 +23,14 @@ final class ParamListWriter extends Writer<Object, Object> {
 
   final HttpWriter http;
   final Iterator<? extends HttpPart> params;
-  final Writer<?, ?> param;
+  final Writer<?, ?> paramWriter;
   final int step;
 
   ParamListWriter(HttpWriter http, Iterator<? extends HttpPart> params,
-                  Writer<?, ?> param, int step) {
+                  Writer<?, ?> paramWriter, int step) {
     this.http = http;
     this.params = params;
-    this.param = param;
+    this.paramWriter = paramWriter;
     this.step = step;
   }
 
@@ -40,32 +40,33 @@ final class ParamListWriter extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return ParamListWriter.write(output, this.http, this.params, this.param, this.step);
+    return ParamListWriter.write(output, this.http, this.params,
+                                 this.paramWriter, this.step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http,
                                       Iterator<? extends HttpPart> params,
-                                      Writer<?, ?> param, int step) {
+                                      Writer<?, ?> paramWriter, int step) {
     do {
       if (step == 1) {
-        if (param == null) {
+        if (paramWriter == null) {
           if (!params.hasNext()) {
             return Writer.done();
           } else {
-            param = params.next().writeHttp(output, http);
+            paramWriter = params.next().writeHttp(output, http);
           }
         } else {
-          param = param.pull(output);
+          paramWriter = paramWriter.pull(output);
         }
-        if (param.isDone()) {
-          param = null;
+        if (paramWriter.isDone()) {
+          paramWriter = null;
           if (!params.hasNext()) {
             return Writer.done();
           } else {
             step = 2;
           }
-        } else if (param.isError()) {
-          return param.asError();
+        } else if (paramWriter.isError()) {
+          return paramWriter.asError();
         }
       }
       if (step == 2 && output.isCont()) {
@@ -84,7 +85,7 @@ final class ParamListWriter extends Writer<Object, Object> {
     } else if (output.isError()) {
       return Writer.error(output.trap());
     }
-    return new ParamListWriter(http, params, param, step);
+    return new ParamListWriter(http, params, paramWriter, step);
   }
 
   static Writer<Object, Object> write(Output<?> output, HttpWriter http,

@@ -87,7 +87,7 @@ public class HttpSettings implements Debug {
 
   /**
    * Returns the maximum size in bytes on the wire of an HTTP request or
-   * response message + entity.
+   * response message + payload.
    */
   public int maxMessageSize() {
     return this.maxMessageSize;
@@ -95,7 +95,7 @@ public class HttpSettings implements Debug {
 
   /**
    * Returns a copy of these {@code HttpSettings} configured with the given
-   * {@code maxMessageSize} limit on HTTP message + entity sizes.
+   * {@code maxMessageSize} limit on HTTP message + payload sizes.
    */
   public HttpSettings maxMessageSize(int maxMessageSize) {
     return this.copy(this.ipSettings, maxMessageSize);

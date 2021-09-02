@@ -19,7 +19,7 @@ import swim.io.FlowContext;
 import swim.io.IpContext;
 import swim.io.IpSocket;
 import swim.warp.Envelope;
-import swim.ws.WsControl;
+import swim.ws.WsControlFrame;
 
 public interface WarpSocketContext extends IpContext, FlowContext {
 
@@ -31,7 +31,7 @@ public interface WarpSocketContext extends IpContext, FlowContext {
 
   void feed(Envelope envelope);
 
-  void write(WsControl<?, ? extends Envelope> frame);
+  void write(WsControlFrame<?, ? extends Envelope> frame);
 
   void become(IpSocket socket);
 

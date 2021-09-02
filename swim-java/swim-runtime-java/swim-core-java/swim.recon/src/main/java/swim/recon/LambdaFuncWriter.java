@@ -51,7 +51,7 @@ final class LambdaFuncWriter<I, V> extends Writer<Object, Object> {
                                              V bindings, V template, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = recon.writePrimary(bindings, output);
+        part = recon.writePrimary(output, bindings);
       } else {
         part = part.pull(output);
       }
@@ -80,7 +80,7 @@ final class LambdaFuncWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 6) {
       if (part == null) {
-        part = recon.writeValue(template, output);
+        part = recon.writeValue(output, template);
       } else {
         part = part.pull(output);
       }

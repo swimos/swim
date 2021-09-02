@@ -21,14 +21,15 @@ import swim.codec.Parser;
 final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
 
   final HttpParser http;
-  final StringBuilder name;
-  final StringBuilder version;
+  final StringBuilder nameBuilder;
+  final StringBuilder versionBuilder;
   final int step;
 
-  UpgradeProtocolParser(HttpParser http, StringBuilder name, StringBuilder version, int step) {
+  UpgradeProtocolParser(HttpParser http, StringBuilder nameBuilder,
+                        StringBuilder versionBuilder, int step) {
     this.http = http;
-    this.name = name;
-    this.version = version;
+    this.nameBuilder = nameBuilder;
+    this.versionBuilder = versionBuilder;
     this.step = step;
   }
 
@@ -38,21 +39,22 @@ final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
 
   @Override
   public Parser<UpgradeProtocol> feed(Input input) {
-    return UpgradeProtocolParser.parse(input, this.http, this.name, this.version, this.step);
+    return UpgradeProtocolParser.parse(input, this.http, this.nameBuilder,
+                                       this.versionBuilder, this.step);
   }
 
-  static Parser<UpgradeProtocol> parse(Input input, HttpParser http, StringBuilder name,
-                                       StringBuilder version, int step) {
+  static Parser<UpgradeProtocol> parse(Input input, HttpParser http, StringBuilder nameBuilder,
+                                       StringBuilder versionBuilder, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (name == null) {
-            name = new StringBuilder();
+          if (nameBuilder == null) {
+            nameBuilder = new StringBuilder();
           }
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
           step = 2;
         } else {
           return Parser.error(Diagnostic.expected("upgrade protocol name", input));
@@ -66,7 +68,7 @@ final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -75,7 +77,7 @@ final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
         input = input.step();
         step = 3;
       } else if (!input.isEmpty()) {
-        return Parser.done(http.upgradeProtocol(name.toString(), ""));
+        return Parser.done(http.upgradeProtocol(nameBuilder.toString(), ""));
       }
     }
     if (step == 3) {
@@ -83,10 +85,10 @@ final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (version == null) {
-            version = new StringBuilder();
+          if (versionBuilder == null) {
+            versionBuilder = new StringBuilder();
           }
-          version.appendCodePoint(c);
+          versionBuilder.appendCodePoint(c);
           step = 4;
         } else {
           return Parser.error(Diagnostic.expected("upgrade protocol version", input));
@@ -100,19 +102,19 @@ final class UpgradeProtocolParser extends Parser<UpgradeProtocol> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          version.appendCodePoint(c);
+          versionBuilder.appendCodePoint(c);
         } else {
           break;
         }
       }
       if (!input.isEmpty()) {
-        return Parser.done(http.upgradeProtocol(name.toString(), version.toString()));
+        return Parser.done(http.upgradeProtocol(nameBuilder.toString(), versionBuilder.toString()));
       }
     }
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new UpgradeProtocolParser(http, name, version, step);
+    return new UpgradeProtocolParser(http, nameBuilder, versionBuilder, step);
   }
 
   static Parser<UpgradeProtocol> parse(Input input, HttpParser http) {

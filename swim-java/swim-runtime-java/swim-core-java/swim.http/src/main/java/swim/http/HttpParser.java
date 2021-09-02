@@ -22,29 +22,29 @@ import swim.codec.Parser;
 import swim.codec.Unicode;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieMap;
-import swim.http.header.Accept;
-import swim.http.header.AcceptCharset;
-import swim.http.header.AcceptEncoding;
-import swim.http.header.AcceptLanguage;
-import swim.http.header.Allow;
-import swim.http.header.Connection;
-import swim.http.header.ContentEncoding;
-import swim.http.header.ContentLength;
-import swim.http.header.ContentType;
-import swim.http.header.Expect;
-import swim.http.header.Host;
-import swim.http.header.MaxForwards;
-import swim.http.header.Origin;
+import swim.http.header.AcceptCharsetHeader;
+import swim.http.header.AcceptEncodingHeader;
+import swim.http.header.AcceptHeader;
+import swim.http.header.AcceptLanguageHeader;
+import swim.http.header.AllowHeader;
+import swim.http.header.ConnectionHeader;
+import swim.http.header.ContentEncodingHeader;
+import swim.http.header.ContentLengthHeader;
+import swim.http.header.ContentTypeHeader;
+import swim.http.header.ExpectHeader;
+import swim.http.header.HostHeader;
+import swim.http.header.MaxForwardsHeader;
+import swim.http.header.OriginHeader;
 import swim.http.header.RawHeader;
-import swim.http.header.SecWebSocketAccept;
-import swim.http.header.SecWebSocketExtensions;
-import swim.http.header.SecWebSocketKey;
-import swim.http.header.SecWebSocketProtocol;
-import swim.http.header.SecWebSocketVersion;
-import swim.http.header.Server;
-import swim.http.header.TransferEncoding;
-import swim.http.header.Upgrade;
-import swim.http.header.UserAgent;
+import swim.http.header.SecWebSocketAcceptHeader;
+import swim.http.header.SecWebSocketExtensionsHeader;
+import swim.http.header.SecWebSocketKeyHeader;
+import swim.http.header.SecWebSocketProtocolHeader;
+import swim.http.header.SecWebSocketVersionHeader;
+import swim.http.header.ServerHeader;
+import swim.http.header.TransferEncodingHeader;
+import swim.http.header.UpgradeHeader;
+import swim.http.header.UserAgentHeader;
 import swim.uri.Uri;
 
 public class HttpParser {
@@ -91,7 +91,8 @@ public class HttpParser {
     return LanguageRange.create(tag, subtag, weight);
   }
 
-  public MediaRange mediaRange(String type, String subtype, float weight, HashTrieMap<String, String> params) {
+  public MediaRange mediaRange(String type, String subtype, float weight,
+                               HashTrieMap<String, String> params) {
     return MediaRange.create(type, subtype, weight, params);
   }
 
@@ -225,53 +226,53 @@ public class HttpParser {
     return parser.bind();
   }
 
-  public Parser<? extends HttpHeader> parseHeaderValue(String name, Input input) {
+  public Parser<? extends HttpHeader> parseHeaderValue(Input input, String name) {
     if ("Accept".equalsIgnoreCase(name)) {
-      return Accept.parseHttpValue(input, this);
+      return AcceptHeader.parseHeaderValue(input, this);
     } else if ("Accept-Charset".equalsIgnoreCase(name)) {
-      return AcceptCharset.parseHttpValue(input, this);
+      return AcceptCharsetHeader.parseHeaderValue(input, this);
     } else if ("Accept-Encoding".equalsIgnoreCase(name)) {
-      return AcceptEncoding.parseHttpValue(input, this);
+      return AcceptEncodingHeader.parseHeaderValue(input, this);
     } else if ("Accept-Language".equalsIgnoreCase(name)) {
-      return AcceptLanguage.parseHttpValue(input, this);
+      return AcceptLanguageHeader.parseHeaderValue(input, this);
     } else if ("Allow".equalsIgnoreCase(name)) {
-      return Allow.parseHttpValue(input, this);
+      return AllowHeader.parseHeaderValue(input, this);
     } else if ("Connection".equalsIgnoreCase(name)) {
-      return Connection.parseHttpValue(input, this);
+      return ConnectionHeader.parseHeaderValue(input, this);
     } else if ("Content-Encoding".equalsIgnoreCase(name)) {
-      return ContentEncoding.parseHttpValue(input, this);
+      return ContentEncodingHeader.parseHeaderValue(input, this);
     } else if ("Content-Length".equalsIgnoreCase(name)) {
-      return ContentLength.parseHttpValue(input, this);
+      return ContentLengthHeader.parseHeaderValue(input, this);
     } else if ("Content-Type".equalsIgnoreCase(name)) {
-      return ContentType.parseHttpValue(input, this);
+      return ContentTypeHeader.parseHeaderValue(input, this);
     } else if ("Expect".equalsIgnoreCase(name)) {
-      return Expect.parseHttpValue(input, this);
+      return ExpectHeader.parseHeaderValue(input, this);
     } else if ("Host".equalsIgnoreCase(name)) {
-      return Host.parseHttpValue(input, this);
+      return HostHeader.parseHeaderValue(input, this);
     } else if ("Max-Forwards".equalsIgnoreCase(name)) {
-      return MaxForwards.parseHttpValue(input, this);
+      return MaxForwardsHeader.parseHeaderValue(input, this);
     } else if ("Origin".equalsIgnoreCase(name)) {
-      return Origin.parseHttpValue(input, this);
+      return OriginHeader.parseHeaderValue(input, this);
     } else if ("Sec-WebSocket-Accept".equalsIgnoreCase(name)) {
-      return SecWebSocketAccept.parseHttpValue(input, this);
+      return SecWebSocketAcceptHeader.parseHeaderValue(input, this);
     } else if ("Sec-WebSocket-Extensions".equalsIgnoreCase(name)) {
-      return SecWebSocketExtensions.parseHttpValue(input, this);
+      return SecWebSocketExtensionsHeader.parseHeaderValue(input, this);
     } else if ("Sec-WebSocket-Key".equalsIgnoreCase(name)) {
-      return SecWebSocketKey.parseHttpValue(input, this);
+      return SecWebSocketKeyHeader.parseHeaderValue(input, this);
     } else if ("Sec-WebSocket-Protocol".equalsIgnoreCase(name)) {
-      return SecWebSocketProtocol.parseHttpValue(input, this);
+      return SecWebSocketProtocolHeader.parseHeaderValue(input, this);
     } else if ("Sec-WebSocket-Version".equalsIgnoreCase(name)) {
-      return SecWebSocketVersion.parseHttpValue(input, this);
+      return SecWebSocketVersionHeader.parseHeaderValue(input, this);
     } else if ("Server".equals(name)) {
-      return Server.parseHttpValue(input, this);
+      return ServerHeader.parseHeaderValue(input, this);
     } else if ("Transfer-Encoding".equalsIgnoreCase(name)) {
-      return TransferEncoding.parseHttpValue(input, this);
+      return TransferEncodingHeader.parseHeaderValue(input, this);
     } else if ("Upgrade".equalsIgnoreCase(name)) {
-      return Upgrade.parseHttpValue(input, this);
+      return UpgradeHeader.parseHeaderValue(input, this);
     } else if ("User-Agent".equalsIgnoreCase(name)) {
-      return UserAgent.parseHttpValue(input, this);
+      return UserAgentHeader.parseHeaderValue(input, this);
     } else {
-      return RawHeader.parseHttpValue(input, this, name.toLowerCase(), name);
+      return RawHeader.parseHeaderValue(input, this, name.toLowerCase(), name);
     }
   }
 
@@ -520,26 +521,27 @@ public class HttpParser {
     return ParamMapParser.parseRest(input);
   }
 
-  public Parser<HashTrieMap<String, String>> parseParamMapRest(StringBuilder key, Input input) {
+  public Parser<HashTrieMap<String, String>> parseParamMapRest(Input input, StringBuilder key) {
     return ParamMapParser.parseRest(input, key);
   }
 
-  public <T> Decoder<HttpMessage<T>> bodyDecoder(HttpMessage<?> message, Decoder<T> content, long length) {
-    return new HttpBodyDecoder<T>(message, content, length);
+  public <T> Decoder<HttpMessage<T>> bodyDecoder(HttpMessage<?> message, Decoder<T> payloadDecoder,
+                                                 long contentLength) {
+    return new HttpBodyDecoder<T>(message, payloadDecoder, contentLength);
   }
 
-  public <T> Decoder<HttpMessage<T>> decodeBody(HttpMessage<?> message, Decoder<T> content,
-                                                long length, InputBuffer input) {
-    return HttpBodyDecoder.decode(input, message, content, length);
+  public <T> Decoder<HttpMessage<T>> decodeBody(InputBuffer input, HttpMessage<?> message,
+                                                Decoder<T> payloadDecoder, long contentLength) {
+    return HttpBodyDecoder.decode(input, message, payloadDecoder, contentLength);
   }
 
-  public <T> Decoder<HttpMessage<T>> chunkedDecoder(HttpMessage<?> message, Decoder<T> content) {
-    return new HttpChunkedDecoder<T>(this, message, content);
+  public <T> Decoder<HttpMessage<T>> chunkedDecoder(HttpMessage<?> message, Decoder<T> payloadDecoder) {
+    return new HttpChunkedDecoder<T>(this, message, payloadDecoder);
   }
 
-  public <T> Decoder<HttpMessage<T>> decodeChunked(HttpMessage<?> message, Decoder<T> content,
-                                                   InputBuffer input) {
-    return HttpChunkedDecoder.decode(input, this, message, content);
+  public <T> Decoder<HttpMessage<T>> decodeChunked(InputBuffer input, HttpMessage<?> message,
+                                                   Decoder<T> payloadDecoder) {
+    return HttpChunkedDecoder.decode(input, this, message, payloadDecoder);
   }
 
 }

@@ -41,7 +41,8 @@ final class MqttDataDecoder extends Decoder<Data> {
     return MqttDataDecoder.decode(input, this.decoder, this.remaining, this.step);
   }
 
-  static Decoder<Data> decode(InputBuffer input, Decoder<byte[]> decoder, int remaining, int step) {
+  static Decoder<Data> decode(InputBuffer input, Decoder<byte[]> decoder,
+                              int remaining, int step) {
     if (step == 1 && input.isCont()) {
       remaining = input.head() << 8;
       input = input.step();
@@ -62,7 +63,7 @@ final class MqttDataDecoder extends Decoder<Data> {
       final boolean inputPart = input.isPart();
       input = input.isPart(remaining > inputRemaining);
       if (decoder == null) {
-        decoder = Binary.parseOutput(Binary.byteArrayOutput(remaining), input);
+        decoder = Binary.parseOutput(input, Binary.byteArrayOutput(remaining));
       } else {
         decoder = decoder.feed(input);
       }

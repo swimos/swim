@@ -72,7 +72,7 @@ public abstract class XmlParser<I, V> {
 
   public abstract Builder<I, V> fragmentBuilder();
 
-  public boolean expandEntityRef(String name, Output<?> output) {
+  public boolean expandEntityRef(Output<?> output, String name) {
     if ("amp".equals(name)) {
       output = output.write('&');
       return true;

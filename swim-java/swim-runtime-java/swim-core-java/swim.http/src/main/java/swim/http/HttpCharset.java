@@ -57,7 +57,7 @@ public final class HttpCharset extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeCharset(this.name, this.weight, output);
+    return http.writeCharset(output, this.name, this.weight);
   }
 
   public boolean matches(HttpCharset that) {

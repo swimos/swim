@@ -262,8 +262,8 @@ public abstract class IpSocketBehaviors {
       public void doRead() {
         final byte[] data = new byte[5];
         for (int i = 0; i < 5; i += 1) {
-          data[i] = (byte) inputBuffer().head();
-          inputBuffer().step();
+          data[i] = (byte) this.inputBuffer().head();
+          this.inputBuffer().step();
         }
         final String text;
         try {
@@ -289,7 +289,7 @@ public abstract class IpSocketBehaviors {
         } catch (Throwable cause) {
           throw new TestException(cause);
         }
-        Binary.writeByteArray(data, outputBuffer());
+        Binary.writeByteArray(this.outputBuffer(), data);
       }
 
       @Override
@@ -361,7 +361,7 @@ public abstract class IpSocketBehaviors {
         } catch (Throwable cause) {
           throw new TestException(cause);
         }
-        Binary.writeByteArray(data, outputBuffer());
+        Binary.writeByteArray(this.outputBuffer(), data);
       }
 
       @Override
@@ -444,7 +444,7 @@ public abstract class IpSocketBehaviors {
         } catch (Throwable cause) {
           throw new TestException(cause);
         }
-        Binary.writeByteArray(data, outputBuffer());
+        Binary.writeByteArray(this.outputBuffer(), data);
       }
 
       @Override

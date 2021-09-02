@@ -19,47 +19,47 @@ import swim.codec.DecoderException;
 import swim.codec.InputBuffer;
 import swim.codec.Parser;
 import swim.codec.Utf8;
-import swim.http.header.ContentType;
+import swim.http.header.ContentTypeHeader;
 
 final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
 
   final HttpParser http;
   final HttpMessage<?> message;
-  final Decoder<T> content;
+  final Decoder<T> payloadDecoder;
   final HttpChunkHeader header;
   final Parser<?> part;
   final int offset;
   final int step;
 
-  HttpChunkedDecoder(HttpParser http, HttpMessage<?> message, Decoder<T> content,
+  HttpChunkedDecoder(HttpParser http, HttpMessage<?> message, Decoder<T> payloadDecoder,
                      HttpChunkHeader header, Parser<?> part, int offset, int step) {
     this.http = http;
     this.message = message;
-    this.content = content;
+    this.payloadDecoder = payloadDecoder;
     this.header = header;
     this.part = part;
     this.offset = offset;
     this.step = step;
   }
 
-  HttpChunkedDecoder(HttpParser http, HttpMessage<?> message, Decoder<T> content) {
-    this(http, message, content, null, null, 0, 1);
+  HttpChunkedDecoder(HttpParser http, HttpMessage<?> message, Decoder<T> payloadDecoder) {
+    this(http, message, payloadDecoder, null, null, 0, 1);
   }
 
   @Override
   public Decoder<HttpMessage<T>> feed(InputBuffer input) {
-    return HttpChunkedDecoder.decode(input, this.http, this.message, this.content,
+    return HttpChunkedDecoder.decode(input, this.http, this.message, this.payloadDecoder,
                                      this.header, this.part, this.offset, this.step);
   }
 
   static <T> Decoder<HttpMessage<T>> decode(InputBuffer input, HttpParser http,
-                                            HttpMessage<?> message, Decoder<T> content,
+                                            HttpMessage<?> message, Decoder<T> payloadDecoder,
                                             HttpChunkHeader header, Parser<?> part,
                                             int offset, int step) {
     do {
       if (step == 1) { // chunk header
         if (part == null) {
-          part = Utf8.parseDecoded(http.chunkHeaderParser(), input);
+          part = Utf8.parseDecoded(input, http.chunkHeaderParser());
         } else {
           part = part.feed(input);
         }
@@ -80,11 +80,11 @@ final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
         final boolean inputPart = input.isPart();
         if (chunkRemaining < inputRemaining) {
           input = input.limit(inputStart + (int) chunkRemaining).isPart(chunkSize != 0);
-          content = content.feed(input);
+          payloadDecoder = payloadDecoder.feed(input);
           input = input.limit(inputLimit);
         } else {
           input = input.isPart(chunkSize != 0);
-          content = content.feed(input);
+          payloadDecoder = payloadDecoder.feed(input);
         }
         input = input.isPart(inputPart);
         offset += input.index() - inputStart;
@@ -96,8 +96,8 @@ final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
             step = 5;
             break;
           }
-        } else if (content.isError()) {
-          return content.asError();
+        } else if (payloadDecoder.isError()) {
+          return payloadDecoder.asError();
         }
       }
       if (step == 3) {
@@ -125,7 +125,7 @@ final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
     } while (true);
     if (step == 5) { // chunk trailer
       if (part == null) {
-        part = Utf8.parseDecoded(http.chunkTrailerParser(), input);
+        part = Utf8.parseDecoded(input, http.chunkTrailerParser());
       } else {
         part = part.feed(input);
       }
@@ -133,24 +133,24 @@ final class HttpChunkedDecoder<T> extends Decoder<HttpMessage<T>> {
         final HttpChunkTrailer trailer = (HttpChunkTrailer) part.bind();
         message = message.appendedHeaders(trailer.headers());
         final MediaType mediaType;
-        final ContentType contentType = message.getHeader(ContentType.class);
-        if (contentType != null) {
-          mediaType = contentType.mediaType();
+        final ContentTypeHeader contentTypeHeader = message.getHeader(ContentTypeHeader.class);
+        if (contentTypeHeader != null) {
+          mediaType = contentTypeHeader.mediaType();
         } else {
           mediaType = null;
         }
-        final HttpValue<T> entity = HttpValue.create(content.bind(), mediaType);
-        return Decoder.done(message.entity(entity));
+        final HttpValue<T> payload = HttpValue.create(payloadDecoder.bind(), mediaType);
+        return Decoder.done(message.payload(payload));
       } else if (part.isError()) {
         return Decoder.error(part.trap());
       }
     }
-    return new HttpChunkedDecoder<T>(http, message, content, header, part, offset, step);
+    return new HttpChunkedDecoder<T>(http, message, payloadDecoder, header, part, offset, step);
   }
 
   static <T> Decoder<HttpMessage<T>> decode(InputBuffer input, HttpParser http,
-                                            HttpMessage<?> message, Decoder<T> content) {
-    return HttpChunkedDecoder.decode(input, http, message, content, null, null, 0, 1);
+                                            HttpMessage<?> message, Decoder<T> payloadDecoder) {
+    return HttpChunkedDecoder.decode(input, http, message, payloadDecoder, null, null, 0, 1);
   }
 
 }

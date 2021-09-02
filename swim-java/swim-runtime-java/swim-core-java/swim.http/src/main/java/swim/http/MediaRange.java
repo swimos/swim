@@ -106,7 +106,7 @@ public final class MediaRange extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeMediaRange(this.type, this.subtype, this.weight, this.params, output);
+    return http.writeMediaRange(output, this.type, this.subtype, this.weight, this.params);
   }
 
   @Override

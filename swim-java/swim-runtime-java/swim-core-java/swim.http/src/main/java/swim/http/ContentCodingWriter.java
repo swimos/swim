@@ -26,7 +26,8 @@ final class ContentCodingWriter extends Writer<Object, Object> {
   final Writer<?, ?> part;
   final int step;
 
-  ContentCodingWriter(HttpWriter http, String name, float weight, Writer<?, ?> part, int step) {
+  ContentCodingWriter(HttpWriter http, String name, float weight,
+                      Writer<?, ?> part, int step) {
     this.http = http;
     this.name = name;
     this.weight = weight;
@@ -40,14 +41,15 @@ final class ContentCodingWriter extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return ContentCodingWriter.write(output, this.http, this.name, this.weight, this.part, this.step);
+    return ContentCodingWriter.write(output, this.http, this.name,
+                                     this.weight, this.part, this.step);
   }
 
-  static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name, float weight,
-                                      Writer<?, ?> part, int step) {
+  static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name,
+                                      float weight, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = http.writeToken(name, output);
+        part = http.writeToken(output, name);
       } else {
         part = part.pull(output);
       }
@@ -64,7 +66,7 @@ final class ContentCodingWriter extends Writer<Object, Object> {
     }
     if (step == 2) {
       if (part == null) {
-        part = http.writeQValue(weight, output);
+        part = http.writeQValue(output, weight);
       } else {
         part = part.pull(output);
       }
@@ -82,7 +84,8 @@ final class ContentCodingWriter extends Writer<Object, Object> {
     return new ContentCodingWriter(http, name, weight, part, step);
   }
 
-  static Writer<Object, Object> write(Output<?> output, HttpWriter http, String name, float weight) {
+  static Writer<Object, Object> write(Output<?> output, HttpWriter http,
+                                      String name, float weight) {
     return ContentCodingWriter.write(output, http, name, weight, null, 1);
   }
 

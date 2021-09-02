@@ -26,7 +26,7 @@ final class DataStructure extends AvroDataType<Value> {
   @SuppressWarnings("unchecked")
   @Override
   public Decoder<Value> decodeData(InputBuffer input) {
-    return (Decoder<Value>) (Decoder<?>) Binary.parseOutput(Data.output(), input);
+    return (Decoder<Value>) (Decoder<?>) Binary.parseOutput(input, Data.output());
   }
 
 }

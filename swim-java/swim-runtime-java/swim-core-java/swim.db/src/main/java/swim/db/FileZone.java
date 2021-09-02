@@ -340,8 +340,8 @@ abstract class FileZoneReconReader extends FileZoneReader {
   @Override
   protected void bind(ByteBuffer buffer) {
     try {
-      final Parser<Value> parser = Utf8.parseDecoded(Recon.structureParser().blockParser(),
-                                                     Binary.inputBuffer(buffer));
+      final Parser<Value> parser = Utf8.parseDecoded(Binary.inputBuffer(buffer),
+                                                     Recon.structureParser().blockParser());
       if (parser.isDone()) {
         this.bind(parser.bind());
       } else {

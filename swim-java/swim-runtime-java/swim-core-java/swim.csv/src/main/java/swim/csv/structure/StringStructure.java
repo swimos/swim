@@ -73,7 +73,7 @@ final class StringStructure implements CsvStructureCol {
   @SuppressWarnings("unchecked")
   @Override
   public Parser<Item> parseCell(Input input) {
-    return (Parser<Item>) (Parser<?>) Unicode.parseOutput(Text.output(), input);
+    return (Parser<Item>) (Parser<?>) Unicode.parseOutput(input, Text.output());
   }
 
   @Override

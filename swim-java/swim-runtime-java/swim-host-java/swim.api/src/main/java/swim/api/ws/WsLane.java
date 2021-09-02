@@ -22,8 +22,8 @@ import swim.api.ws.function.DoUpgradeWs;
 import swim.api.ws.function.WillReadFrameWs;
 import swim.api.ws.function.WillUpgradeWs;
 import swim.api.ws.function.WillWriteFrameWs;
-import swim.ws.WsControl;
-import swim.ws.WsData;
+import swim.ws.WsControlFrame;
+import swim.ws.WsDataFrame;
 
 public interface WsLane<I, O> extends Lane {
 
@@ -47,8 +47,8 @@ public interface WsLane<I, O> extends Lane {
 
   WsLane<I, O> didWriteFrame(DidWriteFrameWs<O> didWriteFrame);
 
-  <O2 extends O> void write(WsData<O2> frame);
+  <O2 extends O> void write(WsDataFrame<O2> frame);
 
-  <O2 extends O> void write(WsControl<?, O2> frame);
+  <O2 extends O> void write(WsControlFrame<?, O2> frame);
 
 }

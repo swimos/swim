@@ -21,7 +21,8 @@ import swim.codec.InputBuffer;
 final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
 
   final WsDecoder ws;
-  final Decoder<O> content;
+  final WsOpcode frameType;
+  final Decoder<O> payloadDecoder;
   final int finRsvOp;
   final long offset;
   final long length;
@@ -29,10 +30,11 @@ final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
   final int position;
   final int step;
 
-  WsFrameDecoder(WsDecoder ws, Decoder<O> content, int finRsvOp, long offset,
-                 long length, byte[] maskingKey, int position, int step) {
+  WsFrameDecoder(WsDecoder ws, WsOpcode frameType, Decoder<O> payloadDecoder, int finRsvOp,
+                 long offset, long length, byte[] maskingKey, int position, int step) {
     this.ws = ws;
-    this.content = content;
+    this.frameType = frameType;
+    this.payloadDecoder = payloadDecoder;
     this.finRsvOp = finRsvOp;
     this.offset = offset;
     this.length = length;
@@ -41,22 +43,25 @@ final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
     this.step = step;
   }
 
-  WsFrameDecoder(WsDecoder ws, Decoder<O> content) {
-    this(ws, content, 0, 0L, 0L, null, 0, 1);
+  WsFrameDecoder(WsDecoder ws, WsOpcode frameType, Decoder<O> payloadDecoder) {
+    this(ws, frameType, payloadDecoder, 0, 0L, 0L, null, 0, 1);
   }
 
   @Override
   public Decoder<WsFrame<O>> feed(InputBuffer input) {
-    return WsFrameDecoder.decode(input, this.ws, this.content, this.finRsvOp, this.offset,
-                                 this.length, this.maskingKey, this.position, this.step);
+    return WsFrameDecoder.decode(input, this.ws, this.frameType, this.payloadDecoder, this.finRsvOp,
+                                 this.offset, this.length, this.maskingKey, this.position, this.step);
   }
 
-  static <O> Decoder<WsFrame<O>> decode(InputBuffer input, WsDecoder ws, Decoder<O> content,
-                                        int finRsvOp, long offset, long length,
-                                        byte[] maskingKey, int position, int step) {
+  static <O> Decoder<WsFrame<O>> decode(InputBuffer input, WsDecoder ws, WsOpcode frameType,
+                                        Decoder<O> payloadDecoder, int finRsvOp, long offset,
+                                        long length, byte[] maskingKey, int position, int step) {
     if (step == 1 && input.isCont()) { // decode finRsvOp
       finRsvOp = input.head();
       input = input.step();
+      if (frameType == null) {
+        frameType = WsOpcode.from(finRsvOp & 0xf);
+      }
       step = 2;
     }
     if (step == 2 && input.isCont()) { // decode maskLength
@@ -126,27 +131,26 @@ final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
       final boolean inputPart = input.isPart();
       input = input.isPart(!eof);
       if (input.remaining() < size) {
-        content = content.feed(input);
+        payloadDecoder = payloadDecoder.feed(input);
       } else {
         final int inputLimit = input.limit();
         input = input.limit(base + size);
-        content = content.feed(input);
+        payloadDecoder = payloadDecoder.feed(input);
         input = input.limit(inputLimit);
       }
       input = input.isPart(inputPart);
 
-      if (content.isError()) {
-        return content.asError();
+      if (payloadDecoder.isError()) {
+        return payloadDecoder.asError();
       } else if (input.index() != base + size) {
         return Decoder.error(new DecoderException("WsFrameDecoder undecoded websocket data"));
-      } else if (content.isDone()) {
+      } else if (payloadDecoder.isDone()) {
         if (offset == length) {
           if ((finRsvOp & 0x80) != 0) {
-            final int opcode = finRsvOp & 0xf;
-            if (opcode < 0x8) { // decoded message
-              return Decoder.done(ws.message(content.bind()));
+            if (frameType.code < 0x8) { // decoded data frame
+              return Decoder.done(ws.dataFrame(frameType, payloadDecoder.bind()));
             } else { // decoded control frame
-              return Decoder.done(ws.control(WsOpcode.from(opcode), content.bind()));
+              return Decoder.done(ws.controlFrame(frameType, payloadDecoder.bind()));
             }
           } else {
             return Decoder.error(new DecoderException("decoded unfinished websocket message"));
@@ -156,9 +160,8 @@ final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
         }
       } else if (offset == length) {
         if ((finRsvOp & 0x80) == 0) {
-          final int opcode = finRsvOp & 0xf;
-          if (opcode < 0x8) { // decoded fragment
-            return Decoder.done(ws.fragment(WsOpcode.from(opcode), content));
+          if ((finRsvOp & 0xf) < 0x8) { // decoded fragment
+            return Decoder.done(ws.fragmentFrame(frameType, payloadDecoder));
           } else {
             return Decoder.error(new DecoderException("decoded fragmented control frame"));
           }
@@ -172,12 +175,13 @@ final class WsFrameDecoder<O> extends Decoder<WsFrame<O>> {
     } else if (input.isError()) {
       return Decoder.error(input.trap());
     }
-    return new WsFrameDecoder<O>(ws, content, finRsvOp, offset, length,
-                                 maskingKey, position, step);
+    return new WsFrameDecoder<O>(ws, frameType, payloadDecoder, finRsvOp,
+                                 offset, length, maskingKey, position, step);
   }
 
-  static <O> Decoder<WsFrame<O>> decode(InputBuffer input, WsDecoder ws, Decoder<O> content) {
-    return WsFrameDecoder.decode(input, ws, content, 0, 0L, 0L, null, 0, 1);
+  static <O> Decoder<WsFrame<O>> decode(InputBuffer input, WsDecoder ws,
+                                        WsOpcode frameType, Decoder<O> payloadDecoder) {
+    return WsFrameDecoder.decode(input, ws, frameType, payloadDecoder, 0, 0L, 0L, null, 0, 1);
   }
 
 }

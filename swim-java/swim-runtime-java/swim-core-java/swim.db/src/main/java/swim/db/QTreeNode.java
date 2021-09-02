@@ -1316,7 +1316,7 @@ public final class QTreeNode extends QTreePage {
 
   @Override
   public void writePage(Output<?> output) {
-    Recon.write(this.toHeader(), output);
+    Recon.write(output, this.toHeader());
     this.writePageContent(output);
     output.write('\n');
   }
@@ -1335,7 +1335,7 @@ public final class QTreeNode extends QTreePage {
       final Slot[] slots = this.slots;
       for (int i = 0, slotCount = slots.length; i < slotCount; i += 1) {
         output.write(',');
-        Recon.write(slots[i], output);
+        Recon.write(output, slots[i]);
       }
       output.write('}');
     }
@@ -1403,7 +1403,7 @@ public final class QTreeNode extends QTreePage {
   @Override
   public String toString() {
     final Output<String> output = Unicode.stringOutput(pageSize() - 1); // ignore trailing '\n'
-    Recon.write(this.toHeader(), output);
+    Recon.write(output, this.toHeader());
     this.writePageContent(output);
     return output.bind();
   }
@@ -1537,7 +1537,7 @@ public final class QTreeNode extends QTreePage {
       }
     }
     final Output<String> message = Unicode.stringOutput("Malformed qnode: ");
-    Recon.write(value, message);
+    Recon.write(message, value);
     throw new StoreException(message.bind(), cause);
   }
 

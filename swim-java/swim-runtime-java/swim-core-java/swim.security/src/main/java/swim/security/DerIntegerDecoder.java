@@ -72,7 +72,7 @@ final class DerIntegerDecoder<V> extends Decoder<V> {
       final boolean inputPart = input.isPart();
       input = input.isPart(remaining > inputRemaining);
       if (data == null) {
-        data = Binary.parseOutput(Binary.byteArrayOutput(remaining), input);
+        data = Binary.parseOutput(input, Binary.byteArrayOutput(remaining));
       } else {
         data = data.feed(input);
       }

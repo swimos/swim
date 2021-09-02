@@ -59,7 +59,7 @@ public final class Base16 {
    */
   @SuppressWarnings("unchecked")
   public Writer<?, byte[]> byteArrayWriter(byte[] input) {
-    return (Writer<?, byte[]>) (Writer<?, ?>) new Base16Writer(input, input, this);
+    return (Writer<?, byte[]>) (Writer<?, ?>) new Base16Writer(this, input, input);
   }
 
   /**
@@ -78,7 +78,7 @@ public final class Base16 {
    */
   @SuppressWarnings("unchecked")
   public Writer<?, ByteBuffer> byteBufferWriter(ByteBuffer input) {
-    return (Writer<?, ByteBuffer>) (Writer<?, ?>) new Base16Writer(input, input, this);
+    return (Writer<?, ByteBuffer>) (Writer<?, ?>) new Base16Writer(this, input, input);
   }
 
   /**
@@ -86,8 +86,8 @@ public final class Base16 {
    * to the {@code output}, returning a {@code Writer} continuation that knows
    * how to write any remaining output that couldn't be immediately generated.
    */
-  public Writer<?, ?> writeByteArray(byte[] input, Output<?> output) {
-    return Base16Writer.write(output, input, this);
+  public Writer<?, ?> writeByteArray(Output<?> output, byte[] input) {
+    return Base16Writer.write(output, this, null, input);
   }
 
   /**
@@ -95,40 +95,40 @@ public final class Base16 {
    * to the {@code output}, returning a {@code Writer} continuation that knows
    * how to write any remaining output that couldn't be immediately generated.
    */
-  public Writer<?, ?> writeByteBuffer(ByteBuffer input, Output<?> output) {
-    return Base16Writer.write(output, input, this);
+  public Writer<?, ?> writeByteBuffer(Output<?> output, ByteBuffer input) {
+    return Base16Writer.write(output, this, null, input);
   }
 
-  public Writer<?, ?> writeInt(int input, Output<?> output, int width) {
-    return Base16IntegerWriter.write(output, null, input, width, this, false);
+  public Writer<?, ?> writeInt(Output<?> output, int input, int width) {
+    return Base16IntegerWriter.write(output, this, null, input, width, false);
   }
 
-  public Writer<?, ?> writeInt(int input, Output<?> output) {
-    return Base16IntegerWriter.write(output, null, input, 0, this, false);
+  public Writer<?, ?> writeInt(Output<?> output, int input) {
+    return Base16IntegerWriter.write(output, this, null, input, 0, false);
   }
 
-  public Writer<?, ?> writeLong(long input, Output<?> output, int width) {
-    return Base16IntegerWriter.write(output, null, input, width, this, false);
+  public Writer<?, ?> writeLong(Output<?> output, long input, int width) {
+    return Base16IntegerWriter.write(output, this, null, input, width, false);
   }
 
-  public Writer<?, ?> writeLong(long input, Output<?> output) {
-    return Base16IntegerWriter.write(output, null, input, 0, this, false);
+  public Writer<?, ?> writeLong(Output<?> output, long input) {
+    return Base16IntegerWriter.write(output, this, null, input, 0, false);
   }
 
-  public Writer<?, ?> writeIntLiteral(int input, Output<?> output, int width) {
-    return Base16IntegerWriter.write(output, null, input, width, this, true);
+  public Writer<?, ?> writeIntLiteral(Output<?> output, int input, int width) {
+    return Base16IntegerWriter.write(output, this, null, input, width, true);
   }
 
-  public Writer<?, ?> writeIntLiteral(int input, Output<?> output) {
-    return Base16IntegerWriter.write(output, null, input, 0, this, true);
+  public Writer<?, ?> writeIntLiteral(Output<?> output, int input) {
+    return Base16IntegerWriter.write(output, this, null, input, 0, true);
   }
 
-  public Writer<?, ?> writeLongLiteral(long input, Output<?> output, int width) {
-    return Base16IntegerWriter.write(output, null, input, width, this, true);
+  public Writer<?, ?> writeLongLiteral(Output<?> output, long input, int width) {
+    return Base16IntegerWriter.write(output, this, null, input, width, true);
   }
 
-  public Writer<?, ?> writeLongLiteral(long input, Output<?> output) {
-    return Base16IntegerWriter.write(output, null, input, 0, this, true);
+  public Writer<?, ?> writeLongLiteral(Output<?> output, long input) {
+    return Base16IntegerWriter.write(output, this, null, input, 0, true);
   }
 
   private static Base16 lowercase;
@@ -218,7 +218,7 @@ public final class Base16 {
     } else {
       Output<String> message = Unicode.stringOutput();
       message = message.write("Invalid base-16 digit: ");
-      message = Format.debugChar(c, message);
+      message = Format.debugChar(message, c);
       throw new IllegalArgumentException(message.bind());
     }
   }
@@ -229,7 +229,7 @@ public final class Base16 {
    *
    * @return the continuation of the {@code output}.
    */
-  public static <T> Output<T> writeQuantum(int c1, int c2, Output<T> output) {
+  public static <T> Output<T> writeQuantum(Output<T> output, int c1, int c2) {
     final int x = Base16.decodeDigit(c1);
     final int y = Base16.decodeDigit(c2);
     output = output.write(x << 4 | y);

@@ -461,7 +461,7 @@ public final class BTreeLeaf extends BTreePage {
 
   @Override
   public void writePage(Output<?> output) {
-    Recon.write(this.toHeader(), output);
+    Recon.write(output, this.toHeader());
     this.writePageContent(output);
     output.write('\n');
   }
@@ -471,10 +471,10 @@ public final class BTreeLeaf extends BTreePage {
     final int n = slots.length;
     if (n > 0) {
       output.write('{');
-      Recon.write(slots[0], output);
+      Recon.write(output, slots[0]);
       for (int i = 1; i < n; i += 1) {
         output.write(',');
-        Recon.write(slots[i], output);
+        Recon.write(output, slots[i]);
       }
       output.write('}');
     }
@@ -526,7 +526,7 @@ public final class BTreeLeaf extends BTreePage {
   @Override
   public String toString() {
     final Output<String> output = Unicode.stringOutput(this.pageSize() - 1); // ignore trailing '\n'
-    Recon.write(this.toHeader(), output);
+    Recon.write(output, this.toHeader());
     this.writePageContent(output);
     return output.bind();
   }
@@ -568,7 +568,7 @@ public final class BTreeLeaf extends BTreePage {
       }
     }
     final Output<String> message = Unicode.stringOutput("Malformed bleaf: ");
-    Recon.write(value, message);
+    Recon.write(message, value);
     throw new StoreException(message.bind(), cause);
   }
 

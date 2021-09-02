@@ -57,7 +57,7 @@ final class Base16Parser<O> extends Parser<O> {
           c = input.head();
           if (Base16.isDigit(c)) {
             input = input.step();
-            Base16.writeQuantum(p, c, output);
+            Base16.writeQuantum(output, p, c);
             p = 0;
             step = 1;
           } else {

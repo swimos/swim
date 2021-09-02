@@ -36,76 +36,76 @@ public abstract class JsonWriter<I, V> {
 
   public abstract V value(I item);
 
-  public abstract Writer<?, ?> writeItem(I item, Output<?> output);
+  public abstract Writer<?, ?> writeItem(Output<?> output, I item);
 
-  public abstract Writer<?, ?> writeField(I item, Output<?> output, int index);
+  public abstract Writer<?, ?> writeField(Output<?> output, I item, int index);
 
-  public abstract Writer<?, ?> writeValue(I item, Output<?> output, int index);
+  public abstract Writer<?, ?> writeValue(Output<?> output, I item, int index);
 
-  public abstract Writer<?, ?> writeValue(V value, Output<?> output);
+  public abstract Writer<?, ?> writeValue(Output<?> output, V value);
 
-  public Writer<?, ?> writeField(V key, V value, Output<?> output) {
+  public Writer<?, ?> writeField(Output<?> output, V key, V value) {
     return FieldWriter.write(output, this, key, value);
   }
 
-  public Writer<?, ?> writeArray(I item, Output<?> output) {
+  public Writer<?, ?> writeArray(Output<?> output, I item) {
     return ArrayWriter.write(output, this, this.items(item));
   }
 
-  public Writer<?, ?> writeObject(I item, Output<?> output) {
+  public Writer<?, ?> writeObject(Output<?> output, I item) {
     return ObjectWriter.write(output, this, this.items(item));
   }
 
-  public Writer<?, ?> writeData(ByteBuffer value, Output<?> output) {
+  public Writer<?, ?> writeData(Output<?> output, ByteBuffer value) {
     if (value != null) {
       return DataWriter.write(output, value);
     } else {
-      return Unicode.writeString("\"\"", output);
+      return Unicode.writeString(output, "\"\"");
     }
   }
 
-  public Writer<?, ?> writeText(String value, Output<?> output) {
+  public Writer<?, ?> writeText(Output<?> output, String value) {
     return StringWriter.write(output, value);
   }
 
-  public Writer<?, ?> writeNum(int value, Output<?> output) {
-    return Base10.writeInt(value, output);
+  public Writer<?, ?> writeNum(Output<?> output, int value) {
+    return Base10.writeInt(output, value);
   }
 
-  public Writer<?, ?> writeNum(long value, Output<?> output) {
-    return Base10.writeLong(value, output);
+  public Writer<?, ?> writeNum(Output<?> output, long value) {
+    return Base10.writeLong(output, value);
   }
 
-  public Writer<?, ?> writeNum(float value, Output<?> output) {
-    return Base10.writeFloat(value, output);
+  public Writer<?, ?> writeNum(Output<?> output, float value) {
+    return Base10.writeFloat(output, value);
   }
 
-  public Writer<?, ?> writeNum(double value, Output<?> output) {
-    return Base10.writeDouble(value, output);
+  public Writer<?, ?> writeNum(Output<?> output, double value) {
+    return Base10.writeDouble(output, value);
   }
 
-  public Writer<?, ?> writeNum(BigInteger value, Output<?> output) {
-    return Unicode.writeString(value, output);
+  public Writer<?, ?> writeNum(Output<?> output, BigInteger value) {
+    return Unicode.writeString(output, value);
   }
 
-  public Writer<?, ?> writeUint32(int value, Output<?> output) {
-    return Base16.lowercase().writeIntLiteral(value, output, 8);
+  public Writer<?, ?> writeUint32(Output<?> output, int value) {
+    return Base16.lowercase().writeIntLiteral(output, value, 8);
   }
 
-  public Writer<?, ?> writeUint64(long value, Output<?> output) {
-    return Base16.lowercase().writeLongLiteral(value, output, 16);
+  public Writer<?, ?> writeUint64(Output<?> output, long value) {
+    return Base16.lowercase().writeLongLiteral(output, value, 16);
   }
 
-  public Writer<?, ?> writeBool(boolean value, Output<?> output) {
-    return Unicode.writeString(value ? "true" : "false", output);
+  public Writer<?, ?> writeBool(Output<?> output, boolean value) {
+    return Unicode.writeString(output, value ? "true" : "false");
   }
 
   public Writer<?, ?> writeNull(Output<?> output) {
-    return Unicode.writeString("null", output);
+    return Unicode.writeString(output, "null");
   }
 
   public Writer<?, ?> writeUndefined(Output<?> output) {
-    return Unicode.writeString("undefined", output);
+    return Unicode.writeString(output, "undefined");
   }
 
 }

@@ -24,33 +24,34 @@ final class HttpChunkEncoder extends Encoder<Object, Object> {
 
   final HttpWriter http;
   final HttpChunkHeader header;
-  final Encoder<?, ?> content;
+  final Encoder<?, ?> payloadEncoder;
   final Writer<?, ?> part;
   final int step;
 
-  HttpChunkEncoder(HttpWriter http, HttpChunkHeader header, Encoder<?, ?> content,
+  HttpChunkEncoder(HttpWriter http, HttpChunkHeader header, Encoder<?, ?> payloadEncoder,
                    Writer<?, ?> part, int step) {
     this.http = http;
     this.header = header;
-    this.content = content;
+    this.payloadEncoder = payloadEncoder;
     this.part = part;
     this.step = step;
   }
 
-  HttpChunkEncoder(HttpWriter http, HttpChunkHeader header, Encoder<?, ?> content) {
-    this(http, header, content, null, 1);
+  HttpChunkEncoder(HttpWriter http, HttpChunkHeader header, Encoder<?, ?> payloadEncoder) {
+    this(http, header, payloadEncoder, null, 1);
   }
 
   @Override
   public Encoder<Object, Object> pull(OutputBuffer<?> output) {
-    return HttpChunkEncoder.encode(output, this.http, this.header, this.content, this.part, this.step);
+    return HttpChunkEncoder.encode(output, this.http, this.header,
+                                   this.payloadEncoder, this.part, this.step);
   }
 
   static Encoder<Object, Object> encode(OutputBuffer<?> output, HttpWriter http, HttpChunkHeader header,
-                                        Encoder<?, ?> content, Writer<?, ?> part, int step) {
+                                        Encoder<?, ?> payloadEncoder, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = Utf8.writeEncoded(header.httpWriter(http), output);
+        part = Utf8.writeEncoded(output, header.httpWriter(http));
       } else {
         part = part.pull(output);
       }
@@ -62,11 +63,11 @@ final class HttpChunkEncoder extends Encoder<Object, Object> {
       }
     }
     if (step == 2) {
-      content = content.pull(output);
-      if (content.isDone()) {
+      payloadEncoder = payloadEncoder.pull(output);
+      if (payloadEncoder.isDone()) {
         step = 3;
-      } else if (content.isError()) {
-        return content.asError();
+      } else if (payloadEncoder.isError()) {
+        return payloadEncoder.asError();
       }
     }
     if (step == 3 && output.isCont()) {
@@ -82,12 +83,12 @@ final class HttpChunkEncoder extends Encoder<Object, Object> {
     } else if (output.isError()) {
       return Encoder.error(output.trap());
     }
-    return new HttpChunkEncoder(http, header, content, part, step);
+    return new HttpChunkEncoder(http, header, payloadEncoder, part, step);
   }
 
   static Encoder<Object, Object> encode(OutputBuffer<?> output, HttpWriter http,
-                                        HttpChunkHeader header, Encoder<?, ?> content) {
-    return HttpChunkEncoder.encode(output, http, header, content, null, 1);
+                                        HttpChunkHeader header, Encoder<?, ?> payloadEncoder) {
+    return HttpChunkEncoder.encode(output, http, header, payloadEncoder, null, 1);
   }
 
 }

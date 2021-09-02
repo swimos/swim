@@ -54,7 +54,7 @@ final class MediaTypeWriter extends Writer<Object, Object> {
                                       Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = http.writeToken(type, output);
+        part = http.writeToken(output, type);
       } else {
         part = part.pull(output);
       }
@@ -71,7 +71,7 @@ final class MediaTypeWriter extends Writer<Object, Object> {
     }
     if (step == 3) {
       if (part == null) {
-        part = http.writeToken(subtype, output);
+        part = http.writeToken(output, subtype);
       } else {
         part = part.pull(output);
       }
@@ -88,7 +88,7 @@ final class MediaTypeWriter extends Writer<Object, Object> {
     }
     if (step == 4) {
       if (part == null) {
-        part = http.writeParamMap(params.iterator(), output);
+        part = http.writeParamMap(output, params.iterator());
       } else {
         part = part.pull(output);
       }

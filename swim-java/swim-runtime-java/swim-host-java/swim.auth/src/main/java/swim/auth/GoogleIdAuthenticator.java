@@ -25,7 +25,7 @@ import swim.concurrent.TimerFunction;
 import swim.concurrent.TimerRef;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
-import swim.http.header.Host;
+import swim.http.header.HostHeader;
 import swim.io.http.AbstractHttpClient;
 import swim.io.http.AbstractHttpRequester;
 import swim.io.http.HttpInterface;
@@ -201,7 +201,7 @@ final class GoogleIdAuthenticatorPublicKeyRequester extends AbstractHttpRequeste
   public void doRequest() {
     final Uri publicKeyUri = this.authenticator.publicKeyUri;
     final Uri requestUri = Uri.create(publicKeyUri.path());
-    final HttpRequest<?> request = HttpRequest.get(requestUri, Host.create(publicKeyUri.authority()));
+    final HttpRequest<?> request = HttpRequest.get(requestUri, HostHeader.create(publicKeyUri.authority()));
     this.writeRequest(request);
   }
 
@@ -209,7 +209,7 @@ final class GoogleIdAuthenticatorPublicKeyRequester extends AbstractHttpRequeste
   public void didRespond(HttpResponse<Value> response) {
     FingerTrieSeq<PublicKeyDef> publicKeyDefs = FingerTrieSeq.empty();
     try {
-      for (Item item : response.entity().get().get("keys")) {
+      for (Item item : response.payload().get().get("keys")) {
         final PublicKeyDef publicKeyDef = JsonWebKey.from(item.toValue()).publicKeyDef();
         if (publicKeyDef != null) {
           publicKeyDefs = publicKeyDefs.appended(publicKeyDef);

@@ -44,7 +44,7 @@ public final class WebSocketParam extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeWebSocketParam(this.key, this.value, output);
+    return http.writeWebSocketParam(output, this.key, this.value);
   }
 
   @Override

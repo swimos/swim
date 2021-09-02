@@ -154,8 +154,7 @@ public class HttpServerResponder<T> implements HttpResponderContext {
   void willRequest(HttpRequest<?> request) {
     this.responder.willRequest(request);
     final Decoder<?> contentDecoder = this.responder.contentDecoder(request);
-    final Decoder<HttpRequest<?>> entityDecoder = (Decoder<HttpRequest<?>>) request.entityDecoder(contentDecoder);
-    this.modem.doReadRequestEntity(entityDecoder);
+    this.modem.doReadRequestPayload((Decoder<HttpRequest<?>>) request.payloadDecoder(contentDecoder));
   }
 
   @SuppressWarnings("unchecked")

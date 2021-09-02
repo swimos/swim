@@ -45,7 +45,7 @@ public final class HttpVersion extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeVersion(this.major, this.minor, output);
+    return http.writeVersion(output, this.major, this.minor);
   }
 
   @Override

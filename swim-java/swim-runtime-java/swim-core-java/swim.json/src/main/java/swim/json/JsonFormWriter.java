@@ -55,7 +55,7 @@ final class JsonFormWriter<T> extends Writer<T, T> {
     }
     if (part == null) {
       final Value value = form.mold(object).toValue();
-      part = json.writeValue(value, output);
+      part = json.writeValue(output, value);
     } else {
       part = part.pull(output);
     }

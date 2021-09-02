@@ -40,23 +40,23 @@ public class CsvParser {
     return c == this.delimiter;
   }
 
-  public <T, R, C> Parser<T> parseTable(CsvHeader<T, R, C> header, Input input) {
+  public <T, R, C> Parser<T> parseTable(Input input, CsvHeader<T, R, C> header) {
     return TableParser.parse(input, this, header);
   }
 
-  public <T, R, C> Parser<CsvHeader<T, R, C>> parseHeader(CsvHeader<T, R, C> header, Input input) {
+  public <T, R, C> Parser<CsvHeader<T, R, C>> parseHeader(Input input, CsvHeader<T, R, C> header) {
     return HeaderParser.parse(input, this, header);
   }
 
-  public <T, R, C> Parser<T> parseBody(CsvHeader<T, R, C> header, Input input) {
+  public <T, R, C> Parser<T> parseBody(Input input, CsvHeader<T, R, C> header) {
     return BodyParser.parse(input, this, header);
   }
 
-  public <T, R, C> Parser<R> parseRow(CsvHeader<T, R, C> header, Input input) {
+  public <T, R, C> Parser<R> parseRow(Input input, CsvHeader<T, R, C> header) {
     return RowParser.parse(input, this, header);
   }
 
-  public <C> Parser<C> parseCell(CsvCol<C> col, Input input) {
+  public <C> Parser<C> parseCell(Input input, CsvCol<C> col) {
     return col.parseCell(input);
   }
 
@@ -78,7 +78,7 @@ public class CsvParser {
 
   public <T, R, C> T parseTableString(CsvHeader<T, R, C> header, String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<T> parser = this.parseTable(header, input);
+    Parser<T> parser = this.parseTable(input, header);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -89,7 +89,7 @@ public class CsvParser {
 
   public <T, R, C> T parseTableData(CsvHeader<T, R, C> header, byte[] data) {
     final Input input = Utf8.decodedInput(Binary.inputBuffer(data));
-    Parser<T> parser = this.parseTable(header, input);
+    Parser<T> parser = this.parseTable(input, header);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -100,7 +100,7 @@ public class CsvParser {
 
   public <T, R, C> T parseTableBuffer(CsvHeader<T, R, C> header, ByteBuffer buffer) {
     final Input input = Utf8.decodedInput(Binary.inputBuffer(buffer));
-    Parser<T> parser = this.parseTable(header, input);
+    Parser<T> parser = this.parseTable(input, header);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -111,7 +111,7 @@ public class CsvParser {
 
   public <T, R, C> T parseBodyString(CsvHeader<T, R, C> header, String string) {
     final Input input = Unicode.stringInput(string);
-    Parser<T> parser = this.parseBody(header, input);
+    Parser<T> parser = this.parseBody(input, header);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -122,7 +122,7 @@ public class CsvParser {
 
   public <T, R, C> T parseBodyData(CsvHeader<T, R, C> header, byte[] data) {
     final Input input = Utf8.decodedInput(Binary.inputBuffer(data));
-    Parser<T> parser = this.parseBody(header, input);
+    Parser<T> parser = this.parseBody(input, header);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -133,7 +133,7 @@ public class CsvParser {
 
   public <T, R, C> T parseBodyBuffer(CsvHeader<T, R, C> header, ByteBuffer buffer) {
     final Input input = Utf8.decodedInput(Binary.inputBuffer(buffer));
-    Parser<T> parser = this.parseBody(header, input);
+    Parser<T> parser = this.parseBody(input, header);
     if (input.isCont() && !parser.isError()) {
       parser = Parser.error(Diagnostic.unexpected(input));
     } else if (input.isError()) {
@@ -144,7 +144,7 @@ public class CsvParser {
 
   public <T, R, C> R parseRowString(CsvHeader<T, R, C> header, String string) {
     Input input = Unicode.stringInput(string);
-    Parser<R> parser = this.parseRow(header, input);
+    Parser<R> parser = this.parseRow(input, header);
     if (parser.isDone()) {
       while (input.isCont()) {
         final int c = input.head();
@@ -163,7 +163,7 @@ public class CsvParser {
 
   public <T, R, C> R parseRowData(CsvHeader<T, R, C> header, byte[] data) {
     Input input = Utf8.decodedInput(Binary.inputBuffer(data));
-    Parser<R> parser = this.parseRow(header, input);
+    Parser<R> parser = this.parseRow(input, header);
     if (parser.isDone()) {
       while (input.isCont()) {
         final int c = input.head();
@@ -182,7 +182,7 @@ public class CsvParser {
 
   public <T, R, C> R parseRowBuffer(CsvHeader<T, R, C> header, ByteBuffer buffer) {
     Input input = Utf8.decodedInput(Binary.inputBuffer(buffer));
-    Parser<R> parser = this.parseRow(header, input);
+    Parser<R> parser = this.parseRow(input, header);
     if (parser.isDone()) {
       while (input.isCont()) {
         final int c = input.head();

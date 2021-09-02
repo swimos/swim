@@ -22,15 +22,15 @@ import swim.collections.HashTrieMap;
 final class TransferCodingParser extends Parser<TransferCoding> {
 
   final HttpParser http;
-  final StringBuilder name;
-  final Parser<HashTrieMap<String, String>> params;
+  final StringBuilder nameBuilder;
+  final Parser<HashTrieMap<String, String>> paramsParser;
   final int step;
 
-  TransferCodingParser(HttpParser http, StringBuilder name,
-                       Parser<HashTrieMap<String, String>> params, int step) {
+  TransferCodingParser(HttpParser http, StringBuilder nameBuilder,
+                       Parser<HashTrieMap<String, String>> paramsParser, int step) {
     this.http = http;
-    this.name = name;
-    this.params = params;
+    this.nameBuilder = nameBuilder;
+    this.paramsParser = paramsParser;
     this.step = step;
   }
 
@@ -40,21 +40,22 @@ final class TransferCodingParser extends Parser<TransferCoding> {
 
   @Override
   public Parser<TransferCoding> feed(Input input) {
-    return TransferCodingParser.parse(input, this.http, this.name, this.params, this.step);
+    return TransferCodingParser.parse(input, this.http, this.nameBuilder,
+                                      this.paramsParser, this.step);
   }
 
-  static Parser<TransferCoding> parse(Input input, HttpParser http, StringBuilder name,
-                                      Parser<HashTrieMap<String, String>> params, int step) {
+  static Parser<TransferCoding> parse(Input input, HttpParser http, StringBuilder nameBuilder,
+                                      Parser<HashTrieMap<String, String>> paramsParser, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (name == null) {
-            name = new StringBuilder();
+          if (nameBuilder == null) {
+            nameBuilder = new StringBuilder();
           }
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
           step = 2;
         } else {
           return Parser.error(Diagnostic.expected("transfer coding", input));
@@ -68,7 +69,7 @@ final class TransferCodingParser extends Parser<TransferCoding> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -76,25 +77,25 @@ final class TransferCodingParser extends Parser<TransferCoding> {
       if (input.isCont()) {
         step = 3;
       } else if (input.isDone()) {
-        return Parser.done(http.transferCoding(name.toString(), HashTrieMap.<String, String>empty()));
+        return Parser.done(http.transferCoding(nameBuilder.toString(), HashTrieMap.<String, String>empty()));
       }
     }
     if (step == 3) {
-      if (params == null) {
-        params = http.parseParamMap(input);
+      if (paramsParser == null) {
+        paramsParser = http.parseParamMap(input);
       } else {
-        params = params.feed(input);
+        paramsParser = paramsParser.feed(input);
       }
-      if (params.isDone()) {
-        return Parser.done(http.transferCoding(name.toString(), params.bind()));
-      } else if (params.isError()) {
-        return params.asError();
+      if (paramsParser.isDone()) {
+        return Parser.done(http.transferCoding(nameBuilder.toString(), paramsParser.bind()));
+      } else if (paramsParser.isError()) {
+        return paramsParser.asError();
       }
     }
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new TransferCodingParser(http, name, params, step);
+    return new TransferCodingParser(http, nameBuilder, paramsParser, step);
   }
 
   static Parser<TransferCoding> parse(Input input, HttpParser http) {

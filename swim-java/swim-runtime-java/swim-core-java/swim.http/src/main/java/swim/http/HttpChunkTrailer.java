@@ -41,7 +41,7 @@ public final class HttpChunkTrailer extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeChunkTrailer(this.headers.iterator(), output);
+    return http.writeChunkTrailer(output, this.headers.iterator());
   }
 
   @Override

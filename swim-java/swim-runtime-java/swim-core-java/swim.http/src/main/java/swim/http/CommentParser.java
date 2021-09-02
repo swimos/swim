@@ -20,27 +20,27 @@ import swim.codec.Parser;
 
 final class CommentParser extends Parser<String> {
 
-  final StringBuilder comment;
+  final StringBuilder commentBuilder;
   final int level;
   final int step;
 
-  CommentParser(StringBuilder comment, int level, int step) {
-    this.comment = comment;
+  CommentParser(StringBuilder commentBuilder, int level, int step) {
+    this.commentBuilder = commentBuilder;
     this.level = level;
     this.step = step;
   }
 
   @Override
   public Parser<String> feed(Input input) {
-    return CommentParser.parse(input, this.comment, this.level, this.step);
+    return CommentParser.parse(input, this.commentBuilder, this.level, this.step);
   }
 
-  static Parser<String> parse(Input input, StringBuilder comment, int level, int step) {
+  static Parser<String> parse(Input input, StringBuilder commentBuilder, int level, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont() && input.head() == '(') {
         input = input.step();
-        comment = new StringBuilder();
+        commentBuilder = new StringBuilder();
         level = 1;
         step = 2;
       } else if (!input.isEmpty()) {
@@ -53,7 +53,7 @@ final class CommentParser extends Parser<String> {
           c = input.head();
           if (Http.isCommentChar(c)) {
             input = input.step();
-            comment.appendCodePoint(c);
+            commentBuilder.appendCodePoint(c);
           } else {
             break;
           }
@@ -61,15 +61,15 @@ final class CommentParser extends Parser<String> {
         if (input.isCont()) {
           if (c == '(') {
             input = input.step();
-            comment.append('(');
+            commentBuilder.append('(');
             level += 1;
           } else if (c == ')') {
             input = input.step();
             level -= 1;
             if (level > 0) {
-              comment.append(')');
+              commentBuilder.append(')');
             } else {
-              return Parser.done(comment.toString());
+              return Parser.done(commentBuilder.toString());
             }
           } else if (c == '\\') {
             input = input.step();
@@ -86,7 +86,7 @@ final class CommentParser extends Parser<String> {
           c = input.head();
           if (Http.isEscapeChar(c)) {
             input = input.step();
-            comment.appendCodePoint(c);
+            commentBuilder.appendCodePoint(c);
             step = 2;
             continue;
           } else {
@@ -101,7 +101,7 @@ final class CommentParser extends Parser<String> {
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new CommentParser(comment, level, step);
+    return new CommentParser(commentBuilder, level, step);
   }
 
   static Parser<String> parse(Input input) {

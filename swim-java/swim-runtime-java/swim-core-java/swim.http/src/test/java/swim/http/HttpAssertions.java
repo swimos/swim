@@ -116,7 +116,7 @@ public final class HttpAssertions {
       final byte[] actual = new byte[n];
       OutputBuffer<?> output = Binary.outputBuffer(actual);
       output = output.limit(i).isPart(true);
-      Writer<?, ?> writer = Utf8.writeEncoded(part.httpWriter(), output);
+      Writer<?, ?> writer = Utf8.writeEncoded(output, part.httpWriter());
       output = output.limit(output.capacity()).isPart(false);
       writer = writer.pull(output);
       if (writer.isError()) {

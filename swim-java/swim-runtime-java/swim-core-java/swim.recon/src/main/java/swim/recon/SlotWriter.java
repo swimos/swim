@@ -53,7 +53,7 @@ final class SlotWriter<I, V> extends Writer<Object, Object> {
                                              V key, V value, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = recon.writeValue(key, output);
+        part = recon.writeValue(output, key);
       } else {
         part = part.pull(output);
       }
@@ -74,7 +74,7 @@ final class SlotWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 3) {
       if (part == null) {
-        part = recon.writeValue(value, output);
+        part = recon.writeValue(output, value);
       } else {
         part = part.pull(output);
       }

@@ -274,7 +274,7 @@ final class UtfReplacementErrorMode extends UtfErrorMode {
                    .write(this.isNonZero ? "replacementNonZero" : "replacement")
                    .write('(');
     if (this.replacementChar != 0xfffd) {
-      output = Format.debugChar(this.replacementChar, output);
+      output = Format.debugChar(output, this.replacementChar);
     }
     output = output.write(')');
     return output;

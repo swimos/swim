@@ -22,17 +22,17 @@ import swim.codec.Parser;
 final class LanguageRangeParser extends Parser<LanguageRange> {
 
   final HttpParser http;
-  final StringBuilder tag;
-  final StringBuilder subtag;
-  final Parser<Float> weight;
+  final StringBuilder tagBuilder;
+  final StringBuilder subtagBuilder;
+  final Parser<Float> weightParser;
   final int step;
 
-  LanguageRangeParser(HttpParser http, StringBuilder tag,
-                      StringBuilder subtag, Parser<Float> weight, int step) {
+  LanguageRangeParser(HttpParser http, StringBuilder tagBuilder,
+                      StringBuilder subtagBuilder, Parser<Float> weightParser, int step) {
     this.http = http;
-    this.tag = tag;
-    this.subtag = subtag;
-    this.weight = weight;
+    this.tagBuilder = tagBuilder;
+    this.subtagBuilder = subtagBuilder;
+    this.weightParser = weightParser;
     this.step = step;
   }
 
@@ -42,25 +42,25 @@ final class LanguageRangeParser extends Parser<LanguageRange> {
 
   @Override
   public Parser<LanguageRange> feed(Input input) {
-    return LanguageRangeParser.parse(input, this.http, this.tag, this.subtag, this.weight, this.step);
+    return LanguageRangeParser.parse(input, this.http, this.tagBuilder, this.subtagBuilder, this.weightParser, this.step);
   }
 
-  static Parser<LanguageRange> parse(Input input, HttpParser http, StringBuilder tag,
-                                     StringBuilder subtag, Parser<Float> weight, int step) {
+  static Parser<LanguageRange> parse(Input input, HttpParser http, StringBuilder tagBuilder,
+                                     StringBuilder subtagBuilder, Parser<Float> weightParser, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
         c = input.head();
         if (Http.isAlpha(c)) {
           input = input.step();
-          if (tag == null) {
-            tag = new StringBuilder();
+          if (tagBuilder == null) {
+            tagBuilder = new StringBuilder();
           }
-          tag.appendCodePoint(c);
+          tagBuilder.appendCodePoint(c);
           step = 2;
         } else if (c == '*') {
           input = input.step();
-          tag = new StringBuilder("*");
+          tagBuilder = new StringBuilder("*");
           step = 18;
         } else {
           return Parser.error(Diagnostic.expected("language tag", input));
@@ -74,7 +74,7 @@ final class LanguageRangeParser extends Parser<LanguageRange> {
         c = input.head();
         if (Http.isAlpha(c)) {
           input = input.step();
-          tag.appendCodePoint(c);
+          tagBuilder.appendCodePoint(c);
           step += 1;
           continue;
         } else if (c == '-') {
@@ -96,10 +96,10 @@ final class LanguageRangeParser extends Parser<LanguageRange> {
         c = input.head();
         if (Http.isAlpha(c) || Base10.isDigit(c)) {
           input = input.step();
-          if (subtag == null) {
-            subtag = new StringBuilder();
+          if (subtagBuilder == null) {
+            subtagBuilder = new StringBuilder();
           }
-          subtag.appendCodePoint(c);
+          subtagBuilder.appendCodePoint(c);
           step = 10;
         } else {
           return Parser.error(Diagnostic.expected("language subtag", input));
@@ -113,7 +113,7 @@ final class LanguageRangeParser extends Parser<LanguageRange> {
         c = input.head();
         if (Http.isAlpha(c) || Base10.isDigit(c)) {
           input = input.step();
-          subtag.appendCodePoint(c);
+          subtagBuilder.appendCodePoint(c);
           step += 1;
           continue;
         } else {
@@ -127,23 +127,23 @@ final class LanguageRangeParser extends Parser<LanguageRange> {
       break;
     }
     if (step == 18) {
-      if (weight == null) {
-        weight = http.parseQValue(input);
+      if (weightParser == null) {
+        weightParser = http.parseQValue(input);
       } else {
-        weight = weight.feed(input);
+        weightParser = weightParser.feed(input);
       }
-      if (weight.isDone()) {
-        final Float qvalue = weight.bind();
+      if (weightParser.isDone()) {
+        final Float qvalue = weightParser.bind();
         final float q = qvalue != null ? (float) qvalue : 1f;
-        return Parser.done(http.languageRange(tag.toString(), subtag != null ? subtag.toString() : null, q));
-      } else if (weight.isError()) {
-        return weight.asError();
+        return Parser.done(http.languageRange(tagBuilder.toString(), subtagBuilder != null ? subtagBuilder.toString() : null, q));
+      } else if (weightParser.isError()) {
+        return weightParser.asError();
       }
     }
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new LanguageRangeParser(http, tag, subtag, weight, step);
+    return new LanguageRangeParser(http, tagBuilder, subtagBuilder, weightParser, step);
   }
 
   static Parser<LanguageRange> parse(Input input, HttpParser http) {

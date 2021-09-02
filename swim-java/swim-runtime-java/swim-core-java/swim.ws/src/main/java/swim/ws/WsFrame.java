@@ -15,7 +15,6 @@
 package swim.ws;
 
 import swim.codec.Encoder;
-import swim.codec.OutputBuffer;
 
 public abstract class WsFrame<T> {
 
@@ -23,16 +22,10 @@ public abstract class WsFrame<T> {
     // sealed
   }
 
-  public abstract boolean isDefined();
+  public abstract WsOpcode frameType();
 
-  public abstract T get();
+  public abstract Object payloadValue();
 
-  public abstract WsOpcode opcode();
-
-  public abstract Object payload();
-
-  public abstract Encoder<?, ?> contentEncoder(WsEncoder ws);
-
-  public abstract Encoder<?, ?> encodeContent(OutputBuffer<?> output, WsEncoder ws);
+  public abstract Encoder<?, ?> payloadEncoder(WsEncoder ws);
 
 }

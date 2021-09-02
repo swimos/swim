@@ -62,12 +62,12 @@ final class GetAttrSelectorWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 4) {
       if (part == null) {
-        part = recon.writeValue(key, output);
+        part = recon.writeValue(output, key);
       } else {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return (Writer<Object, Object>) recon.writeThen(then, output);
+        return (Writer<Object, Object>) recon.writeThen(output, then);
       } else if (part.isError()) {
         return part.asError();
       }

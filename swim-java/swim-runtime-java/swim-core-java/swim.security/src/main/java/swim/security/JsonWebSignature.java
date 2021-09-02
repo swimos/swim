@@ -127,7 +127,7 @@ public class JsonWebSignature implements Debug {
 
     final Value sequence = Record.of(r, s);
     final byte[] derBytes = new byte[Der.structureEncoder().sizeOf(sequence)];
-    Der.structureEncoder().encode(sequence, Binary.outputBuffer(derBytes));
+    Der.structureEncoder().encode(Binary.outputBuffer(derBytes), sequence);
     return Data.wrap(derBytes);
   }
 
@@ -382,9 +382,9 @@ public class JsonWebSignature implements Debug {
   public static JsonWebSignature create(Value unprotectedHeader, Data protectedHeaderData,
                                         Data payloadData, Data signatureData) {
     final Output<Data> signingInput = Data.output();
-    Base64.urlUnpadded().writeByteBuffer(protectedHeaderData.asByteBuffer(), signingInput);
+    Base64.urlUnpadded().writeByteBuffer(signingInput, protectedHeaderData.asByteBuffer());
     signingInput.write('.');
-    Base64.urlUnpadded().writeByteBuffer(payloadData.asByteBuffer(), signingInput);
+    Base64.urlUnpadded().writeByteBuffer(signingInput, payloadData.asByteBuffer());
     return JsonWebSignature.create(unprotectedHeader, signingInput.bind(), protectedHeaderData, payloadData, signatureData);
   }
 
@@ -408,9 +408,9 @@ public class JsonWebSignature implements Debug {
                                          Value protectedHeader, Data payloadData) {
     final Data protectedHeaderData = Json.toData(protectedHeader);
     final Output<Data> signingInput = Data.output();
-    Base64.urlUnpadded().writeByteBuffer(protectedHeaderData.asByteBuffer(), signingInput);
+    Base64.urlUnpadded().writeByteBuffer(signingInput, protectedHeaderData.asByteBuffer());
     signingInput.write('.');
-    Base64.urlUnpadded().writeByteBuffer(payloadData.asByteBuffer(), signingInput);
+    Base64.urlUnpadded().writeByteBuffer(signingInput, payloadData.asByteBuffer());
     return JsonWebSignature.hmacSHA(mac, symmetricKey, unprotectedHeader, protectedHeader, signingInput.bind(), payloadData);
   }
 
@@ -467,9 +467,9 @@ public class JsonWebSignature implements Debug {
                                          Value unprotectedHeader, Value protectedHeader, Data payloadData) {
     final Data protectedHeaderData = Json.toData(protectedHeader);
     final Output<Data> signingInput = Data.output();
-    Base64.urlUnpadded().writeByteBuffer(protectedHeaderData.asByteBuffer(), signingInput);
+    Base64.urlUnpadded().writeByteBuffer(signingInput, protectedHeaderData.asByteBuffer());
     signingInput.write('.');
-    Base64.urlUnpadded().writeByteBuffer(payloadData.asByteBuffer(), signingInput);
+    Base64.urlUnpadded().writeByteBuffer(signingInput, payloadData.asByteBuffer());
     return JsonWebSignature.signRSA(signature, privateKey, keyLength, unprotectedHeader,
                                     protectedHeader, signingInput.bind(), payloadData);
   }
@@ -515,9 +515,9 @@ public class JsonWebSignature implements Debug {
                                            Value unprotectedHeader, Value protectedHeader, Data payloadData) {
     final Data protectedHeaderData = Json.toData(protectedHeader);
     final Output<Data> signingInput = Data.output();
-    Base64.urlUnpadded().writeByteBuffer(protectedHeaderData.asByteBuffer(), signingInput);
+    Base64.urlUnpadded().writeByteBuffer(signingInput, protectedHeaderData.asByteBuffer());
     signingInput.write('.');
-    Base64.urlUnpadded().writeByteBuffer(payloadData.asByteBuffer(), signingInput);
+    Base64.urlUnpadded().writeByteBuffer(signingInput, payloadData.asByteBuffer());
     return JsonWebSignature.signECDSA(signature, privateKey, keyLength, unprotectedHeader,
                                       protectedHeader, signingInput.bind(), payloadData);
   }

@@ -69,35 +69,35 @@ public final class Recon {
     return Recon.structureWriter().sizeOfBlockItem(item);
   }
 
-  public static Writer<?, ?> write(Item item, Output<?> output) {
-    return Recon.structureWriter().writeItem(item, output);
+  public static Writer<?, ?> write(Output<?> output, Item item) {
+    return Recon.structureWriter().writeItem(output, item);
   }
 
-  public static Writer<?, ?> writeBlock(Item item, Output<?> output) {
-    return Recon.structureWriter().writeBlockItem(item, output);
+  public static Writer<?, ?> writeBlock(Output<?> output, Item item) {
+    return Recon.structureWriter().writeBlockItem(output, item);
   }
 
   public static String toString(Item item) {
     final Output<String> output = Unicode.stringOutput();
-    Recon.write(item, output);
+    Recon.write(output, item);
     return output.bind();
   }
 
   public static String toBlockString(Item item) {
     final Output<String> output = Unicode.stringOutput();
-    Recon.writeBlock(item, output);
+    Recon.writeBlock(output, item);
     return output.bind();
   }
 
   public static Data toData(Item item) {
     final Output<Data> output = Utf8.encodedOutput(Data.output());
-    Recon.write(item, output);
+    Recon.write(output, item);
     return output.bind();
   }
 
   public static Data toBlockData(Item item) {
     final Output<Data> output = Utf8.encodedOutput(Data.output());
-    Recon.writeBlock(item, output);
+    Recon.writeBlock(output, item);
     return output.bind();
   }
 

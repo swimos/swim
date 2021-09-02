@@ -49,10 +49,12 @@ final class Base10IntegerWriter extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return Base10IntegerWriter.write(output, this.value, this.input, this.index, this.step);
+    return Base10IntegerWriter.write(output, this.value, this.input,
+                                     this.index, this.step);
   }
 
-  static Writer<Object, Object> write(Output<?> output, Object value, long input, int index, int step) {
+  static Writer<Object, Object> write(Output<?> output, Object value, long input,
+                                      int index, int step) {
     if (step == 0) {
       return Writer.done();
     }

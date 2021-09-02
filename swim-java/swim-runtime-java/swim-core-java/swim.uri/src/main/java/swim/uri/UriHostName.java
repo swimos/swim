@@ -42,7 +42,7 @@ final class UriHostName extends UriHost {
 
   @Override
   public <T> Output<T> display(Output<T> output) {
-    return Uri.writeHost(this.address, output);
+    return Uri.writeHost(output, this.address);
   }
 
   @Override

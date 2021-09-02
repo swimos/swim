@@ -15,14 +15,14 @@
 package swim.http;
 
 import org.testng.annotations.Test;
-import swim.http.header.Connection;
-import swim.http.header.Host;
-import swim.http.header.Origin;
+import swim.http.header.ConnectionHeader;
+import swim.http.header.HostHeader;
+import swim.http.header.OriginHeader;
 import swim.http.header.RawHeader;
-import swim.http.header.SecWebSocketKey;
-import swim.http.header.SecWebSocketProtocol;
-import swim.http.header.SecWebSocketVersion;
-import swim.http.header.Upgrade;
+import swim.http.header.SecWebSocketKeyHeader;
+import swim.http.header.SecWebSocketProtocolHeader;
+import swim.http.header.SecWebSocketVersionHeader;
+import swim.http.header.UpgradeHeader;
 import swim.uri.Uri;
 import static swim.http.HttpAssertions.assertWrites;
 
@@ -44,7 +44,7 @@ public class HttpRequestSpec {
     assertParses("HEAD /path HTTP/1.1\r\n"
                + "Host: example.com\r\n"
                + "\r\n",
-                 HttpRequest.head(Uri.parse("/path"), Host.create("example.com")));
+                 HttpRequest.head(Uri.parse("/path"), HostHeader.create("example.com")));
   }
 
   @Test
@@ -59,13 +59,13 @@ public class HttpRequestSpec {
                + "Sec-WebSocket-Version: 13\r\n"
                + "\r\n",
                  HttpRequest.get(Uri.parse("/chat"),
-                                 Host.create("example.com"),
-                                 Upgrade.create("websocket"),
-                                 Connection.create("Upgrade"),
-                                 SecWebSocketKey.create("dGhlIHNhbXBsZSBub25jZQ=="),
-                                 Origin.create("http://example.com"),
-                                 SecWebSocketProtocol.create("chat", "superchat"),
-                                 SecWebSocketVersion.create(13)));
+                                 HostHeader.create("example.com"),
+                                 UpgradeHeader.create("websocket"),
+                                 ConnectionHeader.create("Upgrade"),
+                                 SecWebSocketKeyHeader.create("dGhlIHNhbXBsZSBub25jZQ=="),
+                                 OriginHeader.create("http://example.com"),
+                                 SecWebSocketProtocolHeader.create("chat", "superchat"),
+                                 SecWebSocketVersionHeader.create(13)));
   }
 
   @Test
@@ -81,7 +81,7 @@ public class HttpRequestSpec {
                  "HEAD /path HTTP/1.1\r\n"
                + "Key: Value\r\n"
                + "\r\n");
-    assertWrites(HttpRequest.head(Uri.parse("/path"), Host.create("example.com")),
+    assertWrites(HttpRequest.head(Uri.parse("/path"), HostHeader.create("example.com")),
                  "HEAD /path HTTP/1.1\r\n"
                + "Host: example.com\r\n"
                + "\r\n");
@@ -90,13 +90,13 @@ public class HttpRequestSpec {
   @Test
   public void writeRequestsWithMultipleHeaders() {
     assertWrites(HttpRequest.get(Uri.parse("/chat"),
-                                 Host.create("example.com"),
-                                 Upgrade.create("websocket"),
-                                 Connection.create("Upgrade"),
-                                 SecWebSocketKey.create("dGhlIHNhbXBsZSBub25jZQ=="),
-                                 Origin.create("http://example.com"),
-                                 SecWebSocketProtocol.create("chat", "superchat"),
-                                 SecWebSocketVersion.create(13)),
+                                 HostHeader.create("example.com"),
+                                 UpgradeHeader.create("websocket"),
+                                 ConnectionHeader.create("Upgrade"),
+                                 SecWebSocketKeyHeader.create("dGhlIHNhbXBsZSBub25jZQ=="),
+                                 OriginHeader.create("http://example.com"),
+                                 SecWebSocketProtocolHeader.create("chat", "superchat"),
+                                 SecWebSocketVersionHeader.create(13)),
                  "GET /chat HTTP/1.1\r\n"
                + "Host: example.com\r\n"
                + "Upgrade: websocket\r\n"

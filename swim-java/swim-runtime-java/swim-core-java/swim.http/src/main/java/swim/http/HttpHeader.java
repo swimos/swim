@@ -20,7 +20,7 @@ import swim.codec.Output;
 import swim.codec.Utf8;
 import swim.codec.Writer;
 
-public abstract class HttpHeader extends HttpPart implements Debug {
+public abstract class HttpHeader extends HttpPart implements Comparable<HttpHeader>, Debug {
 
   public boolean isBlank() {
     return false;
@@ -32,7 +32,7 @@ public abstract class HttpHeader extends HttpPart implements Debug {
 
   public String value() {
     final Output<String> output = Utf8.decodedString();
-    this.writeHttpValue(output, Http.standardWriter()).bind();
+    this.writeHeaderValue(output, Http.standardWriter()).bind();
     return output.bind();
   }
 
@@ -43,10 +43,19 @@ public abstract class HttpHeader extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeHeader(this, output);
+    return http.writeHeader(output, this);
   }
 
-  public abstract Writer<?, ?> writeHttpValue(Output<?> output, HttpWriter http);
+  public abstract Writer<?, ?> writeHeaderValue(Output<?> output, HttpWriter http);
+
+  @Override
+  public int compareTo(HttpHeader that) {
+    int order = this.name().compareTo(that.name());
+    if (order == 0) {
+      order = this.value().compareTo(that.value());
+    }
+    return order;
+  }
 
   @Override
   public abstract <T> Output<T> debug(Output<T> output);

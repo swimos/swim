@@ -162,14 +162,14 @@ public final class UTreeLeaf extends UTreePage {
 
   @Override
   public void writePage(Output<?> output) {
-    Recon.write(this.toHeader(), output);
+    Recon.write(output, this.toHeader());
     this.writePageContent(output);
     output.write('\n');
   }
 
   void writePageContent(Output<?> output) {
     output.write('{');
-    Recon.write(this.value, output);
+    Recon.write(output, this.value);
     output.write('}');
   }
 
@@ -205,7 +205,7 @@ public final class UTreeLeaf extends UTreePage {
   @Override
   public String toString() {
     final Output<String> output = Unicode.stringOutput(this.pageSize() - 1); // ignore trailing '\n'
-    Recon.write(this.toHeader(), output);
+    Recon.write(output, this.toHeader());
     this.writePageContent(output);
     return output.bind();
   }
@@ -241,7 +241,7 @@ public final class UTreeLeaf extends UTreePage {
       }
     }
     final Output<String> message = Unicode.stringOutput("Malformed uleaf: ");
-    Recon.write(value, message);
+    Recon.write(message, value);
     throw new StoreException(message.bind(), cause);
   }
 

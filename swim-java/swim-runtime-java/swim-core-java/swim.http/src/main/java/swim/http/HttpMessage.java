@@ -24,9 +24,9 @@ import swim.codec.Utf8;
 import swim.codec.UtfErrorMode;
 import swim.collections.FingerTrieSeq;
 import swim.collections.HashTrieSet;
-import swim.http.header.ContentLength;
-import swim.http.header.ContentType;
-import swim.http.header.TransferEncoding;
+import swim.http.header.ContentLengthHeader;
+import swim.http.header.ContentTypeHeader;
+import swim.http.header.TransferEncodingHeader;
 import swim.json.Json;
 import swim.recon.Recon;
 import swim.structure.Data;
@@ -151,33 +151,33 @@ public abstract class HttpMessage<T> extends HttpPart {
     }
   }
 
-  public abstract HttpEntity<T> entity();
+  public abstract HttpPayload<T> payload();
 
-  public abstract <T2> HttpMessage<T2> entity(HttpEntity<T2> entity);
+  public abstract <T2> HttpMessage<T2> payload(HttpPayload<T2> payload);
 
-  public abstract <T2> HttpMessage<T2> content(HttpEntity<T2> entity);
+  public abstract <T2> HttpMessage<T2> content(HttpPayload<T2> payload);
 
   public abstract HttpMessage<String> body(String content, MediaType mediaType);
 
   public abstract HttpMessage<String> body(String content);
 
-  public <T2> Decoder<? extends HttpMessage<T2>> entityDecoder(Decoder<T2> contentDecoder) {
+  public <T2> Decoder<? extends HttpMessage<T2>> payloadDecoder(Decoder<T2> contentDecoder) {
     int bodyType = 0;
     long length = 0L;
     final FingerTrieSeq<HttpHeader> headers = this.headers();
     for (int i = 0, n = headers.size(); i < n; i += 1) {
       final HttpHeader header = headers.get(i);
-      if (header instanceof ContentLength) {
+      if (header instanceof ContentLengthHeader) {
         if (bodyType == 0) {
-          length = ((ContentLength) header).length();
+          length = ((ContentLengthHeader) header).length();
           bodyType = 1;
         } else if (bodyType == 1) {
           return Decoder.error(new HttpException("conflicting Content-Length"));
         } else if (bodyType == 2) {
           return Decoder.error(new HttpException("conflicting Content-Length and chunked Transfer-Encoding"));
         }
-      } else if (header instanceof TransferEncoding) {
-        final FingerTrieSeq<TransferCoding> codings = ((TransferEncoding) header).codings();
+      } else if (header instanceof TransferEncodingHeader) {
+        final FingerTrieSeq<TransferCoding> codings = ((TransferEncodingHeader) header).codings();
         for (int j = 0, k = codings.size(); j < k; j += 1) {
           final TransferCoding coding = codings.get(j);
           if (coding.isChunked()) {
@@ -199,7 +199,7 @@ public abstract class HttpMessage<T> extends HttpPart {
     } else if (bodyType == 2) {
       return HttpChunked.httpDecoder(this, contentDecoder);
     } else {
-      return Decoder.done(this.entity(HttpEntity.<T2>empty()));
+      return Decoder.done(this.payload(HttpPayload.<T2>empty()));
     }
   }
 
@@ -224,8 +224,8 @@ public abstract class HttpMessage<T> extends HttpPart {
     final FingerTrieSeq<HttpHeader> headers = this.headers();
     for (int i = 0, n = headers.size(); i < n; i += 1) {
       final HttpHeader header = headers.get(i);
-      if (header instanceof ContentType) {
-        return this.contentDecoder(((ContentType) header).mediaType());
+      if (header instanceof ContentTypeHeader) {
+        return this.contentDecoder(((ContentTypeHeader) header).mediaType());
       }
     }
     return this.contentDecoder(MediaType.applicationOctetStream());

@@ -134,7 +134,7 @@ final class MessageDecoder<T, M> extends Decoder<T> {
         }
         if (step == 3) {
           if (valueDecoder == null) {
-            valueDecoder = protobuf.decodeType(fieldType.valueType(), input);
+            valueDecoder = protobuf.decodeType(input, fieldType.valueType());
           } else {
             valueDecoder = valueDecoder.feed(input);
           }

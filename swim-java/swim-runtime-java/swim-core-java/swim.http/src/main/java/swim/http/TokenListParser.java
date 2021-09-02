@@ -22,22 +22,22 @@ import swim.util.Builder;
 
 final class TokenListParser extends Parser<FingerTrieSeq<String>> {
 
-  final StringBuilder token;
+  final StringBuilder tokenBuilder;
   final Builder<String, FingerTrieSeq<String>> tokens;
   final int step;
 
-  TokenListParser(StringBuilder token, Builder<String, FingerTrieSeq<String>> tokens, int step) {
-    this.token = token;
+  TokenListParser(StringBuilder tokenBuilder, Builder<String, FingerTrieSeq<String>> tokens, int step) {
+    this.tokenBuilder = tokenBuilder;
     this.tokens = tokens;
     this.step = step;
   }
 
   @Override
   public Parser<FingerTrieSeq<String>> feed(Input input) {
-    return TokenListParser.parse(input, this.token, this.tokens, this.step);
+    return TokenListParser.parse(input, this.tokenBuilder, this.tokens, this.step);
   }
 
-  static Parser<FingerTrieSeq<String>> parse(Input input, StringBuilder token,
+  static Parser<FingerTrieSeq<String>> parse(Input input, StringBuilder tokenBuilder,
                                              Builder<String, FingerTrieSeq<String>> tokens, int step) {
     int c = 0;
     if (step == 1) {
@@ -45,8 +45,8 @@ final class TokenListParser extends Parser<FingerTrieSeq<String>> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          token = new StringBuilder();
-          token.appendCodePoint(c);
+          tokenBuilder = new StringBuilder();
+          tokenBuilder.appendCodePoint(c);
           step = 2;
         } else {
           return Parser.done(FingerTrieSeq.<String>empty());
@@ -60,7 +60,7 @@ final class TokenListParser extends Parser<FingerTrieSeq<String>> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          token.appendCodePoint(c);
+          tokenBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -69,8 +69,8 @@ final class TokenListParser extends Parser<FingerTrieSeq<String>> {
         if (tokens == null) {
           tokens = FingerTrieSeq.builder();
         }
-        tokens.add(token.toString());
-        token = null;
+        tokens.add(tokenBuilder.toString());
+        tokenBuilder = null;
         step = 3;
       }
     }
@@ -103,8 +103,8 @@ final class TokenListParser extends Parser<FingerTrieSeq<String>> {
         if (input.isCont()) {
           if (Http.isTokenChar(c)) {
             input = input.step();
-            token = new StringBuilder();
-            token.appendCodePoint(c);
+            tokenBuilder = new StringBuilder();
+            tokenBuilder.appendCodePoint(c);
             step = 5;
           } else {
             return Parser.error(Diagnostic.expected("token", input));
@@ -118,14 +118,14 @@ final class TokenListParser extends Parser<FingerTrieSeq<String>> {
           c = input.head();
           if (Http.isTokenChar(c)) {
             input = input.step();
-            token.appendCodePoint(c);
+            tokenBuilder.appendCodePoint(c);
           } else {
             break;
           }
         }
         if (!input.isEmpty()) {
-          tokens.add(token.toString());
-          token = null;
+          tokens.add(tokenBuilder.toString());
+          tokenBuilder = null;
           step = 3;
           continue;
         }
@@ -135,7 +135,7 @@ final class TokenListParser extends Parser<FingerTrieSeq<String>> {
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new TokenListParser(token, tokens, step);
+    return new TokenListParser(tokenBuilder, tokens, step);
   }
 
   static Parser<FingerTrieSeq<String>> parse(Input input) {

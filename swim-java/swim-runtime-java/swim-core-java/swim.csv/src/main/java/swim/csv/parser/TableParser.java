@@ -48,7 +48,7 @@ final class TableParser<T, R, C> extends Parser<T> {
     int c = 0;
     if (step == 1) {
       if (headerParser == null) {
-        headerParser = csv.parseHeader(header, input);
+        headerParser = csv.parseHeader(input, header);
       }
       while (headerParser.isCont() && !input.isEmpty()) {
         headerParser = headerParser.feed(input);
@@ -67,7 +67,7 @@ final class TableParser<T, R, C> extends Parser<T> {
           step = 3;
         } else if (c == '\n') {
           input = input.step();
-          return csv.parseBody(headerParser.bind(), input);
+          return csv.parseBody(input, headerParser.bind());
         } else {
           return Parser.error(Diagnostic.expected("carriage return or line feed", input));
         }
@@ -78,9 +78,9 @@ final class TableParser<T, R, C> extends Parser<T> {
     if (step == 3) {
       if (input.isCont() && input.head() == '\n') {
         input = input.step();
-        return csv.parseBody(headerParser.bind(), input);
+        return csv.parseBody(input, headerParser.bind());
       } else if (!input.isEmpty()) {
-        return csv.parseBody(headerParser.bind(), input);
+        return csv.parseBody(input, headerParser.bind());
       }
     }
     if (input.isError()) {

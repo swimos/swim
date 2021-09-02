@@ -95,12 +95,12 @@ public final class MqttAssertions {
     }
   }
 
-  public static void assertEncodes(MqttPart part, byte... expected) {
-    assertEncodes(part.mqttEncoder(), ByteBuffer.wrap(expected));
+  public static void assertEncodes(MqttPacket<?> packet, byte... expected) {
+    assertEncodes(packet.mqttEncoder(), ByteBuffer.wrap(expected));
   }
 
-  public static void assertEncodes(MqttPart part, Data expected) {
-    assertEncodes(part.mqttEncoder(), ByteBuffer.wrap(expected.toByteArray()));
+  public static void assertEncodes(MqttPacket<?> packet, Data expected) {
+    assertEncodes(packet.mqttEncoder(), ByteBuffer.wrap(expected.toByteArray()));
   }
 
 }

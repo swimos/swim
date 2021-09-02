@@ -1,19 +1,32 @@
+// Copyright 2015-2021 Swim Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package swim.service.web;
 
 import org.testng.annotations.Test;
-import swim.collections.FingerTrieSeq;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpStatus;
 import swim.http.HttpVersion;
 import swim.http.UpgradeProtocol;
-import swim.http.header.Connection;
-import swim.http.header.Origin;
-import swim.http.header.SecWebSocketAccept;
-import swim.http.header.SecWebSocketExtensions;
-import swim.http.header.SecWebSocketKey;
-import swim.http.header.SecWebSocketVersion;
-import swim.http.header.Upgrade;
+import swim.http.header.ConnectionHeader;
+import swim.http.header.OriginHeader;
+import swim.http.header.SecWebSocketAcceptHeader;
+import swim.http.header.SecWebSocketExtensionsHeader;
+import swim.http.header.SecWebSocketKeyHeader;
+import swim.http.header.SecWebSocketVersionHeader;
+import swim.http.header.UpgradeHeader;
 import swim.io.warp.WarpSettings;
 import swim.io.ws.WsSettings;
 import swim.io.ws.WsUpgradeResponder;
@@ -34,22 +47,21 @@ public class WebServerSpec {
       }
     };
 
-
     final HttpRequest<?> request = HttpRequest.get(Uri.empty(),
-                                                   Upgrade.create("websocket"),
-                                                   Connection.create("Upgrade"),
-                                                   SecWebSocketKey.create("dGhlIHNhbXBsZSBub25jZQ=="),
-                                                   Origin.create("http://example.com"),
-                                                   SecWebSocketExtensions.create("Sec-WebSocket-Extensions", "permessage-deflate"),
-                                                   SecWebSocketVersion.create(13));
+                                                   UpgradeHeader.create("websocket"),
+                                                   ConnectionHeader.create("Upgrade"),
+                                                   SecWebSocketKeyHeader.create("dGhlIHNhbXBsZSBub25jZQ=="),
+                                                   OriginHeader.create("http://example.com"),
+                                                   SecWebSocketExtensionsHeader.create("Sec-WebSocket-Extensions", "permessage-deflate"),
+                                                   SecWebSocketVersionHeader.create(13));
 
     final WsUpgradeResponder responder = (WsUpgradeResponder) server.doRequest(request);
     final HttpResponse<?> response = responder.wsResponse().httpResponse();
     final HttpResponse<?> expected = HttpResponse.create(HttpVersion.HTTP_1_1, HttpStatus.SWITCHING_PROTOCOLS,
-                                                         FingerTrieSeq.of(Connection.create("Upgrade"),
-                                                                          Upgrade.create(UpgradeProtocol.create("websocket")),
-                                                                          SecWebSocketAccept.create("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
-                                                                          SecWebSocketExtensions.create("permessage-deflate")));
+                                                         ConnectionHeader.create("Upgrade"),
+                                                         UpgradeHeader.create(UpgradeProtocol.create("websocket")),
+                                                         SecWebSocketAcceptHeader.create("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
+                                                         SecWebSocketExtensionsHeader.create("permessage-deflate"));
 
     assertEquals(response, expected);
   }

@@ -47,7 +47,7 @@ final class ParamWriter extends Writer<Object, Object> {
                                       String value, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = http.writeToken(key, output);
+        part = http.writeToken(output, key);
       } else {
         part = part.pull(output);
       }
@@ -68,7 +68,7 @@ final class ParamWriter extends Writer<Object, Object> {
     }
     if (step == 3) {
       if (part == null) {
-        part = http.writeValue(value, output);
+        part = http.writeValue(output, value);
       } else {
         part = part.pull(output);
       }

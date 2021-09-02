@@ -25,21 +25,21 @@ import swim.util.Builder;
 final class HttpRequestParser<T> extends Parser<HttpRequest<T>> {
 
   final HttpParser http;
-  final Parser<HttpMethod> method;
-  final StringBuilder uri;
-  final Parser<HttpVersion> version;
-  final Parser<? extends HttpHeader> header;
+  final Parser<HttpMethod> methodParser;
+  final StringBuilder uriBuilder;
+  final Parser<HttpVersion> versionParser;
+  final Parser<? extends HttpHeader> headerParser;
   final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers;
   final int step;
 
-  HttpRequestParser(HttpParser http, Parser<HttpMethod> method, StringBuilder uri,
-                    Parser<HttpVersion> version, Parser<? extends HttpHeader> header,
+  HttpRequestParser(HttpParser http, Parser<HttpMethod> methodParser, StringBuilder uriBuilder,
+                    Parser<HttpVersion> versionParser, Parser<? extends HttpHeader> headerParser,
                     Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers, int step) {
     this.http = http;
-    this.method = method;
-    this.uri = uri;
-    this.version = version;
-    this.header = header;
+    this.methodParser = methodParser;
+    this.uriBuilder = uriBuilder;
+    this.versionParser = versionParser;
+    this.headerParser = headerParser;
     this.headers = headers;
     this.step = step;
   }
@@ -50,28 +50,28 @@ final class HttpRequestParser<T> extends Parser<HttpRequest<T>> {
 
   @Override
   public Parser<HttpRequest<T>> feed(Input input) {
-    return HttpRequestParser.parse(input, this.http, this.method, this.uri, this.version,
-                                   this.header, this.headers, this.step);
+    return HttpRequestParser.parse(input, this.http, this.methodParser, this.uriBuilder,
+                                   this.versionParser, this.headerParser, this.headers, this.step);
   }
 
-  static <T> Parser<HttpRequest<T>> parse(Input input, HttpParser http, Parser<HttpMethod> method,
-                                          StringBuilder uri, Parser<HttpVersion> version,
-                                          Parser<? extends HttpHeader> header,
+  static <T> Parser<HttpRequest<T>> parse(Input input, HttpParser http, Parser<HttpMethod> methodParser,
+                                          StringBuilder uriBuilder, Parser<HttpVersion> versionParser,
+                                          Parser<? extends HttpHeader> headerParser,
                                           Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers, int step) {
     int c = 0;
     if (step == 1) {
-      if (method == null) {
+      if (methodParser == null) {
         if (input.isDone()) {
           return done();
         }
-        method = http.parseMethod(input);
+        methodParser = http.parseMethod(input);
       } else {
-        method = method.feed(input);
+        methodParser = methodParser.feed(input);
       }
-      if (method.isDone()) {
+      if (methodParser.isDone()) {
         step = 2;
-      } else if (method.isError()) {
-        return method.asError();
+      } else if (methodParser.isError()) {
+        return methodParser.asError();
       }
     }
     if (step == 2) {
@@ -83,14 +83,14 @@ final class HttpRequestParser<T> extends Parser<HttpRequest<T>> {
       }
     }
     if (step == 3) {
-      if (uri == null) {
-        uri = new StringBuilder();
+      if (uriBuilder == null) {
+        uriBuilder = new StringBuilder();
       }
       while (input.isCont()) {
         c = input.head();
         if (c != ' ') {
           input = input.step();
-          uri.appendCodePoint(c);
+          uriBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -108,15 +108,15 @@ final class HttpRequestParser<T> extends Parser<HttpRequest<T>> {
       }
     }
     if (step == 5) {
-      if (version == null) {
-        version = http.parseVersion(input);
+      if (versionParser == null) {
+        versionParser = http.parseVersion(input);
       } else {
-        version = version.feed(input);
+        versionParser = versionParser.feed(input);
       }
-      if (version.isDone()) {
+      if (versionParser.isDone()) {
         step = 6;
-      } else if (version.isError()) {
-        return version.asError();
+      } else if (versionParser.isError()) {
+        return versionParser.asError();
       }
     }
     if (step == 6) {
@@ -155,15 +155,15 @@ final class HttpRequestParser<T> extends Parser<HttpRequest<T>> {
         }
       }
       if (step == 9) {
-        if (header == null) {
-          header = http.parseHeader(input);
+        if (headerParser == null) {
+          headerParser = http.parseHeader(input);
         } else {
-          header = header.feed(input);
+          headerParser = headerParser.feed(input);
         }
-        if (header.isDone()) {
+        if (headerParser.isDone()) {
           step = 10;
-        } else if (header.isError()) {
-          return header.asError();
+        } else if (headerParser.isError()) {
+          return headerParser.asError();
         }
       }
       if (step == 10) {
@@ -179,8 +179,8 @@ final class HttpRequestParser<T> extends Parser<HttpRequest<T>> {
           if (headers == null) {
             headers = FingerTrieSeq.builder();
           }
-          headers.add(header.bind());
-          header = null;
+          headers.add(headerParser.bind());
+          headerParser = null;
           input = input.step();
           step = 8;
           continue;
@@ -195,16 +195,18 @@ final class HttpRequestParser<T> extends Parser<HttpRequest<T>> {
         input = input.step();
         final Uri requestUri;
         try {
-          requestUri = Uri.parse(uri.toString());
+          requestUri = Uri.parse(uriBuilder.toString());
         } catch (ParserException cause) {
           return Parser.error(cause);
         }
         if (headers == null) {
-          final HttpRequest<T> request = http.request(method.bind(), requestUri, version.bind(),
+          final HttpRequest<T> request = http.request(methodParser.bind(), requestUri,
+                                                      versionParser.bind(),
                                                       FingerTrieSeq.<HttpHeader>empty());
           return Parser.done(request);
         } else {
-          final HttpRequest<T> request = http.request(method.bind(), requestUri, version.bind(), headers.bind());
+          final HttpRequest<T> request = http.request(methodParser.bind(), requestUri,
+                                                      versionParser.bind(), headers.bind());
           return Parser.done(request);
         }
       } else if (!input.isEmpty()) {
@@ -214,7 +216,8 @@ final class HttpRequestParser<T> extends Parser<HttpRequest<T>> {
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new HttpRequestParser<T>(http, method, uri, version, header, headers, step);
+    return new HttpRequestParser<T>(http, methodParser, uriBuilder, versionParser,
+                                    headerParser, headers, step);
   }
 
   static <T> Parser<HttpRequest<T>> parse(Input input, HttpParser http) {

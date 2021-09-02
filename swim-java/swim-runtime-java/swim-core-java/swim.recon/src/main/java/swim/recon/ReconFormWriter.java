@@ -55,7 +55,7 @@ final class ReconFormWriter<T> extends Writer<T, T> {
     }
     if (part == null) {
       final Value value = form.mold(object).toValue();
-      part = recon.writeValue(value, output);
+      part = recon.writeValue(output, value);
     } else {
       part = part.pull(output);
     }

@@ -75,7 +75,7 @@ public final class ContentCoding extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeContentCoding(this.name, this.weight, output);
+    return http.writeContentCoding(output, this.name, this.weight);
   }
 
   @Override

@@ -62,21 +62,21 @@ public abstract class ReconWriter<I, V> {
 
   public abstract int sizeOfItem(I item);
 
-  public abstract Writer<?, ?> writeItem(I item, Output<?> output);
+  public abstract Writer<?, ?> writeItem(Output<?> output, I item);
 
   public abstract int sizeOfValue(V value);
 
-  public abstract Writer<?, ?> writeValue(V value, Output<?> output);
+  public abstract Writer<?, ?> writeValue(Output<?> output, V value);
 
   public abstract int sizeOfBlockValue(V value);
 
-  public abstract Writer<?, ?> writeBlockValue(V value, Output<?> output);
+  public abstract Writer<?, ?> writeBlockValue(Output<?> output, V value);
 
   public int sizeOfAttr(V key, V value) {
     return AttrWriter.sizeOf(this, key, value);
   }
 
-  public Writer<?, ?> writeAttr(V key, V value, Output<?> output) {
+  public Writer<?, ?> writeAttr(Output<?> output, V key, V value) {
     return AttrWriter.write(output, this, key, value);
   }
 
@@ -84,19 +84,19 @@ public abstract class ReconWriter<I, V> {
     return SlotWriter.sizeOf(this, key, value);
   }
 
-  public Writer<?, ?> writeSlot(V key, V value, Output<?> output) {
+  public Writer<?, ?> writeSlot(Output<?> output, V key, V value) {
     return SlotWriter.write(output, this, key, value);
   }
 
   public abstract int sizeOfBlockItem(I item);
 
-  public abstract Writer<?, ?> writeBlockItem(I item, Output<?> output);
+  public abstract Writer<?, ?> writeBlockItem(Output<?> output, I item);
 
   public int sizeOfBlock(Iterator<I> items, boolean inBlock, boolean inMarkup) {
     return BlockWriter.sizeOf(this, items, inBlock, inMarkup);
   }
 
-  public Writer<?, ?> writeBlock(Iterator<I> items, Output<?> output, boolean inBlock, boolean inMarkup) {
+  public Writer<?, ?> writeBlock(Output<?> output, Iterator<I> items, boolean inBlock, boolean inMarkup) {
     return BlockWriter.write(output, this, items, inBlock, inMarkup);
   }
 
@@ -109,12 +109,12 @@ public abstract class ReconWriter<I, V> {
     }
   }
 
-  public Writer<?, ?> writeBlock(I item, Output<?> output) {
+  public Writer<?, ?> writeBlock(Output<?> output, I item) {
     final Iterator<I> items = this.items(item);
     if (items.hasNext()) {
       return BlockWriter.write(output, this, items, this.isBlockSafe(this.items(item)), false);
     } else {
-      return Unicode.writeString("{}", output);
+      return Unicode.writeString(output, "{}");
     }
   }
 
@@ -127,12 +127,12 @@ public abstract class ReconWriter<I, V> {
     }
   }
 
-  public Writer<?, ?> writeRecord(I item, Output<?> output) {
+  public Writer<?, ?> writeRecord(Output<?> output, I item) {
     final Iterator<I> items = this.items(item);
     if (items.hasNext()) {
       return BlockWriter.write(output, this, items, false, false);
     } else {
-      return Unicode.writeString("{}", output);
+      return Unicode.writeString(output, "{}");
     }
   }
 
@@ -148,16 +148,16 @@ public abstract class ReconWriter<I, V> {
     return 2; // "()"
   }
 
-  public Writer<?, ?> writePrimary(V value, Output<?> output) {
+  public Writer<?, ?> writePrimary(Output<?> output, V value) {
     if (this.isRecord(this.item(value))) {
       final Iterator<I> items = this.items(this.item(value));
       if (items.hasNext()) {
         return PrimaryWriter.write(output, this, items);
       }
     } else if (!this.isExtant(this.item(value))) {
-      return this.writeValue(value, output);
+      return this.writeValue(output, value);
     }
-    return Unicode.writeString("()", output);
+    return Unicode.writeString(output, "()");
   }
 
   public boolean isBlockSafe(Iterator<I> items) {
@@ -185,15 +185,15 @@ public abstract class ReconWriter<I, V> {
     return this.sizeOfMarkupText(this.string(item));
   }
 
-  public Writer<?, ?> writeMarkupText(I item, Output<?> output) {
-    return this.writeMarkupText(this.string(item), output);
+  public Writer<?, ?> writeMarkupText(Output<?> output, I item) {
+    return this.writeMarkupText(output, this.string(item));
   }
 
   public int sizeOfMarkupText(String text) {
     return MarkupTextWriter.sizeOf(text);
   }
 
-  public Writer<?, ?> writeMarkupText(String text, Output<?> output) {
+  public Writer<?, ?> writeMarkupText(Output<?> output, String text) {
     return MarkupTextWriter.write(output, text);
   }
 
@@ -201,11 +201,11 @@ public abstract class ReconWriter<I, V> {
     return DataWriter.sizeOf(length);
   }
 
-  public Writer<?, ?> writeData(ByteBuffer value, Output<?> output) {
+  public Writer<?, ?> writeData(Output<?> output, ByteBuffer value) {
     if (value != null) {
       return DataWriter.write(output, value);
     } else {
-      return Unicode.writeString("%", output);
+      return Unicode.writeString(output, "%");
     }
   }
 
@@ -234,7 +234,7 @@ public abstract class ReconWriter<I, V> {
     }
   }
 
-  public Writer<?, ?> writeText(String value, Output<?> output) {
+  public Writer<?, ?> writeText(Output<?> output, String value) {
     if (this.isIdent(value)) {
       return IdentWriter.write(output, value);
     } else {
@@ -250,8 +250,8 @@ public abstract class ReconWriter<I, V> {
     return size;
   }
 
-  public Writer<?, ?> writeNum(int value, Output<?> output) {
-    return Base10.writeInt(value, output);
+  public Writer<?, ?> writeNum(Output<?> output, int value) {
+    return Base10.writeInt(output, value);
   }
 
   public int sizeOfNum(long value) {
@@ -262,63 +262,63 @@ public abstract class ReconWriter<I, V> {
     return size;
   }
 
-  public Writer<?, ?> writeNum(long value, Output<?> output) {
-    return Base10.writeLong(value, output);
+  public Writer<?, ?> writeNum(Output<?> output, long value) {
+    return Base10.writeLong(output, value);
   }
 
   public int sizeOfNum(float value) {
     return Float.toString(value).length();
   }
 
-  public Writer<?, ?> writeNum(float value, Output<?> output) {
-    return Base10.writeFloat(value, output);
+  public Writer<?, ?> writeNum(Output<?> output, float value) {
+    return Base10.writeFloat(output, value);
   }
 
   public int sizeOfNum(double value) {
     return Double.toString(value).length();
   }
 
-  public Writer<?, ?> writeNum(double value, Output<?> output) {
-    return Base10.writeDouble(value, output);
+  public Writer<?, ?> writeNum(Output<?> output, double value) {
+    return Base10.writeDouble(output, value);
   }
 
   public int sizeOfNum(BigInteger value) {
     return value.toString().length();
   }
 
-  public Writer<?, ?> writeNum(BigInteger value, Output<?> output) {
-    return Unicode.writeString(value, output);
+  public Writer<?, ?> writeNum(Output<?> output, BigInteger value) {
+    return Unicode.writeString(output, value);
   }
 
   public int sizeOfUint32(int value) {
     return 10;
   }
 
-  public Writer<?, ?> writeUint32(int value, Output<?> output) {
-    return Base16.lowercase().writeIntLiteral(value, output, 8);
+  public Writer<?, ?> writeUint32(Output<?> output, int value) {
+    return Base16.lowercase().writeIntLiteral(output, value, 8);
   }
 
   public int sizeOfUint64(long value) {
     return 18;
   }
 
-  public Writer<?, ?> writeUint64(long value, Output<?> output) {
-    return Base16.lowercase().writeLongLiteral(value, output, 16);
+  public Writer<?, ?> writeUint64(Output<?> output, long value) {
+    return Base16.lowercase().writeLongLiteral(output, value, 16);
   }
 
   public int sizeOfBool(boolean value) {
     return value ? 4 : 5;
   }
 
-  public Writer<?, ?> writeBool(boolean value, Output<?> output) {
-    return Unicode.writeString(value ? "true" : "false", output);
+  public Writer<?, ?> writeBool(Output<?> output, boolean value) {
+    return Unicode.writeString(output, value ? "true" : "false");
   }
 
   public int sizeOfLambdaFunc(V bindings, V template) {
     return LambdaFuncWriter.sizeOf(this, bindings, template);
   }
 
-  public Writer<?, ?> writeLambdaFunc(V bindings, V template, Output<?> output) {
+  public Writer<?, ?> writeLambdaFunc(Output<?> output, V bindings, V template) {
     return LambdaFuncWriter.write(output, this, bindings, template);
   }
 
@@ -326,7 +326,7 @@ public abstract class ReconWriter<I, V> {
     return ConditionalOperatorWriter.sizeOf(this, ifTerm, thenTerm, elseTerm, precedence);
   }
 
-  public Writer<?, ?> writeConditionalOperator(I ifTerm, I thenTerm, I elseTerm, int precedence, Output<?> output) {
+  public Writer<?, ?> writeConditionalOperator(Output<?> output, I ifTerm, I thenTerm, I elseTerm, int precedence) {
     return ConditionalOperatorWriter.write(output, this, ifTerm, thenTerm, elseTerm, precedence);
   }
 
@@ -334,7 +334,7 @@ public abstract class ReconWriter<I, V> {
     return InfixOperatorWriter.sizeOf(this, lhs, operator, rhs, precedence);
   }
 
-  public Writer<?, ?> writeInfixOperator(I lhs, String operator, I rhs, int precedence, Output<?> output) {
+  public Writer<?, ?> writeInfixOperator(Output<?> output, I lhs, String operator, I rhs, int precedence) {
     return InfixOperatorWriter.write(output, this, lhs, operator, rhs, precedence);
   }
 
@@ -342,7 +342,7 @@ public abstract class ReconWriter<I, V> {
     return PrefixOperatorWriter.sizeOf(this, operator, operand, precedence);
   }
 
-  public Writer<?, ?> writePrefixOperator(String operator, I operand, int precedence, Output<?> output) {
+  public Writer<?, ?> writePrefixOperator(Output<?> output, String operator, I operand, int precedence) {
     return PrefixOperatorWriter.write(output, this, operator, operand, precedence);
   }
 
@@ -350,13 +350,13 @@ public abstract class ReconWriter<I, V> {
     return InvokeOperatorWriter.sizeOf(this, func, args);
   }
 
-  public Writer<?, ?> writeInvokeOperator(V func, V args, Output<?> output) {
+  public Writer<?, ?> writeInvokeOperator(Output<?> output, V func, V args) {
     return InvokeOperatorWriter.write(output, this, func, args);
   }
 
   public abstract int sizeOfThen(V then);
 
-  public abstract Writer<?, ?> writeThen(V then, Output<?> output);
+  public abstract Writer<?, ?> writeThen(Output<?> output, V then);
 
   public int sizeOfIdentitySelector() {
     return 0;
@@ -378,7 +378,7 @@ public abstract class ReconWriter<I, V> {
     return LiteralSelectorWriter.sizeOf(this, item, then);
   }
 
-  public Writer<?, ?> writeLiteralSelector(I item, V then, Output<?> output) {
+  public Writer<?, ?> writeLiteralSelector(Output<?> output, I item, V then) {
     return LiteralSelectorWriter.write(output, this, item, then);
   }
 
@@ -386,7 +386,7 @@ public abstract class ReconWriter<I, V> {
     return 0;
   }
 
-  public Writer<?, ?> writeThenLiteralSelector(I item, V then, Output<?> output) {
+  public Writer<?, ?> writeThenLiteralSelector(Output<?> output, I item, V then) {
     return Writer.done();
   }
 
@@ -394,7 +394,7 @@ public abstract class ReconWriter<I, V> {
     return GetSelectorWriter.sizeOf(this, key, then);
   }
 
-  public Writer<?, ?> writeGetSelector(V key, V then, Output<?> output) {
+  public Writer<?, ?> writeGetSelector(Output<?> output, V key, V then) {
     return GetSelectorWriter.write(output, this, key, then);
   }
 
@@ -402,7 +402,7 @@ public abstract class ReconWriter<I, V> {
     return GetSelectorWriter.sizeOf(this, key, then);
   }
 
-  public Writer<?, ?> writeThenGetSelector(V key, V then, Output<?> output) {
+  public Writer<?, ?> writeThenGetSelector(Output<?> output, V key, V then) {
     return GetSelectorWriter.writeThen(output, this, key, then);
   }
 
@@ -410,7 +410,7 @@ public abstract class ReconWriter<I, V> {
     return GetAttrSelectorWriter.sizeOf(this, key, then);
   }
 
-  public Writer<?, ?> writeGetAttrSelector(V key, V then, Output<?> output) {
+  public Writer<?, ?> writeGetAttrSelector(Output<?> output, V key, V then) {
     return GetAttrSelectorWriter.write(output, this, key, then);
   }
 
@@ -418,7 +418,7 @@ public abstract class ReconWriter<I, V> {
     return GetAttrSelectorWriter.sizeOf(this, key, then);
   }
 
-  public Writer<?, ?> writeThenGetAttrSelector(V key, V then, Output<?> output) {
+  public Writer<?, ?> writeThenGetAttrSelector(Output<?> output, V key, V then) {
     return GetAttrSelectorWriter.writeThen(output, this, key, then);
   }
 
@@ -426,7 +426,7 @@ public abstract class ReconWriter<I, V> {
     return GetItemSelectorWriter.sizeOf(this, index, then);
   }
 
-  public Writer<?, ?> writeGetItemSelector(V index, V then, Output<?> output) {
+  public Writer<?, ?> writeGetItemSelector(Output<?> output, V index, V then) {
     return GetItemSelectorWriter.write(output, this, index, then);
   }
 
@@ -434,7 +434,7 @@ public abstract class ReconWriter<I, V> {
     return GetItemSelectorWriter.sizeOfThen(this, index, then);
   }
 
-  public Writer<?, ?> writeThenGetItemSelector(V index, V then, Output<?> output) {
+  public Writer<?, ?> writeThenGetItemSelector(Output<?> output, V index, V then) {
     return GetItemSelectorWriter.writeThen(output, this, index, then);
   }
 
@@ -442,7 +442,7 @@ public abstract class ReconWriter<I, V> {
     return KeysSelectorWriter.sizeOf(this, then);
   }
 
-  public Writer<?, ?> writeKeysSelector(V then, Output<?> output) {
+  public Writer<?, ?> writeKeysSelector(Output<?> output, V then) {
     return KeysSelectorWriter.write(output, this, then);
   }
 
@@ -450,7 +450,7 @@ public abstract class ReconWriter<I, V> {
     return KeysSelectorWriter.sizeOf(this, then);
   }
 
-  public Writer<?, ?> writeThenKeysSelector(V then, Output<?> output) {
+  public Writer<?, ?> writeThenKeysSelector(Output<?> output, V then) {
     return KeysSelectorWriter.writeThen(output, this, then);
   }
 
@@ -458,7 +458,7 @@ public abstract class ReconWriter<I, V> {
     return ValuesSelectorWriter.sizeOf(this, then);
   }
 
-  public Writer<?, ?> writeValuesSelector(V then, Output<?> output) {
+  public Writer<?, ?> writeValuesSelector(Output<?> output, V then) {
     return ValuesSelectorWriter.write(output, this, then);
   }
 
@@ -466,7 +466,7 @@ public abstract class ReconWriter<I, V> {
     return ValuesSelectorWriter.sizeOf(this, then);
   }
 
-  public Writer<?, ?> writeThenValuesSelector(V then, Output<?> output) {
+  public Writer<?, ?> writeThenValuesSelector(Output<?> output, V then) {
     return ValuesSelectorWriter.writeThen(output, this, then);
   }
 
@@ -474,7 +474,7 @@ public abstract class ReconWriter<I, V> {
     return ChildrenSelectorWriter.sizeOf(this, then);
   }
 
-  public Writer<?, ?> writeChildrenSelector(V then, Output<?> output) {
+  public Writer<?, ?> writeChildrenSelector(Output<?> output, V then) {
     return ChildrenSelectorWriter.write(output, this, then);
   }
 
@@ -482,7 +482,7 @@ public abstract class ReconWriter<I, V> {
     return ChildrenSelectorWriter.sizeOf(this, then);
   }
 
-  public Writer<?, ?> writeThenChildrenSelector(V then, Output<?> output) {
+  public Writer<?, ?> writeThenChildrenSelector(Output<?> output, V then) {
     return ChildrenSelectorWriter.writeThen(output, this, then);
   }
 
@@ -490,7 +490,7 @@ public abstract class ReconWriter<I, V> {
     return DescendantsSelectorWriter.sizeOf(this, then);
   }
 
-  public Writer<?, ?> writeDescendantsSelector(V then, Output<?> output) {
+  public Writer<?, ?> writeDescendantsSelector(Output<?> output, V then) {
     return DescendantsSelectorWriter.write(output, this, then);
   }
 
@@ -498,7 +498,7 @@ public abstract class ReconWriter<I, V> {
     return DescendantsSelectorWriter.sizeOf(this, then);
   }
 
-  public Writer<?, ?> writeThenDescendantsSelector(V then, Output<?> output) {
+  public Writer<?, ?> writeThenDescendantsSelector(Output<?> output, V then) {
     return DescendantsSelectorWriter.writeThen(output, this, then);
   }
 
@@ -506,7 +506,7 @@ public abstract class ReconWriter<I, V> {
     return FilterSelectorWriter.sizeOf(this, predicate, then);
   }
 
-  public Writer<?, ?> writeFilterSelector(V predicate, V then, Output<?> output) {
+  public Writer<?, ?> writeFilterSelector(Output<?> output, V predicate, V then) {
     return FilterSelectorWriter.write(output, this, predicate, then);
   }
 
@@ -514,7 +514,7 @@ public abstract class ReconWriter<I, V> {
     return FilterSelectorWriter.sizeOfThen(this, predicate, then);
   }
 
-  public Writer<?, ?> writeThenFilterSelector(V predicate, V then, Output<?> output) {
+  public Writer<?, ?> writeThenFilterSelector(Output<?> output, V predicate, V then) {
     return FilterSelectorWriter.writeThen(output, this, predicate, then);
   }
 

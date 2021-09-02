@@ -16,8 +16,8 @@ package swim.codec;
 
 final class Utf8DecodedOutput<T> extends Output<T> {
 
-  final UtfErrorMode errorMode;
   Output<T> output;
+  final UtfErrorMode errorMode;
   int c1;
   int c2;
   int c3;
@@ -238,40 +238,40 @@ final class Utf8DecodedOutput<T> extends Output<T> {
   private static String invalid(int c1) {
     Output<String> output = Unicode.stringOutput();
     output = output.write("invalid UTF-8 code unit: ");
-    Base16.uppercase().writeIntLiteral(c1, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c1, 2).bind();
     return output.bind();
   }
 
   private static String invalid(int c1, int c2) {
     Output<String> output = Unicode.stringOutput();
     output = output.write("invalid UTF-8 code unit sequence: ");
-    Base16.uppercase().writeIntLiteral(c1, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c1, 2).bind();
     output = output.write(' ');
-    Base16.uppercase().writeIntLiteral(c2, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c2, 2).bind();
     return output.bind();
   }
 
   private static String invalid(int c1, int c2, int c3) {
     Output<String> output = Unicode.stringOutput();
     output = output.write("invalid UTF-8 code unit sequence: ");
-    Base16.uppercase().writeIntLiteral(c1, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c1, 2).bind();
     output = output.write(' ');
-    Base16.uppercase().writeIntLiteral(c2, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c2, 2).bind();
     output = output.write(' ');
-    Base16.uppercase().writeIntLiteral(c3, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c3, 2).bind();
     return output.bind();
   }
 
   private static String invalid(int c1, int c2, int c3, int c4) {
     Output<String> output = Unicode.stringOutput();
     output = output.write("invalid UTF-8 code unit sequence: ");
-    Base16.uppercase().writeIntLiteral(c1, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c1, 2).bind();
     output = output.write(' ');
-    Base16.uppercase().writeIntLiteral(c2, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c2, 2).bind();
     output = output.write(' ');
-    Base16.uppercase().writeIntLiteral(c3, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c3, 2).bind();
     output = output.write(' ');
-    Base16.uppercase().writeIntLiteral(c4, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c4, 2).bind();
     return output.bind();
   }
 

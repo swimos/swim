@@ -252,7 +252,7 @@ public final class UTreePageRef extends PageRef {
 
   @Override
   public void writePageRef(Output<?> output) {
-    Recon.write(this.toValue(), output);
+    Recon.write(output, this.toValue());
   }
 
   @Override
@@ -399,7 +399,7 @@ public final class UTreePageRef extends PageRef {
       }
     }
     final Output<String> message = Unicode.stringOutput("Malformed utree page ref: ");
-    Recon.write(value, message);
+    Recon.write(message, value);
     throw new StoreException(message.bind(), cause);
   }
 

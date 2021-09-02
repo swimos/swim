@@ -22,19 +22,20 @@ import swim.collections.HashTrieMap;
 final class MediaRangeParser extends Parser<MediaRange> {
 
   final HttpParser http;
-  final StringBuilder type;
-  final StringBuilder subtype;
-  final Parser<Float> weight;
-  final Parser<HashTrieMap<String, String>> params;
+  final StringBuilder typeBuilder;
+  final StringBuilder subtypeBuilder;
+  final Parser<Float> weightParser;
+  final Parser<HashTrieMap<String, String>> paramsParser;
   final int step;
 
-  MediaRangeParser(HttpParser http, StringBuilder type, StringBuilder subtype,
-                   Parser<Float> weight, Parser<HashTrieMap<String, String>> params, int step) {
+  MediaRangeParser(HttpParser http, StringBuilder typeBuilder,
+                   StringBuilder subtypeBuilder, Parser<Float> weightParser,
+                   Parser<HashTrieMap<String, String>> paramsParser, int step) {
     this.http = http;
-    this.type = type;
-    this.subtype = subtype;
-    this.weight = weight;
-    this.params = params;
+    this.typeBuilder = typeBuilder;
+    this.subtypeBuilder = subtypeBuilder;
+    this.weightParser = weightParser;
+    this.paramsParser = paramsParser;
     this.step = step;
   }
 
@@ -44,21 +45,23 @@ final class MediaRangeParser extends Parser<MediaRange> {
 
   @Override
   public Parser<MediaRange> feed(Input input) {
-    return MediaRangeParser.parse(input, this.http, this.type, this.subtype, this.weight, this.params, this.step);
+    return MediaRangeParser.parse(input, this.http, this.typeBuilder, this.subtypeBuilder,
+                                  this.weightParser, this.paramsParser, this.step);
   }
 
-  static Parser<MediaRange> parse(Input input, HttpParser http, StringBuilder type, StringBuilder subtype,
-                                  Parser<Float> weight, Parser<HashTrieMap<String, String>> params, int step) {
+  static Parser<MediaRange> parse(Input input, HttpParser http, StringBuilder typeBuilder,
+                                  StringBuilder subtypeBuilder, Parser<Float> weightParser,
+                                  Parser<HashTrieMap<String, String>> paramsParser, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (type == null) {
-            type = new StringBuilder();
+          if (typeBuilder == null) {
+            typeBuilder = new StringBuilder();
           }
-          type.appendCodePoint(c);
+          typeBuilder.appendCodePoint(c);
           step = 2;
         } else {
           return Parser.error(Diagnostic.expected("media type", input));
@@ -72,7 +75,7 @@ final class MediaRangeParser extends Parser<MediaRange> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          type.appendCodePoint(c);
+          typeBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -89,10 +92,10 @@ final class MediaRangeParser extends Parser<MediaRange> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (subtype == null) {
-            subtype = new StringBuilder();
+          if (subtypeBuilder == null) {
+            subtypeBuilder = new StringBuilder();
           }
-          subtype.appendCodePoint(c);
+          subtypeBuilder.appendCodePoint(c);
           step = 4;
         } else {
           return Parser.error(Diagnostic.expected("media subtype", input));
@@ -106,7 +109,7 @@ final class MediaRangeParser extends Parser<MediaRange> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          subtype.appendCodePoint(c);
+          subtypeBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -128,8 +131,8 @@ final class MediaRangeParser extends Parser<MediaRange> {
         input = input.step();
         step = 6;
       } else if (!input.isEmpty()) {
-        return Parser.done(http.mediaRange(type.toString(), subtype.toString(), 1f,
-                                           HashTrieMap.<String, String>empty()));
+        return Parser.done(http.mediaRange(typeBuilder.toString(), subtypeBuilder.toString(),
+                                           1f, HashTrieMap.<String, String>empty()));
       }
     }
     if (step == 6) {
@@ -146,7 +149,7 @@ final class MediaRangeParser extends Parser<MediaRange> {
           input = input.step();
           step = 7;
         } else {
-          params = http.parseParamMapRest(input);
+          paramsParser = http.parseParamMapRest(input);
           step = 9;
         }
       } else if (input.isDone()) {
@@ -157,10 +160,10 @@ final class MediaRangeParser extends Parser<MediaRange> {
       if (input.isCont()) {
         c = input.head();
         if (c == '=') {
-          weight = http.parseQValueRest(input);
+          weightParser = http.parseQValueRest(input);
           step = 8;
         } else {
-          params = http.parseParamMapRest(new StringBuilder().append('q'), input);
+          paramsParser = http.parseParamMapRest(input, new StringBuilder().append('q'));
           step = 9;
         }
       } else if (input.isDone()) {
@@ -168,31 +171,33 @@ final class MediaRangeParser extends Parser<MediaRange> {
       }
     }
     if (step == 8) {
-      weight = weight.feed(input);
-      if (weight.isDone()) {
+      weightParser = weightParser.feed(input);
+      if (weightParser.isDone()) {
         step = 9;
-      } else if (weight.isError()) {
-        return weight.asError();
+      } else if (weightParser.isError()) {
+        return weightParser.asError();
       }
     }
     if (step == 9) {
-      if (params == null) {
-        params = http.parseParamMap(input);
+      if (paramsParser == null) {
+        paramsParser = http.parseParamMap(input);
       } else {
-        params = params.feed(input);
+        paramsParser = paramsParser.feed(input);
       }
-      if (params.isDone()) {
-        final Float qvalue = weight != null ? weight.bind() : null;
+      if (paramsParser.isDone()) {
+        final Float qvalue = weightParser != null ? weightParser.bind() : null;
         final float q = qvalue != null ? (float) qvalue : 1f;
-        return Parser.done(http.mediaRange(type.toString(), subtype.toString(), q, params.bind()));
-      } else if (params.isError()) {
-        return params.asError();
+        return Parser.done(http.mediaRange(typeBuilder.toString(),
+                           subtypeBuilder.toString(), q, paramsParser.bind()));
+      } else if (paramsParser.isError()) {
+        return paramsParser.asError();
       }
     }
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new MediaRangeParser(http, type, subtype, weight, params, step);
+    return new MediaRangeParser(http, typeBuilder, subtypeBuilder,
+                                weightParser, paramsParser, step);
   }
 
   static Parser<MediaRange> parse(Input input, HttpParser http) {

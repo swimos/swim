@@ -103,13 +103,13 @@ public final class Span extends Tag {
     if (this.start.note != null) {
       output = output.write(this.start.note).write(": ");
     }
-    output = Format.displayInt(this.start.line, output);
+    output = Format.displayInt(output, this.start.line);
     output = output.write(':');
-    output = Format.displayInt(this.start.column, output);
+    output = Format.displayInt(output, this.start.column);
     output = output.write('-');
-    output = Format.displayInt(this.end.line, output);
+    output = Format.displayInt(output, this.end.line);
     output = output.write(':');
-    output = Format.displayInt(this.end.column, output);
+    output = Format.displayInt(output, this.end.column);
     if (this.end.note != null) {
       output = output.write(": ").write(this.end.note);
     }

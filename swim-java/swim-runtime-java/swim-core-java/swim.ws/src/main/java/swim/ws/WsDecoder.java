@@ -17,113 +17,130 @@ package swim.ws;
 import swim.codec.Binary;
 import swim.codec.Decoder;
 import swim.codec.DecoderException;
+import swim.codec.Encoder;
 import swim.codec.InputBuffer;
 import swim.structure.Data;
 
 public abstract class WsDecoder {
 
-  public <T> WsFrame<T> fragment(WsOpcode opcode, Decoder<T> content) {
-    return new WsFragment<T>(opcode, content);
+  public <T> WsFrame<T> fragmentFrame(WsOpcode frameType, Decoder<T> payloadDecoder) {
+    return new WsFragmentFrame<T>(frameType, payloadDecoder);
   }
 
-  public <T> WsFrame<T> message(T value) {
-    return new WsValue<T>(value);
+  public <T> WsDataFrame<T> dataFrame(WsOpcode frameType, T payloadValue) {
+    switch (frameType) {
+      case TEXT: return this.textFrame(payloadValue);
+      case BINARY: return this.binaryFrame(payloadValue);
+      default: throw new IllegalArgumentException(frameType.toString());
+    }
   }
 
-  public <P, T> WsFrame<T> control(WsOpcode opcode, P payload) {
-    switch (opcode) {
-      case CLOSE: return this.close(payload);
-      case PING: return this.ping(payload);
-      case PONG: return this.pong(payload);
-      default: throw new IllegalArgumentException(opcode.toString());
+  public <T> WsTextFrame<T> textFrame(T payloadValue) {
+    return new WsTextFrame<T>(payloadValue, Encoder.done());
+  }
+
+  public <T> WsBinaryFrame<T> binaryFrame(T payloadValue) {
+    return new WsBinaryFrame<T>(payloadValue, Encoder.done());
+  }
+
+  public <P, T> WsControlFrame<P, T> controlFrame(WsOpcode frameType, P payloadValue) {
+    switch (frameType) {
+      case CLOSE: return this.closeFrame(payloadValue);
+      case PING: return this.pingFrame(payloadValue);
+      case PONG: return this.pongFrame(payloadValue);
+      default: throw new IllegalArgumentException(frameType.toString());
     }
   }
 
   @SuppressWarnings("unchecked")
-  public <P, T> WsFrame<T> close(P payload) {
-    return (WsFrame<T>) WsClose.create(payload);
+  public <P, T> WsCloseFrame<P, T> closeFrame(P payloadValue) {
+    return WsCloseFrame.create(payloadValue);
   }
 
   @SuppressWarnings("unchecked")
-  public <P, T> WsFrame<T> ping(P payload) {
-    return (WsFrame<T>) WsPing.create(payload);
+  public <P, T> WsPingFrame<P, T> pingFrame(P payloadValue) {
+    return WsPingFrame.create(payloadValue);
   }
 
   @SuppressWarnings("unchecked")
-  public <P, T> WsFrame<T> pong(P payload) {
-    return (WsFrame<T>) WsPong.create(payload);
+  public <P, T> WsPongFrame<P, T> pongFrame(P payloadValue) {
+    return WsPongFrame.create(payloadValue);
   }
 
-  public <T> Decoder<T> continuationDecoder(Decoder<T> content) {
-    return content;
+  public <T> Decoder<T> textDecoder(Decoder<T> payloadDecoder) {
+    return payloadDecoder.fork(WsOpcode.TEXT);
   }
 
-  public <T> Decoder<T> textDecoder(Decoder<T> content) {
-    return content.fork(WsOpcode.TEXT);
+  public <T> Decoder<T> binaryDecoder(Decoder<T> payloadDecoder) {
+    return payloadDecoder.fork(WsOpcode.BINARY);
   }
 
-  public <T> Decoder<T> binaryDecoder(Decoder<T> content) {
-    return content.fork(WsOpcode.BINARY);
-  }
-
-  public <T> Decoder<?> closeDecoder(Decoder<T> content) {
+  public <T> Decoder<?> closeDecoder(Decoder<T> payloadDecoder) {
     return WsStatus.decoder();
   }
 
-  public <T> Decoder<?> pingDecoder(Decoder<T> content) {
+  public <T> Decoder<?> pingDecoder(Decoder<T> payloadDecoder) {
     return Binary.outputParser(Data.output());
   }
 
-  public <T> Decoder<?> pongDecoder(Decoder<T> content) {
+  public <T> Decoder<?> pongDecoder(Decoder<T> payloadDecoder) {
     return Binary.outputParser(Data.output());
   }
 
-  public <T> Decoder<WsFrame<T>> frameDecoder(Decoder<T> content) {
-    return new WsOpcodeDecoder<T>(this, content);
+  public <T> Decoder<WsFrame<T>> messageDecoder(Decoder<T> payloadDecoder) {
+    return new WsMessageDecoder<T>(this, null, payloadDecoder);
   }
 
-  public <T> Decoder<WsFrame<T>> decodeFrame(Decoder<T> content, InputBuffer input) {
-    return WsOpcodeDecoder.decode(input, this, content);
+  public <T> Decoder<WsFrame<T>> decodeMessage(InputBuffer input, Decoder<T> payloadDecoder) {
+    return WsMessageDecoder.decode(input, this, null, payloadDecoder);
   }
 
-  public <T> Decoder<WsFrame<T>> decodeFrame(int finRsvOp, Decoder<T> content, InputBuffer input) {
+  public <T> Decoder<WsFrame<T>> continuationDecoder(WsOpcode frameType, Decoder<T> payloadDecoder) {
+    return new WsMessageDecoder<T>(this, frameType, payloadDecoder);
+  }
+
+  public <T> Decoder<WsFrame<T>> decodeContinuation(InputBuffer input, WsOpcode frameType, Decoder<T> payloadDecoder) {
+    return WsMessageDecoder.decode(input, this, frameType, payloadDecoder);
+  }
+
+  public <T> Decoder<WsFrame<T>> decodeFinRsvOp(InputBuffer input, int finRsvOp, WsOpcode frameType, Decoder<T> payloadDecoder) {
     final int opcode = finRsvOp & 0xf;
     switch (opcode) {
-      case 0x0: return this.decodeContinuationFrame(finRsvOp, this.continuationDecoder(content), input);
-      case 0x1: return this.decodeTextFrame(finRsvOp, this.textDecoder(content), input);
-      case 0x2: return this.decodeBinaryFrame(finRsvOp, this.binaryDecoder(content), input);
-      case 0x8: return this.decodeCloseFrame(finRsvOp, this.closeDecoder(content), input);
-      case 0x9: return this.decodePingFrame(finRsvOp, this.pingDecoder(content), input);
-      case 0xa: return this.decodePongFrame(finRsvOp, this.pongDecoder(content), input);
+      case 0x0: return this.decodeContinuationFrame(input, finRsvOp, frameType, payloadDecoder);
+      case 0x1: return this.decodeTextFrame(input, finRsvOp, this.textDecoder(payloadDecoder));
+      case 0x2: return this.decodeBinaryFrame(input, finRsvOp, this.binaryDecoder(payloadDecoder));
+      case 0x8: return this.decodeCloseFrame(input, finRsvOp, this.closeDecoder(payloadDecoder));
+      case 0x9: return this.decodePingFrame(input, finRsvOp, this.pingDecoder(payloadDecoder));
+      case 0xa: return this.decodePongFrame(input, finRsvOp, this.pongDecoder(payloadDecoder));
       default: return Decoder.error(new DecoderException("reserved opcode: " + WsOpcode.from(opcode)));
     }
   }
 
-  public <T> Decoder<WsFrame<T>> decodeContinuationFrame(int finRsvOp, Decoder<T> content, InputBuffer input) {
-    return WsFrameDecoder.decode(input, this, content);
+  public <T> Decoder<WsFrame<T>> decodeContinuationFrame(InputBuffer input, int finRsvOp, WsOpcode frameType, Decoder<T> payloadDecoder) {
+    return WsFrameDecoder.decode(input, this, frameType, payloadDecoder);
   }
 
-  public <T> Decoder<WsFrame<T>> decodeTextFrame(int finRsvOp, Decoder<T> content, InputBuffer input) {
-    return WsFrameDecoder.decode(input, this, content);
+  public <T> Decoder<WsFrame<T>> decodeTextFrame(InputBuffer input, int finRsvOp, Decoder<T> payloadDecoder) {
+    return WsFrameDecoder.decode(input, this, WsOpcode.TEXT, payloadDecoder);
   }
 
-  public <T> Decoder<WsFrame<T>> decodeBinaryFrame(int finRsvOp, Decoder<T> content, InputBuffer input) {
-    return WsFrameDecoder.decode(input, this, content);
-  }
-
-  @SuppressWarnings("unchecked")
-  public <P, T> Decoder<WsFrame<T>> decodeCloseFrame(int finRsvOp, Decoder<P> content, InputBuffer input) {
-    return (Decoder<WsFrame<T>>) (Decoder<?>) WsFrameDecoder.decode(input, this, content);
+  public <T> Decoder<WsFrame<T>> decodeBinaryFrame(InputBuffer input, int finRsvOp, Decoder<T> payloadDecoder) {
+    return WsFrameDecoder.decode(input, this, WsOpcode.BINARY, payloadDecoder);
   }
 
   @SuppressWarnings("unchecked")
-  public <P, T> Decoder<WsFrame<T>> decodePingFrame(int finRsvOp, Decoder<P> content, InputBuffer input) {
-    return (Decoder<WsFrame<T>>) (Decoder<?>) WsFrameDecoder.decode(input, this, content);
+  public <P, T> Decoder<WsFrame<T>> decodeCloseFrame(InputBuffer input, int finRsvOp, Decoder<P> payloadDecoder) {
+    return (Decoder<WsFrame<T>>) (Decoder<?>) WsFrameDecoder.decode(input, this, WsOpcode.CLOSE, payloadDecoder);
   }
 
   @SuppressWarnings("unchecked")
-  public <P, T> Decoder<WsFrame<T>> decodePongFrame(int finRsvOp, Decoder<P> content, InputBuffer input) {
-    return (Decoder<WsFrame<T>>) (Decoder<?>) WsFrameDecoder.decode(input, this, content);
+  public <P, T> Decoder<WsFrame<T>> decodePingFrame(InputBuffer input, int finRsvOp, Decoder<P> payloadDecoder) {
+    return (Decoder<WsFrame<T>>) (Decoder<?>) WsFrameDecoder.decode(input, this, WsOpcode.PING, payloadDecoder);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <P, T> Decoder<WsFrame<T>> decodePongFrame(InputBuffer input, int finRsvOp, Decoder<P> payloadDecoder) {
+    return (Decoder<WsFrame<T>>) (Decoder<?>) WsFrameDecoder.decode(input, this, WsOpcode.PONG, payloadDecoder);
   }
 
 }

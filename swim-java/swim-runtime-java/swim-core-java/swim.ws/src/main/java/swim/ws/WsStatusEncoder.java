@@ -52,7 +52,7 @@ final class WsStatusEncoder extends Encoder<Object, WsStatus> {
     }
     if (step == 3) {
       if (part == null) {
-        part = Utf8.writeString(status.reason, output);
+        part = Utf8.writeString(output, status.reason);
       } else {
         part = part.pull(output);
       }

@@ -52,7 +52,7 @@ final class InvokeOperatorWriter<I, V> extends Writer<Object, Object> {
                                              V func, V args, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = recon.writeValue(func, output);
+        part = recon.writeValue(output, func);
       } else {
         part = part.pull(output);
       }
@@ -69,7 +69,7 @@ final class InvokeOperatorWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 3) {
       if (part == null) {
-        part = recon.writeBlockValue(args, output);
+        part = recon.writeBlockValue(output, args);
       } else {
         part = part.pull(output);
       }

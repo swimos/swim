@@ -42,7 +42,7 @@ public abstract class WsDeflateEncoder extends WsEncoder {
   }
 
   @Override
-  public <T> Encoder<?, WsFrame<T>> encodeTextFrame(WsFrame<T> frame, OutputBuffer<?> output) {
+  public <T> Encoder<?, WsFrame<T>> encodeTextFrame(OutputBuffer<?> output, WsFrame<T> frame) {
     return WsFrameDeflater.encode(output, this, frame);
   }
 
@@ -52,7 +52,7 @@ public abstract class WsDeflateEncoder extends WsEncoder {
   }
 
   @Override
-  public <T> Encoder<?, WsFrame<T>> encodeBinaryFrame(WsFrame<T> frame, OutputBuffer<?> output) {
+  public <T> Encoder<?, WsFrame<T>> encodeBinaryFrame(OutputBuffer<?> output, WsFrame<T> frame) {
     return WsFrameDeflater.encode(output, this, frame);
   }
 

@@ -30,41 +30,41 @@ import swim.codec.Output;
 import swim.codec.OutputBuffer;
 import swim.codec.Utf8;
 import swim.collections.FingerTrieSeq;
-import swim.http.header.ContentLength;
-import swim.http.header.ContentType;
+import swim.http.header.ContentLengthHeader;
+import swim.http.header.ContentTypeHeader;
 import swim.util.Murmur3;
 
-public final class HttpBody<T> extends HttpEntity<T> implements Debug {
+public final class HttpBody<T> extends HttpPayload<T> implements Debug {
 
-  final T value;
-  final Encoder<?, ?> content;
-  final long length;
+  final T payloadValue;
+  final Encoder<?, ?> payloadEncoder;
+  final long contentLength;
   final MediaType mediaType;
 
-  HttpBody(T value, Encoder<?, ?> content, long length, MediaType mediaType) {
-    this.value = value;
-    this.content = content;
-    this.length = length;
+  HttpBody(T payloadValue, Encoder<?, ?> payloadEncoder,
+           long contentLength, MediaType mediaType) {
+    this.payloadValue = payloadValue;
+    this.payloadEncoder = payloadEncoder;
+    this.contentLength = contentLength;
     this.mediaType = mediaType;
   }
 
   @Override
   public boolean isDefined() {
-    return this.value != null;
+    return this.payloadValue != null;
   }
 
   @Override
   public T get() {
-    return this.value;
+    return this.payloadValue;
   }
 
-  public Encoder<?, ?> content() {
-    return this.content;
+  public Encoder<?, ?> payloadEncoder() {
+    return this.payloadEncoder;
   }
 
-  @Override
-  public long length() {
-    return this.length;
+  public long contentLength() {
+    return this.contentLength;
   }
 
   @Override
@@ -81,21 +81,21 @@ public final class HttpBody<T> extends HttpEntity<T> implements Debug {
   public FingerTrieSeq<HttpHeader> headers() {
     FingerTrieSeq<HttpHeader> headers = FingerTrieSeq.empty();
     if (this.mediaType != null) {
-      headers = headers.appended(ContentType.create(this.mediaType));
+      headers = headers.appended(ContentTypeHeader.create(this.mediaType));
     }
-    headers = headers.appended(ContentLength.create(this.length));
+    headers = headers.appended(ContentLengthHeader.create(this.contentLength));
     return headers;
   }
 
   @Override
   public <T2> Encoder<?, HttpMessage<T2>> httpEncoder(HttpMessage<T2> message, HttpWriter http) {
-    return http.bodyEncoder(message, this.content, this.length);
+    return http.bodyEncoder(message, this.payloadEncoder, this.contentLength);
   }
 
   @Override
-  public <T2> Encoder<?, HttpMessage<T2>> encodeHttp(HttpMessage<T2> message,
-                                                     OutputBuffer<?> output, HttpWriter http) {
-    return http.encodeBody(message, this.content, this.length, output);
+  public <T2> Encoder<?, HttpMessage<T2>> encodeHttp(OutputBuffer<?> output,
+                                                     HttpMessage<T2> message, HttpWriter http) {
+    return http.encodeBody(output, message, this.payloadEncoder, this.contentLength);
   }
 
   @Override
@@ -104,8 +104,8 @@ public final class HttpBody<T> extends HttpEntity<T> implements Debug {
       return true;
     } else if (other instanceof HttpBody<?>) {
       final HttpBody<?> that = (HttpBody<?>) other;
-      return (this.value == null ? that.value == null : this.value.equals(that.value))
-          && this.content.equals(that.content) && this.length == that.length
+      return (this.payloadValue == null ? that.payloadValue == null : this.payloadValue.equals(that.payloadValue))
+          && this.contentLength == that.contentLength
           && (this.mediaType == null ? that.mediaType == null : this.mediaType.equals(that.mediaType));
     }
     return false;
@@ -118,18 +118,18 @@ public final class HttpBody<T> extends HttpEntity<T> implements Debug {
     if (HttpBody.hashSeed == 0) {
       HttpBody.hashSeed = Murmur3.seed(HttpBody.class);
     }
-    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(Murmur3.mix(HttpBody.hashSeed,
-        Murmur3.hash(this.value)), this.content.hashCode()),
-        Murmur3.hash(this.length)), Murmur3.hash(this.mediaType)));
+    return Murmur3.mash(Murmur3.mix(Murmur3.mix(Murmur3.mix(HttpBody.hashSeed,
+        Murmur3.hash(this.payloadValue)), Murmur3.hash(this.contentLength)),
+        Murmur3.hash(this.mediaType)));
   }
 
   @Override
   public <T> Output<T> debug(Output<T> output) {
     output = output.write("HttpBody").write('.').write("create").write('(');
-    if (this.value != null) {
-      output = output.debug(this.value).write(", ");
+    if (this.payloadValue != null) {
+      output = output.debug(this.payloadValue).write(", ");
     }
-    output = output.debug(this.content).write(", ").debug(this.length);
+    output = output.debug(this.payloadEncoder).write(", ").debug(this.contentLength);
     if (this.mediaType != null) {
       output = output.write(", ").debug(this.mediaType);
     }
@@ -152,20 +152,20 @@ public final class HttpBody<T> extends HttpEntity<T> implements Debug {
     return (HttpBody<T>) HttpBody.empty;
   }
 
-  public static <T> HttpBody<T> create(T value, Encoder<?, ?> content, long length, MediaType mediaType) {
-    return new HttpBody<T>(value, content, length, mediaType);
+  public static <T> HttpBody<T> create(T payloadValue, Encoder<?, ?> payloadEncoder, long contentLength, MediaType mediaType) {
+    return new HttpBody<T>(payloadValue, payloadEncoder, contentLength, mediaType);
   }
 
-  public static <T> HttpBody<T> create(T value, Encoder<?, ?> content, long length) {
-    return new HttpBody<T>(value, content, length, MediaType.applicationOctetStream());
+  public static <T> HttpBody<T> create(T payloadValue, Encoder<?, ?> payloadEncoder, long contentLength) {
+    return new HttpBody<T>(payloadValue, payloadEncoder, contentLength, MediaType.applicationOctetStream());
   }
 
-  public static <T> HttpBody<T> create(Encoder<?, ?> content, long length, MediaType mediaType) {
-    return new HttpBody<T>(null, content, length, mediaType);
+  public static <T> HttpBody<T> create(Encoder<?, ?> payloadEncoder, long contentLength, MediaType mediaType) {
+    return new HttpBody<T>(null, payloadEncoder, contentLength, mediaType);
   }
 
-  public static <T> HttpBody<T> create(Encoder<?, ?> content, long length) {
-    return new HttpBody<T>(null, content, length, MediaType.applicationOctetStream());
+  public static <T> HttpBody<T> create(Encoder<?, ?> payloadEncoder, long contentLength) {
+    return new HttpBody<T>(null, payloadEncoder, contentLength, MediaType.applicationOctetStream());
   }
 
   public static <T> HttpBody<T> create(ByteBuffer data, MediaType mediaType) {
@@ -176,15 +176,15 @@ public final class HttpBody<T> extends HttpEntity<T> implements Debug {
     return HttpBody.create(data, MediaType.applicationOctetStream());
   }
 
-  public static HttpBody<String> create(String content, MediaType mediaType) {
-    Output<ByteBuffer> output = Utf8.encodedOutput(Binary.byteBufferOutput(content.length()));
-    output = output.write(content);
+  public static HttpBody<String> create(String payloadValue, MediaType mediaType) {
+    Output<ByteBuffer> output = Utf8.encodedOutput(Binary.byteBufferOutput(payloadValue.length()));
+    output = output.write(payloadValue);
     final ByteBuffer data = output.bind();
-    return new HttpBody<String>(content, Binary.byteBufferWriter(data), data.remaining(), mediaType);
+    return new HttpBody<String>(payloadValue, Binary.byteBufferWriter(data), data.remaining(), mediaType);
   }
 
-  public static HttpBody<String> create(String content) {
-    return HttpBody.create(content, MediaType.textPlain());
+  public static HttpBody<String> create(String payloadValue) {
+    return HttpBody.create(payloadValue, MediaType.textPlain());
   }
 
   public static <T> HttpBody<T> fromFile(String path, MediaType mediaType) throws IOException {
@@ -203,7 +203,7 @@ public final class HttpBody<T> extends HttpEntity<T> implements Debug {
     try {
       input = classLoader.getResourceAsStream(resource);
       if (input != null) {
-        final ByteBuffer data = Binary.read(Binary.outputParser(Binary.byteBufferOutput()), input);
+        final ByteBuffer data = Binary.read(input, Binary.outputParser(Binary.byteBufferOutput()));
         body = new HttpBody<T>(null, Binary.byteBufferWriter(data), data.remaining(), mediaType);
       }
     } finally {
@@ -221,13 +221,13 @@ public final class HttpBody<T> extends HttpEntity<T> implements Debug {
     return HttpBody.fromResource(classLoader, resource, MediaType.forPath(resource));
   }
 
-  public static <T> Decoder<HttpMessage<T>> httpDecoder(HttpMessage<?> message, Decoder<T> content, long length) {
-    return Http.standardParser().bodyDecoder(message, content, length);
+  public static <T> Decoder<HttpMessage<T>> httpDecoder(HttpMessage<?> message, Decoder<T> payloadDecoder, long contentLength) {
+    return Http.standardParser().bodyDecoder(message, payloadDecoder, contentLength);
   }
 
-  public static <T> Decoder<HttpMessage<T>> decodeHttp(HttpMessage<?> message, Decoder<T> content,
-                                                       long length, InputBuffer input) {
-    return Http.standardParser().decodeBody(message, content, length, input);
+  public static <T> Decoder<HttpMessage<T>> decodeHttp(InputBuffer input, HttpMessage<?> message,
+                                                       Decoder<T> payloadDecoder, long contentLength) {
+    return Http.standardParser().decodeBody(input, message, payloadDecoder, contentLength);
   }
 
 }

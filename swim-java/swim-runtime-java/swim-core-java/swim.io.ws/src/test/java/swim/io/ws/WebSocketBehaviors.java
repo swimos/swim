@@ -33,18 +33,17 @@ import swim.io.http.HttpResponder;
 import swim.io.http.HttpServer;
 import swim.io.http.HttpService;
 import swim.structure.Data;
-import swim.ws.WsClose;
-import swim.ws.WsData;
+import swim.ws.WsCloseFrame;
+import swim.ws.WsDataFrame;
 import swim.ws.WsDeflateEncoder;
 import swim.ws.WsEncoder;
-import swim.ws.WsFragment;
+import swim.ws.WsFragmentFrame;
 import swim.ws.WsFrame;
-import swim.ws.WsPing;
-import swim.ws.WsPong;
+import swim.ws.WsPingFrame;
+import swim.ws.WsPongFrame;
 import swim.ws.WsRequest;
 import swim.ws.WsResponse;
-import swim.ws.WsText;
-import swim.ws.WsValue;
+import swim.ws.WsTextFrame;
 import static org.testng.Assert.assertEquals;
 
 public abstract class WebSocketBehaviors {
@@ -143,18 +142,18 @@ public abstract class WebSocketBehaviors {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         this.read(Utf8.stringParser());
-        this.write(WsText.create("@clientToServer"));
+        this.write(WsTextFrame.create("@clientToServer"));
       }
 
       @Override
       public void didRead(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsValue.create("@serverToClient"));
+        assertEquals(frame, WsTextFrame.create("@serverToClient"));
         clientRead.countDown();
       }
 
       @Override
       public void didWrite(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsText.create("@clientToServer"));
+        assertEquals(frame, WsTextFrame.create("@clientToServer"));
         clientWrite.countDown();
       }
     };
@@ -162,18 +161,18 @@ public abstract class WebSocketBehaviors {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         this.read(Utf8.stringParser());
-        this.write(WsText.create("@serverToClient"));
+        this.write(WsTextFrame.create("@serverToClient"));
       }
 
       @Override
       public void didRead(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsValue.create("@clientToServer"));
+        assertEquals(frame, WsTextFrame.create("@clientToServer"));
         serverRead.countDown();
       }
 
       @Override
       public void didWrite(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsText.create("@serverToClient"));
+        assertEquals(frame, WsTextFrame.create("@serverToClient"));
         serverWrite.countDown();
       }
     };
@@ -226,18 +225,18 @@ public abstract class WebSocketBehaviors {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         this.read(Utf8.stringParser());
-        this.write(WsPing.create(pingData));
+        this.write(WsPingFrame.create(pingData));
       }
 
       @Override
       public void didRead(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsPong.create(pongData));
+        assertEquals(frame, WsPongFrame.create(pongData));
         clientReadPong.countDown();
       }
 
       @Override
       public void didWrite(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsPing.create(pingData));
+        assertEquals(frame, WsPingFrame.create(pingData));
         clientWritePing.countDown();
       }
     };
@@ -249,14 +248,14 @@ public abstract class WebSocketBehaviors {
 
       @Override
       public void didRead(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsPing.create(pingData));
+        assertEquals(frame, WsPingFrame.create(pingData));
         serverReadPing.countDown();
-        this.write(WsPong.create(pongData));
+        this.write(WsPongFrame.create(pongData));
       }
 
       @Override
       public void didWrite(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsPong.create(pongData));
+        assertEquals(frame, WsPongFrame.create(pongData));
         serverWritePong.countDown();
       }
     };
@@ -307,18 +306,18 @@ public abstract class WebSocketBehaviors {
       @Override
       public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
         this.read(Utf8.stringParser());
-        this.write(WsClose.create(1000, "close"));
+        this.write(WsCloseFrame.create(1000, "close"));
       }
 
       @Override
       public void didRead(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsClose.create(1001, "gone"));
+        assertEquals(frame, WsCloseFrame.create(1001, "gone"));
         clientReadClose.countDown();
       }
 
       @Override
       public void didWrite(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsClose.create(1000, "close"));
+        assertEquals(frame, WsCloseFrame.create(1000, "close"));
         clientWriteClose.countDown();
       }
     };
@@ -330,14 +329,14 @@ public abstract class WebSocketBehaviors {
 
       @Override
       public void didRead(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsClose.create(1000, "close"));
+        assertEquals(frame, WsCloseFrame.create(1000, "close"));
         serverReadClose.countDown();
-        this.write(WsClose.create(1001, "gone"));
+        this.write(WsCloseFrame.create(1001, "gone"));
       }
 
       @Override
       public void didWrite(WsFrame<? extends String> frame) {
-        assertEquals(frame, WsClose.create(1001, "gone"));
+        assertEquals(frame, WsCloseFrame.create(1001, "gone"));
         serverWriteClose.countDown();
       }
     };
@@ -406,7 +405,7 @@ public abstract class WebSocketBehaviors {
                 public void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse) {
                   t0.compareAndSet(0L, System.currentTimeMillis());
                   this.read(Utf8.stringParser());
-                  this.write(WsText.create(payload));
+                  this.write(WsTextFrame.create(payload));
                 }
 
                 @Override
@@ -420,7 +419,7 @@ public abstract class WebSocketBehaviors {
                   if (newDt >= 2L * duration) {
                     if (!this.closed) {
                       this.closed = true;
-                      this.write(WsClose.create(1000));
+                      this.write(WsCloseFrame.create(1000));
                     }
                     return;
                   } else if (newDt >= duration) {
@@ -429,12 +428,12 @@ public abstract class WebSocketBehaviors {
                     }
                     count.incrementAndGet();
                   }
-                  this.write(WsText.create(payload));
+                  this.write(WsTextFrame.create(payload));
                 }
 
                 @Override
                 public void didWrite(WsFrame<? extends String> frame) {
-                  if (frame instanceof WsClose<?, ?>) {
+                  if (frame instanceof WsCloseFrame<?, ?>) {
                     final WsEncoder encoder = ((WebSocketModem) context).encoder;
                     if (encoder instanceof WsDeflateEncoder) {
                       final Deflate<?> deflate = ((WsDeflateEncoder) encoder).deflate();
@@ -459,11 +458,12 @@ public abstract class WebSocketBehaviors {
 
           @Override
           public void didRead(WsFrame<? extends String> frame) {
-            if (frame instanceof WsData<?>) {
+            if (frame instanceof WsDataFrame<?>) {
               this.read(Utf8.stringParser());
-            } else if (frame instanceof WsFragment<?>) {
-              this.read(((WsFragment<? extends String>) frame).contentDecoder());
-            } else if (frame instanceof WsClose<?, ?>) {
+            } else if (frame instanceof WsFragmentFrame<?>) {
+              final WsFragmentFrame<? extends String> fragment = (WsFragmentFrame<? extends String>) frame;
+              this.read(fragment.frameType(), fragment.payloadDecoder());
+            } else if (frame instanceof WsCloseFrame<?, ?>) {
               clientDone.countDown();
             }
           }

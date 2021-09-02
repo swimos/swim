@@ -20,7 +20,7 @@ import java.security.cert.Certificate;
 import java.util.Collection;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
-import swim.http.header.Connection;
+import swim.http.header.ConnectionHeader;
 import swim.io.FlowContext;
 import swim.io.FlowControl;
 import swim.io.FlowModifier;
@@ -63,12 +63,12 @@ public abstract class AbstractHttpClient implements HttpClient, IpContext, FlowC
 
   @Override
   public void didRespond(HttpResponse<?> response) {
-    final Connection connection = response.getHeader(Connection.class);
-    if (connection != null) {
-      if (connection.contains("close")) {
+    final ConnectionHeader connectionHeader = response.getHeader(ConnectionHeader.class);
+    if (connectionHeader != null) {
+      if (connectionHeader.contains("close")) {
         this.close();
         return;
-      } else if (connection.contains("Upgrade")) {
+      } else if (connectionHeader.contains("Upgrade")) {
         return;
       }
     }

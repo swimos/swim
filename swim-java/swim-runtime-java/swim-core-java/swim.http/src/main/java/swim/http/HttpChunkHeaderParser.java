@@ -25,15 +25,15 @@ final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
 
   final HttpParser http;
   final long size;
-  final Parser<ChunkExtension> extension;
+  final Parser<ChunkExtension> extensionParser;
   final Builder<ChunkExtension, FingerTrieSeq<ChunkExtension>> extensions;
   final int step;
 
-  HttpChunkHeaderParser(HttpParser http, long size, Parser<ChunkExtension> extension,
+  HttpChunkHeaderParser(HttpParser http, long size, Parser<ChunkExtension> extensionParser,
                         Builder<ChunkExtension, FingerTrieSeq<ChunkExtension>> extensions, int step) {
     this.http = http;
     this.size = size;
-    this.extension = extension;
+    this.extensionParser = extensionParser;
     this.extensions = extensions;
     this.step = step;
   }
@@ -44,10 +44,10 @@ final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
 
   @Override
   public Parser<HttpChunkHeader> feed(Input input) {
-    return HttpChunkHeaderParser.parse(input, this.http, this.size, this.extension, this.extensions, this.step);
+    return HttpChunkHeaderParser.parse(input, this.http, this.size, this.extensionParser, this.extensions, this.step);
   }
 
-  static Parser<HttpChunkHeader> parse(Input input, HttpParser http, long size, Parser<ChunkExtension> extension,
+  static Parser<HttpChunkHeader> parse(Input input, HttpParser http, long size, Parser<ChunkExtension> extensionParser,
                                        Builder<ChunkExtension, FingerTrieSeq<ChunkExtension>> extensions, int step) {
     int c = 0;
     if (step == 1) {
@@ -96,21 +96,21 @@ final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
         }
       }
       if (step == 4) {
-        if (extension == null) {
-          extension = http.parseChunkExtension(input);
+        if (extensionParser == null) {
+          extensionParser = http.parseChunkExtension(input);
         } else {
-          extension = extension.feed(input);
+          extensionParser = extensionParser.feed(input);
         }
-        if (extension.isDone()) {
+        if (extensionParser.isDone()) {
           if (extensions == null) {
             extensions = FingerTrieSeq.builder();
           }
-          extensions.add(extension.bind());
-          extension = null;
+          extensions.add(extensionParser.bind());
+          extensionParser = null;
           step = 3;
           continue;
-        } else if (extension.isError()) {
-          return extension.asError();
+        } else if (extensionParser.isError()) {
+          return extensionParser.asError();
         }
       }
       break;
@@ -148,7 +148,7 @@ final class HttpChunkHeaderParser extends Parser<HttpChunkHeader> {
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new HttpChunkHeaderParser(http, size, extension, extensions, step);
+    return new HttpChunkHeaderParser(http, size, extensionParser, extensions, step);
   }
 
   static Parser<HttpChunkHeader> parse(Input input, HttpParser http) {

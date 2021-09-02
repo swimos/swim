@@ -34,18 +34,6 @@ final class ByteWriter extends Writer<Object, Object> {
     this(value, Binary.inputBuffer(input));
   }
 
-  ByteWriter(Input input) {
-    this(null, input);
-  }
-
-  ByteWriter(ByteBuffer input) {
-    this(null, Binary.inputBuffer(input));
-  }
-
-  ByteWriter(byte[] input) {
-    this(null, Binary.inputBuffer(input));
-  }
-
   ByteWriter() {
     this(null, (Input) null);
   }
@@ -55,9 +43,9 @@ final class ByteWriter extends Writer<Object, Object> {
     if (value == null) {
       return done();
     } else if (value instanceof ByteBuffer) {
-      return new ByteWriter(((ByteBuffer) value).duplicate());
+      return new ByteWriter(null, ((ByteBuffer) value).duplicate());
     } else if (value instanceof byte[]) {
-      return new ByteWriter((byte[]) value);
+      return new ByteWriter(null, (byte[]) value);
     } else {
       throw new IllegalArgumentException(value.toString());
     }
@@ -91,14 +79,6 @@ final class ByteWriter extends Writer<Object, Object> {
 
   static Writer<Object, Object> write(Output<?> output, Object value, byte[] input) {
     return ByteWriter.write(output, value, Binary.inputBuffer(input));
-  }
-
-  static Writer<Object, Object> write(Output<?> output, ByteBuffer input) {
-    return ByteWriter.write(output, null, Binary.inputBuffer(input));
-  }
-
-  static Writer<Object, Object> write(Output<?> output, byte[] input) {
-    return ByteWriter.write(output, null, Binary.inputBuffer(input));
   }
 
 }

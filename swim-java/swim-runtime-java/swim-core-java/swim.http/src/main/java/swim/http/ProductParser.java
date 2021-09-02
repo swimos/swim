@@ -23,19 +23,20 @@ import swim.util.Builder;
 final class ProductParser extends Parser<Product> {
 
   final HttpParser http;
-  final StringBuilder name;
-  final StringBuilder version;
+  final StringBuilder nameBuilder;
+  final StringBuilder versionBuilder;
+  final Parser<String> commentParser;
   final Builder<String, FingerTrieSeq<String>> comments;
-  final Parser<String> comment;
   final int step;
 
-  ProductParser(HttpParser http, StringBuilder name, StringBuilder version,
-                Builder<String, FingerTrieSeq<String>> comments, Parser<String> comment, int step) {
+  ProductParser(HttpParser http, StringBuilder nameBuilder,
+                StringBuilder versionBuilder, Parser<String> commentParser,
+                Builder<String, FingerTrieSeq<String>> comments, int step) {
     this.http = http;
-    this.name = name;
-    this.version = version;
+    this.nameBuilder = nameBuilder;
+    this.versionBuilder = versionBuilder;
+    this.commentParser = commentParser;
     this.comments = comments;
-    this.comment = comment;
     this.step = step;
   }
 
@@ -45,22 +46,24 @@ final class ProductParser extends Parser<Product> {
 
   @Override
   public Parser<Product> feed(Input input) {
-    return ProductParser.parse(input, this.http, this.name, this.version,
-                               this.comments, this.comment, this.step);
+    return ProductParser.parse(input, this.http, this.nameBuilder,
+                               this.versionBuilder, this.commentParser,
+                               this.comments, this.step);
   }
 
-  static Parser<Product> parse(Input input, HttpParser http, StringBuilder name, StringBuilder version,
-                               Builder<String, FingerTrieSeq<String>> comments, Parser<String> comment, int step) {
+  static Parser<Product> parse(Input input, HttpParser http, StringBuilder nameBuilder,
+                               StringBuilder versionBuilder, Parser<String> commentParser,
+                               Builder<String, FingerTrieSeq<String>> comments, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (name == null) {
-            name = new StringBuilder();
+          if (nameBuilder == null) {
+            nameBuilder = new StringBuilder();
           }
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
           step = 2;
         } else {
           return Parser.error(Diagnostic.expected("product name", input));
@@ -74,7 +77,7 @@ final class ProductParser extends Parser<Product> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -91,10 +94,10 @@ final class ProductParser extends Parser<Product> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (version == null) {
-            version = new StringBuilder();
+          if (versionBuilder == null) {
+            versionBuilder = new StringBuilder();
           }
-          version.appendCodePoint(c);
+          versionBuilder.appendCodePoint(c);
           step = 4;
         } else {
           return Parser.error(Diagnostic.expected("product version", input));
@@ -108,7 +111,7 @@ final class ProductParser extends Parser<Product> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          version.appendCodePoint(c);
+          versionBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -123,8 +126,8 @@ final class ProductParser extends Parser<Product> {
           input = input.step();
           step = 6;
         } else if (!input.isEmpty()) {
-          return Parser.done(http.product(name.toString(), version != null ? version.toString() : null,
-                                          comments != null ? comments.bind() : FingerTrieSeq.<String>empty()));
+          return Parser.done(http.product(nameBuilder.toString(), versionBuilder != null ? versionBuilder.toString() : null,
+                                          comments != null ? comments.bind() : FingerTrieSeq.empty()));
         }
       }
       if (step == 6) {
@@ -149,21 +152,21 @@ final class ProductParser extends Parser<Product> {
         }
       }
       if (step == 7) {
-        if (comment == null) {
-          comment = http.parseComment(input);
+        if (commentParser == null) {
+          commentParser = http.parseComment(input);
         } else {
-          comment = comment.feed(input);
+          commentParser = commentParser.feed(input);
         }
-        if (comment.isDone()) {
+        if (commentParser.isDone()) {
           if (comments == null) {
             comments = FingerTrieSeq.builder();
           }
-          comments.add(comment.bind());
-          comment = null;
+          comments.add(commentParser.bind());
+          commentParser = null;
           step = 5;
           continue;
-        } else if (comment.isError()) {
-          return comment.asError();
+        } else if (commentParser.isError()) {
+          return commentParser.asError();
         }
       }
       break;
@@ -171,7 +174,8 @@ final class ProductParser extends Parser<Product> {
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new ProductParser(http, name, version, comments, comment, step);
+    return new ProductParser(http, nameBuilder, versionBuilder,
+                             commentParser, comments, step);
   }
 
   static Parser<Product> parse(Input input, HttpParser http) {

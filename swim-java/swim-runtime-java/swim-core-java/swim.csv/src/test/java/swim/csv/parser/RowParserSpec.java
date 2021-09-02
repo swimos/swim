@@ -96,16 +96,19 @@ public class RowParserSpec {
 
   @Test
   public void parsRowsWithDifferentDelimiters() {
-    assertParses('^', "^", Record.of("", ""),
+    assertParses("^", Record.of("", ""),
                  CsvStructure.header(CsvStructure.stringCol(),
-                                     CsvStructure.stringCol()));
-    assertParses('^', "foo^bar", Record.of("foo", "bar"),
+                                     CsvStructure.stringCol()),
+                 '^');
+    assertParses("foo^bar", Record.of("foo", "bar"),
                  CsvStructure.header(CsvStructure.stringCol(),
-                                     CsvStructure.stringCol()));
-    assertParses('^', "a^b^c", Record.of("a", "b", "c"),
+                                     CsvStructure.stringCol()),
+                 '^');
+    assertParses("a^b^c", Record.of("a", "b", "c"),
                  CsvStructure.header(CsvStructure.stringCol(),
                                      CsvStructure.stringCol(),
-                                     CsvStructure.stringCol()));
+                                     CsvStructure.stringCol()),
+                 '^');
   }
 
   @Test
@@ -131,8 +134,9 @@ public class RowParserSpec {
   public void parsRowsWithNestedRows() {
     assertParses("1,2^3,4", Record.of(Slot.of("a", 1), Slot.of("b", Record.of(Slot.of("c", 2), Slot.of("d", 3))), Slot.of("e", 4)),
                  CsvStructure.header(CsvStructure.numberCol("a"),
-                                     CsvStructure.parsedCol("b", Csv.rowParser('^', CsvStructure.header(CsvStructure.numberCol("c"),
-                                                                                                        CsvStructure.numberCol("d")))),
+                                     CsvStructure.parsedCol("b", Csv.rowParser(CsvStructure.header(CsvStructure.numberCol("c"),
+                                                                                                   CsvStructure.numberCol("d")),
+                                                                               '^')),
                                      CsvStructure.numberCol("e")));
   }
 
@@ -140,9 +144,10 @@ public class RowParserSpec {
   public void parsRowsWithNestedRowsWithTooFewCells() {
     assertParses("1,2^3,4", Record.of(Slot.of("a", 1), Slot.of("b", Record.of(Slot.of("c", 2), Slot.of("d", 3))), Slot.of("f", 4)),
                  CsvStructure.header(CsvStructure.numberCol("a"),
-                                     CsvStructure.parsedCol("b", Csv.rowParser('^', CsvStructure.header(CsvStructure.numberCol("c"),
-                                                                                                        CsvStructure.numberCol("d"),
-                                                                                                        CsvStructure.numberCol("e")))),
+                                     CsvStructure.parsedCol("b", Csv.rowParser(CsvStructure.header(CsvStructure.numberCol("c"),
+                                                                                                   CsvStructure.numberCol("d"),
+                                                                                                   CsvStructure.numberCol("e")),
+                                                                               '^')),
                                      CsvStructure.numberCol("f")));
   }
 
@@ -150,7 +155,7 @@ public class RowParserSpec {
   public void parsRowsWithNestedArrayRows() {
     assertParses("1,2;3,4", Record.of(Slot.of("a", 1), Slot.of("b", Record.of(2, 3)), Slot.of("e", 4)),
                  CsvStructure.header(CsvStructure.numberCol("a"),
-                                     CsvStructure.parsedCol("b", Csv.rowParser(';', CsvStructure.array(CsvStructure.numberCol()))),
+                                     CsvStructure.parsedCol("b", Csv.rowParser(CsvStructure.array(CsvStructure.numberCol()), ';')),
                                      CsvStructure.numberCol("e")));
   }
 
@@ -225,22 +230,22 @@ public class RowParserSpec {
   }
 
   public static void assertParses(String csvString, Value expected, CsvHeader<Record, Value, Item> header) {
-    assertParses(',', csvString, expected, header);
+    assertParses(csvString, expected, header, ',');
   }
 
-  public static void assertParses(int delimiter, String csvString, Value expected, CsvHeader<Record, Value, Item> header) {
-    CsvAssertions.assertParses(Csv.rowParser(delimiter, header), csvString, expected);
+  public static void assertParses(String csvString, Value expected, CsvHeader<Record, Value, Item> header, int delimiter) {
+    CsvAssertions.assertParses(Csv.rowParser(header, delimiter), csvString, expected);
   }
 
   public static void assertParseFails(String csvString, CsvHeader<Record, Value, Item> header) {
-    assertParseFails(',', csvString, header);
+    assertParseFails(csvString, header, ',');
   }
 
-  public static void assertParseFails(final int delimiter, final String csvString, CsvHeader<Record, Value, Item> header) {
+  public static void assertParseFails(final String csvString, CsvHeader<Record, Value, Item> header, final int delimiter) {
     assertThrows(ParserException.class, new ThrowingRunnable() {
       @Override
       public void run() throws Throwable {
-        Csv.parseRow(delimiter, csvString, header);
+        Csv.parseRow(csvString, header, delimiter);
       }
     });
   }

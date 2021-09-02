@@ -40,7 +40,7 @@ final class EnvelopeDecoder extends Decoder<Envelope> {
 
   static Decoder<Envelope> decode(InputBuffer input, Decoder<Value> output) {
     if (output == null) {
-      output = Utf8.parseDecoded(Recon.structureParser().blockParser(), input);
+      output = Utf8.parseDecoded(input, Recon.structureParser().blockParser());
     } else {
       output = output.feed(input);
     }

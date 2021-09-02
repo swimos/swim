@@ -104,6 +104,10 @@ public final class Binary {
     return new ByteOutputArray(null, 0, settings);
   }
 
+  public static Output<byte[]> byteArrayOutput(byte[] array) {
+    return new ByteOutputArray(array, array.length, OutputSettings.standard());
+  }
+
   /**
    * Returns a new {@code Output} that appends bytes to a growable array.
    * The returned {@code Output} accepts an unbounded number of bytes,
@@ -155,6 +159,10 @@ public final class Binary {
     return new ByteOutputBuffer(null, 0, settings);
   }
 
+  public static Output<ByteBuffer> byteBufferOutput(byte[] array) {
+    return new ByteOutputBuffer(array, array.length, OutputSettings.standard());
+  }
+
   /**
    * Returns a new {@code Output} that appends bytes to a growable array.
    * The returned {@code Output} accepts an unbounded number of bytes,
@@ -179,7 +187,7 @@ public final class Binary {
    * output}, returning a {@code Parser} continuation that knows how to decode
    * subsequent input buffers.
    */
-  public static <O> Parser<O> parseOutput(Output<O> output, Input input) {
+  public static <O> Parser<O> parseOutput(Input input, Output<O> output) {
     return ByteParser.parse(input, output);
   }
 
@@ -221,12 +229,12 @@ public final class Binary {
     return (Writer<Object, O>) (Writer<?, ?>) new ByteWriter(value, input);
   }
 
-  public static Writer<Object, Object> writeByteArray(byte[] input, Output<?> output) {
-    return ByteWriter.write(output, input);
+  public static Writer<Object, Object> writeByteArray(Output<?> output, byte[] input) {
+    return ByteWriter.write(output, null, input);
   }
 
-  public static Writer<Object, Object> writeByteBuffer(ByteBuffer input, Output<?> output) {
-    return ByteWriter.write(output, input);
+  public static Writer<Object, Object> writeByteBuffer(Output<?> output, ByteBuffer input) {
+    return ByteWriter.write(output, null, input);
   }
 
   public static Encoder<ReadableByteChannel, ReadableByteChannel> channelEncoder() {
@@ -237,7 +245,7 @@ public final class Binary {
     return new ChannelEncoder(input);
   }
 
-  public static <O> Decoder<O> decode(Decoder<O> decoder, InputStream input) throws IOException {
+  public static <O> Decoder<O> decode(InputStream input, Decoder<O> decoder) throws IOException {
     final byte[] data = new byte[4096];
     final InputBuffer buffer = Binary.inputBuffer(data);
     do {
@@ -250,8 +258,8 @@ public final class Binary {
     } while (true);
   }
 
-  public static <O> O read(Decoder<O> decoder, InputStream input) throws IOException {
-    decoder = Binary.decode(decoder, input);
+  public static <O> O read(InputStream input, Decoder<O> decoder) throws IOException {
+    decoder = Binary.decode(input, decoder);
     if (decoder.isDone()) {
       return decoder.bind();
     } else {

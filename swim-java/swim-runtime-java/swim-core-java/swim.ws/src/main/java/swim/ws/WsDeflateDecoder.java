@@ -41,33 +41,33 @@ public class WsDeflateDecoder extends WsDecoder implements Cloneable {
   }
 
   @Override
-  public <T> Decoder<WsFrame<T>> decodeContinuationFrame(int finRsvOp, Decoder<T> content, InputBuffer input) {
+  public <T> Decoder<WsFrame<T>> decodeContinuationFrame(InputBuffer input, int finRsvOp, WsOpcode frameType, Decoder<T> payloadDecoder) {
     if (this.decompressing) { // compressed
-      return WsFrameInflater.decode(input, this, content);
+      return WsFrameInflater.decode(input, this, frameType, payloadDecoder);
     } else { // uncompressed
-      return WsFrameDecoder.decode(input, this, content);
+      return WsFrameDecoder.decode(input, this, frameType, payloadDecoder);
     }
   }
 
   @Override
-  public <T> Decoder<WsFrame<T>> decodeTextFrame(int finRsvOp, Decoder<T> content, InputBuffer input) {
+  public <T> Decoder<WsFrame<T>> decodeTextFrame(InputBuffer input, int finRsvOp, Decoder<T> payloadDecoder) {
     if ((finRsvOp & 0x40) != 0) { // compressed
       this.decompressing = (finRsvOp & 0x80) == 0;
-      return WsFrameInflater.decode(input, this, content);
+      return WsFrameInflater.decode(input, this, WsOpcode.TEXT, payloadDecoder);
     } else { // uncompressed
       this.decompressing = false;
-      return WsFrameDecoder.decode(input, this, content);
+      return WsFrameDecoder.decode(input, this, WsOpcode.TEXT, payloadDecoder);
     }
   }
 
   @Override
-  public <T> Decoder<WsFrame<T>> decodeBinaryFrame(int finRsvOp, Decoder<T> content, InputBuffer input) {
+  public <T> Decoder<WsFrame<T>> decodeBinaryFrame(InputBuffer input, int finRsvOp, Decoder<T> payloadDecoder) {
     if ((finRsvOp & 0x40) != 0) { // compressed
       this.decompressing = (finRsvOp & 0x80) == 0;
-      return WsFrameInflater.decode(input, this, content);
+      return WsFrameInflater.decode(input, this, WsOpcode.BINARY, payloadDecoder);
     } else { // uncompressed
       this.decompressing = false;
-      return WsFrameDecoder.decode(input, this, content);
+      return WsFrameDecoder.decode(input, this, WsOpcode.BINARY, payloadDecoder);
     }
   }
 

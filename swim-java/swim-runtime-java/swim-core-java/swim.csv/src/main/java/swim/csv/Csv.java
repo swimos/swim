@@ -53,7 +53,7 @@ public final class Csv {
     return Csv.parser().parseTableString(CsvStructure.header(), csvString);
   }
 
-  public static Record parseTable(int delimiter, String csvString) {
+  public static Record parseTable(String csvString, int delimiter) {
     return Csv.parser(delimiter).parseTableString(CsvStructure.header(), csvString);
   }
 
@@ -61,7 +61,7 @@ public final class Csv {
     return Csv.parser().parseTableData(CsvStructure.header(), csvData);
   }
 
-  public static Record parseTable(int delimiter, byte[] csvData) {
+  public static Record parseTable(byte[] csvData, int delimiter) {
     return Csv.parser(delimiter).parseTableData(CsvStructure.header(), csvData);
   }
 
@@ -69,7 +69,7 @@ public final class Csv {
     return Csv.parser().parseTableBuffer(CsvStructure.header(), csvBuffer);
   }
 
-  public static Record parseTable(int delimiter, ByteBuffer csvBuffer) {
+  public static Record parseTable(ByteBuffer csvBuffer, int delimiter) {
     return Csv.parser(delimiter).parseTableBuffer(CsvStructure.header(), csvBuffer);
   }
 
@@ -77,7 +77,7 @@ public final class Csv {
     return Csv.parser().parseTableString(header, csvString);
   }
 
-  public static <T, R, C> T parseTable(int delimiter, String csvString, CsvHeader<T, R, C> header) {
+  public static <T, R, C> T parseTable(String csvString, CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).parseTableString(header, csvString);
   }
 
@@ -85,7 +85,7 @@ public final class Csv {
     return Csv.parser().parseTableData(header, csvData);
   }
 
-  public static <T, R, C> T parseTable(int delimiter, byte[] csvData, CsvHeader<T, R, C> header) {
+  public static <T, R, C> T parseTable(byte[] csvData, CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).parseTableData(header, csvData);
   }
 
@@ -93,7 +93,7 @@ public final class Csv {
     return Csv.parser().parseTableBuffer(header, csvBuffer);
   }
 
-  public static <T, R, C> T parseTable(int delimiter, ByteBuffer csvBuffer, CsvHeader<T, R, C> header) {
+  public static <T, R, C> T parseTable(ByteBuffer csvBuffer, CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).parseTableBuffer(header, csvBuffer);
   }
 
@@ -101,7 +101,7 @@ public final class Csv {
     return Csv.parser().parseBodyString(header, csvString);
   }
 
-  public static <T, R, C> T parseBody(int delimiter, String csvString, CsvHeader<T, R, C> header) {
+  public static <T, R, C> T parseBody(String csvString, CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).parseBodyString(header, csvString);
   }
 
@@ -109,7 +109,7 @@ public final class Csv {
     return Csv.parser().parseBodyData(header, csvData);
   }
 
-  public static <T, R, C> T parseBody(int delimiter, byte[] csvData, CsvHeader<T, R, C> header) {
+  public static <T, R, C> T parseBody(byte[] csvData, CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).parseBodyData(header, csvData);
   }
 
@@ -117,7 +117,7 @@ public final class Csv {
     return Csv.parser().parseBodyBuffer(header, csvBuffer);
   }
 
-  public static <T, R, C> T parseBody(int delimiter, ByteBuffer csvBuffer, CsvHeader<T, R, C> header) {
+  public static <T, R, C> T parseBody(ByteBuffer csvBuffer, CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).parseBodyBuffer(header, csvBuffer);
   }
 
@@ -125,7 +125,7 @@ public final class Csv {
     return Csv.parser().parseRowString(header, csvString);
   }
 
-  public static <T, R, C> R parseRow(int delimiter, String csvString, CsvHeader<T, R, C> header) {
+  public static <T, R, C> R parseRow(String csvString, CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).parseRowString(header, csvString);
   }
 
@@ -133,7 +133,7 @@ public final class Csv {
     return Csv.parser().parseRowData(header, csvData);
   }
 
-  public static <T, R, C> R parseRow(int delimiter, byte[] csvData, CsvHeader<T, R, C> header) {
+  public static <T, R, C> R parseRow(byte[] csvData, CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).parseRowData(header, csvData);
   }
 
@@ -141,7 +141,7 @@ public final class Csv {
     return Csv.parser().parseRowBuffer(header, csvBuffer);
   }
 
-  public static <T, R, C> R parseRow(int delimiter, ByteBuffer csvBuffer, CsvHeader<T, R, C> header) {
+  public static <T, R, C> R parseRow(ByteBuffer csvBuffer, CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).parseRowBuffer(header, csvBuffer);
   }
 
@@ -157,7 +157,7 @@ public final class Csv {
     return Csv.parser().tableParser(header);
   }
 
-  public static <T, R, C> Parser<T> tableParser(int delimiter, CsvHeader<T, R, C> header) {
+  public static <T, R, C> Parser<T> tableParser(CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).tableParser(header);
   }
 
@@ -173,7 +173,7 @@ public final class Csv {
     return Csv.parser().headerParser(header);
   }
 
-  public static <T, R, C> Parser<CsvHeader<T, R, C>> headerParser(int delimiter, CsvHeader<T, R, C> header) {
+  public static <T, R, C> Parser<CsvHeader<T, R, C>> headerParser(CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).headerParser(header);
   }
 
@@ -181,7 +181,7 @@ public final class Csv {
     return Csv.parser().bodyParser(header);
   }
 
-  public static <T, R, C> Parser<T> bodyParser(int delimiter, CsvHeader<T, R, C> header) {
+  public static <T, R, C> Parser<T> bodyParser(CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).bodyParser(header);
   }
 
@@ -189,7 +189,7 @@ public final class Csv {
     return Csv.parser().rowParser(header);
   }
 
-  public static <T, R, C> Parser<R> rowParser(int delimiter, CsvHeader<T, R, C> header) {
+  public static <T, R, C> Parser<R> rowParser(CsvHeader<T, R, C> header, int delimiter) {
     return Csv.parser(delimiter).rowParser(header);
   }
 

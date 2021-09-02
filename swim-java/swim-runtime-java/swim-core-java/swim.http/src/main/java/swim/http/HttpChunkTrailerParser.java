@@ -23,14 +23,14 @@ import swim.util.Builder;
 final class HttpChunkTrailerParser extends Parser<HttpChunkTrailer> {
 
   final HttpParser http;
-  final Parser<? extends HttpHeader> header;
+  final Parser<? extends HttpHeader> headerParser;
   final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers;
   final int step;
 
-  HttpChunkTrailerParser(HttpParser http, Parser<? extends HttpHeader> header,
+  HttpChunkTrailerParser(HttpParser http, Parser<? extends HttpHeader> headerParser,
                          Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers, int step) {
     this.http = http;
-    this.header = header;
+    this.headerParser = headerParser;
     this.headers = headers;
     this.step = step;
   }
@@ -41,10 +41,10 @@ final class HttpChunkTrailerParser extends Parser<HttpChunkTrailer> {
 
   @Override
   public Parser<HttpChunkTrailer> feed(Input input) {
-    return HttpChunkTrailerParser.parse(input, this.http, this.header, this.headers, this.step);
+    return HttpChunkTrailerParser.parse(input, this.http, this.headerParser, this.headers, this.step);
   }
 
-  static Parser<HttpChunkTrailer> parse(Input input, HttpParser http, Parser<? extends HttpHeader> header,
+  static Parser<HttpChunkTrailer> parse(Input input, HttpParser http, Parser<? extends HttpHeader> headerParser,
                                         Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers, int step) {
     int c = 0;
     do {
@@ -66,15 +66,15 @@ final class HttpChunkTrailerParser extends Parser<HttpChunkTrailer> {
         }
       }
       if (step == 2) {
-        if (header == null) {
-          header = http.parseHeader(input);
+        if (headerParser == null) {
+          headerParser = http.parseHeader(input);
         } else {
-          header = header.feed(input);
+          headerParser = headerParser.feed(input);
         }
-        if (header.isDone()) {
+        if (headerParser.isDone()) {
           step = 3;
-        } else if (header.isError()) {
-          return header.asError();
+        } else if (headerParser.isError()) {
+          return headerParser.asError();
         }
       }
       if (step == 3) {
@@ -98,8 +98,8 @@ final class HttpChunkTrailerParser extends Parser<HttpChunkTrailer> {
             if (headers == null) {
               headers = FingerTrieSeq.builder();
             }
-            headers.add(header.bind());
-            header = null;
+            headers.add(headerParser.bind());
+            headerParser = null;
             step = 1;
             continue;
           } else {
@@ -131,7 +131,7 @@ final class HttpChunkTrailerParser extends Parser<HttpChunkTrailer> {
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new HttpChunkTrailerParser(http, header, headers, step);
+    return new HttpChunkTrailerParser(http, headerParser, headers, step);
   }
 
   static Parser<HttpChunkTrailer> parse(Input input, HttpParser http) {

@@ -55,7 +55,7 @@ final class RecordDecoder<T, R> extends Decoder<T> {
         if (fieldIndex < type.fieldCount()) {
           final AvroFieldType<?, R> fieldType = type.getField(fieldIndex);
           if (fieldType != null) {
-            valueDecoder = avro.decodeType(fieldType.valueType(), input);
+            valueDecoder = avro.decodeType(input, fieldType.valueType());
           } else {
             return Decoder.error(new DecoderException("unknown field: " + fieldIndex));
           }

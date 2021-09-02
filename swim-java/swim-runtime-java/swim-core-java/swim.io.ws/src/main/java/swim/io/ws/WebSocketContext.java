@@ -18,18 +18,21 @@ import swim.codec.Decoder;
 import swim.io.FlowContext;
 import swim.io.IpContext;
 import swim.io.IpSocket;
-import swim.ws.WsControl;
-import swim.ws.WsData;
+import swim.ws.WsControlFrame;
+import swim.ws.WsDataFrame;
+import swim.ws.WsOpcode;
 
 public interface WebSocketContext<I, O> extends IpContext, FlowContext {
 
   WsSettings wsSettings();
 
-  <I2 extends I> void read(Decoder<I2> content);
+  <I2 extends I> void read(Decoder<I2> payloadDecoder);
 
-  <O2 extends O> void write(WsData<O2> frame);
+  <I2 extends I> void read(WsOpcode frameType, Decoder<I2> payloadDecoder);
 
-  <O2 extends O> void write(WsControl<?, O2> frame);
+  <O2 extends O> void write(WsDataFrame<O2> frame);
+
+  <O2 extends O> void write(WsControlFrame<?, O2> frame);
 
   void become(IpSocket socket);
 

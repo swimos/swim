@@ -97,7 +97,7 @@ public class Seed {
     } catch (Throwable cause) {
       if (Cont.isNonFatal(cause)) {
         final Output<String> message = Unicode.stringOutput("Malformed seed: ");
-        Recon.write(value, message);
+        Recon.write(message, value);
         throw new StoreException(message.bind(), cause);
       } else {
         throw cause;

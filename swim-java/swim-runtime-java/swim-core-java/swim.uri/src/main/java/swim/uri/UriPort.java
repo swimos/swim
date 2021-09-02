@@ -67,7 +67,7 @@ public class UriPort implements Comparable<UriPort>, Debug, Display {
     output = output.write("UriPort").write('.');
     if (this.isDefined()) {
       output = output.write("create").write('(');
-      output = Format.displayInt(this.number, output);
+      output = Format.displayInt(output, this.number);
       output = output.write(')');
     } else {
       output = output.write("undefined").write('(').write(')');
@@ -77,7 +77,7 @@ public class UriPort implements Comparable<UriPort>, Debug, Display {
 
   @Override
   public <T> Output<T> display(Output<T> output) {
-    return Format.displayInt(this.number, output);
+    return Format.displayInt(output, this.number);
   }
 
   @Override

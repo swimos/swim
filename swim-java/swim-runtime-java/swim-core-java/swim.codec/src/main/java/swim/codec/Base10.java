@@ -108,7 +108,7 @@ public final class Base10 {
    * {@code output}, returning a {@code Writer} continuation that knows
    * how to write any remaining output that couldn't be immediately generated.
    */
-  public static Writer<?, ?> writeInt(int input, Output<?> output) {
+  public static Writer<?, ?> writeInt(Output<?> output, int input) {
     return Base10IntegerWriter.write(output, null, (long) input);
   }
 
@@ -117,7 +117,7 @@ public final class Base10 {
    * {@code output}, returning a {@code Writer} continuation that knows
    * how to write any remaining output that couldn't be immediately generated.
    */
-  public static Writer<?, ?> writeLong(long input, Output<?> output) {
+  public static Writer<?, ?> writeLong(Output<?> output, long input) {
     return Base10IntegerWriter.write(output, null, input);
   }
 
@@ -126,7 +126,7 @@ public final class Base10 {
    * {@code output}, returning a {@code Writer} continuation that knows
    * how to write any remaining output that couldn't be immediately generated.
    */
-  public static Writer<?, ?> writeFloat(float input, Output<?> output) {
+  public static Writer<?, ?> writeFloat(Output<?> output, float input) {
     return StringWriter.write(output, null, input);
   }
 
@@ -135,7 +135,7 @@ public final class Base10 {
    * {@code output}, returning a {@code Writer} continuation that knows
    * how to write any remaining output that couldn't be immediately generated.
    */
-  public static Writer<?, ?> writeDouble(double input, Output<?> output) {
+  public static Writer<?, ?> writeDouble(Output<?> output, double input) {
     return StringWriter.write(output, null, input);
   }
 
@@ -159,7 +159,7 @@ public final class Base10 {
     } else {
       Output<String> message = Unicode.stringOutput();
       message = message.write("Invalid base-10 digit: ");
-      message = Format.debugChar(c, message);
+      message = Format.debugChar(message, c);
       throw new IllegalArgumentException(message.bind());
     }
   }

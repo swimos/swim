@@ -708,7 +708,7 @@ public class Uri implements Comparable<Uri>, Debug, Display {
     return c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z';
   }
 
-  static <T> Output<T> writeScheme(String scheme, Output<T> output) {
+  static <T> Output<T> writeScheme(Output<T> output, String scheme) {
     final int n = scheme.length();
     for (int i = 0; i < n; i = scheme.offsetByCodePoints(i, 1)) {
       final int c = scheme.codePointAt(i);
@@ -721,137 +721,137 @@ public class Uri implements Comparable<Uri>, Debug, Display {
     return output;
   }
 
-  static <T> Output<T> writeUserInfo(String userInfo, Output<T> output) {
+  static <T> Output<T> writeUserInfo(Output<T> output, String userInfo) {
     final int n = userInfo.length();
     for (int i = 0; i < n; i = userInfo.offsetByCodePoints(i, 1)) {
       final int c = userInfo.codePointAt(i);
       if (Uri.isUserInfoChar(c)) {
         output = output.write(c);
       } else {
-        output = Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
     return output;
   }
 
-  static <T> Output<T> writeUser(String user, Output<T> output) {
+  static <T> Output<T> writeUser(Output<T> output, String user) {
     final int n = user.length();
     for (int i = 0; i < n; i = user.offsetByCodePoints(i, 1)) {
       final int c = user.codePointAt(i);
       if (Uri.isUserChar(c)) {
         output = output.write(c);
       } else {
-        output = Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
     return output;
   }
 
-  static <T> Output<T> writeHost(String address, Output<T> output) {
+  static <T> Output<T> writeHost(Output<T> output, String address) {
     final int n = address.length();
     for (int i = 0; i < n; i = address.offsetByCodePoints(i, 1)) {
       final int c = address.codePointAt(i);
       if (Uri.isHostChar(c)) {
         output = output.write(c);
       } else {
-        output = Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
     return output;
   }
 
-  static <T> Output<T> writeHostLiteral(String address, Output<T> output) {
+  static <T> Output<T> writeHostLiteral(Output<T> output, String address) {
     final int n = address.length();
     for (int i = 0; i < n; i = address.offsetByCodePoints(i, 1)) {
       final int c = address.codePointAt(i);
       if (Uri.isHostChar(c) || c == ':') {
         output = output.write(c);
       } else {
-        output = Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
     return output;
   }
 
-  static <T> Output<T> writePathSegment(String segment, Output<T> output) {
+  static <T> Output<T> writePathSegment(Output<T> output, String segment) {
     final int n = segment.length();
     for (int i = 0; i < n; i = segment.offsetByCodePoints(i, 1)) {
       final int c = segment.codePointAt(i);
       if (Uri.isPathChar(c)) {
         output = output.write(c);
       } else {
-        output = Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
     return output;
   }
 
-  static <T> Output<T> writeQuery(String query, Output<T> output) {
+  static <T> Output<T> writeQuery(Output<T> output, String query) {
     final int n = query.length();
     for (int i = 0; i < n; i = query.offsetByCodePoints(i, 1)) {
       final int c = query.codePointAt(i);
       if (Uri.isQueryChar(c)) {
         output = output.write(c);
       } else {
-        output = Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
     return output;
   }
 
-  static <T> Output<T> writeParam(String param, Output<T> output) {
+  static <T> Output<T> writeParam(Output<T> output, String param) {
     final int n = param.length();
     for (int i = 0; i < n; i = param.offsetByCodePoints(i, 1)) {
       final int c = param.codePointAt(i);
       if (Uri.isParamChar(c)) {
         output = output.write(c);
       } else {
-        output = Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
     return output;
   }
 
-  static <T> Output<T> writeFragment(String fragment, Output<T> output) {
+  static <T> Output<T> writeFragment(Output<T> output, String fragment) {
     final int n = fragment.length();
     for (int i = 0; i < n; i = fragment.offsetByCodePoints(i, 1)) {
       final int c = fragment.codePointAt(i);
       if (Uri.isFragmentChar(c)) {
         output = output.write(c);
       } else {
-        output = Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
     return output;
   }
 
-  static <T> Output<T> writeEncoded(int c, Output<T> output) {
+  static <T> Output<T> writeEncoded(Output<T> output, int c) {
     if (c == 0x00) { // modified UTF-8
-      output = Uri.writePctEncoded(0xC0, output);
-      output = Uri.writePctEncoded(0x80, output);
+      output = Uri.writePctEncoded(output, 0xC0);
+      output = Uri.writePctEncoded(output, 0x80);
     } else if (c >= 0x00 && c <= 0x7F) { // U+0000..U+007F
-      output = Uri.writePctEncoded(c, output);
+      output = Uri.writePctEncoded(output, c);
     } else if (c >= 0x80 && c <= 0x07FF) { // U+0080..U+07FF
-      output = Uri.writePctEncoded(0xC0 | (c >>> 6), output);
-      output = Uri.writePctEncoded(0x80 | (c & 0x3F), output);
+      output = Uri.writePctEncoded(output, 0xC0 | (c >>> 6));
+      output = Uri.writePctEncoded(output, 0x80 | (c & 0x3F));
     } else if (c >= 0x0800 && c <= 0xffff) { // (U+0800..U+D7FF, U+E000..U+FFFF, and surrogates
-      output = Uri.writePctEncoded(0xE0 | (c >>> 12), output);
-      output = Uri.writePctEncoded(0x80 | (c >>> 6 & 0x3F), output);
-      output = Uri.writePctEncoded(0x80 | (c & 0x3F), output);
+      output = Uri.writePctEncoded(output, 0xE0 | (c >>> 12));
+      output = Uri.writePctEncoded(output, 0x80 | (c >>> 6 & 0x3F));
+      output = Uri.writePctEncoded(output, 0x80 | (c & 0x3F));
     } else if (c >= 0x10000 && c <= 0x10FFFF) { // U+10000..U+10FFFF
-      output = Uri.writePctEncoded(0xF0 | (c >>> 18), output);
-      output = Uri.writePctEncoded(0x80 | (c >>> 12 & 0x3F), output);
-      output = Uri.writePctEncoded(0x80 | (c >>> 6 & 0x3F), output);
-      output = Uri.writePctEncoded(0x80 | (c & 0x3F), output);
+      output = Uri.writePctEncoded(output, 0xF0 | (c >>> 18));
+      output = Uri.writePctEncoded(output, 0x80 | (c >>> 12 & 0x3F));
+      output = Uri.writePctEncoded(output, 0x80 | (c >>> 6 & 0x3F));
+      output = Uri.writePctEncoded(output, 0x80 | (c & 0x3F));
     } else { // surrogate or invalid code point
-      output = Uri.writePctEncoded(0xEF, output);
-      output = Uri.writePctEncoded(0xBF, output);
-      output = Uri.writePctEncoded(0xBD, output);
+      output = Uri.writePctEncoded(output, 0xEF);
+      output = Uri.writePctEncoded(output, 0xBF);
+      output = Uri.writePctEncoded(output, 0xBD);
     }
     return output;
   }
 
-  static <T> Output<T> writePctEncoded(int c, Output<T> output) {
+  static <T> Output<T> writePctEncoded(Output<T> output, int c) {
     output = output.write('%')
                    .write(Base16.lowercase().encodeDigit(c >>> 4 & 0xF))
                    .write(Base16.lowercase().encodeDigit(c & 0xF));

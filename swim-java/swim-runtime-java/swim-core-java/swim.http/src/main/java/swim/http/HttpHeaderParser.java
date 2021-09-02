@@ -21,14 +21,15 @@ import swim.codec.Parser;
 final class HttpHeaderParser extends Parser<HttpHeader> {
 
   final HttpParser http;
-  final StringBuilder name;
-  final Parser<? extends HttpHeader> value;
+  final StringBuilder nameBuilder;
+  final Parser<? extends HttpHeader> valueParser;
   final int step;
 
-  HttpHeaderParser(HttpParser http, StringBuilder name, Parser<? extends HttpHeader> value, int step) {
+  HttpHeaderParser(HttpParser http, StringBuilder nameBuilder,
+                   Parser<? extends HttpHeader> valueParser, int step) {
     this.http = http;
-    this.name = name;
-    this.value = value;
+    this.nameBuilder = nameBuilder;
+    this.valueParser = valueParser;
     this.step = step;
   }
 
@@ -38,22 +39,23 @@ final class HttpHeaderParser extends Parser<HttpHeader> {
 
   @Override
   public Parser<HttpHeader> feed(Input input) {
-    return HttpHeaderParser.parse(input, this.http, this.name, this.value, this.step);
+    return HttpHeaderParser.parse(input, this.http, this.nameBuilder,
+                                  this.valueParser, this.step);
   }
 
   @SuppressWarnings("unchecked")
-  static Parser<HttpHeader> parse(Input input, HttpParser http, StringBuilder name,
-                                  Parser<? extends HttpHeader> value, int step) {
+  static Parser<HttpHeader> parse(Input input, HttpParser http, StringBuilder nameBuilder,
+                                  Parser<? extends HttpHeader> valueParser, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (name == null) {
-            name = new StringBuilder();
+          if (nameBuilder == null) {
+            nameBuilder = new StringBuilder();
           }
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
           step = 2;
         } else {
           return Parser.error(Diagnostic.expected("HTTP header name", input));
@@ -67,7 +69,7 @@ final class HttpHeaderParser extends Parser<HttpHeader> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -100,15 +102,15 @@ final class HttpHeaderParser extends Parser<HttpHeader> {
       }
     }
     if (step == 5) {
-      if (value == null) {
-        value = http.parseHeaderValue(name.toString(), input);
+      if (valueParser == null) {
+        valueParser = http.parseHeaderValue(input, nameBuilder.toString());
       } else {
-        value = value.feed(input);
+        valueParser = valueParser.feed(input);
       }
-      if (value.isDone()) {
+      if (valueParser.isDone()) {
         step = 6;
-      } else if (value.isError()) {
-        return value.asError();
+      } else if (valueParser.isError()) {
+        return valueParser.asError();
       }
     }
     if (step == 6) {
@@ -121,13 +123,13 @@ final class HttpHeaderParser extends Parser<HttpHeader> {
         }
       }
       if (!input.isEmpty()) {
-        return (Parser<HttpHeader>) value;
+        return (Parser<HttpHeader>) valueParser;
       }
     }
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new HttpHeaderParser(http, name, value, step);
+    return new HttpHeaderParser(http, nameBuilder, valueParser, step);
   }
 
   static Parser<HttpHeader> parse(Input input, HttpParser http) {

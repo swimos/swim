@@ -76,7 +76,7 @@ final class ConditionalOperatorWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 2) {
       if (part == null) {
-        part = recon.writeItem(ifTerm, output);
+        part = recon.writeItem(output, ifTerm);
       } else {
         part = part.pull(output);
       }
@@ -111,7 +111,7 @@ final class ConditionalOperatorWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 7) {
       if (part == null) {
-        part = recon.writeItem(thenTerm, output);
+        part = recon.writeItem(output, thenTerm);
       } else {
         part = part.pull(output);
       }
@@ -136,7 +136,7 @@ final class ConditionalOperatorWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 11) {
       if (part == null) {
-        part = recon.writeItem(elseTerm, output);
+        part = recon.writeItem(output, elseTerm);
       } else {
         part = part.pull(output);
       }

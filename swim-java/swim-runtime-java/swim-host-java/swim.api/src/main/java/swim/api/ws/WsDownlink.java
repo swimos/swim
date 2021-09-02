@@ -27,8 +27,8 @@ import swim.api.ws.function.WillReadFrameWs;
 import swim.api.ws.function.WillUpgradeWs;
 import swim.api.ws.function.WillWriteFrameWs;
 import swim.uri.Uri;
-import swim.ws.WsControl;
-import swim.ws.WsData;
+import swim.ws.WsControlFrame;
+import swim.ws.WsDataFrame;
 
 public interface WsDownlink<I, O> extends Downlink, WsLink {
 
@@ -69,8 +69,8 @@ public interface WsDownlink<I, O> extends Downlink, WsLink {
   @Override
   WsDownlink<I, O> open();
 
-  <O2 extends O> void write(WsData<O2> frame);
+  <O2 extends O> void write(WsDataFrame<O2> frame);
 
-  <O2 extends O> void write(WsControl<?, O2> frame);
+  <O2 extends O> void write(WsControlFrame<?, O2> frame);
 
 }

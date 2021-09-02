@@ -47,7 +47,7 @@ final class HttpMessageEncoder<T> extends Encoder<Object, HttpMessage<T>> {
                                                     HttpMessage<T> message, Object part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = Utf8.writeEncoded(message.httpWriter(http), output);
+        part = Utf8.writeEncoded(output, message.httpWriter(http));
       } else {
         part = ((Writer<?, ?>) part).pull(output);
       }
@@ -61,7 +61,7 @@ final class HttpMessageEncoder<T> extends Encoder<Object, HttpMessage<T>> {
     }
     if (step == 2) {
       if (part == null) {
-        part = message.entity().encodeHttp(message, output, http);
+        part = message.payload().encodeHttp(output, message, http);
       } else {
         part = ((Encoder<?, ?>) part).pull(output);
       }

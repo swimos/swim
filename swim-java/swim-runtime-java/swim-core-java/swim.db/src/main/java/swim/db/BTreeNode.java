@@ -848,7 +848,7 @@ public final class BTreeNode extends BTreePage {
 
   @Override
   public void writePage(Output<?> output) {
-    Recon.write(this.toHeader(), output);
+    Recon.write(output, this.toHeader());
     this.writePageContent(output);
     output.write('\n');
   }
@@ -863,7 +863,7 @@ public final class BTreeNode extends BTreePage {
         if (i > 0) {
           output.write(',').write('@').write('k').write('n').write('o').write('t')
                 .write('(').write('k').write('e').write('y').write(':');
-          Recon.write(knotKeys[i - 1], output);
+          Recon.write(output, knotKeys[i - 1]);
           output.write(')').write(',');
         }
         childRefs[i].writePageRef(output);
@@ -929,7 +929,7 @@ public final class BTreeNode extends BTreePage {
   @Override
   public String toString() {
     final Output<String> output = Unicode.stringOutput(this.pageSize() - 1); // ignore trailing '\n'
-    Recon.write(this.toHeader(), output);
+    Recon.write(output, this.toHeader());
     this.writePageContent(output);
     return output.bind();
   }
@@ -989,7 +989,7 @@ public final class BTreeNode extends BTreePage {
       }
     }
     final Output<String> message = Unicode.stringOutput("Malformed bnode: ");
-    Recon.write(value, message);
+    Recon.write(message, value);
     throw new StoreException(message.bind(), cause);
   }
 

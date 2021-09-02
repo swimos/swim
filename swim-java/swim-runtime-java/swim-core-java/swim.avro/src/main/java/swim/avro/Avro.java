@@ -37,8 +37,8 @@ public final class Avro {
     return Avro.decoder;
   }
 
-  public static <T> Decoder<T> decodeType(AvroType<T> type, InputBuffer input) {
-    return Avro.decoder().decodeType(type, input);
+  public static <T> Decoder<T> decodeType(InputBuffer input, AvroType<T> type) {
+    return Avro.decoder().decodeType(input, type);
   }
 
   public static <T> Decoder<T> typeDecoder(AvroType<T> type) {

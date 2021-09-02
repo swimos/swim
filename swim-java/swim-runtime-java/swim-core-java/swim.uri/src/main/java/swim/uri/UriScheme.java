@@ -70,7 +70,7 @@ public class UriScheme extends UriPart implements Comparable<UriScheme>, Debug, 
 
   @Override
   public <T> Output<T> display(Output<T> output) {
-    return Uri.writeScheme(this.name, output);
+    return Uri.writeScheme(output, this.name);
   }
 
   @Override

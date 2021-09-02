@@ -25,13 +25,13 @@ final class HttpStatusParser extends Parser<HttpStatus> {
 
   final HttpParser http;
   final int code;
-  final Output<String> phrase;
+  final Output<String> phraseBuilder;
   final int step;
 
-  HttpStatusParser(HttpParser http, int code, Output<String> phrase, int step) {
+  HttpStatusParser(HttpParser http, int code, Output<String> phraseBuilder, int step) {
     this.http = http;
     this.code = code;
-    this.phrase = phrase;
+    this.phraseBuilder = phraseBuilder;
     this.step = step;
   }
 
@@ -41,11 +41,11 @@ final class HttpStatusParser extends Parser<HttpStatus> {
 
   @Override
   public Parser<HttpStatus> feed(Input input) {
-    return HttpStatusParser.parse(input, this.http, this.code, this.phrase, this.step);
+    return HttpStatusParser.parse(input, this.http, this.code, this.phraseBuilder, this.step);
   }
 
   static Parser<HttpStatus> parse(Input input, HttpParser http, int code,
-                                  Output<String> phrase, int step) {
+                                  Output<String> phraseBuilder, int step) {
     int c = 0;
     while (step <= 3) {
       if (input.isCont()) {
@@ -72,26 +72,26 @@ final class HttpStatusParser extends Parser<HttpStatus> {
       }
     }
     if (step == 5) {
-      if (phrase == null) {
-        phrase = Utf8.decodedString();
+      if (phraseBuilder == null) {
+        phraseBuilder = Utf8.decodedString();
       }
       while (input.isCont()) {
         c = input.head();
         if (Http.isPhraseChar(c)) {
           input = input.step();
-          phrase.write(c);
+          phraseBuilder.write(c);
         } else {
           break;
         }
       }
       if (!input.isEmpty()) {
-        return Parser.done(http.status(code, phrase.bind()));
+        return Parser.done(http.status(code, phraseBuilder.bind()));
       }
     }
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new HttpStatusParser(http, code, phrase, step);
+    return new HttpStatusParser(http, code, phraseBuilder, step);
   }
 
   static Parser<HttpStatus> parse(Input input, HttpParser http) {

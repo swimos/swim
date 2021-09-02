@@ -23,19 +23,19 @@ import swim.util.Builder;
 final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
 
   final HttpParser http;
-  final Parser<HttpVersion> version;
-  final Parser<HttpStatus> status;
-  final Parser<? extends HttpHeader> header;
+  final Parser<HttpVersion> versionParser;
+  final Parser<HttpStatus> statusParser;
+  final Parser<? extends HttpHeader> headerParser;
   final Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers;
   final int step;
 
-  HttpResponseParser(HttpParser http, Parser<HttpVersion> version,
-                     Parser<HttpStatus> status, Parser<? extends HttpHeader> header,
+  HttpResponseParser(HttpParser http, Parser<HttpVersion> versionParser,
+                     Parser<HttpStatus> statusParser, Parser<? extends HttpHeader> headerParser,
                      Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers, int step) {
     this.http = http;
-    this.version = version;
-    this.status = status;
-    this.header = header;
+    this.versionParser = versionParser;
+    this.statusParser = statusParser;
+    this.headerParser = headerParser;
     this.headers = headers;
     this.step = step;
   }
@@ -46,27 +46,27 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
 
   @Override
   public Parser<HttpResponse<T>> feed(Input input) {
-    return HttpResponseParser.parse(input, this.http, this.version, this.status,
-                                    this.header, this.headers, this.step);
+    return HttpResponseParser.parse(input, this.http, this.versionParser, this.statusParser,
+                                    this.headerParser, this.headers, this.step);
   }
 
-  static <T> Parser<HttpResponse<T>> parse(Input input, HttpParser http, Parser<HttpVersion> version,
-                                           Parser<HttpStatus> status, Parser<? extends HttpHeader> header,
+  static <T> Parser<HttpResponse<T>> parse(Input input, HttpParser http, Parser<HttpVersion> versionParser,
+                                           Parser<HttpStatus> statusParser, Parser<? extends HttpHeader> headerParser,
                                            Builder<HttpHeader, FingerTrieSeq<HttpHeader>> headers, int step) {
     int c = 0;
     if (step == 1) {
-      if (version == null) {
+      if (versionParser == null) {
         if (input.isDone()) {
           return Parser.done();
         }
-        version = http.parseVersion(input);
+        versionParser = http.parseVersion(input);
       } else {
-        version = version.feed(input);
+        versionParser = versionParser.feed(input);
       }
-      if (version.isDone()) {
+      if (versionParser.isDone()) {
         step = 2;
-      } else if (version.isError()) {
-        return version.asError();
+      } else if (versionParser.isError()) {
+        return versionParser.asError();
       }
     }
     if (step == 2) {
@@ -78,15 +78,15 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
       }
     }
     if (step == 3) {
-      if (status == null) {
-        status = http.parseStatus(input);
+      if (statusParser == null) {
+        statusParser = http.parseStatus(input);
       } else {
-        status = status.feed(input);
+        statusParser = statusParser.feed(input);
       }
-      if (status.isDone()) {
+      if (statusParser.isDone()) {
         step = 4;
-      } else if (status.isError()) {
-        return status.asError();
+      } else if (statusParser.isError()) {
+        return statusParser.asError();
       }
     }
     if (step == 4) {
@@ -124,15 +124,15 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
         }
       }
       if (step == 7) {
-        if (header == null) {
-          header = http.parseHeader(input);
+        if (headerParser == null) {
+          headerParser = http.parseHeader(input);
         } else {
-          header = header.feed(input);
+          headerParser = headerParser.feed(input);
         }
-        if (header.isDone()) {
+        if (headerParser.isDone()) {
           step = 8;
-        } else if (header.isError()) {
-          return header.asError();
+        } else if (headerParser.isError()) {
+          return headerParser.asError();
         }
       }
       if (step == 8) {
@@ -148,8 +148,8 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
           if (headers == null) {
             headers = FingerTrieSeq.builder();
           }
-          headers.add(header.bind());
-          header = null;
+          headers.add(headerParser.bind());
+          headerParser = null;
           input = input.step();
           step = 6;
           continue;
@@ -163,11 +163,11 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
       if (input.isCont() && input.head() == '\n') {
         input = input.step();
         if (headers == null) {
-          final HttpResponse<T> response = http.response(version.bind(), status.bind(),
-              FingerTrieSeq.<HttpHeader>empty());
+          final HttpResponse<T> response = http.response(versionParser.bind(), statusParser.bind(),
+                                                         FingerTrieSeq.<HttpHeader>empty());
           return Parser.done(response);
         } else {
-          final HttpResponse<T> response = http.response(version.bind(), status.bind(), headers.bind());
+          final HttpResponse<T> response = http.response(versionParser.bind(), statusParser.bind(), headers.bind());
           return Parser.done(response);
         }
       } else if (!input.isEmpty()) {
@@ -177,7 +177,7 @@ final class HttpResponseParser<T> extends Parser<HttpResponse<T>> {
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new HttpResponseParser<T>(http, version, status, header, headers, step);
+    return new HttpResponseParser<T>(http, versionParser, statusParser, headerParser, headers, step);
   }
 
   static <T> Parser<HttpResponse<T>> parse(Input input, HttpParser http) {

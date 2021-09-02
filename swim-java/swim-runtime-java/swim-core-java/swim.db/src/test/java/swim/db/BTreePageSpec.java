@@ -88,7 +88,7 @@ public class BTreePageSpec {
     }
   }
 
-  @Test
+  @Test(groups = {"slow"})
   public void testDrop() {
     for (int n = 4; n <= 4096; n *= 2) {
       System.out.println("Dropping prefixes of " + n + " slots ...");
@@ -123,7 +123,7 @@ public class BTreePageSpec {
     }
   }
 
-  @Test
+  @Test(groups = {"slow"})
   public void testTake() {
     for (int n = 4; n <= 4096; n *= 2) {
       System.out.println("Taking prefixes of " + n + " slots ...");

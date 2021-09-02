@@ -74,7 +74,7 @@ public final class TransferCoding extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeTransferCoding(this.name, this.params, output);
+    return http.writeTransferCoding(output, this.name, this.params);
   }
 
   @Override

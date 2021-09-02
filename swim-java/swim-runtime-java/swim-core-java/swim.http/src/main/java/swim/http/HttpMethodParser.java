@@ -21,12 +21,12 @@ import swim.codec.Parser;
 final class HttpMethodParser extends Parser<HttpMethod> {
 
   final HttpParser http;
-  final StringBuilder name;
+  final StringBuilder nameBuilder;
   final int step;
 
-  HttpMethodParser(HttpParser http, StringBuilder name, int step) {
+  HttpMethodParser(HttpParser http, StringBuilder nameBuilder, int step) {
     this.http = http;
-    this.name = name;
+    this.nameBuilder = nameBuilder;
     this.step = step;
   }
 
@@ -36,18 +36,19 @@ final class HttpMethodParser extends Parser<HttpMethod> {
 
   @Override
   public Parser<HttpMethod> feed(Input input) {
-    return HttpMethodParser.parse(input, this.http, this.name, this.step);
+    return HttpMethodParser.parse(input, this.http, this.nameBuilder, this.step);
   }
 
-  static Parser<HttpMethod> parse(Input input, HttpParser http, StringBuilder name, int step) {
+  static Parser<HttpMethod> parse(Input input, HttpParser http,
+                                  StringBuilder nameBuilder, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          name = new StringBuilder();
-          name.appendCodePoint(c);
+          nameBuilder = new StringBuilder();
+          nameBuilder.appendCodePoint(c);
           step = 2;
         } else {
           return Parser.error(Diagnostic.expected("HTTP method", input));
@@ -61,19 +62,19 @@ final class HttpMethodParser extends Parser<HttpMethod> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
         } else {
           break;
         }
       }
       if (!input.isEmpty()) {
-        return Parser.done(http.method(name.toString()));
+        return Parser.done(http.method(nameBuilder.toString()));
       }
     }
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new HttpMethodParser(http, name, step);
+    return new HttpMethodParser(http, nameBuilder, step);
   }
 
   static Parser<HttpMethod> parse(Input input, HttpParser http) {

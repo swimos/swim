@@ -128,7 +128,7 @@ public final class Unicode {
     return new ByteParser<O>(output);
   }
 
-  public static <O> Parser<O> parseOutput(Output<O> output, Input input) {
+  public static <O> Parser<O> parseOutput(Input input, Output<O> output) {
     return ByteParser.parse(input, output);
   }
 
@@ -151,7 +151,7 @@ public final class Unicode {
   }
 
   @SuppressWarnings("unchecked")
-  public static <I> Writer<I, Object> writeString(Object input, Output<?> output) {
+  public static <I> Writer<I, Object> writeString(Output<?> output, Object input) {
     return (Writer<I, Object>) StringWriter.write(output, null, input);
   }
 

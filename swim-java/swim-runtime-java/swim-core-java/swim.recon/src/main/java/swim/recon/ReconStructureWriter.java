@@ -150,17 +150,17 @@ public class ReconStructureWriter extends ReconWriter<Item, Value> {
   }
 
   @Override
-  public Writer<?, ?> writeItem(Item item, Output<?> output) {
+  public Writer<?, ?> writeItem(Output<?> output, Item item) {
     if (item instanceof Field) {
       if (item instanceof Attr) {
         final Attr that = (Attr) item;
-        return this.writeAttr(that.key(), that.value(), output);
+        return this.writeAttr(output, that.key(), that.value());
       } else if (item instanceof Slot) {
         final Slot that = (Slot) item;
-        return this.writeSlot(that.key(), that.value(), output);
+        return this.writeSlot(output, that.key(), that.value());
       }
     } else if (item instanceof Value) {
-      return this.writeValue((Value) item, output);
+      return this.writeValue(output, (Value) item);
     }
     return Writer.error(new WriterException("No Recon serialization for " + item));
   }
@@ -211,42 +211,42 @@ public class ReconStructureWriter extends ReconWriter<Item, Value> {
   }
 
   @Override
-  public Writer<?, ?> writeValue(Value value, Output<?> output) {
+  public Writer<?, ?> writeValue(Output<?> output, Value value) {
     if (value instanceof Record) {
       final Record that = (Record) value;
-      return this.writeRecord(that, output);
+      return this.writeRecord(output, that);
     } else if (value instanceof Data) {
       final Data that = (Data) value;
-      return this.writeData(that.asByteBuffer(), output);
+      return this.writeData(output, that.asByteBuffer());
     } else if (value instanceof Text) {
       final Text that = (Text) value;
-      return this.writeText(that.stringValue(), output);
+      return this.writeText(output, that.stringValue());
     } else if (value instanceof Num) {
       final Num that = (Num) value;
       if (that.isUint32()) {
-        return this.writeUint32(that.intValue(), output);
+        return this.writeUint32(output, that.intValue());
       } else if (that.isUint64()) {
-        return this.writeUint64(that.longValue(), output);
+        return this.writeUint64(output, that.longValue());
       } else if (that.isValidInt()) {
-        return this.writeNum(that.intValue(), output);
+        return this.writeNum(output, that.intValue());
       } else if (that.isValidLong()) {
-        return this.writeNum(that.longValue(), output);
+        return this.writeNum(output, that.longValue());
       } else if (that.isValidFloat()) {
-        return this.writeNum(that.floatValue(), output);
+        return this.writeNum(output, that.floatValue());
       } else if (that.isValidDouble()) {
-        return this.writeNum(that.doubleValue(), output);
+        return this.writeNum(output, that.doubleValue());
       } else if (that.isValidInteger()) {
-        return this.writeNum(that.integerValue(), output);
+        return this.writeNum(output, that.integerValue());
       }
     } else if (value instanceof Bool) {
       final Bool that = (Bool) value;
-      return this.writeBool(that.booleanValue(), output);
+      return this.writeBool(output, that.booleanValue());
     } else if (value instanceof Selector) {
-      return this.writeSelector((Selector) value, output);
+      return this.writeSelector(output, (Selector) value);
     } else if (value instanceof Operator) {
-      return this.writeOperator((Operator) value, output);
+      return this.writeOperator(output, (Operator) value);
     } else if (value instanceof Func) {
-      return this.writeFunc((Func) value, output);
+      return this.writeFunc(output, (Func) value);
     } else if (value instanceof Extant) {
       return this.writeExtant(output);
     } else if (value instanceof Absent) {
@@ -289,36 +289,36 @@ public class ReconStructureWriter extends ReconWriter<Item, Value> {
     throw new WriterException("No Recon serialization for " + selector);
   }
 
-  public Writer<?, ?> writeSelector(Selector selector, Output<?> output) {
+  public Writer<?, ?> writeSelector(Output<?> output, Selector selector) {
     if (selector instanceof IdentitySelector) {
       return this.writeIdentitySelector(output);
     } else if (selector instanceof LiteralSelector) {
       final LiteralSelector that = (LiteralSelector) selector;
-      return this.writeLiteralSelector(that.item(), that.then(), output);
+      return this.writeLiteralSelector(output, that.item(), that.then());
     } else if (selector instanceof GetSelector) {
       final GetSelector that = (GetSelector) selector;
-      return this.writeGetSelector(that.accessor(), that.then(), output);
+      return this.writeGetSelector(output, that.accessor(), that.then());
     } else if (selector instanceof GetAttrSelector) {
       final GetAttrSelector that = (GetAttrSelector) selector;
-      return this.writeGetAttrSelector(that.accessor(), that.then(), output);
+      return this.writeGetAttrSelector(output, that.accessor(), that.then());
     } else if (selector instanceof GetItemSelector) {
       final GetItemSelector that = (GetItemSelector) selector;
-      return this.writeGetItemSelector(that.accessor(), that.then(), output);
+      return this.writeGetItemSelector(output, that.accessor(), that.then());
     } else if (selector instanceof KeysSelector) {
       final KeysSelector that = (KeysSelector) selector;
-      return this.writeKeysSelector(that.then(), output);
+      return this.writeKeysSelector(output, that.then());
     } else if (selector instanceof ValuesSelector) {
       final ValuesSelector that = (ValuesSelector) selector;
-      return this.writeValuesSelector(that.then(), output);
+      return this.writeValuesSelector(output, that.then());
     } else if (selector instanceof ChildrenSelector) {
       final ChildrenSelector that = (ChildrenSelector) selector;
-      return this.writeChildrenSelector(that.then(), output);
+      return this.writeChildrenSelector(output, that.then());
     } else if (selector instanceof DescendantsSelector) {
       final DescendantsSelector that = (DescendantsSelector) selector;
-      return this.writeDescendantsSelector(that.then(), output);
+      return this.writeDescendantsSelector(output, that.then());
     } else if (selector instanceof FilterSelector) {
       final FilterSelector that = (FilterSelector) selector;
-      return this.writeFilterSelector(that.predicate(), that.then(), output);
+      return this.writeFilterSelector(output, that.predicate(), that.then());
     }
     return Writer.error(new WriterException("No Recon serialization for " + selector));
   }
@@ -340,19 +340,19 @@ public class ReconStructureWriter extends ReconWriter<Item, Value> {
     throw new WriterException("No Recon serialization for " + operator);
   }
 
-  public Writer<?, ?> writeOperator(Operator operator, Output<?> output) {
+  public Writer<?, ?> writeOperator(Output<?> output, Operator operator) {
     if (operator instanceof BinaryOperator) {
       final BinaryOperator that = (BinaryOperator) operator;
-      return this.writeInfixOperator(that.lhs(), that.operator(), that.rhs(), that.precedence(), output);
+      return this.writeInfixOperator(output, that.lhs(), that.operator(), that.rhs(), that.precedence());
     } else if (operator instanceof UnaryOperator) {
       final UnaryOperator that = (UnaryOperator) operator;
-      return this.writePrefixOperator(that.operator(), that.operand(), that.precedence(), output);
+      return this.writePrefixOperator(output, that.operator(), that.operand(), that.precedence());
     } else if (operator instanceof InvokeOperator) {
       final InvokeOperator that = (InvokeOperator) operator;
-      return this.writeInvokeOperator(that.func(), that.args(), output);
+      return this.writeInvokeOperator(output, that.func(), that.args());
     } else if (operator instanceof ConditionalOperator) {
       final ConditionalOperator that = (ConditionalOperator) operator;
-      return this.writeConditionalOperator(that.ifTerm(), that.thenTerm(), that.elseTerm(), that.precedence(), output);
+      return this.writeConditionalOperator(output, that.ifTerm(), that.thenTerm(), that.elseTerm(), that.precedence());
     }
     return Writer.error(new WriterException("No Recon serialization for " + operator));
   }
@@ -367,10 +367,10 @@ public class ReconStructureWriter extends ReconWriter<Item, Value> {
     throw new WriterException("No Recon serialization for " + func);
   }
 
-  public Writer<?, ?> writeFunc(Func func, Output<?> output) {
+  public Writer<?, ?> writeFunc(Output<?> output, Func func) {
     if (func instanceof LambdaFunc) {
       final LambdaFunc that = (LambdaFunc) func;
-      return this.writeLambdaFunc(that.bindings(), that.template(), output);
+      return this.writeLambdaFunc(output, that.bindings(), that.template());
     } else if (func instanceof BridgeFunc) {
       return Writer.done();
     }
@@ -388,11 +388,11 @@ public class ReconStructureWriter extends ReconWriter<Item, Value> {
   }
 
   @Override
-  public Writer<?, ?> writeBlockItem(Item item, Output<?> output) {
+  public Writer<?, ?> writeBlockItem(Output<?> output, Item item) {
     if (item instanceof Field) {
-      return this.writeItem(item, output);
+      return this.writeItem(output, item);
     } else if (item instanceof Value) {
-      return this.writeBlockValue((Value) item, output);
+      return this.writeBlockValue(output, (Value) item);
     }
     return Writer.error(new WriterException("No Recon serialization for " + item));
   }
@@ -406,11 +406,11 @@ public class ReconStructureWriter extends ReconWriter<Item, Value> {
   }
 
   @Override
-  public Writer<?, ?> writeBlockValue(Value value, Output<?> output) {
+  public Writer<?, ?> writeBlockValue(Output<?> output, Value value) {
     if (value instanceof Record) {
-      return this.writeBlock((Record) value, output);
+      return this.writeBlock(output, (Record) value);
     }
-    return this.writeValue(value, output);
+    return this.writeValue(output, value);
   }
 
   @Override
@@ -452,38 +452,38 @@ public class ReconStructureWriter extends ReconWriter<Item, Value> {
   }
 
   @Override
-  public Writer<?, ?> writeThen(Value then, Output<?> output) {
+  public Writer<?, ?> writeThen(Output<?> output, Value then) {
     if (then instanceof Selector) {
       final Selector selector = (Selector) then;
       if (selector instanceof IdentitySelector) {
         return this.writeThenIdentitySelector(output);
       } else if (selector instanceof LiteralSelector) {
         final LiteralSelector that = (LiteralSelector) selector;
-        return this.writeThenLiteralSelector(that.item(), that.then(), output);
+        return this.writeThenLiteralSelector(output, that.item(), that.then());
       } else if (selector instanceof GetSelector) {
         final GetSelector that = (GetSelector) selector;
-        return this.writeThenGetSelector(that.accessor(), that.then(), output);
+        return this.writeThenGetSelector(output, that.accessor(), that.then());
       } else if (selector instanceof GetAttrSelector) {
         final GetAttrSelector that = (GetAttrSelector) selector;
-        return this.writeThenGetAttrSelector(that.accessor(), that.then(), output);
+        return this.writeThenGetAttrSelector(output, that.accessor(), that.then());
       } else if (selector instanceof GetItemSelector) {
         final GetItemSelector that = (GetItemSelector) selector;
-        return this.writeThenGetItemSelector(that.accessor(), that.then(), output);
+        return this.writeThenGetItemSelector(output, that.accessor(), that.then());
       } else if (selector instanceof KeysSelector) {
         final KeysSelector that = (KeysSelector) selector;
-        return this.writeThenKeysSelector(that.then(), output);
+        return this.writeThenKeysSelector(output, that.then());
       } else if (selector instanceof ValuesSelector) {
         final ValuesSelector that = (ValuesSelector) selector;
-        return this.writeThenValuesSelector(that.then(), output);
+        return this.writeThenValuesSelector(output, that.then());
       } else if (selector instanceof ChildrenSelector) {
         final ChildrenSelector that = (ChildrenSelector) selector;
-        return this.writeThenChildrenSelector(that.then(), output);
+        return this.writeThenChildrenSelector(output, that.then());
       } else if (selector instanceof DescendantsSelector) {
         final DescendantsSelector that = (DescendantsSelector) selector;
-        return this.writeThenDescendantsSelector(that.then(), output);
+        return this.writeThenDescendantsSelector(output, that.then());
       } else if (selector instanceof FilterSelector) {
         final FilterSelector that = (FilterSelector) selector;
-        return this.writeThenFilterSelector(that.predicate(), that.then(), output);
+        return this.writeThenFilterSelector(output, that.predicate(), that.then());
       }
     }
     return Writer.error(new WriterException("No Recon serialization for " + then));

@@ -22,12 +22,12 @@ import swim.codec.Utf8;
 final class WsStatusDecoder extends Decoder<WsStatus> {
 
   final int code;
-  final Decoder<String> reason;
+  final Decoder<String> reasonDecoder;
   final int step;
 
-  WsStatusDecoder(int code, Decoder<String> reason, int step) {
+  WsStatusDecoder(int code, Decoder<String> reasonDecoder, int step) {
     this.code = code;
-    this.reason = reason;
+    this.reasonDecoder = reasonDecoder;
     this.step = step;
   }
 
@@ -37,10 +37,11 @@ final class WsStatusDecoder extends Decoder<WsStatus> {
 
   @Override
   public Decoder<WsStatus> feed(InputBuffer input) {
-    return WsStatusDecoder.decode(input, this.code, this.reason, this.step);
+    return WsStatusDecoder.decode(input, this.code, this.reasonDecoder, this.step);
   }
 
-  static Decoder<WsStatus> decode(InputBuffer input, int code, Decoder<String> reason, int step) {
+  static Decoder<WsStatus> decode(InputBuffer input, int code,
+                                  Decoder<String> reasonDecoder, int step) {
     if (step == 1) {
       if (input.isCont()) {
         code = input.head() << 8;
@@ -56,15 +57,15 @@ final class WsStatusDecoder extends Decoder<WsStatus> {
       step = 3;
     }
     if (step == 3) {
-      if (reason == null) {
-        reason = Utf8.parseString(input);
+      if (reasonDecoder == null) {
+        reasonDecoder = Utf8.parseString(input);
       } else {
-        reason = reason.feed(input);
+        reasonDecoder = reasonDecoder.feed(input);
       }
-      if (reason.isDone()) {
-        return Decoder.done(new WsStatus(code, reason.bind()));
-      } else if (reason.isError()) {
-        return reason.asError();
+      if (reasonDecoder.isDone()) {
+        return Decoder.done(new WsStatus(code, reasonDecoder.bind()));
+      } else if (reasonDecoder.isError()) {
+        return reasonDecoder.asError();
       }
     }
     if (input.isDone()) {
@@ -72,7 +73,7 @@ final class WsStatusDecoder extends Decoder<WsStatus> {
     } else if (input.isError()) {
       return Decoder.error(input.trap());
     }
-    return new WsStatusDecoder(code, reason, step);
+    return new WsStatusDecoder(code, reasonDecoder, step);
   }
 
   static Decoder<WsStatus> decode(InputBuffer input) {

@@ -53,7 +53,7 @@ final class ChildrenSelectorWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 3 && output.isCont()) {
       output = output.write('*');
-      return (Writer<Object, Object>) recon.writeThen(then, output);
+      return (Writer<Object, Object>) recon.writeThen(output, then);
     }
     if (output.isDone()) {
       return Writer.error(new WriterException("truncated"));

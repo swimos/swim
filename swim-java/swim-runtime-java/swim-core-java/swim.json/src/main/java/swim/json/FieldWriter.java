@@ -43,7 +43,7 @@ final class FieldWriter<I, V> extends Writer<Object, Object> {
                                              V key, V value, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = json.writeValue(key, output);
+        part = json.writeValue(output, key);
       } else {
         part = part.pull(output);
       }
@@ -60,7 +60,7 @@ final class FieldWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 3) {
       if (part == null) {
-        part = json.writeValue(value, output);
+        part = json.writeValue(output, value);
       } else {
         part = part.pull(output);
       }

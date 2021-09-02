@@ -22,26 +22,26 @@ import swim.codec.OutputBuffer;
 final class HttpChunkedEncoder<T> extends Encoder<Object, HttpMessage<T>> {
 
   final HttpMessage<T> message;
-  final Encoder<?, ?> content;
+  final Encoder<?, ?> payloadEncoder;
   final int step;
 
-  HttpChunkedEncoder(HttpMessage<T> message, Encoder<?, ?> content, int step) {
+  HttpChunkedEncoder(HttpMessage<T> message, Encoder<?, ?> payloadEncoder, int step) {
     this.message = message;
-    this.content = content;
+    this.payloadEncoder = payloadEncoder;
     this.step = step;
   }
 
-  HttpChunkedEncoder(HttpMessage<T> message, Encoder<?, ?> content) {
-    this(message, content, 1);
+  HttpChunkedEncoder(HttpMessage<T> message, Encoder<?, ?> payloadEncoder) {
+    this(message, payloadEncoder, 1);
   }
 
   @Override
   public Encoder<Object, HttpMessage<T>> pull(OutputBuffer<?> output) {
-    return HttpChunkedEncoder.encode(output, this.message, this.content, this.step);
+    return HttpChunkedEncoder.encode(output, this.message, this.payloadEncoder, this.step);
   }
 
   static <T> Encoder<Object, HttpMessage<T>> encode(OutputBuffer<?> output, HttpMessage<T> message,
-                                                    Encoder<?, ?> content, int step) {
+                                                    Encoder<?, ?> payloadEncoder, int step) {
     if (step == 1 && output.remaining() > 12) { // chunk
       final int outputStart = output.index();
       final int outputEnd = output.limit();
@@ -49,14 +49,14 @@ final class HttpChunkedEncoder<T> extends Encoder<Object, HttpMessage<T>> {
       output = output.index(outputStart + 10); // chunk header
       output = output.limit(outputEnd - 2); // chunk footer
       output = output.isPart(true);
-      content = content.pull(output);
+      payloadEncoder = payloadEncoder.pull(output);
       final int chunkSize = output.index() - outputStart - 10;
       output = output.limit(outputEnd).isPart(outputPart);
       if (chunkSize > 0) {
         output = output.write('\r').write('\n');
-      } else if (content.isCont()) {
+      } else if (payloadEncoder.isCont()) {
         output = output.index(outputStart);
-        return new HttpChunkedEncoder<T>(message, content, step);
+        return new HttpChunkedEncoder<T>(message, payloadEncoder, step);
       }
       final int chunkEnd = output.index();
       output = output.index(outputStart + 8).write('\r').write('\n');
@@ -74,14 +74,14 @@ final class HttpChunkedEncoder<T> extends Encoder<Object, HttpMessage<T>> {
       final int chunkLength = chunkEnd - chunkStart;
       output = output.move(chunkStart, outputStart, chunkLength)
                      .index(outputStart + chunkLength);
-      if (content.isDone()) {
+      if (payloadEncoder.isDone()) {
         if (chunkSize > 0) {
           step = 2;
         } else {
           step = 3;
         }
-      } else if (content.isError()) {
-        return content.asError();
+      } else if (payloadEncoder.isError()) {
+        return payloadEncoder.asError();
       }
     }
     if (step == 2 && output.remaining() >= 3) { // last chunk
@@ -97,12 +97,12 @@ final class HttpChunkedEncoder<T> extends Encoder<Object, HttpMessage<T>> {
     } else if (output.isError()) {
       return Encoder.error(output.trap());
     }
-    return new HttpChunkedEncoder<T>(message, content, step);
+    return new HttpChunkedEncoder<T>(message, payloadEncoder, step);
   }
 
   static <T> Encoder<Object, HttpMessage<T>> encode(OutputBuffer<?> output, HttpMessage<T> message,
-                                                    Encoder<?, ?> content) {
-    return HttpChunkedEncoder.encode(output, message, content, 1);
+                                                    Encoder<?, ?> payloadEncoder) {
+    return HttpChunkedEncoder.encode(output, message, payloadEncoder, 1);
   }
 
 }

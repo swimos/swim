@@ -16,33 +16,33 @@ package swim.codec;
 
 final class Base64Parser<O> extends Parser<O> {
 
-  final Output<O> output;
   final Base64 base64;
+  final Output<O> output;
   final int p;
   final int q;
   final int r;
   final int step;
 
-  Base64Parser(Output<O> output, Base64 base64, int p, int q, int r, int step) {
-    this.output = output;
+  Base64Parser(Base64 base64, Output<O> output, int p, int q, int r, int step) {
     this.base64 = base64;
+    this.output = output;
     this.p = p;
     this.q = q;
     this.r = r;
     this.step = step;
   }
 
-  Base64Parser(Output<O> output, Base64 base64) {
-    this(output, base64, 0, 0, 0, 1);
+  Base64Parser(Base64 base64, Output<O> output) {
+    this(base64, output, 0, 0, 0, 1);
   }
 
   @Override
   public Parser<O> feed(Input input) {
-    return Base64Parser.parse(input, this.output.clone(), this.base64,
+    return Base64Parser.parse(input, this.base64, this.output.clone(),
                               this.p, this.q, this.r, this.step);
   }
 
-  static <O> Parser<O> parse(Input input, Output<O> output, Base64 base64,
+  static <O> Parser<O> parse(Input input, Base64 base64, Output<O> output,
                              int p, int q, int r, int step) {
     int c = 0;
     while (!input.isError() && !input.isEmpty()) {
@@ -86,14 +86,14 @@ final class Base64Parser<O> extends Parser<O> {
               step = 5;
             }
           } else if (!base64.isPadded()) {
-            output = base64.writeQuantum(p, q, '=', '=', output);
+            output = base64.writeQuantum(output, p, q, '=', '=');
             return Parser.done(output.bind());
           } else {
             return Parser.error(Diagnostic.expected("base64 digit", input));
           }
         } else if (input.isDone()) {
           if (!base64.isPadded()) {
-            output = base64.writeQuantum(p, q, '=', '=', output);
+            output = base64.writeQuantum(output, p, q, '=', '=');
             return Parser.done(output.bind());
           } else {
             return Parser.error(Diagnostic.expected("base64 digit", input));
@@ -105,7 +105,7 @@ final class Base64Parser<O> extends Parser<O> {
           c = input.head();
           if (base64.isDigit(c) || c == '=') {
             input = input.step();
-            output = base64.writeQuantum(p, q, r, c, output);
+            output = base64.writeQuantum(output, p, q, r, c);
             r = 0;
             q = 0;
             p = 0;
@@ -115,14 +115,14 @@ final class Base64Parser<O> extends Parser<O> {
               return Parser.done(output.bind());
             }
           } else if (!base64.isPadded()) {
-            output = base64.writeQuantum(p, q, r, '=', output);
+            output = base64.writeQuantum(output, p, q, r, '=');
             return Parser.done(output.bind());
           } else {
             return Parser.error(Diagnostic.expected("base64 digit", input));
           }
         } else if (input.isDone()) {
           if (!base64.isPadded()) {
-            output = base64.writeQuantum(p, q, r, '=', output);
+            output = base64.writeQuantum(output, p, q, r, '=');
             return Parser.done(output.bind());
           } else {
             return Parser.error(Diagnostic.expected("base64 digit", input));
@@ -133,7 +133,7 @@ final class Base64Parser<O> extends Parser<O> {
           c = input.head();
           if (c == '=') {
             input = input.step();
-            output = base64.writeQuantum(p, q, r, c, output);
+            output = base64.writeQuantum(output, p, q, r, c);
             r = 0;
             q = 0;
             p = 0;
@@ -149,11 +149,11 @@ final class Base64Parser<O> extends Parser<O> {
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new Base64Parser<O>(output, base64, p, q, r, step);
+    return new Base64Parser<O>(base64, output, p, q, r, step);
   }
 
-  static <O> Parser<O> parse(Input input, Output<O> output, Base64 base64) {
-    return Base64Parser.parse(input, output, base64, 0, 0, 0, 1);
+  static <O> Parser<O> parse(Input input, Base64 base64, Output<O> output) {
+    return Base64Parser.parse(input, base64, output, 0, 0, 0, 1);
   }
 
 }

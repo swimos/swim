@@ -67,7 +67,7 @@ final class HttpRequestWriter<T> extends Writer<Object, HttpRequest<T>> {
     }
     if (step == 3) {
       if (part == null) {
-        part = Unicode.writeString(request.uri.toString(), output);
+        part = Unicode.writeString(output, request.uri.toString());
       } else {
         part = part.pull(output);
       }

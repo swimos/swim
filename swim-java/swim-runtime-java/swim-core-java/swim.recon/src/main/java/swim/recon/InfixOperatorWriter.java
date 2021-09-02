@@ -84,7 +84,7 @@ final class InfixOperatorWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 2) {
       if (part == null) {
-        part = recon.writeItem(lhs, output);
+        part = recon.writeItem(output, lhs);
       } else {
         part = part.pull(output);
       }
@@ -111,7 +111,7 @@ final class InfixOperatorWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 5) {
       if (part == null) {
-        part = Unicode.writeString(operator, output);
+        part = Unicode.writeString(output, operator);
       } else {
         part = part.pull(output);
       }
@@ -138,7 +138,7 @@ final class InfixOperatorWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 8) {
       if (part == null) {
-        part = recon.writeItem(rhs, output);
+        part = recon.writeItem(output, rhs);
       } else {
         part = part.pull(output);
       }

@@ -20,116 +20,116 @@ import swim.structure.Data;
 
 public class MqttEncoder {
 
-  public Encoder<?, MqttConnect> connectEncoder(MqttConnect packet) {
-    return new MqttConnectEncoder(this, packet);
+  public Encoder<?, MqttConnectPacket> connectPacketEncoder(MqttConnectPacket packet) {
+    return new MqttConnectPacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttConnect> encodeConnect(MqttConnect packet, OutputBuffer<?> output) {
-    return MqttConnectEncoder.encode(output, this, packet);
+  public Encoder<?, MqttConnectPacket> encodeConnectPacket(OutputBuffer<?> output, MqttConnectPacket packet) {
+    return MqttConnectPacketEncoder.encode(output, this, packet);
   }
 
-  public Encoder<?, MqttConnAck> connAckEncoder(MqttConnAck packet) {
-    return new MqttConnAckEncoder(this, packet);
+  public Encoder<?, MqttConnAckPacket> connAckPacketEncoder(MqttConnAckPacket packet) {
+    return new MqttConnAckPacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttConnAck> encodeConnAck(MqttConnAck packet, OutputBuffer<?> output) {
-    return MqttConnAckEncoder.encode(output, this, packet);
+  public Encoder<?, MqttConnAckPacket> encodeConnAckPacket(OutputBuffer<?> output, MqttConnAckPacket packet) {
+    return MqttConnAckPacketEncoder.encode(output, this, packet);
   }
 
-  public <T> Encoder<?, MqttPublish<T>> publishEncoder(MqttPublish<T> packet) {
-    return new MqttPublishEncoder<T>(this, packet);
+  public <T> Encoder<?, MqttPublishPacket<T>> publishPacketEncoder(MqttPublishPacket<T> packet) {
+    return new MqttPublishPacketEncoder<T>(this, packet);
   }
 
-  public <T> Encoder<?, MqttPublish<T>> encodePublish(MqttPublish<T> packet, OutputBuffer<?> output) {
-    return MqttPublishEncoder.encode(output, this, packet);
+  public <T> Encoder<?, MqttPublishPacket<T>> encodePublishPacket(OutputBuffer<?> output, MqttPublishPacket<T> packet) {
+    return MqttPublishPacketEncoder.encode(output, this, packet);
   }
 
-  public Encoder<?, MqttPubAck> pubAckEncoder(MqttPubAck packet) {
-    return new MqttPubAckEncoder(this, packet);
+  public Encoder<?, MqttPubAckPacket> pubAckPacketEncoder(MqttPubAckPacket packet) {
+    return new MqttPubAckPacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttPubAck> encodePubAck(MqttPubAck packet, OutputBuffer<?> output) {
-    return MqttPubAckEncoder.encode(output, this, packet);
+  public Encoder<?, MqttPubAckPacket> encodePubAckPacket(OutputBuffer<?> output, MqttPubAckPacket packet) {
+    return MqttPubAckPacketEncoder.encode(output, this, packet);
   }
 
-  public Encoder<?, MqttPubRec> pubRecEncoder(MqttPubRec packet) {
-    return new MqttPubRecEncoder(this, packet);
+  public Encoder<?, MqttPubRecPacket> pubRecPacketEncoder(MqttPubRecPacket packet) {
+    return new MqttPubRecPacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttPubRec> encodePubRec(MqttPubRec packet, OutputBuffer<?> output) {
-    return MqttPubRecEncoder.encode(output, this, packet);
+  public Encoder<?, MqttPubRecPacket> encodePubRecPacket(OutputBuffer<?> output, MqttPubRecPacket packet) {
+    return MqttPubRecPacketEncoder.encode(output, this, packet);
   }
 
-  public Encoder<?, MqttPubRel> pubRelEncoder(MqttPubRel packet) {
-    return new MqttPubRelEncoder(this, packet);
+  public Encoder<?, MqttPubRelPacket> pubRelPacketEncoder(MqttPubRelPacket packet) {
+    return new MqttPubRelPacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttPubRel> encodePubRel(MqttPubRel packet, OutputBuffer<?> output) {
-    return MqttPubRelEncoder.encode(output, this, packet);
+  public Encoder<?, MqttPubRelPacket> encodePubRelPacket(OutputBuffer<?> output, MqttPubRelPacket packet) {
+    return MqttPubRelPacketEncoder.encode(output, this, packet);
   }
 
-  public Encoder<?, MqttPubComp> pubCompEncoder(MqttPubComp packet) {
-    return new MqttPubCompEncoder(this, packet);
+  public Encoder<?, MqttPubCompPacket> pubCompPacketEncoder(MqttPubCompPacket packet) {
+    return new MqttPubCompPacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttPubComp> encodePubComp(MqttPubComp packet, OutputBuffer<?> output) {
-    return MqttPubCompEncoder.encode(output, this, packet);
+  public Encoder<?, MqttPubCompPacket> encodePubCompPacket(OutputBuffer<?> output, MqttPubCompPacket packet) {
+    return MqttPubCompPacketEncoder.encode(output, this, packet);
   }
 
-  public Encoder<?, MqttSubscribe> subscribeEncoder(MqttSubscribe packet) {
-    return new MqttSubscribeEncoder(this, packet);
+  public Encoder<?, MqttSubscribePacket> subscribePacketEncoder(MqttSubscribePacket packet) {
+    return new MqttSubscribePacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttSubscribe> encodeSubscribe(MqttSubscribe packet, OutputBuffer<?> output) {
-    return MqttSubscribeEncoder.encode(output, this, packet);
+  public Encoder<?, MqttSubscribePacket> encodeSubscribePacket(OutputBuffer<?> output, MqttSubscribePacket packet) {
+    return MqttSubscribePacketEncoder.encode(output, this, packet);
   }
 
-  public Encoder<?, MqttSubAck> subAckEncoder(MqttSubAck packet) {
-    return new MqttSubAckEncoder(this, packet);
+  public Encoder<?, MqttSubAckPacket> subAckPacketEncoder(MqttSubAckPacket packet) {
+    return new MqttSubAckPacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttSubAck> encodeSubAck(MqttSubAck packet, OutputBuffer<?> output) {
-    return MqttSubAckEncoder.encode(output, this, packet);
+  public Encoder<?, MqttSubAckPacket> encodeSubAckPacket(OutputBuffer<?> output, MqttSubAckPacket packet) {
+    return MqttSubAckPacketEncoder.encode(output, this, packet);
   }
 
-  public Encoder<?, MqttUnsubscribe> unsubscribeEncoder(MqttUnsubscribe packet) {
-    return new MqttUnsubscribeEncoder(this, packet);
+  public Encoder<?, MqttUnsubscribePacket> unsubscribePacketEncoder(MqttUnsubscribePacket packet) {
+    return new MqttUnsubscribePacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttUnsubscribe> encodeUnsubscribe(MqttUnsubscribe packet, OutputBuffer<?> output) {
-    return MqttUnsubscribeEncoder.encode(output, this, packet);
+  public Encoder<?, MqttUnsubscribePacket> encodeUnsubscribePacket(OutputBuffer<?> output, MqttUnsubscribePacket packet) {
+    return MqttUnsubscribePacketEncoder.encode(output, this, packet);
   }
 
-  public Encoder<?, MqttUnsubAck> unsubAckEncoder(MqttUnsubAck packet) {
-    return new MqttUnsubAckEncoder(this, packet);
+  public Encoder<?, MqttUnsubAckPacket> unsubAckPacketEncoder(MqttUnsubAckPacket packet) {
+    return new MqttUnsubAckPacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttUnsubAck> encodeUnsubAck(MqttUnsubAck packet, OutputBuffer<?> output) {
-    return MqttUnsubAckEncoder.encode(output, this, packet);
+  public Encoder<?, MqttUnsubAckPacket> encodeUnsubAckPacket(OutputBuffer<?> output, MqttUnsubAckPacket packet) {
+    return MqttUnsubAckPacketEncoder.encode(output, this, packet);
   }
 
-  public Encoder<?, MqttPingReq> pingReqEncoder(MqttPingReq packet) {
-    return new MqttPingReqEncoder(this, packet);
+  public Encoder<?, MqttPingReqPacket> pingReqPacketEncoder(MqttPingReqPacket packet) {
+    return new MqttPingReqPacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttPingReq> encodePingReq(MqttPingReq packet, OutputBuffer<?> output) {
-    return MqttPingReqEncoder.encode(output, this, packet);
+  public Encoder<?, MqttPingReqPacket> encodePingReqPacket(OutputBuffer<?> output, MqttPingReqPacket packet) {
+    return MqttPingReqPacketEncoder.encode(output, this, packet);
   }
 
-  public Encoder<?, MqttPingResp> pingRespEncoder(MqttPingResp packet) {
-    return new MqttPingRespEncoder(this, packet);
+  public Encoder<?, MqttPingRespPacket> pingRespPacketEncoder(MqttPingRespPacket packet) {
+    return new MqttPingRespPacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttPingResp> encodePingResp(MqttPingResp packet, OutputBuffer<?> output) {
-    return MqttPingRespEncoder.encode(output, this, packet);
+  public Encoder<?, MqttPingRespPacket> encodePingRespPacket(OutputBuffer<?> output, MqttPingRespPacket packet) {
+    return MqttPingRespPacketEncoder.encode(output, this, packet);
   }
 
-  public Encoder<?, MqttDisconnect> disconnectEncoder(MqttDisconnect packet) {
-    return new MqttDisconnectEncoder(this, packet);
+  public Encoder<?, MqttDisconnectPacket> disconnectPacketEncoder(MqttDisconnectPacket packet) {
+    return new MqttDisconnectPacketEncoder(this, packet);
   }
 
-  public Encoder<?, MqttDisconnect> encodeDisconnect(MqttDisconnect packet, OutputBuffer<?> output) {
-    return MqttDisconnectEncoder.encode(output, this, packet);
+  public Encoder<?, MqttDisconnectPacket> encodeDisconnectPacket(OutputBuffer<?> output, MqttDisconnectPacket packet) {
+    return MqttDisconnectPacketEncoder.encode(output, this, packet);
   }
 
   public int sizeOfSubscription(MqttSubscription subscription) {
@@ -140,8 +140,7 @@ public class MqttEncoder {
     return new MqttSubscriptionEncoder(this, subscription);
   }
 
-  public Encoder<MqttSubscription, MqttSubscription> encodeSubscription(MqttSubscription subscription,
-                                                                        OutputBuffer<?> output) {
+  public Encoder<MqttSubscription, MqttSubscription> encodeSubscription(OutputBuffer<?> output, MqttSubscription subscription) {
     return MqttSubscriptionEncoder.encode(output, this, subscription);
   }
 
@@ -153,7 +152,7 @@ public class MqttEncoder {
     return new MqttStringEncoder(string);
   }
 
-  public Encoder<String, String> encodeString(String string, OutputBuffer<?> output) {
+  public Encoder<String, String> encodeString(OutputBuffer<?> output, String string) {
     return MqttStringEncoder.encode(output, string);
   }
 
@@ -165,7 +164,7 @@ public class MqttEncoder {
     return new MqttDataEncoder(data);
   }
 
-  public Encoder<Data, Data> encodeData(Data data, OutputBuffer<?> output) {
+  public Encoder<Data, Data> encodeData(OutputBuffer<?> output, Data data) {
     return MqttDataEncoder.encode(output, data);
   }
 

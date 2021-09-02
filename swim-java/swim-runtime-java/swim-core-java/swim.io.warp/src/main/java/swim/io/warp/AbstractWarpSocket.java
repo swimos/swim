@@ -27,10 +27,10 @@ import swim.io.FlowModifier;
 import swim.io.IpContext;
 import swim.io.IpSocket;
 import swim.warp.Envelope;
-import swim.ws.WsClose;
-import swim.ws.WsControl;
-import swim.ws.WsPing;
-import swim.ws.WsPong;
+import swim.ws.WsCloseFrame;
+import swim.ws.WsControlFrame;
+import swim.ws.WsPingFrame;
+import swim.ws.WsPongFrame;
 
 public abstract class AbstractWarpSocket implements WarpSocket, IpContext, FlowContext {
 
@@ -62,10 +62,10 @@ public abstract class AbstractWarpSocket implements WarpSocket, IpContext, FlowC
   }
 
   @Override
-  public void didRead(WsControl<?, ?> frame) {
-    if (frame instanceof WsPing<?, ?>) {
-      this.write(WsPong.create(frame.payload()));
-    } else if (frame instanceof WsClose<?, ?>) {
+  public void didRead(WsControlFrame<?, ?> frame) {
+    if (frame instanceof WsPingFrame<?, ?>) {
+      this.write(WsPongFrame.create(frame.payloadValue()));
+    } else if (frame instanceof WsCloseFrame<?, ?>) {
       this.close();
     }
   }
@@ -81,8 +81,8 @@ public abstract class AbstractWarpSocket implements WarpSocket, IpContext, FlowC
   }
 
   @Override
-  public void didWrite(WsControl<?, ?> frame) {
-    if (frame instanceof WsClose<?, ?>) {
+  public void didWrite(WsControlFrame<?, ?> frame) {
+    if (frame instanceof WsCloseFrame<?, ?>) {
       this.close();
     }
   }
@@ -228,7 +228,7 @@ public abstract class AbstractWarpSocket implements WarpSocket, IpContext, FlowC
     this.context.feed(envelope);
   }
 
-  public void write(WsControl<?, ? extends Envelope> frame) {
+  public void write(WsControlFrame<?, ? extends Envelope> frame) {
     this.context.write(frame);
   }
 

@@ -45,7 +45,7 @@ public final class ChunkExtension extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeChunkExtension(this.name, this.value, output);
+    return http.writeChunkExtension(output, this.name, this.value);
   }
 
   @Override

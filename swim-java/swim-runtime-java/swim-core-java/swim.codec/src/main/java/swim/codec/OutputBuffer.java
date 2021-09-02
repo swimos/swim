@@ -73,7 +73,7 @@ public abstract class OutputBuffer<T> extends Output<T> {
 
   @Override
   public OutputBuffer<T> display(Object object) {
-    final Output<T> output = Format.display(object, this);
+    final Output<T> output = Format.display(this, object);
     if (output instanceof OutputBuffer) {
       return (OutputBuffer<T>) output;
     } else {
@@ -83,7 +83,7 @@ public abstract class OutputBuffer<T> extends Output<T> {
 
   @Override
   public OutputBuffer<T> debug(Object object) {
-    final Output<T> output = Format.debug(object, this);
+    final Output<T> output = Format.debug(this, object);
     if (output instanceof OutputBuffer) {
       return (OutputBuffer<T>) output;
     } else {

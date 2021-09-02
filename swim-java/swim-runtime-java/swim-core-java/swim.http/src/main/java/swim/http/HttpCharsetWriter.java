@@ -47,7 +47,7 @@ final class HttpCharsetWriter extends Writer<Object, Object> {
                                       float weight, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = http.writeToken(name, output);
+        part = http.writeToken(output, name);
       } else {
         part = part.pull(output);
       }
@@ -64,7 +64,7 @@ final class HttpCharsetWriter extends Writer<Object, Object> {
     }
     if (step == 2) {
       if (part == null) {
-        part = http.writeQValue(weight, output);
+        part = http.writeQValue(output, weight);
       } else {
         part = part.pull(output);
       }

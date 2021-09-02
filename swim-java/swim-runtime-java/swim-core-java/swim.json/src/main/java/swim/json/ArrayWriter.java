@@ -50,7 +50,7 @@ final class ArrayWriter<I, V> extends Writer<Object, Object> {
       if (step == 2) {
         if (part == null) {
           if (items.hasNext()) {
-            part = json.writeValue(items.next(), output, index);
+            part = json.writeValue(output, items.next(), index);
           } else {
             step = 4;
             break;

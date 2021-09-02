@@ -134,7 +134,7 @@ final class UriPathSegment extends UriPath {
     if (this.string != null) {
       output = output.write(this.string);
     } else {
-      output = UriPath.display(this, output);
+      output = UriPath.display(output, this);
     }
     return output;
   }

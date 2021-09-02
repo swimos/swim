@@ -113,7 +113,7 @@ public class OpenIdToken extends JsonWebToken {
 
   public OpenIdToken accessTokenHash(Data accessTokenHash) {
     final Output<String> atHash = Unicode.stringOutput();
-    Base64.urlUnpadded().writeByteBuffer(accessTokenHash.asByteBuffer(), atHash);
+    Base64.urlUnpadded().writeByteBuffer(atHash, accessTokenHash.asByteBuffer());
     return this.copy(this.value.updatedSlot("at_hash", atHash.bind()));
   }
 

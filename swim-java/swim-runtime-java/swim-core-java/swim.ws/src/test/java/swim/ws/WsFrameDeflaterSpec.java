@@ -26,37 +26,37 @@ public class WsFrameDeflaterSpec {
 
   @Test
   public void deflateUnmaskedTextFrame() {
-    assertEncodes(WsText.create("Hello"), Data.fromBase16("c107f248cdc9c90700"));
+    assertEncodes(WsTextFrame.create("Hello"), Data.fromBase16("c107f248cdc9c90700"));
   }
 
   @Test
   public void deflateUnmaskedTextFragments() {
-    assertEncodes(WsText.create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"), Data.fromBase16("411E72747276717573F7F0F4F2F6F1F5F30F080C0A0E090D0B8F888C4A4C4A4E8018494D4BCFC8CCCACEC9CDCB2F282C2A2E292D2BAFA8AC02000000"), 32, 32);
+    assertEncodes(WsTextFrame.create("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"), Data.fromBase16("411E72747276717573F7F0F4F2F6F1F5F30F080C0A0E090D0B8F888C4A4C4A4E8018494D4BCFC8CCCACEC9CDCB2F282C2A2E292D2BAFA8AC02000000"), 32, 32);
   }
 
   @Test
   public void deflateMaskedTextFrame() {
     final byte[] maskingKey = {(byte) 0x37, (byte) 0xfa, (byte) 0x21, (byte) 0x3d};
-    assertEncodes(maskingKey, WsText.create("Hello"), Data.fromBase16("c18737fa213dc5b2ecf4fefd21"));
+    assertEncodes(maskingKey, WsTextFrame.create("Hello"), Data.fromBase16("c18737fa213dc5b2ecf4fefd21"));
   }
 
   @Test
   public void deflateUnmaskedSharedWindow() {
     final WsDeflateEncoder ws = new TestWsDeflateEncoder(null);
-    assertEncodes(ws, WsText.create("Hello"), Data.fromBase16("c107f248cdc9c90700"));
-    assertEncodes(ws, WsText.create("Hello"), Data.fromBase16("c105f200110000"));
-    assertEncodes(ws, WsText.create("Hello"), Data.fromBase16("c10402130000"));
-    assertEncodes(ws, WsText.create("Hello"), Data.fromBase16("c10402130000"));
+    assertEncodes(ws, WsTextFrame.create("Hello"), Data.fromBase16("c107f248cdc9c90700"));
+    assertEncodes(ws, WsTextFrame.create("Hello"), Data.fromBase16("c105f200110000"));
+    assertEncodes(ws, WsTextFrame.create("Hello"), Data.fromBase16("c10402130000"));
+    assertEncodes(ws, WsTextFrame.create("Hello"), Data.fromBase16("c10402130000"));
   }
 
   @Test
   public void deflateMaskedSharedWindow() {
     final byte[] maskingKey = {(byte) 0x37, (byte) 0xfa, (byte) 0x21, (byte) 0x3d};
     final WsDeflateEncoder ws = new TestWsDeflateEncoder(maskingKey);
-    assertEncodes(ws, WsText.create("Hello"), Data.fromBase16("c18737fa213dc5b2ecf4fefd21"));
-    assertEncodes(ws, WsText.create("Hello"), Data.fromBase16("c18537fa213dc5fa303d37"));
-    assertEncodes(ws, WsText.create("Hello"), Data.fromBase16("c18437fa213d35e9213d"));
-    assertEncodes(ws, WsText.create("Hello"), Data.fromBase16("c18437fa213d35e9213d"));
+    assertEncodes(ws, WsTextFrame.create("Hello"), Data.fromBase16("c18737fa213dc5b2ecf4fefd21"));
+    assertEncodes(ws, WsTextFrame.create("Hello"), Data.fromBase16("c18537fa213dc5fa303d37"));
+    assertEncodes(ws, WsTextFrame.create("Hello"), Data.fromBase16("c18437fa213d35e9213d"));
+    assertEncodes(ws, WsTextFrame.create("Hello"), Data.fromBase16("c18437fa213d35e9213d"));
   }
 
   static void assertEncodes(WsEncoder ws, WsFrame<?> frame, Data encoded, int... bufferSizes) {

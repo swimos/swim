@@ -318,11 +318,11 @@ public class HttpServerModem implements IpModem<HttpRequest<?>, HttpResponse<?>>
     this.context.read(Utf8.decodedParser(Http.standardParser().requestParser()));
   }
 
-  void doReadRequestEntity(Decoder<HttpRequest<?>> entityDecoder) {
-    if (entityDecoder.isCont()) {
-      this.context.read(entityDecoder);
+  void doReadRequestPayload(Decoder<HttpRequest<?>> payloadDecoder) {
+    if (payloadDecoder.isCont()) {
+      this.context.read(payloadDecoder);
     } else {
-      this.didRead(entityDecoder.bind());
+      this.didRead(payloadDecoder.bind());
     }
   }
 

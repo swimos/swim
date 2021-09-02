@@ -18,48 +18,41 @@ import java.nio.ByteBuffer;
 
 final class Base64Writer extends Writer<Object, Object> {
 
+  final Base64 base64;
   final Object value;
   final ByteBuffer input;
-  final Base64 base64;
   final int index;
   final int limit;
   final int step;
 
-  Base64Writer(Object value, ByteBuffer input, Base64 base64, int index, int limit, int step) {
+  Base64Writer(Base64 base64, Object value, ByteBuffer input,
+               int index, int limit, int step) {
+    this.base64 = base64;
     this.value = value;
     this.input = input;
-    this.base64 = base64;
     this.index = index;
     this.limit = limit;
     this.step = step;
   }
 
-  Base64Writer(Object value, ByteBuffer input, Base64 base64) {
-    this(value, input, base64, input.position(), input.limit(), 1);
+  Base64Writer(Base64 base64, Object value, ByteBuffer input) {
+    this(base64, value, input, input.position(), input.limit(), 1);
   }
 
-  Base64Writer(ByteBuffer input, Base64 base64) {
-    this(null, input, base64);
-  }
-
-  Base64Writer(Object value, byte[] input, Base64 base64) {
-    this(value, ByteBuffer.wrap(input), base64);
-  }
-
-  Base64Writer(byte[] input, Base64 base64) {
-    this(null, input, base64);
+  Base64Writer(Base64 base64, Object value, byte[] input) {
+    this(base64, value, ByteBuffer.wrap(input));
   }
 
   Base64Writer(Base64 base64) {
-    this(null, null, base64, 0, 0, 0);
+    this(base64, null, null, 0, 0, 0);
   }
 
   @Override
   public Writer<Object, Object> feed(Object value) {
     if (value instanceof ByteBuffer) {
-      return new Base64Writer((ByteBuffer) value, this.base64);
+      return new Base64Writer(this.base64, null, (ByteBuffer) value);
     } else if (value instanceof byte[]) {
-      return new Base64Writer((byte[]) value, this.base64);
+      return new Base64Writer(this.base64, null, (byte[]) value);
     } else {
       throw new IllegalArgumentException(value.toString());
     }
@@ -67,12 +60,12 @@ final class Base64Writer extends Writer<Object, Object> {
 
   @Override
   public Writer<Object, Object> pull(Output<?> output) {
-    return Base64Writer.write(output, this.value, this.input, this.base64,
+    return Base64Writer.write(output, this.base64, this.value, this.input,
                               this.index, this.limit, this.step);
   }
 
-  static Writer<Object, Object> write(Output<?> output, Object value, ByteBuffer input,
-                                      Base64 base64, int index, int limit, int step) {
+  static Writer<Object, Object> write(Output<?> output, Base64 base64, Object value,
+                                      ByteBuffer input, int index, int limit, int step) {
     while (index + 2 < limit && output.isCont()) {
       final int x = input.get(index) & 0xff;
       final int y = input.get(index + 1) & 0xff;
@@ -148,23 +141,15 @@ final class Base64Writer extends Writer<Object, Object> {
     } else if (output.isError()) {
       return Writer.error(output.trap());
     }
-    return new Base64Writer(value, input, base64, index, limit, step);
+    return new Base64Writer(base64, value, input, index, limit, step);
   }
 
-  static Writer<?, ?> write(Output<?> output, Object value, ByteBuffer input, Base64 base64) {
-    return Base64Writer.write(output, value, input, base64, input.position(), input.limit(), 1);
+  static Writer<?, ?> write(Output<?> output, Base64 base64, Object value, ByteBuffer input) {
+    return Base64Writer.write(output, base64, value, input, input.position(), input.limit(), 1);
   }
 
-  static Writer<?, ?> write(Output<?> output, ByteBuffer input, Base64 base64) {
-    return Base64Writer.write(output, null, input, base64);
-  }
-
-  static Writer<?, ?> write(Output<?> output, Object value, byte[] input, Base64 base64) {
-    return Base64Writer.write(output, value, ByteBuffer.wrap(input), base64);
-  }
-
-  static Writer<?, ?> write(Output<?> output, byte[] input, Base64 base64) {
-    return Base64Writer.write(output, null, input, base64);
+  static Writer<?, ?> write(Output<?> output, Base64 base64, Object value, byte[] input) {
+    return Base64Writer.write(output, base64, value, ByteBuffer.wrap(input));
   }
 
 }

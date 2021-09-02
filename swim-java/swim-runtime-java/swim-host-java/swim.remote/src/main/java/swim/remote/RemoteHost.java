@@ -91,10 +91,10 @@ import swim.warp.SyncRequest;
 import swim.warp.SyncedResponse;
 import swim.warp.UnlinkRequest;
 import swim.warp.UnlinkedResponse;
-import swim.ws.WsClose;
-import swim.ws.WsControl;
-import swim.ws.WsPing;
-import swim.ws.WsPong;
+import swim.ws.WsCloseFrame;
+import swim.ws.WsControlFrame;
+import swim.ws.WsPingFrame;
+import swim.ws.WsPongFrame;
 
 public class RemoteHost extends AbstractTierBinding implements HostBinding, WarpSocket, StayContext {
 
@@ -657,22 +657,22 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   @Override
-  public void didRead(WsControl<?, ?> frame) {
+  public void didRead(WsControlFrame<?, ?> frame) {
     final WarpSocketContext warpSocketContext = this.warpSocketContext;
-    if (frame instanceof WsClose<?, ?>) {
+    if (frame instanceof WsCloseFrame<?, ?>) {
       if (warpSocketContext != null) {
-        warpSocketContext.write(WsClose.create(1000));
+        warpSocketContext.write(WsCloseFrame.create(1000));
       } else {
-        this.didReadClose((WsClose<?, ?>) frame);
+        this.didReadClose((WsCloseFrame<?, ?>) frame);
       }
-    } else if (frame instanceof WsPing<?, ?>) {
+    } else if (frame instanceof WsPingFrame<?, ?>) {
       if (warpSocketContext != null) {
-        warpSocketContext.write(WsPong.create(frame.payload()));
+        warpSocketContext.write(WsPongFrame.create(frame.payloadValue()));
       }
     }
   }
 
-  protected void didReadClose(WsClose<?, ?> frame) {
+  protected void didReadClose(WsCloseFrame<?, ?> frame) {
     this.close();
   }
 
@@ -992,7 +992,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
     if (directive != null && directive.isForbidden()) {
       final WarpSocketContext warpSocketContext = this.warpSocketContext;
       if (warpSocketContext != null) {
-        warpSocketContext.write(WsClose.create(1008, "Unauthorized"));
+        warpSocketContext.write(WsCloseFrame.create(1008, "Unauthorized"));
       } else {
         this.close();
       }
@@ -1020,7 +1020,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   protected void forbid() {
     final WarpSocketContext warpSocketContext = this.warpSocketContext;
     if (warpSocketContext != null) {
-      warpSocketContext.write(WsClose.create(1008, "Forbidden"));
+      warpSocketContext.write(WsCloseFrame.create(1008, "Forbidden"));
     } else {
       this.close();
     }
@@ -1037,7 +1037,7 @@ public class RemoteHost extends AbstractTierBinding implements HostBinding, Warp
   }
 
   @Override
-  public void didWrite(WsControl<?, ?> frame) {
+  public void didWrite(WsControlFrame<?, ?> frame) {
     // nop
   }
 

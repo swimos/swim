@@ -21,14 +21,15 @@ import swim.codec.Parser;
 final class ChunkExtensionParser extends Parser<ChunkExtension> {
 
   final HttpParser http;
-  final StringBuilder name;
-  final StringBuilder value;
+  final StringBuilder nameBuilder;
+  final StringBuilder valueBuilder;
   final int step;
 
-  ChunkExtensionParser(HttpParser http, StringBuilder name, StringBuilder value, int step) {
+  ChunkExtensionParser(HttpParser http, StringBuilder nameBuilder,
+                       StringBuilder valueBuilder, int step) {
     this.http = http;
-    this.name = name;
-    this.value = value;
+    this.nameBuilder = nameBuilder;
+    this.valueBuilder = valueBuilder;
     this.step = step;
   }
 
@@ -38,11 +39,12 @@ final class ChunkExtensionParser extends Parser<ChunkExtension> {
 
   @Override
   public Parser<ChunkExtension> feed(Input input) {
-    return ChunkExtensionParser.parse(input, this.http, this.name, this.value, this.step);
+    return ChunkExtensionParser.parse(input, this.http, this.nameBuilder,
+                                      this.valueBuilder, this.step);
   }
 
-  static Parser<ChunkExtension> parse(Input input, HttpParser http, StringBuilder name,
-                                      StringBuilder value, int step) {
+  static Parser<ChunkExtension> parse(Input input, HttpParser http, StringBuilder nameBuilder,
+                                      StringBuilder valueBuilder, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
@@ -62,10 +64,10 @@ final class ChunkExtensionParser extends Parser<ChunkExtension> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (name == null) {
-            name = new StringBuilder();
+          if (nameBuilder == null) {
+            nameBuilder = new StringBuilder();
           }
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
           step = 3;
         } else {
           return Parser.error(Diagnostic.expected("chunk extension name", input));
@@ -79,7 +81,7 @@ final class ChunkExtensionParser extends Parser<ChunkExtension> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -93,13 +95,13 @@ final class ChunkExtensionParser extends Parser<ChunkExtension> {
         input = input.step();
         step = 5;
       } else if (!input.isEmpty()) {
-        return Parser.done(http.chunkExtension(name.toString(), ""));
+        return Parser.done(http.chunkExtension(nameBuilder.toString(), ""));
       }
     }
     if (step == 5) {
       if (input.isCont()) {
-        if (value == null) {
-          value = new StringBuilder();
+        if (valueBuilder == null) {
+          valueBuilder = new StringBuilder();
         }
         if (input.head() == '"') {
           input = input.step();
@@ -116,7 +118,7 @@ final class ChunkExtensionParser extends Parser<ChunkExtension> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          value.appendCodePoint(c);
+          valueBuilder.appendCodePoint(c);
           step = 7;
         } else {
           return Parser.error(Diagnostic.expected("chunk extension value", input));
@@ -130,13 +132,13 @@ final class ChunkExtensionParser extends Parser<ChunkExtension> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          value.appendCodePoint(c);
+          valueBuilder.appendCodePoint(c);
         } else {
           break;
         }
       }
       if (!input.isEmpty()) {
-        return Parser.done(http.chunkExtension(name.toString(), value.toString()));
+        return Parser.done(http.chunkExtension(nameBuilder.toString(), valueBuilder.toString()));
       }
     }
     do {
@@ -145,7 +147,7 @@ final class ChunkExtensionParser extends Parser<ChunkExtension> {
           c = input.head();
           if (Http.isQuotedChar(c)) {
             input = input.step();
-            value.appendCodePoint(c);
+            valueBuilder.appendCodePoint(c);
           } else {
             break;
           }
@@ -153,7 +155,7 @@ final class ChunkExtensionParser extends Parser<ChunkExtension> {
         if (input.isCont()) {
           if (c == '"') {
             input = input.step();
-            return Parser.done(http.chunkExtension(name.toString(), value.toString()));
+            return Parser.done(http.chunkExtension(nameBuilder.toString(), valueBuilder.toString()));
           } else if (c == '\\') {
             input = input.step();
             step = 9;
@@ -169,7 +171,7 @@ final class ChunkExtensionParser extends Parser<ChunkExtension> {
           c = input.head();
           if (Http.isEscapeChar(c)) {
             input = input.step();
-            value.appendCodePoint(c);
+            valueBuilder.appendCodePoint(c);
             step = 8;
             continue;
           } else {
@@ -184,7 +186,7 @@ final class ChunkExtensionParser extends Parser<ChunkExtension> {
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new ChunkExtensionParser(http, name, value, step);
+    return new ChunkExtensionParser(http, nameBuilder, valueBuilder, step);
   }
 
   static Parser<ChunkExtension> parse(Input input, HttpParser http) {

@@ -67,7 +67,7 @@ final class LiteralSelectorWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 2) {
       if (part == null) {
-        part = recon.writeItem(item, output);
+        part = recon.writeItem(output, item);
       } else {
         part = part.pull(output);
       }
@@ -89,7 +89,7 @@ final class LiteralSelectorWriter<I, V> extends Writer<Object, Object> {
       }
     }
     if (step == 4) {
-      return (Writer<Object, Object>) recon.writeThen(then, output);
+      return (Writer<Object, Object>) recon.writeThen(output, then);
     }
     if (output.isDone()) {
       return Writer.error(new WriterException("truncated"));

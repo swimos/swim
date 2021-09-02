@@ -64,7 +64,7 @@ public abstract class HttpLaneModel<View extends HttpLaneView<?>, U extends Http
   }
 
   protected HttpResponse<?> doRespondDefault(U uplink, HttpRequest<?> request) {
-    return HttpResponse.create(HttpStatus.NOT_FOUND).entity(HttpBody.empty());
+    return HttpResponse.create(HttpStatus.NOT_FOUND).payload(HttpBody.empty());
   }
 
   protected Decoder<Object> decodeRequest(U uplink, HttpRequest<?> request) {

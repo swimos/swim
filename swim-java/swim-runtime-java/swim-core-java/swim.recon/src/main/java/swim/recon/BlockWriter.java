@@ -230,7 +230,7 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
             output = output.write(']');
             inBrackets = false;
           }
-          part = recon.writeItem(item, output);
+          part = recon.writeItem(output, item);
           first = false;
           step = 7;
         } else if (inBrackets && recon.isText(item)) {
@@ -238,7 +238,7 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
             output = output.write('}');
             inBraces = false;
           }
-          part = recon.writeMarkupText(item, output);
+          part = recon.writeMarkupText(output, item);
           step = 7;
         } else if (inBraces) {
           if (!first) {
@@ -250,11 +250,11 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
           step = 7;
         } else if (inBrackets) {
           if (recon.isRecord(item) && recon.isMarkupSafe(recon.items(item))) {
-            part = recon.writeBlock(recon.items(item), output, false, true);
+            part = recon.writeBlock(output, recon.items(item), false, true);
             step = 5;
           } else {
             output = output.write('{');
-            part = recon.writeItem(item, output);
+            part = recon.writeItem(output, item);
             inBraces = true;
             first = false;
             step = 7;
@@ -262,7 +262,7 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
         } else if (markupSafe && recon.isText(item) && next != null && !recon.isField(next)
             && !recon.isText(next) && !recon.isBool(next)) {
           output = output.write('[');
-          part = recon.writeMarkupText(item, output);
+          part = recon.writeMarkupText(output, item);
           inBrackets = true;
           step = 7;
         } else if (inBlock && !inBraces) {
@@ -275,7 +275,7 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
           step = 7;
         } else if (inMarkup && recon.isText(item) && next == null) {
           output = output.write('[');
-          part = recon.writeMarkupText(item, output);
+          part = recon.writeMarkupText(output, item);
           step = 8;
         } else if (!inMarkup && recon.isValue(item) && !recon.isRecord(item)
                && (!first && next == null || next != null && recon.isAttr(next))) {
@@ -283,11 +283,11 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
               || recon.isNum(item) || recon.isBool(item))) {
             output = output.write(' ');
           }
-          part = recon.writeItem(item, output);
+          part = recon.writeItem(output, item);
           step = 7;
         } else {
           output = output.write('{');
-          part = recon.writeItem(item, output);
+          part = recon.writeItem(output, item);
           inBraces = true;
           first = false;
           step = 7;
@@ -304,7 +304,7 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
       }
       if (step == 6 && output.isCont()) {
         if (next != null && recon.isText(next)) {
-          part = recon.writeMarkupText(next, output);
+          part = recon.writeMarkupText(output, next);
           next = null;
           step = 7;
         } else if (next != null && !recon.isAttr(next)) {
@@ -382,9 +382,9 @@ final class BlockWriter<I, V> extends Writer<Object, Object> {
 
   static <I, V> Writer<?, ?> writeItem(Output<?> output, ReconWriter<I, V> recon, I item) {
     if (recon.isField(item)) {
-      return recon.writeSlot(recon.key(item), recon.value(item), output);
+      return recon.writeSlot(output, recon.key(item), recon.value(item));
     } else {
-      return recon.writeItem(item, output);
+      return recon.writeItem(output, item);
     }
   }
 

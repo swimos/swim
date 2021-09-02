@@ -105,23 +105,23 @@ public final class Diagnostic implements Display {
     final Diagnostic cause = this.cause;
     final int contextLines = 2;
     final int lineDigits = this.lineDigits();
-    output = Diagnostic.display(input, start, end, severity, message, note, cause,
-                                contextLines, lineDigits, output);
+    output = Diagnostic.display(output, input, start, end, severity, message,
+                                note, cause, contextLines, lineDigits);
     return output;
   }
 
-  static <T> Output<T> display(Input input, Mark start, Mark end, Severity severity,
-                               String message, String note, Diagnostic cause,
-                               int contextLines, int lineDigits, Output<T> output) {
+  static <T> Output<T> display(Output<T> output, Input input, Mark start, Mark end,
+                               Severity severity, String message, String note,
+                               Diagnostic cause, int contextLines, int lineDigits) {
     do {
       if (message != null) {
-        output = Diagnostic.displayMessage(severity, message, output);
+        output = Diagnostic.displayMessage(output, severity, message);
         output = output.writeln();
       }
-      output = Diagnostic.displayAnchor(input, start, lineDigits, output);
+      output = Diagnostic.displayAnchor(output, input, start, lineDigits);
       output = output.writeln();
-      final Map.Entry<Diagnostic, Output<T>> cont = Diagnostic.displayContext(input, start, end, severity, note,
-                                                                              cause, contextLines, lineDigits, output);
+      final Map.Entry<Diagnostic, Output<T>> cont = Diagnostic.displayContext(output, input, start, end, severity,
+                                                                              note, cause, contextLines, lineDigits);
       final Diagnostic next = cont.getKey();
       output = cont.getValue();
       if (next != null) {
@@ -140,8 +140,8 @@ public final class Diagnostic implements Display {
     return output;
   }
 
-  static <T> Output<T> displayMessage(Severity severity, String message, Output<T> output) {
-    output = Diagnostic.formatSeverity(severity, output);
+  static <T> Output<T> displayMessage(Output<T> output, Severity severity, String message) {
+    output = Diagnostic.formatSeverity(output, severity);
     output = output.write(severity.label());
     output = OutputStyle.reset(output);
     output = OutputStyle.bold(output);
@@ -153,59 +153,59 @@ public final class Diagnostic implements Display {
     return output;
   }
 
-  static <T> Output<T> displayAnchor(Input input, Mark start, int lineDigits, Output<T> output) {
-    output = Diagnostic.displayLineLeadArrow(lineDigits, output);
+  static <T> Output<T> displayAnchor(Output<T> output, Input input, Mark start, int lineDigits) {
+    output = Diagnostic.displayLineLeadArrow(output, lineDigits);
     output = output.write(' ');
     final Object id = input.id();
     if (id != null) {
-      output = Format.display(id, output);
+      output = Format.display(output, id);
     }
     output = output.write(':');
-    output = Format.displayInt(start.line, output);
+    output = Format.displayInt(output, start.line);
     output = output.write(':');
-    output = Format.displayInt(start.column, output);
+    output = Format.displayInt(output, start.column);
     output = output.writeln();
 
-    output = Diagnostic.displayLineLead(lineDigits, output);
+    output = Diagnostic.displayLineLead(output, lineDigits);
     return output;
   }
 
-  static <T> Map.Entry<Diagnostic, Output<T>> displayContext(Input input, Mark start, Mark end, Severity severity,
-                                                             String note, Diagnostic cause, int contextLines,
-                                                             int lineDigits, Output<T> output) {
+  static <T> Map.Entry<Diagnostic, Output<T>> displayContext(Output<T> output, Input input, Mark start, Mark end,
+                                                             Severity severity, String note, Diagnostic cause,
+                                                             int contextLines, int lineDigits) {
     Diagnostic next = cause;
     final boolean sameCause = cause != null && cause.message == null
                            && Objects.equals(input.id(), cause.input.id());
     final int causeOrder = sameCause ? (start.offset <= cause.tag.start().offset ? -1 : 1) : 0;
     if (causeOrder == 1) {
-      final Map.Entry<Diagnostic, Output<T>> cont = Diagnostic.displayContext(cause.input.clone(), cause.tag.start(), cause.tag.end(),
-                                                                              cause.severity, cause.note, cause.cause,
-                                                                              contextLines, lineDigits, output);
+      final Map.Entry<Diagnostic, Output<T>> cont = Diagnostic.displayContext(output, cause.input.clone(), cause.tag.start(),
+                                                                              cause.tag.end(), cause.severity, cause.note,
+                                                                              cause.cause, contextLines, lineDigits);
       next = cont.getKey();
       output = cont.getValue();
       output = output.writeln();
-      output = Diagnostic.displayLineLeadEllipsis(lineDigits, output);
+      output = Diagnostic.displayLineLeadEllipsis(output, lineDigits);
       output = output.writeln();
     }
-    output = Diagnostic.displayLines(input, start, end, severity, contextLines, lineDigits, output);
+    output = Diagnostic.displayLines(output, input, start, end, severity, contextLines, lineDigits);
     if (note != null) {
-      output = Diagnostic.displayNote(note, lineDigits, output);
+      output = Diagnostic.displayNote(output, note, lineDigits);
     }
     if (causeOrder == -1) {
       output = output.writeln();
-      output = Diagnostic.displayLineLeadEllipsis(lineDigits, output);
+      output = Diagnostic.displayLineLeadEllipsis(output, lineDigits);
       output = output.writeln();
-      final Map.Entry<Diagnostic, Output<T>> cont = Diagnostic.displayContext(cause.input.clone(), cause.tag.start(), cause.tag.end(),
-                                                                              cause.severity, cause.note, cause.cause,
-                                                                              contextLines, lineDigits, output);
+      final Map.Entry<Diagnostic, Output<T>> cont = Diagnostic.displayContext(output, cause.input.clone(), cause.tag.start(),
+                                                                              cause.tag.end(), cause.severity, cause.note,
+                                                                              cause.cause, contextLines, lineDigits);
       next = cont.getKey();
       output = cont.getValue();
     }
     return new AbstractMap.SimpleImmutableEntry<Diagnostic, Output<T>>(next, output);
   }
 
-  static <T> Output<T> displayLines(Input input, Mark start, Mark end, Severity severity,
-                                    int contextLines, int lineDigits, Output<T> output) {
+  static <T> Output<T> displayLines(Output<T> output, Input input, Mark start, Mark end,
+                                    Severity severity, int contextLines, int lineDigits) {
     final int startLine = start.line();
     final int endLine = end.line();
     int line = input.line();
@@ -217,12 +217,12 @@ public final class Diagnostic implements Display {
 
     if (endLine - startLine > 2 * contextLines + 2) {
       while (line <= startLine + contextLines) {
-        output = Diagnostic.displayLine(input, start, end, severity, line, lineDigits, output);
+        output = Diagnostic.displayLine(output, input, start, end, severity, line, lineDigits);
         line += 1;
       }
-      output = Diagnostic.displayLineLeadEllipsis(lineDigits, output);
+      output = Diagnostic.displayLineLeadEllipsis(output, lineDigits);
       output = output.write(' ');
-      output = Diagnostic.formatSeverity(severity, output);
+      output = Diagnostic.formatSeverity(output, severity);
       output = output.write('|');
       output = OutputStyle.reset(output);
       output = output.writeln();
@@ -233,51 +233,51 @@ public final class Diagnostic implements Display {
     }
 
     while (line <= endLine) {
-      output = Diagnostic.displayLine(input, start, end, severity, line, lineDigits, output);
+      output = Diagnostic.displayLine(output, input, start, end, severity, line, lineDigits);
       line += 1;
     }
     return output;
   }
 
-  static <T> Output<T> displayNote(String note, int lineDigits, Output<T> output) {
+  static <T> Output<T> displayNote(Output<T> output, String note, int lineDigits) {
     output = output.writeln();
-    output = Diagnostic.displayLineLead(lineDigits, output);
+    output = Diagnostic.displayLineLead(output, lineDigits);
     output = output.writeln();
-    output = Diagnostic.displayLineComment("note", note, lineDigits, output);
+    output = Diagnostic.displayLineComment(output, "note", note, lineDigits);
     return output;
   }
 
-  static <T> Output<T> displayLine(Input input, Mark start, Mark end, Severity severity,
-                                   int line, int lineDigits, Output<T> output) {
+  static <T> Output<T> displayLine(Output<T> output, Input input, Mark start, Mark end,
+                                   Severity severity, int line, int lineDigits) {
     if (start.line == line && end.line == line) {
-      output = Diagnostic.displaySingleLine(input, start, end, severity, line, lineDigits, output);
+      output = Diagnostic.displaySingleLine(output, input, start, end, severity, line, lineDigits);
     } else if (start.line == line) {
-      output = Diagnostic.displayStartLine(input, start, severity, line, lineDigits, output);
+      output = Diagnostic.displayStartLine(output, input, start, severity, line, lineDigits);
     } else if (end.line == line) {
-      output = Diagnostic.displayEndLine(input, end, severity, line, lineDigits, output);
+      output = Diagnostic.displayEndLine(output, input, end, severity, line, lineDigits);
     } else {
-      output = Diagnostic.displayMidLine(input, severity, line, lineDigits, output);
+      output = Diagnostic.displayMidLine(output, input, severity, line, lineDigits);
     }
     return output;
   }
 
-  static <T> Output<T> displaySingleLine(Input input, Mark start, Mark end, Severity severity,
-                                         int line, int lineDigits, Output<T> output) {
-    output = Diagnostic.displayLineLeadNumber(line, lineDigits, output);
+  static <T> Output<T> displaySingleLine(Output<T> output, Input input, Mark start, Mark end,
+                                         Severity severity, int line, int lineDigits) {
+    output = Diagnostic.displayLineLeadNumber(output, line, lineDigits);
     output = output.write(' ');
     for (int i = 1; i < input.column(); i += 1) {
       output = output.write(' ');
     }
-    output = Diagnostic.displayLineText(input, line, output);
+    output = Diagnostic.displayLineText(output, input, line);
 
-    output = Diagnostic.displayLineLead(lineDigits, output);
+    output = Diagnostic.displayLineLead(output, lineDigits);
     output = output.write(' ');
     int i = 1;
     while (i < start.column) {
       output = output.write(' ');
       i += 1;
     }
-    output = Diagnostic.formatSeverity(severity, output);
+    output = Diagnostic.formatSeverity(output, severity);
     while (i <= end.column) {
       output = output.write('^');
       i += 1;
@@ -289,18 +289,18 @@ public final class Diagnostic implements Display {
     return output;
   }
 
-  static <T> Output<T> displayStartLine(Input input, Mark start, Severity severity,
-                                        int line, int lineDigits, Output<T> output) {
-    output = Diagnostic.displayLineLeadNumber(line, lineDigits, output);
+  static <T> Output<T> displayStartLine(Output<T> output, Input input, Mark start,
+                                        Severity severity, int line, int lineDigits) {
+    output = Diagnostic.displayLineLeadNumber(output, line, lineDigits);
     output = output.write(' ').write(' ').write(' ');
     for (int i = 1; i < input.column(); i += 1) {
       output = output.write(' ');
     }
-    output = Diagnostic.displayLineText(input, line, output);
+    output = Diagnostic.displayLineText(output, input, line);
 
-    output = Diagnostic.displayLineLead(lineDigits, output);
+    output = Diagnostic.displayLineLead(output, lineDigits);
     output = output.write(' ').write(' ');
-    output = Diagnostic.formatSeverity(severity, output);
+    output = Diagnostic.formatSeverity(output, severity);
     output = output.write('_');
     int i = 1;
     while (i < start.column) {
@@ -316,19 +316,19 @@ public final class Diagnostic implements Display {
     return output;
   }
 
-  static <T> Output<T> displayEndLine(Input input, Mark end, Severity severity,
-                                      int line, int lineDigits, Output<T> output) {
-    output = Diagnostic.displayLineLeadNumber(line, lineDigits, output);
+  static <T> Output<T> displayEndLine(Output<T> output, Input input, Mark end,
+                                      Severity severity, int line, int lineDigits) {
+    output = Diagnostic.displayLineLeadNumber(output, line, lineDigits);
     output = output.write(' ');
-    output = Diagnostic.formatSeverity(severity, output);
+    output = Diagnostic.formatSeverity(output, severity);
     output = output.write('|');
     output = OutputStyle.reset(output);
     output = output.write(' ');
-    output = Diagnostic.displayLineText(input, line, output);
+    output = Diagnostic.displayLineText(output, input, line);
 
-    output = Diagnostic.displayLineLead(lineDigits, output);
+    output = Diagnostic.displayLineLead(output, lineDigits);
     output = output.write(' ');
-    output = Diagnostic.formatSeverity(severity, output);
+    output = Diagnostic.formatSeverity(output, severity);
     output = output.write('|').write('_');
     int i = 1;
     while (i < end.column) {
@@ -343,21 +343,21 @@ public final class Diagnostic implements Display {
     return output;
   }
 
-  static <T> Output<T> displayMidLine(Input input, Severity severity,
-                                      int line, int lineDigits, Output<T> output) {
-    output = Diagnostic.displayLineLeadNumber(line, lineDigits, output);
+  static <T> Output<T> displayMidLine(Output<T> output, Input input,
+                                      Severity severity, int line, int lineDigits) {
+    output = Diagnostic.displayLineLeadNumber(output, line, lineDigits);
     output = output.write(' ');
-    output = Diagnostic.formatSeverity(severity, output);
+    output = Diagnostic.formatSeverity(output, severity);
     output = output.write('|');
     output = OutputStyle.reset(output);
     output = output.write(' ');
-    output = Diagnostic.displayLineText(input, line, output);
+    output = Diagnostic.displayLineText(output, input, line);
     return output;
   }
 
-  static <T> Output<T> displayLineComment(String label, String comment,
-                                          int lineDigits, Output<T> output) {
-    output = Diagnostic.displayLineLeadComment(lineDigits, output);
+  static <T> Output<T> displayLineComment(Output<T> output, String label,
+                                          String comment, int lineDigits) {
+    output = Diagnostic.displayLineLeadComment(output, lineDigits);
     output = output.write(' ');
     output = OutputStyle.bold(output);
     output = output.write(label).write(':');
@@ -368,7 +368,7 @@ public final class Diagnostic implements Display {
     return output;
   }
 
-  static <T> Output<T> displayLineLead(int lineDigits, Output<T> output) {
+  static <T> Output<T> displayLineLead(Output<T> output, int lineDigits) {
     output = OutputStyle.blueBold(output);
     final int padding = 1 + lineDigits;
     for (int i = 0; i < padding; i += 1) {
@@ -379,7 +379,7 @@ public final class Diagnostic implements Display {
     return output;
   }
 
-  static <T> Output<T> displayLineLeadComment(int lineDigits, Output<T> output) {
+  static <T> Output<T> displayLineLeadComment(Output<T> output, int lineDigits) {
     output = OutputStyle.blueBold(output);
     final int padding = 1 + lineDigits;
     for (int i = 0; i < padding; i += 1) {
@@ -390,7 +390,7 @@ public final class Diagnostic implements Display {
     return output;
   }
 
-  static <T> Output<T> displayLineLeadArrow(int lineDigits, Output<T> output) {
+  static <T> Output<T> displayLineLeadArrow(Output<T> output, int lineDigits) {
     for (int i = 0; i < lineDigits; i += 1) {
       output = output.write(' ');
     }
@@ -400,7 +400,7 @@ public final class Diagnostic implements Display {
     return output;
   }
 
-  static <T> Output<T> displayLineLeadEllipsis(int lineDigits, Output<T> output) {
+  static <T> Output<T> displayLineLeadEllipsis(Output<T> output, int lineDigits) {
     output = OutputStyle.blueBold(output);
     for (int i = 0; i < lineDigits; i += 1) {
       output = output.write('.');
@@ -410,19 +410,19 @@ public final class Diagnostic implements Display {
     return output;
   }
 
-  static <T> Output<T> displayLineLeadNumber(int line, int lineDigits, Output<T> output) {
+  static <T> Output<T> displayLineLeadNumber(Output<T> output, int line, int lineDigits) {
     final int padding = lineDigits - Base10.countDigits(line);
     for (int i = 0; i < padding; i += 1) {
       output = output.write(' ');
     }
     output = OutputStyle.blueBold(output);
-    output = Format.displayInt(line, output);
+    output = Format.displayInt(output, line);
     output = output.write(' ').write('|');
     output = OutputStyle.reset(output);
     return output;
   }
 
-  static <T> Output<T> displayLineText(Input input, int line, Output<T> output) {
+  static <T> Output<T> displayLineText(Output<T> output, Input input, int line) {
     while (input.isCont() && input.line() == line) {
       output = output.write(input.head());
       input = input.step();
@@ -439,7 +439,7 @@ public final class Diagnostic implements Display {
     }
   }
 
-  static <T> Output<T> formatSeverity(Severity severity, Output<T> output) {
+  static <T> Output<T> formatSeverity(Output<T> output, Severity severity) {
     switch (severity.level()) {
       case Severity.FATAL_LEVEL:
       case Severity.ALERT_LEVEL:
@@ -540,7 +540,7 @@ public final class Diagnostic implements Display {
     final String message;
     if (input.isCont()) {
       Output<String> output = Unicode.stringOutput().write("unexpected").write(' ');
-      output = Format.debugChar(input.head(), output);
+      output = Format.debugChar(output, input.head());
       message = output.bind();
     } else {
       message = "unexpected end of input";
@@ -580,10 +580,10 @@ public final class Diagnostic implements Display {
 
   public static Diagnostic expected(int expected, Input input, Severity severity, String note, Diagnostic cause) {
     Output<String> output = Unicode.stringOutput().write("expected").write(' ');
-    output = Format.debugChar(expected, output);
+    output = Format.debugChar(output, expected);
     output = output.write(", ").write("but found").write(' ');
     if (input.isCont()) {
-      output = Format.debugChar(input.head(), output);
+      output = Format.debugChar(output, input.head());
     } else {
       output = output.write("end of input");
     }
@@ -625,7 +625,7 @@ public final class Diagnostic implements Display {
     Output<String> output = Unicode.stringOutput().write("expected").write(' ').write(expected)
                                                   .write(", ").write("but found").write(' ');
     if (input.isCont()) {
-      output = Format.debugChar(input.head(), output);
+      output = Format.debugChar(output, input.head());
     } else {
       output = output.write("end of input");
     }

@@ -14,12 +14,27 @@
 
 package swim.mqtt;
 
-public abstract class MqttPacket<T> extends MqttPart {
+import swim.codec.Encoder;
+import swim.codec.OutputBuffer;
+
+public abstract class MqttPacket<T> {
 
   public abstract int packetType();
 
   public abstract int packetFlags();
 
-  abstract int bodySize(MqttEncoder mqtt);
+  abstract int variableHeaderSize(MqttEncoder mqtt);
+
+  public abstract Encoder<?, ?> mqttEncoder(MqttEncoder mqtt);
+
+  public Encoder<?, ?> mqttEncoder() {
+    return this.mqttEncoder(Mqtt.standardEncoder());
+  }
+
+  public abstract Encoder<?, ?> encodeMqtt(OutputBuffer<?> output, MqttEncoder mqtt);
+
+  public Encoder<?, ?> encodeMqtt(OutputBuffer<?> output) {
+    return this.encodeMqtt(output, Mqtt.standardEncoder());
+  }
 
 }

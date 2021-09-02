@@ -50,7 +50,7 @@ final class ObjectWriter<I, V> extends Writer<Object, Object> {
       if (step == 3) {
         if (part == null) {
           if (items.hasNext()) {
-            part = json.writeField(items.next(), output, index);
+            part = json.writeField(output, items.next(), index);
           } else {
             step = 5;
             break;

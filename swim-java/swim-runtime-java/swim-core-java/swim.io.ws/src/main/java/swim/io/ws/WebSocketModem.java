@@ -25,11 +25,12 @@ import swim.io.FlowModifier;
 import swim.io.IpModem;
 import swim.io.IpModemContext;
 import swim.io.IpSocket;
-import swim.ws.WsControl;
-import swim.ws.WsData;
+import swim.ws.WsControlFrame;
+import swim.ws.WsDataFrame;
 import swim.ws.WsDecoder;
 import swim.ws.WsEncoder;
 import swim.ws.WsFrame;
+import swim.ws.WsOpcode;
 
 public class WebSocketModem<I, O> implements IpModem<Object, Object>, WebSocketContext<I, O> {
 
@@ -229,17 +230,21 @@ public class WebSocketModem<I, O> implements IpModem<Object, Object>, WebSocketC
   }
 
   @Override
-  public <I2 extends I> void read(Decoder<I2> content) {
-    this.context.read(this.decoder.frameDecoder(content));
+  public <I2 extends I> void read(Decoder<I2> payloadDecoder) {
+    this.context.read(this.decoder.messageDecoder(payloadDecoder));
+  }
+
+  public <I2 extends I> void read(WsOpcode frameType, Decoder<I2> payloadDecoder) {
+    this.context.read(this.decoder.continuationDecoder(frameType, payloadDecoder));
   }
 
   @Override
-  public <O2 extends O> void write(WsData<O2> frame) {
+  public <O2 extends O> void write(WsDataFrame<O2> frame) {
     this.context.write(this.encoder.frameEncoder(frame));
   }
 
   @Override
-  public <O2 extends O> void write(WsControl<?, O2> frame) {
+  public <O2 extends O> void write(WsControlFrame<?, O2> frame) {
     this.context.write(this.encoder.frameEncoder(frame));
   }
 

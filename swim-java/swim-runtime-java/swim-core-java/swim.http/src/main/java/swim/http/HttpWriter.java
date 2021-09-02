@@ -28,7 +28,7 @@ public class HttpWriter {
     return new HttpRequestWriter<T>(this, request);
   }
 
-  public <T> Writer<?, HttpRequest<T>> writeRequest(HttpRequest<T> request, Output<?> output) {
+  public <T> Writer<?, HttpRequest<T>> writeRequest(Output<?> output, HttpRequest<T> request) {
     return HttpRequestWriter.write(output, this, request);
   }
 
@@ -36,7 +36,7 @@ public class HttpWriter {
     return new HttpResponseWriter<T>(this, response);
   }
 
-  public <T> Writer<?, HttpResponse<T>> writeResponse(HttpResponse<T> response, Output<?> output) {
+  public <T> Writer<?, HttpResponse<T>> writeResponse(Output<?> output, HttpResponse<T> response) {
     return HttpResponseWriter.write(output, this, response);
   }
 
@@ -44,7 +44,7 @@ public class HttpWriter {
     return new TokenWriter(name);
   }
 
-  public Writer<?, ?> writeMethod(String name, Output<?> output) {
+  public Writer<?, ?> writeMethod(Output<?> output, String name) {
     return TokenWriter.write(output, name);
   }
 
@@ -52,7 +52,7 @@ public class HttpWriter {
     return new HttpStatusWriter(this, code, phrase);
   }
 
-  public Writer<?, ?> writeStatus(int code, String phrase, Output<?> output) {
+  public Writer<?, ?> writeStatus(Output<?> output, int code, String phrase) {
     return HttpStatusWriter.write(output, this, code, phrase);
   }
 
@@ -60,7 +60,7 @@ public class HttpWriter {
     return new HttpVersionWriter(major, minor);
   }
 
-  public Writer<?, ?> writeVersion(int major, int minor, Output<?> output) {
+  public Writer<?, ?> writeVersion(Output<?> output, int major, int minor) {
     return HttpVersionWriter.write(output, major, minor);
   }
 
@@ -68,19 +68,19 @@ public class HttpWriter {
     return new HttpHeaderWriter(this, header);
   }
 
-  public Writer<?, ?> writeHeader(HttpHeader header, Output<?> output) {
+  public Writer<?, ?> writeHeader(Output<?> output, HttpHeader header) {
     return HttpHeaderWriter.write(output, this, header);
   }
 
-  public Writer<?, ?> writeHeaderValue(HttpHeader header, Output<?> output) {
-    return header.writeHttpValue(output, this);
+  public Writer<?, ?> writeHeaderValue(Output<?> output, HttpHeader header) {
+    return header.writeHeaderValue(output, this);
   }
 
   public Writer<?, ?> chunkHeaderWriter(long size, Iterator<ChunkExtension> extensions) {
     return new HttpChunkHeaderWriter(this, size, extensions);
   }
 
-  public Writer<?, ?> writeChunkHeader(long size, Iterator<ChunkExtension> extensions, Output<?> output) {
+  public Writer<?, ?> writeChunkHeader(Output<?> output, long size, Iterator<ChunkExtension> extensions) {
     return HttpChunkHeaderWriter.write(output, this, size, extensions);
   }
 
@@ -88,7 +88,7 @@ public class HttpWriter {
     return new HttpChunkTrailerWriter(this, headers);
   }
 
-  public Writer<?, ?> writeChunkTrailer(Iterator<HttpHeader> headers, Output<?> output) {
+  public Writer<?, ?> writeChunkTrailer(Output<?> output, Iterator<HttpHeader> headers) {
     return HttpChunkTrailerWriter.write(output, this, headers);
   }
 
@@ -96,7 +96,7 @@ public class HttpWriter {
     return new ParamWriter(this, name, value);
   }
 
-  public Writer<?, ?> writeChunkExtension(String name, String value, Output<?> output) {
+  public Writer<?, ?> writeChunkExtension(Output<?> output, String name, String value) {
     return ParamWriter.write(output, this, name, value);
   }
 
@@ -108,7 +108,7 @@ public class HttpWriter {
     }
   }
 
-  public Writer<?, ?> writeCharset(String name, float weight, Output<?> output) {
+  public Writer<?, ?> writeCharset(Output<?> output, String name, float weight) {
     if (weight == 1f) {
       return TokenWriter.write(output, name);
     } else {
@@ -120,7 +120,7 @@ public class HttpWriter {
     return new LanguageRangeWriter(this, tag, subtag, weight);
   }
 
-  public Writer<?, ?> writeLanguageRange(String tag, String subtag, float weight, Output<?> output) {
+  public Writer<?, ?> writeLanguageRange(Output<?> output, String tag, String subtag, float weight) {
     return LanguageRangeWriter.write(output, this, tag, subtag, weight);
   }
 
@@ -128,7 +128,7 @@ public class HttpWriter {
     return new MediaRangeWriter(this, type, subtype, weight, params);
   }
 
-  public Writer<?, ?> writeMediaRange(String type, String subtype, float weight, HashTrieMap<String, String> params, Output<?> output) {
+  public Writer<?, ?> writeMediaRange(Output<?> output, String type, String subtype, float weight, HashTrieMap<String, String> params) {
     return MediaRangeWriter.write(output, this, type, subtype, weight, params);
   }
 
@@ -136,7 +136,7 @@ public class HttpWriter {
     return new MediaTypeWriter(this, type, subtype, params);
   }
 
-  public Writer<?, ?> writeMediaType(String type, String subtype, HashTrieMap<String, String> params, Output<?> output) {
+  public Writer<?, ?> writeMediaType(Output<?> output, String type, String subtype, HashTrieMap<String, String> params) {
     return MediaTypeWriter.write(output, this, type, subtype, params);
   }
 
@@ -144,7 +144,7 @@ public class HttpWriter {
     return new ProductWriter(this, name, version, comments);
   }
 
-  public Writer<?, ?> writeProduct(String name, String version, Iterator<String> comments, Output<?> output) {
+  public Writer<?, ?> writeProduct(Output<?> output, String name, String version, Iterator<String> comments) {
     return ProductWriter.write(output, this, name, version, comments);
   }
 
@@ -152,7 +152,7 @@ public class HttpWriter {
     return new UpgradeProtocolWriter(this, name, version);
   }
 
-  public Writer<?, ?> writeUpgradeProtocol(String name, String version, Output<?> output) {
+  public Writer<?, ?> writeUpgradeProtocol(Output<?> output, String name, String version) {
     return UpgradeProtocolWriter.write(output, this, name, version);
   }
 
@@ -164,7 +164,7 @@ public class HttpWriter {
     }
   }
 
-  public Writer<?, ?> writeContentCoding(String name, float weight, Output<?> output) {
+  public Writer<?, ?> writeContentCoding(Output<?> output, String name, float weight) {
     if (weight == 1f) {
       return TokenWriter.write(output, name);
     } else {
@@ -180,7 +180,7 @@ public class HttpWriter {
     }
   }
 
-  public Writer<?, ?> writeTransferCoding(String name, HashTrieMap<String, String> params, Output<?> output) {
+  public Writer<?, ?> writeTransferCoding(Output<?> output, String name, HashTrieMap<String, String> params) {
     if (params.isEmpty()) {
       return TokenWriter.write(output, name);
     } else {
@@ -192,7 +192,7 @@ public class HttpWriter {
     return new ParamWriter(this, key, value);
   }
 
-  public Writer<?, ?> writeWebSocketParam(String key, String value, Output<?> output) {
+  public Writer<?, ?> writeWebSocketParam(Output<?> output, String key, String value) {
     return ParamWriter.write(output, this, key, value);
   }
 
@@ -200,76 +200,75 @@ public class HttpWriter {
     return new WebSocketExtensionWriter(this, name, params);
   }
 
-  public Writer<?, ?> writeWebSocketExtension(String name, Iterator<WebSocketParam> params, Output<?> output) {
+  public Writer<?, ?> writeWebSocketExtension(Output<?> output, String name, Iterator<WebSocketParam> params) {
     return WebSocketExtensionWriter.write(output, this, name, params);
   }
 
-  public Writer<?, ?> writeValue(String value, Output<?> output) {
+  public Writer<?, ?> writeValue(Output<?> output, String value) {
     if (Http.isToken(value)) {
-      return this.writeToken(value, output);
+      return this.writeToken(output, value);
     } else {
-      return this.writeQuoted(value, output);
+      return this.writeQuoted(output, value);
     }
   }
 
-  public Writer<?, ?> writeToken(String token, Output<?> output) {
+  public Writer<?, ?> writeToken(Output<?> output, String token) {
     return TokenWriter.write(output, token);
   }
 
-  public Writer<?, ?> writeQuoted(String quoted, Output<?> output) {
+  public Writer<?, ?> writeQuoted(Output<?> output, String quoted) {
     return QuotedWriter.write(output, quoted);
   }
 
-  public Writer<?, ?> writePhrase(String phrase, Output<?> output) {
+  public Writer<?, ?> writePhrase(Output<?> output, String phrase) {
     return PhraseWriter.write(output, phrase);
   }
 
-  public Writer<?, ?> writeField(String field, Output<?> output) {
+  public Writer<?, ?> writeField(Output<?> output, String field) {
     return FieldWriter.write(output, field);
   }
 
-  public Writer<?, ?> writeQValue(float weight, Output<?> output) {
+  public Writer<?, ?> writeQValue(Output<?> output, float weight) {
     return QValueWriter.write(output, weight);
   }
 
-  public Writer<?, ?> writeComments(Iterator<String> comments, Output<?> output) {
+  public Writer<?, ?> writeComments(Output<?> output, Iterator<String> comments) {
     return CommentsWriter.write(output, comments);
   }
 
-  public Writer<?, ?> writeTokenList(Iterator<?> tokens, Output<?> output) {
+  public Writer<?, ?> writeTokenList(Output<?> output, Iterator<?> tokens) {
     return TokenListWriter.write(output, tokens);
   }
 
-  public Writer<?, ?> writeParam(String key, String value, Output<?> output) {
+  public Writer<?, ?> writeParam(Output<?> output, String key, String value) {
     return ParamWriter.write(output, this, key, value);
   }
 
-  public Writer<?, ?> writeParamList(Iterator<? extends HttpPart> params, Output<?> output) {
+  public Writer<?, ?> writeParamList(Output<?> output, Iterator<? extends HttpPart> params) {
     return ParamListWriter.write(output, this, params);
   }
 
-  public Writer<?, ?> writeParamMap(Iterator<? extends Map.Entry<?, ?>> params, Output<?> output) {
+  public Writer<?, ?> writeParamMap(Output<?> output, Iterator<? extends Map.Entry<?, ?>> params) {
     return ParamMapWriter.write(output, this, params);
   }
 
   public <T2> Encoder<?, HttpMessage<T2>> bodyEncoder(HttpMessage<T2> message,
-                                                      Encoder<?, ?> content, long length) {
-    return new HttpBodyEncoder<T2>(message, content, length);
+                                                      Encoder<?, ?> payloadEncoder, long contentLength) {
+    return new HttpBodyEncoder<T2>(message, payloadEncoder, contentLength);
   }
 
-  public <T2> Encoder<?, HttpMessage<T2>> encodeBody(HttpMessage<T2> message,
-                                                     Encoder<?, ?> content, long length,
-                                                     OutputBuffer<?> output) {
-    return HttpBodyEncoder.encode(output, message, content, length);
+  public <T2> Encoder<?, HttpMessage<T2>> encodeBody(OutputBuffer<?> output, HttpMessage<T2> message,
+                                                     Encoder<?, ?> payloadEncoder, long contentLength) {
+    return HttpBodyEncoder.encode(output, message, payloadEncoder, contentLength);
   }
 
-  public <T2> Encoder<?, HttpMessage<T2>> chunkedEncoder(HttpMessage<T2> message, Encoder<?, ?> content) {
-    return new HttpChunkedEncoder<T2>(message, content);
+  public <T2> Encoder<?, HttpMessage<T2>> chunkedEncoder(HttpMessage<T2> message, Encoder<?, ?> payloadEncoder) {
+    return new HttpChunkedEncoder<T2>(message, payloadEncoder);
   }
 
-  public <T2> Encoder<?, HttpMessage<T2>> encodeChunked(HttpMessage<T2> message, Encoder<?, ?> content,
-                                                        OutputBuffer<?> output) {
-    return HttpChunkedEncoder.encode(output, message, content);
+  public <T2> Encoder<?, HttpMessage<T2>> encodeChunked(OutputBuffer<?> output, HttpMessage<T2> message,
+                                                        Encoder<?, ?> payloadEncoder) {
+    return HttpChunkedEncoder.encode(output, message, payloadEncoder);
   }
 
 }

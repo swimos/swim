@@ -24,7 +24,7 @@ final class DataReflection extends ProtobufDataType<ByteBuffer> {
 
   @Override
   public Decoder<ByteBuffer> decodeData(InputBuffer input) {
-    return Binary.parseOutput(Binary.byteBufferOutput(), input);
+    return Binary.parseOutput(input, Binary.byteBufferOutput());
   }
 
 }

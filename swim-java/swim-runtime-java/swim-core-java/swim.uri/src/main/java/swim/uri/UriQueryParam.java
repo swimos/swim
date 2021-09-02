@@ -82,7 +82,7 @@ final class UriQueryParam extends UriQuery {
     if (this.string != null) {
       output = output.write(this.string);
     } else {
-      output = UriQuery.display(this, output);
+      output = UriQuery.display(output, this);
     }
     return output;
   }

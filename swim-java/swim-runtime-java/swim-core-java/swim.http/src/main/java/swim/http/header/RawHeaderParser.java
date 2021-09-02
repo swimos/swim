@@ -24,13 +24,14 @@ final class RawHeaderParser extends Parser<RawHeader> {
 
   final String lowerCaseName;
   final String name;
-  final Output<String> value;
+  final Output<String> valueOutput;
   final int step;
 
-  RawHeaderParser(String lowerCaseName, String name, Output<String> value, int step) {
+  RawHeaderParser(String lowerCaseName, String name,
+                  Output<String> valueOutput, int step) {
     this.lowerCaseName = lowerCaseName;
     this.name = name;
-    this.value = value;
+    this.valueOutput = valueOutput;
     this.step = step;
   }
 
@@ -40,22 +41,22 @@ final class RawHeaderParser extends Parser<RawHeader> {
 
   @Override
   public Parser<RawHeader> feed(Input input) {
-    return RawHeaderParser.parse(input, this.lowerCaseName, this.name, this.value, this.step);
+    return RawHeaderParser.parse(input, this.lowerCaseName, this.name, this.valueOutput, this.step);
   }
 
   static Parser<RawHeader> parse(Input input, String lowerCaseName, String name,
-                                 Output<String> value, int step) {
+                                 Output<String> valueOutput, int step) {
     int c = 0;
     do {
       if (step == 1) {
-        if (value == null) {
-          value = Utf8.decodedString();
+        if (valueOutput == null) {
+          valueOutput = Utf8.decodedString();
         }
         while (input.isCont()) {
           c = input.head();
           if (Http.isFieldChar(c)) {
             input = input.step();
-            value.write(c);
+            valueOutput.write(c);
           } else {
             break;
           }
@@ -64,7 +65,7 @@ final class RawHeaderParser extends Parser<RawHeader> {
           input = input.step();
           step = 2;
         } else if (!input.isEmpty()) {
-          return Parser.done(RawHeader.create(lowerCaseName, name, value.bind()));
+          return Parser.done(RawHeader.create(lowerCaseName, name, valueOutput.bind()));
         }
       }
       if (step == 2) {
@@ -78,12 +79,12 @@ final class RawHeaderParser extends Parser<RawHeader> {
         }
         if (input.isCont() && Http.isFieldChar(c)) {
           input = input.step();
-          value.write(' ');
-          value.write(c);
+          valueOutput = valueOutput.write(' ');
+          valueOutput = valueOutput.write(c);
           step = 1;
           continue;
         } else if (!input.isEmpty()) {
-          return Parser.done(RawHeader.create(lowerCaseName, name, value.bind()));
+          return Parser.done(RawHeader.create(lowerCaseName, name, valueOutput.bind()));
         }
       }
       break;
@@ -91,7 +92,7 @@ final class RawHeaderParser extends Parser<RawHeader> {
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new RawHeaderParser(lowerCaseName, name, value, step);
+    return new RawHeaderParser(lowerCaseName, name, valueOutput, step);
   }
 
   static Parser<RawHeader> parse(Input input, String lowerCaseName, String name) {

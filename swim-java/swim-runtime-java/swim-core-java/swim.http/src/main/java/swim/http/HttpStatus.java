@@ -45,7 +45,7 @@ public final class HttpStatus extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeStatus(this.code, this.phrase, output);
+    return http.writeStatus(output, this.code, this.phrase);
   }
 
   @Override

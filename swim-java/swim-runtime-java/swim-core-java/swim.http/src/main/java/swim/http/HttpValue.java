@@ -22,13 +22,13 @@ import swim.codec.OutputBuffer;
 import swim.collections.FingerTrieSeq;
 import swim.util.Murmur3;
 
-public final class HttpValue<T> extends HttpEntity<T> implements Debug {
+public final class HttpValue<T> extends HttpPayload<T> implements Debug {
 
-  final T value;
+  final T payloadValue;
   final MediaType mediaType;
 
-  HttpValue(T value, MediaType mediaType) {
-    this.value = value;
+  HttpValue(T payloadValue, MediaType mediaType) {
+    this.payloadValue = payloadValue;
     this.mediaType = mediaType;
   }
 
@@ -39,12 +39,7 @@ public final class HttpValue<T> extends HttpEntity<T> implements Debug {
 
   @Override
   public T get() {
-    return this.value;
-  }
-
-  @Override
-  public long length() {
-    return -1L;
+    return this.payloadValue;
   }
 
   @Override
@@ -68,8 +63,8 @@ public final class HttpValue<T> extends HttpEntity<T> implements Debug {
   }
 
   @Override
-  public <T2> Encoder<?, HttpMessage<T2>> encodeHttp(HttpMessage<T2> message,
-                                                     OutputBuffer<?> output, HttpWriter http) {
+  public <T2> Encoder<?, HttpMessage<T2>> encodeHttp(OutputBuffer<?> output,
+                                                     HttpMessage<T2> message, HttpWriter http) {
     throw new UnsupportedOperationException();
   }
 
@@ -79,7 +74,7 @@ public final class HttpValue<T> extends HttpEntity<T> implements Debug {
       return true;
     } else if (other instanceof HttpValue<?>) {
       final HttpValue<?> that = (HttpValue<?>) other;
-      return (this.value == null ? that.value == null : this.value.equals(that.value))
+      return (this.payloadValue == null ? that.payloadValue == null : this.payloadValue.equals(that.payloadValue))
           && (this.mediaType == null ? that.mediaType == null : this.mediaType.equals(that.mediaType));
     }
     return false;
@@ -93,12 +88,12 @@ public final class HttpValue<T> extends HttpEntity<T> implements Debug {
       HttpValue.hashSeed = Murmur3.seed(HttpValue.class);
     }
     return Murmur3.mash(Murmur3.mix(Murmur3.mix(HttpValue.hashSeed,
-        Murmur3.hash(this.value)), Murmur3.hash(this.mediaType)));
+        Murmur3.hash(this.payloadValue)), Murmur3.hash(this.mediaType)));
   }
 
   @Override
   public <T> Output<T> debug(Output<T> output) {
-    output = output.write("HttpValue").write('.').write("create").write('(').debug(this.value);
+    output = output.write("HttpValue").write('.').write("create").write('(').debug(this.payloadValue);
     if (this.mediaType != null) {
       output = output.write(", ").debug(this.mediaType);
     }
@@ -111,12 +106,12 @@ public final class HttpValue<T> extends HttpEntity<T> implements Debug {
     return Format.debug(this);
   }
 
-  public static <T> HttpValue<T> create(T value, MediaType mediaType) {
-    return new HttpValue<T>(value, mediaType);
+  public static <T> HttpValue<T> create(T payloadValue, MediaType mediaType) {
+    return new HttpValue<T>(payloadValue, mediaType);
   }
 
-  public static <T> HttpValue<T> create(T value) {
-    return new HttpValue<T>(value, null);
+  public static <T> HttpValue<T> create(T payloadValue) {
+    return new HttpValue<T>(payloadValue, null);
   }
 
 }

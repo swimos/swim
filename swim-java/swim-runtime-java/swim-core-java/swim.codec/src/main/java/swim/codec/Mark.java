@@ -165,9 +165,9 @@ public final class Mark extends Tag implements Comparable<Mark> {
 
   @Override
   public <T> Output<T> display(Output<T> output) {
-    output = Format.displayInt(this.line, output);
+    output = Format.displayInt(output, this.line);
     output = output.write(':');
-    output = Format.displayInt(this.column, output);
+    output = Format.displayInt(output, this.column);
     if (this.note != null) {
       output = output.write(": ").write(this.note);
     }
@@ -177,14 +177,14 @@ public final class Mark extends Tag implements Comparable<Mark> {
   @Override
   public <T> Output<T> debug(Output<T> output) {
     output = output.write("Mark").write('.').write("at").write('(');
-    output = Format.debugLong(this.offset, output);
+    output = Format.debugLong(output, this.offset);
     output = output.write(", ");
-    output = Format.debugInt(this.line, output);
+    output = Format.debugInt(output, this.line);
     output = output.write(", ");
-    output = Format.debugInt(this.column, output);
+    output = Format.debugInt(output, this.column);
     if (this.note != null) {
       output = output.write(", ");
-      output = Format.debugString(this.note, output);
+      output = Format.debugString(output, this.note);
     }
     output = output.write(')');
     return output;

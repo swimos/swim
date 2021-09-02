@@ -80,7 +80,7 @@ public class Germ {
 
   public void writeValue(Output<?> output) {
     final Value value = this.toValue();
-    Recon.write(value, output);
+    Recon.write(output, value);
     int i = Recon.sizeOf(value);
     while (i < Germ.BLOCK_SIZE) {
       if (i % 1024 == 1023) {
@@ -140,7 +140,7 @@ public class Germ {
       }
     }
     final Output<String> message = Unicode.stringOutput("Malformed germ: ");
-    Recon.write(value, message);
+    Recon.write(message, value);
     throw new StoreException(message.bind(), error);
   }
 

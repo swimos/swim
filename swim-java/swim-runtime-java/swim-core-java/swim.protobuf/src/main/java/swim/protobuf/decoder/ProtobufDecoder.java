@@ -31,77 +31,77 @@ import swim.protobuf.schema.ProtobufZigZagType;
 
 public class ProtobufDecoder {
 
-  public <T> Decoder<T> decodeType(ProtobufType<T> type, InputBuffer input) {
+  public <T> Decoder<T> decodeType(InputBuffer input, ProtobufType<T> type) {
     if (type instanceof ProtobufPrimitiveType<?>) {
-      return this.decodePrimitive((ProtobufPrimitiveType<T>) type, input);
+      return this.decodePrimitive(input, (ProtobufPrimitiveType<T>) type);
     } else if (type instanceof ProtobufComplexType<?>) {
-      return this.decodeComplex((ProtobufComplexType<T>) type, input);
+      return this.decodeComplex(input, (ProtobufComplexType<T>) type);
     } else {
       return Decoder.error(new DecoderException("unsupported protobuf type: " + type));
     }
   }
 
-  public <T> Decoder<T> decodePrimitive(ProtobufPrimitiveType<T> type, InputBuffer input) {
+  public <T> Decoder<T> decodePrimitive(InputBuffer input, ProtobufPrimitiveType<T> type) {
     if (type instanceof ProtobufVarintType<?>) {
-      return this.decodeVarint((ProtobufVarintType<T>) type, input);
+      return this.decodeVarint(input, (ProtobufVarintType<T>) type);
     } else if (type instanceof ProtobufZigZagType<?>) {
-      return this.decodeZigZag((ProtobufZigZagType<T>) type, input);
+      return this.decodeZigZag(input, (ProtobufZigZagType<T>) type);
     } else if (type instanceof ProtobufFixed32Type<?>) {
-      return this.decodeFixed32((ProtobufFixed32Type<T>) type, input);
+      return this.decodeFixed32(input, (ProtobufFixed32Type<T>) type);
     } else if (type instanceof ProtobufFixed64Type<?>) {
-      return this.decodeFixed64((ProtobufFixed64Type<T>) type, input);
+      return this.decodeFixed64(input, (ProtobufFixed64Type<T>) type);
     } else {
       return Decoder.error(new DecoderException("unsupported protobuf type: " + type));
     }
   }
 
-  public <T> Decoder<T> decodeComplex(ProtobufComplexType<T> type, InputBuffer input) {
+  public <T> Decoder<T> decodeComplex(InputBuffer input, ProtobufComplexType<T> type) {
     if (type instanceof ProtobufDataType<?>) {
-      return this.decodeData((ProtobufDataType<T>) type, input);
+      return this.decodeData(input, (ProtobufDataType<T>) type);
     } else if (type instanceof ProtobufStringType<?>) {
-      return this.decodeString((ProtobufStringType<T>) type, input);
+      return this.decodeString(input, (ProtobufStringType<T>) type);
     } else if (type instanceof ProtobufMessageType<?, ?>) {
-      return this.decodeMessage((ProtobufMessageType<T, ?>) type, input);
+      return this.decodeMessage(input, (ProtobufMessageType<T, ?>) type);
     } else if (type instanceof ProtobufRepeatedType<?, ?>) {
-      return this.decodeRepeated((ProtobufRepeatedType<?, T>) type, input);
+      return this.decodeRepeated(input, (ProtobufRepeatedType<?, T>) type);
     } else {
       return Decoder.error(new DecoderException("unsupported protobuf type: " + type));
     }
   }
 
-  public <T> Decoder<T> decodeVarint(ProtobufVarintType<T> type, InputBuffer input) {
+  public <T> Decoder<T> decodeVarint(InputBuffer input, ProtobufVarintType<T> type) {
     return VarintDecoder.decode(input, type);
   }
 
-  public <T> Decoder<T> decodeZigZag(ProtobufZigZagType<T> type, InputBuffer input) {
+  public <T> Decoder<T> decodeZigZag(InputBuffer input, ProtobufZigZagType<T> type) {
     return ZigZagDecoder.decode(input, type);
   }
 
-  public <T> Decoder<T> decodeFixed32(ProtobufFixed32Type<T> type, InputBuffer input) {
+  public <T> Decoder<T> decodeFixed32(InputBuffer input, ProtobufFixed32Type<T> type) {
     return Fixed32Decoder.decode(input, type);
   }
 
-  public <T> Decoder<T> decodeFixed64(ProtobufFixed64Type<T> type, InputBuffer input) {
+  public <T> Decoder<T> decodeFixed64(InputBuffer input, ProtobufFixed64Type<T> type) {
     return Fixed64Decoder.decode(input, type);
   }
 
-  public <T> Decoder<T> decodeData(ProtobufDataType<T> type, InputBuffer input) {
+  public <T> Decoder<T> decodeData(InputBuffer input, ProtobufDataType<T> type) {
     return DataDecoder.decode(input, type);
   }
 
-  public <T> Decoder<T> decodeString(ProtobufStringType<T> type, InputBuffer input) {
+  public <T> Decoder<T> decodeString(InputBuffer input, ProtobufStringType<T> type) {
     return StringDecoder.decode(input, type);
   }
 
-  public <T, M> Decoder<T> decodeMessage(ProtobufMessageType<T, M> type, InputBuffer input) {
+  public <T, M> Decoder<T> decodeMessage(InputBuffer input, ProtobufMessageType<T, M> type) {
     return MessageDecoder.decode(input, this, type, 0L);
   }
 
-  public <T, M> Decoder<T> decodePayload(ProtobufMessageType<T, M> type, InputBuffer input) {
+  public <T, M> Decoder<T> decodePayload(InputBuffer input, ProtobufMessageType<T, M> type) {
     return MessageDecoder.decode(input, this, type, -1L);
   }
 
-  public <I, T> Decoder<T> decodeRepeated(ProtobufRepeatedType<I, T> type, InputBuffer input) {
+  public <I, T> Decoder<T> decodeRepeated(InputBuffer input, ProtobufRepeatedType<I, T> type) {
     return RepeatedDecoder.decode(input, this, type);
   }
 

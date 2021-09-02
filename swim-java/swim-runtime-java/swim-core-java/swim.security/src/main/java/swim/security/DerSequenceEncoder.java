@@ -100,7 +100,7 @@ final class DerSequenceEncoder<V> extends Encoder<Object, Object> {
       if (element != null) {
         element = element.pull(output);
       } else if (elements.hasNext()) {
-        element = der.encode(elements.next(), output);
+        element = der.encode(output, elements.next());
       }
       output = output.limit(outputLimit).isPart(outputPart);
       offset += output.index() - outputStart;

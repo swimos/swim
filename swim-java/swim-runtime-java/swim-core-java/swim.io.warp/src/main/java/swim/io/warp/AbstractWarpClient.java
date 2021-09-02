@@ -22,8 +22,9 @@ import swim.io.ws.WsSettings;
 import swim.io.ws.WsUpgradeRequester;
 import swim.warp.Envelope;
 import swim.warp.WarpException;
-import swim.ws.WsControl;
-import swim.ws.WsData;
+import swim.ws.WsControlFrame;
+import swim.ws.WsDataFrame;
+import swim.ws.WsOpcode;
 import swim.ws.WsRequest;
 
 public abstract class AbstractWarpClient extends AbstractWsClient implements WebSocketContext<Envelope, Envelope> {
@@ -50,17 +51,22 @@ public abstract class AbstractWarpClient extends AbstractWsClient implements Web
   }
 
   @Override
-  public <I2 extends Envelope> void read(Decoder<I2> content) {
+  public <I2 extends Envelope> void read(Decoder<I2> payloadDecoder) {
     throw new WarpException("unupgraded websocket");
   }
 
   @Override
-  public <O2 extends Envelope> void write(WsData<O2> frame) {
+  public <I2 extends Envelope> void read(WsOpcode frameType, Decoder<I2> payloadDecoder) {
     throw new WarpException("unupgraded websocket");
   }
 
   @Override
-  public <O2 extends Envelope> void write(WsControl<?, O2> frame) {
+  public <O2 extends Envelope> void write(WsDataFrame<O2> frame) {
+    throw new WarpException("unupgraded websocket");
+  }
+
+  @Override
+  public <O2 extends Envelope> void write(WsControlFrame<?, O2> frame) {
     throw new WarpException("unupgraded websocket");
   }
 

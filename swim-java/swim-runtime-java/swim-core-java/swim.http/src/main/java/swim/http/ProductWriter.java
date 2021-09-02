@@ -28,8 +28,8 @@ final class ProductWriter extends Writer<Object, Object> {
   final Writer<?, ?> part;
   final int step;
 
-  ProductWriter(HttpWriter http, String name, String version, Iterator<String> comments,
-                Writer<?, ?> part, int step) {
+  ProductWriter(HttpWriter http, String name, String version,
+                Iterator<String> comments, Writer<?, ?> part, int step) {
     this.http = http;
     this.name = name;
     this.version = version;
@@ -53,7 +53,7 @@ final class ProductWriter extends Writer<Object, Object> {
                                       Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = http.writeToken(name, output);
+        part = http.writeToken(output, name);
       } else {
         part = part.pull(output);
       }
@@ -76,7 +76,7 @@ final class ProductWriter extends Writer<Object, Object> {
     }
     if (step == 3) {
       if (part == null) {
-        part = http.writeToken(version, output);
+        part = http.writeToken(output, version);
       } else {
         part = part.pull(output);
       }
@@ -93,7 +93,7 @@ final class ProductWriter extends Writer<Object, Object> {
     }
     if (step == 4) {
       if (part == null) {
-        part = http.writeComments(comments, output);
+        part = http.writeComments(output, comments);
       } else {
         part = part.pull(output);
       }

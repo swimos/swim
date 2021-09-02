@@ -21,14 +21,15 @@ import swim.codec.Parser;
 final class HttpCharsetParser extends Parser<HttpCharset> {
 
   final HttpParser http;
-  final StringBuilder name;
-  final Parser<Float> weight;
+  final StringBuilder nameBuilder;
+  final Parser<Float> weightParser;
   final int step;
 
-  HttpCharsetParser(HttpParser http, StringBuilder name, Parser<Float> weight, int step) {
+  HttpCharsetParser(HttpParser http, StringBuilder nameBuilder,
+                    Parser<Float> weightParser, int step) {
     this.http = http;
-    this.name = name;
-    this.weight = weight;
+    this.nameBuilder = nameBuilder;
+    this.weightParser = weightParser;
     this.step = step;
   }
 
@@ -38,21 +39,22 @@ final class HttpCharsetParser extends Parser<HttpCharset> {
 
   @Override
   public Parser<HttpCharset> feed(Input input) {
-    return HttpCharsetParser.parse(input, this.http, this.name, this.weight, this.step);
+    return HttpCharsetParser.parse(input, this.http, this.nameBuilder,
+                                   this.weightParser, this.step);
   }
 
-  static Parser<HttpCharset> parse(Input input, HttpParser http, StringBuilder name,
-                                   Parser<Float> weight, int step) {
+  static Parser<HttpCharset> parse(Input input, HttpParser http, StringBuilder nameBuilder,
+                                   Parser<Float> weightParser, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (name == null) {
-            name = new StringBuilder();
+          if (nameBuilder == null) {
+            nameBuilder = new StringBuilder();
           }
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
           step = 2;
         } else {
           return Parser.error(Diagnostic.expected("charset", input));
@@ -66,7 +68,7 @@ final class HttpCharsetParser extends Parser<HttpCharset> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -76,23 +78,23 @@ final class HttpCharsetParser extends Parser<HttpCharset> {
       }
     }
     if (step == 3) {
-      if (weight == null) {
-        weight = http.parseQValue(input);
+      if (weightParser == null) {
+        weightParser = http.parseQValue(input);
       } else {
-        weight = weight.feed(input);
+        weightParser = weightParser.feed(input);
       }
-      if (weight.isDone()) {
-        final Float qvalue = weight.bind();
+      if (weightParser.isDone()) {
+        final Float qvalue = weightParser.bind();
         final float q = qvalue != null ? (float) qvalue : 1f;
-        return Parser.done(http.charset(name.toString(), q));
-      } else if (weight.isError()) {
-        return weight.asError();
+        return Parser.done(http.charset(nameBuilder.toString(), q));
+      } else if (weightParser.isError()) {
+        return weightParser.asError();
       }
     }
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new HttpCharsetParser(http, name, weight, step);
+    return new HttpCharsetParser(http, nameBuilder, weightParser, step);
   }
 
   static Parser<HttpCharset> parse(Input input, HttpParser http) {

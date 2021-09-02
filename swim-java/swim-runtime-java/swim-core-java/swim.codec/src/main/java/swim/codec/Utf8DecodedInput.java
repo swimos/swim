@@ -21,11 +21,11 @@ final class Utf8DecodedInput extends Input {
   long offset;
   int line;
   int column;
-  int state;
   int c1;
   int c2;
   int c3;
   int have;
+  int state;
   InputException error;
 
   Utf8DecodedInput(Input input, UtfErrorMode errorMode, long offset, int line,
@@ -45,7 +45,7 @@ final class Utf8DecodedInput extends Input {
   }
 
   Utf8DecodedInput(Input input, UtfErrorMode errorMode) {
-    this(input, errorMode, 0L, 1, 1, -1, -1, -1, 0, DECODE, null);
+    this(input, errorMode, 0L, 1, 1, -1, -1, -1, 0, Utf8DecodedInput.DECODE, null);
   }
 
   @Override
@@ -55,17 +55,17 @@ final class Utf8DecodedInput extends Input {
 
   @Override
   public boolean isEmpty() {
-    return this.state() == EMPTY;
+    return this.state() == Utf8DecodedInput.EMPTY;
   }
 
   @Override
   public boolean isDone() {
-    return this.state() == DONE;
+    return this.state() == Utf8DecodedInput.DONE;
   }
 
   @Override
   public boolean isError() {
-    return this.state() == ERROR;
+    return this.state() == Utf8DecodedInput.ERROR;
   }
 
   @Override
@@ -80,7 +80,7 @@ final class Utf8DecodedInput extends Input {
   }
 
   int state() {
-    if (this.state == DECODE) {
+    if (this.state == Utf8DecodedInput.DECODE) {
       Input input = this.input;
       final int c1;
       final int c2;
@@ -96,7 +96,7 @@ final class Utf8DecodedInput extends Input {
       }
       if (c1 == 0 && this.errorMode.isNonZero()) { // invalid NUL byte
         this.have = 1;
-        this.state = ERROR;
+        this.state = Utf8DecodedInput.ERROR;
         this.error = new InputException("invalid NUL byte");
       } else if (c1 >= 0 && c1 <= 0x7f) { // U+0000..U+007F
         this.have = 1;
@@ -138,7 +138,7 @@ final class Utf8DecodedInput extends Input {
           } else if (c3 >= 0) { // invalid c3
             this.have = 2;
             if (this.errorMode.isFatal()) {
-              this.state = ERROR;
+              this.state = Utf8DecodedInput.ERROR;
               this.error = new InputException(Utf8DecodedInput.invalid(c1, c2, c3));
             } else {
               this.state = this.errorMode.replacementChar();
@@ -146,7 +146,7 @@ final class Utf8DecodedInput extends Input {
           } else if (input.isDone()) { // truncated c3
             this.have = 2;
             if (this.errorMode.isFatal()) {
-              this.state = ERROR;
+              this.state = Utf8DecodedInput.ERROR;
               this.error = new InputException(Utf8DecodedInput.invalid(c1, c2));
             } else {
               this.state = this.errorMode.replacementChar();
@@ -154,7 +154,7 @@ final class Utf8DecodedInput extends Input {
           } else if (input.isEmpty()) { // awaiting c3
             this.c1 = c1;
             this.c2 = c2;
-            this.state = EMPTY;
+            this.state = Utf8DecodedInput.EMPTY;
           }
         } else if (c1 == 0xf0 && c2 >= 0x90 && c2 <= 0xbf // U+10000..U+3FFFF
             || c1 >= 0xf1 && c1 <= 0xf3 && c2 >= 0x80 && c2 <= 0xbf // U+40000..U+FFFFF
@@ -185,7 +185,7 @@ final class Utf8DecodedInput extends Input {
             } else if (c4 >= 0) { // invalid c4
               this.have = 3;
               if (this.errorMode.isFatal()) {
-                this.state = ERROR;
+                this.state = Utf8DecodedInput.ERROR;
                 this.error = new InputException(Utf8DecodedInput.invalid(c1, c2, c3, c4));
               } else {
                 this.state = this.errorMode.replacementChar();
@@ -193,7 +193,7 @@ final class Utf8DecodedInput extends Input {
             } else if (input.isDone()) { // truncated c4
               this.have = 3;
               if (this.errorMode.isFatal()) {
-                this.state = ERROR;
+                this.state = Utf8DecodedInput.ERROR;
                 this.error = new InputException(Utf8DecodedInput.invalid(c1, c2, c3));
               } else {
                 this.state = this.errorMode.replacementChar();
@@ -202,12 +202,12 @@ final class Utf8DecodedInput extends Input {
               this.c1 = c1;
               this.c2 = c2;
               this.c3 = c3;
-              this.state = EMPTY;
+              this.state = Utf8DecodedInput.EMPTY;
             }
           } else if (c3 >= 0) { // invalid c3
             this.have = 2;
             if (this.errorMode.isFatal()) {
-              this.state = ERROR;
+              this.state = Utf8DecodedInput.ERROR;
               this.error = new InputException(Utf8DecodedInput.invalid(c1, c2, c3));
             } else {
               this.state = this.errorMode.replacementChar();
@@ -215,7 +215,7 @@ final class Utf8DecodedInput extends Input {
           } else if (input.isDone()) { // truncated c3
             this.have = 2;
             if (this.errorMode.isFatal()) {
-              this.state = ERROR;
+              this.state = Utf8DecodedInput.ERROR;
               this.error = new InputException(Utf8DecodedInput.invalid(c1, c2));
             } else {
               this.state = this.errorMode.replacementChar();
@@ -223,12 +223,12 @@ final class Utf8DecodedInput extends Input {
           } else if (input.isEmpty()) { // awaiting c3
             this.c1 = c1;
             this.c2 = c2;
-            this.state = EMPTY;
+            this.state = Utf8DecodedInput.EMPTY;
           }
         } else if (c2 >= 0) { // invalid c2
           this.have = 1;
           if (this.errorMode.isFatal()) {
-            this.state = ERROR;
+            this.state = Utf8DecodedInput.ERROR;
             this.error = new InputException(Utf8DecodedInput.invalid(c1, c2));
           } else {
             this.state = this.errorMode.replacementChar();
@@ -236,27 +236,27 @@ final class Utf8DecodedInput extends Input {
         } else if (input.isDone()) { // truncated c2
           this.have = 1;
           if (this.errorMode.isFatal()) {
-            this.state = ERROR;
+            this.state = Utf8DecodedInput.ERROR;
             this.error = new InputException(Utf8DecodedInput.invalid(c1));
           } else {
             this.state = this.errorMode.replacementChar();
           }
         } else if (input.isEmpty()) { // awaiting c2
           this.c1 = c1;
-          this.state = EMPTY;
+          this.state = Utf8DecodedInput.EMPTY;
         }
       } else if (c1 >= 0) { // invalid c1
         this.have = 1;
         if (this.errorMode.isFatal()) {
-          this.state = ERROR;
+          this.state = Utf8DecodedInput.ERROR;
           this.error = new InputException(Utf8DecodedInput.invalid(c1));
         } else {
           this.state = this.errorMode.replacementChar();
         }
       } else if (input.isDone()) { // end of input
-        this.state = DONE;
+        this.state = Utf8DecodedInput.DONE;
       } else if (input.isEmpty()) { // awaiting c1
-        this.state = EMPTY;
+        this.state = Utf8DecodedInput.EMPTY;
       }
       this.input = input;
     }
@@ -287,7 +287,7 @@ final class Utf8DecodedInput extends Input {
       this.c2 = -1;
       this.c3 = -1;
       this.have = 0;
-      this.state = DECODE;
+      this.state = Utf8DecodedInput.DECODE;
       return this;
     } else {
       final Throwable error = new InputException("invalid step");
@@ -299,14 +299,14 @@ final class Utf8DecodedInput extends Input {
   public Input fork(Object condition) {
     if (condition instanceof Input) {
       this.input = (Input) condition;
-      this.state = DECODE;
+      this.state = Utf8DecodedInput.DECODE;
     }
     return this;
   }
 
   @Override
   public Throwable trap() {
-    if (this.state() == ERROR) {
+    if (this.state() == Utf8DecodedInput.ERROR) {
       return this.error;
     } else {
       throw new IllegalStateException();
@@ -315,7 +315,7 @@ final class Utf8DecodedInput extends Input {
 
   @Override
   public Input seek(Mark mark) {
-    this.input.seek(mark);
+    this.input = this.input.seek(mark);
     if (mark != null) {
       this.offset = mark.offset;
       this.line = mark.line;
@@ -329,7 +329,7 @@ final class Utf8DecodedInput extends Input {
     this.c2 = -1;
     this.c3 = -1;
     this.have = 0;
-    this.state = DECODE;
+    this.state = Utf8DecodedInput.DECODE;
     this.error = null;
     return this;
   }
@@ -359,14 +359,17 @@ final class Utf8DecodedInput extends Input {
     return this;
   }
 
+  @Override
   public long offset() {
     return this.offset;
   }
 
+  @Override
   public int line() {
     return this.line;
   }
 
+  @Override
   public int column() {
     return this.column;
   }
@@ -397,40 +400,40 @@ final class Utf8DecodedInput extends Input {
   private static String invalid(int c1) {
     Output<String> output = Unicode.stringOutput();
     output = output.write("invalid UTF-8 code unit: ");
-    Base16.uppercase().writeIntLiteral(c1, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c1, 2).bind();
     return output.bind();
   }
 
   private static String invalid(int c1, int c2) {
     Output<String> output = Unicode.stringOutput();
     output = output.write("invalid UTF-8 code unit sequence: ");
-    Base16.uppercase().writeIntLiteral(c1, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c1, 2).bind();
     output = output.write(' ');
-    Base16.uppercase().writeIntLiteral(c2, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c2, 2).bind();
     return output.bind();
   }
 
   private static String invalid(int c1, int c2, int c3) {
     Output<String> output = Unicode.stringOutput();
     output = output.write("invalid UTF-8 code unit sequence: ");
-    Base16.uppercase().writeIntLiteral(c1, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c1, 2).bind();
     output = output.write(' ');
-    Base16.uppercase().writeIntLiteral(c2, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c2, 2).bind();
     output = output.write(' ');
-    Base16.uppercase().writeIntLiteral(c3, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c3, 2).bind();
     return output.bind();
   }
 
   private static String invalid(int c1, int c2, int c3, int c4) {
     Output<String> output = Unicode.stringOutput();
     output = output.write("invalid UTF-8 code unit sequence: ");
-    Base16.uppercase().writeIntLiteral(c1, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c1, 2).bind();
     output = output.write(' ');
-    Base16.uppercase().writeIntLiteral(c2, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c2, 2).bind();
     output = output.write(' ');
-    Base16.uppercase().writeIntLiteral(c3, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c3, 2).bind();
     output = output.write(' ');
-    Base16.uppercase().writeIntLiteral(c4, output, 2).bind();
+    Base16.uppercase().writeIntLiteral(output, c4, 2).bind();
     return output.bind();
   }
 

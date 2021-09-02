@@ -66,7 +66,7 @@ final class FixedStructure extends AvroFixedType<Value> {
 
   @SuppressWarnings("unchecked")
   public Decoder<Value> decodeFixed(InputBuffer input) {
-    return (Decoder<Value>) (Decoder<?>) Binary.parseOutput(Data.output(this.size), input);
+    return (Decoder<Value>) (Decoder<?>) Binary.parseOutput(input, Data.output(this.size));
   }
 
 }

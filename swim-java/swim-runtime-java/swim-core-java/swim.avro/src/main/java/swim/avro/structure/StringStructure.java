@@ -27,7 +27,7 @@ final class StringStructure extends AvroStringType<Value> {
   @SuppressWarnings("unchecked")
   @Override
   public Parser<Value> parseString(Input input) {
-    return Unicode.parseOutput((Output<Value>) (Output<?>) Text.output(), input);
+    return Unicode.parseOutput(input, (Output<Value>) (Output<?>) Text.output());
   }
 
 }

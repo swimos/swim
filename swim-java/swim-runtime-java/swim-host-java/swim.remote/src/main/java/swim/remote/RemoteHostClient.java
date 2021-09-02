@@ -37,7 +37,7 @@ import swim.system.HostContext;
 import swim.uri.Uri;
 import swim.uri.UriAuthority;
 import swim.uri.UriScheme;
-import swim.ws.WsClose;
+import swim.ws.WsCloseFrame;
 import swim.ws.WsRequest;
 
 public class RemoteHostClient extends RemoteHost {
@@ -146,7 +146,7 @@ public class RemoteHostClient extends RemoteHost {
   }
 
   @Override
-  protected void didReadClose(WsClose<?, ?> frame) {
+  protected void didReadClose(WsCloseFrame<?, ?> frame) {
     Throwable failure = null;
     try {
       final WarpSocketContext warpSocketContext = this.warpSocketContext;

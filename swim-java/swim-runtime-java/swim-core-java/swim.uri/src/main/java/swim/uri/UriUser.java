@@ -100,10 +100,10 @@ public class UriUser implements Debug, Display {
   @Override
   public <T> Output<T> display(Output<T> output) {
     if (this.username != null) {
-      output = Uri.writeUser(this.username, output);
+      output = Uri.writeUser(output, this.username);
       if (this.password != null) {
         output = output.write(':');
-        output = Uri.writeUser(this.password, output);
+        output = Uri.writeUser(output, this.password);
       }
     }
     return output;

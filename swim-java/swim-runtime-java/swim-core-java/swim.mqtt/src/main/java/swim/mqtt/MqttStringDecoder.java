@@ -37,8 +37,7 @@ final class MqttStringDecoder extends Decoder<String> {
 
   @Override
   public Decoder<String> feed(InputBuffer input) {
-    return MqttStringDecoder.decode(input, this.decoder,
-                                    this.remaining, this.step);
+    return MqttStringDecoder.decode(input, this.decoder, this.remaining, this.step);
   }
 
   static Decoder<String> decode(InputBuffer input, Decoder<String> decoder,

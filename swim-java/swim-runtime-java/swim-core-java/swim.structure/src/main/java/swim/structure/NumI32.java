@@ -321,7 +321,7 @@ final class NumI32 extends Num {
 
   @Override
   public <T> Output<T> display(Output<T> output) {
-    output = Format.debugInt(this.value, output);
+    output = Format.debugInt(output, this.value);
     return output;
   }
 

@@ -181,7 +181,7 @@ public class JsonWriterSpec {
       final byte[] actual = new byte[n];
       OutputBuffer<?> buffer = Binary.outputBuffer(actual);
       buffer = buffer.limit(i);
-      Writer<?, ?> writer = Json.write(item, Utf8.decodedOutput(buffer).isPart(true));
+      Writer<?, ?> writer = Json.write(Utf8.decodedOutput(buffer).isPart(true), item);
       buffer = buffer.limit(buffer.capacity());
       writer = writer.pull(Utf8.decodedOutput(buffer).isPart(false));
       if (writer.isError()) {

@@ -88,7 +88,7 @@ public final class MediaType extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeMediaType(this.type, this.subtype, this.params, output);
+    return http.writeMediaType(output, this.type, this.subtype, this.params);
   }
 
   @Override

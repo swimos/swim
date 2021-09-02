@@ -56,7 +56,7 @@ public abstract class HttpSocketBehaviors {
 
       @Override
       public void didRespond(HttpResponse<String> response) {
-        assertEquals(response.entity().get(), "serverToClient");
+        assertEquals(response.payload().get(), "serverToClient");
         clientResponse.countDown();
       }
     };
@@ -70,7 +70,7 @@ public abstract class HttpSocketBehaviors {
     final AbstractHttpResponder<String> responder = new AbstractHttpResponder<String>() {
       @Override
       public void doRespond(HttpRequest<String> request) {
-        assertEquals(request.entity().get(), "clientToServer");
+        assertEquals(request.payload().get(), "clientToServer");
         serverRequest.countDown();
         this.writeResponse(HttpResponse.create(HttpStatus.OK).body("serverToClient"));
       }
@@ -139,7 +139,7 @@ public abstract class HttpSocketBehaviors {
 
             @Override
             public void didRespond(HttpResponse<String> response) {
-              assertEquals(response.entity().get(), "serverToClient");
+              assertEquals(response.payload().get(), "serverToClient");
               clientResponse.countDown();
             }
           });
@@ -152,7 +152,7 @@ public abstract class HttpSocketBehaviors {
         return new AbstractHttpResponder<String>() {
           @Override
           public void doRespond(HttpRequest<String> request) {
-            assertEquals(request.entity().get(), "clientToServer");
+            assertEquals(request.payload().get(), "clientToServer");
             serverRequest.countDown();
             this.writeResponse(HttpResponse.create(HttpStatus.OK).body("serverToClient"));
           }
@@ -213,7 +213,7 @@ public abstract class HttpSocketBehaviors {
 
       @Override
       public void didRespond(HttpResponse<String> response) {
-        assertEquals(response.entity().get(), "serverToClient");
+        assertEquals(response.payload().get(), "serverToClient");
         clientResponse.countDown();
       }
     };
@@ -227,7 +227,7 @@ public abstract class HttpSocketBehaviors {
     final AbstractHttpResponder<String> responder = new AbstractHttpResponder<String>() {
       @Override
       public void doRespond(HttpRequest<String> request) {
-        assertEquals(request.entity().get(), "clientToServer");
+        assertEquals(request.payload().get(), "clientToServer");
         serverRequest.countDown();
         this.writeResponse(HttpResponse.create(HttpStatus.OK)
                                        .content(HttpChunked.create(Utf8.stringWriter("serverTo").andThen(Utf8.stringWriter("Client")),

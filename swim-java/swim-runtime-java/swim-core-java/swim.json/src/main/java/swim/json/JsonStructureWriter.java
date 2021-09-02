@@ -54,92 +54,91 @@ public class JsonStructureWriter extends JsonWriter<Item, Value> {
   }
 
   @Override
-  public Writer<?, ?> writeItem(Item item, Output<?> output) {
+  public Writer<?, ?> writeItem(Output<?> output, Item item) {
     if (item instanceof Field) {
       if (item instanceof Attr) {
         final Attr that = (Attr) item;
-        return this.writeField(Text.from('@' + that.key().stringValue()), that.value(), output);
+        return this.writeField(output, Text.from('@' + that.key().stringValue()), that.value());
       } else if (item instanceof Slot) {
         final Slot that = (Slot) item;
         if (that.key() instanceof Text) {
-          return this.writeField(that.key(), that.value(), output);
+          return this.writeField(output, that.key(), that.value());
         } else {
-          return this.writeValue(Record.of(Slot.of("$key", that.key()), Slot.of("$value", that.value())), output);
+          return this.writeValue(output, Record.of(Slot.of("$key", that.key()), Slot.of("$value", that.value())));
         }
       }
     } else if (item instanceof Value) {
-      return this.writeValue((Value) item, output);
+      return this.writeValue(output, (Value) item);
     }
     return Writer.error(new WriterException("No JSON serialization for " + item));
   }
 
   @Override
-  public Writer<?, ?> writeField(Item item, Output<?> output, int index) {
+  public Writer<?, ?> writeField(Output<?> output, Item item, int index) {
     if (item instanceof Field) {
       if (item instanceof Attr) {
         final Attr that = (Attr) item;
-        return this.writeField(Text.from('@' + that.key().stringValue()), that.value(), output);
+        return this.writeField(output, Text.from('@' + that.key().stringValue()), that.value());
       } else if (item instanceof Slot) {
         final Slot that = (Slot) item;
         if (that.key() instanceof Text) {
-          return this.writeField(that.key(), that.value(), output);
+          return this.writeField(output, that.key(), that.value());
         } else {
-          return this.writeField(Text.from("$" + index),
-                                 Record.of(Slot.of("$key", that.key()), Slot.of("$value", that.value())),
-                                 output);
+          return this.writeField(output, Text.from("$" + index),
+                                 Record.of(Slot.of("$key", that.key()), Slot.of("$value", that.value())));
         }
       }
     } else if (item instanceof Value) {
-      return this.writeItem(Slot.of(Text.from("$" + index), (Value) item), output);
+      return this.writeItem(output, Slot.of(Text.from("$" + index), (Value) item));
     }
     return Writer.error(new WriterException("No JSON serialization for " + item));
   }
 
   @Override
-  public Writer<?, ?> writeValue(Item item, Output<?> output, int index) {
+  public Writer<?, ?> writeValue(Output<?> output, Item item, int index) {
     if (item instanceof Field) {
-      return this.writeValue(item.toValue(), output);
+      return this.writeValue(output, item.toValue());
     } else if (item instanceof Value) {
-      return this.writeValue((Value) item, output);
+      return this.writeValue(output, (Value) item);
     }
     return Writer.error(new WriterException("No JSON serialization for " + item));
   }
 
   @Override
-  public Writer<?, ?> writeValue(Value value, Output<?> output) {
+  public Writer<?, ?> writeValue(Output<?> output, Value value) {
     if (value instanceof Record) {
       final Record that = (Record) value;
       if (that.isArray()) {
-        return this.writeArray(that, output);
+        return this.writeArray(output, that);
       } else {
-        return this.writeObject(that, output);
+        return this.writeObject(output, that);
       }
     } else if (value instanceof Data) {
       final Data that = (Data) value;
-      return this.writeData(that.asByteBuffer(), output);
+      return this.writeData(output, that.asByteBuffer());
     } else if (value instanceof Text) {
       final Text that = (Text) value;
-      return this.writeText(that.stringValue(), output);
+      return this.writeText(output, that.stringValue());
     } else if (value instanceof Num) {
       final Num that = (Num) value;
       if (that.isUint32()) {
-        return this.writeUint32(that.intValue(), output);
+        return this.writeUint32(output, that.intValue());
       } else if (that.isUint64()) {
-        return this.writeUint64(that.longValue(), output);
+        return this.writeUint64(output, that.longValue());
       } else if (that.isValidInt()) {
-        return this.writeNum(that.intValue(), output);
+        return this.writeNum(output, that.intValue());
       } else if (that.isValidLong()) {
-        return this.writeNum(that.longValue(), output);
+        return this.writeNum(output, that.longValue());
       } else if (that.isValidFloat()) {
-        return this.writeNum(that.floatValue(), output);
+        return this.writeNum(output, that.floatValue());
       } else if (that.isValidDouble()) {
-        return this.writeNum(that.doubleValue(), output);
+        return this.writeNum(output, that.doubleValue());
       } else if (that.isValidInteger()) {
-        return this.writeNum(that.integerValue(), output);
+        return this.writeNum(output, that.integerValue());
       }
     } else if (value instanceof Bool) {
       final Bool that = (Bool) value;
-      return this.writeBool(that.booleanValue(), output);
+      return this.writeBool(output, that.booleanValue());
     } else if (value instanceof Extant) {
       return this.writeNull(output);
     } else if (value instanceof Absent) {

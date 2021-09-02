@@ -89,7 +89,7 @@ final class ReferenceParser extends Parser<Object> {
         c = input.head();
         if (c == ';') {
           input = input.step();
-          final boolean expanded = xml.expandEntityRef(nameParser.bind(), output);
+          final boolean expanded = xml.expandEntityRef(output, nameParser.bind());
           if (expanded) {
             return Parser.done();
           } else {

@@ -61,19 +61,19 @@ public final class Json {
     return Json.structureParser().valueParser();
   }
 
-  public static Writer<?, ?> write(Item item, Output<?> output) {
-    return Json.structureWriter().writeItem(item, output);
+  public static Writer<?, ?> write(Output<?> output, Item item) {
+    return Json.structureWriter().writeItem(output, item);
   }
 
   public static String toString(Item item) {
     final Output<String> output = Unicode.stringOutput();
-    Json.write(item, output);
+    Json.write(output, item);
     return output.bind();
   }
 
   public static Data toData(Item item) {
     final Output<Data> output = Utf8.encodedOutput(Data.output());
-    Json.write(item, output);
+    Json.write(output, item);
     return output.bind();
   }
 

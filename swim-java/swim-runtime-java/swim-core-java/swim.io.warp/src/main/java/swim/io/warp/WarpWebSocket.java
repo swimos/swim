@@ -35,12 +35,12 @@ import swim.io.ws.WebSocket;
 import swim.io.ws.WebSocketContext;
 import swim.warp.Envelope;
 import swim.warp.WarpException;
-import swim.ws.WsClose;
-import swim.ws.WsControl;
-import swim.ws.WsData;
-import swim.ws.WsFragment;
+import swim.ws.WsCloseFrame;
+import swim.ws.WsControlFrame;
+import swim.ws.WsDataFrame;
+import swim.ws.WsFragmentFrame;
 import swim.ws.WsFrame;
-import swim.ws.WsText;
+import swim.ws.WsTextFrame;
 
 public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketContext, PullContext<Envelope>, StayContext {
 
@@ -81,14 +81,14 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
 
   @Override
   public void didRead(WsFrame<? extends Envelope> frame) {
-    if (frame instanceof WsFragment<?>) {
-      final WsFragment<? extends Envelope> fragment = (WsFragment<? extends Envelope>) frame;
-      this.context.read(fragment.contentDecoder());
+    if (frame instanceof WsFragmentFrame<?>) {
+      final WsFragmentFrame<? extends Envelope> fragment = (WsFragmentFrame<? extends Envelope>) frame;
+      this.context.read(fragment.frameType(), fragment.payloadDecoder());
     } else {
-      if (frame instanceof WsData<?>) {
-        this.socket.didRead(frame.get());
-      } else if (frame instanceof WsControl<?, ?>) {
-        this.socket.didRead((WsControl<?, ?>) frame);
+      if (frame instanceof WsDataFrame<?>) {
+        this.socket.didRead(((WsDataFrame<? extends Envelope>) frame).payloadValue());
+      } else if (frame instanceof WsControlFrame<?, ?>) {
+        this.socket.didRead((WsControlFrame<?, ?>) frame);
       }
       this.context.read(Envelope.decoder());
     }
@@ -102,7 +102,7 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
 
   @Override
   public void didWrite(WsFrame<? extends Envelope> frame) {
-    if (frame instanceof WsData<?>) {
+    if (frame instanceof WsDataFrame<?>) {
       do {
         final long oldStatus = WarpWebSocket.STATUS.get(this);
         final long oldBuffer = (oldStatus & WarpWebSocket.BUFFER_MASK) >>> WarpWebSocket.BUFFER_SHIFT;
@@ -116,9 +116,9 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
           throw new WarpException("overbuffer");
         }
       } while (true);
-      this.socket.didWrite(frame.get());
-    } else if (frame instanceof WsControl<?, ?>) {
-      this.socket.didWrite((WsControl<?, ?>) frame);
+      this.socket.didWrite(((WsDataFrame<? extends Envelope>) frame).payloadValue());
+    } else if (frame instanceof WsControlFrame<?, ?>) {
+      this.socket.didWrite((WsControlFrame<?, ?>) frame);
     }
     this.generateDemand();
   }
@@ -367,7 +367,7 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
         throw new WarpException("overdemand");
       }
     } while (true);
-    this.context.write(WsText.create(envelope, envelope.reconEncoder()));
+    this.context.write(WsTextFrame.create(envelope, envelope.reconEncoder()));
   }
 
   @Override
@@ -429,8 +429,8 @@ public class WarpWebSocket implements WebSocket<Envelope, Envelope>, WarpSocketC
   }
 
   @Override
-  public void write(WsControl<?, ? extends Envelope> frame) {
-    if (frame instanceof WsClose<?, ?>) {
+  public void write(WsControlFrame<?, ? extends Envelope> frame) {
+    if (frame instanceof WsCloseFrame<?, ?>) {
       do {
         final long oldStatus = WarpWebSocket.STATUS.get(this);
         if ((oldStatus & (WarpWebSocket.UPGRADED | WarpWebSocket.CLOSING)) == WarpWebSocket.UPGRADED) {

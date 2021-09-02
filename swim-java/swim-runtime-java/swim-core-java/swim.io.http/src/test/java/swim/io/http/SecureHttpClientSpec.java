@@ -22,7 +22,7 @@ import swim.concurrent.Theater;
 import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.http.HttpStatus;
-import swim.http.header.Host;
+import swim.http.header.HostHeader;
 import swim.uri.Uri;
 import swim.uri.UriAuthority;
 import static org.testng.Assert.assertEquals;
@@ -55,7 +55,7 @@ public class SecureHttpClientSpec {
       @Override
       public void doRequest() {
         final Uri requestUri = Uri.create(uri.path());
-        final HttpRequest<?> request = HttpRequest.get(requestUri, Host.create(uri.authority()));
+        final HttpRequest<?> request = HttpRequest.get(requestUri, HostHeader.create(uri.authority()));
         this.writeRequest(request);
       }
 

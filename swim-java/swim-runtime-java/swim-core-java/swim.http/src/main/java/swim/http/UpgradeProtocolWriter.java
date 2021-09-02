@@ -49,7 +49,7 @@ final class UpgradeProtocolWriter extends Writer<Object, Object> {
                                       String version, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = http.writeToken(name, output);
+        part = http.writeToken(output, name);
       } else {
         part = part.pull(output);
       }
@@ -70,7 +70,7 @@ final class UpgradeProtocolWriter extends Writer<Object, Object> {
     }
     if (step == 3) {
       if (part == null) {
-        part = http.writeToken(version, output);
+        part = http.writeToken(output, version);
       } else {
         part = part.pull(output);
       }

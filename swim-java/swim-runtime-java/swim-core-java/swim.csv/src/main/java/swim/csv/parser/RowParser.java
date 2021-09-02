@@ -85,7 +85,7 @@ final class RowParser<T, R, C> extends Parser<R> {
           } else {
             col = (CsvCol<C>) header.overflowCol();
           }
-          cellParser = csv.parseCell(col, cellInput);
+          cellParser = csv.parseCell(cellInput, col);
         }
         while (cellParser.isCont() && !cellInput.isEmpty()) {
           cellParser = cellParser.feed(cellInput);
@@ -118,7 +118,7 @@ final class RowParser<T, R, C> extends Parser<R> {
           } else {
             col = (CsvCol<C>) header.overflowCol();
           }
-          cellParser = csv.parseCell(col, cellInput);
+          cellParser = csv.parseCell(cellInput, col);
         }
         while (cellParser.isCont() && !cellInput.isEmpty()) {
           cellParser = cellParser.feed(cellInput);

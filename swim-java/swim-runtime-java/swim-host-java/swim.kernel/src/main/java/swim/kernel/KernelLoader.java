@@ -169,7 +169,7 @@ public final class KernelLoader {
   }
 
   public static Value parseConfigValue(InputStream configInput) throws IOException {
-    return Utf8.read(Recon.structureParser().blockParser(), configInput);
+    return Utf8.read(configInput, Recon.structureParser().blockParser());
   }
 
 }

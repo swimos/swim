@@ -165,7 +165,7 @@ final class MapDecoder<K, V, T> extends Decoder<T> {
       }
       if (step == 5) {
         if (valueDecoder == null) {
-          valueDecoder = avro.decodeType(type.valueType(), input);
+          valueDecoder = avro.decodeType(input, type.valueType());
         }
         while (valueDecoder.isCont() && !input.isEmpty()) {
           valueDecoder = valueDecoder.feed(input);

@@ -130,7 +130,7 @@ final class PrimaryWriter<I, V> extends Writer<Object, Object> {
             output = output.write(')');
             inParens = false;
           }
-          part = recon.writeItem(item, output);
+          part = recon.writeItem(output, item);
           first = false;
           step = 4;
         } else if (inParens) {
@@ -139,15 +139,15 @@ final class PrimaryWriter<I, V> extends Writer<Object, Object> {
           } else {
             first = false;
           }
-          part = recon.writeBlockItem(item, output);
+          part = recon.writeBlockItem(output, item);
           step = 4;
         } else if (recon.isValue(item) && !recon.isRecord(item)
             && (!first && next == null || next != null && recon.isAttr(next))) {
-          part = recon.writeItem(item, output);
+          part = recon.writeItem(output, item);
           step = 4;
         } else {
           output = output.write('(');
-          part = recon.writeItem(item, output);
+          part = recon.writeItem(output, item);
           inParens = true;
           first = false;
           step = 4;

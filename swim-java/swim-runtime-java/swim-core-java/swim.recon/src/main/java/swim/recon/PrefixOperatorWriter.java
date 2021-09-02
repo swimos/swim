@@ -63,7 +63,7 @@ final class PrefixOperatorWriter<I, V> extends Writer<Object, Object> {
                                              Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = Unicode.writeString(operator, output);
+        part = Unicode.writeString(output, operator);
       } else {
         part = part.pull(output);
       }
@@ -86,7 +86,7 @@ final class PrefixOperatorWriter<I, V> extends Writer<Object, Object> {
     }
     if (step == 3) {
       if (part == null) {
-        part = recon.writeItem(rhs, output);
+        part = recon.writeItem(output, rhs);
       } else {
         part = part.pull(output);
       }

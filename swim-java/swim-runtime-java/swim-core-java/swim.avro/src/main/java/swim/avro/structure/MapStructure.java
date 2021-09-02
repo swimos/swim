@@ -35,7 +35,7 @@ final class MapStructure<V extends Value> extends AvroMapType<Value, V, Record> 
   @SuppressWarnings("unchecked")
   @Override
   public Parser<Value> parseKey(Input input) {
-    return (Parser<Value>) (Parser<?>) Unicode.parseOutput(Text.output(), input);
+    return (Parser<Value>) (Parser<?>) Unicode.parseOutput(input, Text.output());
   }
 
   @Override

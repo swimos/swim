@@ -63,7 +63,7 @@ final class FixedReflection extends AvroFixedType<byte[]> {
   }
 
   public Decoder<byte[]> decodeFixed(InputBuffer input) {
-    return Binary.parseOutput(Binary.byteArrayOutput(this.size), input);
+    return Binary.parseOutput(input, Binary.byteArrayOutput(this.size));
   }
 
 }

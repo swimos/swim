@@ -83,30 +83,30 @@ public class TableParserSpec {
   }
 
   public static void assertParses(String csvString, Record expected) {
-    assertParses(',', csvString, expected, CsvStructure.header());
+    assertParses(csvString, expected, CsvStructure.header(), ',');
   }
 
   public static void assertParses(String csvString, Record expected, CsvHeader<Record, Value, Item> header) {
-    assertParses(',', csvString, expected, header);
+    assertParses(csvString, expected, header, ',');
   }
 
-  public static void assertParses(int delimiter, String csvString, Record expected, CsvHeader<Record, Value, Item> header) {
-    CsvAssertions.assertParses(Csv.tableParser(delimiter, header), csvString, expected);
+  public static void assertParses(String csvString, Record expected, CsvHeader<Record, Value, Item> header, int delimiter) {
+    CsvAssertions.assertParses(Csv.tableParser(header, delimiter), csvString, expected);
   }
 
   public static void assertParseFails(final String csvString) {
-    assertParseFails(',', csvString, CsvStructure.header());
+    assertParseFails(csvString, CsvStructure.header(), ',');
   }
 
   public static void assertParseFails(final String csvString, final CsvHeader<Record, Value, Item> header) {
-    assertParseFails(',', csvString, header);
+    assertParseFails(csvString, header, ',');
   }
 
-  public static void assertParseFails(final int delimiter, final String csvString, final CsvHeader<Record, Value, Item> header) {
+  public static void assertParseFails(final String csvString, final CsvHeader<Record, Value, Item> header, final int delimiter) {
     assertThrows(ParserException.class, new ThrowingRunnable() {
       @Override
       public void run() throws Throwable {
-        Csv.parseTable(delimiter, csvString, header);
+        Csv.parseTable(csvString, header, delimiter);
       }
     });
   }

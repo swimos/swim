@@ -51,7 +51,7 @@ final class WebSocketExtensionWriter extends Writer<Object, Object> {
                                       Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = http.writeToken(name, output);
+        part = http.writeToken(output, name);
       } else {
         part = part.pull(output);
       }

@@ -293,7 +293,7 @@ public class Text extends Value {
 
   @Override
   public <T> Output<T> display(Output<T> output) {
-    return Format.debug(this.value, output);
+    return Format.debug(output, this.value);
   }
 
   private static Text empty;

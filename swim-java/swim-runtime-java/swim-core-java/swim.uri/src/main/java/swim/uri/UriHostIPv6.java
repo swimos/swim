@@ -47,7 +47,7 @@ final class UriHostIPv6 extends UriHost {
       output = output.write(this.string);
     } else {
       output = output.write('[');
-      Uri.writeHostLiteral(this.address, output);
+      Uri.writeHostLiteral(output, this.address);
       output = output.write(']');
     }
     return output;

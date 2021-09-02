@@ -50,7 +50,7 @@ public final class HttpChunkHeader extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeChunkHeader(this.size, this.extensions.iterator(), output);
+    return http.writeChunkHeader(output, this.size, this.extensions.iterator());
   }
 
   @Override

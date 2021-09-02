@@ -51,7 +51,7 @@ final class LanguageRangeWriter extends Writer<Object, Object> {
                                       String subtag, float weight, Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = http.writeField(tag, output);
+        part = http.writeField(output, tag);
       } else {
         part = part.pull(output);
       }
@@ -74,7 +74,7 @@ final class LanguageRangeWriter extends Writer<Object, Object> {
     }
     if (step == 3) {
       if (part == null) {
-        part = http.writeField(subtag, output);
+        part = http.writeField(output, subtag);
       } else {
         part = part.pull(output);
       }
@@ -91,7 +91,7 @@ final class LanguageRangeWriter extends Writer<Object, Object> {
     }
     if (step == 4) {
       if (part == null) {
-        part = http.writeQValue(weight, output);
+        part = http.writeQValue(output, weight);
       } else {
         part = part.pull(output);
       }

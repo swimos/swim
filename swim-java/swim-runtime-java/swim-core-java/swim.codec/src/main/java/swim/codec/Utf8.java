@@ -34,6 +34,14 @@ public final class Utf8 {
     return new Utf8DecodedInput(input, UtfErrorMode.fatal());
   }
 
+  public static Input decodedInput(String input, UtfErrorMode errorMode) {
+    return new Utf8DecodedInput(Unicode.stringInput(input), errorMode);
+  }
+
+  public static Input decodedInput(String input) {
+    return new Utf8DecodedInput(Unicode.stringInput(input), UtfErrorMode.fatal());
+  }
+
   /**
    * Returns a new {@code Output} that accepts UTF-8 code unit sequences, and
    * writes decoded Unicode code points to the composed {@code output}, handling
@@ -115,11 +123,11 @@ public final class Utf8 {
     return new OutputWriter<I, O>(Utf8.encodedOutput(Output.full()), writer);
   }
 
-  public static <O> Writer<?, O> writeString(O input, Output<?> output, UtfErrorMode errorMode) {
+  public static <O> Writer<?, O> writeString(Output<?> output, O input, UtfErrorMode errorMode) {
     return OutputWriter.write(Utf8.encodedOutput(output, errorMode), Unicode.stringWriter(input));
   }
 
-  public static <O> Writer<?, O> writeString(O input, Output<?> output) {
+  public static <O> Writer<?, O> writeString(Output<?> output, O input) {
     return OutputWriter.write(Utf8.encodedOutput(output), Unicode.stringWriter(input));
   }
 
@@ -147,7 +155,7 @@ public final class Utf8 {
    * how to decode subsequent input buffers. Handles invalid code unit
    * sequences according to the {@code errorMode} policy.
    */
-  public static <O> Decoder<O> decodeOutput(Output<O> output, InputBuffer input, UtfErrorMode errorMode) {
+  public static <O> Decoder<O> decodeOutput(InputBuffer input, Output<O> output, UtfErrorMode errorMode) {
     return OutputParser.parse(Utf8.decodedInput(input, errorMode), output);
   }
 
@@ -157,7 +165,7 @@ public final class Utf8 {
    * how to decode subsequent input buffers. Handles invalid code unit
    * sequences according to the {@link UtfErrorMode#fatal()} policy.
    */
-  public static <O> Decoder<O> decodeOutput(Output<O> output, Input input) {
+  public static <O> Decoder<O> decodeOutput(Input input, Output<O> output) {
     return OutputParser.parse(Utf8.decodedInput(input), output);
   }
 
@@ -169,11 +177,11 @@ public final class Utf8 {
     return new InputParser<O>(Utf8.decodedInput(Input.empty()), parser);
   }
 
-  public static <O> Parser<O> parseDecoded(Parser<O> parser, Input input, UtfErrorMode errorMode) {
+  public static <O> Parser<O> parseDecoded(Input input, Parser<O> parser, UtfErrorMode errorMode) {
     return InputParser.parse(Utf8.decodedInput(input, errorMode), parser);
   }
 
-  public static <O> Parser<O> parseDecoded(Parser<O> parser, Input input) {
+  public static <O> Parser<O> parseDecoded(Input input, Parser<O> parser) {
     return InputParser.parse(Utf8.decodedInput(input), parser);
   }
 
@@ -185,20 +193,20 @@ public final class Utf8 {
     return new OutputWriter<I, O>(Utf8.encodedOutput(Output.full()), writer);
   }
 
-  public static <I, O> Writer<I, O> writeEncoded(Writer<I, O> writer, Output<?> output, UtfErrorMode errorMode) {
+  public static <I, O> Writer<I, O> writeEncoded(Output<?> output, Writer<I, O> writer, UtfErrorMode errorMode) {
     return OutputWriter.write(Utf8.encodedOutput(output, errorMode), writer);
   }
 
-  public static <I, O> Writer<I, O> writeEncoded(Writer<I, O> writer, Output<?> output) {
+  public static <I, O> Writer<I, O> writeEncoded(Output<?> output, Writer<I, O> writer) {
     return OutputWriter.write(Utf8.encodedOutput(output), writer);
   }
 
-  public static <O> Decoder<O> decode(Parser<O> parser, InputStream input) throws IOException {
-    return Binary.decode(Utf8.decodedParser(parser), input);
+  public static <O> Decoder<O> decode(InputStream input, Parser<O> parser) throws IOException {
+    return Binary.decode(input, Utf8.decodedParser(parser));
   }
 
-  public static <O> O read(Parser<O> parser, InputStream input) throws IOException {
-    return Binary.read(Utf8.decodedParser(parser), input);
+  public static <O> O read(InputStream input, Parser<O> parser) throws IOException {
+    return Binary.read(input, Utf8.decodedParser(parser));
   }
 
   /**

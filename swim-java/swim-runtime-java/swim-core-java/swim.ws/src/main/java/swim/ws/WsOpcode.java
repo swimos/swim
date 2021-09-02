@@ -19,7 +19,6 @@ import swim.codec.Output;
 
 public enum WsOpcode implements Debug {
 
-  INVALID(-1),
   CONTINUATION(0x0),
   TEXT(0x1),
   BINARY(0x2),
@@ -41,10 +40,6 @@ public enum WsOpcode implements Debug {
 
   WsOpcode(int code) {
     this.code = code;
-  }
-
-  public boolean isValid() {
-    return this.code >= 0;
   }
 
   public boolean isData() {
@@ -85,7 +80,7 @@ public enum WsOpcode implements Debug {
 
   @Override
   public <T> Output<T> debug(Output<T> output) {
-    output = output.write("WsOpcode").write('.').write(name());
+    output = output.write("WsOpcode").write('.').write(this.name());
     return output;
   }
 
@@ -107,7 +102,7 @@ public enum WsOpcode implements Debug {
       case 0xd: return WsOpcode.RESERVED_D;
       case 0xe: return WsOpcode.RESERVED_E;
       case 0xf: return WsOpcode.RESERVED_F;
-      default: return WsOpcode.INVALID;
+      default: throw new IllegalArgumentException(Integer.toString(code));
     }
   }
 

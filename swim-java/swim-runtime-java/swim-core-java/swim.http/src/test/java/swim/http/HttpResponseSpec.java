@@ -15,12 +15,12 @@
 package swim.http;
 
 import org.testng.annotations.Test;
-import swim.http.header.Connection;
-import swim.http.header.ContentLength;
+import swim.http.header.ConnectionHeader;
+import swim.http.header.ContentLengthHeader;
 import swim.http.header.RawHeader;
-import swim.http.header.SecWebSocketAccept;
-import swim.http.header.SecWebSocketProtocol;
-import swim.http.header.Upgrade;
+import swim.http.header.SecWebSocketAcceptHeader;
+import swim.http.header.SecWebSocketProtocolHeader;
+import swim.http.header.UpgradeHeader;
 import static swim.http.HttpAssertions.assertWrites;
 
 public class HttpResponseSpec {
@@ -41,7 +41,7 @@ public class HttpResponseSpec {
     assertParses("HTTP/1.1 200 OK\r\n"
                + "Content-Length: 0\r\n"
                + "\r\n",
-                 HttpResponse.create(HttpStatus.OK, ContentLength.create(0)));
+                 HttpResponse.create(HttpStatus.OK, ContentLengthHeader.create(0)));
   }
 
   @Test
@@ -53,10 +53,10 @@ public class HttpResponseSpec {
                + "Sec-WebSocket-Protocol: chat\r\n"
                + "\r\n",
                  HttpResponse.create(HttpStatus.SWITCHING_PROTOCOLS,
-                                     Upgrade.create("websocket"),
-                                     Connection.create("Upgrade"),
-                                     SecWebSocketAccept.create("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
-                                     SecWebSocketProtocol.create("chat")));
+                                     UpgradeHeader.create("websocket"),
+                                     ConnectionHeader.create("Upgrade"),
+                                     SecWebSocketAcceptHeader.create("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
+                                     SecWebSocketProtocolHeader.create("chat")));
   }
 
   @Test
@@ -72,7 +72,7 @@ public class HttpResponseSpec {
                  "HTTP/1.1 200 OK\r\n"
                + "Foo: Bar\r\n"
                + "\r\n");
-    assertWrites(HttpResponse.create(HttpStatus.OK, ContentLength.create(0)),
+    assertWrites(HttpResponse.create(HttpStatus.OK, ContentLengthHeader.create(0)),
                  "HTTP/1.1 200 OK\r\n"
                + "Content-Length: 0\r\n"
                + "\r\n");
@@ -81,10 +81,10 @@ public class HttpResponseSpec {
   @Test
   public void writeResponsesWithMultipleHeaders() {
     assertWrites(HttpResponse.create(HttpStatus.SWITCHING_PROTOCOLS,
-                                     Upgrade.create("websocket"),
-                                     Connection.create("Upgrade"),
-                                     SecWebSocketAccept.create("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
-                                     SecWebSocketProtocol.create("chat")),
+                                     UpgradeHeader.create("websocket"),
+                                     ConnectionHeader.create("Upgrade"),
+                                     SecWebSocketAcceptHeader.create("s3pPLMBiTxaQ9kYGzzhZRbK+xOo="),
+                                     SecWebSocketProtocolHeader.create("chat")),
                  "HTTP/1.1 101 Switching Protocols\r\n"
                + "Upgrade: websocket\r\n"
                + "Connection: Upgrade\r\n"

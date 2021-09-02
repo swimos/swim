@@ -21,7 +21,7 @@ import swim.codec.Output;
 import swim.codec.OutputBuffer;
 import swim.collections.FingerTrieSeq;
 
-final class HttpEmpty extends HttpEntity<Object> implements Debug {
+final class HttpEmpty extends HttpPayload<Object> implements Debug {
 
   @Override
   public boolean isDefined() {
@@ -31,11 +31,6 @@ final class HttpEmpty extends HttpEntity<Object> implements Debug {
   @Override
   public Object get() {
     return null;
-  }
-
-  @Override
-  public long length() {
-    return 0L;
   }
 
   @Override
@@ -59,14 +54,14 @@ final class HttpEmpty extends HttpEntity<Object> implements Debug {
   }
 
   @Override
-  public <T2> Encoder<?, HttpMessage<T2>> encodeHttp(HttpMessage<T2> message,
-                                                     OutputBuffer<?> output, HttpWriter http) {
+  public <T2> Encoder<?, HttpMessage<T2>> encodeHttp(OutputBuffer<?> output,
+                                                     HttpMessage<T2> message, HttpWriter http) {
     return Encoder.done(message);
   }
 
   @Override
   public <T> Output<T> debug(Output<T> output) {
-    output = output.write("HttpEntity").write('.').write("empty").write('(').write(')');
+    output = output.write("HttpPayload").write('.').write("empty").write('(').write(')');
     return output;
   }
 

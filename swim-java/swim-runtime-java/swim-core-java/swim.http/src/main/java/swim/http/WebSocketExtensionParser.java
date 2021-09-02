@@ -23,16 +23,16 @@ import swim.util.Builder;
 final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
 
   final HttpParser http;
-  final StringBuilder name;
-  final Parser<WebSocketParam> param;
+  final StringBuilder nameBuilder;
+  final Parser<WebSocketParam> paramParser;
   final Builder<WebSocketParam, FingerTrieSeq<WebSocketParam>> params;
   final int step;
 
-  WebSocketExtensionParser(HttpParser http, StringBuilder name, Parser<WebSocketParam> param,
+  WebSocketExtensionParser(HttpParser http, StringBuilder nameBuilder, Parser<WebSocketParam> paramParser,
                            Builder<WebSocketParam, FingerTrieSeq<WebSocketParam>> params, int step) {
     this.http = http;
-    this.name = name;
-    this.param = param;
+    this.nameBuilder = nameBuilder;
+    this.paramParser = paramParser;
     this.params = params;
     this.step = step;
   }
@@ -43,10 +43,10 @@ final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
 
   @Override
   public Parser<WebSocketExtension> feed(Input input) {
-    return WebSocketExtensionParser.parse(input, this.http, this.name, this.param, this.params, this.step);
+    return WebSocketExtensionParser.parse(input, this.http, this.nameBuilder, this.paramParser, this.params, this.step);
   }
 
-  static Parser<WebSocketExtension> parse(Input input, HttpParser http, StringBuilder name, Parser<WebSocketParam> param,
+  static Parser<WebSocketExtension> parse(Input input, HttpParser http, StringBuilder nameBuilder, Parser<WebSocketParam> paramParser,
                                           Builder<WebSocketParam, FingerTrieSeq<WebSocketParam>> params, int step) {
     int c = 0;
     if (step == 1) {
@@ -54,10 +54,10 @@ final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (name == null) {
-            name = new StringBuilder();
+          if (nameBuilder == null) {
+            nameBuilder = new StringBuilder();
           }
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
           step = 2;
         } else {
           return Parser.error(Diagnostic.expected("websocket extension", input));
@@ -71,7 +71,7 @@ final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          name.appendCodePoint(c);
+          nameBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -97,7 +97,7 @@ final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
           input = input.step();
           step = 4;
         } else if (!input.isEmpty()) {
-          return Parser.done(http.webSocketExtension(name.toString(), params != null ? params.bind() : FingerTrieSeq.<WebSocketParam>empty()));
+          return Parser.done(http.webSocketExtension(nameBuilder.toString(), params != null ? params.bind() : FingerTrieSeq.empty()));
         }
       }
       if (step == 4) {
@@ -114,18 +114,18 @@ final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
         }
       }
       if (step == 5) {
-        if (param == null) {
-          param = http.parseWebSocketParam(input);
+        if (paramParser == null) {
+          paramParser = http.parseWebSocketParam(input);
         } else {
-          param = param.feed(input);
+          paramParser = paramParser.feed(input);
         }
-        if (param.isDone()) {
-          params.add(param.bind());
-          param = null;
+        if (paramParser.isDone()) {
+          params.add(paramParser.bind());
+          paramParser = null;
           step = 3;
           continue;
-        } else if (param.isError()) {
-          return param.asError();
+        } else if (paramParser.isError()) {
+          return paramParser.asError();
         }
       }
       break;
@@ -133,7 +133,7 @@ final class WebSocketExtensionParser extends Parser<WebSocketExtension> {
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new WebSocketExtensionParser(http, name, param, params, step);
+    return new WebSocketExtensionParser(http, nameBuilder, paramParser, params, step);
   }
 
   static Parser<WebSocketExtension> parse(Input input, HttpParser http) {

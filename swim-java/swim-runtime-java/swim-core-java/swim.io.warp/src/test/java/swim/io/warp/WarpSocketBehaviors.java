@@ -38,8 +38,8 @@ import swim.warp.CommandMessage;
 import swim.warp.Envelope;
 import swim.warp.LinkRequest;
 import swim.warp.LinkedResponse;
-import swim.ws.WsClose;
-import swim.ws.WsControl;
+import swim.ws.WsCloseFrame;
+import swim.ws.WsControlFrame;
 import swim.ws.WsRequest;
 import swim.ws.WsResponse;
 import static org.testng.Assert.assertEquals;
@@ -330,7 +330,7 @@ public abstract class WarpSocketBehaviors {
                   if (newDt >= testDuration) {
                     if (!this.closed) {
                       this.closed = true;
-                      this.write(WsClose.create(1000));
+                      this.write(WsCloseFrame.create(1000));
                     }
                     return;
                   } else if (newDt >= warmupDuration) {
@@ -382,8 +382,8 @@ public abstract class WarpSocketBehaviors {
                 }
 
                 @Override
-                public void didWrite(WsControl<?, ?> frame) {
-                  if (frame instanceof WsClose<?, ?>) {
+                public void didWrite(WsControlFrame<?, ?> frame) {
+                  if (frame instanceof WsCloseFrame<?, ?>) {
                     serverDone.countDown();
                   }
                 }
@@ -396,8 +396,8 @@ public abstract class WarpSocketBehaviors {
       for (int connection = 0; connection < connections; connection += 1) {
         clients[connection] = this.connect(endpoint, new AbstractWarpSocket() {
           @Override
-          public void didRead(WsControl<?, ?> frame) {
-            if (frame instanceof WsClose<?, ?>) {
+          public void didRead(WsControlFrame<?, ?> frame) {
+            if (frame instanceof WsCloseFrame<?, ?>) {
               clientDone.countDown();
             }
           }

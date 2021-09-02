@@ -275,7 +275,7 @@ final class NumF32 extends Num {
 
   @Override
   public <T> Output<T> display(Output<T> output) {
-    output = Format.debugFloat(this.value, output);
+    output = Format.debugFloat(output, this.value);
     return output;
   }
 

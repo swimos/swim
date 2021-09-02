@@ -51,7 +51,7 @@ final class HttpChunkHeaderWriter extends Writer<Object, Object> {
                                       Writer<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = Base16.uppercase().writeLong(size, output);
+        part = Base16.uppercase().writeLong(output, size);
       } else {
         part = part.pull(output);
       }

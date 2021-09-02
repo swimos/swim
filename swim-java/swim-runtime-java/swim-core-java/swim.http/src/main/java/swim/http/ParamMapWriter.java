@@ -63,7 +63,7 @@ final class ParamMapWriter extends Writer<Object, Object> {
       if (step == 3) {
         if (part == null) {
           final Map.Entry<?, ?> param = params.next();
-          part = http.writeParam(param.getKey().toString(), param.getValue().toString(), output);
+          part = http.writeParam(output, param.getKey().toString(), param.getValue().toString());
         } else {
           part = part.pull(output);
         }

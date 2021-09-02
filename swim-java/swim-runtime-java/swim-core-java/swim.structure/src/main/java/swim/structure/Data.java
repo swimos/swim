@@ -394,7 +394,7 @@ public class Data extends Value {
           break;
         }
       } while (true);
-      return Binary.writeByteBuffer(buffer, output);
+      return Binary.writeByteBuffer(output, buffer);
     } else {
       return Writer.done();
     }
@@ -402,7 +402,7 @@ public class Data extends Value {
 
   public Writer<?, ?> writeBase16(Output<?> output, Base16 base16) {
     if (this.array != null && this.size != 0) {
-      return base16.writeByteBuffer(ByteBuffer.wrap(this.array, this.offset, this.size), output);
+      return base16.writeByteBuffer(output, ByteBuffer.wrap(this.array, this.offset, this.size));
     } else {
       return Writer.done();
     }
@@ -424,7 +424,7 @@ public class Data extends Value {
 
   public Writer<?, ?> writeBase64(Output<?> output, Base64 base64) {
     if (this.array != null && this.size != 0) {
-      return base64.writeByteBuffer(ByteBuffer.wrap(this.array, this.offset, this.size), output);
+      return base64.writeByteBuffer(output, ByteBuffer.wrap(this.array, this.offset, this.size));
     } else {
       return Writer.done();
     }

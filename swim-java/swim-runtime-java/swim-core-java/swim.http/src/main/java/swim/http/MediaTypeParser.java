@@ -22,17 +22,17 @@ import swim.collections.HashTrieMap;
 final class MediaTypeParser extends Parser<MediaType> {
 
   final HttpParser http;
-  final StringBuilder type;
-  final StringBuilder subtype;
-  final Parser<HashTrieMap<String, String>> params;
+  final StringBuilder typeBuilder;
+  final StringBuilder subtypeBuilder;
+  final Parser<HashTrieMap<String, String>> paramsParser;
   final int step;
 
-  MediaTypeParser(HttpParser http, StringBuilder type, StringBuilder subtype,
-                  Parser<HashTrieMap<String, String>> params, int step) {
+  MediaTypeParser(HttpParser http, StringBuilder typeBuilder, StringBuilder subtypeBuilder,
+                  Parser<HashTrieMap<String, String>> paramsParser, int step) {
     this.http = http;
-    this.type = type;
-    this.subtype = subtype;
-    this.params = params;
+    this.typeBuilder = typeBuilder;
+    this.subtypeBuilder = subtypeBuilder;
+    this.paramsParser = paramsParser;
     this.step = step;
   }
 
@@ -42,21 +42,23 @@ final class MediaTypeParser extends Parser<MediaType> {
 
   @Override
   public Parser<MediaType> feed(Input input) {
-    return MediaTypeParser.parse(input, this.http, this.type, this.subtype, this.params, this.step);
+    return MediaTypeParser.parse(input, this.http, this.typeBuilder, this.subtypeBuilder,
+                                 this.paramsParser, this.step);
   }
 
-  static Parser<MediaType> parse(Input input, HttpParser http, StringBuilder type, StringBuilder subtype,
-                                 Parser<HashTrieMap<String, String>> params, int step) {
+  static Parser<MediaType> parse(Input input, HttpParser http,
+                                 StringBuilder typeBuilder, StringBuilder subtypeBuilder,
+                                 Parser<HashTrieMap<String, String>> paramsParser, int step) {
     int c = 0;
     if (step == 1) {
       if (input.isCont()) {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (type == null) {
-            type = new StringBuilder();
+          if (typeBuilder == null) {
+            typeBuilder = new StringBuilder();
           }
-          type.appendCodePoint(c);
+          typeBuilder.appendCodePoint(c);
           step = 2;
         } else {
           return Parser.error(Diagnostic.expected("media type", input));
@@ -70,7 +72,7 @@ final class MediaTypeParser extends Parser<MediaType> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          type.appendCodePoint(c);
+          typeBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -87,10 +89,10 @@ final class MediaTypeParser extends Parser<MediaType> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          if (subtype == null) {
-            subtype = new StringBuilder();
+          if (subtypeBuilder == null) {
+            subtypeBuilder = new StringBuilder();
           }
-          subtype.appendCodePoint(c);
+          subtypeBuilder.appendCodePoint(c);
           step = 4;
         } else {
           return Parser.error(Diagnostic.expected("media subtype", input));
@@ -104,7 +106,7 @@ final class MediaTypeParser extends Parser<MediaType> {
         c = input.head();
         if (Http.isTokenChar(c)) {
           input = input.step();
-          subtype.appendCodePoint(c);
+          subtypeBuilder.appendCodePoint(c);
         } else {
           break;
         }
@@ -114,21 +116,22 @@ final class MediaTypeParser extends Parser<MediaType> {
       }
     }
     if (step == 5) {
-      if (params == null) {
-        params = http.parseParamMap(input);
+      if (paramsParser == null) {
+        paramsParser = http.parseParamMap(input);
       } else {
-        params = params.feed(input);
+        paramsParser = paramsParser.feed(input);
       }
-      if (params.isDone()) {
-        return Parser.done(http.mediaType(type.toString(), subtype.toString(), params.bind()));
-      } else if (params.isError()) {
-        return params.asError();
+      if (paramsParser.isDone()) {
+        return Parser.done(http.mediaType(typeBuilder.toString(), subtypeBuilder.toString(),
+                                          paramsParser.bind()));
+      } else if (paramsParser.isError()) {
+        return paramsParser.asError();
       }
     }
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new MediaTypeParser(http, type, subtype, params, step);
+    return new MediaTypeParser(http, typeBuilder, subtypeBuilder, paramsParser, step);
   }
 
   static Parser<MediaType> parse(Input input, HttpParser http) {

@@ -29,28 +29,28 @@ public abstract class WsEncoder {
   }
 
   public <T> Encoder<?, WsFrame<T>> frameEncoder(WsFrame<T> frame) {
-    final WsOpcode opcode = frame.opcode();
-    switch (opcode) {
-      case CONTINUATION: return Encoder.error(new EncoderException("invalid opcode: " + opcode));
+    final WsOpcode frameType = frame.frameType();
+    switch (frameType) {
+      case CONTINUATION: return Encoder.error(new EncoderException("invalid opcode: " + frameType));
       case TEXT: return this.textFrameEncoder(frame);
       case BINARY: return this.binaryFrameEncoder(frame);
       case CLOSE: return this.closeFrameEncoder(frame);
       case PING: return this.pingFrameEncoder(frame);
       case PONG: return this.pongFrameEncoder(frame);
-      default: return Encoder.error(new EncoderException("reserved opcode: " + opcode));
+      default: return Encoder.error(new EncoderException("reserved opcode: " + frameType));
     }
   }
 
-  public <T> Encoder<?, WsFrame<T>> encodeFrame(WsFrame<T> frame, OutputBuffer<?> output) {
-    final WsOpcode opcode = frame.opcode();
-    switch (opcode) {
-      case CONTINUATION: return Encoder.error(new EncoderException("invalid opcode: " + opcode));
-      case TEXT: return this.encodeTextFrame(frame, output);
-      case BINARY: return this.encodeBinaryFrame(frame, output);
-      case CLOSE: return this.encodeCloseFrame(frame, output);
-      case PING: return this.encodePingFrame(frame, output);
-      case PONG: return this.encodePongFrame(frame, output);
-      default: return Encoder.error(new EncoderException("reserved opcode: " + opcode));
+  public <T> Encoder<?, WsFrame<T>> encodeFrame(OutputBuffer<?> output, WsFrame<T> frame) {
+    final WsOpcode frameType = frame.frameType();
+    switch (frameType) {
+      case CONTINUATION: return Encoder.error(new EncoderException("invalid opcode: " + frameType));
+      case TEXT: return this.encodeTextFrame(output, frame);
+      case BINARY: return this.encodeBinaryFrame(output, frame);
+      case CLOSE: return this.encodeCloseFrame(output, frame);
+      case PING: return this.encodePingFrame(output, frame);
+      case PONG: return this.encodePongFrame(output, frame);
+      default: return Encoder.error(new EncoderException("reserved opcode: " + frameType));
     }
   }
 
@@ -58,7 +58,7 @@ public abstract class WsEncoder {
     return new WsFrameEncoder<T>(this, frame);
   }
 
-  public <T> Encoder<?, WsFrame<T>> encodeTextFrame(WsFrame<T> frame, OutputBuffer<?> output) {
+  public <T> Encoder<?, WsFrame<T>> encodeTextFrame(OutputBuffer<?> output, WsFrame<T> frame) {
     return WsFrameEncoder.encode(output, this, frame);
   }
 
@@ -66,7 +66,7 @@ public abstract class WsEncoder {
     return new WsFrameEncoder<T>(this, frame);
   }
 
-  public <T> Encoder<?, WsFrame<T>> encodeBinaryFrame(WsFrame<T> frame, OutputBuffer<?> output) {
+  public <T> Encoder<?, WsFrame<T>> encodeBinaryFrame(OutputBuffer<?> output, WsFrame<T> frame) {
     return WsFrameEncoder.encode(output, this, frame);
   }
 
@@ -74,7 +74,7 @@ public abstract class WsEncoder {
     return new WsFrameEncoder<T>(this, frame);
   }
 
-  public <T> Encoder<?, WsFrame<T>> encodeCloseFrame(WsFrame<T> frame, OutputBuffer<?> output) {
+  public <T> Encoder<?, WsFrame<T>> encodeCloseFrame(OutputBuffer<?> output, WsFrame<T> frame) {
     return WsFrameEncoder.encode(output, this, frame);
   }
 
@@ -82,7 +82,7 @@ public abstract class WsEncoder {
     return new WsFrameEncoder<T>(this, frame);
   }
 
-  public <T> Encoder<?, WsFrame<T>> encodePingFrame(WsFrame<T> frame, OutputBuffer<?> output) {
+  public <T> Encoder<?, WsFrame<T>> encodePingFrame(OutputBuffer<?> output, WsFrame<T> frame) {
     return WsFrameEncoder.encode(output, this, frame);
   }
 
@@ -90,7 +90,7 @@ public abstract class WsEncoder {
     return new WsFrameEncoder<T>(this, frame);
   }
 
-  public <T> Encoder<?, WsFrame<T>> encodePongFrame(WsFrame<T> frame, OutputBuffer<?> output) {
+  public <T> Encoder<?, WsFrame<T>> encodePongFrame(OutputBuffer<?> output, WsFrame<T> frame) {
     return WsFrameEncoder.encode(output, this, frame);
   }
 

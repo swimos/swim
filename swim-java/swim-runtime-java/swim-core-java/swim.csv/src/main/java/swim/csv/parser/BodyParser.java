@@ -63,7 +63,7 @@ final class BodyParser<T, R, C> extends Parser<T> {
       }
       if (step == 2) {
         if (rowParser == null) {
-          rowParser = csv.parseRow(header, input);
+          rowParser = csv.parseRow(input, header);
         }
         while (rowParser.isCont() && !input.isEmpty()) {
           rowParser = rowParser.feed(input);

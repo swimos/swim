@@ -58,7 +58,7 @@ public final class WebSocketExtension extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeWebSocketExtension(this.name, this.params.iterator(), output);
+    return http.writeWebSocketExtension(output, this.name, this.params.iterator());
   }
 
   @Override

@@ -45,7 +45,7 @@ final class DataWriter extends Writer<Object, Object> {
     }
     if (step == 2) {
       if (part == null) {
-        part = Base64.standard().writeByteBuffer(buffer, output);
+        part = Base64.standard().writeByteBuffer(output, buffer);
       } else {
         part = part.pull(output);
       }

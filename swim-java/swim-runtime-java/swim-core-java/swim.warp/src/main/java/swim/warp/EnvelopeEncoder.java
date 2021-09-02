@@ -48,7 +48,7 @@ final class EnvelopeEncoder extends Encoder<Envelope, Envelope> {
 
   static Encoder<Envelope, Envelope> encode(OutputBuffer<?> output, Envelope envelope, Encoder<?, ?> input) {
     if (input == null) {
-      input = Utf8.writeEncoded(envelope.reconWriter(), output);
+      input = Utf8.writeEncoded(output, envelope.reconWriter());
     } else {
       input = input.pull(output);
     }

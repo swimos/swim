@@ -18,7 +18,7 @@ import swim.http.HttpRequest;
 import swim.http.HttpResponse;
 import swim.io.IpSocket;
 import swim.warp.Envelope;
-import swim.ws.WsControl;
+import swim.ws.WsControlFrame;
 
 public interface WarpSocket {
 
@@ -32,13 +32,13 @@ public interface WarpSocket {
 
   void didRead(Envelope envelope);
 
-  void didRead(WsControl<?, ?> frame);
+  void didRead(WsControlFrame<?, ?> frame);
 
   void doWrite();
 
   void didWrite(Envelope envelope);
 
-  void didWrite(WsControl<?, ?> frame);
+  void didWrite(WsControlFrame<?, ?> frame);
 
   void didUpgrade(HttpRequest<?> httpRequest, HttpResponse<?> httpResponse);
 

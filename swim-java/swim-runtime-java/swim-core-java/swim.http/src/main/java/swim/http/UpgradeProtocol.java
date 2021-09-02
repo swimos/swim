@@ -45,7 +45,7 @@ public final class UpgradeProtocol extends HttpPart implements Debug {
 
   @Override
   public Writer<?, ?> writeHttp(Output<?> output, HttpWriter http) {
-    return http.writeUpgradeProtocol(this.name, this.version, output);
+    return http.writeUpgradeProtocol(output, this.name, this.version);
   }
 
   public boolean matches(UpgradeProtocol that) {

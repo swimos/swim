@@ -21,24 +21,27 @@ import swim.collections.HashTrieMap;
 
 final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
 
-  final StringBuilder key;
-  final StringBuilder value;
+  final StringBuilder keyBuilder;
+  final StringBuilder valueBuilder;
   final HashTrieMap<String, String> params;
   final int step;
 
-  ParamMapParser(StringBuilder key, StringBuilder value, HashTrieMap<String, String> params, int step) {
-    this.key = key;
-    this.value = value;
+  ParamMapParser(StringBuilder keyBuilder, StringBuilder valueBuilder,
+                 HashTrieMap<String, String> params, int step) {
+    this.keyBuilder = keyBuilder;
+    this.valueBuilder = valueBuilder;
     this.params = params;
     this.step = step;
   }
 
   @Override
   public Parser<HashTrieMap<String, String>> feed(Input input) {
-    return ParamMapParser.parse(input, this.key, this.value, this.params, this.step);
+    return ParamMapParser.parse(input, this.keyBuilder, this.valueBuilder,
+                                this.params, this.step);
   }
 
-  static Parser<HashTrieMap<String, String>> parse(Input input, StringBuilder key, StringBuilder value,
+  static Parser<HashTrieMap<String, String>> parse(Input input, StringBuilder keyBuilder,
+                                                   StringBuilder valueBuilder,
                                                    HashTrieMap<String, String> params, int step) {
     int c = 0;
     do {
@@ -72,9 +75,9 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
         }
         if (input.isCont()) {
           if (Http.isTokenChar(c)) {
-            key = new StringBuilder();
+            keyBuilder = new StringBuilder();
             input = input.step();
-            key.appendCodePoint(c);
+            keyBuilder.appendCodePoint(c);
             step = 3;
           } else {
             return Parser.error(Diagnostic.expected("param name", input));
@@ -88,7 +91,7 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
           c = input.head();
           if (Http.isTokenChar(c)) {
             input = input.step();
-            key.appendCodePoint(c);
+            keyBuilder.appendCodePoint(c);
           } else {
             break;
           }
@@ -125,8 +128,8 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
           }
         }
         if (input.isCont()) {
-          if (value == null) {
-            value = new StringBuilder();
+          if (valueBuilder == null) {
+            valueBuilder = new StringBuilder();
           }
           if (c == '"') {
             input = input.step();
@@ -143,7 +146,7 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
           c = input.head();
           if (Http.isTokenChar(c)) {
             input = input.step();
-            value.appendCodePoint(c);
+            valueBuilder.appendCodePoint(c);
             step = 7;
           } else {
             return Parser.error(Diagnostic.expected("param value", input));
@@ -157,7 +160,7 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
           c = input.head();
           if (Http.isTokenChar(c)) {
             input = input.step();
-            value.appendCodePoint(c);
+            valueBuilder.appendCodePoint(c);
           } else {
             break;
           }
@@ -166,9 +169,9 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
           if (params == null) {
             params = HashTrieMap.empty();
           }
-          params = params.updated(key.toString(), value.toString());
-          key = null;
-          value = null;
+          params = params.updated(keyBuilder.toString(), valueBuilder.toString());
+          keyBuilder = null;
+          valueBuilder = null;
           step = 1;
           continue;
         }
@@ -178,7 +181,7 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
           c = input.head();
           if (Http.isQuotedChar(c)) {
             input = input.step();
-            value.appendCodePoint(c);
+            valueBuilder.appendCodePoint(c);
           } else {
             break;
           }
@@ -189,9 +192,9 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
             if (params == null) {
               params = HashTrieMap.empty();
             }
-            params = params.updated(key.toString(), value.toString());
-            key = null;
-            value = null;
+            params = params.updated(keyBuilder.toString(), valueBuilder.toString());
+            keyBuilder = null;
+            valueBuilder = null;
             step = 1;
             continue;
           } else if (c == '\\') {
@@ -209,7 +212,7 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
           c = input.head();
           if (Http.isEscapeChar(c)) {
             input = input.step();
-            value.appendCodePoint(c);
+            valueBuilder.appendCodePoint(c);
             step = 8;
             continue;
           } else {
@@ -224,7 +227,7 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
     if (input.isError()) {
       return Parser.error(input.trap());
     }
-    return new ParamMapParser(key, value, params, step);
+    return new ParamMapParser(keyBuilder, valueBuilder, params, step);
   }
 
   static Parser<HashTrieMap<String, String>> parse(Input input) {
@@ -235,8 +238,8 @@ final class ParamMapParser extends Parser<HashTrieMap<String, String>> {
     return ParamMapParser.parse(input, null, null, null, 2);
   }
 
-  static Parser<HashTrieMap<String, String>> parseRest(Input input, StringBuilder key) {
-    return ParamMapParser.parse(input, key, null, null, 3);
+  static Parser<HashTrieMap<String, String>> parseRest(Input input, StringBuilder keyBuilder) {
+    return ParamMapParser.parse(input, keyBuilder, null, null, 3);
   }
 
 }

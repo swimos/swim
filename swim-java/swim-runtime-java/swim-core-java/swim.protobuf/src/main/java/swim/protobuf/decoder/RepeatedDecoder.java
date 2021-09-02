@@ -56,7 +56,7 @@ final class RepeatedDecoder<I, T> extends Decoder<T> {
         return Decoder.done(builder.bind());
       }
       if (itemDecoder == null) {
-        itemDecoder = protobuf.decodeType(type.itemType(), input);
+        itemDecoder = protobuf.decodeType(input, type.itemType());
       } else {
         itemDecoder = itemDecoder.feed(input);
       }

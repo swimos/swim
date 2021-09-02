@@ -76,7 +76,7 @@ public class UriFragment extends UriPart implements Comparable<UriFragment>, Deb
     if (this.string != null) {
       output = output.write(this.string);
     } else if (this.identifier != null) {
-      output = Uri.writeFragment(this.identifier, output);
+      output = Uri.writeFragment(output, this.identifier);
     }
     return output;
   }

@@ -54,12 +54,12 @@ public class HttpChunkedSpec {
 
   public static <T> void assertDecodes(Decoder<T> decodee, String input, T expected) {
     final HttpResponse<T> headers = HttpResponse.create(HttpStatus.OK);
-    final HttpResponse<T> response = headers.entity(HttpValue.create(expected));
+    final HttpResponse<T> response = headers.payload(HttpValue.create(expected));
     HttpAssertions.assertDecodes(Http.standardParser().chunkedDecoder(headers, decodee), input, response);
   }
 
-  public static void assertEncodes(HttpEntity<?> entity, String expected) {
-    HttpAssertions.assertEncodes(entity.httpEncoder(null), expected);
+  public static void assertEncodes(HttpPayload<?> payload, String expected) {
+    HttpAssertions.assertEncodes(payload.httpEncoder(null), expected);
   }
 
 }

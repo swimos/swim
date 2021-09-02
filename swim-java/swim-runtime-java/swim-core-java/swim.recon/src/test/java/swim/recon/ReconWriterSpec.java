@@ -396,7 +396,7 @@ public class ReconWriterSpec {
       final byte[] actual = new byte[n];
       OutputBuffer<?> buffer = Binary.outputBuffer(actual);
       buffer = buffer.limit(i);
-      Writer<?, ?> writer = Recon.write(item, Utf8.decodedOutput(buffer).isPart(true));
+      Writer<?, ?> writer = Recon.write(Utf8.decodedOutput(buffer).isPart(true), item);
       buffer = buffer.limit(buffer.capacity());
       writer = writer.pull(Utf8.decodedOutput(buffer).isPart(false));
       if (writer.isError()) {
@@ -422,7 +422,7 @@ public class ReconWriterSpec {
       final byte[] actual = new byte[n];
       OutputBuffer<?> buffer = Binary.outputBuffer(actual);
       buffer = buffer.limit(i);
-      Writer<?, ?> writer = Recon.writeBlock(item, Utf8.decodedOutput(buffer).isPart(true));
+      Writer<?, ?> writer = Recon.writeBlock(Utf8.decodedOutput(buffer).isPart(true), item);
       buffer = buffer.limit(buffer.capacity());
       writer = writer.pull(Utf8.decodedOutput(buffer).isPart(false));
       if (writer.isError()) {

@@ -321,7 +321,7 @@ final class NumI64 extends Num {
 
   @Override
   public <T> Output<T> display(Output<T> output) {
-    output = Format.debugLong(this.value, output);
+    output = Format.debugLong(output, this.value);
     return output;
   }
 

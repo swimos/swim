@@ -68,7 +68,7 @@ final class MqttStringEncoder extends Encoder<String, String> {
     }
     if (step == 3) {
       if (encoder == null) {
-        encoder = Utf8.writeString(string, output);
+        encoder = Utf8.writeString(output, string);
       } else {
         encoder = encoder.pull(output);
       }

@@ -56,7 +56,7 @@ final class MqttSubscriptionEncoder extends Encoder<MqttSubscription, MqttSubscr
                                                             Encoder<?, ?> part, int step) {
     if (step == 1) {
       if (part == null) {
-        part = mqtt.encodeString(subscription.topicName, output);
+        part = mqtt.encodeString(output, subscription.topicName);
       } else {
         part = part.pull(output);
       }
