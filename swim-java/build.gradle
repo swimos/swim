@@ -26,6 +26,7 @@ javadoc {
                 'swim.decipher',
                 'swim.deflate',
                 'swim.http',
+                'swim.http2',
                 'swim.io',
                 'swim.io.http',
                 'swim.io.mqtt',

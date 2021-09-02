@@ -29,6 +29,7 @@ dependencies {
   api project(':swim-deflate')
   api project(':swim-mqtt')
   api project(':swim-http')
+  api project(':swim-http2')
   api project(':swim-ws')
   api project(':swim-warp')
   api project(':swim-concurrent')

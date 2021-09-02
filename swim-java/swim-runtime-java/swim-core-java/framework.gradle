@@ -71,6 +71,9 @@ ext.includeSwimCore = { frameworkDir ->
   include 'swim-http'
   project(':swim-http').projectDir = file("${frameworkDir}/swim.http")
 
+  include 'swim-http2'
+  project(':swim-http2').projectDir = file("${frameworkDir}/swim.http2")
+
   include 'swim-ws'
   project(':swim-ws').projectDir = file("${frameworkDir}/swim.ws")
 
