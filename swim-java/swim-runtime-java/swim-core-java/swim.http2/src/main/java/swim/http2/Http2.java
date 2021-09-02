@@ -12,17 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/**
- * HTTP/2 frame model and wire protocol codec that incrementally decodes
- * and encodes HTTP/2 streams without intermediate buffering.
- */
-@SuppressWarnings("module")
-module swim.http2 {
-  requires swim.util;
-  requires transitive swim.codec;
-  requires transitive swim.collections;
-  requires transitive swim.structure;
+package swim.http2;
 
-  exports swim.hpack;
-  exports swim.http2;
+public final class Http2 {
+
+  private Http2() {
+    // static
+  }
+
+  private static Http2Decoder standardDecoder;
+
+  public static Http2Decoder standardDecoder() {
+    if (Http2.standardDecoder == null) {
+      Http2.standardDecoder = new Http2Decoder();
+    }
+    return Http2.standardDecoder;
+  }
+
+  private static Http2Encoder standardEncoder;
+
+  public static Http2Encoder standardEncoder() {
+    if (Http2.standardEncoder == null) {
+      Http2.standardEncoder = new Http2Encoder();
+    }
+    return Http2.standardEncoder;
+  }
+
 }

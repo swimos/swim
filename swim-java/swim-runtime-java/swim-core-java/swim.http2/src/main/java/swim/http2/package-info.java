@@ -13,16 +13,7 @@
 // limitations under the License.
 
 /**
- * HTTP/2 frame model and wire protocol codec that incrementally decodes
- * and encodes HTTP/2 streams without intermediate buffering.
+ * HTTP/2 wire protocol codec.
  */
-@SuppressWarnings("module")
-module swim.http2 {
-  requires swim.util;
-  requires transitive swim.codec;
-  requires transitive swim.collections;
-  requires transitive swim.structure;
 
-  exports swim.hpack;
-  exports swim.http2;
-}
+package swim.http2;
