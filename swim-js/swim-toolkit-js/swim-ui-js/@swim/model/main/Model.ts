@@ -20,6 +20,7 @@ import type {ModelConsumerType, ModelConsumer} from "./ModelConsumer";
 import type {TraitClass, Trait} from "./Trait";
 import type {ModelServiceConstructor, ModelService} from "./service/ModelService";
 import type {RefreshService} from "./service/RefreshService";
+import type {SelectionService} from "./service/SelectionService";
 import type {WarpService} from "./service/WarpService";
 import type {ModelPropertyConstructor, ModelProperty} from "./property/ModelProperty";
 import type {ModelFastenerConstructor, ModelFastener} from "./fastener/ModelFastener";
@@ -700,6 +701,8 @@ export abstract class Model implements ModelDownlinkContext {
   }
 
   declare readonly refreshService: RefreshService<this>; // defined by RefreshService
+
+  declare readonly selectionService: SelectionService<this>; // defined by SelectionService
 
   declare readonly warpService: WarpService<this>; // defined by WarpService
 

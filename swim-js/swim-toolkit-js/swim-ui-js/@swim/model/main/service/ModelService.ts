@@ -19,9 +19,11 @@ import type {Trait} from "../Trait";
 import {ModelManager} from "../manager/ModelManager";
 import type {ModelManagerObserverType} from "../manager/ModelManagerObserver";
 import {RefreshManager} from "../refresh/RefreshManager";
+import {SelectionManager} from "../selection/SelectionManager";
 import {WarpManager} from "../warp/WarpManager";
 import {ModelManagerService} from "../"; // forward import
 import {RefreshService} from "../"; // forward import
+import {SelectionService} from "../"; // forward import
 import {WarpService} from "../"; // forward import
 import type {TraitService} from "./TraitService";
 
@@ -133,6 +135,7 @@ export const ModelService = function <M extends Model, T>(
   new<M extends Model, T>(owner: M, serviceName: string | undefined): ModelService<M, T>;
 
   <M extends Model, T extends RefreshManager = RefreshManager>(descriptor: {type: typeof RefreshManager} & ModelServiceDescriptor<M, T, ModelManagerObserverType<T>>): PropertyDecorator;
+  <M extends Model, T extends SelectionManager = SelectionManager>(descriptor: {type: typeof SelectionManager} & ModelServiceDescriptor<M, T, ModelManagerObserverType<T>>): PropertyDecorator;
   <M extends Model, T extends WarpManager = WarpManager>(descriptor: {type: typeof WarpManager} & ModelServiceDescriptor<M, T, ModelManagerObserverType<T>>): PropertyDecorator;
   <M extends Model, T extends ModelManager = ModelManager>(descriptor: {type: typeof ModelManager} & ModelServiceDescriptor<M, T, ModelManagerObserverType<T>>): PropertyDecorator;
   <M extends Model, T, I = {}>(descriptor: ModelServiceDescriptorExtends<M, T, I>): PropertyDecorator;
@@ -368,6 +371,8 @@ ModelService.prototype.unmount = function (this: ModelService<Model, unknown>): 
 ModelService.getClass = function (type: unknown): ModelServiceClass | null {
   if (type === RefreshManager) {
     return RefreshService;
+  } else if (type === SelectionManager) {
+    return SelectionService;
   } else if (type === WarpManager) {
     return WarpService;
   } else if (type === ModelManager) {

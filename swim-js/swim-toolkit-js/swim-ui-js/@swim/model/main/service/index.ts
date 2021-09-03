@@ -27,6 +27,8 @@ export {ModelManagerService} from "./ModelManagerService";
 
 export {RefreshService} from "./RefreshService";
 
+export {SelectionService} from "./SelectionService";
+
 export {WarpService} from "./WarpService";
 
 export {
