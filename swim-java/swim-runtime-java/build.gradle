@@ -101,7 +101,7 @@ subprojects {
 def localizeDependencies(subproject) {
   if (subproject.plugins.hasPlugin(JavaLibraryPlugin)) {
     subproject.configurations.api.dependencies.toArray().each { dependency ->
-      if (dependency instanceof ExternalModuleDependency && dependency.group == "org.swimos") {
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
         subproject.configurations.api.dependencies.remove(dependency)
         subproject.dependencies {
           api project(':' + dependency.name)
@@ -109,7 +109,7 @@ def localizeDependencies(subproject) {
       }
     }
     subproject.configurations.implementation.dependencies.toArray().each { dependency ->
-      if (dependency instanceof ExternalModuleDependency && dependency.group == "org.swimos") {
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
         subproject.configurations.implementation.dependencies.remove(dependency)
         subproject.dependencies {
           implementation project(':' + dependency.name)
@@ -117,7 +117,7 @@ def localizeDependencies(subproject) {
       }
     }
     subproject.configurations.testImplementation.dependencies.toArray().each { dependency ->
-      if (dependency instanceof ExternalModuleDependency && dependency.group == "org.swimos") {
+      if (dependency instanceof ExternalModuleDependency && dependency.group == 'org.swimos') {
         subproject.configurations.testImplementation.dependencies.remove(dependency)
         subproject.dependencies {
           testImplementation project(':' + dependency.name)
