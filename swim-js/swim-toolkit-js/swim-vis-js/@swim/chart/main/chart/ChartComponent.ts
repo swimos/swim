@@ -116,6 +116,22 @@ export class ChartComponent<X, Y> extends GraphComponent<X, Y> {
   }
 
   protected attachChartView(chartView: ChartView<X, Y>): void {
+    const topAxisComponent = this.topAxis.component;
+    if (topAxisComponent !== null) {
+      topAxisComponent.axis.injectView(chartView);
+    }
+    const rightAxisComponent = this.rightAxis.component;
+    if (rightAxisComponent !== null) {
+      rightAxisComponent.axis.injectView(chartView);
+    }
+    const bottomAxisComponent = this.bottomAxis.component;
+    if (bottomAxisComponent !== null) {
+      bottomAxisComponent.axis.injectView(chartView);
+    }
+    const leftAxisComponent = this.leftAxis.component;
+    if (leftAxisComponent !== null) {
+      leftAxisComponent.axis.injectView(chartView);
+    }
     if (this.graph.view !== null || this.graph.trait !== null) {
       this.graph.injectView(chartView);
     }

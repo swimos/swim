@@ -676,53 +676,28 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
 
     const topAxisView = this.topAxis.view;
     if (topAxisView !== null) {
-      const topFrame = topAxisView.viewFrame;
-      if (topFrame.xMin !== graphLeft || topFrame.yMin !== frame.yMin ||
-          topFrame.xMax !== graphRight || topFrame.yMax !== graphBottom) {
-        topAxisView.setViewFrame(new R2Box(graphLeft, frame.yMin, graphRight, graphBottom));
-        topAxisView.origin.setState(new R2Point(graphLeft, graphTop), View.Intrinsic);
-        topAxisView.requireUpdate(View.NeedsLayout);
-      }
+      topAxisView.setViewFrame(new R2Box(graphLeft, frame.yMin, graphRight, graphBottom));
+      topAxisView.origin.setState(new R2Point(graphLeft, graphTop), View.Intrinsic);
     }
     const rightAxisView = this.rightAxis.view;
     if (rightAxisView !== null) {
-      const rightFrame = rightAxisView.viewFrame;
-      if (rightFrame.xMin !== graphLeft || rightFrame.yMin !== graphTop ||
-          rightFrame.xMax !== frame.xMax || rightFrame.yMax !== graphBottom) {
-        rightAxisView.setViewFrame(new R2Box(graphLeft, graphTop, frame.xMax, graphBottom));
-        rightAxisView.origin.setState(new R2Point(Math.max(graphLeft, graphRight), graphBottom), View.Intrinsic);
-        rightAxisView.requireUpdate(View.NeedsLayout);
-      }
+      rightAxisView.setViewFrame(new R2Box(graphLeft, graphTop, frame.xMax, graphBottom));
+      rightAxisView.origin.setState(new R2Point(Math.max(graphLeft, graphRight), graphBottom), View.Intrinsic);
     }
     const bottomAxisView = this.bottomAxis.view;
     if (bottomAxisView !== null) {
-      const bottomFrame = bottomAxisView.viewFrame;
-      if (bottomFrame.xMin !== graphLeft || bottomFrame.yMin !== graphTop ||
-          bottomFrame.xMax !== graphRight || bottomFrame.yMax !== frame.yMax) {
-        bottomAxisView.setViewFrame(new R2Box(graphLeft, graphTop, graphRight, frame.yMax));
-        bottomAxisView.origin.setState(new R2Point(graphLeft, Math.max(graphTop, graphBottom)), View.Intrinsic);
-        bottomAxisView.requireUpdate(View.NeedsLayout);
-      }
+      bottomAxisView.setViewFrame(new R2Box(graphLeft, graphTop, graphRight, frame.yMax));
+      bottomAxisView.origin.setState(new R2Point(graphLeft, Math.max(graphTop, graphBottom)), View.Intrinsic);
     }
     const leftAxisView = this.leftAxis.view;
     if (leftAxisView !== null) {
-      const leftFrame = leftAxisView.viewFrame;
-      if (leftFrame.xMin !== frame.xMin || leftFrame.yMin !== graphTop ||
-          leftFrame.xMax !== graphRight || leftFrame.yMax !== graphBottom) {
-        leftAxisView.setViewFrame(new R2Box(frame.xMin, graphTop, graphRight, graphBottom));
-        leftAxisView.origin.setState(new R2Point(graphLeft, graphBottom), View.Intrinsic);
-        leftAxisView.requireUpdate(View.NeedsLayout);
-      }
+      leftAxisView.setViewFrame(new R2Box(frame.xMin, graphTop, graphRight, graphBottom));
+      leftAxisView.origin.setState(new R2Point(graphLeft, graphBottom), View.Intrinsic);
     }
 
     const graphView = this.graph.view;
     if (graphView !== null) {
-      const graphFrame = graphView.viewFrame;
-      if (graphFrame.xMin !== graphLeft || graphFrame.yMin !== graphTop ||
-          graphFrame.xMax !== graphRight || graphFrame.yMax !== graphBottom) {
-        graphView.setViewFrame(new R2Box(graphLeft, graphTop, graphRight, graphBottom));
-        graphView.requireUpdate(View.NeedsLayout);
-      }
+      graphView.setViewFrame(new R2Box(graphLeft, graphTop, graphRight, graphBottom));
     }
   }
 
