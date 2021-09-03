@@ -834,7 +834,7 @@ public class Uri implements Comparable<Uri>, Debug, Display {
     } else if (c >= 0x80 && c <= 0x07FF) { // U+0080..U+07FF
       output = Uri.writePctEncoded(output, 0xC0 | (c >>> 6));
       output = Uri.writePctEncoded(output, 0x80 | (c & 0x3F));
-    } else if (c >= 0x0800 && c <= 0xffff) { // (U+0800..U+D7FF, U+E000..U+FFFF, and surrogates
+    } else if (c >= 0x0800 && c <= 0xFFFF) { // U+0800..U+D7FF, U+E000..U+FFFF, and surrogates
       output = Uri.writePctEncoded(output, 0xE0 | (c >>> 12));
       output = Uri.writePctEncoded(output, 0x80 | (c >>> 6 & 0x3F));
       output = Uri.writePctEncoded(output, 0x80 | (c & 0x3F));

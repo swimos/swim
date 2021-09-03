@@ -237,10 +237,11 @@ export class GeoSegment extends GeoCurve implements Interpolate<GeoSegment>, Has
         Numbers.hash(this.lng1)), Numbers.hash(this.lat1)));
   }
 
-  debug(output: Output): void {
-    output.write("GeoSegment").write(46/*'.'*/).write("of").write(40/*'('*/)
-        .debug(this.lng0).write(", ").debug(this.lat0).write(", ")
-        .debug(this.lng1).write(", ").debug(this.lat1).write(41/*')'*/);
+  debug<T>(output: Output<T>): Output<T> {
+    output = output.write("GeoSegment").write(46/*'.'*/).write("of").write(40/*'('*/)
+                   .debug(this.lng0).write(", ").debug(this.lat0).write(", ")
+                   .debug(this.lng1).write(", ").debug(this.lat1).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

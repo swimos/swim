@@ -82,9 +82,10 @@ export class IdentityTransform extends Transform {
     return Constructors.hash(IdentityTransform);
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Transform").write(46/*'.'*/).write("identity")
-        .write(40/*'('*/).write(41/*')'*/);
+                   .write(40/*'('*/).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

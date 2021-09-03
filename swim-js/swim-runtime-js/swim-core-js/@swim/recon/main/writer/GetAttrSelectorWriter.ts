@@ -59,12 +59,12 @@ export class GetAttrSelectorWriter<I, V> extends Writer {
     }
     if (step === 4) {
       if (part === void 0) {
-        part = recon.writeValue(key, output);
+        part = recon.writeValue(output, key);
       } else {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return recon.writeThen(then, output);
+        return recon.writeThen(output, then);
       } else if (part.isError()) {
         return part.asError();
       }

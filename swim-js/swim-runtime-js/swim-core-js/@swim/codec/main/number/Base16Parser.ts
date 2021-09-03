@@ -62,7 +62,7 @@ export class Base16Parser<O> extends Parser<O> {
       if (step === 2) {
         if (input.isCont() && (c = input.head(), Base16.isDigit(c))) {
           input = input.step();
-          Base16.writeQuantum(p, c, output);
+          output = Base16.writeQuantum(output, p, c);
           p = 0;
           step = 1;
         } else if (!input.isEmpty()) {

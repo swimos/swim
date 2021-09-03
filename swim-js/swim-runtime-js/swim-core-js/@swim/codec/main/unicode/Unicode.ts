@@ -54,7 +54,7 @@ export const Unicode = {} as {
 
   stringWriter<I, O>(input: O): Writer<I, O>;
 
-  writeString<I>(input: unknown, output: Output): Writer<I, unknown>;
+  writeString<I>(output: Output, input: unknown): Writer<I, unknown>;
 
   /** @hidden */
   isAlpha(c: number): boolean;
@@ -95,7 +95,7 @@ Unicode.stringWriter = function <I, O>(input?: O): Writer<I, unknown> {
   }
 };
 
-Unicode.writeString = function <I>(input: unknown, output: Output): Writer<I, unknown> {
+Unicode.writeString = function <I>(output: Output, input: unknown): Writer<I, unknown> {
   return StringWriter.write(output, void 0, "" + input);
 };
 

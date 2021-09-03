@@ -62,22 +62,25 @@ export class UriFragment implements HashCode, Compare, Debug, Display {
     return Strings.hash(this.identifier);
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("UriFragment").write(46/*'.'*/);
     if (this.isDefined()) {
-      output = output.write("parse").write(40/*'('*/).write(34/*'"'*/).display(this).write(34/*'"'*/).write(41/*')'*/);
+      output = output.write("parse").write(40/*'('*/).write(34/*'"'*/)
+                     .display(this).write(34/*'"'*/).write(41/*')'*/);
     } else {
       output = output.write("undefined").write(40/*'('*/).write(41/*')'*/);
     }
+    return output;
   }
 
-  display(output: Output): void {
+  display<T>(output: Output<T>): Output<T> {
     const stringValue = this.stringValue
     if (stringValue !== void 0) {
       output = output.write(stringValue);
     } else if (this.identifier !== void 0) {
-      Uri.writeFragment(this.identifier, output);
+      output = Uri.writeFragment(output, this.identifier);
     }
+    return output;
   }
 
   /** @hidden */

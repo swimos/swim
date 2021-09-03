@@ -47,9 +47,9 @@ export abstract class Tag implements HashCode, Display, Debug {
    */
   abstract shift(mark: Mark): Tag;
 
-  abstract display(output: Output): void;
+  abstract display<T>(output: Output<T>): Output<T>;
 
-  abstract debug(output: Output): void;
+  abstract debug<T>(output: Output<T>): Output<T>;
 
   abstract equals(that: unknown): boolean;
 

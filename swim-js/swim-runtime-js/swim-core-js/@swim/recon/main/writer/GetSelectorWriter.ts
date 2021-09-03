@@ -71,9 +71,9 @@ export class GetSelectorWriter<I, V> extends Writer {
     if (step === 4) {
       if (part === void 0) {
         if (recon.isRecord(recon.item(key))) {
-          part = recon.writeBlockValue(key, output);
+          part = recon.writeBlockValue(output, key);
         } else {
-          part = recon.writeValue(key, output);
+          part = recon.writeValue(output, key);
         }
       } else {
         part = part.pull(output);
@@ -96,7 +96,7 @@ export class GetSelectorWriter<I, V> extends Writer {
       }
     }
     if (step === 6) {
-      return recon.writeThen(then, output);
+      return recon.writeThen(output, then);
     }
     if (output.isDone()) {
       return Writer.error(new WriterException("truncated"));

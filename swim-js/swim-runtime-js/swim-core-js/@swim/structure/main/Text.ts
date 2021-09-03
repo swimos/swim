@@ -150,17 +150,18 @@ export class Text extends Value {
     return hashValue;
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Text").write(46/*'.'*/);
     if (this.value.length === 0) {
       output = output.write("empty").write(40/*'('*/).write(41/*')'*/);
     } else {
       output = output.write("from").write(40/*'('*/).debug(this.value).write(41/*')'*/);
     }
+    return output;
   }
 
-  override display(output: Output): void {
-    Format.debug(this.value, output);
+  override display<T>(output: Output<T>): Output<T> {
+    return Format.debugAny(output, this.value);
   }
 
   override toString(): string {

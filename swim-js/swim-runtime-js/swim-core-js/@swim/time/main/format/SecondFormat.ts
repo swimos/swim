@@ -19,8 +19,9 @@ import {SecondParser} from "../"; // forward import
 
 /** @hidden */
 export class SecondFormat extends DateTimeFormat {
-  override writeDate(date: DateTime, output: Output): void {
-    DateTimeFormat.writeDateNumber2(date.second, output);
+  override writeDate<T>(output: Output<T>, date: DateTime): Output<T> {
+    output = DateTimeFormat.writeDateNumber2(output, date.second);
+    return output;
   }
 
   override parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {

@@ -90,24 +90,26 @@ export class UriUser implements HashCode, Debug, Display {
     return Strings.hash(this.toString());
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("UriUser").write(46/*'.'*/);
     if (this.isDefined()) {
       output = output.write("parse").write(40/*'('*/).write(34/*'"'*/)
-          .display(this).write(34/*'"'*/).write(41/*')'*/);
+                     .display(this).write(34/*'"'*/).write(41/*')'*/);
     } else {
       output = output.write("undefined").write(40/*'('*/).write(41/*')'*/);
     }
+    return output;
   }
 
-  display(output: Output): void {
+  display<T>(output: Output<T>): Output<T> {
     if (this.username !== void 0) {
-      Uri.writeUser(this.username, output);
+      output = Uri.writeUser(output, this.username);
       if (this.password !== void 0) {
         output = output.write(58/*':'*/);
-        Uri.writeUser(this.password, output);
+        output = Uri.writeUser(output, this.password);
       }
     }
+    return output;
   }
 
   toString(): string {

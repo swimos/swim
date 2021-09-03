@@ -125,12 +125,13 @@ export abstract class Selector extends Expression {
     return 11;
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Selector").write(46/*'.'*/).write("identity").write(40/*'('*/).write(41/*')'*/);
-    this.debugThen(output);
+    output = this.debugThen(output);
+    return output;
   }
 
-  abstract debugThen(output: Output): void;
+  abstract debugThen<T>(output: Output<T>): Output<T>;
 
   abstract override clone(): Selector;
 

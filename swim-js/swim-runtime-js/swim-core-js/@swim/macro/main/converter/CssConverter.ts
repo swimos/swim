@@ -17,45 +17,45 @@ import {Item, Attr, Slot, Value, Record, Text, Num} from "@swim/structure";
 import {Converter} from "./Converter";
 
 export class CssConverter extends Converter {
-  override convert<O>(model: Item, output: Output<O>): O {
+  override convert<O>(output: Output<O>, model: Item): O {
     if (model instanceof Record) {
-      output = this.writeStylesheet(model, output);
+      output = this.writeStylesheet(output, model);
     } else if (model instanceof Text) {
       output = output.write(model.value);
     }
     return output.bind();
   }
 
-  writeStylesheet<O>(stylesheet: Record, output: Output<O>): Output<O> {
+  writeStylesheet<O>(output: Output<O>, stylesheet: Record): Output<O> {
     if (stylesheet.tag !== void 0) {
-      output = this.writeBlock(stylesheet, output);
+      output = this.writeBlock(output, stylesheet);
     } else {
       for (let i = 0, n = stylesheet.length; i < n; i += 1) {
         const item = stylesheet.getItem(i);
         if (item instanceof Record) {
-          output = this.writeBlock(item, output);
+          output = this.writeBlock(output, item);
         }
       }
     }
     return output;
   }
 
-  writeBlock<O>(block: Record, output: Output<O>): Output<O> {
+  writeBlock<O>(output: Output<O>, block: Record): Output<O> {
     const head = block.head();
     if (head instanceof Attr) {
       const tag = head.key.value;
       if (tag === "rule") {
-        output = this.writeRuleset(Value.absent(), head.value, block.tail().branch(), output);
+        output = this.writeRuleset(output, Value.absent(), head.value, block.tail().branch());
       } else if (tag === "media") {
-        output = this.writeRuleset(head.value, Value.absent(), block.tail().branch(), output);
+        output = this.writeRuleset(output, head.value, Value.absent(), block.tail().branch());
       }
     } else {
-      output = this.writeStylesheet(block, output);
+      output = this.writeStylesheet(output, block);
     }
     return output;
   }
 
-  writeRuleset<O>(mediaQueries: Value, selectors: Value, declarations: Value, output: Output<O>): Output<O> {
+  writeRuleset<O>(output: Output<O>, mediaQueries: Value, selectors: Value, declarations: Value): Output<O> {
     let inMedia = false;
     let inRule = false;
     let isEmpty = true;
@@ -76,8 +76,8 @@ export class CssConverter extends Converter {
               output = output.write(10/*'\n'*/);
               inMedia = false;
             }
-            output = this.writeRuleset(mediaQueries, this.nestedSelector(selectors, head.value),
-                                       declaration.tail().branch(), output);
+            output = this.writeRuleset(output, mediaQueries, this.nestedSelector(selectors, head.value),
+                                       declaration.tail().branch());
             isEmpty = false;
           } else if (tag === "media") {
             if (inRule) {
@@ -90,8 +90,8 @@ export class CssConverter extends Converter {
               output = output.write(10/*'\n'*/);
               inMedia = false;
             }
-            output = this.writeRuleset(this.nestedMediaQuery(mediaQueries, head.value), selectors,
-                                       declaration.tail().branch(), output);
+            output = this.writeRuleset(output, this.nestedMediaQuery(mediaQueries, head.value), selectors,
+                                       declaration.tail().branch());
             isEmpty = false;
           }
         } else if (declaration instanceof Slot) {
@@ -99,7 +99,7 @@ export class CssConverter extends Converter {
             output = output.write(64/*'@'*/);
             output = output.write("media");
             output = output.write(32/*' '*/);
-            output = this.writeMediaQueries(mediaQueries, output);
+            output = this.writeMediaQueries(output, mediaQueries);
             output = output.write(32/*' '*/);
             output = output.write(123/*'{'*/);
             output = output.write(10/*'\n'*/);
@@ -107,14 +107,14 @@ export class CssConverter extends Converter {
             isEmpty = false;
           }
           if (!inRule) {
-            output = this.writeSelectors(selectors, output);
+            output = this.writeSelectors(output, selectors);
             output = output.write(32/*' '*/);
             output = output.write(123/*'{'*/);
             output = output.write(10/*'\n'*/);
             inRule = true;
             isEmpty = false;
           }
-          output = this.writeDeclaration(declaration.key, declaration.value, output);
+          output = this.writeDeclaration(output, declaration.key, declaration.value);
         } else if (declaration instanceof Record && !declaration.isEmpty()) {
           if (declaration.fieldCount === 0) {
             if (inRule) {
@@ -127,14 +127,14 @@ export class CssConverter extends Converter {
               output = output.write(10/*'\n'*/);
               inMedia = false;
             }
-            output = this.writeRuleset(mediaQueries, selectors, declaration, output);
+            output = this.writeRuleset(output, mediaQueries, selectors, declaration);
             isEmpty = false;
           } else {
             if (!inMedia && mediaQueries.isDistinct()) {
               output = output.write(64/*'@'*/);
               output = output.write("media");
               output = output.write(32/*' '*/);
-              output = this.writeMediaQueries(mediaQueries, output);
+              output = this.writeMediaQueries(output, mediaQueries);
               output = output.write(32/*' '*/);
               output = output.write(123/*'{'*/);
               output = output.write(10/*'\n'*/);
@@ -142,14 +142,14 @@ export class CssConverter extends Converter {
               isEmpty = false;
             }
             if (!inRule) {
-              output = this.writeSelectors(selectors, output);
+              output = this.writeSelectors(output, selectors);
               output = output.write(32/*' '*/);
               output = output.write(123/*'{'*/);
               output = output.write(10/*'\n'*/);
               inRule = true;
               isEmpty = false;
             }
-            output = this.writeDeclarations(declaration, output);
+            output = this.writeDeclarations(output, declaration);
           }
         }
       }
@@ -158,7 +158,7 @@ export class CssConverter extends Converter {
       output = output.write(64/*'@'*/);
       output = output.write("media");
       output = output.write(32/*' '*/);
-      output = this.writeMediaQueries(mediaQueries, output);
+      output = this.writeMediaQueries(output, mediaQueries);
       output = output.write(32/*' '*/);
       output = output.write(123/*'{'*/);
       output = output.write(10/*'\n'*/);
@@ -186,21 +186,21 @@ export class CssConverter extends Converter {
     }
   }
 
-  writeMediaQueries<O>(mediaQueries: Value, output: Output<O>): Output<O> {
+  writeMediaQueries<O>(output: Output<O>, mediaQueries: Value): Output<O> {
     if (mediaQueries instanceof Record) {
-      output = this.writeMediaExpression(mediaQueries, output);
+      output = this.writeMediaExpression(output, mediaQueries);
     } else {
-      output = this.writeMediaQuery(mediaQueries, output);
+      output = this.writeMediaQuery(output, mediaQueries);
     }
     return output;
   }
 
-  writeMediaExpression<O>(mediaExpression: Record, output: Output<O>): Output<O> {
+  writeMediaExpression<O>(output: Output<O>, mediaExpression: Record): Output<O> {
     const tag = mediaExpression.tag;
     if (tag === "and") {
-      output = this.writeMediaAnd(mediaExpression.tail().branch(), output);
+      output = this.writeMediaAnd(output, mediaExpression.tail().branch());
     } else if (tag === "not") {
-      output = this.writeMediaNot(mediaExpression.tail().branch(), output);
+      output = this.writeMediaNot(output, mediaExpression.tail().branch());
     } else {
       for (let i = 0, n = mediaExpression.length; i < n; i += 1) {
         const mediaQuery = mediaExpression.getItem(i);
@@ -208,26 +208,26 @@ export class CssConverter extends Converter {
           output = output.write(44/*','*/);
           output = output.write(32/*' '*/);
         }
-        output = this.writeMediaQuery(mediaQuery, output);
+        output = this.writeMediaQuery(output, mediaQuery);
       }
     }
     return output;
   }
 
-  writeMediaQuery<O>(mediaQuery: Item, output: Output<O>): Output<O> {
+  writeMediaQuery<O>(output: Output<O>, mediaQuery: Item): Output<O> {
     if (mediaQuery instanceof Slot) {
       output = output.write(40/*'('*/);
-      output = this.writeMediaFeature(mediaQuery.key, mediaQuery.value, output);
+      output = this.writeMediaFeature(output, mediaQuery.key, mediaQuery.value);
       output = output.write(41/*')'*/);
     } else if (mediaQuery instanceof Record) {
-      output = this.writeMediaExpression(mediaQuery, output);
+      output = this.writeMediaExpression(output, mediaQuery);
     } else {
       output = output.write(mediaQuery.stringValue(""));
     }
     return output;
   }
 
-  writeMediaAnd<O>(mediaQuery: Record, output: Output<O>): Output<O> {
+  writeMediaAnd<O>(output: Output<O>, mediaQuery: Record): Output<O> {
     for (let i = 0, n = mediaQuery.length; i < n; i += 1) {
       const medium = mediaQuery.getItem(i);
       if (i !== 0) {
@@ -235,12 +235,12 @@ export class CssConverter extends Converter {
         output = output.write("and");
         output = output.write(32/*' '*/);
       }
-      output = this.writeMediaQuery(medium, output);
+      output = this.writeMediaQuery(output, medium);
     }
     return output;
   }
 
-  writeMediaNot<O>(mediaQuery: Record, output: Output<O>): Output<O> {
+  writeMediaNot<O>(output: Output<O>, mediaQuery: Record): Output<O> {
     output = output.write("not");
     output = output.write(32/*' '*/);
     const n = mediaQuery.length;
@@ -249,7 +249,7 @@ export class CssConverter extends Converter {
     }
     for (let i = 0; i < n; i += 1) {
       const medium = mediaQuery.getItem(i);
-      output = this.writeMediaQuery(medium, output);
+      output = this.writeMediaQuery(output, medium);
     }
     if (n === 1) {
       output = output.write(41/*')'*/);
@@ -257,7 +257,7 @@ export class CssConverter extends Converter {
     return output;
   }
 
-  writeMediaFeature<O>(name: Value, value: Value, output: Output<O>): Output<O> {
+  writeMediaFeature<O>(output: Output<O>, name: Value, value: Value): Output<O> {
     output = output.write(name.stringValue(""));
     output = output.write(58/*':'*/);
     output = output.write(32/*' '*/);
@@ -283,7 +283,7 @@ export class CssConverter extends Converter {
     }
   }
 
-  writeSelectors<O>(selectors: Value, output: Output<O>): Output<O> {
+  writeSelectors<O>(output: Output<O>, selectors: Value): Output<O> {
     if (selectors instanceof Record) {
       for (let i = 0, n = selectors.length; i < n; i += 1) {
         const selector = selectors.getItem(i);
@@ -291,47 +291,47 @@ export class CssConverter extends Converter {
           output = output.write(44/*','*/);
           output = output.write(10/*'\n'*/);
         }
-        output = this.writeSelector(selector, output);
+        output = this.writeSelector(output, selector);
       }
     } else {
-      output = this.writeSelector(selectors, output);
+      output = this.writeSelector(output, selectors);
     }
     return output;
   }
 
-  writeSelector<O>(selector: Value, output: Output<O>): Output<O> {
+  writeSelector<O>(output: Output<O>, selector: Value): Output<O> {
     output = output.write(selector.stringValue(""));
     return output;
   }
 
-  writeDeclarations<O>(declarations: Record, output: Output<O>): Output<O> {
+  writeDeclarations<O>(output: Output<O>, declarations: Record): Output<O> {
     for (let i = 0, n = declarations.length; i < n; i += 1) {
       const declaration = declarations.getItem(i);
       if (declaration instanceof Slot) {
-        output = this.writeDeclaration(declaration.key, declaration.value, output);
+        output = this.writeDeclaration(output, declaration.key, declaration.value);
       } else if (declaration instanceof Record) {
-        output = this.writeDeclarations(declaration, output);
+        output = this.writeDeclarations(output, declaration);
       }
     }
     return output;
   }
 
-  writeDeclaration<O>(property: Value, expression: Value, output: Output<O>): Output<O> {
-    output = this.writeProperty(property, output);
+  writeDeclaration<O>(output: Output<O>, property: Value, expression: Value): Output<O> {
+    output = this.writeProperty(output, property);
     output = output.write(58/*':'*/);
     output = output.write(32/*' '*/);
-    output = this.writeExpression(expression, output);
+    output = this.writeExpression(output, expression);
     output = output.write(59/*';'*/);
     output = output.write(10/*'\n'*/);
     return output;
   }
 
-  writeProperty<O>(property: Value, output: Output<O>): Output<O> {
+  writeProperty<O>(output: Output<O>, property: Value): Output<O> {
     output = output.write(property.stringValue(""));
     return output;
   }
 
-  writeExpression<O>(expression: Value, output: Output<O>): Output<O> {
+  writeExpression<O>(output: Output<O>, expression: Value): Output<O> {
     output = output.write(expression.stringValue(""));
     return output;
   }

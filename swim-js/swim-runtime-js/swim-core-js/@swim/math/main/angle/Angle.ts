@@ -139,7 +139,7 @@ export abstract class Angle implements Interpolate<Angle>, HashCode, Equivalent,
 
   abstract hashCode(): number;
 
-  abstract debug(output: Output): void;
+  abstract debug<T>(output: Output<T>): Output<T>;
 
   abstract toString(): string;
 

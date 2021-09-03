@@ -240,7 +240,7 @@ export class TableLayout implements Equals, Equivalent, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("TableLayout").write(46/*'.'*/).write("of").write(40/*'('*/)
     for (let i = 0, n = this.cols.length; i < n; i += 1) {
       if (i !== 0) {
@@ -251,9 +251,10 @@ export class TableLayout implements Equals, Equivalent, Debug {
     output = output.write(41/*')'*/);
     if (this.width !== null || this.left !== null || this.right !== null || this.colSpacing !== null) {
       output = output.write(46/*'.'*/).write("resized").write(40/*'('*/)
-          .debug(this.width).write(", ").debug(this.left).write(", ")
-          .debug(this.right).write(", ").debug(this.colSpacing).write(41/*')'*/);
+                     .debug(this.width).write(", ").debug(this.left).write(", ")
+                     .debug(this.right).write(", ").debug(this.colSpacing).write(41/*')'*/);
     }
+    return output;
   }
 
   toString(): string {

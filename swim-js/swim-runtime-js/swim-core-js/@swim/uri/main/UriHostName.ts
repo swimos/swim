@@ -33,13 +33,15 @@ export class UriHostName extends UriHost {
     return this.address;
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("UriHost").write(46/*'.'*/).write("hostname")
-        .write(40/*'('*/).debug(this.address).write(41/*')'*/);
+                   .write(40/*'('*/).debug(this.address).write(41/*')'*/);
+    return output;
   }
 
-  override display(output: Output): void {
-    Uri.writeHost(this.address, output);
+  override display<T>(output: Output<T>): Output<T> {
+    output = Uri.writeHost(output, this.address);
+    return output;
   }
 
   override toString(): string {

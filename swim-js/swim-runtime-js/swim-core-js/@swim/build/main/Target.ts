@@ -257,14 +257,14 @@ export class Target {
 
   compile(): Promise<unknown> {
     if (this.canCompile()) {
-      const output = Unicode.stringOutput(OutputSettings.styled());
-      OutputStyle.greenBold(output);
-      output.write("compiling");
-      OutputStyle.reset(output);
-      output.write(" ");
-      OutputStyle.yellow(output);
-      output.write(this.uid);
-      OutputStyle.reset(output);
+      let output = Unicode.stringOutput(OutputSettings.styled());
+      output = OutputStyle.greenBold(output);
+      output = output.write("compiling");
+      output = OutputStyle.reset(output);
+      output = output.write(" ");
+      output = OutputStyle.yellow(output);
+      output = output.write(this.uid);
+      output = OutputStyle.reset(output);
       console.log(output.bind());
 
       const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
@@ -300,14 +300,14 @@ export class Target {
   }
 
   watch(): void {
-    const output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.greenBold(output);
-    output.write("watching");
-    OutputStyle.reset(output);
-    output.write(" ");
-    OutputStyle.yellow(output);
-    output.write(this.uid);
-    OutputStyle.reset(output);
+    let output = Unicode.stringOutput(OutputSettings.styled());
+    output = OutputStyle.greenBold(output);
+    output = output.write("watching");
+    output = OutputStyle.reset(output);
+    output = output.write(" ");
+    output = OutputStyle.yellow(output);
+    output = output.write(this.uid);
+    output = OutputStyle.reset(output);
     console.log(output.bind());
 
     const configPath = ts.findConfigFile(this.baseDir, ts.sys.fileExists, "tsconfig.json");
@@ -365,14 +365,14 @@ export class Target {
         // change detected
         this.failed = false;
         this.compileStart = Date.now();
-        const output = Unicode.stringOutput(OutputSettings.styled());
-        OutputStyle.greenBold(output);
-        output.write("recompiling");
-        OutputStyle.reset(output);
-        output.write(" ");
-        OutputStyle.yellow(output);
-        output.write(this.uid);
-        OutputStyle.reset(output);
+        let output = Unicode.stringOutput(OutputSettings.styled());
+        output = OutputStyle.greenBold(output);
+        output = output.write("recompiling");
+        output = OutputStyle.reset(output);
+        output = output.write(" ");
+        output = OutputStyle.yellow(output);
+        output = output.write(this.uid);
+        output = OutputStyle.reset(output);
         console.log(output.bind());
       } else if (status.code === 6194) {
         // complete
@@ -394,7 +394,7 @@ export class Target {
     }
   }
 
-  protected onCompileUpdate(status: ts.Diagnostic) {
+  protected onCompileUpdate(status: ts.Diagnostic): void {
     // hook
   }
 
@@ -424,8 +424,8 @@ export class Target {
       const diagnostic = new Diagnostic(input, tag, severity, "" + error.code, void 0, null);
       console.log(diagnostic.toString(OutputSettings.styled()));
     } else {
-      const output = Unicode.stringOutput(OutputSettings.styled());
-      Diagnostic.displayMessage(severity, message, output);
+      let output = Unicode.stringOutput(OutputSettings.styled());
+      output = Diagnostic.displayMessage(output, severity, message);
       console.log(output.bind());
     }
   }
@@ -445,34 +445,34 @@ export class Target {
     }
   }
 
-  protected onCompileSuccess() {
+  protected onCompileSuccess(): void {
     const dt = Date.now() - this.compileStart;
     this.compileStart = 0;
-    const output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.greenBold(output);
-    output.write("compiled");
-    OutputStyle.reset(output);
-    output.write(" ");
-    OutputStyle.yellow(output);
-    output.write(this.uid);
-    OutputStyle.reset(output);
-    output.write(" in ");
-    output.debug(dt);
-    output.write("ms");
+    let output = Unicode.stringOutput(OutputSettings.styled());
+    output = OutputStyle.greenBold(output);
+    output = output.write("compiled");
+    output = OutputStyle.reset(output);
+    output = output.write(" ");
+    output = OutputStyle.yellow(output);
+    output = output.write(this.uid);
+    output = OutputStyle.reset(output);
+    output = output.write(" in ");
+    output = output.debug(dt);
+    output = output.write("ms");
     console.log(output.bind());
     console.log();
   }
 
-  protected onCompileFailure() {
+  protected onCompileFailure(): void {
     this.compileStart = 0;
-    const output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.redBold(output);
-    output.write("failed to compile");
-    OutputStyle.reset(output);
-    output.write(" ");
-    OutputStyle.yellow(output);
-    output.write(this.uid);
-    OutputStyle.reset(output);
+    let output = Unicode.stringOutput(OutputSettings.styled());
+    output = OutputStyle.redBold(output);
+    output = output.write("failed to compile");
+    output = OutputStyle.reset(output);
+    output = output.write(" ");
+    output = OutputStyle.yellow(output);
+    output = output.write(this.uid);
+    output = OutputStyle.reset(output);
     console.log(output.bind());
     console.log();
   }
@@ -631,14 +631,14 @@ export class Target {
     this.cancelBundle();
     this.bundleTimer = -1;
 
-    const output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.greenBold(output);
-    output.write("bundling");
-    OutputStyle.reset(output);
-    output.write(" ");
-    OutputStyle.yellow(output);
-    output.write(this.uid);
-    OutputStyle.reset(output);
+    let output = Unicode.stringOutput(OutputSettings.styled());
+    output = OutputStyle.greenBold(output);
+    output = output.write("bundling");
+    output = OutputStyle.reset(output);
+    output = output.write(" ");
+    output = OutputStyle.yellow(output);
+    output = output.write(this.uid);
+    output = OutputStyle.reset(output);
     console.log(output.bind());
 
     const bundleConfig = this.project.bundleConfig[this.id] as rollup.RollupOptions | undefined;
@@ -663,17 +663,17 @@ export class Target {
           this.writeBundle(bundle, bundleConfig.output as rollup.OutputOptions);
 
           const dt = Date.now() - t0;
-          const output = Unicode.stringOutput(OutputSettings.styled());
-          OutputStyle.greenBold(output);
-          output.write("bundled");
-          OutputStyle.reset(output);
-          output.write(" ");
-          OutputStyle.yellow(output);
-          output.write(this.uid);
-          OutputStyle.reset(output);
-          output.write(" in ");
-          output.debug(dt);
-          output.write("ms");
+          let output = Unicode.stringOutput(OutputSettings.styled());
+          output = OutputStyle.greenBold(output);
+          output = output.write("bundled");
+          output = OutputStyle.reset(output);
+          output = output.write(" ");
+          output = OutputStyle.yellow(output);
+          output = output.write(this.uid);
+          output = OutputStyle.reset(output);
+          output = output.write(" in ");
+          output = output.debug(dt);
+          output = output.write("ms");
           console.log(output.bind());
 
           this.onBundleSuccess();
@@ -759,12 +759,12 @@ export class Target {
   }
 
   protected onMinifyError(error: Error): Promise<any> {
-    const output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.redBold(output);
-    output.write("error:");
-    OutputStyle.reset(output);
-    output.write(" ");
-    output.write(error.message);
+    let output = Unicode.stringOutput(OutputSettings.styled());
+    output = OutputStyle.redBold(output);
+    output = output.write("error:");
+    output = OutputStyle.reset(output);
+    output = output.write(" ");
+    output = output.write(error.message);
     console.log(output.bind());
     console.log();
     return Promise.reject(error);
@@ -784,39 +784,39 @@ export class Target {
     if (warning.code === "CIRCULAR_DEPENDENCY" || warning.code === "MISSING_NODE_BUILTINS") {
       return; // suppress superfluous warnings
     }
-    const output = Unicode.stringOutput(OutputSettings.styled());
+    let output = Unicode.stringOutput(OutputSettings.styled());
     if (warning.importer !== void 0) {
-      output.write(warning.importer);
-      output.write(" ");
+      output = output.write(warning.importer);
+      output = output.write(" ");
     }
-    OutputStyle.blue(output);
-    output.write("warning:");
-    OutputStyle.reset(output);
+    output = OutputStyle.blue(output);
+    output = output.write("warning:");
+    output = OutputStyle.reset(output);
     if (warning.message.length !== 0) {
-      output.write(" ");
-      output.write(warning.message);
+      output = output.write(" ");
+      output = output.write(warning.message);
     }
     console.log(output.bind());
   }
 
   protected onBundleError(error: Error): void {
     let output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.redBold(output);
-    output.write("error:");
-    OutputStyle.reset(output);
-    output.write(" ");
-    output.write(error.message);
+    output = OutputStyle.redBold(output);
+    output = output.write("error:");
+    output = OutputStyle.reset(output);
+    output = output.write(" ");
+    output = output.write(error.message);
     console.log(output.bind());
     console.log();
 
     output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.redBold(output);
-    output.write("failed to bundle");
-    OutputStyle.reset(output);
-    output.write(" ");
-    OutputStyle.yellow(output);
-    output.write(this.uid);
-    OutputStyle.reset(output);
+    output = OutputStyle.redBold(output);
+    output = output.write("failed to bundle");
+    output = OutputStyle.reset(output);
+    output = output.write(" ");
+    output = OutputStyle.yellow(output);
+    output = output.write(this.uid);
+    output = OutputStyle.reset(output);
     console.log(output.bind());
   }
 
@@ -848,14 +848,14 @@ export class Target {
   }
 
   test(): Promise<unknown> {
-    const output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.greenBold(output);
-    output.write("testing");
-    OutputStyle.reset(output);
-    output.write(" ");
-    OutputStyle.yellow(output);
-    output.write(this.uid);
-    OutputStyle.reset(output);
+    let output = Unicode.stringOutput(OutputSettings.styled());
+    output = OutputStyle.greenBold(output);
+    output = output.write("testing");
+    output = OutputStyle.reset(output);
+    output = output.write(" ");
+    output = OutputStyle.yellow(output);
+    output = output.write(this.uid);
+    output = OutputStyle.reset(output);
     console.log(output.bind());
 
     const bundleConfig = this.project.bundleConfig[this.id] as rollup.RollupOptions | undefined;
@@ -870,29 +870,29 @@ export class Target {
         proc.on("exit", (code: number): void => {
           const dt = Date.now() - t0;
           if (code === 0) {
-            const output = Unicode.stringOutput(OutputSettings.styled());
-            OutputStyle.greenBold(output);
-            output.write("tested");
-            OutputStyle.reset(output);
-            output.write(" ");
-            OutputStyle.yellow(output);
-            output.write(this.uid);
-            OutputStyle.reset(output);
-            output.write(" in ");
-            output.debug(dt);
-            output.write("ms");
+            let output = Unicode.stringOutput(OutputSettings.styled());
+            output = OutputStyle.greenBold(output);
+            output = output.write("tested");
+            output = OutputStyle.reset(output);
+            output = output.write(" ");
+            output = OutputStyle.yellow(output);
+            output = output.write(this.uid);
+            output = OutputStyle.reset(output);
+            output = output.write(" in ");
+            output = output.debug(dt);
+            output = output.write("ms");
             console.log(output.bind());
             console.log();
             resolve();
           } else {
-            const output = Unicode.stringOutput(OutputSettings.styled());
-            OutputStyle.redBold(output);
-            output.write("failed to test");
-            OutputStyle.reset(output);
-            output.write(" ");
-            OutputStyle.yellow(output);
-            output.write(this.uid);
-            OutputStyle.reset(output);
+            let output = Unicode.stringOutput(OutputSettings.styled());
+            output = OutputStyle.redBold(output);
+            output = output.write("failed to test");
+            output = OutputStyle.reset(output);
+            output = output.write(" ");
+            output = OutputStyle.yellow(output);
+            output = output.write(this.uid);
+            output = OutputStyle.reset(output);
             console.log(output.bind());
             console.log();
             reject(code);
@@ -900,14 +900,14 @@ export class Target {
         });
       });
     } else {
-      const output = Unicode.stringOutput(OutputSettings.styled());
-      OutputStyle.greenBold(output);
-      output.write("untested");
-      OutputStyle.reset(output);
-      output.write(" ");
-      OutputStyle.yellow(output);
-      output.write(this.uid);
-      OutputStyle.reset(output);
+      let output = Unicode.stringOutput(OutputSettings.styled());
+      output = OutputStyle.greenBold(output);
+      output = output.write("untested");
+      output = OutputStyle.reset(output);
+      output = output.write(" ");
+      output = OutputStyle.yellow(output);
+      output = output.write(this.uid);
+      output = OutputStyle.reset(output);
       console.log(output.bind());
       console.log();
       return Promise.resolve(0);
@@ -929,13 +929,13 @@ export class Target {
 
   doc(): Promise<unknown> {
     let output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.greenBold(output);
-    output.write("documenting");
-    OutputStyle.reset(output);
-    output.write(" ");
-    OutputStyle.yellow(output);
-    output.write(this.uid);
-    OutputStyle.reset(output);
+    output = OutputStyle.greenBold(output);
+    output = output.write("documenting");
+    output = OutputStyle.reset(output);
+    output = output.write(" ");
+    output = OutputStyle.yellow(output);
+    output = output.write(this.uid);
+    output = OutputStyle.reset(output);
     console.log(output.bind());
 
     const outDir = Path.join(this.project.baseDir, "doc", "/");
@@ -999,29 +999,29 @@ export class Target {
         .then(() => {
           const dt = Date.now() - t0;
           output = Unicode.stringOutput(OutputSettings.styled());
-          OutputStyle.greenBold(output);
-          output.write("documented");
-          OutputStyle.reset(output);
-          output.write(" ");
-          OutputStyle.yellow(output);
-          output.write(this.uid);
-          OutputStyle.reset(output);
-          output.write(" in ");
-          output.debug(dt);
-          output.write("ms");
+          output = OutputStyle.greenBold(output);
+          output = output.write("documented");
+          output = OutputStyle.reset(output);
+          output = output.write(" ");
+          output = OutputStyle.yellow(output);
+          output = output.write(this.uid);
+          output = OutputStyle.reset(output);
+          output = output.write(" in ");
+          output = output.debug(dt);
+          output = output.write("ms");
           console.log(output.bind());
           console.log();
         })
         .catch(this.onDocError);
     } else {
-      const output = Unicode.stringOutput(OutputSettings.styled());
-      OutputStyle.redBold(output);
-      output.write("failed to document");
-      OutputStyle.reset(output);
-      output.write(" ");
-      OutputStyle.yellow(output);
-      output.write(this.uid);
-      OutputStyle.reset(output);
+      let output = Unicode.stringOutput(OutputSettings.styled());
+      output = OutputStyle.redBold(output);
+      output = output.write("failed to document");
+      output = OutputStyle.reset(output);
+      output = output.write(" ");
+      output = OutputStyle.yellow(output);
+      output = output.write(this.uid);
+      output = OutputStyle.reset(output);
       console.log(output.bind());
       console.log();
       return Promise.reject();
@@ -1030,22 +1030,22 @@ export class Target {
 
   protected onDocError(error: Error): void {
     let output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.redBold(output);
-    output.write("error:");
-    OutputStyle.reset(output);
-    output.write(" ");
-    output.write(error.message);
+    output = OutputStyle.redBold(output);
+    output = output.write("error:");
+    output = OutputStyle.reset(output);
+    output = output.write(" ");
+    output = output.write(error.message);
     console.log(output.bind());
     console.log();
 
     output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.redBold(output);
-    output.write("failed to document");
-    OutputStyle.reset(output);
-    output.write(" ");
-    OutputStyle.yellow(output);
-    output.write(this.uid);
-    OutputStyle.reset(output);
+    output = OutputStyle.redBold(output);
+    output = output.write("failed to document");
+    output = OutputStyle.reset(output);
+    output = output.write(" ");
+    output = OutputStyle.yellow(output);
+    output = output.write(this.uid);
+    output = OutputStyle.reset(output);
     console.log(output.bind());
   }
 
@@ -1055,12 +1055,12 @@ export class Target {
       const commandLine = ts.getParsedCommandLineOfConfigFile(configPath!, this.compilerOptions, ts.sys as any)!;
       const tsBuildInfoFile = commandLine.options.tsBuildInfoFile;
       if (tsBuildInfoFile !== void 0 && tsBuildInfoFile.length !== 0 && FS.existsSync(tsBuildInfoFile)) {
-        const output = Unicode.stringOutput(OutputSettings.styled());
-        OutputStyle.greenBold(output);
-        output.write("deleting");
-        OutputStyle.reset(output);
-        output.write(" ");
-        output.write(tsBuildInfoFile);
+        let output = Unicode.stringOutput(OutputSettings.styled());
+        output = OutputStyle.greenBold(output);
+        output = output.write("deleting");
+        output = OutputStyle.reset(output);
+        output = output.write(" ");
+        output = output.write(tsBuildInfoFile);
         console.log(output.bind());
         FS.unlinkSync(tsBuildInfoFile);
       }

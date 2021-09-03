@@ -182,13 +182,14 @@ export class RgbColor extends Color {
         Numbers.hash(this.r)), Numbers.hash(this.g)), Numbers.hash(this.b)), Numbers.hash(this.a)));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Color").write(46/*'.'*/).write("rgb").write(40/*'('*/)
-        .debug(this.r).write(", ").debug(this.g).write(", ").debug(this.b);
+                   .debug(this.r).write(", ").debug(this.g).write(", ").debug(this.b);
     if (this.a !== 1) {
       output = output.write(", ").debug(this.a);
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   override toHexString(): string {

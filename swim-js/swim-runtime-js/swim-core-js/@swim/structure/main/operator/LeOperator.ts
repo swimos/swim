@@ -89,9 +89,10 @@ export class LeOperator extends BinaryOperator {
         this.operand1.hashCode()), this.operand2.hashCode()));
   }
 
-  override debug(output: Output): void {
-    output.debug(this.operand1).write(46/*'.'*/).write("le").write(40/*'('*/)
-        .debug(this.operand2).write(41/*')'*/);
+  override debug<T>(output: Output<T>): Output<T> {
+    return output.debug(this.operand1).write(46/*'.'*/).write("le").write(40/*'('*/)
+                 .debug(this.operand2).write(41/*')'*/);
+    return output;
   }
 
   override clone(): LeOperator {

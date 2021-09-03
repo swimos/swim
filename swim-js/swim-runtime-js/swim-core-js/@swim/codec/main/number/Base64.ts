@@ -14,7 +14,7 @@
 
 import {Lazy} from "@swim/util";
 import type {Input} from "../input/Input";
-import type {Output} from "../output/Output";
+import {Output} from "../output/Output";
 import type {Parser} from "../parser/Parser";
 import type {Writer} from "../writer/Writer";
 import {Format} from "../format/Format";
@@ -65,9 +65,9 @@ export abstract class Base64 {
     } else if (c === 47/*'/'*/ || c === 95/*'_'*/) {
       return 63;
     } else {
-      const message = Unicode.stringOutput();
-      message.write("Invalid base-64 digit: ");
-      Format.debugChar(c, message);
+      let message = Unicode.stringOutput();
+      message = message.write("Invalid base-64 digit: ");
+      message = Format.debugChar(message, c);
       throw new Error(message.bind());
     }
   }
@@ -83,8 +83,10 @@ export abstract class Base64 {
   /**
    * Decodes the base-64 digits `c1`, `c2`, `c3`, and `c4`, and writes the 8 to
    * 24 bit quantity they represent to the given `output`.
+   *
+   * @return the continuation of the `output`.
    */
-  writeQuantum(c1: number, c2: number, c3: number, c4: number, output: Output): void {
+  writeQuantum<T>(output: Output<T>, c1: number, c2: number, c3: number, c4: number): Output<T> {
     const x = this.decodeDigit(c1);
     const y = this.decodeDigit(c2);
     if (c3 !== 61/*'='*/) {
@@ -100,10 +102,11 @@ export abstract class Base64 {
       }
     } else {
       if (c4 !== 61/*'='*/) {
-        throw new Error("Improperly padded base-64");
+        return Output.error(new Error("Improperly padded base-64"));
       }
       output = output.write((x << 2) | (y >>> 4));
     }
+    return output;
   }
 
   /**
@@ -111,7 +114,7 @@ export abstract class Base64 {
    * writes the decoded bytes to `output`.
    */
   parser<O>(output: Output<O>): Parser<O> {
-    return new Base64Parser<O>(output, this);
+    return new Base64Parser<O>(this, output);
   }
 
   /**
@@ -120,7 +123,7 @@ export abstract class Base64 {
    * parse any additional input.
    */
   parse<O>(input: Input, output: Output<O>): Parser<O> {
-    return Base64Parser.parse(input, output, this);
+    return Base64Parser.parse(input, this, output);
   }
 
   /**
@@ -130,7 +133,7 @@ export abstract class Base64 {
    * binds]] a `Uint8Array` array containing all parsed base-64 data.
    */
   parseUint8Array(input: Input): Parser<Uint8Array> {
-    return Base64Parser.parse(input, Binary.output(), this);
+    return Base64Parser.parse(input, this, Binary.output());
   }
 
   /**
@@ -146,9 +149,9 @@ export abstract class Base64 {
   uint8ArrayWriter(input: Uint8Array): Writer<unknown, Uint8Array>;
   uint8ArrayWriter(input?: Uint8Array): Writer {
     if (input === void 0) {
-      return new Base64Writer(void 0, null, this);
+      return new Base64Writer(this, void 0, null);
     } else {
-      return new Base64Writer(input, input, this);
+      return new Base64Writer(this, input, input);
     }
   }
 
@@ -157,8 +160,8 @@ export abstract class Base64 {
    * the `output`, returning a `Writer` continuation that knows how to write
    * any remaining output that couldn't be immediately generated.
    */
-  writeUint8Array(input: Uint8Array, output: Output): Writer {
-    return Base64Writer.write(output, void 0, input, this);
+  writeUint8Array(output: Output, input: Uint8Array): Writer {
+    return Base64Writer.write(output, this, void 0, input);
   }
 
   /** @hidden */

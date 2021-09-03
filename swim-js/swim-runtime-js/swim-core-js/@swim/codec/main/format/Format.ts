@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {AnyOutputSettings} from "../output/OutputSettings";
-import {Output} from "../output/Output";
+import type {Output} from "../output/Output";
 import type {Display} from "./Display";
 import type {Debug} from "./Debug";
 import {Unicode} from "../unicode/Unicode";
@@ -28,36 +28,12 @@ export const Format = {} as {
   readonly lineSeparator: string;
 
   /**
-   * Writes the code points of the human-readable [[Display]] string for the
-   * given `object` to `output`.  Assumes `output` is a Unicode `Output` writer
-   * with sufficient capacity.  Delegates to [[Display.display]], if `object`
-   * implements `Display`; otherwise writes the result of `Object.toString`.
-   *
-   * @throws [[OutputException]] if the `output` exits the _cont_ state before
-   *         the full display string has been written.
-   */
-  display(object: unknown, output: Output): void;
-
-  /**
    * Returns the human-readable [[Display]] string for the givem `object`,
    * output using the given `settings`.  Delegates to [[Display.displa]],
    * if `object` implements `Display`; otherwise returns the result of
    * `Object.toString`.
    */
   display(object: unknown, settings?: AnyOutputSettings): string;
-
-  /**
-   * Writes the code points of the developer-readable [[Debug]] string for the
-   * given `object` to `output`.  Assumes `output` is a Unicode `Output` writer
-   * with sufficient capacity.  Delegates to [[Debug.debug]], if `object`
-   * implements `Debug`; writes a JavaScript string literal, if `object` is a
-   * `string`, and writes a JavaScript number literal, if `object` is a
-   * `number`; otherwise writes the result of `Object.toString`.
-   *
-   * @throws [[OutputException]] if the `output` exits the _cont_ state before
-   *         the full debug string has been written.
-   */
-  debug(object: unknown, output: Output): void;
 
   /**
    * Returns the developer-readable [[Debug]] string for the givem `object`,
@@ -69,40 +45,62 @@ export const Format = {} as {
   debug(object: unknown, settings?: AnyOutputSettings): string;
 
   /**
+   * Writes the code points of the human-readable [[Display]] string for the
+   * given `object` to `output`.  Assumes `output` is a Unicode `Output` writer
+   * with sufficient capacity.  Delegates to [[Display.display]], if `object`
+   * implements `Display`; otherwise writes the result of `Object.toString`.
+   *
+   * @return the continuation of the `output`.
+   * @throws [[OutputException]] if the `output` exits the _cont_ state before
+   *         the full display string has been written.
+   */
+  displayAny<T>(output: Output<T>, object: unknown): Output<T>;
+
+  /**
+   * Writes the code points of the developer-readable [[Debug]] string for the
+   * given `object` to `output`.  Assumes `output` is a Unicode `Output` writer
+   * with sufficient capacity.  Delegates to [[Debug.debug]], if `object`
+   * implements `Debug`; writes a JavaScript string literal, if `object` is a
+   * `string`, and writes a JavaScript number literal, if `object` is a
+   * `number`; otherwise writes the result of `Object.toString`.
+   *
+   * @return the continuation of the `output`.
+   * @throws [[OutputException]] if the `output` exits the _cont_ state before
+   *         the full debug string has been written.
+   */
+  debugAny<T>(output: Output<T>, object: unknown): Output<T>;
+
+  /**
    * Writes the code points of the numeric string for the given `value`
    * to `output`.
    *
-   * @throws [[OutputException]] if the `output` exits the _cont_ state before
-   *         the full numeric string has been written.
+   * @return the continuation of the `output`.
    */
-  displayNumber(value: number, output: Output): void;
+  displayNumber<T>(output: Output<T>, value: number): Output<T>;
 
   /**
    * Writes the code points of the JavaScript numeric literal for the given
    * `value` to `output`.
    *
-   * @throws [[OutputException]] if the `output` exits the _cont_ state before
-   *         the full numeric literal has been written.
+   * @return the continuation of the `output`.
    */
-  debugNumber(value: number, output: Output): void;
+  debugNumber<T>(output: Output<T>, value: number): Output<T>;
 
   /**
    * Writes the code points of the JavaScript character literal for the given
    * `character` to `output`.
    *
-   * @throws [[OutputException]] if the `output` exits the _cont_ state before
-   *         the full character literal has been written.
+   * @return the continuation of the `output`.
    */
-  debugChar(character: number, output: Output): void;
+  debugChar<T>(output: Output<T>, character: number): Output<T>;
 
   /**
    * Writes the code points of the JavaScript string literal for the given
    * `string` to `output`.
    *
-   * @throws [[OutputException]] if the `output` exits the _cont_ state before
-   *         the full string literal has been written.
+   * @return the continuation of the `output`.
    */
-  debugString(string: string, output: Output): void;
+  debugString<T>(output: Output<T>, string: string): Output<T>;
 
   /** @hidden */
   encodeHex(x: number): number;
@@ -149,119 +147,79 @@ Object.defineProperty(Format, "lineSeparator", {
   configurable: true,
 });
 
-Format.display = function (object: unknown, output?: Output | AnyOutputSettings): void | string {
-  const notOutput = !(output instanceof Output);
+Format.display = function (object: unknown, settings?: AnyOutputSettings): string {
   if (object === void 0) {
-    if (output === void 0) {
-      return "undefined";
-    } else {
-      if (!(output instanceof Output)) {
-        output = Unicode.stringOutput(output);
-      }
-      output = output.write("undefined");
-    }
+    return "undefined";
   } else if (object === null) {
-    if (output === void 0) {
-      return "null";
-    } else {
-      if (!(output instanceof Output)) {
-        output = Unicode.stringOutput(output);
-      }
-      output = output.write("null");
-    }
+    return "null";
   } else if (typeof object === "number") {
-    if (output === void 0) {
-      return "" + object;
-    } else {
-      if (!(output instanceof Output)) {
-        output = Unicode.stringOutput(output);
-      }
-      Format.displayNumber(object, output);
-    }
+    return "" + object;
   } else if (typeof object === "string") {
-    if (output === void 0) {
-      return object;
-    } else {
-      if (!(output instanceof Output)) {
-        output = Unicode.stringOutput(output);
-      }
-      output = output.write(object);
-    }
-  } else if (typeof (object as any).display === "function") {
-    if (!(output instanceof Output)) {
-      output = Unicode.stringOutput(output);
-    }
-    (object as Display).display(output);
+    return object;
+  } else if (typeof (object as Display).display === "function") {
+    let output = Unicode.stringOutput(settings);
+    output = (object as Display).display(output);
+    return output.bind();
   } else {
-    if (output === void 0) {
-      return "" + object;
-    } else {
-      if (!(output instanceof Output)) {
-        output = Unicode.stringOutput(output);
-      }
-      output = output.write("" + object);
-    }
+    return "" + object;
   }
-  if (notOutput) {
-    return output.toString();
-  }
-} as typeof Format.display;
+};
 
-Format.debug = function (object: unknown, output?: Output | AnyOutputSettings): void | string {
-  const notOutput = !(output instanceof Output);
+Format.debug = function (object: unknown, settings?: AnyOutputSettings): string {
   if (object === void 0) {
-    if (output === void 0) {
-      return "undefined";
-    } else {
-      if (!(output instanceof Output)) {
-        output = Unicode.stringOutput(output);
-      }
-      output = output.write("undefined");
-    }
+    return "undefined";
   } else if (object === null) {
-    if (output === void 0) {
-      return "null";
-    } else {
-      if (!(output instanceof Output)) {
-        output = Unicode.stringOutput(output);
-      }
-      output = output.write("null");
-    }
+    return "null";
   } else if (typeof object === "number") {
-    if (output === void 0) {
-      return "" + object;
-    } else {
-      if (!(output instanceof Output)) {
-        output = Unicode.stringOutput(output);
-      }
-      Format.debugNumber(object, output);
-    }
+    return "" + object;
   } else if (typeof object === "string") {
-    if (!(output instanceof Output)) {
-      output = Unicode.stringOutput(output);
-    }
-    Format.debugString(object, output);
-  } else if (typeof (object as any).debug === "function") {
-    if (!(output instanceof Output)) {
-      output = Unicode.stringOutput(output);
-    }
-    (object as Debug).debug(output);
+    let output = Unicode.stringOutput(settings);
+    output = Format.debugString(output, object);
+    return output.bind();
+  } else if (typeof (object as Debug).debug === "function") {
+    let output = Unicode.stringOutput(settings);
+    output = (object as Debug).debug(output);
+    return output.bind();
   } else {
-    if (output === void 0) {
-      return "" + object;
-    } else {
-      if (!(output instanceof Output)) {
-        output = Unicode.stringOutput(output);
-      }
-      output = output.write("" + object);
-    }
+    return "" + object;
   }
-  if (notOutput) {
-    return output.toString();
-  }
-} as typeof Format.debug;
+};
 
-Format.displayNumber = function (value: number, output: Output): void {
+Format.displayAny = function <T>(output: Output<T>, object: unknown): Output<T> {
+  if (object === void 0) {
+    output = output.write("undefined");
+  } else if (object === null) {
+    output = output.write("null");
+  } else if (typeof object === "number") {
+    output = Format.displayNumber(output, object);
+  } else if (typeof object === "string") {
+    output = output.write(object);
+  } else if (typeof (object as Display).display === "function") {
+    output = (object as Display).display(output);
+  } else {
+    output = output.write("" + object);
+  }
+  return output;
+};
+
+Format.debugAny = function <T>(output: Output<T>, object: unknown): Output<T> {
+  if (object === void 0) {
+    output = output.write("undefined");
+  } else if (object === null) {
+    output = output.write("null");
+  } else if (typeof object === "number") {
+    output = Format.debugNumber(output, object);
+  } else if (typeof object === "string") {
+    output = Format.debugString(output, object);
+  } else if (typeof (object as Debug).debug === "function") {
+    output = (object as Debug).debug(output);
+  } else {
+    output = output.write("" + object);
+  }
+  return output;
+};
+
+Format.displayNumber = function <T>(output: Output<T>, value: number): Output<T> {
   if (isFinite(value) && Math.floor(value) === value && Math.abs(value) < 2147483648) {
     if (value < 0) {
       output = output.write(45/*'-'*/);
@@ -286,39 +244,40 @@ Format.displayNumber = function (value: number, output: Output): void {
   } else {
     output = output.write(Format.decimal(value, output.settings.precision));
   }
+  return output;
 };
 
-Format.debugNumber = function (value: number, output: Output): void {
-  Format.displayNumber(value, output);
+Format.debugNumber = function <T>(output: Output<T>, value: number): Output<T> {
+  return Format.displayNumber(output, value);
 };
 
-Format.debugChar = function (character: number, output: Output): void {
+Format.debugChar = function <T>(output: Output<T>, value: number): Output<T> {
   output = output.write(39/*'\''*/);
-  switch (character) {
-      case 8/*'\b'*/: output.write(92/*'\\'*/).write(98/*'b'*/); break;
-      case 9/*'\t'*/: output.write(92/*'\\'*/).write(116/*'t'*/); break;
-      case 10/*'\n'*/: output.write(92/*'\\'*/).write(110/*'n'*/); break;
-      case 12/*'\f'*/: output.write(92/*'\\'*/).write(102/*'f'*/); break;
-      case 13/*'\r'*/: output.write(92/*'\\'*/).write(114/*'r'*/); break;
-      case 34/*'\"'*/: output.write(92/*'\\'*/).write(34/*'\"'*/); break;
-      case 39/*'\"'*/: output.write(92/*'\\'*/).write(39/*'\''*/); break;
-      case 92/*'\\'*/: output.write(92/*'\\'*/).write(92/*'\\'*/); break;
+  switch (value) {
+    case 8/*'\b'*/: output.write(92/*'\\'*/).write(98/*'b'*/); break;
+    case 9/*'\t'*/: output.write(92/*'\\'*/).write(116/*'t'*/); break;
+    case 10/*'\n'*/: output.write(92/*'\\'*/).write(110/*'n'*/); break;
+    case 12/*'\f'*/: output.write(92/*'\\'*/).write(102/*'f'*/); break;
+    case 13/*'\r'*/: output.write(92/*'\\'*/).write(114/*'r'*/); break;
+    case 34/*'\"'*/: output.write(92/*'\\'*/).write(34/*'\"'*/); break;
+    case 39/*'\"'*/: output.write(92/*'\\'*/).write(39/*'\''*/); break;
+    case 92/*'\\'*/: output.write(92/*'\\'*/).write(92/*'\\'*/); break;
     default:
-      if (character >= 0x0000 && character <= 0x001f
-          || character >= 0x007f && character <= 0x009f) {
+      if (value >= 0x0000 && value <= 0x001f || value >= 0x007f && value <= 0x009f) {
         output = output.write(92/*'\\'*/).write(117/*'u'*/)
-          .write(Format.encodeHex(character >>> 12 & 0xf))
-          .write(Format.encodeHex(character >>>  8 & 0xf))
-          .write(Format.encodeHex(character >>>  4 & 0xf))
-          .write(Format.encodeHex(character        & 0xf));
+                       .write(Format.encodeHex(value >>> 12 & 0xf))
+                       .write(Format.encodeHex(value >>>  8 & 0xf))
+                       .write(Format.encodeHex(value >>>  4 & 0xf))
+                       .write(Format.encodeHex(value        & 0xf));
       } else {
-        output = output.write(character);
+        output = output.write(value);
       }
   }
   output = output.write(39/*'\''*/);
+  return output;
 };
 
-Format.debugString = function (string: string, output: Output): void {
+Format.debugString = function <T>(output: Output<T>, string: string): Output<T> {
   output = output.write(34/*'\"'*/);
   let input = Unicode.stringInput(string);
   while (input.isCont()) {
@@ -334,10 +293,10 @@ Format.debugString = function (string: string, output: Output): void {
       default:
         if (c >= 0x0000 && c <= 0x001f || c >= 0x007f && c <= 0x009f) {
           output = output.write(92/*'\\'*/).write(117/*'u'*/)
-            .write(Format.encodeHex(c >>> 12 & 0xf))
-            .write(Format.encodeHex(c >>>  8 & 0xf))
-            .write(Format.encodeHex(c >>>  4 & 0xf))
-            .write(Format.encodeHex(c        & 0xf));
+                         .write(Format.encodeHex(c >>> 12 & 0xf))
+                         .write(Format.encodeHex(c >>>  8 & 0xf))
+                         .write(Format.encodeHex(c >>>  4 & 0xf))
+                         .write(Format.encodeHex(c        & 0xf));
         } else {
           output = output.write(c);
         }
@@ -345,6 +304,7 @@ Format.debugString = function (string: string, output: Output): void {
     input = input.step();
   }
   output = output.write(34/*'\"'*/);
+  return output;
 };
 
 Format.encodeHex = function (x: number): number {

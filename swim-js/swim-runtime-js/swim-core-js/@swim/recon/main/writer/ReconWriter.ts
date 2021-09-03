@@ -76,21 +76,21 @@ export abstract class ReconWriter<I, V> {
 
   abstract sizeOfItem(item: I): number;
 
-  abstract writeItem(item: I, output: Output): Writer;
+  abstract writeItem(output: Output, item: I): Writer;
 
   abstract sizeOfValue(value: V): number;
 
-  abstract writeValue(value: V, output: Output): Writer;
+  abstract writeValue(output: Output, value: V): Writer;
 
   abstract sizeOfBlockValue(value: V): number;
 
-  abstract writeBlockValue(value: V, output: Output): Writer;
+  abstract writeBlockValue(output: Output, value: V): Writer;
 
   sizeOfAttr(key: V, value: V): number {
     return AttrWriter.sizeOf(this, key, value);
   }
 
-  writeAttr(key: V, value: V, output: Output): Writer {
+  writeAttr(output: Output, key: V, value: V): Writer {
     return AttrWriter.write(output, this, key, value);
   }
 
@@ -98,13 +98,13 @@ export abstract class ReconWriter<I, V> {
     return SlotWriter.sizeOf(this, key, value);
   }
 
-  writeSlot(key: V, value: V, output: Output): Writer {
+  writeSlot(output: Output, key: V, value: V): Writer {
     return SlotWriter.write(output, this, key, value);
   }
 
   abstract sizeOfBlockItem(item: I): number;
 
-  abstract writeBlockItem(item: I, output: Output): Writer;
+  abstract writeBlockItem(output: Output, item: I): Writer;
 
   sizeOfBlock(item: I): number;
   sizeOfBlock(items: Cursor<I>, inBlock: boolean, inMarkup: boolean): number;
@@ -121,9 +121,9 @@ export abstract class ReconWriter<I, V> {
     }
   }
 
-  writeBlock(item: I, output: Output): Writer;
-  writeBlock(items: Cursor<I>, output: Output, inBlock: boolean, inMarkup: boolean): Writer;
-  writeBlock(item: I | Cursor<I>, output: Output, inBlock?: boolean, inMarkup?: boolean): Writer {
+  writeBlock(output: Output, item: I): Writer;
+  writeBlock(output: Output, items: Cursor<I>, inBlock: boolean, inMarkup: boolean): Writer;
+  writeBlock(output: Output, item: I | Cursor<I>, inBlock?: boolean, inMarkup?: boolean): Writer {
     if (arguments.length === 4) {
       return BlockWriter.write(output, this, item as Cursor<I>, inBlock!, inMarkup!);
     } else {
@@ -131,7 +131,7 @@ export abstract class ReconWriter<I, V> {
       if (items.hasNext()) {
         return BlockWriter.write(output, this, items, this.isBlockSafe(this.items(item as I)), false);
       } else {
-        return Unicode.writeString("{}", output);
+        return Unicode.writeString(output, "{}");
       }
     }
   }
@@ -145,12 +145,12 @@ export abstract class ReconWriter<I, V> {
     }
   }
 
-  writeRecord(item: I, output: Output): Writer {
+  writeRecord(output: Output, item: I): Writer {
     const items = this.items(item);
     if (items.hasNext()) {
       return BlockWriter.write(output, this, items, false, false);
     } else {
-      return Unicode.writeString("{}", output);
+      return Unicode.writeString(output, "{}");
     }
   }
 
@@ -166,16 +166,16 @@ export abstract class ReconWriter<I, V> {
     return 2; // "()"
   }
 
-  writePrimary(value: V, output: Output): Writer {
+  writePrimary(output: Output, value: V): Writer {
     if (this.isRecord(this.item(value))) {
       const items = this.items(this.item(value));
       if (items.hasNext()) {
         return PrimaryWriter.write(output, this, items);
       }
     } else if (!this.isExtant(this.item(value))) {
-      return this.writeValue(value, output);
+      return this.writeValue(output, value);
     }
-    return Unicode.writeString("()", output);
+    return Unicode.writeString(output, "()");
   }
 
   isBlockSafe(items: Cursor<I>): boolean {
@@ -206,7 +206,7 @@ export abstract class ReconWriter<I, V> {
     return MarkupTextWriter.sizeOf(item);
   }
 
-  writeMarkupText(item: I | string, output: Output): Writer {
+  writeMarkupText(output: Output, item: I | string): Writer {
     if (typeof item !== "string") {
       item = this.string(item);
     }
@@ -217,11 +217,11 @@ export abstract class ReconWriter<I, V> {
     return DataWriter.sizeOf(length);
   }
 
-  writeData(value: Uint8Array | undefined, output: Output): Writer {
+  writeData(output: Output, value: Uint8Array | undefined): Writer {
     if (value !== void 0) {
       return DataWriter.write(output, value);
     } else {
-      return Unicode.writeString("%", output);
+      return Unicode.writeString(output, "%");
     }
   }
 
@@ -251,7 +251,7 @@ export abstract class ReconWriter<I, V> {
     }
   }
 
-  writeText(value: string, output: Output): Writer {
+  writeText(output: Output, value: string): Writer {
     if (this.isIdent(value)) {
       return IdentWriter.write(output, value);
     } else {
@@ -271,11 +271,11 @@ export abstract class ReconWriter<I, V> {
     }
   }
 
-  writeNum(value: number, output: Output): Writer {
+  writeNum(output: Output, value: number): Writer {
     if (isFinite(value) && Math.floor(value) === value && Math.abs(value) < 2147483648) {
-      return Base10.writeInteger(value, output);
+      return Base10.writeInteger(output, value);
     } else {
-      return Unicode.writeString("" + value, output);
+      return Unicode.writeString(output, "" + value);
     }
   }
 
@@ -283,31 +283,31 @@ export abstract class ReconWriter<I, V> {
     return 10;
   }
 
-  writeUint32(value: number, output: Output): Writer {
-    return Base16.lowercase.writeIntegerLiteral(value, output, 8);
+  writeUint32(output: Output, value: number): Writer {
+    return Base16.lowercase.writeIntegerLiteral(output, value, 8);
   }
 
   sizeOfUint64(value: number): number {
     return 18;
   }
 
-  writeUint64(value: number, output: Output): Writer {
-    return Base16.lowercase.writeIntegerLiteral(value, output, 16);
+  writeUint64(output: Output, value: number): Writer {
+    return Base16.lowercase.writeIntegerLiteral(output, value, 16);
   }
 
   sizeOfBool(value: boolean): number {
     return value ? 4 : 5;
   }
 
-  writeBool(value: boolean, output: Output): Writer {
-    return Unicode.writeString(value ? "true" : "false", output);
+  writeBool(output: Output, value: boolean): Writer {
+    return Unicode.writeString(output, value ? "true" : "false");
   }
 
   sizeOfLambdaFunc(bindings: V, template: V): number {
     return LambdaFuncWriter.sizeOf(this, bindings, template);
   }
 
-  writeLambdaFunc(bindings: V, template: V, output: Output): Writer {
+  writeLambdaFunc(output: Output, bindings: V, template: V): Writer {
     return LambdaFuncWriter.write(output, this, bindings, template);
   }
 
@@ -315,7 +315,7 @@ export abstract class ReconWriter<I, V> {
     return ConditionalOperatorWriter.sizeOf(this, ifTerm, thenTerm, elseTerm, precedence);
   }
 
-  writeConditionalOperator(ifTerm: I, thenTerm: I, elseTerm: I, precedence: number, output: Output): Writer {
+  writeConditionalOperator(output: Output, ifTerm: I, thenTerm: I, elseTerm: I, precedence: number): Writer {
     return ConditionalOperatorWriter.write(output, this, ifTerm, thenTerm, elseTerm, precedence);
   }
 
@@ -323,7 +323,7 @@ export abstract class ReconWriter<I, V> {
     return InfixOperatorWriter.sizeOf(this, lhs, operator, rhs, precedence);
   }
 
-  writeInfixOperator(lhs: I, operator: string, rhs: I, precedence: number, output: Output): Writer {
+  writeInfixOperator(output: Output, lhs: I, operator: string, rhs: I, precedence: number): Writer {
     return InfixOperatorWriter.write(output, this, lhs, operator, rhs, precedence);
   }
 
@@ -331,7 +331,7 @@ export abstract class ReconWriter<I, V> {
     return PrefixOperatorWriter.sizeOf(this, operator, rhs, precedence);
   }
 
-  writePrefixOperator(operator: string, rhs: I, precedence: number, output: Output): Writer {
+  writePrefixOperator(output: Output, operator: string, rhs: I, precedence: number): Writer {
     return PrefixOperatorWriter.write(output, this, operator, rhs, precedence);
   }
 
@@ -339,13 +339,13 @@ export abstract class ReconWriter<I, V> {
     return InvokeOperatorWriter.sizeOf(this, func, args);
   }
 
-  writeInvokeOperator(func: V, args: V, output: Output): Writer {
+  writeInvokeOperator(output: Output, func: V, args: V): Writer {
     return InvokeOperatorWriter.write(output, this, func, args);
   }
 
   abstract sizeOfThen(then: V): number;
 
-  abstract writeThen(then: V, output: Output): Writer;
+  abstract writeThen(output: Output, then: V): Writer;
 
   sizeOfIdentitySelector(): number {
     return 0;
@@ -367,7 +367,7 @@ export abstract class ReconWriter<I, V> {
     return LiteralSelectorWriter.sizeOf(this, item, then);
   }
 
-  writeLiteralSelector(item: I, then: V, output: Output): Writer {
+  writeLiteralSelector(output: Output, item: I, then: V): Writer {
     return LiteralSelectorWriter.write(output, this, item, then);
   }
 
@@ -375,7 +375,7 @@ export abstract class ReconWriter<I, V> {
     return 0;
   }
 
-  writeThenLiteralSelector(item: I, then: V, output: Output): Writer {
+  writeThenLiteralSelector(output: Output, item: I, then: V): Writer {
     return Writer.end();
   }
 
@@ -383,7 +383,7 @@ export abstract class ReconWriter<I, V> {
     return GetSelectorWriter.sizeOf(this, key, then);
   }
 
-  writeGetSelector(key: V, then: V, output: Output): Writer {
+  writeGetSelector(output: Output, key: V, then: V): Writer {
     return GetSelectorWriter.write(output, this, key, then);
   }
 
@@ -391,7 +391,7 @@ export abstract class ReconWriter<I, V> {
     return GetSelectorWriter.sizeOf(this, key, then);
   }
 
-  writeThenGetSelector(key: V, then: V, output: Output): Writer {
+  writeThenGetSelector(output: Output, key: V, then: V): Writer {
     return GetSelectorWriter.writeThen(output, this, key, then);
   }
 
@@ -399,7 +399,7 @@ export abstract class ReconWriter<I, V> {
     return GetAttrSelectorWriter.sizeOf(this, key, then);
   }
 
-  writeGetAttrSelector(key: V, then: V, output: Output): Writer {
+  writeGetAttrSelector(output: Output, key: V, then: V): Writer {
     return GetAttrSelectorWriter.write(output, this, key, then);
   }
 
@@ -407,7 +407,7 @@ export abstract class ReconWriter<I, V> {
     return GetAttrSelectorWriter.sizeOf(this, key, then);
   }
 
-  writeThenGetAttrSelector(key: V, then: V, output: Output): Writer {
+  writeThenGetAttrSelector(output: Output, key: V, then: V): Writer {
     return GetAttrSelectorWriter.writeThen(output, this, key, then);
   }
 
@@ -415,7 +415,7 @@ export abstract class ReconWriter<I, V> {
     return GetItemSelectorWriter.sizeOf(this, index, then);
   }
 
-  writeGetItemSelector(index: V, then: V, output: Output): Writer {
+  writeGetItemSelector(output: Output, index: V, then: V): Writer {
     return GetItemSelectorWriter.write(output, this, index, then);
   }
 
@@ -423,7 +423,7 @@ export abstract class ReconWriter<I, V> {
     return GetItemSelectorWriter.sizeOfThen(this, index, then);
   }
 
-  writeThenGetItemSelector(index: V, then: V, output: Output): Writer {
+  writeThenGetItemSelector(output: Output, index: V, then: V): Writer {
     return GetItemSelectorWriter.writeThen(output, this, index, then);
   }
 
@@ -431,7 +431,7 @@ export abstract class ReconWriter<I, V> {
     return KeysSelectorWriter.sizeOf(this, then);
   }
 
-  writeKeysSelector(then: V, output: Output): Writer {
+  writeKeysSelector(output: Output, then: V): Writer {
     return KeysSelectorWriter.write(output, this, then);
   }
 
@@ -439,7 +439,7 @@ export abstract class ReconWriter<I, V> {
     return KeysSelectorWriter.sizeOf(this, then);
   }
 
-  writeThenKeysSelector(then: V, output: Output): Writer {
+  writeThenKeysSelector(output: Output, then: V): Writer {
     return KeysSelectorWriter.writeThen(output, this, then);
   }
 
@@ -447,7 +447,7 @@ export abstract class ReconWriter<I, V> {
     return ValuesSelectorWriter.sizeOf(this, then);
   }
 
-  writeValuesSelector(then: V, output: Output): Writer {
+  writeValuesSelector(output: Output, then: V): Writer {
     return ValuesSelectorWriter.write(output, this, then);
   }
 
@@ -455,7 +455,7 @@ export abstract class ReconWriter<I, V> {
     return ValuesSelectorWriter.sizeOf(this, then);
   }
 
-  writeThenValuesSelector(then: V, output: Output): Writer {
+  writeThenValuesSelector(output: Output, then: V): Writer {
     return ValuesSelectorWriter.writeThen(output, this, then);
   }
 
@@ -463,7 +463,7 @@ export abstract class ReconWriter<I, V> {
     return ChildrenSelectorWriter.sizeOf(this, then);
   }
 
-  writeChildrenSelector(then: V, output: Output): Writer {
+  writeChildrenSelector(output: Output, then: V): Writer {
     return ChildrenSelectorWriter.write(output, this, then);
   }
 
@@ -471,7 +471,7 @@ export abstract class ReconWriter<I, V> {
     return ChildrenSelectorWriter.sizeOf(this, then);
   }
 
-  writeThenChildrenSelector(then: V, output: Output): Writer {
+  writeThenChildrenSelector(output: Output, then: V): Writer {
     return ChildrenSelectorWriter.writeThen(output, this, then);
   }
 
@@ -479,7 +479,7 @@ export abstract class ReconWriter<I, V> {
     return DescendantsSelectorWriter.sizeOf(this, then);
   }
 
-  writeDescendantsSelector(then: V, output: Output): Writer {
+  writeDescendantsSelector(output: Output, then: V): Writer {
     return DescendantsSelectorWriter.write(output, this, then);
   }
 
@@ -487,7 +487,7 @@ export abstract class ReconWriter<I, V> {
     return DescendantsSelectorWriter.sizeOf(this, then);
   }
 
-  writeThenDescendantsSelector(then: V, output: Output): Writer {
+  writeThenDescendantsSelector(output: Output, then: V): Writer {
     return DescendantsSelectorWriter.writeThen(output, this, then);
   }
 
@@ -495,7 +495,7 @@ export abstract class ReconWriter<I, V> {
     return FilterSelectorWriter.sizeOf(this, predicate, then);
   }
 
-  writeFilterSelector(predicate: V, then: V, output: Output): Writer {
+  writeFilterSelector(output: Output, predicate: V, then: V): Writer {
     return FilterSelectorWriter.write(output, this, predicate, then);
   }
 
@@ -503,7 +503,7 @@ export abstract class ReconWriter<I, V> {
     return FilterSelectorWriter.sizeOfThen(this, predicate, then);
   }
 
-  writeThenFilterSelector(predicate: V, then: V, output: Output): Writer {
+  writeThenFilterSelector(output: Output, predicate: V, then: V): Writer {
     return FilterSelectorWriter.writeThen(output, this, predicate, then);
   }
 

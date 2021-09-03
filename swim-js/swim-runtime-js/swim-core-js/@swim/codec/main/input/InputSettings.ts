@@ -79,7 +79,7 @@ export class InputSettings implements HashCode, Debug {
         Booleans.hash(this.stripped)));
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("InputSettings").write(46/*'.'*/);
     if (!this.stripped) {
       output = output.write("standard");
@@ -87,6 +87,7 @@ export class InputSettings implements HashCode, Debug {
       output = output.write("stripped");
     }
     output = output.write(40/*'('*/).write(41/*')'*/);
+    return output;
   }
 
   toString(): string {

@@ -62,9 +62,9 @@ export class Base16 {
   uint8ArrayWriter(input: Uint8Array): Writer<unknown, Uint8Array>;
   uint8ArrayWriter(input?: Uint8Array): Writer<unknown, unknown> {
     if (input === void 0) {
-      return new Base16Writer(void 0, null, this);
+      return new Base16Writer(this, void 0, null);
     } else {
-      return new Base16Writer(input, input, this);
+      return new Base16Writer(this, input, input);
     }
   }
 
@@ -73,16 +73,16 @@ export class Base16 {
    * the `output`, returning a `Writer` continuation that knows how to write any
    * remaining output that couldn't be immediately generated.
    */
-  writeUint8Array(input: Uint8Array, output: Output): Writer<unknown, unknown> {
-    return Base16Writer.write(output, void 0, input, this);
+  writeUint8Array(output: Output, input: Uint8Array): Writer<unknown, unknown> {
+    return Base16Writer.write(output, this, void 0, input);
   }
 
-  writeInteger(input: number, output: Output, width: number = 0): Writer<unknown, unknown> {
-    return Base16IntegerWriter.write(output, void 0, input, width, this);
+  writeInteger(output: Output, input: number, width: number = 0): Writer<unknown, unknown> {
+    return Base16IntegerWriter.write(output, this, void 0, input, width);
   }
 
-  writeIntegerLiteral(input: number, output: Output, width: number = 0): Writer<unknown, unknown> {
-    return Base16IntegerWriter.writeLiteral(output, void 0, input, width, this);
+  writeIntegerLiteral(output: Output, input: number, width: number = 0): Writer<unknown, unknown> {
+    return Base16IntegerWriter.writeLiteral(output, this, void 0, input, width);
   }
 
   /**
@@ -123,9 +123,9 @@ export class Base16 {
     } else if (c >= 97/*'a'*/ && c <= 102/*'f'*/) {
       return 10 + (c - 97/*'a'*/);
     } else {
-      const message = Unicode.stringOutput();
-      message.write("Invalid base-16 digit: ");
-      Format.debugChar(c, message);
+      let message = Unicode.stringOutput();
+      message = message.write("Invalid base-16 digit: ");
+      message = Format.debugChar(message, c);
       throw new Error(message.bind());
     }
   }
@@ -133,11 +133,14 @@ export class Base16 {
   /**
    * Decodes the base-16 digits `c1` and `c2`, and writes the 8-bit  quantity
    * they represent to the given `output`.
+   *
+   * @return the continuation of the `output`.
    */
-  static writeQuantum(c1: number, c2: number, output: Output): void {
+  static writeQuantum<T>(output: Output<T>, c1: number, c2: number): Output<T> {
     const x = Base16.decodeDigit(c1);
     const y = Base16.decodeDigit(c2);
     output = output.write(x << 4 | y);
+    return output;
   }
 
   /**

@@ -157,19 +157,20 @@ export class TreeRoot implements Equals, Equivalent, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("TreeRoot").write(46/*'.'*/).write("create").write(40/*'('*/)
-        .debug(this.key).write(", ").debug(this.grow).write(", ")
-        .debug(this.shrink).write(", ").debug(this.basis);
+                   .debug(this.key).write(", ").debug(this.grow).write(", ")
+                   .debug(this.shrink).write(", ").debug(this.basis);
     if (this.optional) {
       output = output.write(", ").debug(this.optional);
     }
     output = output.write(41/*')'*/);
     if (this.width !== null || this.left !== null || this.right !== null || this.hidden) {
       output = output.write(46/*'.'*/).write("resized").write(40/*'('*/)
-          .debug(this.width).write(", ").debug(this.left).write(", ")
-          .debug(this.right).write(", ").debug(this.hidden).write(41/*')'*/);
+                     .debug(this.width).write(", ").debug(this.left).write(", ")
+                     .debug(this.right).write(", ").debug(this.hidden).write(41/*')'*/);
     }
+    return output;
   }
 
   toString(): string {

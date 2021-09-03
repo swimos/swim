@@ -61,19 +61,21 @@ export class UriPort implements HashCode, Compare, Debug, Display {
     return Strings.hash(this.toString());
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("UriPort").write(46/*'.'*/);
     if (this.isDefined()) {
       output = output.write("create").write(40/*'('*/);
-      Format.displayNumber(this.number, output);
-      output = output.write(41/*')'*/);
+      output = Format.displayNumber(output, this.number);
     } else {
-      output = output.write("undefined").write(40/*'('*/).write(41/*')'*/);
+      output = output.write("undefined").write(40/*'('*/);
     }
+    output = output.write(41/*')'*/);
+    return output;
   }
 
-  display(output: Output): void {
-    Format.displayNumber(this.number, output);
+  display<T>(output: Output<T>): Output<T> {
+    output = Format.displayNumber(output, this.number);
+    return output;
   }
 
   toString(): string {

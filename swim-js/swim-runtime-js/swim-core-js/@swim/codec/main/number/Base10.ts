@@ -78,7 +78,7 @@ export const Base10 = {} as {
    * returning a `Writer` continuation that knows how to write any remaining
    * output that couldn't be immediately generated.
    */
-  writeInteger(input: number, output: Output): Writer;
+  writeInteger(output: Output, input: number): Writer;
 };
 
 Base10.isDigit = function (c: number): boolean {
@@ -89,9 +89,9 @@ Base10.decodeDigit = function (c: number): number {
   if (c >= 48/*'0'*/ && c <= 57/*'9'*/) {
     return c - 48/*'0'*/;
   } else {
-    const message = Unicode.stringOutput();
-    message.write("Invalid base-10 digit: ");
-    Format.debugChar(c, message);
+    let message = Unicode.stringOutput();
+    message = message.write("Invalid base-10 digit: ");
+    message = Format.debugChar(message, c);
     throw new Error(message.bind());
   }
 };
@@ -145,6 +145,6 @@ Base10.integerWriter = function (input?: number): Writer {
   }
 } as typeof Base10.integerWriter;
 
-Base10.writeInteger = function (input: number, output: Output): Writer {
+Base10.writeInteger = function (output: Output, input: number): Writer {
   return Base10IntegerWriter.write(output, void 0, input);
 };

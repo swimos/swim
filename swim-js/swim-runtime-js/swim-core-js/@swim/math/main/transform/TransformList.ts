@@ -204,7 +204,7 @@ export class TransformList extends Transform {
     return Murmur3.mash(hashValue);
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Transform").write(46/*'.'*/).write("list").write(40/*'('*/);
     const transforms = this.transforms;
     const n = transforms.length;
@@ -215,6 +215,7 @@ export class TransformList extends Transform {
       }
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   /** @hidden */

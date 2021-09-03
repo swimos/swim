@@ -219,9 +219,10 @@ export class GetSelector extends Selector {
         this.item.hashCode()), this.then.hashCode()));
   }
 
-  override debugThen(output: Output): void {
+  override debugThen<T>(output: Output<T>): Output<T> {
     output = output.write(46/*'.'*/).write("get").write(40/*'('*/).debug(this.item).write(41/*')'*/);
-    this.then.debugThen(output);
+    output = this.then.debugThen(output);
+    return output;
   }
 
   override clone(): Selector {

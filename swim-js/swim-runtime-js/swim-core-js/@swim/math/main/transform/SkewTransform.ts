@@ -129,15 +129,17 @@ export class SkewTransform extends Transform {
         this.x.hashCode()), this.y.hashCode()));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Transform").write(46/*'.'*/).write("skew");
     if (this.x.isDefined() && !this.y.isDefined()) {
-      output = output.write("X").write(40/*'('*/).debug(this.x).write(41/*')'*/);
+      output = output.write("X").write(40/*'('*/).debug(this.x);
     } else if (!this.x.isDefined() && this.y.isDefined()) {
-      output = output.write("Y").write(40/*'('*/).debug(this.y).write(41/*')'*/);
+      output = output.write("Y").write(40/*'('*/).debug(this.y);
     } else {
-      output = output.write(40/*'('*/).debug(this.x).write(", ").debug(this.y).write(41/*')'*/);
+      output = output.write(40/*'('*/).debug(this.x).write(", ").debug(this.y);
     }
+    output = output.write(41/*')'*/);
+    return output;
   }
 
   /** @hidden */

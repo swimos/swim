@@ -67,9 +67,10 @@ export class Constraint implements ConstraintKey, Debug {
     return this;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.debug(this.scope).write(46/*'.'*/).write("constraint").write(40/*'('*/)
-        .debug(this.expression).write(", ").debug(this.relation).write(", ").debug(void 0).write(", ");
+                   .debug(this.expression).write(", ").debug(this.relation).write(", ")
+                   .debug(void 0).write(", ");
     if (this.strength === ConstraintStrength.Required) {
       output = output.debug("required");
     } else if (this.strength === ConstraintStrength.Strong) {
@@ -82,6 +83,7 @@ export class Constraint implements ConstraintKey, Debug {
       output = output.debug(this.strength);
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   toString(): string {

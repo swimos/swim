@@ -35,8 +35,9 @@ export class ShortWeekdayFormat extends DateTimeFormat {
     }
   }
 
-  override writeDate(date: DateTime, output: Output): void {
-    output.write(this.locale.shortWeekdays[date.weekday]!);
+  override writeDate<T>(output: Output<T>, date: DateTime): Output<T> {
+    output = output.write(this.locale.shortWeekdays[date.weekday]!);
+    return output;
   }
 
   override parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {

@@ -172,13 +172,14 @@ export class HslColor extends Color {
         Numbers.hash(this.h)), Numbers.hash(this.s)), Numbers.hash(this.l)), Numbers.hash(this.a)));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Color").write(46/*'.'*/).write("hsl").write(40/*'('*/)
-        .debug(this.h).write(", ").debug(this.s).write(", ").debug(this.l);
+                   .debug(this.h).write(", ").debug(this.s).write(", ").debug(this.l);
     if (this.a !== 1) {
       output = output.write(", ").debug(this.a);
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   override toHexString(): string {

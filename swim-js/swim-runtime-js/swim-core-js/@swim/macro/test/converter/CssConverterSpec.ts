@@ -23,7 +23,7 @@ export class CssConverterSpec extends Spec {
     const converter = new CssConverter();
     const model = Recon.parse("@rule(\".test\") {\n"
                             + "}\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "");
   }
 
@@ -34,7 +34,7 @@ export class CssConverterSpec extends Spec {
                             + "  color: \"#000\"\n"
                             + "  background-color: \"#fff\"\n"
                             + "}\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, ".test {\n"
                      + "color: #000;\n"
                      + "background-color: #fff;\n"
@@ -47,7 +47,7 @@ export class CssConverterSpec extends Spec {
     const model = Recon.parse("@rule(html, head) {\n"
                             + "  background-color: \"#fff\"\n"
                             + "}\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "html,\n"
                      + "head {\n"
                      + "background-color: #fff;\n"
@@ -62,7 +62,7 @@ export class CssConverterSpec extends Spec {
                             + "    color: \"#000\"\n"
                             + "  }\n"
                             + "}\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, ".a .x,\n"
                      + ".a .y,\n"
                      + ".b .x,\n"
@@ -81,7 +81,7 @@ export class CssConverterSpec extends Spec {
                             + "  }\n"
                             + "  color: \"#888\"\n"
                             + "}\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, ".a,\n"
                      + ".b {\n"
                      + "background-color: #fff;\n"
@@ -107,7 +107,7 @@ export class CssConverterSpec extends Spec {
                             + "    background-color: \"#fff\"\n"
                             + "  }\n"
                             + "}\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "@media screen {\n"
                      + "#test {\n"
                      + "color: #000;\n"
@@ -120,7 +120,7 @@ export class CssConverterSpec extends Spec {
   convertMediaAndQueries(exam: Exam): void {
     const converter = new CssConverter();
     const model = Recon.parse("@media(@and{min-width: 400, min-height: 800})\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "@media (min-width: 400px) and (min-height: 800px) {\n"
                      + "}\n");
   }
@@ -129,7 +129,7 @@ export class CssConverterSpec extends Spec {
   convertMediaNotQueries(exam: Exam): void {
     const converter = new CssConverter();
     const model = Recon.parse("@media(@not{@and{screen, color}})\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "@media not (screen and color) {\n"
                      + "}\n");
   }
@@ -138,7 +138,7 @@ export class CssConverterSpec extends Spec {
   convertMultiMediaQueries(exam: Exam): void {
     const converter = new CssConverter();
     const model = Recon.parse("@media(@and{min-width: 400, min-height: 800}, screen)\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "@media (min-width: 400px) and (min-height: 800px), screen {\n"
                      + "}\n");
   }

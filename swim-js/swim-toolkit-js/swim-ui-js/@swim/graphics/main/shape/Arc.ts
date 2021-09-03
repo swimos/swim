@@ -377,7 +377,7 @@ export class Arc implements Graphics, Equals, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("Arc").write(46/*'.'*/).write("create").write(40/*'('*/).write(41/*')'*/);
     if (this.center.isDefined()) {
       output = output.write(46/*'.'*/).write("center").write(40/*'('*/).debug(this.center).write(41/*')'*/);
@@ -403,6 +403,7 @@ export class Arc implements Graphics, Equals, Debug {
     if (this.cornerRadius.isDefined()) {
       output = output.write(46/*'.'*/).write("cornerRadius").write(40/*'('*/).debug(this.cornerRadius).write(41/*')'*/);
     }
+    return output;
   }
 
   toString(): string {

@@ -188,26 +188,28 @@ export class R2CubicCurve extends R2BezierCurve implements Debug {
                           f.transformX(this.x3, this.y3), f.transformY(this.x3, this.y3));
   }
 
-  override writeMove(output: Output): void {
-    output.write(77/*'M'*/);
-    Format.displayNumber(this.x0, output)
-    output.write(44/*','*/)
-    Format.displayNumber(this.y0, output);
+  override writeMove<T>(output: Output<T>): Output<T> {
+    output = output.write(77/*'M'*/);
+    output = Format.displayNumber(output, this.x0)
+    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, this.y0);
+    return output;
   }
 
-  override writeRest(output: Output): void {
-    output.write(67/*'C'*/);
-    Format.displayNumber(this.x1, output)
-    output.write(44/*','*/)
-    Format.displayNumber(this.y1, output);
-    output.write(44/*','*/)
-    Format.displayNumber(this.x2, output)
-    output.write(44/*','*/)
-    Format.displayNumber(this.y2, output);
-    output.write(44/*','*/)
-    Format.displayNumber(this.x3, output)
-    output.write(44/*','*/)
-    Format.displayNumber(this.y3, output);
+  override writeRest<T>(output: Output<T>): Output<T> {
+    output = output.write(67/*'C'*/);
+    output = Format.displayNumber(output, this.x1)
+    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, this.y1);
+    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, this.x2)
+    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, this.y2);
+    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, this.x3)
+    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, this.y3);
+    return output;
   }
 
   override equivalentTo(that: unknown, epsilon?: number): boolean {
@@ -238,12 +240,13 @@ export class R2CubicCurve extends R2BezierCurve implements Debug {
     return false;
   }
 
-  debug(output: Output): void {
-    output.write("R2Curve").write(46/*'.'*/).write("cubic").write(40/*'('*/)
-        .debug(this.x0).write(", ").debug(this.y0).write(", ")
-        .debug(this.x1).write(", ").debug(this.y1).write(", ")
-        .debug(this.x2).write(", ").debug(this.y2).write(", ")
-        .debug(this.x3).write(", ").debug(this.y3).write(41/*')'*/);
+  debug<T>(output: Output<T>): Output<T> {
+    output = output.write("R2Curve").write(46/*'.'*/).write("cubic").write(40/*'('*/)
+                   .debug(this.x0).write(", ").debug(this.y0).write(", ")
+                   .debug(this.x1).write(", ").debug(this.y1).write(", ")
+                   .debug(this.x2).write(", ").debug(this.y2).write(", ")
+                   .debug(this.x3).write(", ").debug(this.y3).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

@@ -816,7 +816,7 @@ export abstract class Record extends Value implements Builder<Item, Record> {
     return hashValue;
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Record").write(46/*'.'*/);
     if (this.isEmpty()) {
       output = output.write("empty").write(40/*'('*/).write(41/*')'*/);
@@ -826,14 +826,11 @@ export abstract class Record extends Value implements Builder<Item, Record> {
         if (index !== 0) {
           output = output.write(44/*','*/).write(32/*' '*/);
         }
-        output.display(item);
+        output = output.display(item);
       }, this);
       output = output.write(41/*')'*/);
     }
-  }
-
-  override display(output: Output): void {
-    this.debug(output);
+    return output;
   }
 
   /** @hidden */

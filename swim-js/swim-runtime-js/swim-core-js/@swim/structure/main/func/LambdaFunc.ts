@@ -114,8 +114,9 @@ export class LambdaFunc extends Func {
         this.bindings.hashCode()), this.template.hashCode()));
   }
 
-  override debug(output: Output): void {
-    output.debug(this.bindings).write(46/*'.'*/).write("lambda").write(40/*'('*/)
-        .debug(this.template).write(41/*')'*/);
+  override debug<T>(output: Output<T>): Output<T> {
+    output = output.debug(this.bindings).write(46/*'.'*/).write("lambda").write(40/*'('*/)
+                   .debug(this.template).write(41/*')'*/);
+    return output;
   }
 }

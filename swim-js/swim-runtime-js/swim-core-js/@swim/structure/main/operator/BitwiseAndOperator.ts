@@ -89,9 +89,10 @@ export class BitwiseAndOperator extends BinaryOperator {
         this.operand1.hashCode()), this.operand2.hashCode()));
   }
 
-  override debug(output: Output): void {
-    output.debug(this.operand1).write(46/*'.'*/).write("bitwiseAnd").write(40/*'('*/)
-        .debug(this.operand2).write(41/*')'*/);
+  override debug<T>(output: Output<T>): Output<T> {
+    output = output.debug(this.operand1).write(46/*'.'*/).write("bitwiseAnd").write(40/*'('*/)
+                   .debug(this.operand2).write(41/*')'*/);
+    return output;
   }
 
   override clone(): BitwiseAndOperator {

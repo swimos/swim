@@ -301,9 +301,10 @@ export class ConstraintBinding implements ConstraintVariable, Debug {
     }
   }
 
-  debug(output: Output): void {
-    output = output.debug(this.owner).write(46/*'.'*/).write("constraintVariable")
-        .write(40/*'('*/).debug(this.name).write(", ").debug(this.state).write(41/*')'*/);
+  debug<T>(output: Output<T>): Output<T> {
+    output = output.debug(this.owner).write(46/*'.'*/).write("constraintVariable").write(40/*'('*/)
+                   .debug(this.name).write(", ").debug(this.state).write(41/*')'*/);
+    return output;
   }
 
   toString(): string {

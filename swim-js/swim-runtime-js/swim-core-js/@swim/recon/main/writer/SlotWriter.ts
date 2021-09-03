@@ -50,7 +50,7 @@ export class SlotWriter<I, V> extends Writer {
                      part?: Writer, step: number = 1): Writer {
     if (step === 1) {
       if (part === void 0) {
-        part = recon.writeValue(key, output);
+        part = recon.writeValue(output, key);
       } else {
         part = part.pull(output);
       }
@@ -71,7 +71,7 @@ export class SlotWriter<I, V> extends Writer {
     }
     if (step === 3) {
       if (part === void 0) {
-        part = recon.writeValue(value, output);
+        part = recon.writeValue(output, value);
       } else {
         part = part.pull(output);
       }

@@ -259,9 +259,11 @@ export class R2Circle extends R2Shape implements Interpolate<R2Circle>, HashCode
         Numbers.hash(this.cx)), Numbers.hash(this.cy)), Numbers.hash(this.r)));
   }
 
-  debug(output: Output): void {
-    output.write("R2Circle").write(46/*'.'*/).write("of").write(40/*'('*/)
-        .debug(this.cx).write(", ").debug(this.cy).write(", ").debug(this.r).write(41/*')'*/);
+  debug<T>(output: Output<T>): Output<T> {
+    output = output.write("R2Circle").write(46/*'.'*/).write("of").write(40/*'('*/)
+                   .debug(this.cx).write(", ").debug(this.cy).write(", ")
+                   .debug(this.r).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

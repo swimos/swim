@@ -38,7 +38,7 @@ export class ExportDirective extends Directive {
         const extension = exportPath.substr(dotIndex + 1);
         const converter = context.getConverter(extension);
         if (converter !== null) {
-          output = converter.convert(model, Unicode.stringOutput());
+          output = converter.convert(Unicode.stringOutput(), model);
         } else {
           output = model.stringValue();
         }

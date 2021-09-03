@@ -166,14 +166,14 @@ export class Project {
   }
 
   publish(options?: {tag?: string, "dry-run"?: boolean}): Promise<unknown> {
-    const output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.greenBold(output);
-    output.write("publishing");
-    OutputStyle.reset(output);
-    output.write(" ");
-    OutputStyle.yellow(output);
-    output.write(this.id);
-    OutputStyle.reset(output);
+    let output = Unicode.stringOutput(OutputSettings.styled());
+    output = OutputStyle.greenBold(output);
+    output = output.write("publishing");
+    output = OutputStyle.reset(output);
+    output = output.write(" ");
+    output = OutputStyle.yellow(output);
+    output = output.write(this.id);
+    output = OutputStyle.reset(output);
     console.log(output.bind());
 
     return new Promise<void>((resolve, reject): void => {
@@ -187,15 +187,15 @@ export class Project {
           args.push("--dry-run");
         }
       }
-      const output = Unicode.stringOutput(OutputSettings.styled());
-      OutputStyle.gray(output);
-      output.write("npm");
-      OutputStyle.reset(output);
+      let output = Unicode.stringOutput(OutputSettings.styled());
+      output = OutputStyle.gray(output);
+      output = output.write("npm");
+      output = OutputStyle.reset(output);
       for (let i = 0; i < args.length; i += 1) {
-        output.write(" ");
-        OutputStyle.gray(output);
-        output.write(args[i]!);
-        OutputStyle.reset(output);
+        output = output.write(" ");
+        output = OutputStyle.gray(output);
+        output = output.write(args[i]!);
+        output = OutputStyle.reset(output);
       }
       console.log(output.bind());
 
@@ -204,29 +204,29 @@ export class Project {
       proc.on("exit", (code: number): void => {
         const dt = Date.now() - t0;
         if (code === 0) {
-          const output = Unicode.stringOutput(OutputSettings.styled());
-          OutputStyle.greenBold(output);
-          output.write("published");
-          OutputStyle.reset(output);
-          output.write(" ");
-          OutputStyle.yellow(output);
-          output.write(this.id);
-          OutputStyle.reset(output);
-          output.write(" in ");
-          output.debug(dt);
-          output.write("ms");
+          let output = Unicode.stringOutput(OutputSettings.styled());
+          output = OutputStyle.greenBold(output);
+          output = output.write("published");
+          output = OutputStyle.reset(output);
+          output = output.write(" ");
+          output = OutputStyle.yellow(output);
+          output = output.write(this.id);
+          output = OutputStyle.reset(output);
+          output = output.write(" in ");
+          output = output.debug(dt);
+          output = output.write("ms");
           console.log(output.bind());
           console.log();
           resolve();
         } else {
-          const output = Unicode.stringOutput(OutputSettings.styled());
-          OutputStyle.redBold(output);
-          output.write("failed to publish");
-          OutputStyle.reset(output);
-          output.write(" ");
-          OutputStyle.yellow(output);
-          output.write(this.id);
-          OutputStyle.reset(output);
+          let output = Unicode.stringOutput(OutputSettings.styled());
+          output = OutputStyle.redBold(output);
+          output = output.write("failed to publish");
+          output = OutputStyle.reset(output);
+          output = output.write(" ");
+          output = OutputStyle.yellow(output);
+          output = output.write(this.id);
+          output = OutputStyle.reset(output);
           console.log(output.bind());
           console.log();
           reject(code);
@@ -239,12 +239,12 @@ export class Project {
     this.cleanTargets();
     for (let i = 0; i < this.cleanDirs.length; i += 1) {
       const cleanDir = Path.resolve(this.baseDir, this.cleanDirs[i]!);
-      const output = Unicode.stringOutput(OutputSettings.styled());
-      OutputStyle.greenBold(output);
-      output.write("deleting");
-      OutputStyle.reset(output);
-      output.write(" ");
-      output.write(cleanDir);
+      let output = Unicode.stringOutput(OutputSettings.styled());
+      output = OutputStyle.greenBold(output);
+      output = output.write("deleting");
+      output = OutputStyle.reset(output);
+      output = output.write(" ");
+      output = output.write(cleanDir);
       console.log(output.bind());
       Project.rmdir(cleanDir);
     }

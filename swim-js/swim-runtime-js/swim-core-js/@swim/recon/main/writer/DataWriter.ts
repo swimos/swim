@@ -43,7 +43,7 @@ export class DataWriter extends Writer {
     }
     if (step === 2) {
       if (part === void 0) {
-        part = Base64.standard().writeUint8Array(array, output);
+        part = Base64.standard().writeUint8Array(output, array);
       } else {
         part = part.pull(output);
       }

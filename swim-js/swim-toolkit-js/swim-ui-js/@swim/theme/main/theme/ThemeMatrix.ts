@@ -404,11 +404,11 @@ export class ThemeMatrix implements Equals, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     const cols = this.colArray;
     const n = cols.length;
     output = output.write("ThemeMatrix").write(46/*'.'*/)
-        .write(n !== 0 ? "forCols" : "empty").write(40/*'('*/);
+                   .write(n !== 0 ? "forCols" : "empty").write(40/*'('*/);
     for (let j = 0; j < n; j += 1) {
       const [feel, col] = cols[j]!;
       if (j !== 0) {
@@ -417,6 +417,7 @@ export class ThemeMatrix implements Equals, Debug {
       output = output.write(91/*'['*/).debug(feel).write(", ").debug(col).write(93/*']'*/);
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   toString(): string {

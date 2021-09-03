@@ -124,9 +124,10 @@ export class RotateTransform extends Transform {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(RotateTransform), this.angle.hashCode()));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Transform").write(46/*'.'*/).write("rotate")
-        .write(40/*'('*/).debug(this.angle).write(41/*')'*/);
+                   .write(40/*'('*/).debug(this.angle).write(41/*')'*/);
+    return output;
   }
 
   /** @hidden */

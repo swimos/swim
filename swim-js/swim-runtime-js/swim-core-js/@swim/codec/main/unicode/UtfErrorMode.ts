@@ -61,7 +61,7 @@ export abstract class UtfErrorMode implements HashCode, Debug {
 
   abstract hashCode(): number;
 
-  abstract debug(output: Output): void;
+  abstract debug<T>(output: Output<T>): Output<T>;
 
   toString(): string {
     return Format.debug(this);

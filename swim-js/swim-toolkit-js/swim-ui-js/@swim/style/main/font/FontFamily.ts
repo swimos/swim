@@ -67,25 +67,25 @@ FontFamily.format = function (family: FontFamily): string {
   if (isIdent) {
     return family;
   } else {
-    const output = Unicode.stringOutput();
-    output.write(34/*'"'*/);
+    let output = Unicode.stringOutput();
+    output = output.write(34/*'"'*/);
     for (let i = 0; i < n; i = family.offsetByCodePoints(i, 1)) {
       const c = family.charCodeAt(i);
       if (c === 10/*'\n'*/ || c === 34/*'"'*/ || c === 39/*'\''*/) {
-        output.write(92/*'\\'*/).write(c);
+        output = output.write(92/*'\\'*/).write(c);
       } else if (c >= 0x20) {
-        output.write(c);
+        output = output.write(c);
       } else {
         const base16 = Base16.uppercase;
-        output.write(92/*'\\'*/).write(base16.encodeDigit(c >>> 20 & 0xf))
-                                .write(base16.encodeDigit(c >>> 16 & 0xf))
-                                .write(base16.encodeDigit(c >>> 12 & 0xf))
-                                .write(base16.encodeDigit(c >>>  8 & 0xf))
-                                .write(base16.encodeDigit(c >>>  4 & 0xf))
-                                .write(base16.encodeDigit(c        & 0xf));
+        output = output.write(92/*'\\'*/).write(base16.encodeDigit(c >>> 20 & 0xf))
+                                         .write(base16.encodeDigit(c >>> 16 & 0xf))
+                                         .write(base16.encodeDigit(c >>> 12 & 0xf))
+                                         .write(base16.encodeDigit(c >>>  8 & 0xf))
+                                         .write(base16.encodeDigit(c >>>  4 & 0xf))
+                                         .write(base16.encodeDigit(c        & 0xf));
       }
     }
-    output.write(34/*'"'*/);
+    output = output.write(34/*'"'*/);
     return output.toString();
   }
 };

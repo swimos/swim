@@ -292,10 +292,11 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
         Numbers.hash(this.lngMax)), Numbers.hash(this.latMax)));
   }
 
-  debug(output: Output): void {
-    output.write("GeoBox").write(46/*'.'*/).write("of").write(40/*'('*/)
-        .debug(this.lngMin).write(", ").debug(this.latMin).write(", ")
-        .debug(this.lngMax).write(", ").debug(this.latMax).write(41/*')'*/);
+  debug<T>(output: Output<T>): Output<T> {
+    output = output.write("GeoBox").write(46/*'.'*/).write("of").write(40/*'('*/)
+                   .debug(this.lngMin).write(", ").debug(this.latMin).write(", ")
+                   .debug(this.lngMax).write(", ").debug(this.latMax).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

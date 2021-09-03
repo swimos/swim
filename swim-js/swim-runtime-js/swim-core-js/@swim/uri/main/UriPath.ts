@@ -320,18 +320,19 @@ export abstract class UriPath implements HashCode, Compare, Debug, Display {
     return Strings.hash(this.toString());
   }
 
-  abstract debug(output: Output): void;
+  abstract debug<T>(output: Output<T>): Output<T>;
 
-  display(output: Output): void {
+  display<T>(output: Output<T>): Output<T> {
     let path: UriPath = this;
     while (!path.isEmpty()) {
       if (path.isAbsolute()) {
         output = output.write(47/*'/'*/);
       } else {
-        Uri.writePathSegment(path.head(), output);
+        output = Uri.writePathSegment(output, path.head());
       }
       path = path.tail();
     }
+    return output;
   }
 
   abstract toString(): string;

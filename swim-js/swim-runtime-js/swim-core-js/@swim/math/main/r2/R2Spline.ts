@@ -259,23 +259,25 @@ export class R2Spline extends R2Curve implements Debug {
     }
   }
 
-  override writeMove(output: Output): void {
+  override writeMove<T>(output: Output<T>): Output<T> {
     const curves = this.curves;
     if (curves.length !== 0) {
-      curves[0]!.writeMove(output);
+      output = curves[0]!.writeMove(output);
     }
+    return output;
   }
 
-  override writeRest(output: Output): void {
+  override writeRest<T>(output: Output<T>): Output<T> {
     const curves = this.curves;
     const closed = this.closed;
     const n = curves.length - (closed ? 1 : 0);
     for (let i = 0; i < n; i += 1) {
-      curves[i]!.writeRest(output);
+      output = curves[i]!.writeRest(output);
     }
     if (closed) {
-      output.write(90/*'Z'*/);
+      output = output.write(90/*'Z'*/);
     }
+    return output;
   }
 
   /** @hidden */
@@ -318,7 +320,7 @@ export class R2Spline extends R2Curve implements Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     const curves = this.curves;
     const n = curves.length;
     output = output.write("R2Spline").write(46/*'.'*/);
@@ -332,6 +334,7 @@ export class R2Spline extends R2Curve implements Debug {
       }
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

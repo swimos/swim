@@ -486,30 +486,31 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return hashValue;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("Uri").write(46/*'.'*/);
     if (this.isDefined()) {
       output = output.write("parse").write(40/*'('*/).write(34/*'"'*/).display(this).write(34/*'"'*/).write(41/*')'*/);
     } else {
       output = output.write("empty").write(40/*'('*/).write(41/*')'*/);
     }
+    return output;
   }
 
   /** @hidden */
   readonly stringValue!: string | undefined;
 
-  display(output: Output): void {
+  display<T>(output: Output<T>): Output<T> {
     const stringValue = this.stringValue;
     if (stringValue !== void 0) {
       output = output.write(stringValue);
     } else {
       if (this.scheme.isDefined()) {
-        output.display(this.scheme).write(58/*':'*/);
+        output = output.display(this.scheme).write(58/*':'*/);
       }
       if (this.authority.isDefined()) {
         output = output.write(47/*'/'*/).write(47/*'/'*/).display(this.authority);
       }
-      output.display(this.path);
+      output = output.display(this.path);
       if (this.query.isDefined()) {
         output = output.write(63/*'?'*/).display(this.query);
       }
@@ -517,6 +518,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
         output = output.write(35/*'#'*/).display(this.fragment);
       }
     }
+    return output;
   }
 
   toString(): string {
@@ -819,145 +821,155 @@ export class Uri implements HashCode, Compare, Debug, Display {
   }
 
   /** @hidden */
-  static writeScheme(scheme: string, output: Output): void {
+  static writeScheme<T>(output: Output<T>, scheme: string): Output<T> {
     for (let i = 0, n = scheme.length; i < n; i += 1) {
       const c = scheme.charCodeAt(i);
       if (i > 0 && Uri.isSchemeChar(c) || i === 0 && Uri.isAlpha(c)) {
         output = output.write(c);
       } else {
-        throw new UriException("Invalid scheme: " + scheme);
+        output = Output.error(new UriException("Invalid scheme: " + scheme));
       }
     }
+    return output;
   }
 
   /** @hidden */
-  static writeUserInfo(userInfo: string, output: Output): void {
+  static writeUserInfo<T>(output: Output<T>, userInfo: string): Output<T> {
     for (let i = 0, n = userInfo.length; i < n; i += 1) {
       const c = userInfo.charCodeAt(i);
       if (Uri.isUserInfoChar(c)) {
         output = output.write(c);
       } else {
-        Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
+    return output;
   }
 
   /** @hidden */
-  static writeUser(user: string, output: Output): void {
+  static writeUser<T>(output: Output<T>, user: string): Output<T> {
     for (let i = 0, n = user.length; i < n; i += 1) {
       const c = user.charCodeAt(i);
       if (Uri.isUserChar(c)) {
         output = output.write(c);
       } else {
-        Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
+    return output;
   }
 
   /** @hidden */
-  static writeHost(address: string, output: Output): void {
+  static writeHost<T>(output: Output<T>, address: string): Output<T> {
     for (let i = 0, n = address.length; i < n; i += 1) {
       const c = address.charCodeAt(i);
       if (Uri.isHostChar(c)) {
         output = output.write(c);
       } else {
-        Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
+    return output;
   }
 
   /** @hidden */
-  static writeHostLiteral(address: string, output: Output): void {
+  static writeHostLiteral<T>(output: Output<T>, address: string): Output<T> {
     for (let i = 0, n = address.length; i < n; i += 1) {
       const c = address.charCodeAt(i);
       if (Uri.isHostChar(c) || c === 58/*':'*/) {
         output = output.write(c);
       } else {
-        Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
+    return output;
   }
 
   /** @hidden */
-  static writePathSegment(segment: string, output: Output): void {
+  static writePathSegment<T>(output: Output<T>, segment: string): Output<T> {
     for (let i = 0, n = segment.length; i < n; i += 1) {
       const c = segment.charCodeAt(i);
       if (Uri.isPathChar(c)) {
         output = output.write(c);
       } else {
-        Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
+    return output;
   }
 
   /** @hidden */
-  static writeQuery(query: string, output: Output): void {
+  static writeQuery<T>(output: Output<T>, query: string): Output<T> {
     for (let i = 0, n = query.length; i < n; i += 1) {
       const c = query.charCodeAt(i);
       if (Uri.isQueryChar(c)) {
         output = output.write(c);
       } else {
-        Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
+    return output;
   }
 
   /** @hidden */
-  static writeParam(param: string, output: Output): void {
+  static writeParam<T>(output: Output<T>, param: string): Output<T> {
     for (let i = 0, n = param.length; i < n; i += 1) {
       const c = param.charCodeAt(i);
       if (Uri.isParamChar(c)) {
         output = output.write(c);
       } else {
-        Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
+    return output;
   }
 
   /** @hidden */
-  static writeFragment(fragment: string, output: Output): void {
+  static writeFragment<T>(output: Output<T>, fragment: string): Output<T> {
     for (let i = 0, n = fragment.length; i < n; i += 1) {
       const c = fragment.charCodeAt(i);
       if (Uri.isFragmentChar(c)) {
         output = output.write(c);
       } else {
-        Uri.writeEncoded(c, output);
+        output = Uri.writeEncoded(output, c);
       }
     }
+    return output;
   }
 
   /** @hidden */
-  static writeEncoded(c: number, output: Output): void {
+  static writeEncoded<T>(output: Output<T>, c: number): Output<T> {
     if (c === 0x00) { // modified UTF-8
-      Uri.writePctEncoded(0xC0, output);
-      Uri.writePctEncoded(0x80, output);
+      output = Uri.writePctEncoded(output, 0xC0);
+      output = Uri.writePctEncoded(output, 0x80);
     } else if (c >= 0x00 && c <= 0x7F) { // U+0000..U+007F
-      Uri.writePctEncoded(c, output);
+      output = Uri.writePctEncoded(output, c);
     } else if (c >= 0x80 && c <= 0x07FF) { // U+0080..U+07FF
-      Uri.writePctEncoded(0xC0 | (c >>> 6), output);
-      Uri.writePctEncoded(0x80 | (c & 0x3F), output);
-    } else if (c >= 0x0800 && c <= 0xFFFF    // U+0800..U+D7FF
-            || c >= 0xE000 && c <= 0xFFFF) { // U+E000..U+FFFF
-      Uri.writePctEncoded(0xE0 | (c >>> 12), output);
-      Uri.writePctEncoded(0x80 | (c >>>  6 & 0x3F), output);
-      Uri.writePctEncoded(0x80 | (c        & 0x3F), output);
+      output = Uri.writePctEncoded(output, 0xC0 | (c >>> 6));
+      output = Uri.writePctEncoded(output, 0x80 | (c & 0x3F));
+    } else if (c >= 0x0800 && c <= 0xFFFF) { // U+0800..U+D7FF, U+E000..U+FFFF, and surrogates
+      output = Uri.writePctEncoded(output, 0xE0 | (c >>> 12));
+      output = Uri.writePctEncoded(output, 0x80 | (c >>> 6 & 0x3F));
+      output = Uri.writePctEncoded(output, 0x80 | (c & 0x3F));
     } else if (c >= 0x10000 && c <= 0x10FFFF) { // U+10000..U+10FFFF
-      Uri.writePctEncoded(0xF0 | (c >>> 18), output);
-      Uri.writePctEncoded(0x80 | (c >>> 12 & 0x3F), output);
-      Uri.writePctEncoded(0x80 | (c >>>  6 & 0x3F), output);
-      Uri.writePctEncoded(0x80 | (c        & 0x3F), output);
+      output = Uri.writePctEncoded(output, 0xF0 | (c >>> 18));
+      output = Uri.writePctEncoded(output, 0x80 | (c >>> 12 & 0x3F));
+      output = Uri.writePctEncoded(output, 0x80 | (c >>> 6 & 0x3F));
+      output = Uri.writePctEncoded(output, 0x80 | (c & 0x3F));
     } else { // surrogate or invalid code point
-      Uri.writePctEncoded(0xEF, output);
-      Uri.writePctEncoded(0xBF, output);
-      Uri.writePctEncoded(0xBD, output);
+      output = Uri.writePctEncoded(output, 0xEF);
+      output = Uri.writePctEncoded(output, 0xBF);
+      output = Uri.writePctEncoded(output, 0xBD);
     }
+    return output;
   }
 
   /** @hidden */
-  static writePctEncoded(c: number, output: Output): void {
+  static writePctEncoded<T>(output: Output<T>, c: number): Output<T> {
     const base16 = Base16.lowercase;
     output = output.write(37/*'%'*/)
-          .write(base16.encodeDigit(c >>> 4 & 0xF))
-          .write(base16.encodeDigit(c       & 0xF));
+                   .write(base16.encodeDigit(c >>> 4 & 0xF))
+                   .write(base16.encodeDigit(c       & 0xF));
+    return output;
   }
 }

@@ -29,7 +29,7 @@ export class PatternFormat extends DateTimeFormat {
     this.specifiers = specifiers;
   }
 
-  override writeDate(date: DateTime, output: Output): void {
+  override writeDate<T>(output: Output<T>, date: DateTime): Output<T> {
     const pattern = this.pattern;
     const specifiers = this.specifiers;
     let i = 0;
@@ -38,12 +38,12 @@ export class PatternFormat extends DateTimeFormat {
     while (j < n) {
       if (pattern.charCodeAt(j) === 37/*'%'*/) {
         if (i !== j) {
-          output.write(pattern.slice(i, j));
+          output = output.write(pattern.slice(i, j));
         }
         const s = pattern.charAt(j + 1);
         const f = specifiers[s];
         if (f !== void 0) {
-          f.writeDate(date, output);
+          output = f.writeDate(output, date);
         }
         j += 2;
         i = j;
@@ -52,8 +52,9 @@ export class PatternFormat extends DateTimeFormat {
       }
     }
     if (i !== j) {
-      output.write(pattern.slice(i, j));
+      output = output.write(pattern.slice(i, j));
     }
+    return output;
   }
 
   override parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {

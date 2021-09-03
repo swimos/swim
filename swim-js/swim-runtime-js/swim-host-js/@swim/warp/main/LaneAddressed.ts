@@ -81,14 +81,15 @@ export abstract class LaneAddressed<E extends LaneAddressed<E>> extends Envelope
         this.lane.hashCode()), this.body.hashCode()));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write(this.constructor.name).write(46/*'.'*/)
-        .write("create").write(40/*'('*/)
-        .debug(this.node.toString()).write(", ").debug(this.lane.toString());
+                   .write("create").write(40/*'('*/)
+                   .debug(this.node.toString()).write(", ").debug(this.lane.toString());
     if (this.body.isDefined()) {
       output = output.write(", ").debug(this.body);
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   override toValue(): Value {

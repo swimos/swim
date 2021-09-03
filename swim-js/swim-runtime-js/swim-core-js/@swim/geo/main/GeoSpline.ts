@@ -297,7 +297,7 @@ export class GeoSpline extends GeoCurve implements Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     const curves = this.curves;
     const n = curves.length;
     output = output.write("GeoSpline").write(46/*'.'*/);
@@ -311,6 +311,7 @@ export class GeoSpline extends GeoCurve implements Debug {
       }
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

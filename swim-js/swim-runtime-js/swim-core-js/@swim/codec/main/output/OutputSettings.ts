@@ -150,7 +150,7 @@ export class OutputSettings implements Debug, HashCode {
         Numbers.hash(this.precision)));
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("OutputSettings").write(46/*'.'*/);
     if (!this.pretty && !this.styled) {
       output = output.write("standard");
@@ -164,12 +164,13 @@ export class OutputSettings implements Debug, HashCode {
     output = output.write(40/*'('*/).write(41/*')'*/);
     if (this.lineSeparator !== Format.lineSeparator) {
       output = output.write(46/*'.'*/).write("lineSeparator").write(40/*'('*/)
-          .display(this.lineSeparator).write(41/*')'*/);
+                     .display(this.lineSeparator).write(41/*')'*/);
     }
     if (this.precision !== -1) {
       output = output.write(46/*'.'*/).write("precision").write(40/*'('*/)
-          .display(this.precision).write(41/*')'*/);
+                     .display(this.precision).write(41/*')'*/);
     }
+    return output;
   }
 
   toString(): string {

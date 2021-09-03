@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Output} from "@swim/codec";
+import {Output} from "@swim/codec";
 import type {Item} from "@swim/structure";
 import {Recon} from "@swim/recon";
 import {Converter} from "./Converter";
 
 export class ReconConverter extends Converter {
-  override convert<O>(model: Item, output: Output<O>): O {
-    const writer = Recon.writeBlock(model, output);
+  override convert<O>(output: Output<O>, model: Item): O {
+    const writer = Recon.writeBlock(output, model);
     if (writer.isError()) {
-      writer.bind();
+      output = Output.error(writer.trap());
     }
     return output.bind();
   }

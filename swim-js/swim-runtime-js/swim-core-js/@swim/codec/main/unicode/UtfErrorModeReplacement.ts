@@ -70,9 +70,10 @@ export class UtfErrorModeReplacement extends UtfErrorMode {
         Numbers.hash(this.replacementChar)), Booleans.hash(this.nonZero)));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("UtfErrorMode").write(46/*'.'*/)
-        .write(this.nonZero ? "replacementNonZero" : "replacement")
-        .write(40/*'('*/).write(41/*')'*/);
+                   .write(this.nonZero ? "replacementNonZero" : "replacement")
+                   .write(40/*'('*/).write(41/*')'*/);
+    return output;
   }
 }

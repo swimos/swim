@@ -124,7 +124,7 @@ export class R2Group<S extends R2Shape = R2Shape> extends R2Shape implements Equ
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     const shapes = this.shapes;
     const n = shapes.length;
     output = output.write("R2Group").write(46/*'.'*/);
@@ -138,6 +138,7 @@ export class R2Group<S extends R2Shape = R2Shape> extends R2Shape implements Equ
       }
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

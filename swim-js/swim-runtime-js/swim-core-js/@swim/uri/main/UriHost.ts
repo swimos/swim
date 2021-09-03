@@ -69,9 +69,9 @@ export abstract class UriHost implements HashCode, Compare, Debug, Display {
     return Strings.hash(this.toString());
   }
 
-  abstract debug(output: Output): void;
+  abstract debug<T>(output: Output<T>): Output<T>;
 
-  abstract display(output: Output): void;
+  abstract display<T>(output: Output<T>): Output<T>;
 
   abstract toString(): string;
 

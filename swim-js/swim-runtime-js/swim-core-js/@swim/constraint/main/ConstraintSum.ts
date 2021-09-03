@@ -81,7 +81,7 @@ export class ConstraintSum implements ConstraintExpression, Debug {
     return new ConstraintSum(newTerms, this.constant / scalar);
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("ConstraintExpression").write(46/*'.'*/).write("sum").write(40/*'('*/);
     const n = this.terms.size;
     for (let i = 0; i < n; i += 1) {
@@ -102,6 +102,7 @@ export class ConstraintSum implements ConstraintExpression, Debug {
       output = output.debug(this.constant);
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   toString(): string {

@@ -139,10 +139,11 @@ export class Rect implements Graphics, Equals, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("Rect").write(46/*'.'*/).write("create").write(40/*'('*/)
-        .debug(this.x).write(", ").debug(this.y).write(", ")
-        .debug(this.width).write(", ").debug(this.height).write(41/*')'*/);
+                   .debug(this.x).write(", ").debug(this.y).write(", ")
+                   .debug(this.width).write(", ").debug(this.height).write(41/*')'*/);
+    return output;
   }
 
   toString(): string {

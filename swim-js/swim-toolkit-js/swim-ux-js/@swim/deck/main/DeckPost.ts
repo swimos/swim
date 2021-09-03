@@ -130,15 +130,16 @@ export class DeckPost implements Equals, Equivalent, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("DeckPost").write(46/*'.'*/).write("create").write(40/*'('*/)
-        .debug(this.key).write(", ").debug(this.grow).write(", ")
-        .debug(this.shrink).write(", ").debug(this.basis).write(41/*')'*/);
+                   .debug(this.key).write(", ").debug(this.grow).write(", ")
+                   .debug(this.shrink).write(", ").debug(this.basis).write(41/*')'*/);
     if (this.width !== null || this.left !== null || this.right !== null) {
       output = output.write(46/*'.'*/).write("resized").write(40/*'('*/)
-          .debug(this.width).write(", ").debug(this.left).write(", ")
-          .debug(this.right).write(", ").write(41/*')'*/);
+                     .debug(this.width).write(", ").debug(this.left).write(", ")
+                     .debug(this.right).write(", ").write(41/*')'*/);
     }
+    return output;
   }
 
   toString(): string {

@@ -57,17 +57,18 @@ export class TimeZone implements HashCode, Debug {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(TimeZone), Numbers.hash(this.offset)));
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("TimeZone").write(46/*'.'*/);
     if (this.name === "UTC" && this.offset === 0) {
-      output = output.write("utc").write(40/*'('*/).write(41/*')'*/);
+      output = output.write("utc").write(40/*'('*/);
     } else if (this.name === void 0) {
-      output = output.write("forOffset").write(40/*'('*/)
-          .debug(this.offset).write(41/*')'*/);
+      output = output.write("forOffset").write(40/*'('*/).debug(this.offset);
     } else {
-      output = output.write("from").write(40/*'('*/)
-          .debug(this.name).write(", ").debug(this.offset).write(41/*')'*/);
+      output = output.write("create").write(40/*'('*/)
+                     .debug(this.name).write(", ").debug(this.offset);
     }
+    output = output.write(41/*')'*/);
+    return output;
   }
 
   toString(): string {
@@ -82,6 +83,14 @@ export class TimeZone implements HashCode, Debug {
   @Lazy
   static get local(): TimeZone {
     return TimeZone.forOffset(-new Date().getTimezoneOffset());
+  }
+
+  static create(name: string | undefined, offset: number): TimeZone {
+    if (name === "UTC" && offset === 0) {
+      return TimeZone.utc;
+    } else {
+      return new TimeZone(name, offset);
+    }
   }
 
   static forName(name: string): TimeZone | null {

@@ -249,7 +249,7 @@ export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     const splines = this.splines;
     const n = splines.length;
     output = output.write("GeoPath").write(46/*'.'*/);
@@ -274,6 +274,7 @@ export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
       }
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

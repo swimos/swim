@@ -34,7 +34,7 @@ export class DocTarget extends ConverterComponent {
     this.targetReflections = {};
   }
 
-  override initialize() {
+  override initialize(): void {
     this.listenTo(this.owner, {
       [Converter.EVENT_BEGIN]: this.onBegin,
       [Converter.EVENT_CREATE_DECLARATION]: this.onDeclaration,

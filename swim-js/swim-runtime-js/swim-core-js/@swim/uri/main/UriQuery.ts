@@ -167,9 +167,9 @@ export abstract class UriQuery implements HashCode, Compare, Debug, Display {
     return Strings.hash(this.toString());
   }
 
-  abstract debug(output: Output): void;
+  abstract debug<T>(output: Output<T>): Output<T>;
 
-  display(output: Output): void {
+  display<T>(output: Output<T>): Output<T> {
     let query: UriQuery = this;
     let first = true;
     while (!query.isEmpty()) {
@@ -180,12 +180,13 @@ export abstract class UriQuery implements HashCode, Compare, Debug, Display {
       }
       const key = query.key;
       if (key !== void 0) {
-        Uri.writeParam(key, output);
+        output = Uri.writeParam(output, key);
         output = output.write(61/*'='*/);
       }
-      Uri.writeQuery(query.value, output);
+      output = Uri.writeQuery(output, query.value);
       query = query.tail();
     }
+    return output;
   }
 
   abstract toString(): string;

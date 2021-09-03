@@ -25,8 +25,9 @@ export interface Debug {
    * Writes a developer readable, debug-formatted string representation of this
    * object to `output`.
    *
+   * @return the continuation of the `output`.
    * @throws [[OutputException]] if the `output` exits the _cont_ state before
    *         the full debug string has been written.
    */
-  debug(output: Output): void;
+  debug<T>(output: Output<T>): Output<T>;
 }

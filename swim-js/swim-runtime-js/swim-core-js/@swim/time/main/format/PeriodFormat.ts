@@ -35,8 +35,9 @@ export class PeriodFormat extends DateTimeFormat {
     }
   }
 
-  override writeDate(date: DateTime, output: Output): void {
-    output.write(this.locale.periods[+(date.hour >= 12)]!);
+  override writeDate<T>(output: Output<T>, date: DateTime): Output<T> {
+    output = output.write(this.locale.periods[date.hour >= 12 ? 1 : 0]!);
+    return output;
   }
 
   override parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {

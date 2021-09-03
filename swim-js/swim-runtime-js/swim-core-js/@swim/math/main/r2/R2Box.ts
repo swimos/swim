@@ -287,10 +287,11 @@ export class R2Box extends R2Shape implements Interpolate<R2Box>, HashCode, Equi
         Numbers.hash(this.xMax)), Numbers.hash(this.yMax)));
   }
 
-  debug(output: Output): void {
-    output.write("R2Box").write(46/*'.'*/).write("of").write(40/*'('*/)
-        .debug(this.xMin).write(", ").debug(this.yMin).write(", ")
-        .debug(this.xMax).write(", ").debug(this.yMax).write(41/*')'*/);
+  debug<T>(output: Output<T>): Output<T> {
+    output = output.write("R2Box").write(46/*'.'*/).write("of").write(40/*'('*/)
+                   .debug(this.xMin).write(", ").debug(this.yMin).write(", ")
+                   .debug(this.xMax).write(", ").debug(this.yMax).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

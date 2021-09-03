@@ -19,8 +19,9 @@ import {MonthOfYearParser} from "../"; // forward import
 
 /** @hidden */
 export class MonthOfYearFormat extends DateTimeFormat {
-  override writeDate(date: DateTime, output: Output): void {
-    DateTimeFormat.writeDateNumber2(date.month + 1, output);
+  override writeDate<T>(output: Output<T>, date: DateTime): Output<T> {
+    output = DateTimeFormat.writeDateNumber2(output, date.month + 1);
+    return output;
   }
 
   override parseDateTime(input: Input, date: DateTimeInit): Parser<DateTimeInit> {

@@ -22,300 +22,300 @@ export const OutputStyle = {} as {
    * Writes the ASCII reset escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  reset(output: Output): void
+  reset<T>(output: Output<T>): Output<T>
 
   /**
    * Writes the ASCII bold (increased intensity) escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  bold(output: Output): void;
+  bold<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII faint (decreased intensity) escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  faint(output: Output): void;
+  faint<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII black foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  black(output: Output): void;
+  black<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII red foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  red(output: Output): void;
+  red<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII green foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  green(output: Output): void;
+  green<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII yellow foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  yellow(output: Output): void;
+  yellow<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII blue foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  blue(output: Output): void;
+  blue<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII magenta foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  magenta(output: Output): void;
+  magenta<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII cyan foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  cyan(output: Output): void;
+  cyan<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII gray foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  gray(output: Output): void;
+  gray<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII bold black foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  blackBold(output: Output): void;
+  blackBold<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII bold red foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  redBold(output: Output): void;
+  redBold<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII bold green foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  greenBold(output: Output): void;
+  greenBold<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII bold yellow foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  yellowBold(output: Output): void;
+  yellowBold<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII bold blue foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  blueBold(output: Output): void;
+  blueBold<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII bold magenta foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  magentaBold(output: Output): void;
+  magentaBold<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII bold cyan foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  cyanBold(output: Output): void;
+  cyanBold<T>(output: Output<T>): Output<T>;
 
   /**
    * Writes the ASCII bold gray foreground color escape code to `output`,
    * if [[OutputSettings.isStyled `output.settings.isStyled()`]] is `true`.
    *
-   * @throws [[OutputException]] if `output` exits the _cont_ state before the
-   *         full escape code has been written.
+   * @return the continuation of the `output`.
    */
-  grayBold(output: Output): void;
+  grayBold<T>(output: Output<T>): Output<T>;
 };
 
-OutputStyle.reset = function (output: Output): void {
+OutputStyle.reset = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(48/*'0'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.bold = function (output: Output): void {
+OutputStyle.bold = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(49/*'1'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.faint = function (output: Output): void {
+OutputStyle.faint = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(50/*'2'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.black = function (output: Output): void {
+OutputStyle.black = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(48/*'0'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(48/*'0'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(48/*'0'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.red = function (output: Output): void {
+OutputStyle.red = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(48/*'0'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(49/*'1'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(49/*'1'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.green = function (output: Output): void {
+OutputStyle.green = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(48/*'0'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(50/*'2'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(50/*'2'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.yellow = function (output: Output): void {
+OutputStyle.yellow = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(48/*'0'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(51/*'3'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(51/*'3'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.blue = function (output: Output): void {
+OutputStyle.blue = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(48/*'0'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(52/*'4'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(52/*'4'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.magenta = function (output: Output): void {
+OutputStyle.magenta = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(48/*'0'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(53/*'5'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(53/*'5'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.cyan = function (output: Output): void {
+OutputStyle.cyan = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(48/*'0'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(54/*'6'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(54/*'6'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.gray = function (output: Output): void {
+OutputStyle.gray = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(48/*'0'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(55/*'7'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(55/*'7'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.blackBold = function (output: Output): void {
+OutputStyle.blackBold = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(49/*'1'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(48/*'0'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(48/*'0'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.redBold = function (output: Output): void {
+OutputStyle.redBold = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(49/*'1'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(49/*'1'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(49/*'1'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.greenBold = function (output: Output): void {
+OutputStyle.greenBold = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(49/*'1'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(50/*'2'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(50/*'2'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.yellowBold = function (output: Output): void {
+OutputStyle.yellowBold = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(49/*'1'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(51/*'3'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(51/*'3'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.blueBold = function (output: Output): void {
+OutputStyle.blueBold = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(49/*'1'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(52/*'4'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(52/*'4'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.magentaBold = function (output: Output): void {
+OutputStyle.magentaBold = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(49/*'1'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(53/*'5'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(53/*'5'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.cyanBold = function (output: Output): void {
+OutputStyle.cyanBold = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(49/*'1'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(54/*'6'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(54/*'6'*/).write(109/*'m'*/);
   }
+  return output;
 };
 
-OutputStyle.grayBold = function (output: Output): void {
+OutputStyle.grayBold = function <T>(output: Output<T>): Output<T> {
   if (output.settings.isStyled()) {
     output = output.write(27).write(91/*'['*/).write(49/*'1'*/).write(59/*';'*/)
-        .write(51/*'3'*/).write(55/*'7'*/).write(109/*'m'*/);
+                   .write(51/*'3'*/).write(55/*'7'*/).write(109/*'m'*/);
   }
+  return output;
 };

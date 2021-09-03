@@ -20,29 +20,29 @@ import type {Base64} from "./Base64";
 /** @hidden */
 export class Base64Writer extends Writer {
   /** @hidden */
+  readonly base64!: Base64;
+  /** @hidden */
   readonly value!: unknown;
   /** @hidden */
   readonly input!: Uint8Array | null;
-  /** @hidden */
-  readonly base64!: Base64;
   /** @hidden */
   readonly index!: number;
   /** @hidden */
   readonly step!: number;
 
-  constructor(value: unknown, input: Uint8Array | null, base64: Base64,
+  constructor(base64: Base64, value: unknown, input: Uint8Array | null,
               index: number = 0, step: number = 1) {
     super();
+    Object.defineProperty(this, "base64", {
+      value: base64,
+      enumerable: true,
+    });
     Object.defineProperty(this, "value", {
       value: value,
       enumerable: true,
     });
     Object.defineProperty(this, "input", {
       value: input,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "base64", {
-      value: base64,
       enumerable: true,
     });
     Object.defineProperty(this, "index", {
@@ -57,7 +57,7 @@ export class Base64Writer extends Writer {
 
   override feed(value: unknown): Writer {
     if (value instanceof Uint8Array) {
-      return new Base64Writer(null, value, this.base64);
+      return new Base64Writer(this.base64, null, value);
     } else {
       throw new TypeError("" + value);
     }
@@ -67,11 +67,11 @@ export class Base64Writer extends Writer {
     if (this.input === null) {
       throw new WriterException();
     }
-    return Base64Writer.write(output, this.value, this.input, this.base64,
+    return Base64Writer.write(output, this.base64, this.value, this.input,
                               this.index, this.step);
   }
 
-  static write(output: Output, value: unknown, input: Uint8Array, base64: Base64,
+  static write(output: Output, base64: Base64, value: unknown, input: Uint8Array,
                index: number = 0, step: number = 1): Writer {
     while (index + 2 < input.length && output.isCont()) {
       const x = input[index]!;
@@ -148,6 +148,6 @@ export class Base64Writer extends Writer {
     } else if (output.isError()) {
       return Writer.error(output.trap());
     }
-    return new Base64Writer(value, input, base64, index, step);
+    return new Base64Writer(base64, value, input, index, step);
   }
 }

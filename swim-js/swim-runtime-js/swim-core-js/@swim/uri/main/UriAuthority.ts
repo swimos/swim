@@ -224,31 +224,33 @@ export class UriAuthority implements HashCode, Compare, Debug, Display {
     return hashValue;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("UriAuthority").write(46/*'.'*/);
     if (this.isDefined()) {
       output = output.write("parse").write(40/*'('*/).write(34/*'"'*/)
-        .display(this).write(34/*'"'*/).write(41/*')'*/);
+                     .display(this).write(34/*'"'*/).write(41/*')'*/);
     } else {
       output = output.write("undefined").write(40/*'('*/).write(41/*')'*/);
     }
+    return output;
   }
 
-  display(output: Output): void {
+  display<T>(output: Output<T>): Output<T> {
     const stringValue = this.stringValue;
     if (stringValue !== void 0) {
       output = output.write(stringValue);
     } else {
       const user = this.user;
       if (user.isDefined()) {
-        output.display(user).write(64/*'@'*/);
+        output = output.display(user).write(64/*'@'*/);
       }
-      output.display(this.host);
+      output = output.display(this.host);
       const port = this.port;
       if (port.isDefined()) {
         output = output.write(58/*':'*/).display(port);
       }
     }
+    return output;
   }
 
   /** @hidden */

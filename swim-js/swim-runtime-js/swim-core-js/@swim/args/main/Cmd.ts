@@ -353,7 +353,7 @@ export class Cmd implements Equals, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("Cmd").write(46/*'.'*/).write("of").write(40/*'('*/).debug(this.name).write(41/*')'*/);
     if (this.desc !== void 0) {
       output = output.write(46/*'.'*/).write("desc").write(40/*'('*/).debug(this.desc).write(41/*')'*/);
@@ -379,6 +379,7 @@ export class Cmd implements Equals, Debug {
     if (this.base !== null) {
       output = output.write(46/*'.'*/).write("base").write(40/*'('*/).debug(this.base).write(41/*')'*/);
     }
+    return output;
   }
 
   toString(): string {

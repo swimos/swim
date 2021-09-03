@@ -76,18 +76,20 @@ export class UriQueryParam extends UriQuery {
     return new UriQueryParam(this.key, this.value, this.rest);
   }
 
-  override debug(output: Output): void {
-    output = output.write("UriQuery").write(46/*'.'*/).write("parse")
-        .write(40/*'('*/).write(34/*'"'*/).display(this).write(34/*'"'*/).write(41/*')'*/);
+  override debug<T>(output: Output<T>): Output<T> {
+    output = output.write("UriQuery").write(46/*'.'*/).write("parse").write(40/*'('*/)
+                   .write(34/*'"'*/).display(this).write(34/*'"'*/).write(41/*')'*/);
+    return output;
   }
 
-  override display(output: Output): void {
+  override display<T>(output: Output<T>): Output<T> {
     const stringValue = this.stringValue;
     if (stringValue !== void 0) {
       output = output.write(stringValue);
     } else {
-      super.display(output);
+      output = super.display(output);
     }
+    return output;
   }
 
   /** @hidden */

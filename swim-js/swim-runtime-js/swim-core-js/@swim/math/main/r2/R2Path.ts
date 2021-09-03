@@ -226,18 +226,19 @@ export class R2Path extends R2Shape implements Equals, Equivalent, Debug {
     }
   }
 
-  writePath(output: Output): void {
+  writePath<T>(output: Output<T>): Output<T> {
     const splines = this.splines;
     const n = splines.length;
     if (output.settings === OutputSettings.standard()) {
       for (let i = 0; i < n; i += 1) {
-        output.write(splines[i]!.toPathString()); // write memoized subpath strings
+        output = output.write(splines[i]!.toPathString()); // write memoized subpath strings
       }
     } else {
       for (let i = 0; i < n; i += 1) {
-        splines[i]!.writePath(output);
+        output = splines[i]!.writePath(output);
       }
     }
+    return output;
   }
 
   /** @hidden */
@@ -278,7 +279,7 @@ export class R2Path extends R2Shape implements Equals, Equivalent, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     const splines = this.splines;
     const n = splines.length;
     output = output.write("R2Path").write(46/*'.'*/);
@@ -303,6 +304,7 @@ export class R2Path extends R2Shape implements Equals, Equivalent, Debug {
       }
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   toAttributeString(): string {

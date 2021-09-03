@@ -86,9 +86,10 @@ export class GradAngle extends Angle {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(GradAngle), Numbers.hash(this.value)));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Angle").write(46/*'.'*/).write("grad")
-        .write(40/*'('*/).debug(this.value).write(41/*')'*/);
+                   .write(40/*'('*/).debug(this.value).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

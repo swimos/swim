@@ -417,16 +417,13 @@ export class Slot extends Field {
         this.key.hashCode()), this.value.hashCode()));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Slot").write(46/*'.'*/).write("of").write(40/*'('*/).display(this.key);
     if (!(this.value instanceof Extant)) {
       output = output.write(44/*','*/).write(32/*' '*/).display(this.value);
     }
     output = output.write(41/*')'*/);
-  }
-
-  override display(output: Output): void {
-    this.debug(output);
+    return output;
   }
 
   static override of(key: AnyValue, value?: AnyValue): Slot {

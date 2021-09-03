@@ -63,9 +63,10 @@ export class UtfErrorModeFatal extends UtfErrorMode {
         Booleans.hash(this.nonZero)));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("UtfErrorMode").write(46/*'.'*/)
-        .write(this.nonZero ? "fatalNonZero" : "fatal")
-        .write(40/*'('*/).write(41/*')'*/);
+                   .write(this.nonZero ? "fatalNonZero" : "fatal")
+                   .write(40/*'('*/).write(41/*')'*/);
+    return output;
   }
 }

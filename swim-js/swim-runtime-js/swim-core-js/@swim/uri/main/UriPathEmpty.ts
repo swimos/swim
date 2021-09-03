@@ -92,13 +92,14 @@ export class UriPathEmpty extends UriPath {
     return that;
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("UriPath").write(46/*'.'*/).write("empty")
-        .write(40/*'('*/).write(41/*')'*/);
+                   .write(40/*'('*/).write(41/*')'*/);
+    return output;
   }
 
-  override display(output: Output): void {
-    // nop
+  override display<T>(output: Output<T>): Output<T> {
+    return output; // blank
   }
 
   override toString(): string {

@@ -294,9 +294,11 @@ export class GeoTile extends GeoShape implements HashCode, Equivalent, Debug {
         Numbers.hash(this.x)), Numbers.hash(this.y)), Numbers.hash(this.z)));
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("GeoTile").write(46/*'.'*/).write("of").write(40/*'('*/)
-        .debug(this.x).write(", ").debug(this.y).write(", ").debug(this.z).write(41/*')'*/);
+                   .debug(this.x).write(", ").debug(this.y).write(", ")
+                   .debug(this.z).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

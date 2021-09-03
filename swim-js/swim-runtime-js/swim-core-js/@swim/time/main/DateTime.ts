@@ -252,8 +252,9 @@ export class DateTime implements Interpolate<DateTime>, HashCode, Equivalent, Co
         Numbers.hash(this.time)), this.zone.hashCode()));
   }
 
-  display(output: Output, format: DateTimeFormat = DateTimeFormat.iso8601): void {
-    format.writeDate(this, output);
+  display<T>(output: Output<T>, format: DateTimeFormat = DateTimeFormat.iso8601): Output<T> {
+    output = format.writeDate(output, this);
+    return output;
   }
 
   toString(format: DateTimeFormat = DateTimeFormat.iso8601): string {

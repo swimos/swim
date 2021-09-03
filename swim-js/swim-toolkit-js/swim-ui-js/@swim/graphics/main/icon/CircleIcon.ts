@@ -167,11 +167,12 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("new").write(32/*' '*/).write("CircleIcon").write(40/*'('*/)
-        .debug(this.fillColor).write(", ")
-        .debug(this.fillLook).write(", ")
-        .debug(this.moodModifier).write(41/*')'*/);
+                   .debug(this.fillColor).write(", ")
+                   .debug(this.fillLook).write(", ")
+                   .debug(this.moodModifier).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

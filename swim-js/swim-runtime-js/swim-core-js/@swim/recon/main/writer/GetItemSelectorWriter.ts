@@ -63,12 +63,12 @@ export class GetItemSelectorWriter<I, V> extends Writer {
     }
     if (step === 3) {
       if (part === void 0) {
-        part = recon.writeValue(index, output);
+        part = recon.writeValue(output, index);
       } else {
         part = part.pull(output);
       }
       if (part.isDone()) {
-        return recon.writeThen(then, output);
+        return recon.writeThen(output, then);
       } else if (part.isError()) {
         return part.asError();
       }

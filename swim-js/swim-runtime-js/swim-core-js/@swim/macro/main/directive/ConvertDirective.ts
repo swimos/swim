@@ -32,7 +32,7 @@ export class ConvertDirective extends Directive {
 
   protected convert(converter: Converter, model: Item, context: ProcessorContext): Item {
     model = context.evaluate(model);
-    const output = converter.convert(model, Unicode.stringOutput());
+    const output = converter.convert(Unicode.stringOutput(), model);
     return Text.from(output);
   }
 }

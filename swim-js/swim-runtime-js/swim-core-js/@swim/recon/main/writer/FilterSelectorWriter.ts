@@ -66,7 +66,7 @@ export class FilterSelectorWriter<I, V> extends Writer {
     }
     if (step === 3) {
       if (part === void 0) {
-        part = recon.writeValue(predicate, output);
+        part = recon.writeValue(output, predicate);
       } else {
         part = part.pull(output);
       }
@@ -79,7 +79,7 @@ export class FilterSelectorWriter<I, V> extends Writer {
     }
     if (step === 4 && output.isCont()) {
       output = output.write(93/*']'*/);
-      return recon.writeThen(then, output);
+      return recon.writeThen(output, then);
     }
     if (output.isDone()) {
       return Writer.error(new WriterException("truncated"));

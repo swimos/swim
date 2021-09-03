@@ -136,9 +136,10 @@ export class InvokeOperator extends Operator {
         this.func.hashCode()), this.args.hashCode()));
   }
 
-  override debug(output: Output): void {
-    output.debug(this.func).write(46/*'.'*/).write("invoke").write(40/*'('*/)
-        .debug(this.args).write(41/*')'*/);
+  override debug<T>(output: Output<T>): Output<T> {
+    output = output.debug(this.func).write(46/*'.'*/).write("invoke").write(40/*'('*/)
+                   .debug(this.args).write(41/*')'*/);
+    return output;
   }
 
   override clone(): InvokeOperator {

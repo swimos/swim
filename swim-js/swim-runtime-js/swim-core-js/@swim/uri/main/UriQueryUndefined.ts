@@ -76,13 +76,14 @@ export class UriQueryUndefined extends UriQuery {
     return builder.bind();
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("UriQuery").write(46/*'.'*/).write("undefined")
-        .write(40/*'('*/).write(41/*')'*/);
+                   .write(40/*'('*/).write(41/*')'*/);
+    return output;
   }
 
-  override display(output: Output): void {
-    // nop
+  override display<T>(output: Output<T>): Output<T> {
+    return output; // blank
   }
 
   override toString(): string {

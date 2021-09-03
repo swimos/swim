@@ -53,18 +53,19 @@ export abstract class R2Curve extends R2Shape implements Equals, Equivalent {
     this.transformDrawRest(context, f);
   }
 
-  abstract writeMove(output: Output): void;
+  abstract writeMove<T>(output: Output<T>): Output<T>;
 
-  abstract writeRest(output: Output): void;
+  abstract writeRest<T>(output: Output<T>): Output<T>;
 
-  writePath(output: Output): void {
-    this.writeMove(output);
-    this.writeRest(output);
+  writePath<T>(output: Output<T>): Output<T> {
+    output = this.writeMove(output);
+    output = this.writeRest(output);
+    return output;
   }
 
   toPathString(outputSettings?: AnyOutputSettings): string {
-    const output = Unicode.stringOutput(outputSettings);
-    this.writePath(output);
+    let output = Unicode.stringOutput(outputSettings);
+    output = this.writePath(output);
     return output.toString();
   }
 

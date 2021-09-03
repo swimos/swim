@@ -69,7 +69,7 @@ export abstract class Color implements Interpolate<Color>, HashCode, Equivalent,
 
   abstract hashCode(): number;
 
-  abstract debug(output: Output): void;
+  abstract debug<T>(output: Output<T>): Output<T>;
 
   abstract toHexString(): string;
 

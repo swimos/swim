@@ -125,7 +125,7 @@ export abstract class Transform implements R2Operator, Interpolate<Transform>, H
 
   abstract hashCode(): number;
 
-  abstract debug(output: Output): void;
+  abstract debug<T>(output: Output<T>): Output<T>;
 
   abstract toString(): string;
 

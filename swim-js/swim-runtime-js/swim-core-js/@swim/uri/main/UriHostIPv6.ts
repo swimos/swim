@@ -38,20 +38,22 @@ export class UriHostIPv6 extends UriHost {
     return this.address;
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("UriHost").write(46/*'.'*/).write("ipv6")
-        .write(40/*'('*/).debug(this.address).write(41/*')'*/);
+                   .write(40/*'('*/).debug(this.address).write(41/*')'*/);
+    return output;
   }
 
-  override display(output: Output): void {
+  override display<T>(output: Output<T>): Output<T> {
     const stringValue = this.stringValue;
     if (stringValue !== void 0) {
       output = output.write(stringValue);
     } else {
       output = output.write(91/*'['*/);
-      Uri.writeHostLiteral(this.address, output);
+      output = Uri.writeHostLiteral(output, this.address);
       output = output.write(93/*']'*/);
     }
+    return output;
   }
 
   /** @hidden */

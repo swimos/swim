@@ -20,29 +20,29 @@ import type {Base16} from "./Base16";
 /** @hidden */
 export class Base16Writer extends Writer {
   /** @hidden */
+  readonly base16!: Base16;
+  /** @hidden */
   readonly value!: unknown;
   /** @hidden */
   readonly input!: Uint8Array | null;
-  /** @hidden */
-  readonly base16!: Base16;
   /** @hidden */
   readonly index!: number;
   /** @hidden */
   readonly step!: number;
 
-  constructor(value: unknown, input: Uint8Array | null, base16: Base16,
+  constructor(base16: Base16, value: unknown, input: Uint8Array | null,
               index: number = 0, step: number = 1) {
     super();
+    Object.defineProperty(this, "base16", {
+      value: base16,
+      enumerable: true,
+    });
     Object.defineProperty(this, "value", {
       value: value,
       enumerable: true,
     });
     Object.defineProperty(this, "input", {
       value: input,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "base16", {
-      value: base16,
       enumerable: true,
     });
     Object.defineProperty(this, "index", {
@@ -57,7 +57,7 @@ export class Base16Writer extends Writer {
 
   override feed(value: unknown): Writer {
     if (value instanceof Uint8Array) {
-      return new Base16Writer(void 0, value, this.base16);
+      return new Base16Writer(this.base16, void 0, value);
     } else {
       throw new TypeError("" + value);
     }
@@ -67,12 +67,12 @@ export class Base16Writer extends Writer {
     if (this.input === null) {
       throw new WriterException();
     }
-    return Base16Writer.write(output, this.value, this.input, this.base16,
+    return Base16Writer.write(output, this.base16, this.value, this.input,
                               this.index, this.step);
   }
 
-  static write(output: Output, value: unknown, input: Uint8Array,
-               base16: Base16, index: number = 0, step: number = 1): Writer {
+  static write(output: Output, base16: Base16, value: unknown, input: Uint8Array,
+               index: number = 0, step: number = 1): Writer {
     while (index < input.length) {
       const x = input[index]!;
       if (step === 1 && output.isCont()) {
@@ -92,6 +92,6 @@ export class Base16Writer extends Writer {
     } else if (output.isError()) {
       return Writer.error(output.trap());
     }
-    return new Base16Writer(value, input, base16, index, step);
+    return new Base16Writer(base16, value, input, index, step);
   }
 }

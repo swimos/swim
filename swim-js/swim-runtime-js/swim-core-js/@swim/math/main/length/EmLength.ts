@@ -78,9 +78,10 @@ export class EmLength extends Length {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(EmLength), Numbers.hash(this.value)));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Length").write(46/*'.'*/).write("em")
-        .write(40/*'('*/).debug(this.value).write(41/*')'*/);
+                   .write(40/*'('*/).debug(this.value).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

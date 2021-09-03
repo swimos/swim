@@ -78,26 +78,38 @@ public final class Recon {
   }
 
   public static String toString(Item item) {
-    final Output<String> output = Unicode.stringOutput();
-    Recon.write(output, item);
+    Output<String> output = Unicode.stringOutput();
+    final Writer<?, ?> writer = Recon.write(output, item);
+    if (!writer.isDone()) {
+      output = Output.error(writer.trap());
+    }
     return output.bind();
   }
 
   public static String toBlockString(Item item) {
-    final Output<String> output = Unicode.stringOutput();
-    Recon.writeBlock(output, item);
+    Output<String> output = Unicode.stringOutput();
+    final Writer<?, ?> writer = Recon.writeBlock(output, item);
+    if (!writer.isDone()) {
+      output = Output.error(writer.trap());
+    }
     return output.bind();
   }
 
   public static Data toData(Item item) {
-    final Output<Data> output = Utf8.encodedOutput(Data.output());
-    Recon.write(output, item);
+    Output<Data> output = Utf8.encodedOutput(Data.output());
+    final Writer<?, ?> writer = Recon.write(output, item);
+    if (!writer.isDone()) {
+      output = Output.error(writer.trap());
+    }
     return output.bind();
   }
 
   public static Data toBlockData(Item item) {
-    final Output<Data> output = Utf8.encodedOutput(Data.output());
-    Recon.writeBlock(output, item);
+    Output<Data> output = Utf8.encodedOutput(Data.output());
+    final Writer<?, ?> writer = Recon.writeBlock(output, item);
+    if (!writer.isDone()) {
+      output = Output.error(writer.trap());
+    }
     return output.bind();
   }
 

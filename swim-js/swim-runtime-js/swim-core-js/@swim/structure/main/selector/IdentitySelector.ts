@@ -139,8 +139,8 @@ export class IdentitySelector extends Selector {
     return Constructors.hash(IdentitySelector);
   }
 
-  override debugThen(output: Output): void {
-    // nop
+  override debugThen<T>(output: Output<T>): Output<T> {
+    return output; // blank
   }
 
   override clone(): Selector {

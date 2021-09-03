@@ -217,10 +217,11 @@ export class GetAttrSelector extends Selector {
         this.item.hashCode()), this.then.hashCode()));
   }
 
-  override debugThen(output: Output): void {
+  override debugThen<T>(output: Output<T>): Output<T> {
     output = output.write(46/*'.'*/).write("getAttr").write(40/*'('*/)
-        .debug(this.item).write(41/*')'*/);
-    this.then.debugThen(output);
+                   .debug(this.item).write(41/*')'*/);
+    output = this.then.debugThen(output);
+    return output;
   }
 
   override clone(): Selector {

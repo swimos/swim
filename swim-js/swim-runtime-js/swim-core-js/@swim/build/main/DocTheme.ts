@@ -87,7 +87,7 @@ export class DocTheme extends typedoc.DefaultTheme {
     }
   }
 
-  protected includeDedicatedUrls(reflection: typedoc.ContainerReflection, item: typedoc.NavigationItem) {
+  protected includeDedicatedUrls(reflection: typedoc.ContainerReflection, item: typedoc.NavigationItem): void {
     const childCount = reflection.children !== void 0 ? reflection.children.length : 0;
     for (let i = 0; i < childCount; i += 1) {
       const childReflection = reflection.children![i]!;

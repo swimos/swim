@@ -102,10 +102,10 @@ export abstract class LinkAddressed<E extends LinkAddressed<E>> extends Envelope
         Numbers.hash(this.prio)), Numbers.hash(this.rate)), this.body.hashCode()));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write(this.constructor.name).write(46/*'.'*/)
-        .write("create").write(40/*'('*/)
-        .debug(this.node.toString()).write(", ").debug(this.lane.toString());
+                   .write("create").write(40/*'('*/)
+                   .debug(this.node.toString()).write(", ").debug(this.lane.toString());
     if (this.prio !== 0 || this.rate !== 0) {
       output = output.write(", ").debug(this.prio).write(", ").debug(this.rate);
     }
@@ -113,6 +113,7 @@ export abstract class LinkAddressed<E extends LinkAddressed<E>> extends Envelope
       output = output.write(", ").debug(this.body);
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   override toValue(): Value {

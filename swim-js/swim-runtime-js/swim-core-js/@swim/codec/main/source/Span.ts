@@ -87,28 +87,30 @@ export class Span extends Tag {
         this.start.hashCode()), this.end.hashCode()));
   }
 
-  override display(output: Output): void {
+  override display<T>(output: Output<T>): Output<T> {
     if (this.start.note !== void 0) {
       output = output.write(this.start.note).write(58/*':'*/).write(32/*' '*/);
     }
-    Format.displayNumber(this.start.line, output);
+    output = Format.displayNumber(output, this.start.line);
     output = output.write(58/*':'*/);
-    Format.displayNumber(this.start.column, output);
+    output = Format.displayNumber(output, this.start.column);
     output = output.write(45/*'-'*/);
-    Format.displayNumber(this.end.line, output);
+    output = Format.displayNumber(output, this.end.line);
     output = output.write(58/*':'*/);
-    Format.displayNumber(this.end.column, output);
+    output = Format.displayNumber(output, this.end.column);
     if (this.end.note !== void 0) {
       output = output.write(58/*':'*/).write(32/*' '*/).write(this.end.note);
     }
+    return output;
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Span").write(".").write("from").write("(");
-    this.start.debug(output);
+    output = this.start.debug(output);
     output = output.write(", ");
-    this.end.debug(output);
+    output = this.end.debug(output);
     output = output.write(")");
+    return output;
   }
 
   override toString(): string {

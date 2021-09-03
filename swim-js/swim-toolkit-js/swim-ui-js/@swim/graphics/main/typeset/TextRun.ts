@@ -213,9 +213,9 @@ export class TextRun implements Graphics, Equals, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("TextRun").write(46/*'.'*/).write("create").write(40/*'('*/)
-        .debug(this.text).write(41/*')'*/);
+                   .debug(this.text).write(41/*')'*/);
     if (this.font !== null) {
       output = output.write(46/*'.'*/).write("font").write(40/*'('*/).debug(this.font).write(41/*')'*/);
     }
@@ -231,6 +231,7 @@ export class TextRun implements Graphics, Equals, Debug {
     if (this.textColor !== null) {
       output = output.write(46/*'.'*/).write("textColor").write(40/*'('*/).debug(this.textColor).write(41/*')'*/);
     }
+    return output;
   }
 
   toString(): string {

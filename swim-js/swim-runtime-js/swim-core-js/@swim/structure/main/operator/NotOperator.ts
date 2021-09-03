@@ -73,8 +73,9 @@ export class NotOperator extends UnaryOperator {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(NotOperator), this.operand.hashCode()));
   }
 
-  override debug(output: Output): void {
-    output.debug(this.operand).write(46/*'.'*/).write("not").write(40/*'('*/).write(41/*')'*/);
+  override debug<T>(output: Output<T>): Output<T> {
+    output = output.debug(this.operand).write(46/*'.'*/).write("not").write(40/*'('*/).write(41/*')'*/);
+    return output;
   }
 
   override clone(): NotOperator {

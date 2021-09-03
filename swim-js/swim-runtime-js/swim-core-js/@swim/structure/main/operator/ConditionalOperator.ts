@@ -133,10 +133,11 @@ export class ConditionalOperator extends Operator {
         this.ifTerm.hashCode()), this.thenTerm.hashCode()), this.elseTerm.hashCode()));
   }
 
-  override debug(output: Output): void {
-    output.debug(this.ifTerm).write(46/*'.'*/).write("conditional").write(40/*'('*/)
-        .debug(this.thenTerm).write(44/*','*/).write(32/*' '*/)
-        .debug(this.elseTerm).write(41/*')'*/);
+  override debug<T>(output: Output<T>): Output<T> {
+    output = output.debug(this.ifTerm).write(46/*'.'*/).write("conditional").write(40/*'('*/)
+                   .debug(this.thenTerm).write(44/*','*/).write(32/*' '*/)
+                   .debug(this.elseTerm).write(41/*')'*/);
+    return output;
   }
 
   override clone(): ConditionalOperator {

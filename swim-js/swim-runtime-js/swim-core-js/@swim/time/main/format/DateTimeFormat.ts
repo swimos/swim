@@ -52,12 +52,12 @@ export abstract class DateTimeFormat {
 
   format(date: AnyDateTime): string {
     date = DateTime.fromAny(date);
-    const output = Unicode.stringOutput();
-    this.writeDate(date as DateTime, output);
+    let output = Unicode.stringOutput();
+    output = this.writeDate(output, date as DateTime);
     return output.bind();
   }
 
-  abstract writeDate(date: DateTime, output: Output): void;
+  abstract writeDate<T>(output: Output<T>, date: DateTime): Output<T>;
 
   parse(input: Input | string): DateTime {
     if (typeof input === "string") {
@@ -197,40 +197,42 @@ export abstract class DateTimeFormat {
   static parseDateString(input: Input, factory: DateStringFactory, locale: DateTimeLocale,
                          date?: DateTimeInit, output?: Output<string>): Parser<DateTimeInit> {
     let c = 0;
-    output = output || Unicode.stringOutput();
+    output = output !== void 0 ? output : Unicode.stringOutput();
     do {
       if (input.isCont() && (c = input.head(), Unicode.isAlpha(c))) {
         input.step();
         output.write(c);
         continue;
       } else if (!input.isEmpty()) {
-        return factory.term(locale, output.bind(), date || {}, input);
+        return factory.term(locale, output.bind(), date !== void 0 ? date : {}, input);
       }
       break;
     } while (true);
-    return factory.cont(locale, date || {}, output, input);
+    return factory.cont(locale, date !== void 0 ? date : {}, output, input);
   }
 
   /** @hidden */
-  static writeDateNumber2(value: number, output: Output): void {
+  static writeDateNumber2<T>(output: Output<T>, value: number): Output<T> {
     const c1 = 48/*'0'*/ + value % 10;
     value /= 10;
     const c0 = 48/*'0'*/ + value % 10;
     output = output.write(c0).write(c1);
+    return output;
   }
 
   /** @hidden */
-  static writeDateNumber3(value: number, output: Output): void {
+  static writeDateNumber3<T>(output: Output<T>, value: number): Output<T> {
     const c2 = 48/*'0'*/ + value % 10;
     value /= 10;
     const c1 = 48/*'0'*/ + value % 10;
     value /= 10;
     const c0 = 48/*'0'*/ + value % 10;
     output = output.write(c0).write(c1).write(c2);
+    return output;
   }
 
   /** @hidden */
-  static writeDateNumber4(value: number, output: Output): void {
+  static writeDateNumber4<T>(output: Output<T>, value: number): Output<T> {
     const c3 = 48/*'0'*/ + value % 10;
     value /= 10;
     const c2 = 48/*'0'*/ + value % 10;
@@ -239,5 +241,6 @@ export abstract class DateTimeFormat {
     value /= 10;
     const c0 = 48/*'0'*/ + value % 10;
     output = output.write(c0).write(c1).write(c2).write(c3);
+    return output;
   }
 }

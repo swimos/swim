@@ -148,9 +148,10 @@ export class GeoPoint extends GeoShape implements Interpolate<GeoPoint>, HashCod
         Numbers.hash(this.lng)), Numbers.hash(this.lat)));
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("GeoPoint").write(46/*'.'*/).write("of").write(40/*'('*/)
-        .debug(this.lng).write(", ").debug(this.lat).write(41/*')'*/);
+                   .debug(this.lng).write(", ").debug(this.lat).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

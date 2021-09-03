@@ -35,11 +35,11 @@ export {
 
 export {
   Proof,
-  ValidProof,
-  InvalidProof,
-  RefutedProof,
-  ErrorProof,
-  PendingProof,
+  ProofValid,
+  ProofInvalid,
+  ProofRefuted,
+  ProofError,
+  ProofPending,
 } from "./Proof";
 
 export {Report} from "./Report";

@@ -49,7 +49,7 @@ export class ChildrenSelectorWriter<I, V> extends Writer {
     }
     if (step === 3 && output.isCont()) {
       output = output.write(42/*'*'*/);
-      return recon.writeThen(then, output);
+      return recon.writeThen(output, then);
     }
     if (output.isDone()) {
       return Writer.error(new WriterException("truncated"));

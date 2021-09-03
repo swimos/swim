@@ -140,7 +140,7 @@ export class Opt implements Equals, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("Opt").write(46/*'.'*/).write("of").write(40/*'('*/).debug(this.name).write(41/*')'*/);
     if (this.flag !== void 0) {
       output = output.write(46/*'.'*/).write("flag").write(40/*'('*/).debug(this.flag).write(41/*')'*/);
@@ -153,6 +153,7 @@ export class Opt implements Equals, Debug {
       const arg = args[argIndex]!;
       output = output.write(46/*'.'*/).write("arg").write(40/*'('*/).debug(arg).write(41/*')'*/);
     }
+    return output;
   }
 
   toString(): string {

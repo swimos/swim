@@ -57,17 +57,20 @@ export class UriScheme implements HashCode, Compare, Debug, Display {
     return Strings.hash(this.name);
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("UriScheme").write(46/*'.'*/);
     if (this.isDefined()) {
-      output = output.write("parse").write(40/*'('*/).write(34/*'"'*/).display(this).write(34/*'"'*/).write(41/*')'*/);
+      output = output.write("parse").write(40/*'('*/).write(34/*'"'*/)
+                     .display(this).write(34/*'"'*/).write(41/*')'*/);
     } else {
       output = output.write("undefined").write(40/*'('*/).write(41/*')'*/);
     }
+    return output;
   }
 
-  display(output: Output): void {
-    Uri.writeScheme(this.name, output);
+  display<T>(output: Output<T>): Output<T> {
+    output = Uri.writeScheme(output, this.name);
+    return output;
   }
 
   toString(): string {

@@ -64,9 +64,10 @@ export class InterpreterSettings implements Debug, HashCode {
         Numbers.hash(this.maxScopeDepth)));
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("new").write(32/*' '*/).write("InterpreterSettings")
-        .write(40/*'('*/).debug(this.maxScopeDepth).write(41/*')'*/);
+                   .write(40/*'('*/).debug(this.maxScopeDepth).write(41/*')'*/);
+    return output;
   }
 
   toString(): string {

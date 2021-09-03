@@ -35,9 +35,9 @@ export const Recon = {} as {
 
   sizeOfBlock(item: Item): number;
 
-  write(item: Item, output: Output): Writer;
+  write(output: Output, item: Item): Writer;
 
-  writeBlock(item: Item, output: Output): Writer;
+  writeBlock(output: Output, item: Item): Writer;
 
   toString(item: Item): string;
 
@@ -111,35 +111,47 @@ Recon.sizeOfBlock = function (item: Item): number {
   return Recon.structureWriter().sizeOfBlockItem(item);
 };
 
-Recon.write = function (item: Item, output: Output): Writer {
-  return Recon.structureWriter().writeItem(item, output);
+Recon.write = function (output: Output, item: Item): Writer {
+  return Recon.structureWriter().writeItem(output, item);
 };
 
-Recon.writeBlock = function (item: Item, output: Output): Writer {
-  return Recon.structureWriter().writeBlockItem(item, output);
+Recon.writeBlock = function (output: Output, item: Item): Writer {
+  return Recon.structureWriter().writeBlockItem(output, item);
 };
 
 Recon.toString = function (item: Item): string {
-  const output = Unicode.stringOutput();
-  Recon.write(item, output);
+  let output = Unicode.stringOutput();
+  const writer = Recon.write(output, item);
+  if (!writer.isDone()) {
+    output = Output.error(writer.trap());
+  }
   return output.bind();
 };
 
 Recon.toBlockString = function (item: Item): string {
-  const output = Unicode.stringOutput();
-  Recon.writeBlock(item, output);
+  let output = Unicode.stringOutput();
+  const writer = Recon.writeBlock(output, item);
+  if (!writer.isDone()) {
+    output = Output.error(writer.trap());
+  }
   return output.bind();
 };
 
 Recon.toData = function (item: Item): Data {
-  const output = Utf8.encodedOutput(Data.output());
-  Recon.write(item, output);
+  let output = Utf8.encodedOutput(Data.output());
+  const writer = Recon.write(output, item);
+  if (!writer.isDone()) {
+    output = Output.error(writer.trap());
+  }
   return output.bind();
 };
 
 Recon.toBlockData = function (item: Item): Data {
-  const output = Utf8.encodedOutput(Data.output());
-  Recon.writeBlock(item, output);
+  let output = Utf8.encodedOutput(Data.output());
+  const writer = Recon.writeBlock(output, item);
+  if (!writer.isDone()) {
+    output = Output.error(writer.trap());
+  }
   return output.bind();
 };
 

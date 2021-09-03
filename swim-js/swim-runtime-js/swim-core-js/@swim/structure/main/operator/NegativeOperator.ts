@@ -78,8 +78,9 @@ export class NegativeOperator extends UnaryOperator {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(NegativeOperator), this.operand.hashCode()));
   }
 
-  override debug(output: Output): void {
-    output.debug(this.operand).write(46/*'.'*/).write("negative").write(40/*'('*/).write(41/*')'*/);
+  override debug<T>(output: Output<T>): Output<T> {
+    output = output.debug(this.operand).write(46/*'.'*/).write("negative").write(40/*'('*/).write(41/*')'*/);
+    return output;
   }
 
   override clone(): NegativeOperator {

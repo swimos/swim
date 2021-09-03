@@ -25,8 +25,9 @@ export interface Display {
    * Writes a human readable, display-formatted string representation of this
    * object to `output`.
    *
+   * @return the continuation of the `output`.
    * @throws [[OutputException]] if the `output` exits the _cont_ state before
    *         the full display string has been written.
    */
-  display(output: Output): void;
+  display<T>(output: Output<T>): Output<T>;
 }

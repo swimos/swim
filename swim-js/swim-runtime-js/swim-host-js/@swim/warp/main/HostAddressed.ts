@@ -73,13 +73,14 @@ export abstract class HostAddressed<E extends HostAddressed<E>> extends Envelope
           this.body.hashCode()));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write(this.constructor.name).write(46/*'.'*/)
-        .write("create").write(40/*'('*/);
+                   .write("create").write(40/*'('*/);
     if (this.body.isDefined()) {
       output = output.debug(this.body);
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   override toValue(): Value {

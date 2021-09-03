@@ -42,7 +42,6 @@ export class WeekdayParser extends Parser<DateTimeInit> {
   static term(locale: DateTimeLocale, value: string, date: DateTimeInit, input: Input): Parser<DateTimeInit> {
     const day = locale.weekdays.indexOf(value);
     if (day >= 0) {
-      // nop
       return Parser.done(date);
     } else {
       return Parser.error(Diagnostic.message("expected weekday, but found " + value, input));

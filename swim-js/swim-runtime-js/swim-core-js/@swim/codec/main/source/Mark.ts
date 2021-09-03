@@ -151,27 +151,29 @@ export class Mark extends Tag {
         Strings.hash(this.note)));
   }
 
-  override display(output: Output): void {
-    Format.displayNumber(this.line, output);
+  override display<T>(output: Output<T>): Output<T> {
+    output = Format.displayNumber(output, this.line);
     output = output.write(58/*':'*/);
-    Format.displayNumber(this.column, output);
+    output = Format.displayNumber(output, this.column);
     if (this.note !== void 0) {
       output = output.write(58/*':'*/).write(32/*' '*/).write(this.note);
     }
+    return output;
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Mark").write(".").write("at").write("(");
-    Format.debugNumber(this.offset, output);
+    output = Format.debugNumber(output, this.offset);
     output = output.write(", ");
-    Format.debugNumber(this.line, output);
+    output = Format.debugNumber(output, this.line);
     output = output.write(", ");
-    Format.debugNumber(this.column, output);
+    output = Format.debugNumber(output, this.column);
     if (this.note !== void 0) {
       output = output.write(", ");
-      Format.debugString(this.note, output);
+      output = Format.debugString(output, this.note);
     }
     output = output.write(")");
+    return output;
   }
 
   override toString(): string {

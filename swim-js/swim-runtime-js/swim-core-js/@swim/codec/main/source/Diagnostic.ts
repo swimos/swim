@@ -99,7 +99,7 @@ export class Diagnostic implements Display {
     return digits;
   }
 
-  display(output: Output): void {
+  display<T>(output: Output<T>): Output<T> {
     const input = this.input.clone();
     const start = this.tag.start;
     const end = this.tag.end;
@@ -109,8 +109,368 @@ export class Diagnostic implements Display {
     const cause = this.cause;
     const contextLines = 2;
     const lineDigits = this.lineDigits();
-    Diagnostic.displayDiagnostic(input, start, end, severity, message, note,
-                                 cause, contextLines, lineDigits, output);
+    output = Diagnostic.display(output, input, start, end, severity, message,
+                                note, cause, contextLines, lineDigits);
+    return output;
+  }
+
+
+  private static display<T>(output: Output<T>, input: Input, start: Mark, end: Mark,
+                            severity: Severity, message: string | undefined,
+                            note: string | undefined, cause: Diagnostic | null,
+                            contextLines: number, lineDigits: number): Output<T> {
+    do {
+      if (message !== void 0) {
+        output = Diagnostic.displayMessage(output, severity, message);
+        output = output.writeln();
+      }
+      output = Diagnostic.displayAnchor(output, input, start, lineDigits);
+      output = output.writeln();
+      const cont = Diagnostic.displayContext(output, input, start, end, severity,
+                                             note, cause, contextLines, lineDigits);
+      const next = cont[0];
+      output = cont[1];
+      if (next !== null) {
+        output = output.writeln();
+        input = next.input.clone();
+        start = next.tag.start;
+        end = next.tag.end;
+        severity = next.severity;
+        message = next.message;
+        note = next.note;
+        cause = next.cause;
+      } else {
+        break;
+      }
+    } while (true);
+    return output;
+  }
+
+  /** @hidden */
+  static displayMessage<T>(output: Output<T>, severity: Severity, message: string | undefined): Output<T> {
+    output = Diagnostic.formatSeverity(output, severity);
+    output = output.write(severity.label);
+    output = OutputStyle.reset(output);
+    output = OutputStyle.bold(output);
+    output = output.write(58/*':'*/);
+    if (message !== void 0) {
+      output = output.write(32/*' '*/).write(message);
+    }
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  private static displayAnchor<T>(output: Output<T>, input: Input,
+                                  start: Mark, lineDigits: number): Output<T> {
+    output = Diagnostic.displayLineLeadArrow(output, lineDigits);
+    output = output.write(32/*' '*/);
+    const id = input.id;
+    if (id !== void 0) {
+      output = Format.displayAny(output, id);
+    }
+    output = output.write(58/*':'*/);
+    output = Format.displayNumber(output, start.line);
+    output = output.write(58/*':'*/);
+    output = Format.displayNumber(output, start.column);
+    output = output.writeln();
+
+    output = Diagnostic.displayLineLead(output, lineDigits);
+    return output;
+  }
+
+  private static displayContext<T>(output: Output<T>, input: Input, start: Mark, end: Mark,
+                                   severity: Severity, note: string | undefined,
+                                   cause: Diagnostic | null, contextLines: number,
+                                   lineDigits: number): [Diagnostic | null, Output<T>] {
+    let next = cause;
+    const sameCause = cause !== null && cause.message === void 0
+                   && Values.equal(input.id, cause.input.id);
+    const causeOrder = sameCause ? (start.offset <= cause!.tag.start.offset ? -1 : 1) : 0;
+    if (causeOrder === 1) {
+      const cont = Diagnostic.displayContext(output, cause!.input.clone(), cause!.tag.start,
+                                             cause!.tag.end, cause!.severity, cause!.note,
+                                             cause!.cause, contextLines, lineDigits);
+      next = cont[0];
+      output = cont[1];
+      output = output.writeln();
+      output = Diagnostic.displayLineLeadEllipsis(output, lineDigits);
+      output = output.writeln();
+    }
+    output = Diagnostic.displayLines(output, input, start, end, severity, contextLines, lineDigits);
+    if (note !== void 0) {
+      output = Diagnostic.displayNote(output, note, lineDigits);
+    }
+    if (causeOrder === -1) {
+      output = output.writeln();
+      output = Diagnostic.displayLineLeadEllipsis(output, lineDigits);
+      output = output.writeln();
+      const cont = Diagnostic.displayContext(output, cause!.input.clone(), cause!.tag.start,
+                                             cause!.tag.end, cause!.severity, cause!.note,
+                                             cause!.cause, contextLines, lineDigits);
+      next = cont[0];
+      output = cont[1];
+    }
+    return [next, output];
+  }
+
+  private static displayLines<T>(output: Output<T>, input: Input, start: Mark, end: Mark,
+                                 severity: Severity, contextLines: number,
+                                 lineDigits: number): Output<T> {
+    const startLine = start.line;
+    const endLine = end.line;
+    let line = input.line;
+
+    while (line < startLine) {
+      Diagnostic.consumeLineText(input, line);
+      line += 1;
+    }
+
+    if (endLine - startLine > 2 * contextLines + 2) {
+      while (line <= startLine + contextLines) {
+        output = Diagnostic.displayLine(output, input, start, end, severity, line, lineDigits);
+        line += 1;
+      }
+      output = Diagnostic.displayLineLeadEllipsis(output, lineDigits);
+      output = output.write(32/*' '*/);
+      output = Diagnostic.formatSeverity(output, severity);
+      output = output.write(124/*'|'*/);
+      output = OutputStyle.reset(output);
+      output = output.writeln();
+      while (line < endLine - contextLines) {
+        Diagnostic.consumeLineText(input, line);
+        line += 1;
+      }
+    }
+
+    while (line <= endLine) {
+      output = Diagnostic.displayLine(output, input, start, end, severity, line, lineDigits);
+      line += 1;
+    }
+    return output;
+  }
+
+  private static displayNote<T>(output: Output<T>, note: string | undefined, lineDigits: number): Output<T> {
+    output = output.writeln();
+    output = Diagnostic.displayLineLead(output, lineDigits);
+    output = output.writeln();
+    output = Diagnostic.displayLineComment(output, 'note', note, lineDigits);
+    return output;
+  }
+
+  private static displayLine<T>(output: Output<T>, input: Input, start: Mark, end: Mark,
+                                severity: Severity, line: number, lineDigits: number): Output<T> {
+    if (start.line === line && end.line === line) {
+      output = Diagnostic.displaySingleLine(output, input, start, end, severity, line, lineDigits);
+    } else if (start.line === line) {
+      output = Diagnostic.displayStartLine(output, input, start, severity, line, lineDigits);
+    } else if (end.line === line) {
+      output = Diagnostic.displayEndLine(output, input, end, severity, line, lineDigits);
+    } else {
+      output = Diagnostic.displayMidLine(output, input, severity, line, lineDigits);
+    }
+    return output;
+  }
+
+  private static displaySingleLine<T>(output: Output<T>, input: Input, start: Mark, end: Mark,
+                                      severity: Severity, line: number, lineDigits: number): Output<T> {
+    output = Diagnostic.displayLineLeadNumber(output, line, lineDigits);
+    output = output.write(32/*' '*/);
+    for (let i = 1; i < input.column; i += 1) {
+      output = output.write(32/*' '*/);
+    }
+    output = Diagnostic.displayLineText(output, input, line);
+
+    output = Diagnostic.displayLineLead(output, lineDigits);
+    output = output.write(32/*' '*/);
+    let i = 1;
+    while (i < start.column) {
+      output = output.write(32/*' '*/);
+      i += 1;
+    }
+    output = Diagnostic.formatSeverity(output, severity);
+    while (i <= end.column) {
+      output = output.write(94/*'^'*/);
+      i += 1;
+    }
+    if (end.note !== void 0) {
+      output = output.write(32/*' '*/).write(end.note);
+    }
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  private static displayStartLine<T>(output: Output<T>, input: Input, start: Mark,
+                                     severity: Severity, line: number, lineDigits: number): Output<T> {
+    output = Diagnostic.displayLineLeadNumber(output, line, lineDigits);
+    output = output.write(32/*' '*/).write(32/*' '*/).write(32/*' '*/);
+    for (let i = 1; i < input.column; i += 1) {
+      output = output.write(32/*' '*/);
+    }
+    output = Diagnostic.displayLineText(output, input, line);
+
+    output = Diagnostic.displayLineLead(output, lineDigits);
+    output = output.write(32/*' '*/).write(32/*' '*/);
+    output = Diagnostic.formatSeverity(output, severity);
+    output = output.write(95/*'_'*/);
+    let i = 1;
+    while (i < start.column) {
+      output = output.write(95/*'_'*/);
+      i += 1;
+    }
+    output = output.write(94/*'^'*/);
+    if (start.note !== void 0) {
+      output = output.write(32/*' '*/).write(start.note);
+    }
+    output = OutputStyle.reset(output);
+    output = output.writeln();
+    return output;
+  }
+
+  private static displayEndLine<T>(output: Output<T>, input: Input, end: Mark,
+                                   severity: Severity, line: number, lineDigits: number): Output<T> {
+    output = Diagnostic.displayLineLeadNumber(output, line, lineDigits);
+    output = output.write(32/*' '*/);
+    output = Diagnostic.formatSeverity(output, severity);
+    output = output.write(124/*'|'*/);
+    output = OutputStyle.reset(output);
+    output = output.write(32/*' '*/);
+    output = Diagnostic.displayLineText(output, input, line);
+
+    output = Diagnostic.displayLineLead(output, lineDigits);
+    output = output.write(32/*' '*/);
+    output = Diagnostic.formatSeverity(output, severity);
+    output = output.write(124/*'|'*/).write(95/*'_'*/);
+    let i = 1;
+    while (i < end.column) {
+      output = output.write(95/*'_'*/);
+      i += 1;
+    }
+    output = output.write(94/*'^'*/);
+    if (end.note !== void 0) {
+      output = output.write(32/*' '*/).write(end.note);
+    }
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  private static displayMidLine<T>(output: Output<T>, input: Input, severity: Severity,
+                                   line: number, lineDigits: number): Output<T> {
+    output = Diagnostic.displayLineLeadNumber(output, line, lineDigits);
+    output = output.write(32/*' '*/);
+    output = Diagnostic.formatSeverity(output, severity);
+    output = output.write(124/*'|'*/);
+    output = OutputStyle.reset(output);
+    output = output.write(32/*' '*/);
+    output = Diagnostic.displayLineText(output, input, line);
+    return output;
+  }
+
+  private static displayLineComment<T>(output: Output<T>, label: string,
+                                       comment: string | undefined, lineDigits: number): Output<T> {
+    output = Diagnostic.displayLineLeadComment(output, lineDigits);
+    output = output.write(32/*' '*/);
+    output = OutputStyle.bold(output);
+    output = output.write(label).write(58/*':'*/);
+    output = OutputStyle.reset(output);
+    if (comment !== void 0) {
+      output = output.write(32/*' '*/).write(comment);
+    }
+    return output;
+  }
+
+  private static displayLineLead<T>(output: Output<T>, lineDigits: number): Output<T> {
+    output = OutputStyle.blueBold(output);
+    const padding = 1 + lineDigits;
+    for (let i = 0; i < padding; i += 1) {
+      output = output.write(32/*' '*/);
+    }
+    output = output.write(124/*'|'*/);
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  private static displayLineLeadComment<T>(output: Output<T>, lineDigits: number): Output<T> {
+    output = OutputStyle.blueBold(output);
+    const padding = 1 + lineDigits;
+    for (let i = 0; i < padding; i += 1) {
+      output = output.write(32/*' '*/);
+    }
+    output = output.write(61/*'='*/);
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  private static displayLineLeadArrow<T>(output: Output<T>, lineDigits: number): Output<T> {
+    for (let i = 0; i < lineDigits; i += 1) {
+      output = output.write(32/*' '*/);
+    }
+    output = OutputStyle.blueBold(output);
+    output = output.write(45/*'-'*/).write(45/*'-'*/).write(62/*'>'*/);
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  private static displayLineLeadEllipsis<T>(output: Output<T>, lineDigits: number): Output<T> {
+    output = OutputStyle.blueBold(output);
+    for (let i = 0; i < lineDigits; i += 1) {
+      output = output.write(46/*'.'*/);
+    }
+    output = OutputStyle.reset(output);
+    output = output.write(32/*' '*/).write(32/*' '*/);
+    return output;
+  }
+
+  private static displayLineLeadNumber<T>(output: Output<T>, line: number, lineDigits: number): Output<T> {
+    const padding = lineDigits - Base10.countDigits(line);
+    for (let i = 0; i < padding; i += 1) {
+      output = output.write(32/*' '*/);
+    }
+    output = OutputStyle.blueBold(output);
+    output = Format.displayNumber(output, line);
+    output = output.write(32/*' '*/).write(124/*'|'*/);
+    output = OutputStyle.reset(output);
+    return output;
+  }
+
+  private static displayLineText<T>(output: Output<T>, input: Input, line: number): Output<T> {
+    while (input.isCont() && input.line === line) {
+      output = output.write(input.head());
+      input = input.step();
+    }
+    if (input.line === line) {
+      output = output.writeln();
+    }
+    return output;
+  }
+
+  private static consumeLineText(input: Input, line: number): void {
+    while (input.isCont() && input.line === line) {
+      input = input.step();
+    }
+  }
+
+  private static formatSeverity<T>(output: Output<T>, severity: Severity): Output<T> {
+    switch (severity.level) {
+      case Severity.FATAL_LEVEL:
+      case Severity.ALERT_LEVEL:
+      case Severity.ERROR_LEVEL:
+        output = OutputStyle.redBold(output);
+        break;
+      case Severity.WARNING_LEVEL:
+        output = OutputStyle.yellowBold(output);
+        break;
+      case Severity.NOTE_LEVEL:
+        output = OutputStyle.greenBold(output);
+        break;
+      case Severity.INFO_LEVEL:
+        output = OutputStyle.cyanBold(output);
+        break;
+      case Severity.DEBUG_LEVEL:
+      case Severity.TRACE_LEVEL:
+      default:
+        output = OutputStyle.magentaBold(output);
+    }
+    return output;
   }
 
   toString(settings?: OutputSettings): string {
@@ -233,8 +593,8 @@ export class Diagnostic implements Display {
 
     let message;
     if (input.isCont()) {
-      const output = Unicode.stringOutput().write("unexpected").write(32/*' '*/);
-      Format.debugChar(input.head(), output);
+      let output = Unicode.stringOutput().write("unexpected").write(32/*' '*/);
+      output = Format.debugChar(output, input.head());
       message = output.bind();
     } else {
       message = "unexpected end of input";
@@ -284,13 +644,13 @@ export class Diagnostic implements Display {
 
     let output = Unicode.stringOutput().write("expected").write(32/*' '*/);
     if (typeof expected === "number") {
-      Format.debugChar(expected, output);
+      output = Format.debugChar(output, expected);
     } else {
       output = output.write(expected);
     }
     output = output.write(44/*','*/).write(32/*' '*/).write("but found").write(32/*' '*/);
     if (input.isCont()) {
-      Format.debugChar(input.head(), output);
+      output = Format.debugChar(output, input.head());
     } else {
       output = output.write("end of input");
     }
@@ -299,352 +659,5 @@ export class Diagnostic implements Display {
     const source = input.clone();
     source.seek();
     return new Diagnostic(source, mark, severity as Severity, message, note as string | undefined, cause);
-  }
-
-  private static displayDiagnostic(input: Input, start: Mark, end: Mark,
-                                   severity: Severity, message: string | undefined,
-                                   note: string | undefined, cause: Diagnostic | null,
-                                   contextLines: number, lineDigits: number,
-                                   output: Output): void {
-    do {
-      if (message !== void 0) {
-        Diagnostic.displayMessage(severity, message, output);
-        output = output.writeln();
-      }
-      Diagnostic.displayAnchor(input, start, lineDigits, output);
-      output = output.writeln();
-      const next = Diagnostic.displayContext(input, start, end, severity, note,
-                                             cause, contextLines, lineDigits, output);
-      if (next !== null) {
-        output = output.writeln();
-        input = next.input.clone();
-        start = next.tag.start;
-        end = next.tag.end;
-        severity = next.severity;
-        message = next.message;
-        note = next.note;
-        cause = next.cause;
-      } else {
-        break;
-      }
-    } while (true);
-  }
-
-  /** @hidden */
-  static displayMessage(severity: Severity, message: string | undefined, output: Output): void {
-    Diagnostic.formatSeverity(severity, output);
-    output = output.write(severity.label);
-    OutputStyle.reset(output);
-    OutputStyle.bold(output);
-    output = output.write(58/*':'*/);
-    if (message !== void 0) {
-      output = output.write(32/*' '*/).write(message);
-    }
-    OutputStyle.reset(output);
-  }
-
-  private static displayAnchor(input: Input, start: Mark, lineDigits: number,
-                               output: Output): void {
-    Diagnostic.displayLineLeadArrow(lineDigits, output);
-    output = output.write(32/*' '*/);
-    const id = input.id;
-    if (id !== void 0) {
-      Format.display(id, output);
-    }
-    output = output.write(58/*':'*/);
-    Format.displayNumber(start.line, output);
-    output = output.write(58/*':'*/);
-    Format.displayNumber(start.column, output);
-    output = output.writeln();
-
-    Diagnostic.displayLineLead(lineDigits, output);
-  }
-
-  private static displayCause(cause: Diagnostic, contextLines: number,
-                              lineDigits: number, output: Output): Diagnostic | null {
-    const input = cause.input.clone();
-    const start = cause.tag.start;
-    const end = cause.tag.end;
-    const severity = cause.severity;
-    const note = cause.note;
-    const next = cause.cause;
-    return Diagnostic.displayContext(input, start, end, severity, note, next,
-                                     contextLines, lineDigits, output);
-  }
-
-  private static displayContext(input: Input, start: Mark, end: Mark,
-                                severity: Severity, note: string | undefined,
-                                cause: Diagnostic | null, contextLines: number,
-                                lineDigits: number, output: Output): Diagnostic | null {
-    let next = cause;
-    const sameCause = cause !== null && cause.message === void 0
-                   && Values.equal(input.id, cause.input.id);
-    const causeOrder = sameCause ? (start.offset <= cause!.tag.start.offset ? -1 : 1) : 0;
-    if (causeOrder === 1) {
-      next = Diagnostic.displayCause(cause!, contextLines, lineDigits, output);
-      output = output.writeln();
-      Diagnostic.displayLineLeadEllipsis(lineDigits, output);
-      output = output.writeln();
-    }
-    Diagnostic.displayLines(input, start, end, severity, contextLines, lineDigits, output);
-    if (note !== void 0) {
-      Diagnostic.displayNote(note, lineDigits, output);
-    }
-    if (causeOrder === -1) {
-      output = output.writeln();
-      Diagnostic.displayLineLeadEllipsis(lineDigits, output);
-      output = output.writeln();
-      next = Diagnostic.displayCause(cause!, contextLines, lineDigits, output);
-    }
-    return next;
-  }
-
-  private static displayLines(input: Input, start: Mark, end: Mark,
-                              severity: Severity, contextLines: number,
-                              lineDigits: number, output: Output): void {
-    const startLine = start.line;
-    const endLine = end.line;
-    let line = input.line;
-
-    while (line < startLine) {
-      Diagnostic.consumeLineText(input, line);
-      line += 1;
-    }
-
-    if (endLine - startLine > 2 * contextLines + 2) {
-      while (line <= startLine + contextLines) {
-        Diagnostic.displayLine(input, start, end, severity, line, lineDigits, output);
-        line += 1;
-      }
-      Diagnostic.displayLineLeadEllipsis(lineDigits, output);
-      output = output.write(32/*' '*/);
-      Diagnostic.formatSeverity(severity, output);
-      output = output.write(124/*'|'*/);
-      OutputStyle.reset(output);
-      output = output.writeln();
-      while (line < endLine - contextLines) {
-        Diagnostic.consumeLineText(input, line);
-        line += 1;
-      }
-    }
-
-    while (line <= endLine) {
-      Diagnostic.displayLine(input, start, end, severity, line, lineDigits, output);
-      line += 1;
-    }
-  }
-
-  private static displayNote(note: string | undefined, lineDigits: number, output: Output): void {
-    output = output.writeln();
-    Diagnostic.displayLineLead(lineDigits, output);
-    output = output.writeln();
-    Diagnostic.displayLineComment('note', note, lineDigits, output);
-  }
-
-  private static displayLine(input: Input, start: Mark, end: Mark,
-                             severity: Severity, line: number,
-                             lineDigits: number, output: Output): void {
-    if (start.line === line && end.line === line) {
-      Diagnostic.displaySingleLine(input, start, end, severity, line, lineDigits, output);
-    } else if (start.line === line) {
-      Diagnostic.displayStartLine(input, start, severity, line, lineDigits, output);
-    } else if (end.line === line) {
-      Diagnostic.displayEndLine(input, end, severity, line, lineDigits, output);
-    } else {
-      Diagnostic.displayMidLine(input, severity, line, lineDigits, output);
-    }
-  }
-
-  private static displaySingleLine(input: Input, start: Mark, end: Mark,
-                                   severity: Severity, line: number,
-                                   lineDigits: number, output: Output): void {
-    Diagnostic.displayLineLeadNumber(line, lineDigits, output);
-    output = output.write(32/*' '*/);
-    for (let i = 1; i < input.column; i += 1) {
-      output = output.write(32/*' '*/);
-    }
-    Diagnostic.displayLineText(input, line, output);
-
-    Diagnostic.displayLineLead(lineDigits, output);
-    output = output.write(32/*' '*/);
-    let i = 1;
-    while (i < start.column) {
-      output = output.write(32/*' '*/);
-      i += 1;
-    }
-    Diagnostic.formatSeverity(severity, output);
-    while (i <= end.column) {
-      output = output.write(94/*'^'*/);
-      i += 1;
-    }
-    if (end.note !== void 0) {
-      output = output.write(32/*' '*/).write(end.note);
-    }
-    OutputStyle.reset(output);
-  }
-
-  private static displayStartLine(input: Input, start: Mark,
-                                  severity: Severity, line: number,
-                                  lineDigits: number, output: Output): void {
-    Diagnostic.displayLineLeadNumber(line, lineDigits, output);
-    output = output.write(32/*' '*/).write(32/*' '*/).write(32/*' '*/);
-    for (let i = 1; i < input.column; i += 1) {
-      output = output.write(32/*' '*/);
-    }
-    Diagnostic.displayLineText(input, line, output);
-
-    Diagnostic.displayLineLead(lineDigits, output);
-    output = output.write(32/*' '*/).write(32/*' '*/);
-    Diagnostic.formatSeverity(severity, output);
-    output = output.write(95/*'_'*/);
-    let i = 1;
-    while (i < start.column) {
-      output = output.write(95/*'_'*/);
-      i += 1;
-    }
-    output = output.write(94/*'^'*/);
-    if (start.note !== void 0) {
-      output = output.write(32/*' '*/).write(start.note);
-    }
-    OutputStyle.reset(output);
-    output = output.writeln();
-  }
-
-  private static displayEndLine(input: Input, end: Mark,
-                                severity: Severity, line: number,
-                                lineDigits: number, output: Output): void {
-    Diagnostic.displayLineLeadNumber(line, lineDigits, output);
-    output = output.write(32/*' '*/);
-    Diagnostic.formatSeverity(severity, output);
-    output = output.write(124/*'|'*/);
-    OutputStyle.reset(output);
-    output = output.write(32/*' '*/);
-    Diagnostic.displayLineText(input, line, output);
-
-    Diagnostic.displayLineLead(lineDigits, output);
-    output = output.write(32/*' '*/);
-    Diagnostic.formatSeverity(severity, output);
-    output = output.write(124/*'|'*/).write(95/*'_'*/);
-    let i = 1;
-    while (i < end.column) {
-      output = output.write(95/*'_'*/);
-      i += 1;
-    }
-    output = output.write(94/*'^'*/);
-    if (end.note !== void 0) {
-      output = output.write(32/*' '*/).write(end.note);
-    }
-    OutputStyle.reset(output);
-  }
-
-  private static displayMidLine(input: Input, severity: Severity, line: number,
-                                lineDigits: number, output: Output): void {
-    Diagnostic.displayLineLeadNumber(line, lineDigits, output);
-    output = output.write(32/*' '*/);
-    Diagnostic.formatSeverity(severity, output);
-    output = output.write(124/*'|'*/);
-    OutputStyle.reset(output);
-    output = output.write(32/*' '*/);
-    Diagnostic.displayLineText(input, line, output);
-  }
-
-  private static displayLineComment(label: string, comment: string | undefined,
-                                    lineDigits: number, output: Output): void {
-    Diagnostic.displayLineLeadComment(lineDigits, output);
-    output = output.write(32/*' '*/);
-    OutputStyle.bold(output);
-    output = output.write(label).write(58/*':'*/);
-    OutputStyle.reset(output);
-    if (comment !== void 0) {
-      output = output.write(32/*' '*/).write(comment);
-    }
-  }
-
-  private static displayLineLead(lineDigits: number, output: Output): void {
-    OutputStyle.blueBold(output);
-    const padding = 1 + lineDigits;
-    for (let i = 0; i < padding; i += 1) {
-      output = output.write(32/*' '*/);
-    }
-    output = output.write(124/*'|'*/);
-    OutputStyle.reset(output);
-  }
-
-  private static displayLineLeadComment(lineDigits: number, output: Output): void {
-    OutputStyle.blueBold(output);
-    const padding = 1 + lineDigits;
-    for (let i = 0; i < padding; i += 1) {
-      output = output.write(32/*' '*/);
-    }
-    output = output.write(61/*'='*/);
-    OutputStyle.reset(output);
-  }
-
-  private static displayLineLeadArrow(lineDigits: number, output: Output): void {
-    for (let i = 0; i < lineDigits; i += 1) {
-      output = output.write(32/*' '*/);
-    }
-    OutputStyle.blueBold(output);
-    output = output.write(45/*'-'*/).write(45/*'-'*/).write(62/*'>'*/);
-    OutputStyle.reset(output);
-  }
-
-  private static displayLineLeadEllipsis(lineDigits: number, output: Output): void {
-    OutputStyle.blueBold(output);
-    for (let i = 0; i < lineDigits; i += 1) {
-      output = output.write(46/*'.'*/);
-    }
-    OutputStyle.reset(output);
-    output = output.write(32/*' '*/).write(32/*' '*/);
-  }
-
-  private static displayLineLeadNumber(line: number, lineDigits: number, output: Output): void {
-    const padding = lineDigits - Base10.countDigits(line);
-    for (let i = 0; i < padding; i += 1) {
-      output = output.write(32/*' '*/);
-    }
-    OutputStyle.blueBold(output);
-    Format.displayNumber(line, output);
-    output = output.write(32/*' '*/).write(124/*'|'*/);
-    OutputStyle.reset(output);
-  }
-
-  private static displayLineText(input: Input, line: number, output: Output): void {
-    while (input.isCont() && input.line === line) {
-      output = output.write(input.head());
-      input = input.step();
-    }
-    if (input.line === line) {
-      output = output.writeln();
-    }
-  }
-
-  private static consumeLineText(input: Input, line: number): void {
-    while (input.isCont() && input.line === line) {
-      input = input.step();
-    }
-  }
-
-  private static formatSeverity(severity: Severity, output: Output): void {
-    switch (severity.level) {
-      case Severity.FATAL_LEVEL:
-      case Severity.ALERT_LEVEL:
-      case Severity.ERROR_LEVEL:
-        OutputStyle.redBold(output);
-        break;
-      case Severity.WARNING_LEVEL:
-        OutputStyle.yellowBold(output);
-        break;
-      case Severity.NOTE_LEVEL:
-        OutputStyle.greenBold(output);
-        break;
-      case Severity.INFO_LEVEL:
-        OutputStyle.cyanBold(output);
-        break;
-      case Severity.DEBUG_LEVEL:
-      case Severity.TRACE_LEVEL:
-      default:
-        OutputStyle.magentaBold(output);
-    }
   }
 }

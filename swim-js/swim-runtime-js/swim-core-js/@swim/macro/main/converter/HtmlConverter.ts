@@ -17,32 +17,32 @@ import {Item, Attr, Slot, Value, Record} from "@swim/structure";
 import {Converter} from "./Converter";
 
 export class HtmlConverter extends Converter {
-  override convert<O>(model: Item, output: Output<O>): O {
+  override convert<O>(output: Output<O>, model: Item): O {
     if (model instanceof Record) {
-      output = this.writeDocument(model, output);
+      output = this.writeDocument(output, model);
     }
     return output.bind();
   }
 
-  writeDocument<O>(document: Record, output: Output<O>): Output<O> {
+  writeDocument<O>(output: Output<O>, document: Record): Output<O> {
     if (document.tag !== void 0) {
-      output = this.writeElement(document, output);
+      output = this.writeElement(output, document);
     } else {
       for (let i = 0, n = document.length; i < n; i += 1) {
         const node = document.getItem(i);
         if (node instanceof Record) {
           const tag = node.tag;
           if (tag === "cdata") {
-            output = this.writeCdata(node, output);
+            output = this.writeCdata(output, node);
           } else if (tag === "doctype") {
-            output = this.writeDoctype(node, output);
+            output = this.writeDoctype(output, node);
           } else {
-            output = this.writeElement(node, output);
+            output = this.writeElement(output, node);
           }
         } else if (node instanceof Value) {
           const text = node.stringValue();
           if (text !== void 0) {
-            output = this.writeText(text, output);
+            output = this.writeText(output, text);
           }
         }
       }
@@ -50,7 +50,7 @@ export class HtmlConverter extends Converter {
     return output;
   }
 
-  writeDoctype<O>(doctype: Record, output: Output<O>): Output<O> {
+  writeDoctype<O>(output: Output<O>, doctype: Record): Output<O> {
     const head = doctype.head();
     if (head instanceof Attr && head.key.value === "doctype") {
       const name = head.value.stringValue();
@@ -66,72 +66,72 @@ export class HtmlConverter extends Converter {
     return output;
   }
 
-  writeFragment<O>(fragment: Record, output: Output<O>): Output<O> {
+  writeFragment<O>(output: Output<O>, fragment: Record): Output<O> {
     for (let i = 0, n = fragment.length; i < n; i += 1) {
       const node = fragment.getItem(i);
       if (node instanceof Record) {
         const tag = node.tag;
         if (tag !== void 0) {
           if (tag === "cdata") {
-            output = this.writeCdata(node, output);
+            output = this.writeCdata(output, node);
           } else {
-            output = this.writeElement(node, output);
+            output = this.writeElement(output, node);
           }
         } else {
-          output = this.writeFragment(node, output);
+          output = this.writeFragment(output, node);
         }
       } else if (node instanceof Value) {
         const text = node.stringValue();
         if (text !== void 0) {
-          output = this.writeText(text, output);
+          output = this.writeText(output, text);
         }
       }
     }
     return output;
   }
 
-  protected writeElement<O>(element: Record, output: Output<O>): Output<O> {
+  protected writeElement<O>(output: Output<O>, element: Record): Output<O> {
     const tag = element.head();
     if (tag instanceof Attr) {
       const tagName = tag.key.value;
       const attributes = tag.value;
       const fragment = element.tail();
       if (fragment.isEmpty()) {
-        //output = this.writeEmptyTag(tagName, attributes, output);
-        output = this.writeStartTag(tagName, attributes, output);
-        output = this.writeEndTag(tagName, output);
+        //output = this.writeEmptyTag(tagName, attributes);
+        output = this.writeStartTag(output, tagName, attributes);
+        output = this.writeEndTag(output, tagName);
       } else {
-        output = this.writeStartTag(tagName, attributes, output);
-        output = this.writeFragment(fragment.branch(), output);
-        output = this.writeEndTag(tagName, output);
+        output = this.writeStartTag(output, tagName, attributes);
+        output = this.writeFragment(output, fragment.branch());
+        output = this.writeEndTag(output, tagName);
       }
     }
     return output;
   }
 
-  protected writeAttributes<O>(attributes: Record, output: Output<O>): Output<O> {
+  protected writeAttributes<O>(output: Output<O>, attributes: Record): Output<O> {
     for (let i = 0, n = attributes.length; i < n; i += 1) {
       const attribute = attributes.getItem(i);
       if (attribute instanceof Slot) {
-        output = this.writeAttribute(attribute, output);
+        output = this.writeAttribute(output, attribute);
       }
     }
     return output;
   }
 
-  protected writeAttribute<O>(attribute: Slot, output: Output<O>): Output<O> {
+  protected writeAttribute<O>(output: Output<O>, attribute: Slot): Output<O> {
     const attributeName = attribute.key.stringValue();
     const attributeValue = attribute.value.stringValue();
     if (attributeName !== void 0 && attributeValue !== void 0) {
       output = output.write(32/*' '*/);
-      output = this.writeName(attributeName, output);
+      output = this.writeName(output, attributeName);
       output = output.write(61/*'='*/);
-      output = this.writeAttributeValue(attributeValue, output);
+      output = this.writeAttributeValue(output, attributeValue);
     }
     return output;
   }
 
-  protected writeAttributeValue<O>(attributeValue: string, output: Output<O>): Output<O> {
+  protected writeAttributeValue<O>(output: Output<O>, attributeValue: string): Output<O> {
     output = output.write(34/*'"'*/);
     for (let i = 0, n = attributeValue.length; i < n; i += 1) {
       const c = attributeValue.charCodeAt(i);
@@ -145,36 +145,36 @@ export class HtmlConverter extends Converter {
     return output;
   }
 
-  //protected writeEmptyTag<O>(tagName: string, attributes: Value, output: Output<O>): Output<O> {
+  //protected writeEmptyTag<O>(output: Output<O>, tagName: string, attributes: Value): Output<O> {
   //  output = output.write(60/*'<'*/);
-  //  output = this.writeName(tagName, output);
+  //  output = this.writeName(output, tagName);
   //  if (attributes instanceof Record) {
-  //    output = this.writeAttributes(attributes, output);
+  //    output = this.writeAttributes(output, attributes);
   //  }
   //  output = output.write(47/*'/'*/);
   //  output = output.write(62/*'>'*/);
   //  return output;
   //}
 
-  protected writeStartTag<O>(tagName: string, attributes: Value, output: Output<O>): Output<O> {
+  protected writeStartTag<O>(output: Output<O>, tagName: string, attributes: Value): Output<O> {
     output = output.write(60/*'<'*/);
-    output = this.writeName(tagName, output);
+    output = this.writeName(output, tagName);
     if (attributes instanceof Record) {
-      output = this.writeAttributes(attributes, output);
+      output = this.writeAttributes(output, attributes);
     }
     output = output.write(62/*'>'*/);
     return output;
   }
 
-  protected writeEndTag<O>(tagName: string, output: Output<O>): Output<O> {
+  protected writeEndTag<O>(output: Output<O>, tagName: string): Output<O> {
     output = output.write(60/*'<'*/);
     output = output.write(47/*'/'*/);
-    output = this.writeName(tagName, output);
+    output = this.writeName(output, tagName);
     output = output.write(62/*'>'*/);
     return output;
   }
 
-  writeText<O>(text: string, output: Output<O>): Output<O> {
+  writeText<O>(output: Output<O>, text: string): Output<O> {
     for (let i = 0, n = text.length; i < n; i += 1) {
       const c = text.charCodeAt(i);
       if (c === 60/*'<'*/) {
@@ -188,7 +188,7 @@ export class HtmlConverter extends Converter {
     return output;
   }
 
-  writeCdata<O>(node: Record, output: Output<O>): Output<O> {
+  writeCdata<O>(output: Output<O>, node: Record): Output<O> {
     const text = node.tail().stringValue();
     if (text !== void 0) {
       output = output.write("<![CDATA[");
@@ -198,7 +198,7 @@ export class HtmlConverter extends Converter {
     return output;
   }
 
-  protected writeName<O>(name: string, output: Output<O>): Output<O> {
+  protected writeName<O>(output: Output<O>, name: string): Output<O> {
     const n = name.length;
     if (n !== 0) {
       for (let i = 0; i < n; i += 1) {

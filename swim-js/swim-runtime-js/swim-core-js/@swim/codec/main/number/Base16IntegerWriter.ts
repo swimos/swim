@@ -20,21 +20,25 @@ import type {Base16} from "./Base16";
 /** @hidden */
 export class Base16IntegerWriter extends Writer {
   /** @hidden */
+  readonly base16!: Base16;
+  /** @hidden */
   readonly value!: unknown;
   /** @hidden */
   readonly input!: number;
   /** @hidden */
   readonly width!: number;
   /** @hidden */
-  readonly base16!: Base16;
-  /** @hidden */
   readonly index!: number;
   /** @hidden */
   readonly step!: number;
 
-  constructor(value: unknown, input: number, width: number,
-              base16: Base16, index: number = 0, step: number = 3) {
+  constructor(base16: Base16, value: unknown, input: number,
+              width: number, index: number = 0, step: number = 3) {
     super();
+    Object.defineProperty(this, "base16", {
+      value: base16,
+      enumerable: true,
+    });
     Object.defineProperty(this, "value", {
       value: value,
       enumerable: true,
@@ -45,10 +49,6 @@ export class Base16IntegerWriter extends Writer {
     });
     Object.defineProperty(this, "width", {
       value: width,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "base16", {
-      value: base16,
       enumerable: true,
     });
     Object.defineProperty(this, "index", {
@@ -62,12 +62,12 @@ export class Base16IntegerWriter extends Writer {
   }
 
   override pull(output: Output): Writer {
-    return Base16IntegerWriter.write(output, this.value, this.input, this.width,
-                                     this.base16, this.index, this.step);
+    return Base16IntegerWriter.write(output, this.base16, this.value, this.input,
+                                     this.width, this.index, this.step);
   }
 
-  static write(output: Output, value: unknown, input: number, width: number,
-               base16: Base16, index: number = 0, step: number = 3): Writer {
+  static write(output: Output, base16: Base16, value: unknown, input: number,
+               width: number, index: number = 0, step: number = 3): Writer {
     if (step <= 0) {
       return Writer.end();
     }
@@ -110,11 +110,11 @@ export class Base16IntegerWriter extends Writer {
     } else if (output.isError()) {
       return Writer.error(output.trap());
     }
-    return new Base16IntegerWriter(value, input, width, base16, index, step);
+    return new Base16IntegerWriter(base16, value, input, width, index, step);
   }
 
-  static writeLiteral(output: Output, value: unknown, input: number,
-                      width: number, base16: Base16): Writer {
-    return Base16IntegerWriter.write(output, value, input, width, base16, 0, 1);
+  static writeLiteral(output: Output, base16: Base16, value: unknown,
+                      input: number, width: number): Writer {
+    return Base16IntegerWriter.write(output, base16, value, input, width, 0, 1);
   }
 }

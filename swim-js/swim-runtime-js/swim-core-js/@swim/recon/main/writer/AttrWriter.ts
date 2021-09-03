@@ -56,7 +56,7 @@ export class AttrWriter<I, V> extends Writer {
     }
     if (step === 2) {
       if (part === void 0) {
-        part = recon.writeValue(key, output);
+        part = recon.writeValue(output, key);
       } else {
         part = part.pull(output);
       }
@@ -77,7 +77,7 @@ export class AttrWriter<I, V> extends Writer {
     }
     if (step === 4) {
       if (part === void 0) {
-        part = recon.writeBlockValue(value, output);
+        part = recon.writeBlockValue(output, value);
       } else {
         part = part.pull(output);
       }

@@ -270,13 +270,14 @@ export class Num extends Value {
     return Numbers.hash(this.value);
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Num").write(46/*'.'*/).write("from")
-        .write(40/*'('*/).display(this).write(41/*')'*/);
+                   .write(40/*'('*/).display(this).write(41/*')'*/);
+    return output;
   }
 
-  override display(output: Output): void {
-    Format.displayNumber(this.value, output);
+  override display<T>(output: Output<T>): Output<T> {
+    return Format.displayNumber(output, this.value);
   }
 
   /** @hidden */

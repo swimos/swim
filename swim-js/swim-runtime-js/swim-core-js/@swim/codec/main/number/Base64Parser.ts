@@ -21,9 +21,9 @@ import type {Base64} from "./Base64";
 /** @hidden */
 export class Base64Parser<O> extends Parser<O> {
   /** @hidden */
-  readonly output!: Output<O>;
-  /** @hidden */
   readonly base64!: Base64;
+  /** @hidden */
+  readonly output!: Output<O>;
   /** @hidden */
   readonly p!: number;
   /** @hidden */
@@ -33,15 +33,15 @@ export class Base64Parser<O> extends Parser<O> {
   /** @hidden */
   readonly step!: number;
 
-  constructor(output: Output<O>, base64: Base64, p: number = 0, q: number = 0,
+  constructor(base64: Base64, output: Output<O>, p: number = 0, q: number = 0,
               r: number = 0, step: number = 1) {
     super();
-    Object.defineProperty(this, "output", {
-      value: output,
-      enumerable: true,
-    });
     Object.defineProperty(this, "base64", {
       value: base64,
+      enumerable: true,
+    });
+    Object.defineProperty(this, "output", {
+      value: output,
       enumerable: true,
     });
     Object.defineProperty(this, "p", {
@@ -63,11 +63,11 @@ export class Base64Parser<O> extends Parser<O> {
   }
 
   override feed(input: Input): Parser<O> {
-    return Base64Parser.parse(input, this.output.clone(), this.base64,
+    return Base64Parser.parse(input, this.base64, this.output.clone(),
                               this.p, this.q, this.r, this.step);
   }
 
-  static parse<O>(input: Input, output: Output<O>, base64: Base64, p: number = 0,
+  static parse<O>(input: Input, base64: Base64, output: Output<O>, p: number = 0,
                   q: number = 0, r: number = 0, step: number = 1): Parser<O> {
     let c = 0;
     while (!input.isEmpty()) {
@@ -100,7 +100,7 @@ export class Base64Parser<O> extends Parser<O> {
           }
         } else if (!input.isEmpty()) {
           if (!base64.isPadded()) {
-            base64.writeQuantum(p, q, 61/*'='*/, 61/*'='*/, output);
+            output = base64.writeQuantum(output, p, q, 61/*'='*/, 61/*'='*/);
             return Parser.done(output.bind());
           } else {
             return Parser.error(Diagnostic.unexpected(input));
@@ -110,7 +110,7 @@ export class Base64Parser<O> extends Parser<O> {
       if (step === 4) {
         if (input.isCont() && (c = input.head(), base64.isDigit(c) || c === 61/*'='*/)) {
           input = input.step();
-          base64.writeQuantum(p, q, r, c, output);
+          output = base64.writeQuantum(output, p, q, r, c);
           r = 0;
           q = 0;
           p = 0;
@@ -121,7 +121,7 @@ export class Base64Parser<O> extends Parser<O> {
           }
         } else if (!input.isEmpty()) {
           if (!base64.isPadded()) {
-            base64.writeQuantum(p, q, r, 61/*'='*/, output);
+            output = base64.writeQuantum(output, p, q, r, 61/*'='*/);
             return Parser.done(output.bind());
           } else {
             return Parser.error(Diagnostic.unexpected(input));
@@ -130,7 +130,7 @@ export class Base64Parser<O> extends Parser<O> {
       } else if (step === 5) {
         if (input.isCont() && (c = input.head(), c === 61/*'='*/)) {
           input = input.step();
-          base64.writeQuantum(p, q, r, c, output);
+          output = base64.writeQuantum(output, p, q, r, c);
           r = 0;
           q = 0;
           p = 0;
@@ -140,6 +140,6 @@ export class Base64Parser<O> extends Parser<O> {
         }
       }
     }
-    return new Base64Parser<O>(output, base64, p, q, r, step);
+    return new Base64Parser<O>(base64, output, p, q, r, step);
   }
 }

@@ -122,13 +122,15 @@ export class Bool extends Value {
     return this.hashValue;
   }
 
-  override debug(output: Output): void {
-    output = output.write("Bool").write(46/*'.'*/).write("from")
-        .write(40/*'('*/).write(this.value ? "true" : "false").write(41/*')'*/);
+  override debug<T>(output: Output<T>): Output<T> {
+    output = output.write("Bool").write(46/*'.'*/).write("from").write(40/*'('*/)
+                   .write(this.value ? "true" : "false").write(41/*')'*/);
+    return output;
   }
 
-  override display(output: Output): void {
+  override display<T>(output: Output<T>): Output<T> {
     output = output.write(this.value ? "true" : "false");
+    return output;
   }
 
   @Lazy

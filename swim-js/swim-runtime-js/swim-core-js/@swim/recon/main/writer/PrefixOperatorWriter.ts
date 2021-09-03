@@ -57,7 +57,7 @@ export class PrefixOperatorWriter<I, V> extends Writer {
                      precedence: number, part?: Writer, step: number = 1): Writer {
     if (step === 1) {
       if (part === void 0) {
-        part = Unicode.writeString(operator, output);
+        part = Unicode.writeString(output, operator);
       } else {
         part = part.pull(output);
       }
@@ -80,7 +80,7 @@ export class PrefixOperatorWriter<I, V> extends Writer {
     }
     if (step === 3) {
       if (part === void 0) {
-        part = recon.writeItem(rhs, output);
+        part = recon.writeItem(output, rhs);
       } else {
         part = part.pull(output);
       }

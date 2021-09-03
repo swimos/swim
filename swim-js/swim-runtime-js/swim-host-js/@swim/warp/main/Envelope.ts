@@ -69,7 +69,7 @@ export abstract class Envelope implements HashCode, Debug {
 
   abstract hashCode(): number;
 
-  abstract debug(output: Output): void;
+  abstract debug<T>(output: Output<T>): Output<T>;
 
   toString(): string {
     return Format.debug(this);

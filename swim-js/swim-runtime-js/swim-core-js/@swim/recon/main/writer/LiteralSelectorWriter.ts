@@ -64,7 +64,7 @@ export class LiteralSelectorWriter<I, V> extends Writer {
     }
     if (step === 2) {
       if (part === void 0) {
-        part = recon.writeItem(item, output);
+        part = recon.writeItem(output, item);
       } else {
         part = part.pull(output);
       }
@@ -86,7 +86,7 @@ export class LiteralSelectorWriter<I, V> extends Writer {
       }
     }
     if (step === 4) {
-      return recon.writeThen(then, output);
+      return recon.writeThen(output, then);
     }
     if (output.isDone()) {
       return Writer.error(new WriterException("truncated"));

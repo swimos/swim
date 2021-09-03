@@ -215,18 +215,20 @@ export class R2Segment extends R2BezierCurve implements Interpolate<R2Segment>, 
     context.lineTo(f.transformX(this.x1, this.y1), f.transformY(this.x1, this.y1));
   }
 
-  override writeMove(output: Output): void {
-    output.write(77/*'M'*/);
-    Format.displayNumber(this.x0, output)
-    output.write(44/*','*/)
-    Format.displayNumber(this.y0, output);
+  override writeMove<T>(output: Output<T>): Output<T> {
+    output = output.write(77/*'M'*/);
+    output = Format.displayNumber(output, this.x0)
+    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, this.y0);
+    return output;
   }
 
-  override writeRest(output: Output): void {
-    output.write(76/*'L'*/);
-    Format.displayNumber(this.x1, output)
-    output.write(44/*','*/)
-    Format.displayNumber(this.y1, output);
+  override writeRest<T>(output: Output<T>): Output<T> {
+    output = output.write(76/*'L'*/);
+    output = Format.displayNumber(output, this.x1)
+    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, this.y1);
+    return output;
   }
 
   interpolateTo(that: R2Segment): Interpolator<R2Segment>;
@@ -267,10 +269,11 @@ export class R2Segment extends R2BezierCurve implements Interpolate<R2Segment>, 
         Numbers.hash(this.x1)), Numbers.hash(this.y1)));
   }
 
-  debug(output: Output): void {
-    output.write("R2Segment").write(46/*'.'*/).write("of").write(40/*'('*/)
-        .debug(this.x0).write(", ").debug(this.y0).write(", ")
-        .debug(this.x1).write(", ").debug(this.y1).write(41/*')'*/);
+  debug<T>(output: Output<T>): Output<T> {
+    output = output.write("R2Segment").write(46/*'.'*/).write("of").write(40/*'('*/)
+                   .debug(this.x0).write(", ").debug(this.y0).write(", ")
+                   .debug(this.x1).write(", ").debug(this.y1).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

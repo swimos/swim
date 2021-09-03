@@ -461,11 +461,11 @@ export class MoodMatrix<M extends Mood = Feel, N extends Mood = Feel> implements
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     const cols = this.colArray;
     const n = cols.length;
     output = output.write("MoodMatrix").write(46/*'.'*/)
-        .write(n !== 0 ? "forCols" : "empty").write(40/*'('*/);
+                   .write(n !== 0 ? "forCols" : "empty").write(40/*'('*/);
     for (let j = 0; j < n; j += 1) {
       const [colKey, col] = cols[j]!;
       if (j !== 0) {
@@ -474,6 +474,7 @@ export class MoodMatrix<M extends Mood = Feel, N extends Mood = Feel> implements
       output = output.write(91/*'['*/).debug(colKey).write(", ").debug(col).write(93/*']'*/);
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   toString(): string {

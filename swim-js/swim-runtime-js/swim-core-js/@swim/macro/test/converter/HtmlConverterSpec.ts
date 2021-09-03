@@ -23,7 +23,7 @@ export class HtmlConverterSpec extends Spec {
     const converter = new HtmlConverter();
     const model = Recon.parse("@doctype(html)\n"
                             + "@html\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "<!DOCTYPE html><html></html>");
   }
 
@@ -31,7 +31,7 @@ export class HtmlConverterSpec extends Spec {
   convertEmptyElement(exam: Exam): void {
     const converter = new HtmlConverter();
     const model = Recon.parse("@html\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "<html></html>");
   }
 
@@ -44,7 +44,7 @@ export class HtmlConverterSpec extends Spec {
                             + "  @body {\n"
                             + "  }\n"
                             + "}\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "<html><head></head><body></body></html>");
   }
 
@@ -52,7 +52,7 @@ export class HtmlConverterSpec extends Spec {
   convertEmptyElementAttributes(exam: Exam): void {
     const converter = new HtmlConverter();
     const model = Recon.parse("@html(lang: en)\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "<html lang=\"en\"></html>");
   }
 
@@ -65,7 +65,7 @@ export class HtmlConverterSpec extends Spec {
                             + "    @div\n"
                             + "  }\n"
                             + "}\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "<html lang=\"en\"><head></head><body id=\"root\" class=\"root-class\"><div></div></body></html>");
   }
 
@@ -79,7 +79,7 @@ export class HtmlConverterSpec extends Spec {
                             + "  @body {\n"
                             + "  }\n"
                             + "}\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "<html><head><title>Test</title></head><body></body></html>");
   }
 
@@ -92,7 +92,7 @@ export class HtmlConverterSpec extends Spec {
                             + "    @p[Hello, @em[world]!]\n"
                             + "  }\n"
                             + "}\n");
-    const result = converter.convert(model, Unicode.stringOutput());
+    const result = converter.convert(Unicode.stringOutput(), model);
     exam.equal(result, "<html><body><h1>Greetings</h1><p>Hello, <em>world</em>!</p></body></html>");
   }
 }

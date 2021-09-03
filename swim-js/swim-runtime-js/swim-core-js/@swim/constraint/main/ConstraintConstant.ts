@@ -75,13 +75,14 @@ export class ConstraintConstant implements ConstraintTerm, Debug {
     return ConstraintExpression.constant(this.constant / scalar);
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("ConstraintExpression").write(46/*'.'*/)
     if (this.constant === 0) {
       output = output.write("zero");
     } else {
       output = output.write("constant").write(40/*'('*/).debug(this.constant).write(41/*')'*/);
     }
+    return output;
   }
 
   toString(): string {

@@ -35,7 +35,7 @@ export abstract class Proof implements Display {
    */
   abstract readonly message: string | undefined;
 
-  abstract display(output: Output): void;
+  abstract display<T>(output: Output<T>): Output<T>;
 
   toString(settings?: OutputSettings): string {
     return Format.display(this, settings);
@@ -45,16 +45,16 @@ export abstract class Proof implements Display {
    * Returns generic `Proof` for the validity of an `operator`, with an
    * optional `message` detailing the circumstances of the assertion.
    */
-  static valid(operator: string, message?: string): ValidProof {
-    return new ValidProof(operator, message);
+  static valid(operator: string, message?: string): ProofValid {
+    return new ProofValid(operator, message);
   }
 
   /**
    * Returns generic `Proof` against the validity of an `operator`, with an
    * optional `message` detailing the circumstances of the assertion.
    */
-  static invalid(operator: string, message?: string): InvalidProof {
-    return new InvalidProof(operator, message);
+  static invalid(operator: string, message?: string): ProofInvalid {
+    return new ProofInvalid(operator, message);
   }
 
   /**
@@ -62,8 +62,8 @@ export abstract class Proof implements Display {
    * assertion, citing contradictory left- and right-hand side operands, along
    * with an optional `message` detailing the circumstances of the assertion.
    */
-  static refuted(lhs: unknown, operator: string, rhs: unknown, message?: string): RefutedProof {
-    return new RefutedProof(lhs, operator, rhs, message);
+  static refuted(lhs: unknown, operator: string, rhs: unknown, message?: string): ProofRefuted {
+    return new ProofRefuted(lhs, operator, rhs, message);
   }
 
   /**
@@ -71,8 +71,8 @@ export abstract class Proof implements Display {
    * that was thrown while evaluating the assertion, along with an optional
    * `message` detailing the circumstances of the assertion.
    */
-  static error(error: unknown, message?: string): ErrorProof {
-    return new ErrorProof(error, message);
+  static error(error: unknown, message?: string): ProofError {
+    return new ProofError(error, message);
   }
 
   /**
@@ -80,15 +80,15 @@ export abstract class Proof implements Display {
    * yet been implemented, along with an optional `message` detailing the
    * circumstances of the assertion.
    */
-  static pending(message?: string): PendingProof {
-    return new PendingProof(message);
+  static pending(message?: string): ProofPending {
+    return new ProofPending(message);
   }
 }
 
 /**
  * Generic `Proof` for the validity of an assertion.
  */
-export class ValidProof extends Proof {
+export class ProofValid extends Proof {
   constructor(operator: string, message: string | undefined) {
     super();
     Object.defineProperty(this, "operator", {
@@ -112,23 +112,24 @@ export class ValidProof extends Proof {
 
   override readonly message!: string | undefined;
 
-  override display(output: Output): void {
+  override display<T>(output: Output<T>): Output<T> {
     if (this.message !== void 0) {
-      OutputStyle.gray(output);
-      output.display(this.message).write(58/*':'*/).write(32/*' '*/);
-      OutputStyle.reset(output);
+      output = OutputStyle.gray(output);
+      output = output.display(this.message).write(58/*':'*/).write(32/*' '*/);
+      output = OutputStyle.reset(output);
     }
 
-    OutputStyle.green(output);
+    output = OutputStyle.green(output);
     output = output.write(this.operator);
-    OutputStyle.reset(output);
+    output = OutputStyle.reset(output);
+    return output;
   }
 }
 
 /**
  * Generic `Proof` against the validity of an assertion.
  */
-export class InvalidProof extends Proof {
+export class ProofInvalid extends Proof {
   constructor(operator: string, message: string | undefined) {
     super();
     Object.defineProperty(this, "operator", {
@@ -152,23 +153,24 @@ export class InvalidProof extends Proof {
 
   override readonly message!: string | undefined;
 
-  override display(output: Output): void {
+  override display<T>(output: Output<T>): Output<T> {
     if (this.message !== void 0) {
-      OutputStyle.gray(output);
-      output.display(this.message).write(58/*':'*/).write(32/*' '*/);
-      OutputStyle.reset(output);
+      output = OutputStyle.gray(output);
+      output = output.display(this.message).write(58/*':'*/).write(32/*' '*/);
+      output = OutputStyle.reset(output);
     }
 
-    OutputStyle.red(output);
+    output = OutputStyle.red(output);
     output = output.write(this.operator);
-    OutputStyle.reset(output);
+    output = OutputStyle.reset(output);
+    return output;
   }
 }
 
 /**
  * Specific `Proof` against the validity of a binary operator assertion.
  */
-export class RefutedProof extends Proof {
+export class ProofRefuted extends Proof {
   constructor(lhs: unknown, operator: string, rhs: unknown, message: string | undefined) {
     super();
     Object.defineProperty(this, "lhs", {
@@ -210,29 +212,30 @@ export class RefutedProof extends Proof {
 
   override readonly message!: string | undefined;
 
-  override display(output: Output): void {
+  override display<T>(output: Output<T>): Output<T> {
     if (this.message !== void 0) {
-      OutputStyle.gray(output);
-      output.display(this.message).write(58/*':'*/).write(32/*' '*/);
-      OutputStyle.reset(output);
+      output = OutputStyle.gray(output);
+      output = output.display(this.message).write(58/*':'*/).write(32/*' '*/);
+      output = OutputStyle.reset(output);
     }
 
-    output.display(this.lhs);
+    output = output.display(this.lhs);
 
     output = output.write(32/*' '*/);
-    OutputStyle.red(output);
+    output = OutputStyle.red(output);
     output = output.write(this.operator);
-    OutputStyle.reset(output);
+    output = OutputStyle.reset(output);
     output = output.write(32/*' '*/);
 
-    output.display(this.rhs);
+    output = output.display(this.rhs);
+    return output;
   }
 }
 
 /**
  * `Proof` against the validity of an assertion due to an exception.
  */
-export class ErrorProof extends Proof {
+export class ProofError extends Proof {
   constructor(error: unknown, message: string | undefined) {
     super();
     Object.defineProperty(this, "error", {
@@ -256,21 +259,22 @@ export class ErrorProof extends Proof {
 
   override readonly message!: string | undefined;
 
-  override display(output: Output): void {
+  override display<T>(output: Output<T>): Output<T> {
     if (this.message !== void 0) {
-      OutputStyle.gray(output);
-      output.display(this.message).write(58/*':'*/).write(32/*' '*/);
-      OutputStyle.reset(output);
+      output = OutputStyle.gray(output);
+      output = output.display(this.message).write(58/*':'*/).write(32/*' '*/);
+      output = OutputStyle.reset(output);
     }
 
-    OutputStyle.red(output);
+    output = OutputStyle.red(output);
     output = output.write("" + this.error);
-    OutputStyle.reset(output);
+    output = OutputStyle.reset(output);
 
     const stack = (this.error as Error).stack;
     if (typeof stack === "string") {
       output = output.writeln().write(stack);
     }
+    return output;
   }
 }
 
@@ -278,7 +282,7 @@ export class ErrorProof extends Proof {
  * Tentative `Proof` for the validity of an assertion that hasn't yet been
  * implemented.
  */
-export class PendingProof extends Proof {
+export class ProofPending extends Proof {
   constructor(message: string | undefined) {
     super();
     Object.defineProperty(this, "message", {
@@ -297,15 +301,16 @@ export class PendingProof extends Proof {
 
   override readonly message!: string | undefined;
 
-  override display(output: Output): void {
+  override display<T>(output: Output<T>): Output<T> {
     if (this.message !== void 0) {
-      OutputStyle.gray(output);
-      output.display(this.message).write(58/*':'*/).write(32/*' '*/);
-      OutputStyle.reset(output);
+      output = OutputStyle.gray(output);
+      output = output.display(this.message).write(58/*':'*/).write(32/*' '*/);
+      output = OutputStyle.reset(output);
     }
 
-    OutputStyle.yellow(output);
+    output = OutputStyle.yellow(output);
     output = output.write("pending");
-    OutputStyle.reset(output);
+    output = OutputStyle.reset(output);
+    return output;
   }
 }

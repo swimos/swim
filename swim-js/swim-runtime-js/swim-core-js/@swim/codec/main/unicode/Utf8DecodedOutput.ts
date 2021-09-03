@@ -262,16 +262,16 @@ export class Utf8DecodedOutput<T> extends Output<T> {
     let output = Unicode.stringOutput();
     output = output.write("invalid UTF-8 code unit sequence: ");
     const base16 = Base16.uppercase;
-    base16.writeIntegerLiteral(c1, output, 2);
+    base16.writeIntegerLiteral(output, c1, 2);
     if (c2 !== void 0) {
       output = output.write(' ');
-      base16.writeIntegerLiteral(c2, output, 2);
+      base16.writeIntegerLiteral(output, c2, 2);
       if (c3 !== void 0) {
         output = output.write(' ');
-        base16.writeIntegerLiteral(c3, output, 2);
+        base16.writeIntegerLiteral(output, c3, 2);
         if (c4 !== void 0) {
           output = output.write(' ');
-          base16.writeIntegerLiteral(c4, output, 2);
+          base16.writeIntegerLiteral(output, c4, 2);
         }
       }
     }

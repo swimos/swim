@@ -148,13 +148,12 @@ export abstract class Output<T = unknown> implements Builder<number, T> {
    * given `object`.  Assumes this is a Unicode `Output` writer with sufficient
    * capacity.
    *
-   * @return `this`
+   * @return the continuation of the `output`.
    * @throws [[OutputException]] if this `Output` exits the _cont_ state before
    *         the full display string has been written.
    */
   display(object: unknown): Output<T> {
-    Format.display(object, this);
-    return this;
+    return Format.displayAny(this, object);
   }
 
   /**
@@ -162,13 +161,12 @@ export abstract class Output<T = unknown> implements Builder<number, T> {
    * given `object`.  Assumes this is a Unicode `Output` writer with sufficient
    * capacity.
    *
-   * @return `this`
+   * @return the continuation of the `output`.
    * @throws [[OutputException]] if this `Output` exits the _cont_ state before
    *         the full debug string has been written.
    */
   debug(object: unknown): Output<T> {
-    Format.debug(object, this);
-    return this;
+    return Format.debugAny(this, object);
   }
 
   /**

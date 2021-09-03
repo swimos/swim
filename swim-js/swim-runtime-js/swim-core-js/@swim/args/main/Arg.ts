@@ -80,7 +80,7 @@ export class Arg implements HashCode, Debug {
         Strings.hash(this.name)), Strings.hash(this.value)), Booleans.hash(this.optional)));
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("Arg").write(46/*'.'*/).write("of").write(40/*'('*/).debug(this.name);
     if (this.value !== void 0) {
       output = output.write(", ").debug(this.value);
@@ -89,6 +89,7 @@ export class Arg implements HashCode, Debug {
     if (this.optional) {
       output = output.write(46/*'.'*/).write("optional").write(40/*'('*/).write("true").write(41/*')'*/);
     }
+    return output;
   }
 
   toString(): string {

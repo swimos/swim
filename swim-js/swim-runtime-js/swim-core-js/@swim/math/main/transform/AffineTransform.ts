@@ -185,11 +185,12 @@ export class AffineTransform extends Transform {
         Numbers.hash(this.tx)), Numbers.hash(this.ty)));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Transform").write(46/*'.'*/).write("affine").write(40/*'('*/)
-        .debug(this.x0).write(", ").debug(this.y0).write(", ")
-        .debug(this.x1).write(", ").debug(this.y1).write(", ")
-        .debug(this.tx).write(", ").debug(this.ty).write(41/*')'*/);
+                   .debug(this.x0).write(", ").debug(this.y0).write(", ")
+                   .debug(this.x1).write(", ").debug(this.y1).write(", ")
+                   .debug(this.tx).write(", ").debug(this.ty).write(41/*')'*/);
+    return output;
   }
 
   /** @hidden */

@@ -125,7 +125,7 @@ export class GeoGroup<S extends GeoShape = GeoShape> extends GeoShape implements
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     const shapes = this.shapes;
     const n = shapes.length;
     output = output.write("GeoGroup").write(46/*'.'*/);
@@ -139,6 +139,7 @@ export class GeoGroup<S extends GeoShape = GeoShape> extends GeoShape implements
       }
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

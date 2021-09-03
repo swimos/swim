@@ -50,7 +50,7 @@ export class LambdaFuncWriter<I, V> extends Writer {
                      part?: Writer, step: number = 1): Writer {
     if (step === 1) {
       if (part === void 0) {
-        part = recon.writePrimary(bindings, output);
+        part = recon.writePrimary(output, bindings);
       } else {
         part = part.pull(output);
       }
@@ -79,7 +79,7 @@ export class LambdaFuncWriter<I, V> extends Writer {
     }
     if (step === 6) {
       if (part === void 0) {
-        part = recon.writeValue(template, output);
+        part = recon.writeValue(output, template);
       } else {
         part = part.pull(output);
       }

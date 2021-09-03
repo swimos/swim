@@ -18,7 +18,6 @@ import {Output} from "./Output";
 import {OutputBufferFull} from "../"; // forward import
 import {OutputBufferDone} from "../"; // forward import
 import {OutputBufferError} from "../"; // forward import
-import {Format} from "../"; // forward import
 
 /**
  * Non-blocking token stream buffer.
@@ -52,16 +51,6 @@ export abstract class OutputBuffer<T = unknown> extends Output<T> {
       this.write(string);
     }
     return this.write(this.settings.lineSeparator);
-  }
-
-  override display(object: unknown): OutputBuffer<T> {
-    Format.display(object, this);
-    return this;
-  }
-
-  override debug(object: unknown): OutputBuffer<T> {
-    Format.debug(object, this);
-    return this;
   }
 
   abstract step(offset?: number): OutputBuffer<T>;

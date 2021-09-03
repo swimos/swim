@@ -147,14 +147,15 @@ export class LiteralSelector extends Selector {
         this.item.hashCode()), this.then.hashCode()));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Selector").write(46/*'.'*/).write("literal").write(40/*'('*/)
-        .debug(this.item).write(41/*')'*/);
-    this.then.debugThen(output);
+                   .debug(this.item).write(41/*')'*/);
+    output = this.then.debugThen(output);
+    return output;
   }
 
-  override debugThen(output: Output): void {
-    // nop
+  override debugThen<T>(output: Output<T>): Output<T> {
+    return output; // blank
   }
 
   override clone(): Selector {

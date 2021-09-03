@@ -53,7 +53,7 @@ export class KeysSelectorWriter<I, V> extends Writer {
     }
     if (step === 4 && output.isCont()) {
       output = output.write(58/*':'*/);
-      return recon.writeThen(then, output);
+      return recon.writeThen(output, then);
     }
     if (output.isDone()) {
       return Writer.error(new WriterException("truncated"));

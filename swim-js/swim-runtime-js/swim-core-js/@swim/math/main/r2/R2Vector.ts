@@ -101,9 +101,10 @@ export class R2Vector implements Interpolate<R2Vector>, HashCode, Equivalent, De
         Numbers.hash(this.x)), Numbers.hash(this.y)));
   }
 
-  debug(output: Output): void {
-    output.write("R2Vector").write(46/*'.'*/).write("of").write(40/*'('*/)
-        .debug(this.x).write(", ").debug(this.y).write(41/*')'*/);
+  debug<T>(output: Output<T>): Output<T> {
+    output = output.write("R2Vector").write(46/*'.'*/).write("of").write(40/*'('*/)
+                   .debug(this.x).write(", ").debug(this.y).write(41/*')'*/);
+    return output;
   }
 
   toString(): string {

@@ -170,11 +170,11 @@ export class LookVector<T> implements Equals, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     const array = this.array;
     const n = array.length;
     output = output.write("LookVector").write(46/*'.'*/)
-        .write(n !== 0 ? "of" : "empty").write(40/*'('*/);
+                   .write(n !== 0 ? "of" : "empty").write(40/*'('*/);
     for (let i = 0; i < n; i += 1) {
       const [feel, value] = array[i]!;
       if (i !== 0) {
@@ -183,6 +183,7 @@ export class LookVector<T> implements Equals, Debug {
       output = output.write(91/*'['*/).debug(feel).write(", ").debug(value).write(93/*']'*/);
     }
     output = output.write(41/*')'*/);
+    return output;
   }
 
   toString(): string {

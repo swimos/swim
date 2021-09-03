@@ -351,7 +351,7 @@ export class Data extends Value {
       if (array.length !== size) {
         array = array.slice(0, size);
       }
-      return base16.writeUint8Array(array, output);
+      return base16.writeUint8Array(output, array);
     } else {
       return Writer.end();
     }
@@ -359,7 +359,7 @@ export class Data extends Value {
 
   toBase16(base16: Base16 = Base16.uppercase): string {
     const output = Unicode.stringOutput();
-    this.writeBase16(output, base16);
+    this.writeBase16(output, base16).bind();
     return output.bind();
   }
 
@@ -370,7 +370,7 @@ export class Data extends Value {
       if (array.length !== size) {
         array = array.slice(0, size);
       }
-      return base64.writeUint8Array(array, output);
+      return base64.writeUint8Array(output, array);
     } else {
       return Writer.end();
     }
@@ -455,19 +455,19 @@ export class Data extends Value {
         this.array !== null ? this.array : new Uint8Array(0)));
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Data").write(46/*'.'*/);
     if (this.size === 0) {
       output = output.write("empty").write(40/*'('*/).write(41/*')'*/);
     } else {
       output = output.write("base16").write(40/*'('*/).write(34/*'"'*/);
-      this.writeBase16(output);
+      const writer = this.writeBase16(output);
+      if (!writer.isDone()) {
+        return Output.error(writer.trap());
+      }
       output = output.write(34/*'"'*/).write(41/*')'*/);
     }
-  }
-
-  override display(output: Output): void {
-    this.debug(output);
+    return output;
   }
 
   /** @hidden */

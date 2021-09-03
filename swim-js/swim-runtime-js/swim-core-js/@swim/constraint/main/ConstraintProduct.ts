@@ -83,9 +83,10 @@ export class ConstraintProduct implements ConstraintTerm, Debug {
     return ConstraintExpression.product(this.coefficient / scalar, this.variable);
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("ConstraintExpression").write(46/*'.'*/).write("product").write(40/*'('*/)
-        .debug(this.coefficient).write(", ").debug(this.variable).write(41/*')'*/);
+                   .debug(this.coefficient).write(", ").debug(this.variable).write(41/*')'*/);
+    return output;
   }
 
   toString(): string {

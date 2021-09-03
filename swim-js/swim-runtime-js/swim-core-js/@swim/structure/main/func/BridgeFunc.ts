@@ -43,7 +43,8 @@ export abstract class BridgeFunc extends Func {
     return Constructors.hash(this.constructor);
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write(this.constructor.name);
+    return output;
   }
 }

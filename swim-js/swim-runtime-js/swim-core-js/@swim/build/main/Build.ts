@@ -131,14 +131,14 @@ export class Build {
           }
         }
       } else {
-        const output = Unicode.stringOutput(OutputSettings.styled());
-        OutputStyle.redBold(output);
-        output.write("unknown project");
-        OutputStyle.reset(output);
-        output.write(" ");
-        OutputStyle.yellow(output);
-        output.write(projectId);
-        OutputStyle.reset(output);
+        let output = Unicode.stringOutput(OutputSettings.styled());
+        output = OutputStyle.redBold(output);
+        output = output.write("unknown project");
+        output = OutputStyle.reset(output);
+        output = output.write(" ");
+        output = OutputStyle.yellow(output);
+        output = output.write(projectId);
+        output = OutputStyle.reset(output);
         console.log(output.bind());
       }
     }
@@ -176,14 +176,14 @@ export class Build {
             }
           }
         } else {
-          const output = Unicode.stringOutput(OutputSettings.styled());
-          OutputStyle.redBold(output);
-          output.write("unknown project");
-          OutputStyle.reset(output);
-          output.write(" ");
-          OutputStyle.yellow(output);
-          output.write(projectId);
-          OutputStyle.reset(output);
+          let output = Unicode.stringOutput(OutputSettings.styled());
+          output = OutputStyle.redBold(output);
+          output = output.write("unknown project");
+          output = OutputStyle.reset(output);
+          output = output.write(" ");
+          output = OutputStyle.yellow(output);
+          output = output.write(projectId);
+          output = OutputStyle.reset(output);
           console.log(output.bind());
         }
       } else if (targetId !== void 0) { // :<target>
@@ -228,14 +228,14 @@ export class Build {
             }
           }
         } else {
-          const output = Unicode.stringOutput(OutputSettings.styled());
-          OutputStyle.redBold(output);
-          output.write("unknown project");
-          OutputStyle.reset(output);
-          output.write(" ");
-          OutputStyle.yellow(output);
-          output.write(projectId);
-          OutputStyle.reset(output);
+          let output = Unicode.stringOutput(OutputSettings.styled());
+          output = OutputStyle.redBold(output);
+          output = output.write("unknown project");
+          output = OutputStyle.reset(output);
+          output = output.write(" ");
+          output = OutputStyle.yellow(output);
+          output = output.write(projectId);
+          output = OutputStyle.reset(output);
           console.log(output.bind());
         }
       } else if (targetId !== void 0) { // :<target>
@@ -269,14 +269,14 @@ export class Build {
           return result.then(this.forEachProject.bind(this, specifiers, callback, i + 1));
         }
       } else {
-        const output = Unicode.stringOutput(OutputSettings.styled());
-        OutputStyle.redBold(output);
-        output.write("unknown project");
-        OutputStyle.reset(output);
-        output.write(" ");
-        OutputStyle.yellow(output);
-        output.write(projectId!);
-        OutputStyle.reset(output);
+        let output = Unicode.stringOutput(OutputSettings.styled());
+        output = OutputStyle.redBold(output);
+        output = output.write("unknown project");
+        output = OutputStyle.reset(output);
+        output = output.write(" ");
+        output = OutputStyle.yellow(output);
+        output = output.write(projectId!);
+        output = OutputStyle.reset(output);
         console.log(output.bind());
       }
       return Promise.resolve(void 0).then(this.forEachProject.bind(this, specifiers, callback, i + 1));
@@ -344,18 +344,18 @@ export class Build {
   }
 
   printProjects(): void {
-    const output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.greenBold(output);
-    output.write("projects");
-    OutputStyle.reset(output);
+    let output = Unicode.stringOutput(OutputSettings.styled());
+    output = OutputStyle.greenBold(output);
+    output = output.write("projects");
+    output = OutputStyle.reset(output);
     console.log(output.bind());
     for (let i = 0; i < this.projectList.length; i += 1) {
       const project = this.projectList[i]!;
-      const output = Unicode.stringOutput(OutputSettings.styled());
-      output.write(" - ");
-      OutputStyle.yellow(output);
-      output.write(project.id);
-      OutputStyle.reset(output);
+      let output = Unicode.stringOutput(OutputSettings.styled());
+      output = output.write(" - ");
+      output = OutputStyle.yellow(output);
+      output = output.write(project.id);
+      output = OutputStyle.reset(output);
       console.log(output.bind());
     }
   }
@@ -364,21 +364,21 @@ export class Build {
     if (!Array.isArray(targets)) {
       targets = this.transitiveTargets(targets);
     }
-    const output = Unicode.stringOutput(OutputSettings.styled());
-    OutputStyle.greenBold(output);
-    output.write("targets");
-    OutputStyle.reset(output);
+    let output = Unicode.stringOutput(OutputSettings.styled());
+    output = OutputStyle.greenBold(output);
+    output = output.write("targets");
+    output = OutputStyle.reset(output);
     console.log(output.bind());
     for (let i = 0; i < targets.length; i += 1) {
       const target = targets[i]!;
-      const output = Unicode.stringOutput(OutputSettings.styled());
-      output.write(" - ");
+      let output = Unicode.stringOutput(OutputSettings.styled());
+      output = output.write(" - ");
       if (target.selected) {
-        OutputStyle.yellow(output);
+        output = OutputStyle.yellow(output);
       }
-      output.write(target.uid);
+      output = output.write(target.uid);
       if (target.selected) {
-        OutputStyle.reset(output);
+        output = OutputStyle.reset(output);
       }
       console.log(output.bind());
     }

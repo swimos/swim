@@ -490,10 +490,10 @@ export abstract class Item implements Interpolate<Item>, HashCode, Equivalent, C
 
   abstract hashCode(): number;
 
-  abstract debug(output: Output): void;
+  abstract debug<T>(output: Output<T>): Output<T>;
 
-  display(output: Output): void {
-    this.debug(output);
+  display<T>(output: Output<T>): Output<T> {
+    return this.debug(output);
   }
 
   toString(): string {

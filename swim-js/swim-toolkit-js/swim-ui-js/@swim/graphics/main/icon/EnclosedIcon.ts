@@ -319,14 +319,15 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("new").write(32/*' '*/).write("EnclosedIcon").write(40/*'('*/)
-        .debug(this.outer).write(", ")
-        .debug(this.inner).write(", ")
-        .debug(this.innerScale).write(", ")
-        .debug(this.moodModifier).write(", ")
-        .debug(this.outerMoodModifier).write(", ")
-        .debug(this.innerMoodModifier).write(41/*')'*/);
+                   .debug(this.outer).write(", ")
+                   .debug(this.inner).write(", ")
+                   .debug(this.innerScale).write(", ")
+                   .debug(this.moodModifier).write(", ")
+                   .debug(this.outerMoodModifier).write(", ")
+                   .debug(this.innerMoodModifier).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {

@@ -172,12 +172,14 @@ export class Absent extends Value {
     return Constructors.hash(Absent);
   }
 
-  override debug(output: Output): void {
+  override debug<T>(output: Output<T>): Output<T> {
     output = output.write("Value").write(46/*'.'*/).write("absent").write(40/*'('*/).write(41/*')'*/);
+    return output;
   }
 
-  override display(output: Output): void {
+  override display<T>(output: Output<T>): Output<T> {
     output = output.write("undefined");
+    return output;
   }
 
   @Lazy

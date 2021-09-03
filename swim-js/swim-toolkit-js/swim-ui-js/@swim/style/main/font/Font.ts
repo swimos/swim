@@ -213,7 +213,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     return false;
   }
 
-  debug(output: Output): void {
+  debug<T>(output: Output<T>): Output<T> {
     output = output.write("Font").write(46/*'.'*/).write("family").write(40/*'('*/);
     if (typeof this.family === "string") {
       output = output.debug(this.family);
@@ -242,6 +242,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     if (this.height !== void 0) {
       output = output.write(46/*'.'*/).write("height").write(40/*'('*/).debug(this.height).write(41/*')'*/);
     }
+    return output;
   }
 
   /* @hidden */

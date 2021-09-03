@@ -148,7 +148,7 @@ export abstract class Length implements Interpolate<Length>, HashCode, Equivalen
 
   abstract hashCode(): number;
 
-  abstract debug(output: Output): void;
+  abstract debug<T>(output: Output<T>): Output<T>;
 
   abstract toString(): string;
 

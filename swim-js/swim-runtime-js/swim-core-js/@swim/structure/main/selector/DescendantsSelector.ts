@@ -168,9 +168,10 @@ export class DescendantsSelector extends Selector {
     return Murmur3.mash(Murmur3.mix(Constructors.hash(DescendantsSelector), this.then.hashCode()));
   }
 
-  override debugThen(output: Output): void {
+  override debugThen<T>(output: Output<T>): Output<T> {
     output = output.write(46/*'.'*/).write("descendants").write(40/*'('*/).write(41/*')'*/);
-    this.then.debugThen(output);
+    output = this.then.debugThen(output);
+    return output;
   }
 
   override clone(): Selector {

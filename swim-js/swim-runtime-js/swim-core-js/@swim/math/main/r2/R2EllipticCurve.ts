@@ -199,30 +199,32 @@ export class R2EllipticCurve extends R2Curve implements Debug {
                     this.phi, b0, b1, b1 - b0 < 0);
   }
 
-  override writeMove(output: Output): void {
+  override writeMove<T>(output: Output<T>): Output<T> {
     const {x0, y0} = this.toEndpoints();
-    output.write(77/*'M'*/);
-    Format.displayNumber(x0, output)
-    output.write(44/*','*/)
-    Format.displayNumber(y0, output);
+    output = output.write(77/*'M'*/);
+    output = Format.displayNumber(output, x0)
+    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, y0);
+    return output;
   }
 
-  override writeRest(output: Output): void {
+  override writeRest<T>(output: Output<T>): Output<T> {
     const {rx, ry, phi, large, sweep, x1, y1} = this.toEndpoints();
-    output.write(65/*'A'*/);
-    Format.displayNumber(rx, output)
-    output.write(44/*','*/)
-    Format.displayNumber(ry, output);
-    output.write(32/*' '*/)
-    Format.displayNumber(phi, output)
-    output.write(32/*' '*/)
-    output.write(large ? 49/*'1'*/ : 48/*'0'*/);
-    output.write(44/*','*/)
-    output.write(sweep ? 49/*'1'*/ : 48/*'0'*/);
-    output.write(32/*' '*/)
-    Format.displayNumber(x1, output);
-    output.write(44/*','*/)
-    Format.displayNumber(y1, output);
+    output = output.write(65/*'A'*/);
+    output = Format.displayNumber(output, rx)
+    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, ry);
+    output = output.write(32/*' '*/)
+    output = Format.displayNumber(output, phi)
+    output = output.write(32/*' '*/)
+    output = output.write(large ? 49/*'1'*/ : 48/*'0'*/);
+    output = output.write(44/*','*/)
+    output = output.write(sweep ? 49/*'1'*/ : 48/*'0'*/);
+    output = output.write(32/*' '*/)
+    output = Format.displayNumber(output, x1);
+    output = output.write(44/*','*/)
+    output = Format.displayNumber(output, y1);
+    return output;
   }
 
   toEndpoints(): {x0: number, y0: number, rx: number, ry: number, phi: number,
@@ -278,12 +280,13 @@ export class R2EllipticCurve extends R2Curve implements Debug {
     return false;
   }
 
-  debug(output: Output): void {
-    output.write("R2Curve").write(46/*'.'*/).write("elliptic").write(40/*'('*/)
-        .debug(this.cx).write(", ").debug(this.cy).write(", ")
-        .debug(this.rx).write(", ").debug(this.ry).write(", ")
-        .debug(this.phi).write(", ").debug(this.a0).write(", ")
-        .debug(this.da).write(41/*')'*/);
+  debug<T>(output: Output<T>): Output<T> {
+    output = output.write("R2Curve").write(46/*'.'*/).write("elliptic").write(40/*'('*/)
+                   .debug(this.cx).write(", ").debug(this.cy).write(", ")
+                   .debug(this.rx).write(", ").debug(this.ry).write(", ")
+                   .debug(this.phi).write(", ").debug(this.a0).write(", ")
+                   .debug(this.da).write(41/*')'*/);
+    return output;
   }
 
   override toString(): string {
