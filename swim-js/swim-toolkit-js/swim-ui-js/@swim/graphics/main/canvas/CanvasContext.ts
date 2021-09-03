@@ -82,9 +82,6 @@ export interface CanvasContext extends PaintingContext {
   isPointInStroke(x: number, y: number): boolean;
   stroke(): void;
 
-  drawFocusIfNeeded(element: Element): void;
-  scrollPathIntoView(): void;
-
   fillText(text: string, x: number, y: number, maxWidth?: number): void;
   measureText(text: string): TextMetrics;
   strokeText(text: string, x: number, y: number, maxWidth?: number): void;

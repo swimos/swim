@@ -1935,8 +1935,6 @@ export class CanvasView extends HtmlView {
 
     touch.radiusX = event.radiusX;
     touch.radiusY = event.radiusY;
-    touch.altitudeAngle = event.altitudeAngle;
-    touch.azimuthAngle = event.azimuthAngle;
     touch.rotationAngle = event.rotationAngle;
     touch.force = event.force;
   }
@@ -2000,7 +1998,6 @@ export class CanvasView extends HtmlView {
         }
         touch = {
           identifier: changedTouch.identifier,
-          touchType: changedTouch.touchType,
           target: changedTouch.target,
         };
         touches[id] = touch;
@@ -2043,7 +2040,6 @@ export class CanvasView extends HtmlView {
       if (touch === void 0) {
         touch = {
           identifier: changedTouch.identifier,
-          touchType: changedTouch.touchType,
           target: changedTouch.target,
         };
         touches[id] = touch;
@@ -2074,7 +2070,6 @@ export class CanvasView extends HtmlView {
       if (touch === void 0) {
         touch = {
           identifier: changedTouch.identifier,
-          touchType: changedTouch.touchType,
           target: changedTouch.target,
         };
         touches[id] = touch;
@@ -2113,7 +2108,6 @@ export class CanvasView extends HtmlView {
       if (touch === void 0) {
         touch = {
           identifier: changedTouch.identifier,
-          touchType: changedTouch.touchType,
           target: changedTouch.target,
         };
         touches[id] = touch;

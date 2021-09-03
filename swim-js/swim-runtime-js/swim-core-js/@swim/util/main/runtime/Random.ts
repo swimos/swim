@@ -22,7 +22,7 @@ if (typeof window !== "undefined" && window.crypto !== void 0) {
   };
 } else if (typeof window !== "undefined" && (window as any).msCrypto !== void 0) {
   Random.fillBytes = function (array: Int8Array | Uint8Array | Int16Array | Uint16Array | Int32Array | Uint32Array): void {
-    ((window as any).msCrypto as RandomSource).getRandomValues(array);
+    ((window as any).msCrypto as Crypto).getRandomValues(array);
   };
 } else {
   Random.fillBytes = function (array: Int8Array | Uint8Array | Int16Array | Uint16Array | Int32Array | Uint32Array): void {

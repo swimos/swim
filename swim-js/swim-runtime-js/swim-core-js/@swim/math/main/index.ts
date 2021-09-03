@@ -40,7 +40,6 @@ declare global { // CSS Typed OM shim
   interface CSSNumericValue extends CSSStyleValue {
     to(unit: string): CSSUnitValue;
   }
-  type CSSNumberish = number | CSSNumericValue;
 
   interface CSSUnitValue extends CSSNumericValue {
     value: number;
@@ -66,11 +65,11 @@ declare global { // CSS Typed OM shim
   }
 
   interface CSSTranslate extends CSSTransformComponent {
-    x: CSSNumberish;
-    y: CSSNumberish;
+    x: CSSNumericValue;
+    y: CSSNumericValue;
   }
   var CSSTranslate: {
-    new(x: CSSNumberish, y: CSSNumberish): CSSTranslate;
+    new(x: CSSNumericValue, y: CSSNumericValue): CSSTranslate;
   };
 
   interface CSSRotate extends CSSTransformComponent {
@@ -81,33 +80,33 @@ declare global { // CSS Typed OM shim
   };
 
   interface CSSScale extends CSSTransformComponent {
-    x: CSSNumberish;
-    y: CSSNumberish;
+    x: number | CSSNumericValue;
+    y: number | CSSNumericValue;
   }
   var CSSScale: {
-    new(x: CSSNumberish, y: CSSNumberish): CSSScale;
+    new(x: number | CSSNumericValue, y: number | CSSNumericValue): CSSScale;
   };
 
   interface CSSSkew extends CSSTransformComponent {
-    ax: CSSNumberish;
-    ay: CSSNumberish;
+    ax: CSSNumericValue;
+    ay: CSSNumericValue;
   }
   var CSSSkew: {
-    new(ax: CSSNumberish, ay: CSSNumberish): CSSSkew;
+    new(ax: CSSNumericValue, ay: CSSNumericValue): CSSSkew;
   };
 
   interface CSSSkewX extends CSSTransformComponent {
-    ax: CSSNumberish;
+    ax: CSSNumericValue;
   }
   var CSSSkewX: {
-    new(ax: CSSNumberish): CSSSkewX;
+    new(ax: CSSNumericValue): CSSSkewX;
   };
 
   interface CSSSkewY extends CSSTransformComponent {
-    ay: CSSNumberish;
+    ay: CSSNumericValue;
   }
   var CSSSkewY: {
-    new(ay: CSSNumberish): CSSSkewY;
+    new(ay: CSSNumericValue): CSSSkewY;
   };
 
   interface CSSMatrixComponent extends CSSTransformComponent {

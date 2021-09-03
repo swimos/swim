@@ -86,7 +86,7 @@ export * from "./gesture";
 
 declare global {
   interface VisualViewportEventMap {
-    "resize": UIEvent;
+    "resize": Event;
     "scroll": Event;
   }
 
@@ -98,7 +98,7 @@ declare global {
     readonly pageLeft: number;
     readonly pageTop: number;
     readonly scale: number;
-    onresize: ((this: VisualViewport, event: UIEvent) => any) | null;
+    onresize: ((this: VisualViewport, event: Event) => any) | null;
     onscroll: ((this: VisualViewport, event: Event) => any) | null;
     addEventListener<K extends keyof VisualViewportEventMap>(type: K, listener: (this: VisualViewport, event: VisualViewportEventMap[K]) => unknown, options?: boolean | AddEventListenerOptions): void;
     addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
