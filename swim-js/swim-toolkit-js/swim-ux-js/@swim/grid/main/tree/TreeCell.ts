@@ -15,7 +15,6 @@
 import {View, PositionGestureInput} from "@swim/view";
 import {HtmlViewConstructor, HtmlViewInit, HtmlView} from "@swim/dom";
 import type {TreeCellObserver} from "./TreeCellObserver";
-import type {TreeCellController} from "./TreeCellController";
 import {TitleTreeCell} from "../"; // forward import
 import {DisclosureTreeCell} from "../"; // forward import
 import {IconTreeCell} from "../"; // forward import
@@ -23,7 +22,6 @@ import {IconTreeCell} from "../"; // forward import
 export type AnyTreeCell = TreeCell | TreeCellInit | HTMLElement;
 
 export interface TreeCellInit extends HtmlViewInit {
-  viewController?: TreeCellController;
   cellType?: TreeCellType;
 }
 
@@ -43,8 +41,6 @@ export class TreeCell extends HtmlView {
     this.overflowY.setState("hidden", View.Intrinsic);
   }
 
-  override readonly viewController!: TreeCellController | null;
-
   override readonly viewObservers!: ReadonlyArray<TreeCellObserver>;
 
   override initView(init: TreeCellInit): void {
@@ -60,10 +56,6 @@ export class TreeCell extends HtmlView {
           viewObserver.cellDidPress(input, event, this);
         }
       }
-      const viewController = this.viewController;
-      if (viewController !== null && viewController.cellDidPress !== void 0) {
-        viewController.cellDidPress(input, event, this);
-      }
     }
   }
 
@@ -75,10 +67,6 @@ export class TreeCell extends HtmlView {
         if (viewObserver.cellDidLongPress !== void 0) {
           viewObserver.cellDidLongPress(input, this);
         }
-      }
-      const viewController = this.viewController;
-      if (viewController !== null && viewController.cellDidLongPress !== void 0) {
-        viewController.cellDidLongPress(input, this);
       }
     }
   }

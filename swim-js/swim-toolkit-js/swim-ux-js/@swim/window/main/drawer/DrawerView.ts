@@ -29,7 +29,6 @@ import {
 } from "@swim/view";
 import {HtmlViewInit, HtmlView} from "@swim/dom";
 import type {DrawerViewObserver} from "./DrawerViewObserver";
-import type {DrawerViewController} from "./DrawerViewController";
 
 export type DrawerPlacement = "top" | "right" | "bottom" | "left";
 
@@ -38,7 +37,6 @@ export type DrawerState = "hidden" | "hiding"
                         | "collapsed" | "collapsing";
 
 export interface DrawerViewInit extends HtmlViewInit {
-  viewController?: DrawerViewController;
   drawerPlacement?: DrawerPlacement;
   collapsedWidth?: AnyLength;
   expandedWidth?: AnyLength;
@@ -79,8 +77,6 @@ export class DrawerView extends HtmlView implements Modal {
   protected initTheme(): void {
     this.modifyTheme(Feel.default, [[Feel.raised, 1]]);
   }
-
-  override readonly viewController!: DrawerViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<DrawerViewObserver>;
 
@@ -209,10 +205,6 @@ export class DrawerView extends HtmlView implements Modal {
   readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
 
   protected willSetDrawerPlacement(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.drawerWillSetPlacement !== void 0) {
-      viewController.drawerWillSetPlacement(newPlacement, oldPlacement, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -233,10 +225,6 @@ export class DrawerView extends HtmlView implements Modal {
       if (viewObserver.drawerDidSetPlacement !== void 0) {
         viewObserver.drawerDidSetPlacement(newPlacement, oldPlacement, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.drawerDidSetPlacement !== void 0) {
-      viewController.drawerDidSetPlacement(newPlacement, oldPlacement, this);
     }
   }
 
@@ -556,10 +544,6 @@ export class DrawerView extends HtmlView implements Modal {
   protected willShow(): void {
     this.setDisplayState(DrawerView.ShowingState);
 
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.drawerWillShow !== void 0) {
-      viewController.drawerWillShow(this);
-    }
     const viewObservers = this.viewObservers!;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -582,10 +566,6 @@ export class DrawerView extends HtmlView implements Modal {
       if (viewObserver.drawerDidShow !== void 0) {
         viewObserver.drawerDidShow(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.drawerDidShow !== void 0) {
-      viewController.drawerDidShow(this);
     }
   }
 
@@ -611,10 +591,6 @@ export class DrawerView extends HtmlView implements Modal {
     this.setDisplayState(DrawerView.HidingState);
     this.modalService.dismissModal(this);
 
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.drawerWillHide !== void 0) {
-      viewController.drawerWillHide(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -636,10 +612,6 @@ export class DrawerView extends HtmlView implements Modal {
       if (viewObserver.drawerDidHide !== void 0) {
         viewObserver.drawerDidHide(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.drawerDidHide !== void 0) {
-      viewController.drawerDidHide(this);
     }
   }
 
@@ -671,10 +643,6 @@ export class DrawerView extends HtmlView implements Modal {
     this.setDisplayState(DrawerView.ExpandingState);
     this.modalService.dismissModal(this);
 
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.drawerWillExpand !== void 0) {
-      viewController.drawerWillExpand(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -694,10 +662,6 @@ export class DrawerView extends HtmlView implements Modal {
       if (viewObserver.drawerDidExpand !== void 0) {
         viewObserver.drawerDidExpand(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.drawerDidExpand !== void 0) {
-      viewController.drawerDidExpand(this);
     }
   }
 
@@ -732,10 +696,6 @@ export class DrawerView extends HtmlView implements Modal {
     this.setDisplayState(DrawerView.CollapsingState);
     this.modalService.dismissModal(this);
 
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.drawerWillCollapse !== void 0) {
-      viewController.drawerWillCollapse(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -757,10 +717,6 @@ export class DrawerView extends HtmlView implements Modal {
       if (viewObserver.drawerDidCollapse !== void 0) {
         viewObserver.drawerDidCollapse(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.drawerDidCollapse !== void 0) {
-      viewController.drawerDidCollapse(this);
     }
   }
 

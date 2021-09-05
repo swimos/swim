@@ -17,7 +17,7 @@ import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
-import {SvgViewInit, SvgView, SvgViewController} from "@swim/dom";
+import {SvgViewInit, SvgView} from "@swim/dom";
 import type {Graphics} from "../graphics/Graphics";
 import {SvgContext} from "../svg/SvgContext";
 import {SvgRenderer} from "../svg/SvgRenderer";
@@ -27,7 +27,6 @@ import {IconViewInit, IconView} from "./IconView";
 import {IconViewAnimator} from "./IconViewAnimator";
 
 export interface SvgIconViewInit extends SvgViewInit, IconViewInit {
-  viewController?: SvgViewController;
 }
 
 export class SvgIconView extends SvgView implements IconView {

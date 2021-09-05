@@ -51,7 +51,6 @@ export {
   DeckViewCard,
 } from "./DeckView";
 export {DeckViewObserver} from "./DeckViewObserver";
-export {DeckViewController} from "./DeckViewController";
 
 export {TitleDeckBar} from "./TitleDeckBar";
-export {TitleDeckViewController} from "./TitleDeckViewController";
+export {TitleDeckView} from "./TitleDeckView";

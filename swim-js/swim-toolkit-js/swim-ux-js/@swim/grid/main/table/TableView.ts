@@ -15,7 +15,7 @@
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {Look} from "@swim/theme";
 import {ViewContextType, ViewFlags, View, ViewEdgeInsets, ViewProperty, ViewFastener} from "@swim/view";
-import {HtmlView, HtmlViewController} from "@swim/dom";
+import {HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import {RowView} from "../row/RowView";
 import type {TableViewObserver} from "./TableViewObserver";
@@ -43,8 +43,6 @@ export class TableView extends HtmlView {
   protected initTable(): void {
     this.addClass("table");
   }
-
-  override readonly viewController!: HtmlViewController & TableViewObserver | null;
 
   override readonly viewObservers!: ReadonlyArray<TableViewObserver>;
 
@@ -116,10 +114,6 @@ export class TableView extends HtmlView {
 
   protected willSetRow(newRowView: RowView | null, oldRowView: RowView | null,
                        targetView: View | null, rowFastener: ViewFastener<this, RowView>): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetRow !== void 0) {
-      viewController.viewWillSetRow(newRowView, oldRowView, targetView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -148,10 +142,6 @@ export class TableView extends HtmlView {
       if (viewObserver.viewDidSetRow !== void 0) {
         viewObserver.viewDidSetRow(newRowView, oldRowView, targetView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetRow !== void 0) {
-      viewController.viewDidSetRow(newRowView, oldRowView, targetView, this);
     }
   }
 

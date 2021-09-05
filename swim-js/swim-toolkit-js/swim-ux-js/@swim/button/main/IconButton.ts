@@ -26,7 +26,7 @@ import {
   ViewFastener,
   PositionGestureDelegate,
 } from "@swim/view";
-import type {HtmlViewObserver, HtmlViewController} from "@swim/dom";
+import type {HtmlViewObserver} from "@swim/dom";
 import {
   Graphics,
   Icon,
@@ -40,7 +40,6 @@ import type {ButtonObserver} from "./ButtonObserver";
 import {ButtonMembraneInit, ButtonMembrane} from "./ButtonMembrane";
 
 export interface IconButtonInit extends ButtonMembraneInit, IconViewInit {
-  viewController?: HtmlViewController;
 }
 
 export class IconButton extends ButtonMembrane implements IconView, PositionGestureDelegate {
@@ -79,8 +78,6 @@ export class IconButton extends ButtonMembrane implements IconView, PositionGest
     super.initView(init);
     IconView.initView(this, init);
   }
-
-  override readonly viewController!: HtmlViewController & ButtonObserver | null;
 
   override readonly viewObservers!: ReadonlyArray<HtmlViewObserver & ButtonObserver>;
 
@@ -334,10 +331,6 @@ export class IconButton extends ButtonMembrane implements IconView, PositionGest
       if (viewObserver.buttonDidPress !== void 0) {
         viewObserver.buttonDidPress(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.buttonDidPress !== void 0) {
-      viewController.buttonDidPress(this);
     }
   }
 }

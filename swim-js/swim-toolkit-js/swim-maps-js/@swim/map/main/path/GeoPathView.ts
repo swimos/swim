@@ -16,7 +16,6 @@ import {AnyR2Point, R2Point, R2Box, R2Path} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox, AnyGeoPath, GeoPath} from "@swim/geo";
 import {ViewContextType, View, ViewAnimator} from "@swim/view";
 import type {GeoViewInit} from "../geo/GeoView";
-import type {GeoViewController} from "../geo/GeoViewController";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoPathViewObserver} from "./GeoPathViewObserver";
@@ -42,15 +41,9 @@ export class GeoPathView extends GeoLayerView {
     }
   }
 
-  override readonly viewController!: GeoViewController<GeoPathView> & GeoPathViewObserver | null;
-
   override readonly viewObservers!: ReadonlyArray<GeoPathViewObserver>;
 
   protected willSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGeoPath !== void 0) {
-      viewController.viewWillSetGeoPath(newGeoPath, oldGeoPath, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -74,10 +67,6 @@ export class GeoPathView extends GeoLayerView {
       if (viewObserver.viewDidSetGeoPath !== void 0) {
         viewObserver.viewDidSetGeoPath(newGeoPath, oldGeoPath, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGeoPath !== void 0) {
-      viewController.viewDidSetGeoPath(newGeoPath, oldGeoPath, this);
     }
   }
 

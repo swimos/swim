@@ -26,7 +26,6 @@ import {
   CanvasRenderer,
 } from "@swim/graphics";
 import type {GeoViewInit} from "../geo/GeoView";
-import type {GeoViewController} from "../geo/GeoViewController";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoPointViewObserver} from "./GeoPointViewObserver";
@@ -63,15 +62,9 @@ export class GeoPointView extends GeoLayerView {
     this.setState(init);
   }
 
-  override readonly viewController!: GeoViewController<GeoPointView> & GeoPointViewObserver | null;
-
   override readonly viewObservers!: ReadonlyArray<GeoPointViewObserver>;
 
   protected willSetGeoPoint(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGeoPoint !== void 0) {
-      viewController.viewWillSetGeoPoint(newGeoPoint, oldGeoPoint, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -93,10 +86,6 @@ export class GeoPointView extends GeoLayerView {
       if (viewObserver.viewDidSetGeoPoint !== void 0) {
         viewObserver.viewDidSetGeoPoint(newGeoPoint, oldGeoPoint, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGeoPoint !== void 0) {
-      viewController.viewDidSetGeoPoint(newGeoPoint, oldGeoPoint, this);
     }
   }
 
@@ -150,10 +139,6 @@ export class GeoPointView extends GeoLayerView {
   }
 
   protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGeoLabel !== void 0) {
-      viewController.viewWillSetGeoLabel(newLabelView, oldLabelView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -180,10 +165,6 @@ export class GeoPointView extends GeoLayerView {
       if (viewObserver.viewDidSetGeoLabel !== void 0) {
         viewObserver.viewDidSetGeoLabel(newLabelView, oldLabelView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGeoLabel !== void 0) {
-      viewController.viewDidSetGeoLabel(newLabelView, oldLabelView, this);
     }
   }
 

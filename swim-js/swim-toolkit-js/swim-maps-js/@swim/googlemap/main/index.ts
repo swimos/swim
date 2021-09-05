@@ -16,4 +16,3 @@ export {GoogleMapViewport} from "./GoogleMapViewport";
 
 export {GoogleMapView} from "./GoogleMapView";
 export {GoogleMapViewObserver} from "./GoogleMapViewObserver";
-export {GoogleMapViewController} from "./GoogleMapViewController";

@@ -21,13 +21,11 @@ import {AnyTreeSeed, TreeSeed} from "./TreeSeed";
 import type {TreeViewContext} from "./TreeViewContext";
 import {AnyTreeLeaf, TreeLeaf} from "./TreeLeaf";
 import type {TreeLimbObserver} from "./TreeLimbObserver";
-import type {TreeLimbController} from "./TreeLimbController";
 import {AnyTreeView, TreeView} from "./TreeView";
 
 export type AnyTreeLimb = TreeLimb | TreeLimbInit | HTMLElement;
 
 export interface TreeLimbInit extends HtmlViewInit {
-  viewController?: TreeLimbController;
   expanded?: boolean;
 
   leaf?: AnyTreeLeaf;
@@ -51,8 +49,6 @@ export class TreeLimb extends HtmlView {
     this.addClass("tree-limb");
     this.position.setState("relative", View.Intrinsic);
   }
-
-  override readonly viewController!: TreeLimbController | null;
 
   override readonly viewObservers!: ReadonlyArray<TreeLimbObserver>;
 
@@ -175,10 +171,6 @@ export class TreeLimb extends HtmlView {
     this.disclosureState.setState("expanding", View.Intrinsic);
     this.requireUpdate(View.NeedsResize | View.NeedsChange | View.NeedsLayout);
 
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.limbWillExpand !== void 0) {
-      viewController.limbWillExpand(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -203,10 +195,6 @@ export class TreeLimb extends HtmlView {
       if (viewObserver.limbDidExpand !== void 0) {
         viewObserver.limbDidExpand(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.limbDidExpand !== void 0) {
-      viewController.limbDidExpand(this);
     }
   }
 
@@ -238,10 +226,6 @@ export class TreeLimb extends HtmlView {
   protected willCollapse(timing: AnyTiming | boolean): void {
     this.disclosureState.setState("collapsing", View.Intrinsic);
 
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.limbWillCollapse !== void 0) {
-      viewController.limbWillCollapse(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -271,10 +255,6 @@ export class TreeLimb extends HtmlView {
       if (viewObserver.limbDidCollapse !== void 0) {
         viewObserver.limbDidCollapse(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.limbDidCollapse !== void 0) {
-      viewController.limbDidCollapse(this);
     }
   }
 

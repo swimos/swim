@@ -26,7 +26,6 @@ export {
   GeoView,
 } from "./GeoView";
 export {GeoViewObserver} from "./GeoViewObserver";
-export {GeoViewController} from "./GeoViewController";
 
 export {GeoTrait} from "./GeoTrait";
 export {GeoTraitObserver} from "./GeoTraitObserver";

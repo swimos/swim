@@ -14,7 +14,6 @@
 
 export {MapView} from "./MapView";
 export {MapViewObserver} from "./MapViewObserver";
-export {MapViewController} from "./MapViewController";
 
 export {MapTrait} from "./MapTrait";
 export {MapTraitObserver} from "./MapTraitObserver";

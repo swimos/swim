@@ -22,7 +22,6 @@ import {MapView} from "../map/MapView";
 import type {WorldMapViewport} from "./WorldMapViewport";
 import {EquirectangularMapViewport} from "./EquirectangularMapViewport";
 import type {WorldMapViewObserver} from "./WorldMapViewObserver";
-import type {WorldMapViewController} from "./WorldMapViewController";
 
 export class WorldMapView extends MapView {
   constructor(geoViewport: WorldMapViewport) {
@@ -34,17 +33,11 @@ export class WorldMapView extends MapView {
     });
   }
 
-  override readonly viewController!: WorldMapViewController | null;
-
   override readonly viewObservers!: ReadonlyArray<WorldMapViewObserver>;
 
   override readonly geoViewport!: WorldMapViewport;
 
   protected willSetGeoViewport(newGeoViewport: WorldMapViewport, oldGeoViewport: WorldMapViewport): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGeoViewport !== void 0) {
-      viewController.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -65,10 +58,6 @@ export class WorldMapView extends MapView {
       if (viewObserver.viewDidSetGeoViewport !== void 0) {
         viewObserver.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGeoViewport !== void 0) {
-      viewController.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
     }
   }
 

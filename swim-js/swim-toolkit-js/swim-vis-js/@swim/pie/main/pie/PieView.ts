@@ -19,7 +19,6 @@ import {ViewContextType, View, ViewAnimator, ViewFastener} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
-  GraphicsViewController,
   LayerView,
   TypesetView,
   AnyTextRunView,
@@ -130,8 +129,6 @@ export class PieView extends LayerView {
     }
   }
 
-  override readonly viewController!: GraphicsViewController & PieViewObserver | null;
-
   override readonly viewObservers!: ReadonlyArray<PieViewObserver>;
 
   @ViewAnimator({type: Number, state: 0, updateFlags: View.NeedsLayout})
@@ -205,10 +202,6 @@ export class PieView extends LayerView {
   }
 
   protected willSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetPieTitle !== void 0) {
-      viewController.viewWillSetPieTitle(newTitleView, oldTitleView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -235,10 +228,6 @@ export class PieView extends LayerView {
       if (viewObserver.viewDidSetPieTitle !== void 0) {
         viewObserver.viewDidSetPieTitle(newTitleView, oldTitleView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetPieTitle !== void 0) {
-      viewController.viewDidSetPieTitle(newTitleView, oldTitleView, this);
     }
   }
 
@@ -323,10 +312,6 @@ export class PieView extends LayerView {
 
   protected willSetSlice(newSliceView: SliceView | null, oldSliceView: SliceView | null,
                          targetView: View | null, sliceFastener: ViewFastener<this, SliceView>): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetSlice !== void 0) {
-      viewController.viewWillSetSlice(newSliceView, oldSliceView, targetView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -355,10 +340,6 @@ export class PieView extends LayerView {
       if (viewObserver.viewDidSetSlice !== void 0) {
         viewObserver.viewDidSetSlice(newSliceView, oldSliceView, targetView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetSlice !== void 0) {
-      viewController.viewDidSetSlice(newSliceView, oldSliceView, targetView, this);
     }
   }
 

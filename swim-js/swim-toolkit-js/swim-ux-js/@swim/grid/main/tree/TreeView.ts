@@ -30,12 +30,10 @@ import type {TreeViewContext} from "./TreeViewContext";
 import {AnyTreeLimb, TreeLimb, TreeLimbState} from "./TreeLimb";
 import {AnyTreeStem, TreeStem} from "./TreeStem";
 import type {TreeViewObserver} from "./TreeViewObserver";
-import type {TreeViewController} from "./TreeViewController";
 
 export type AnyTreeView = TreeView | TreeViewInit | HTMLElement;
 
 export interface TreeViewInit extends HtmlViewInit {
-  viewController?: TreeViewController;
   limbSpacing?: number;
 
   seed?: AnyTreeSeed;
@@ -66,8 +64,6 @@ export class TreeView extends HtmlView {
     this.position.setState("relative", View.Intrinsic);
     this.opacity.setState(0, View.Intrinsic);
   }
-
-  override readonly viewController!: TreeViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<TreeViewObserver>;
 

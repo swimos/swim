@@ -19,7 +19,6 @@ import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewContextType, View, ViewAnimator} from "@swim/view";
 import type {Graphics} from "../graphics/Graphics";
 import type {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
-import type {GraphicsViewController} from "../graphics/GraphicsViewController";
 import {LayerView} from "../layer/LayerView";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
 import {Icon} from "./Icon";
@@ -28,7 +27,6 @@ import {IconViewInit, IconView} from "./IconView";
 import {IconViewAnimator} from "./IconViewAnimator";
 
 export interface GraphicsIconViewInit extends GraphicsViewInit, IconViewInit {
-  viewController?: GraphicsViewController;
 }
 
 export class GraphicsIconView extends LayerView implements IconView {

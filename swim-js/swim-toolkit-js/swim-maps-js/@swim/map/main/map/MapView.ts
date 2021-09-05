@@ -21,11 +21,8 @@ import type {AnyGeoPerspective} from "../geo/GeoPerspective";
 import type {GeoViewport} from "../geo/GeoViewport";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import type {MapViewObserver} from "./MapViewObserver";
-import type {MapViewController} from "./MapViewController";
 
 export abstract class MapView extends GeoLayerView {
-  override readonly viewController!: MapViewController | null;
-
   override readonly viewObservers!: ReadonlyArray<MapViewObserver>;
 
   override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
@@ -62,10 +59,6 @@ export abstract class MapView extends GeoLayerView {
   }
 
   protected willSetCanvas(newCanvasView: CanvasView | null, oldCanvasView: CanvasView | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetMapCanvas !== void 0) {
-      viewController.viewWillSetMapCanvas(newCanvasView, oldCanvasView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -92,10 +85,6 @@ export abstract class MapView extends GeoLayerView {
       if (viewObserver.viewDidSetMapCanvas !== void 0) {
         viewObserver.viewDidSetMapCanvas(newCanvasView, oldCanvasView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetMapCanvas !== void 0) {
-      viewController.viewDidSetMapCanvas(newCanvasView, oldCanvasView, this);
     }
   }
 
@@ -127,10 +116,6 @@ export abstract class MapView extends GeoLayerView {
   }
 
   protected willSetContainer(newContainerView: HtmlView | null, oldContainerView: HtmlView | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetMapContainer !== void 0) {
-      viewController.viewWillSetMapContainer(newContainerView, oldContainerView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -157,10 +142,6 @@ export abstract class MapView extends GeoLayerView {
       if (viewObserver.viewDidSetMapContainer !== void 0) {
         viewObserver.viewDidSetMapContainer(newContainerView, oldContainerView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetMapContainer !== void 0) {
-      viewController.viewDidSetMapContainer(newContainerView, oldContainerView, this);
     }
   }
 

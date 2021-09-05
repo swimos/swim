@@ -16,7 +16,7 @@ import type {Timing} from "@swim/mapping";
 import {AnyLength, Length} from "@swim/math";
 import {Look, Feel, MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewContextType, ViewFlags, View, ViewEdgeInsets, ViewProperty, ViewAnimator} from "@swim/view";
-import {HtmlView, HtmlViewController} from "@swim/dom";
+import {HtmlView} from "@swim/dom";
 import {AnyDeckRail, DeckRail} from "./DeckRail";
 import {DeckSlot} from "./DeckSlot";
 import type {DeckBarObserver} from "./DeckBarObserver";
@@ -40,8 +40,6 @@ export class DeckBar extends HtmlView {
       insetLeft: 0,
     }, View.Intrinsic);
   }
-
-  override readonly viewController!: HtmlViewController & DeckBarObserver | null;
 
   override readonly viewObservers!: ReadonlyArray<DeckBarObserver>;
 

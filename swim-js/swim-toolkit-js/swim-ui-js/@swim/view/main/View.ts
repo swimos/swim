@@ -43,7 +43,6 @@ import type {
   ViewDidLayout,
   ViewObserverCache,
 } from "./ViewObserver";
-import type {ViewControllerType, ViewController} from "./ViewController";
 import type {ViewIdiom} from "./viewport/ViewIdiom";
 import type {Viewport} from "./viewport/Viewport";
 import type {ViewServiceConstructor, ViewService} from "./service/ViewService";
@@ -83,7 +82,6 @@ export type ViewPrecedence = number;
 
 export interface ViewInit {
   key?: string;
-  viewController?: ViewController;
 }
 
 export interface ViewFactory<V extends View = View, U = never> {
@@ -131,11 +129,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
       enumerable: true,
       configurable: true,
     });
-    Object.defineProperty(this, "viewController", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
     Object.defineProperty(this, "viewObservers", {
       value: Arrays.empty,
       enumerable: true,
@@ -154,9 +147,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   }
 
   initView(init: ViewInit): void {
-    if (init.viewController !== void 0) {
-      this.setViewController(init.viewController as ViewControllerType<this>);
-    }
+    // hook
   }
 
   readonly viewFlags!: ViewFlags;
@@ -167,40 +158,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
       enumerable: true,
       configurable: true,
     });
-  }
-
-  readonly viewController!: ViewController | null;
-
-  setViewController(newViewController: ViewControllerType<this> | null): void {
-    const oldViewController = this.viewController;
-    if (oldViewController !== newViewController) {
-      this.willSetViewController(newViewController);
-      if (oldViewController !== null) {
-        oldViewController.setView(null);
-      }
-      Object.defineProperty(this, "viewController", {
-        value: newViewController,
-        enumerable: true,
-        configurable: true,
-      });
-      if (newViewController !== null) {
-        newViewController.setView(this);
-      }
-      this.onSetViewController(newViewController);
-      this.didSetViewController(newViewController);
-    }
-  }
-
-  protected willSetViewController(viewController: ViewControllerType<this> | null): void {
-    // hook
-  }
-
-  protected onSetViewController(viewController: ViewControllerType<this> | null): void {
-    // hook
-  }
-
-  protected didSetViewController(viewController: ViewControllerType<this> | null): void {
-    // hook
   }
 
   readonly viewObservers!: ReadonlyArray<ViewObserver>;
@@ -355,10 +312,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   }
 
   protected willSetParentView(newParentView: View | null, oldParentView: View | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetParentView !== void 0) {
-      viewController.viewWillSetParentView(newParentView, oldParentView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -379,10 +332,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
       if (viewObserver.viewDidSetParentView !== void 0) {
         viewObserver.viewDidSetParentView(newParentView, oldParentView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetParentView !== void 0) {
-      viewController.viewDidSetParentView(newParentView, oldParentView, this);
     }
   }
 
@@ -419,10 +368,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   }
 
   protected willInsertChildView(childView: View, targetView: View | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillInsertChildView !== void 0) {
-      viewController.viewWillInsertChildView(childView, targetView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -444,10 +389,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
         viewObserver.viewDidInsertChildView(childView, targetView, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidInsertChildView !== void 0) {
-      viewController.viewDidInsertChildView(childView, targetView, this);
-    }
   }
 
   abstract cascadeInsert(updateFlags?: ViewFlags, viewContext?: ViewContext): void;
@@ -462,10 +403,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   }
 
   protected willRemoveChildView(childView: View): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillRemoveChildView !== void 0) {
-      viewController.viewWillRemoveChildView(childView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -487,10 +424,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
       if (viewObserver.viewDidRemoveChildView !== void 0) {
         viewObserver.viewDidRemoveChildView(childView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidRemoveChildView !== void 0) {
-      viewController.viewDidRemoveChildView(childView, this);
     }
   }
 
@@ -540,10 +473,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   abstract cascadeMount(): void;
 
   protected willMount(): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillMount !== void 0) {
-      viewController.viewWillMount(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -569,19 +498,11 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
         viewObserver.viewDidMount(this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidMount !== void 0) {
-      viewController.viewDidMount(this);
-    }
   }
 
   abstract cascadeUnmount(): void;
 
   protected willUnmount(): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillUnmount !== void 0) {
-      viewController.viewWillUnmount(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -603,10 +524,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
         viewObserver.viewDidUnmount(this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidUnmount !== void 0) {
-      viewController.viewDidUnmount(this);
-    }
   }
 
   isPowered(): boolean {
@@ -620,10 +537,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   abstract cascadePower(): void;
 
   protected willPower(): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillPower !== void 0) {
-      viewController.viewWillPower(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -646,19 +559,11 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
         viewObserver.viewDidPower(this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidPower !== void 0) {
-      viewController.viewDidPower(this);
-    }
   }
 
   abstract cascadeUnpower(): void;
 
   protected willUnpower(): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillUnpower !== void 0) {
-      viewController.viewWillUnpower(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -680,10 +585,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
         viewObserver.viewDidUnpower(this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidUnpower !== void 0) {
-      viewController.viewDidUnpower(this);
-    }
   }
 
   isCulled(): boolean {
@@ -695,10 +596,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   abstract cascadeCull(): void;
 
   protected willCull(): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillCull !== void 0) {
-      viewController.viewWillCull(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -720,10 +617,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
         viewObserver.viewDidCull(this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidCull !== void 0) {
-      viewController.viewDidCull(this);
-    }
   }
 
   abstract cascadeUncull(): void;
@@ -733,10 +626,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   }
 
   protected willUncull(): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillUncull !== void 0) {
-      viewController.viewWillUncull(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -761,10 +650,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
       if (viewObserver.viewDidUncull !== void 0) {
         viewObserver.viewDidUncull(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidUncull !== void 0) {
-      viewController.viewDidUncull(this);
     }
   }
 
@@ -867,10 +752,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   }
 
   protected willResize(viewContext: ViewContextType<this>): void {
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewWillResize(viewContext, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillResizeObservers;
     if (viewObservers !== void 0) {
       for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -892,17 +773,9 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
         viewObserver.viewDidResize(viewContext, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewDidResize(viewContext, this);
-    }
   }
 
   protected willScroll(viewContext: ViewContextType<this>): void {
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewWillScroll(viewContext, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillScrollObservers;
     if (viewObservers !== void 0) {
       for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -924,17 +797,9 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
         viewObserver.viewDidScroll(viewContext, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewDidScroll(viewContext, this);
-    }
   }
 
   protected willChange(viewContext: ViewContextType<this>): void {
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewWillChange(viewContext, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillChangeObservers;
     if (viewObservers !== void 0) {
       for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -956,17 +821,9 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
         viewObserver.viewDidChange(viewContext, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewDidChange(viewContext, this);
-    }
   }
 
   protected willAnimate(viewContext: ViewContextType<this>): void {
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewWillAnimate(viewContext, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillAnimateObservers;
     if (viewObservers !== void 0) {
       for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -1001,10 +858,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
         const viewObserver = viewObservers[i]!;
         viewObserver.viewDidAnimate(viewContext, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewDidAnimate(viewContext, this);
     }
   }
 
@@ -1076,10 +929,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   }
 
   protected willLayout(viewContext: ViewContextType<this>): void {
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewWillLayout(viewContext, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillLayoutObservers;
     if (viewObservers !== void 0) {
       for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -1100,10 +949,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
         const viewObserver = viewObservers[i]!;
         viewObserver.viewDidLayout(viewContext, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewDidLayout(viewContext, this);
     }
   }
 
@@ -1177,10 +1022,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
   }
 
   protected willApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillApplyTheme !== void 0) {
-      viewController.viewWillApplyTheme(theme, mood, timing, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -1201,10 +1042,6 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
       if (viewObserver.viewDidApplyTheme !== void 0) {
         viewObserver.viewDidApplyTheme(theme, mood, timing, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidApplyTheme !== void 0) {
-      viewController.viewDidApplyTheme(theme, mood, timing, this);
     }
   }
 

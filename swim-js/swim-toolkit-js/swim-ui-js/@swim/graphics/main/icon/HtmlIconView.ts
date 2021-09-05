@@ -17,7 +17,7 @@ import {AnyLength, Length} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
-import {HtmlViewInit, HtmlView, HtmlViewController} from "@swim/dom";
+import {HtmlViewInit, HtmlView} from "@swim/dom";
 import type {Graphics} from "../graphics/Graphics";
 import {Icon} from "./Icon";
 import {FilledIcon} from "./FilledIcon";
@@ -26,7 +26,6 @@ import {IconViewAnimator} from "./IconViewAnimator";
 import {SvgIconView} from "./SvgIconView";
 
 export interface HtmlIconViewInit extends HtmlViewInit, IconViewInit {
-  viewController?: HtmlViewController;
 }
 
 export class HtmlIconView extends HtmlView implements IconView {

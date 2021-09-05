@@ -17,15 +17,12 @@
 import {MapView} from "@swim/map";
 import {EsriViewport} from "./EsriViewport";
 import type {EsriViewObserver} from "./EsriViewObserver";
-import type {EsriViewController} from "./EsriViewController";
 
 export abstract class EsriView extends MapView {
   constructor() {
     super();
     EsriViewport.init();
   }
-
-  override readonly viewController!: EsriViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<EsriViewObserver>;
 

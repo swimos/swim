@@ -17,7 +17,7 @@ import {AnyLength, Length} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewContextType, ViewContext, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
-import {HtmlView, HtmlViewController} from "@swim/dom";
+import {HtmlView} from "@swim/dom";
 import {SvgIconView} from "@swim/graphics";
 import {DeckSlot} from "./DeckSlot";
 import type {DeckButtonObserver} from "./DeckButtonObserver";
@@ -36,8 +36,6 @@ export class DeckButton extends DeckSlot {
     this.userSelect.setState("none", View.Intrinsic);
     this.cursor.setState("pointer", View.Intrinsic);
   }
-
-  override readonly viewController!: HtmlViewController & DeckButtonObserver | null;
 
   override readonly viewObservers!: ReadonlyArray<DeckButtonObserver>;
 

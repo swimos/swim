@@ -31,4 +31,3 @@ export {
   ViewWillSetStyle,
   ViewDidSetStyle,
 } from "./ElementViewObserver";
-export {ElementViewController} from "./ElementViewController";

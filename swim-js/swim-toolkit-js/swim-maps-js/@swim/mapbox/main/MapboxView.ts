@@ -24,7 +24,6 @@ import type {CanvasView} from "@swim/graphics";
 import {AnyGeoPerspective, MapView} from "@swim/map";
 import {MapboxViewport} from "./MapboxViewport";
 import type {MapboxViewObserver} from "./MapboxViewObserver";
-import type {MapboxViewController} from "./MapboxViewController";
 
 export class MapboxView extends MapView {
   constructor(map: mapboxgl.Map) {
@@ -44,8 +43,6 @@ export class MapboxView extends MapView {
     this.initMap(map);
   }
 
-  override readonly viewController!: MapboxViewController | null;
-
   override readonly viewObservers!: ReadonlyArray<MapboxViewObserver>;
 
   readonly map!: mapboxgl.Map;
@@ -59,10 +56,6 @@ export class MapboxView extends MapView {
   override readonly geoViewport!: MapboxViewport;
 
   protected willSetGeoViewport(newGeoViewport: MapboxViewport, oldGeoViewport: MapboxViewport): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGeoViewport !== void 0) {
-      viewController.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -83,10 +76,6 @@ export class MapboxView extends MapView {
       if (viewObserver.viewDidSetGeoViewport !== void 0) {
         viewObserver.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGeoViewport !== void 0) {
-      viewController.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
     }
   }
 
@@ -156,10 +145,6 @@ export class MapboxView extends MapView {
   }
 
   protected willMoveMap(): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillMoveMap !== void 0) {
-      viewController.viewWillMoveMap(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -176,10 +161,6 @@ export class MapboxView extends MapView {
       if (viewObserver.viewDidMoveMap !== void 0) {
         viewObserver.viewDidMoveMap(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidMoveMap !== void 0) {
-      viewController.viewDidMoveMap(this);
     }
   }
 

@@ -30,4 +30,3 @@ export {
   GraphicsView,
 } from "./GraphicsView";
 export {GraphicsViewObserver} from "./GraphicsViewObserver";
-export {GraphicsViewController} from "./GraphicsViewController";

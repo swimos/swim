@@ -26,4 +26,3 @@ export {
   CanvasView,
 } from "./CanvasView";
 export {CanvasViewObserver} from "./CanvasViewObserver";
-export {CanvasViewController} from "./CanvasViewController";

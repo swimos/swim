@@ -19,10 +19,8 @@ import {View, ViewFastener, PositionGesture} from "@swim/view";
 import {StyleRule, StyleSheet, HtmlView, StyleView, SvgView} from "@swim/dom";
 import {TokenViewInit, TokenView} from "./TokenView";
 import type {InputTokenViewObserver} from "./InputTokenViewObserver";
-import type {InputTokenViewController} from "./InputTokenViewController";
 
 export interface InputTokenViewInit extends TokenViewInit {
-  controller?: InputTokenViewController;
 }
 
 export class InputTokenView extends TokenView {
@@ -39,8 +37,6 @@ export class InputTokenView extends TokenView {
     this.addClass("input-token");
     this.label.setView(this.label.createView());
   }
-
-  override readonly viewController!: InputTokenViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<InputTokenViewObserver>;
 
@@ -158,10 +154,6 @@ export class InputTokenView extends TokenView {
         viewObserver.tokenDidUpdateInput(inputView, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.tokenDidUpdateInput !== void 0) {
-      viewController.tokenDidUpdateInput(inputView, this);
-    }
   }
 
   protected onInputChange(event: Event): void {
@@ -179,10 +171,6 @@ export class InputTokenView extends TokenView {
         viewObserver.tokenDidChangeInput(inputView, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.tokenDidChangeInput !== void 0) {
-      viewController.tokenDidChangeInput(inputView, this);
-    }
   }
 
   protected onInputKey(event: KeyboardEvent): void {
@@ -199,10 +187,6 @@ export class InputTokenView extends TokenView {
       if (viewObserver.tokenDidAcceptInput !== void 0) {
         viewObserver.tokenDidAcceptInput(inputView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.tokenDidAcceptInput !== void 0) {
-      viewController.tokenDidAcceptInput(inputView, this);
     }
   }
 }

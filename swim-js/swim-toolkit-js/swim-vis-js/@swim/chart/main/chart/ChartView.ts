@@ -17,7 +17,6 @@ import {AnyLength, Length, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
-import type {GraphicsViewController} from "@swim/graphics";
 import type {ChartViewObserver} from "./ChartViewObserver";
 import {ScaledViewInit, ScaledView} from "../scaled/ScaledView";
 import {AnyGraphView, GraphView} from "../graph/GraphView";
@@ -133,8 +132,6 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
     }
   }
 
-  override readonly viewController!: GraphicsViewController<ChartView<X, Y>> & ChartViewObserver<X, Y> | null;
-
   override readonly viewObservers!: ReadonlyArray<ChartViewObserver<X, Y>>;
 
   @ViewAnimator({type: Length, state: Length.px(20)})
@@ -227,10 +224,6 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
   }
 
   protected willSetGraph(newGraphView: GraphView<X, Y> | null, oldGraphView: GraphView<X, Y> | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGraph !== void 0) {
-      viewController.viewWillSetGraph(newGraphView, oldGraphView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -257,10 +250,6 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       if (viewObserver.viewDidSetGraph !== void 0) {
         viewObserver.viewDidSetGraph(newGraphView, oldGraphView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGraph !== void 0) {
-      viewController.viewDidSetGraph(newGraphView, oldGraphView, this);
     }
   }
 
@@ -299,10 +288,6 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
   }
 
   protected willSetTopAxis(newTopAxisView: AxisView<X> | null, oldTopAxisView: AxisView<X> | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetTopAxis !== void 0) {
-      viewController.viewWillSetTopAxis(newTopAxisView, oldTopAxisView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -329,10 +314,6 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       if (viewObserver.viewDidSetTopAxis !== void 0) {
         viewObserver.viewDidSetTopAxis(newTopAxisView, oldTopAxisView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetTopAxis !== void 0) {
-      viewController.viewDidSetTopAxis(newTopAxisView, oldTopAxisView, this);
     }
   }
 
@@ -371,10 +352,6 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
   }
 
   protected willSetRightAxis(newRightAxisView: AxisView<Y> | null, oldRightAxisView: AxisView<Y> | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetRightAxis !== void 0) {
-      viewController.viewWillSetRightAxis(newRightAxisView, oldRightAxisView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -401,10 +378,6 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       if (viewObserver.viewDidSetRightAxis !== void 0) {
         viewObserver.viewDidSetRightAxis(newRightAxisView, oldRightAxisView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetRightAxis !== void 0) {
-      viewController.viewDidSetRightAxis(newRightAxisView, oldRightAxisView, this);
     }
   }
 
@@ -443,10 +416,6 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
   }
 
   protected willSetBottomAxis(newBottomAxisView: AxisView<X> | null, oldBottomAxisView: AxisView<X> | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetBottomAxis !== void 0) {
-      viewController.viewWillSetBottomAxis(newBottomAxisView, oldBottomAxisView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -473,10 +442,6 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       if (viewObserver.viewDidSetBottomAxis !== void 0) {
         viewObserver.viewDidSetBottomAxis(newBottomAxisView, oldBottomAxisView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetBottomAxis !== void 0) {
-      viewController.viewDidSetBottomAxis(newBottomAxisView, oldBottomAxisView, this);
     }
   }
 
@@ -515,10 +480,6 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
   }
 
   protected willSetLeftAxis(newLeftAxisView: AxisView<Y> | null, oldLeftAxisView: AxisView<Y> | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetLeftAxis !== void 0) {
-      viewController.viewWillSetLeftAxis(newLeftAxisView, oldLeftAxisView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -545,10 +506,6 @@ export class ChartView<X, Y> extends ScaledView<X, Y> {
       if (viewObserver.viewDidSetLeftAxis !== void 0) {
         viewObserver.viewDidSetLeftAxis(newLeftAxisView, oldLeftAxisView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetLeftAxis !== void 0) {
-      viewController.viewDidSetLeftAxis(newLeftAxisView, oldLeftAxisView, this);
     }
   }
 

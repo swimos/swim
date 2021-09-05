@@ -17,12 +17,10 @@ import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
 import {View} from "@swim/view";
 import {HtmlViewConstructor, HtmlViewInit, HtmlView} from "@swim/dom";
 import type {TreeVeinObserver} from "./TreeVeinObserver";
-import type {TreeVeinController} from "./TreeVeinController";
 
 export type AnyTreeVein = TreeVein | TreeVeinInit | HTMLElement;
 
 export interface TreeVeinInit extends HtmlViewInit {
-  viewController?: TreeVeinController;
 }
 
 export class TreeVein extends HtmlView {
@@ -38,8 +36,6 @@ export class TreeVein extends HtmlView {
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
   }
-
-  override readonly viewController!: TreeVeinController | null;
 
   override readonly viewObservers!: ReadonlyArray<TreeVeinObserver>;
 

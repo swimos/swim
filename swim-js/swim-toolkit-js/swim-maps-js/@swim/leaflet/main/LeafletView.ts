@@ -23,7 +23,6 @@ import type {CanvasView} from "@swim/graphics";
 import {AnyGeoPerspective, MapView} from "@swim/map";
 import {LeafletViewport} from "./LeafletViewport";
 import type {LeafletViewObserver} from "./LeafletViewObserver";
-import type {LeafletViewController} from "./LeafletViewController";
 
 export class LeafletView extends MapView {
   constructor(map: L.Map) {
@@ -43,8 +42,6 @@ export class LeafletView extends MapView {
     this.initMap(map);
   }
 
-  override readonly viewController!: LeafletViewController | null;
-
   override readonly viewObservers!: ReadonlyArray<LeafletViewObserver>;
 
   readonly map!: L.Map;
@@ -58,10 +55,6 @@ export class LeafletView extends MapView {
   override readonly geoViewport!: LeafletViewport;
 
   protected willSetGeoViewport(newGeoViewport: LeafletViewport, oldGeoViewport: LeafletViewport): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGeoViewport !== void 0) {
-      viewController.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -82,10 +75,6 @@ export class LeafletView extends MapView {
       if (viewObserver.viewDidSetGeoViewport !== void 0) {
         viewObserver.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGeoViewport !== void 0) {
-      viewController.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
     }
   }
 
@@ -144,10 +133,6 @@ export class LeafletView extends MapView {
   }
 
   protected willMoveMap(): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillMoveMap !== void 0) {
-      viewController.viewWillMoveMap(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -164,10 +149,6 @@ export class LeafletView extends MapView {
       if (viewObserver.viewDidMoveMap !== void 0) {
         viewObserver.viewDidMoveMap(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidMoveMap !== void 0) {
-      viewController.viewDidMoveMap(this);
     }
   }
 

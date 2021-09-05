@@ -17,13 +17,7 @@ import {BTree} from "@swim/collections";
 import {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewFlags, View, ViewProperty, ViewAnimator} from "@swim/view";
-import {
-  GraphicsViewInit,
-  GraphicsView,
-  GraphicsViewController,
-  CanvasContext,
-  CanvasRenderer,
-} from "@swim/graphics";
+import {GraphicsViewInit, GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import type {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
 import {AnyTickView, TickView} from "../tick/TickView";
 import {TickGenerator} from "../tick/TickGenerator";
@@ -70,8 +64,6 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
       configurable: true,
     });
   }
-
-  override readonly viewController!: GraphicsViewController<AxisView<D>> & AxisViewObserver<D> | null;
 
   override readonly viewObservers!: ReadonlyArray<AxisViewObserver<D>>;
 
@@ -409,10 +401,6 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
 
   protected createTickLabel(tickValue: D, tickView: TickView<D>): GraphicsView | string | null {
     let tickLabel: GraphicsView | string | null = null;
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.createTickLabel !== void 0) {
-      tickLabel = viewController.createTickLabel(tickValue, tickView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n && (tickLabel === void 0 || tickLabel === null); i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -435,13 +423,6 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
   }
 
   protected formatTickLabel(tickLabel: string, tickView: TickView<D>): string | null {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.formatTickLabel !== void 0) {
-      const label = viewController.formatTickLabel(tickLabel, tickView, this);
-      if (label !== void 0) {
-        return label;
-      }
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;

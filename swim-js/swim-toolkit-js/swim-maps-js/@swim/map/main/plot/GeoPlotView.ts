@@ -19,7 +19,6 @@ import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, View, ViewProperty, ViewAnimator} from "@swim/view";
 import {GraphicsView, StrokeViewInit, StrokeView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import type {GeoViewInit} from "../geo/GeoView";
-import type {GeoViewController} from "../geo/GeoViewController";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import {AnyGeoPointView, GeoPointView} from "./GeoPointView";
@@ -73,8 +72,6 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
       this.points(points);
     }
   }
-
-  override readonly viewController!: GeoViewController<GeoPlotView> & GeoPlotViewObserver | null;
 
   override readonly viewObservers!: ReadonlyArray<GeoPlotViewObserver>;
 

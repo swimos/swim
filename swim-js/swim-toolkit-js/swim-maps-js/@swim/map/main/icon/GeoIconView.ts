@@ -29,7 +29,6 @@ import {
   CanvasRenderer,
 } from "@swim/graphics";
 import type {GeoViewInit} from "../geo/GeoView";
-import type {GeoViewController} from "../geo/GeoViewController";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoIconViewObserver} from "./GeoIconViewObserver";
@@ -37,7 +36,6 @@ import type {GeoIconViewObserver} from "./GeoIconViewObserver";
 export type AnyGeoIconView = GeoIconView | GeoIconViewInit;
 
 export interface GeoIconViewInit extends GeoViewInit, IconViewInit {
-  viewController?: GeoViewController;
   geoCenter?: AnyGeoPoint;
   viewCenter?: AnyR2Point;
 }
@@ -68,18 +66,12 @@ export class GeoIconView extends GeoLayerView implements IconView {
     }
   }
 
-  override readonly viewController!: GeoViewController<GeoIconView> & GeoIconViewObserver | null;
-
   override readonly viewObservers!: ReadonlyArray<GeoIconViewObserver>;
 
   /** @hidden */
   readonly canvas!: HTMLCanvasElement | null;
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGeoCenter !== void 0) {
-      viewController.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -103,10 +95,6 @@ export class GeoIconView extends GeoLayerView implements IconView {
       if (viewObserver.viewDidSetGeoCenter !== void 0) {
         viewObserver.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGeoCenter !== void 0) {
-      viewController.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
     }
   }
 
@@ -159,10 +147,6 @@ export class GeoIconView extends GeoLayerView implements IconView {
   readonly iconColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGraphics !== void 0) {
-      viewController.viewWillSetGraphics(newGraphics, oldGraphic, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -183,10 +167,6 @@ export class GeoIconView extends GeoLayerView implements IconView {
       if (viewObserver.viewDidSetGraphics !== void 0) {
         viewObserver.viewDidSetGraphics(newGraphics, oldGraphic, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGraphics !== void 0) {
-      viewController.viewDidSetGraphics(newGraphics, oldGraphic, this);
     }
   }
 

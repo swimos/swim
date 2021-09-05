@@ -28,7 +28,6 @@ import {HtmlView} from "@swim/dom";
 import {DeckBar} from "./DeckBar";
 import {DeckCard} from "./DeckCard";
 import type {DeckViewObserver} from "./DeckViewObserver";
-import type {DeckViewController} from "./DeckViewController";
 
 export class DeckView extends HtmlView {
   constructor(node: HTMLElement) {
@@ -44,8 +43,6 @@ export class DeckView extends HtmlView {
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
   }
-
-  override readonly viewController!: DeckViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<DeckViewObserver>;
 
@@ -100,6 +97,7 @@ export class DeckView extends HtmlView {
     }
 
     this.deckPhase.setState(newCardCount, timing);
+    this.onPushCard(newCardView, oldCardView);
     if (timing === false) {
       this.didPushCard(newCardView, oldCardView);
     }
@@ -111,6 +109,10 @@ export class DeckView extends HtmlView {
         viewObserver.deckWillPushCard(newCardView, oldCardView, this);
       }
     });
+  }
+
+  protected onPushCard(newCardView: DeckCard, oldCardView: DeckCard | null): void {
+    // hook
   }
 
   protected didPushCard(newCardView: DeckCard, oldCardView: DeckCard | null): void {
@@ -154,6 +156,7 @@ export class DeckView extends HtmlView {
       }
 
       this.deckPhase.setState(newCardCount, timing);
+      this.onPopCard(newCardView, oldCardView);
       if (timing === false) {
         this.didPopCard(newCardView, oldCardView);
       }
@@ -168,6 +171,10 @@ export class DeckView extends HtmlView {
         viewObserver.deckWillPopCard(newCardView, oldCardView, this);
       }
     });
+  }
+
+  protected onPopCard(newCardView: DeckCard | null, oldCardView: DeckCard): void {
+    // hook
   }
 
   protected didPopCard(newCardView: DeckCard | null, oldCardView: DeckCard): void {

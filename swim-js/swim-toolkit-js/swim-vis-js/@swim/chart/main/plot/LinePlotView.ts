@@ -16,7 +16,7 @@ import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
-import type {GraphicsView, GraphicsViewController, CanvasContext, CanvasRenderer, StrokeViewInit, StrokeView} from "@swim/graphics";
+import type {GraphicsView, CanvasContext, CanvasRenderer, StrokeViewInit, StrokeView} from "@swim/graphics";
 import type {DataPointView} from "../data/DataPointView";
 import {SeriesPlotType, SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
 import type {LinePlotViewObserver} from "./LinePlotViewObserver";
@@ -42,8 +42,6 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
     }
   }
 
-  override readonly viewController!: GraphicsViewController<LinePlotView<X, Y>> & LinePlotViewObserver<X, Y> | null;
-
   override readonly viewObservers!: ReadonlyArray<LinePlotViewObserver<X, Y>>;
 
   override get plotType(): SeriesPlotType {
@@ -51,10 +49,6 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
   }
 
   protected willSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetPlotStroke !== void 0) {
-      viewController.viewWillSetPlotStroke(newStroke, oldStroke, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -76,10 +70,6 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
         viewObserver.viewDidSetPlotStroke(newStroke, oldStroke, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetPlotStroke !== void 0) {
-      viewController.viewDidSetPlotStroke(newStroke, oldStroke, this);
-    }
   }
 
   @ViewAnimator<LinePlotView<X, Y>, Color | null, AnyColor | null>({
@@ -97,10 +87,6 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
   readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetPlotStrokeWidth !== void 0) {
-      viewController.viewWillSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -128,10 +114,6 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
       if (viewObserver.viewDidSetPlotStrokeWidth !== void 0) {
         viewObserver.viewDidSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetPlotStrokeWidth !== void 0) {
-      viewController.viewDidSetPlotStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
     }
   }
 

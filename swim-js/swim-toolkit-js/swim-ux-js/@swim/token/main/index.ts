@@ -18,11 +18,9 @@ export {
   TokenView,
 } from "./TokenView";
 export {TokenViewObserver} from "./TokenViewObserver";
-export {TokenViewController} from "./TokenViewController";
 
 export {
   InputTokenViewInit,
   InputTokenView,
 } from "./InputTokenView";
 export {InputTokenViewObserver} from "./InputTokenViewObserver";
-export {InputTokenViewController} from "./InputTokenViewController";

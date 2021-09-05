@@ -27,12 +27,10 @@ import {ButtonMembraneInit, ButtonMembrane} from "@swim/button";
 import {AnyTreeSeed, TreeSeed} from "./TreeSeed";
 import {AnyTreeCell, TreeCell} from "./TreeCell";
 import type {TreeLeafObserver} from "./TreeLeafObserver";
-import type {TreeLeafController} from "./TreeLeafController";
 
 export type AnyTreeLeaf = TreeLeaf | TreeLeafInit | HTMLElement;
 
 export interface TreeLeafInit extends ButtonMembraneInit {
-  viewController?: TreeLeafController;
   highlighted?: boolean;
 
   cells?: AnyTreeCell[];
@@ -51,8 +49,6 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
   }
-
-  override readonly viewController!: TreeLeafController | null;
 
   override readonly viewObservers!: ReadonlyArray<TreeLeafObserver>;
 
@@ -108,10 +104,6 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
   }
 
   protected willHighlight(timing: Timing | boolean): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.leafWillHighlight !== void 0) {
-      viewController.leafWillHighlight(timing, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -153,10 +145,6 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
         viewObserver.leafDidHighlight(timing, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.leafDidHighlight !== void 0) {
-      viewController.leafDidHighlight(timing, this);
-    }
   }
 
   unhighlight(timing?: AnyTiming | boolean): void {
@@ -174,10 +162,6 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
   }
 
   protected willUnhighlight(timing: Timing | boolean): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.leafWillUnhighlight !== void 0) {
-      viewController.leafWillUnhighlight(timing, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -213,10 +197,6 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
       if (viewObserver.leafDidUnhighlight !== void 0) {
         viewObserver.leafDidUnhighlight(timing, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.leafDidUnhighlight !== void 0) {
-      viewController.leafDidUnhighlight(timing, this);
     }
   }
 
@@ -323,10 +303,6 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
           viewObserver.leafDidPress(input, event, this);
         }
       }
-      const viewController = this.viewController;
-      if (viewController !== null && viewController.leafDidPress !== void 0) {
-        viewController.leafDidPress(input, event, this);
-      }
     }
   }
 
@@ -348,10 +324,6 @@ export class TreeLeaf extends ButtonMembrane implements PositionGestureDelegate 
         if (viewObserver.leafDidLongPress !== void 0) {
           viewObserver.leafDidLongPress(input, this);
         }
-      }
-      const viewController = this.viewController;
-      if (viewController !== null && viewController.leafDidLongPress !== void 0) {
-        viewController.leafDidLongPress(input, this);
       }
     }
   }

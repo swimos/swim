@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {View, ViewFastener} from "@swim/view";
-import {HtmlView, HtmlViewController} from "@swim/dom";
+import {HtmlView} from "@swim/dom";
 import type {CellViewObserver} from "./CellViewObserver";
 
 export class CellView extends HtmlView {
@@ -27,8 +27,6 @@ export class CellView extends HtmlView {
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
   }
-
-  override readonly viewController!: HtmlViewController & CellViewObserver | null;
 
   override readonly viewObservers!: ReadonlyArray<CellViewObserver>;
 
@@ -58,10 +56,6 @@ export class CellView extends HtmlView {
   }
 
   protected willSetContent(newContentView: HtmlView | null, oldContentView: HtmlView | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetCellContent !== void 0) {
-      viewController.viewWillSetCellContent(newContentView, oldContentView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -88,10 +82,6 @@ export class CellView extends HtmlView {
       if (viewObserver.viewDidSetCellContent !== void 0) {
         viewObserver.viewDidSetCellContent(newContentView, oldContentView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetCellContent !== void 0) {
-      viewController.viewDidSetCellContent(newContentView, oldContentView, this);
     }
   }
 

@@ -20,7 +20,6 @@ import {ViewContextType, View, ViewAnimator, ViewFastener} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
-  GraphicsViewController,
   LayerView,
   CanvasContext,
   CanvasRenderer,
@@ -126,15 +125,9 @@ export class SliceView extends LayerView {
     }
   }
 
-  override readonly viewController!: GraphicsViewController & SliceViewObserver | null;
-
   override readonly viewObservers!: ReadonlyArray<SliceViewObserver>;
 
   protected willSetValue(newValue: number, oldValue: number): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetSliceValue !== void 0) {
-      viewController.viewWillSetSliceValue(newValue, oldValue, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -155,10 +148,6 @@ export class SliceView extends LayerView {
       if (viewObserver.viewDidSetSliceValue !== void 0) {
         viewObserver.viewDidSetSliceValue(newValue, oldValue, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetSliceValue !== void 0) {
-      viewController.viewDidSetSliceValue(newValue, oldValue, this);
     }
   }
 
@@ -242,10 +231,6 @@ export class SliceView extends LayerView {
   }
 
   protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetSliceLabel !== void 0) {
-      viewController.viewWillSetSliceLabel(newLabelView, oldLabelView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -272,10 +257,6 @@ export class SliceView extends LayerView {
       if (viewObserver.viewDidSetSliceLabel !== void 0) {
         viewObserver.viewDidSetSliceLabel(newLabelView, oldLabelView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetSliceLabel !== void 0) {
-      viewController.viewDidSetSliceLabel(newLabelView, oldLabelView, this);
     }
   }
 
@@ -317,10 +298,6 @@ export class SliceView extends LayerView {
   }
 
   protected willSetLegend(newLegendView: GraphicsView | null, oldLegendView: GraphicsView | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetSliceLegend !== void 0) {
-      viewController.viewWillSetSliceLegend(newLegendView, oldLegendView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -347,10 +324,6 @@ export class SliceView extends LayerView {
       if (viewObserver.viewDidSetSliceLegend !== void 0) {
         viewObserver.viewDidSetSliceLegend(newLegendView, oldLegendView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetSliceLegend !== void 0) {
-      viewController.viewDidSetSliceLegend(newLegendView, oldLegendView, this);
     }
   }
 

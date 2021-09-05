@@ -20,7 +20,6 @@ import {Look, Mood} from "@swim/theme";
 import {ViewContextType, View, ViewAnimator, ViewFastener} from "@swim/view";
 import {StrokeView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import type {GeoView} from "../geo/GeoView";
-import type {GeoViewController} from "../geo/GeoViewController";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import type {GeoRippleViewObserver} from "./GeoRippleViewObserver";
 
@@ -35,15 +34,9 @@ export interface GeoRippleOptions {
 }
 
 export class GeoRippleView extends GeoLayerView implements StrokeView {
-  override readonly viewController!: GeoViewController<GeoRippleView> & GeoRippleViewObserver | null;
-
   override readonly viewObservers!: ReadonlyArray<GeoRippleViewObserver>;
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGeoCenter !== void 0) {
-      viewController.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -67,10 +60,6 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
       if (viewObserver.viewDidSetGeoCenter !== void 0) {
         viewObserver.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGeoCenter !== void 0) {
-      viewController.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
     }
   }
 

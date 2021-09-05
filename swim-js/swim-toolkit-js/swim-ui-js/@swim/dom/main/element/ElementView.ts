@@ -39,7 +39,6 @@ import type {
   ViewWillSetStyle,
   ViewDidSetStyle,
 } from "./ElementViewObserver";
-import type {ElementViewController} from "./ElementViewController";
 
 export interface ViewElement extends Element, ElementCSSInlineStyle {
   view?: ElementView;
@@ -71,7 +70,6 @@ export type ElementViewMemberMap<V> = {
 };
 
 export interface ElementViewInit extends NodeViewInit {
-  viewController?: ElementViewController;
   id?: string;
   classList?: string[];
   mood?: MoodVector;
@@ -106,8 +104,6 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   override readonly node!: Element & ElementCSSInlineStyle;
-
-  override readonly viewController!: ElementViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<ElementViewObserver>;
 
@@ -373,10 +369,6 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   protected willSetAttribute(attributeName: string, value: unknown): void {
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewWillSetAttribute(attributeName, value, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillSetAttributeObservers;
     if (viewObservers !== void 0) {
       for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -397,10 +389,6 @@ export class ElementView extends NodeView implements StyleContext {
         const viewObserver = viewObservers[i]!;
         viewObserver.viewDidSetAttribute(attributeName, value, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewDidSetAttribute(attributeName, value, this);
     }
   }
 
@@ -524,10 +512,6 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   protected willSetStyle(propertyName: string, value: unknown, priority: string | undefined): void {
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewWillSetStyle(propertyName, value, priority, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillSetStyleObservers;
     if (viewObservers !== void 0) {
       for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -548,10 +532,6 @@ export class ElementView extends NodeView implements StyleContext {
         const viewObserver = viewObservers[i]!;
         viewObserver.viewDidSetStyle(propertyName, value, priority, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewDidSetStyle(propertyName, value, priority, this);
     }
   }
 

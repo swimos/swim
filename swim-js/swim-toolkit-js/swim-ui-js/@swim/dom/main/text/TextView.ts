@@ -15,14 +15,12 @@
 import type {ViewConstructor, View} from "@swim/view";
 import {NodeViewInit, NodeViewConstructor, NodeView} from "../node/NodeView";
 import type {TextViewObserver} from "./TextViewObserver";
-import type {TextViewController} from "./TextViewController";
 
 export interface ViewText extends Text {
   view?: TextView;
 }
 
 export interface TextViewInit extends NodeViewInit {
-  viewController?: TextViewController;
 }
 
 export interface TextViewConstructor<V extends TextView = TextView> extends NodeViewConstructor<V> {
@@ -34,8 +32,6 @@ export class TextView extends NodeView {
   }
 
   override readonly node!: Text;
-
-  override readonly viewController!: TextViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<TextViewObserver>;
 

@@ -63,9 +63,7 @@ const settingsItem = drawerView.append(swim.ListItem)
   .label("Settings");
 settingsItem.icon.view.iconWidth(20).iconHeight(20);
 
-const listViewController = new swim.ListViewController();
-listView.setViewController(listViewController);
-listViewController.selectItem(item1);
+listView.selectItem(item1);
 
 drawerView.show();
 

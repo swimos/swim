@@ -26,14 +26,11 @@ import {GraphicsViewInit, GraphicsView} from "@swim/graphics";
 import type {GeoViewport} from "./GeoViewport";
 import type {GeoViewContext} from "./GeoViewContext";
 import type {GeoViewObserver} from "./GeoViewObserver";
-import type {GeoViewController} from "./GeoViewController";
 
 export interface GeoViewInit extends GraphicsViewInit {
 }
 
 export abstract class GeoView extends GraphicsView {
-  override readonly viewController!: GeoViewController | null;
-
   override readonly viewObservers!: ReadonlyArray<GeoViewObserver>;
 
   override initView(init: GeoViewInit): void {
@@ -151,10 +148,6 @@ export abstract class GeoView extends GraphicsView {
   }
 
   protected willProject(viewContext: ViewContextType<this>): void {
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewWillProject(viewContext, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillProjectObservers;
     if (viewObservers !== void 0) {
       for (let i = 0; i < viewObservers.length; i += 1) {
@@ -175,10 +168,6 @@ export abstract class GeoView extends GraphicsView {
         const viewObserver = viewObservers[i]!;
         viewObserver.viewDidProject(viewContext, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewDidProject(viewContext, this);
     }
   }
 
@@ -227,10 +216,6 @@ export abstract class GeoView extends GraphicsView {
   }
 
   willSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGeoBounds !== void 0) {
-      viewController.viewWillSetGeoBounds(newGeoBounds, oldGeoBounds, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -254,10 +239,6 @@ export abstract class GeoView extends GraphicsView {
       if (viewObserver.viewDidSetGeoBounds !== void 0) {
         viewObserver.viewDidSetGeoBounds(newGeoBounds, oldGeoBounds, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGeoBounds !== void 0) {
-      viewController.viewDidSetGeoBounds(newGeoBounds, oldGeoBounds, this);
     }
   }
 

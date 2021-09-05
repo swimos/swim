@@ -14,28 +14,26 @@
 
 import {View} from "@swim/view";
 import type {DeckCard} from "./DeckCard";
-import type {DeckView} from "./DeckView";
-import {DeckViewController} from "./DeckViewController";
+import {DeckView} from "./DeckView";
 import {TitleDeckBar} from "./TitleDeckBar";
 
-export class TitleDeckViewController<V extends DeckView> extends DeckViewController<V> {
-  override onSetView(deckView: V | null): void {
-    super.onSetView(deckView);
-    if (deckView !== null) {
-      this.initBar(deckView);
-    }
+export class TitleDeckView extends DeckView {
+  constructor(node: HTMLElement) {
+    super(node);
+    this.initBar();
   }
 
-  protected initBar(deckView: V): void {
-    let deckBar = deckView.bar.view;
+  protected initBar(): void {
+    let deckBar = this.bar.view;
     if (!(deckBar instanceof TitleDeckBar)) {
       deckBar = TitleDeckBar.create();
-      deckView.bar.setView(deckBar);
+      this.bar.setView(deckBar);
     }
   }
 
-  override deckWillPushCard(newCardView: DeckCard, oldCardView: DeckCard | null, deckView: V): void {
-    const deckBar = deckView.bar.view;
+  protected override willPushCard(newCardView: DeckCard, oldCardView: DeckCard | null): void {
+    super.willPushCard(newCardView, oldCardView);
+    const deckBar = this.bar.view;
     if (deckBar instanceof TitleDeckBar) {
       deckBar.pushTitle(newCardView.cardTitle.getStateOr(""));
       const backMembrane = deckBar.backMembrane.view;
@@ -45,26 +43,30 @@ export class TitleDeckViewController<V extends DeckView> extends DeckViewControl
     }
   }
 
-  override deckDidPushCard(newCardView: DeckCard, oldCardView: DeckCard | null, deckView: V): void {
-    const deckBar = deckView.bar.view;
+  protected override didPushCard(newCardView: DeckCard, oldCardView: DeckCard | null): void {
+    const deckBar = this.bar.view;
     if (deckBar instanceof TitleDeckBar) {
       const backMembrane = deckBar.backMembrane.view;
       if (backMembrane !== null) {
         backMembrane.pointerEvents.setState("auto", View.Intrinsic);
       }
     }
+    super.didPushCard(newCardView, oldCardView);
   }
 
-  override deckWillPopCard(newCardView: DeckCard | null, oldCardView: DeckCard, deckView: V): void {
-    const deckBar = deckView.bar.view;
+  protected override willPopCard(newCardView: DeckCard | null, oldCardView: DeckCard): void {
+    super.willPopCard(newCardView, oldCardView);
+    const deckBar = this.bar.view;
     if (deckBar instanceof TitleDeckBar) {
       deckBar.popTitle();
     }
   }
 
-  override deckDidPressBackButton(event: Event | null, deckView: V): void {
-    if (!deckView.deckPhase.isAnimating()) {
-      deckView.popCard();
+  override didPressBackButton(event: Event | null): void {
+    if (!this.deckPhase.isAnimating()) {
+      this.popCard();
     }
+    super.didPressBackButton(event);
   }
+
 }

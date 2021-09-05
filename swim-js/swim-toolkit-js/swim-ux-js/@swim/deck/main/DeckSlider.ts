@@ -17,7 +17,7 @@ import {Length} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewContextType, ViewContext, View, ViewAnimator, ViewFastener} from "@swim/view";
-import {HtmlView, HtmlViewController} from "@swim/dom";
+import {HtmlView} from "@swim/dom";
 import {DeckSlot} from "./DeckSlot";
 import type {DeckSliderObserver} from "./DeckSliderObserver";
 
@@ -33,8 +33,6 @@ export class DeckSlider extends DeckSlot {
     this.addClass("deck-slider");
     this.position.setState("relative", View.Intrinsic);
   }
-
-  override readonly viewController!: HtmlViewController & DeckSliderObserver | null;
 
   override readonly viewObservers!: ReadonlyArray<DeckSliderObserver>;
 

@@ -29,7 +29,6 @@ import {Height, HtmlView} from "@swim/dom";
 import {Graphics, HtmlIconView} from "@swim/graphics";
 import {ButtonMembrane} from "@swim/button";
 import type {ListItemObserver} from "./ListItemObserver";
-import type {ListItemController} from "./ListItemController";
 import {ListView} from "./ListView";
 
 export class ListItem extends ButtonMembrane implements PositionGestureDelegate {
@@ -52,8 +51,6 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
     this.cursor.setState("pointer", View.Intrinsic);
     this.userSelect.setState("none", View.Intrinsic);
   }
-
-  override readonly viewController!: ListItemController | null;
 
   override readonly viewObservers!: ReadonlyArray<ListItemObserver>;
 
@@ -423,10 +420,6 @@ export class ListItem extends ButtonMembrane implements PositionGestureDelegate 
       if (viewObserver.listItemDidPress !== void 0) {
         viewObserver.listItemDidPress(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.listItemDidPress !== void 0) {
-      viewController.listItemDidPress(this);
     }
 
     const parentView = this.parentView;

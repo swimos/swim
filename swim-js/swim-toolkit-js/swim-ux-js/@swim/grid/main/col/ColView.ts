@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {View, ViewFastener} from "@swim/view";
-import {HtmlView, HtmlViewController} from "@swim/dom";
+import {HtmlView} from "@swim/dom";
 import type {ColViewObserver} from "./ColViewObserver";
 
 export class ColView extends HtmlView {
@@ -27,8 +27,6 @@ export class ColView extends HtmlView {
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
   }
-
-  override readonly viewController!: HtmlViewController & ColViewObserver | null;
 
   override readonly viewObservers!: ReadonlyArray<ColViewObserver>;
 
@@ -54,10 +52,6 @@ export class ColView extends HtmlView {
   }
 
   protected willSetHeader(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetColHeader !== void 0) {
-      viewController.viewWillSetColHeader(newHeaderView, oldHeaderView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -84,10 +78,6 @@ export class ColView extends HtmlView {
       if (viewObserver.viewDidSetColHeader !== void 0) {
         viewObserver.viewDidSetColHeader(newHeaderView, oldHeaderView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetColHeader !== void 0) {
-      viewController.viewDidSetColHeader(newHeaderView, oldHeaderView, this);
     }
   }
 

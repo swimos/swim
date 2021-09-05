@@ -41,7 +41,6 @@ import {ViewNodeType, NodeViewConstructor, NodeView} from "../node/NodeView";
 import {AttributeAnimatorMemberInit, AttributeAnimator} from "../attribute/AttributeAnimator";
 import {ElementViewInit, ElementViewConstructor, ElementView} from "../element/ElementView";
 import type {SvgViewObserver} from "./SvgViewObserver";
-import type {SvgViewController} from "./SvgViewController";
 
 export interface ViewSvg extends SVGElement {
   view?: SvgView;
@@ -106,7 +105,6 @@ export interface SvgViewStyleInit {
 }
 
 export interface SvgViewInit extends ElementViewInit {
-  viewController?: SvgViewController;
   attributes?: SvgViewAttributesInit;
   style?: SvgViewStyleInit;
 }
@@ -373,8 +371,6 @@ export class SvgView extends ElementView {
   }
 
   override readonly node!: SVGElement;
-
-  override readonly viewController!: SvgViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<SvgViewObserver>;
 

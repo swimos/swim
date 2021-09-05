@@ -16,11 +16,15 @@ import {View} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {ListItem} from "./ListItem";
 import type {ListViewObserver} from "./ListViewObserver";
-import type {ListViewController} from "./ListViewController";
 
 export class ListView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
+    Object.defineProperty(this, "selectedItem", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
     this.initList();
   }
 
@@ -33,9 +37,9 @@ export class ListView extends HtmlView {
     this.userSelect.setState("none", View.Intrinsic);
   }
 
-  override readonly viewController!: ListViewController | null;
-
   override readonly viewObservers!: ReadonlyArray<ListViewObserver>;
+
+  readonly selectedItem!: ListItem | null;
 
   protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
@@ -59,18 +63,46 @@ export class ListView extends HtmlView {
     // hook
   }
 
+  selectItem(newItem: ListItem | null): void {
+    const oldItem = this.selectedItem;
+    if (oldItem !== newItem) {
+      this.willSelectItem(newItem, oldItem);
+      Object.defineProperty(this, "selectedItem", {
+        value: newItem,
+        enumerable: true,
+        configurable: true,
+      });
+      this.onSelectItem(newItem, oldItem);
+      this.didSelectItem(newItem, oldItem);
+    }
+  }
+
+  protected willSelectItem(newItem: ListItem | null, oldItem: ListItem | null): void {
+    // hook
+  }
+
+  protected onSelectItem(newItem: ListItem | null, oldItem: ListItem | null): void {
+    if (oldItem !== null) {
+      oldItem.unhighlight(true);
+    }
+    if (newItem !== null) {
+      newItem.highlight(false);
+    }
+  }
+
+  protected didSelectItem(newItem: ListItem | null, oldItem: ListItem | null): void {
+    // hook
+  }
+
   /** @hidden */
   onPressItem(item: ListItem): void {
+    this.selectItem(item);
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
       if (viewObserver.listDidPressItem !== void 0) {
         viewObserver.listDidPressItem(item, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.listDidPressItem !== void 0) {
-      viewController.listDidPressItem(item, this);
     }
   }
 }

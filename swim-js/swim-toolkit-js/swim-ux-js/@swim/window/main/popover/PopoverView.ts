@@ -31,12 +31,10 @@ import {
 } from "@swim/view";
 import {HtmlViewInit, HtmlView, HtmlViewObserver} from "@swim/dom";
 import type {PopoverViewObserver} from "./PopoverViewObserver";
-import type {PopoverViewController} from "./PopoverViewController";
 
 export type PopoverPlacement = "none" | "above" | "below" | "over" | "top" | "bottom" | "right" | "left";
 
 export interface PopoverViewInit extends HtmlViewInit {
-  viewController?: PopoverViewController;
   source?: View;
   placement?: PopoverPlacement[];
   placementFrame?: R2Box;
@@ -92,8 +90,6 @@ export class PopoverView extends HtmlView implements Modal {
     arrow.height.setState(0, View.Intrinsic);
     return arrow;
   }
-
-  override readonly viewController!: PopoverViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<PopoverViewObserver>;
 
@@ -154,10 +150,6 @@ export class PopoverView extends HtmlView implements Modal {
   }
 
   protected willSetSourceView(newSourceView: View | null, oldSourceView: View | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.popoverWillSetSource !== void 0) {
-      viewController.popoverWillSetSource(newSourceView, oldSourceView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -178,10 +170,6 @@ export class PopoverView extends HtmlView implements Modal {
       if (viewObserver.popoverDidSetSource !== void 0) {
         viewObserver.popoverDidSetSource(newSourceView, oldSourceView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.popoverDidSetSource !== void 0) {
-      viewController.popoverDidSetSource(newSourceView, oldSourceView, this);
     }
   }
 
@@ -306,10 +294,6 @@ export class PopoverView extends HtmlView implements Modal {
   protected willShow(): void {
     this.setDisplayState(PopoverView.ShowingState);
 
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.popoverWillShow !== void 0) {
-      viewController.popoverWillShow(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -336,10 +320,6 @@ export class PopoverView extends HtmlView implements Modal {
         viewObserver.popoverDidShow(this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.popoverDidShow !== void 0) {
-      viewController.popoverDidShow(this);
-    }
   }
 
   hideModal(timing?: AnyTiming | boolean): void {
@@ -362,10 +342,6 @@ export class PopoverView extends HtmlView implements Modal {
   protected willHide(): void {
     this.setDisplayState(PopoverView.HidingState);
 
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.popoverWillHide !== void 0) {
-      viewController.popoverWillHide(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -390,10 +366,6 @@ export class PopoverView extends HtmlView implements Modal {
       if (viewObserver.popoverDidHide !== void 0) {
         viewObserver.popoverDidHide(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.popoverDidHide !== void 0) {
-      viewController.popoverDidHide(this);
     }
   }
 
@@ -758,10 +730,6 @@ export class PopoverView extends HtmlView implements Modal {
   }
 
   protected willPlacePopover(placement: PopoverPlacement): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.popoverWillPlace !== void 0) {
-      viewController.popoverWillPlace(placement, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -782,10 +750,6 @@ export class PopoverView extends HtmlView implements Modal {
       if (viewObserver.popoverDidPlace !== void 0) {
         viewObserver.popoverDidPlace(placement, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.popoverDidPlace !== void 0) {
-      viewController.popoverDidPlace(placement, this);
     }
   }
 

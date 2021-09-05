@@ -25,7 +25,6 @@ import {
   CanvasContext,
   CanvasRenderer,
 } from "@swim/graphics";
-import type {GeoViewController} from "../geo/GeoViewController";
 import {GeoPathViewInit, GeoPathView} from "./GeoPathView";
 import type {GeoAreaViewObserver} from "./GeoAreaViewObserver";
 
@@ -50,15 +49,9 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     }
   }
 
-  override readonly viewController!: GeoViewController<GeoAreaView> & GeoAreaViewObserver | null;
-
   override readonly viewObservers!: ReadonlyArray<GeoAreaViewObserver>;
 
   protected willSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetFill !== void 0) {
-      viewController.viewWillSetFill(newFill, oldFill, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -80,10 +73,6 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
         viewObserver.viewDidSetFill(newFill, oldFill, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetFill !== void 0) {
-      viewController.viewDidSetFill(newFill, oldFill, this);
-    }
   }
 
   @ViewAnimator<GeoAreaView, Color | null, AnyColor | null>({
@@ -101,10 +90,6 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetStroke !== void 0) {
-      viewController.viewWillSetStroke(newStroke, oldStroke, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -126,10 +111,6 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
         viewObserver.viewDidSetStroke(newStroke, oldStroke, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetStroke !== void 0) {
-      viewController.viewDidSetStroke(newStroke, oldStroke, this);
-    }
   }
 
   @ViewAnimator<GeoAreaView, Color | null, AnyColor | null>({
@@ -147,10 +128,6 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
   readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetStrokeWidth !== void 0) {
-      viewController.viewWillSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -171,10 +148,6 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
       if (viewObserver.viewDidSetStrokeWidth !== void 0) {
         viewObserver.viewDidSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetStrokeWidth !== void 0) {
-      viewController.viewDidSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
     }
   }
 

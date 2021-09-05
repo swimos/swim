@@ -53,10 +53,6 @@ export {
   ViewWillComposite,
   ViewDidComposite,
 } from "./ViewObserver";
-export {
-  ViewControllerType,
-  ViewController,
-} from "./ViewController";
 
 export * from "./manager";
 

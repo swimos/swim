@@ -19,10 +19,8 @@ import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
 import {Graphics, Icon, FilledIcon, IconViewInit, IconView, IconViewAnimator, SvgIconView} from "@swim/graphics";
 import {TreeCellInit, TreeCell} from "./TreeCell";
-import type {TreeCellController} from "./TreeCellController";
 
 export interface IconTreeCellInit extends TreeCellInit, IconViewInit {
-  viewController?: TreeCellController;
 }
 
 export class IconTreeCell extends TreeCell implements IconView {

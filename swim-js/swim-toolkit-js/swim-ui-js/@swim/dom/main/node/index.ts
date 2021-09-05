@@ -20,4 +20,3 @@ export {
   NodeView,
 } from "./NodeView";
 export {NodeViewObserver} from "./NodeViewObserver";
-export {NodeViewController} from "./NodeViewController";

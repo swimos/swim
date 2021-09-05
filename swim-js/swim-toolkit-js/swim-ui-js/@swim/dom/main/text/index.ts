@@ -19,4 +19,3 @@ export {
   TextView,
 } from "./TextView";
 export {TextViewObserver} from "./TextViewObserver";
-export {TextViewController} from "./TextViewController";

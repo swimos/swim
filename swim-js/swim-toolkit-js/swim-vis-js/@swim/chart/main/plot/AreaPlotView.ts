@@ -16,7 +16,7 @@ import type {R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {ViewAnimator} from "@swim/view";
-import type {GraphicsView, GraphicsViewController, CanvasContext, CanvasRenderer, FillViewInit, FillView} from "@swim/graphics";
+import type {GraphicsView, CanvasContext, CanvasRenderer, FillViewInit, FillView} from "@swim/graphics";
 import {SeriesPlotType, SeriesPlotViewInit, SeriesPlotView} from "./SeriesPlotView";
 import type {AreaPlotViewObserver} from "./AreaPlotViewObserver";
 
@@ -33,8 +33,6 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
     }
   }
 
-  override readonly viewController!: GraphicsViewController<AreaPlotView<X, Y>> & AreaPlotViewObserver<X, Y> | null;
-
   override readonly viewObservers!: ReadonlyArray<AreaPlotViewObserver<X, Y>>;
 
   override get plotType(): SeriesPlotType {
@@ -42,10 +40,6 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
   }
 
   protected willSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetPlotFill !== void 0) {
-      viewController.viewWillSetPlotFill(newFill, oldFill, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -66,10 +60,6 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
       if (viewObserver.viewDidSetPlotFill !== void 0) {
         viewObserver.viewDidSetPlotFill(newFill, oldFill, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetPlotFill !== void 0) {
-      viewController.viewDidSetPlotFill(newFill, oldFill, this);
     }
   }
 

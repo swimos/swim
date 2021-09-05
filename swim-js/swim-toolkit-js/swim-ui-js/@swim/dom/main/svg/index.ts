@@ -23,4 +23,3 @@ export {
   SvgView,
 } from "./SvgView";
 export {SvgViewObserver} from "./SvgViewObserver";
-export {SvgViewController} from "./SvgViewController";

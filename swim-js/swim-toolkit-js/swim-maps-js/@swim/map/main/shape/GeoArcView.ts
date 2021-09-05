@@ -37,7 +37,6 @@ import {
 } from "@swim/graphics";
 import {Arc} from "@swim/graphics";
 import type {GeoViewInit} from "../geo/GeoView";
-import type {GeoViewController} from "../geo/GeoViewController";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import {GeoRippleOptions, GeoRippleView} from "../effect/GeoRippleView";
 import type {GeoArcViewObserver} from "./GeoArcViewObserver";
@@ -97,15 +96,9 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
     }
   }
 
-  override readonly viewController!: GeoViewController<GeoArcView> & GeoArcViewObserver | null;
-
   override readonly viewObservers!: ReadonlyArray<GeoArcViewObserver>;
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGeoCenter !== void 0) {
-      viewController.viewWillSetGeoCenter(newGeoCenter, oldGeoCenter, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -129,10 +122,6 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
       if (viewObserver.viewDidSetGeoCenter !== void 0) {
         viewObserver.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGeoCenter !== void 0) {
-      viewController.viewDidSetGeoCenter(newGeoCenter, oldGeoCenter, this);
     }
   }
 

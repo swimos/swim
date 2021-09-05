@@ -14,7 +14,7 @@
 
 import {Look} from "@swim/theme";
 import {ViewContextType, ViewFlags, View, ViewProperty, ViewFastener} from "@swim/view";
-import {HtmlView, HtmlViewController} from "@swim/dom";
+import {HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import {CellView} from "../cell/CellView";
 import type {RowViewObserver} from "./RowViewObserver";
@@ -34,8 +34,6 @@ export class RowView extends HtmlView {
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
   }
-
-  override readonly viewController!: HtmlViewController & RowViewObserver | null;
 
   override readonly viewObservers!: ReadonlyArray<RowViewObserver>;
 
@@ -95,10 +93,6 @@ export class RowView extends HtmlView {
 
   protected willSetCell(newCellView: CellView | null, oldCellView: CellView | null,
                         targetView: View | null, cellFastener: ViewFastener<this, CellView>): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetCell !== void 0) {
-      viewController.viewWillSetCell(newCellView, oldCellView, targetView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -127,10 +121,6 @@ export class RowView extends HtmlView {
       if (viewObserver.viewDidSetCell !== void 0) {
         viewObserver.viewDidSetCell(newCellView, oldCellView, targetView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetCell !== void 0) {
-      viewController.viewDidSetCell(newCellView, oldCellView, targetView, this);
     }
   }
 

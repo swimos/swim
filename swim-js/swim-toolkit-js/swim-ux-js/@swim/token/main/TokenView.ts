@@ -31,12 +31,10 @@ import {
 import {HtmlViewInit, HtmlView, SvgView} from "@swim/dom";
 import {Graphics, PathContext, PathRenderer} from "@swim/graphics";
 import type {TokenViewObserver} from "./TokenViewObserver";
-import type {TokenViewController} from "./TokenViewController";
 
 export type TokenViewState = "collapsed" | "expanding" | "expanded" | "collapsing";
 
 export interface TokenViewInit extends HtmlViewInit {
-  controller?: TokenViewController;
 }
 
 export class TokenView extends HtmlView {
@@ -76,8 +74,6 @@ export class TokenView extends HtmlView {
     this.userSelect.setState("none", View.Intrinsic);
     this.shape.injectView();
   }
-
-  override readonly viewController!: TokenViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<TokenViewObserver>;
 
@@ -703,6 +699,7 @@ export class TokenView extends HtmlView {
       }
       if (this.tokenState !== "expanding") {
         this.willExpand();
+        this.onExpand();
       }
       if (timing !== false) {
         if (this.expandedPhase.value !== 1) {
@@ -728,10 +725,6 @@ export class TokenView extends HtmlView {
       labelContainer.display.setState("block", View.Intrinsic);
     }
 
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.tokenWillExpand !== void 0) {
-      viewController.tokenWillExpand(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -739,6 +732,10 @@ export class TokenView extends HtmlView {
         viewObserver.tokenWillExpand(this);
       }
     }
+  }
+
+  protected onExpand(): void {
+    // hook
   }
 
   protected didExpand(): void {
@@ -756,10 +753,6 @@ export class TokenView extends HtmlView {
         viewObserver.tokenDidExpand(this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.tokenDidExpand !== void 0) {
-      viewController.tokenDidExpand(this);
-    }
   }
 
   collapse(timing?: AnyTiming | boolean): void {
@@ -771,6 +764,7 @@ export class TokenView extends HtmlView {
       }
       if (this.tokenState !== "collapsing") {
         this.willCollapse();
+        this.onCollapse();
       }
       if (timing !== false) {
         if (this.expandedPhase.value !== 0) {
@@ -792,16 +786,19 @@ export class TokenView extends HtmlView {
       configurable: true,
     });
 
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.tokenWillCollapse !== void 0) {
-      viewController.tokenWillCollapse(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
       if (viewObserver.tokenWillCollapse !== void 0) {
         viewObserver.tokenWillCollapse(this);
       }
+    }
+  }
+
+  protected onCollapse(): void {
+    const labelView = this.label.view;
+    if (labelView !== null) {
+      labelView.node.blur();
     }
   }
 
@@ -820,10 +817,6 @@ export class TokenView extends HtmlView {
         viewObserver.tokenDidCollapse(this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.tokenDidCollapse !== void 0) {
-      viewController.tokenDidCollapse(this);
-    }
   }
 
   toggle(timing?: AnyTiming | boolean): void {
@@ -836,6 +829,10 @@ export class TokenView extends HtmlView {
   }
 
   protected onClickHead(event: MouseEvent): void {
+    const labelView = this.label.view;
+    if (labelView !== null && this.isExpanded()) {
+      labelView.node.focus();
+    }
     this.didPressHead();
   }
 
@@ -846,10 +843,6 @@ export class TokenView extends HtmlView {
       if (viewObserver.tokenDidPressHead !== void 0) {
         viewObserver.tokenDidPressHead(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.tokenDidPressHead !== void 0) {
-      viewController.tokenDidPressHead(this);
     }
   }
 
@@ -865,10 +858,6 @@ export class TokenView extends HtmlView {
         viewObserver.tokenDidPressBody(this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.tokenDidPressBody !== void 0) {
-      viewController.tokenDidPressBody(this);
-    }
   }
 
   protected onClickFoot(event: MouseEvent): void {
@@ -882,10 +871,6 @@ export class TokenView extends HtmlView {
       if (viewObserver.tokenDidPressFoot !== void 0) {
         viewObserver.tokenDidPressFoot(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.tokenDidPressFoot !== void 0) {
-      viewController.tokenDidPressFoot(this);
     }
   }
 }

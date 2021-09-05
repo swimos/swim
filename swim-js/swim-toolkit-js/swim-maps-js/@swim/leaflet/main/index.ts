@@ -16,4 +16,3 @@ export {LeafletViewport} from "./LeafletViewport";
 
 export {LeafletView} from "./LeafletView";
 export {LeafletViewObserver} from "./LeafletViewObserver";
-export {LeafletViewController} from "./LeafletViewController";

@@ -18,7 +18,7 @@ import {BTree} from "@swim/collections";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewFlags, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
-import {GraphicsView, GraphicsViewController, CanvasContext, CanvasRenderer} from "@swim/graphics";
+import {GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import type {DataPointCategory} from "../data/DataPoint";
 import {AnyDataPointView, DataPointView} from "../data/DataPointView";
 import {ContinuousScaleAnimator} from "../scaled/ContinuousScaleAnimator";
@@ -101,8 +101,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     }
   }
 
-  override readonly viewController!: GraphicsViewController<SeriesPlotView<X, Y>> & SeriesPlotViewObserver<X, Y> | null;
-
   override readonly viewObservers!: ReadonlyArray<SeriesPlotViewObserver<X, Y>>;
 
   abstract readonly plotType: SeriesPlotType;
@@ -117,10 +115,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   readonly hitMode!: ViewProperty<this, SeriesPlotHitMode>;
 
   protected willSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetXScale !== void 0) {
-      viewController.viewWillSetXScale(newXScale, oldXScale, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -143,10 +137,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
         viewObserver.viewDidSetXScale(newXScale, oldXScale, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetXScale !== void 0) {
-      viewController.viewDidSetXScale(newXScale, oldXScale, this);
-    }
   }
 
   @ViewAnimator<SeriesPlotView<X, Y>, ContinuousScale<X, number> | null>({
@@ -165,10 +155,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   readonly xScale!: ContinuousScaleAnimator<this, X, number>;
 
   protected willSetYScale(newYScale: ContinuousScale<Y, number> | null, oldYScale: ContinuousScale<Y, number> | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetYScale !== void 0) {
-      viewController.viewWillSetYScale(newYScale, oldYScale, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -190,10 +176,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
       if (viewObserver.viewDidSetYScale !== void 0) {
         viewObserver.viewDidSetYScale(newYScale, oldYScale, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetYScale !== void 0) {
-      viewController.viewDidSetYScale(newYScale, oldYScale, this);
     }
   }
 
@@ -251,10 +233,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   }
 
   protected willSetXRangePadding(newXRangePadding: readonly [number, number], oldXRangePadding: readonly [number, number]): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetXRangePadding !== void 0) {
-      viewController.viewWillSetXRangePadding(newXRangePadding, oldXRangePadding, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -276,10 +254,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
         viewObserver.viewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetXRangePadding !== void 0) {
-      viewController.viewDidSetXRangePadding(newXRangePadding, oldXRangePadding, this);
-    }
   }
 
   @ViewProperty<SeriesPlotView<X, Y>, readonly [number, number]>({
@@ -297,10 +271,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   readonly xRangePadding!: ViewProperty<this, readonly [number, number]>
 
   protected willSetYRangePadding(newYRangePadding: readonly [number, number], oldYRangePadding: readonly [number, number]): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetYRangePadding !== void 0) {
-      viewController.viewWillSetYRangePadding(newYRangePadding, oldYRangePadding, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -321,10 +291,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
       if (viewObserver.viewDidSetYRangePadding !== void 0) {
         viewObserver.viewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetYRangePadding !== void 0) {
-      viewController.viewDidSetYRangePadding(newYRangePadding, oldYRangePadding, this);
     }
   }
 
@@ -359,10 +325,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   }
 
   protected willSetXDataDomain(newXDataDomain: Domain<X> | null, oldXDataDomain: Domain<X> | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetXDataDomain !== void 0) {
-      viewController.viewWillSetXDataDomain(newXDataDomain, oldXDataDomain, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -384,10 +346,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
       if (viewObserver.viewDidSetXDataDomain !== void 0) {
         viewObserver.viewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetXDataDomain !== void 0) {
-      viewController.viewDidSetXDataDomain(newXDataDomain, oldXDataDomain, this);
     }
   }
 
@@ -422,10 +380,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   }
 
   protected willSetYDataDomain(newYDataDomain: Domain<Y> | null, oldYDataDomain: Domain<Y> | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetYDataDomain !== void 0) {
-      viewController.viewWillSetYDataDomain(newYDataDomain, oldYDataDomain, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -447,10 +401,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
       if (viewObserver.viewDidSetYDataDomain !== void 0) {
         viewObserver.viewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetYDataDomain !== void 0) {
-      viewController.viewDidSetYDataDomain(newYDataDomain, oldYDataDomain, this);
     }
   }
 
@@ -592,10 +542,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
 
   protected willSetDataPoint(newDataPointView: DataPointView<X, Y> | null, oldDataPointView: DataPointView<X, Y> | null,
                              targetView: View | null, dataPointFastener: ViewFastener<this, DataPointView<X, Y>>): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetDataPoint !== void 0) {
-      viewController.viewWillSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -624,10 +570,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
       if (viewObserver.viewDidSetDataPoint !== void 0) {
         viewObserver.viewDidSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetDataPoint !== void 0) {
-      viewController.viewDidSetDataPoint(newDataPointView, oldDataPointView, targetView, this);
     }
   }
 

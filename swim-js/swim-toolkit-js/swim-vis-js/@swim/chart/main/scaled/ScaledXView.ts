@@ -14,13 +14,11 @@
 
 import type {Domain, Range, AnyTiming, ContinuousScale} from "@swim/mapping";
 import type {ViewAnimator} from "@swim/view";
-import {GraphicsView, GraphicsViewController} from "@swim/graphics";
+import {GraphicsView} from "@swim/graphics";
 import type {ScaledXViewObserver} from "./ScaledXViewObserver";
 import {ScaledView} from "../"; // forward import
 
 export interface ScaledXView<X> extends GraphicsView {
-  readonly viewController: GraphicsViewController<ScaledXView<X>> & ScaledXViewObserver<X> | null;
-
   readonly viewObservers: ReadonlyArray<ScaledXViewObserver<X>>;
 
   readonly xScale: ViewAnimator<this, ContinuousScale<X, number> | null, string>;

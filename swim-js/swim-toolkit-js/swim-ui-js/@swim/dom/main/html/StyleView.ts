@@ -18,10 +18,8 @@ import type {CssRule} from "../css/CssRule";
 import {StyleSheetContext, StyleSheet} from "../css/StyleSheet";
 import {HtmlViewInit, HtmlView} from "../html/HtmlView";
 import type {StyleViewObserver} from "./StyleViewObserver";
-import type {StyleViewController} from "./StyleViewController";
 
 export interface StyleViewInit extends HtmlViewInit {
-  viewController?: StyleViewController;
 }
 
 export class StyleView extends HtmlView implements StyleSheetContext {
@@ -35,8 +33,6 @@ export class StyleView extends HtmlView implements StyleSheetContext {
   }
 
   override readonly node!: HTMLStyleElement;
-
-  override readonly viewController!: StyleViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<StyleViewObserver>;
 

@@ -15,7 +15,7 @@
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewAnimator} from "@swim/view";
-import {GraphicsView, GraphicsViewController, CanvasContext, CanvasRenderer} from "@swim/graphics";
+import {GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import {ScaledViewInit, ScaledView} from "../scaled/ScaledView";
 import {AnyPlotView, PlotView} from "../plot/PlotView";
 import type {GraphViewObserver} from "./GraphViewObserver";
@@ -30,8 +30,6 @@ export interface GraphViewInit<X, Y> extends ScaledViewInit<X, Y> {
 }
 
 export class GraphView<X, Y> extends ScaledView<X, Y> {
-  override readonly viewController!: GraphicsViewController<GraphView<X, Y>> & GraphViewObserver<X, Y> | null;
-
   override readonly viewObservers!: ReadonlyArray<GraphViewObserver<X, Y>>;
 
   override initView(init: GraphViewInit<X, Y>): void {

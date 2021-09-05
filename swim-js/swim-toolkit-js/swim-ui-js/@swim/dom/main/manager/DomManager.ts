@@ -17,7 +17,6 @@ import {ViewManager} from "@swim/view";
 import type {ViewNode, NodeView} from "../node/NodeView";
 import type {TextView} from "../text/TextView";
 import {ViewElement, ElementView} from "../element/ElementView";
-import type {ElementViewController} from "../element/ElementViewController";
 import {HtmlView} from "../html/HtmlView";
 import {SvgView} from "../svg/SvgView";
 import type {DomManagerObserver} from "./DomManagerObserver";
@@ -28,7 +27,6 @@ export class DomManager<V extends NodeView = NodeView> extends ViewManager<V> {
   protected override onInsertRootView(rootView: V): void {
     super.onInsertRootView(rootView);
     if (rootView instanceof ElementView && rootView.node.hasAttribute("swim-app")) {
-      this.materializeViewController(rootView);
       this.materializeView(rootView);
     }
   }
@@ -75,7 +73,6 @@ export class DomManager<V extends NodeView = NodeView> extends ViewManager<V> {
       }
     }
     const childView = new viewClass(childNode);
-    this.materializeViewController(childView);
     const key = childNode.getAttribute("key");
     parentView.injectChildView(childView, null, key !== null ? key : void 0);
     return childView;
@@ -83,18 +80,6 @@ export class DomManager<V extends NodeView = NodeView> extends ViewManager<V> {
 
   materializeText(parentView: NodeView, childNode: Text): TextView | null {
     return null;
-  }
-
-  materializeViewController(view: ElementView): void {
-    const viewControllerName = view.node.getAttribute("swim-controller");
-    if (viewControllerName !== null) {
-      const ViewControllerClass = DomManager.eval(viewControllerName) as {new(): ElementViewController} | undefined;
-      if (typeof ViewControllerClass !== "function") {
-        throw new TypeError(viewControllerName);
-      }
-      const viewController = new ViewControllerClass();
-      view.setViewController(viewController);
-    }
   }
 
   @Lazy

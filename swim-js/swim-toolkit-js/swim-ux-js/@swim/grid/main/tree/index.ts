@@ -32,7 +32,6 @@ export {
   TreeCell,
 } from "./TreeCell";
 export {TreeCellObserver} from "./TreeCellObserver";
-export {TreeCellController} from "./TreeCellController";
 
 export {TitleTreeCell} from "./TitleTreeCell";
 export {DisclosureTreeCell} from "./DisclosureTreeCell";
@@ -47,7 +46,6 @@ export {
   TreeLeaf,
 } from "./TreeLeaf";
 export {TreeLeafObserver} from "./TreeLeafObserver";
-export {TreeLeafController} from "./TreeLeafController";
 
 export {
   AnyTreeLimb,
@@ -56,7 +54,6 @@ export {
   TreeLimb,
 } from "./TreeLimb";
 export {TreeLimbObserver} from "./TreeLimbObserver";
-export {TreeLimbController} from "./TreeLimbController";
 
 export {
   AnyTreeVein,
@@ -64,7 +61,6 @@ export {
   TreeVein,
 } from "./TreeVein";
 export {TreeVeinObserver} from "./TreeVeinObserver";
-export {TreeVeinController} from "./TreeVeinController";
 
 export {
   AnyTreeStem,
@@ -72,7 +68,6 @@ export {
   TreeStem,
 } from "./TreeStem";
 export {TreeStemObserver} from "./TreeStemObserver";
-export {TreeStemController} from "./TreeStemController";
 
 export {
   AnyTreeView,
@@ -80,4 +75,3 @@ export {
   TreeView,
 } from "./TreeView";
 export {TreeViewObserver} from "./TreeViewObserver";
-export {TreeViewController} from "./TreeViewController";

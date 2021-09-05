@@ -51,7 +51,6 @@ import {GraphicsView} from "../graphics/GraphicsView";
 import {WebGLRenderer} from "../webgl/WebGLRenderer";
 import {CanvasRenderer} from "./CanvasRenderer";
 import type {CanvasViewObserver} from "./CanvasViewObserver";
-import type {CanvasViewController} from "./CanvasViewController";
 
 /** @hidden */
 export interface CanvasViewMouse extends ViewMouseEventInit {
@@ -66,7 +65,6 @@ export interface CanvasViewTouch extends ViewTouchInit {
 }
 
 export interface CanvasViewInit extends HtmlViewInit {
-  viewController?: CanvasViewController;
   renderer?: AnyGraphicsRenderer;
   clickEventsEnabled?: boolean;
   wheelEventsEnabled?: boolean;
@@ -153,8 +151,6 @@ export class CanvasView extends HtmlView {
   }
 
   override readonly node!: HTMLCanvasElement;
-
-  override readonly viewController!: CanvasViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<CanvasViewObserver>;
 
@@ -973,10 +969,6 @@ export class CanvasView extends HtmlView {
   }
 
   protected willRender(viewContext: ViewContextType<this>): void {
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewWillRender(viewContext, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillRenderObservers;
     if (viewObservers !== void 0) {
       for (let i = 0; i < viewObservers.length; i += 1) {
@@ -998,17 +990,9 @@ export class CanvasView extends HtmlView {
         viewObserver.viewDidRender(viewContext, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewDidRender(viewContext, this);
-    }
   }
 
   protected willRasterize(viewContext: ViewContextType<this>): void {
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewWillRasterize(viewContext, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillRasterizeObservers;
     if (viewObservers !== void 0) {
       for (let i = 0; i < viewObservers.length; i += 1) {
@@ -1030,17 +1014,9 @@ export class CanvasView extends HtmlView {
         viewObserver.viewDidRasterize(viewContext, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewDidRasterize(viewContext, this);
-    }
   }
 
   protected willComposite(viewContext: ViewContextType<this>): void {
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewWillComposite(viewContext, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillCompositeObservers;
     if (viewObservers !== void 0) {
       for (let i = 0; i < viewObservers.length; i += 1) {
@@ -1061,10 +1037,6 @@ export class CanvasView extends HtmlView {
         const viewObserver = viewObservers[i]!;
         viewObserver.viewDidComposite(viewContext, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      viewController.viewDidComposite(viewContext, this);
     }
   }
 
@@ -1127,10 +1099,6 @@ export class CanvasView extends HtmlView {
   }
 
   protected willSetHidden(hidden: boolean): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetHidden !== void 0) {
-      viewController.viewWillSetHidden(hidden, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length ; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -1153,10 +1121,6 @@ export class CanvasView extends HtmlView {
       if (viewObserver.viewDidSetHidden !== void 0) {
         viewObserver.viewDidSetHidden(hidden, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetHidden !== void 0) {
-      viewController.viewDidSetHidden(hidden, this);
     }
   }
 

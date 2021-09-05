@@ -23,7 +23,6 @@ import {
   CanvasContext,
   CanvasRenderer,
 } from "@swim/graphics";
-import type {GeoViewController} from "../geo/GeoViewController";
 import {GeoPathViewInit, GeoPathView} from "./GeoPathView";
 import type {GeoLineViewObserver} from "./GeoLineViewObserver";
 
@@ -45,15 +44,9 @@ export class GeoLineView extends GeoPathView implements StrokeView {
     }
   }
 
-  override readonly viewController!: GeoViewController<GeoLineView> & GeoLineViewObserver | null;
-
   override readonly viewObservers!: ReadonlyArray<GeoLineViewObserver>;
 
   protected willSetStroke(newStroke: Color | null, oldStroke: Color | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetStroke !== void 0) {
-      viewController.viewWillSetStroke(newStroke, oldStroke, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -75,10 +68,6 @@ export class GeoLineView extends GeoPathView implements StrokeView {
         viewObserver.viewDidSetStroke(newStroke, oldStroke, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetStroke !== void 0) {
-      viewController.viewDidSetStroke(newStroke, oldStroke, this);
-    }
   }
 
   @ViewAnimator<GeoLineView, Color | null, AnyColor | null>({
@@ -96,10 +85,6 @@ export class GeoLineView extends GeoPathView implements StrokeView {
   readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetStrokeWidth !== void 0) {
-      viewController.viewWillSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -120,10 +105,6 @@ export class GeoLineView extends GeoPathView implements StrokeView {
       if (viewObserver.viewDidSetStrokeWidth !== void 0) {
         viewObserver.viewDidSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetStrokeWidth !== void 0) {
-      viewController.viewDidSetStrokeWidth(newStrokeWidth, oldStrokeWidth, this);
     }
   }
 

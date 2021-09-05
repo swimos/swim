@@ -43,7 +43,6 @@ import {
 import type {GraphicsRenderer} from "./GraphicsRenderer";
 import type {GraphicsViewContext} from "./GraphicsViewContext";
 import type {GraphicsViewObserver} from "./GraphicsViewObserver";
-import type {GraphicsViewController} from "./GraphicsViewController";
 import {CanvasView} from "../"; // forward import
 
 export interface GraphicsViewEventMap {
@@ -74,7 +73,6 @@ export interface GraphicsViewEventMap {
 }
 
 export interface GraphicsViewInit extends ViewInit {
-  viewController?: GraphicsViewController;
   mood?: MoodVector;
   moodModifier?: MoodMatrix;
   theme?: ThemeMatrix;
@@ -166,8 +164,6 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  override readonly viewController!: GraphicsViewController | null;
-
   override readonly viewObservers!: ReadonlyArray<GraphicsViewObserver>;
 
   protected override onAddViewObserver(viewObserver: ViewObserverType<this>): void {
@@ -216,13 +212,6 @@ export abstract class GraphicsView extends View {
 
   protected willObserve<T>(callback: (this: this, viewObserver: ViewObserverType<this>) => T | void): T | undefined {
     let result: T | undefined;
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      result = callback.call(this, viewController as ViewObserverType<this>) as T | undefined;
-      if (result !== void 0) {
-        return result;
-      }
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -240,13 +229,6 @@ export abstract class GraphicsView extends View {
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
       result = callback.call(this, viewObserver as ViewObserverType<this>) as T | undefined;
-      if (result !== void 0) {
-        return result;
-      }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      result = callback.call(this, viewController as ViewObserverType<this>) as T | undefined;
       if (result !== void 0) {
         return result;
       }
@@ -799,10 +781,6 @@ export abstract class GraphicsView extends View {
   }
 
   protected willRender(viewContext: ViewContextType<this>): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillRender !== void 0) {
-      viewController.viewWillRender(viewContext, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillRenderObservers;
     if (viewObservers !== void 0) {
       for (let i = 0; i < viewObservers.length; i += 1) {
@@ -824,17 +802,9 @@ export abstract class GraphicsView extends View {
         viewObserver.viewDidRender(viewContext, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidRender !== void 0) {
-      viewController.viewDidRender(viewContext, this);
-    }
   }
 
   protected willRasterize(viewContext: ViewContextType<this>): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillRasterize !== void 0) {
-      viewController.viewWillRasterize(viewContext, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillRasterizeObservers;
     if (viewObservers !== void 0) {
       for (let i = 0; i < viewObservers.length; i += 1) {
@@ -856,17 +826,9 @@ export abstract class GraphicsView extends View {
         viewObserver.viewDidRasterize(viewContext, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidRasterize !== void 0) {
-      viewController.viewDidRasterize(viewContext, this);
-    }
   }
 
   protected willComposite(viewContext: ViewContextType<this>): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillComposite !== void 0) {
-      viewController.viewWillComposite(viewContext, this);
-    }
     const viewObservers = this.viewObserverCache.viewWillCompositeObservers;
     if (viewObservers !== void 0) {
       for (let i = 0; i < viewObservers.length; i += 1) {
@@ -887,10 +849,6 @@ export abstract class GraphicsView extends View {
         const viewObserver = viewObservers[i]!;
         viewObserver.viewDidComposite(viewContext, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidComposite !== void 0) {
-      viewController.viewDidComposite(viewContext, this);
     }
   }
 
@@ -1165,10 +1123,6 @@ export abstract class GraphicsView extends View {
   }
 
   protected willSetHidden(hidden: boolean): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetHidden !== void 0) {
-      viewController.viewWillSetHidden(hidden, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -1191,10 +1145,6 @@ export abstract class GraphicsView extends View {
       if (viewObserver.viewDidSetHidden !== void 0) {
         viewObserver.viewDidSetHidden(hidden, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetHidden !== void 0) {
-      viewController.viewDidSetHidden(hidden, this);
     }
   }
 

@@ -19,7 +19,6 @@ import {ViewContextType, ViewAnimator, ViewFastener} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
-  GraphicsViewController,
   LayerView,
   CanvasContext,
   CanvasRenderer,
@@ -121,8 +120,6 @@ export abstract class TickView<D> extends LayerView {
     }
   }
 
-  override readonly viewController!: GraphicsViewController & TickViewObserver<D> | null;
-
   override readonly viewObservers!: ReadonlyArray<TickViewObserver<D>>;
 
   abstract readonly orientation: TickOrientation;
@@ -187,10 +184,6 @@ export abstract class TickView<D> extends LayerView {
   }
 
   protected willSetLabel(newLabelView: GraphicsView | null, oldLabelView: GraphicsView | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetTickLabel !== void 0) {
-      viewController.viewWillSetTickLabel(newLabelView, oldLabelView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -217,10 +210,6 @@ export abstract class TickView<D> extends LayerView {
       if (viewObserver.viewDidSetTickLabel !== void 0) {
         viewObserver.viewDidSetTickLabel(newLabelView, oldLabelView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetTickLabel !== void 0) {
-      viewController.viewDidSetTickLabel(newLabelView, oldLabelView, this);
     }
   }
 

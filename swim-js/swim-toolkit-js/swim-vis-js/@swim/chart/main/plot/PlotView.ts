@@ -15,7 +15,7 @@
 import type {Domain, Range, AnyTiming, ContinuousScale} from "@swim/mapping";
 import type {AnyFont, AnyColor} from "@swim/style";
 import type {ViewAnimator} from "@swim/view";
-import {GraphicsViewInit, GraphicsView, GraphicsViewController} from "@swim/graphics";
+import {GraphicsViewInit, GraphicsView} from "@swim/graphics";
 import type {AnyDataPointView} from "../data/DataPointView";
 import type {ScaledXYView} from "../scaled/ScaledXYView";
 import type {PlotViewObserver} from "./PlotViewObserver";
@@ -42,8 +42,6 @@ export interface PlotViewInit<X, Y> extends GraphicsViewInit {
 }
 
 export interface PlotView<X, Y> extends GraphicsView, ScaledXYView<X, Y> {
-  readonly viewController: GraphicsViewController<PlotView<X, Y>> & PlotViewObserver<X, Y> | null;
-
   readonly viewObservers: ReadonlyArray<PlotViewObserver<X, Y>>;
 
   plotType: PlotType;

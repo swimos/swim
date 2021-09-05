@@ -36,7 +36,6 @@ export {
   ButtonStack,
 } from "./ButtonStack";
 export {ButtonStackObserver} from "./ButtonStackObserver";
-export {ButtonStackController} from "./ButtonStackController";
 
 export {IconButton} from "./IconButton";
 

@@ -32,7 +32,6 @@ import {
   ViewFastener,
 } from "@swim/view";
 import type {NodeViewObserver} from "./NodeViewObserver";
-import type {NodeViewController} from "./NodeViewController";
 import {TextViewConstructor, TextView} from "../"; // forward import
 import {ViewElement, ElementView} from "../"; // forward import
 
@@ -43,7 +42,6 @@ export interface ViewNode extends Node {
 }
 
 export interface NodeViewInit extends ViewInit {
-  viewController?: NodeViewController;
   text?: string;
 }
 
@@ -111,19 +109,10 @@ export class NodeView extends View {
 
   readonly node!: Node;
 
-  override readonly viewController!: NodeViewController | null;
-
   override readonly viewObservers!: ReadonlyArray<NodeViewObserver>;
 
   protected willObserve<T>(callback: (this: this, viewObserver: ViewObserverType<this>) => T | void): T | undefined {
     let result: T | undefined;
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      result = callback.call(this, viewController as ViewObserverType<this>) as T | undefined;
-      if (result !== void 0) {
-        return result;
-      }
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -141,13 +130,6 @@ export class NodeView extends View {
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
       result = callback.call(this, viewObserver as ViewObserverType<this>) as T | undefined;
-      if (result !== void 0) {
-        return result;
-      }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null) {
-      result = callback.call(this, viewController as ViewObserverType<this>) as T | undefined;
       if (result !== void 0) {
         return result;
       }
@@ -649,10 +631,6 @@ export class NodeView extends View {
   }
 
   protected willInsertChildNode(childNode: Node, targetNode: Node | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillInsertChildNode !== void 0) {
-      viewController.viewWillInsertChildNode(childNode, targetNode, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -673,10 +651,6 @@ export class NodeView extends View {
       if (viewObserver.viewDidInsertChildNode !== void 0) {
         viewObserver.viewDidInsertChildNode(childNode, targetNode, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidInsertChildNode !== void 0) {
-      viewController.viewDidInsertChildNode(childNode, targetNode, this);
     }
   }
 
@@ -799,10 +773,6 @@ export class NodeView extends View {
   }
 
   protected willRemoveChildNode(childNode: Node): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillRemoveChildNode !== void 0) {
-      viewController.viewWillRemoveChildNode(childNode, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -823,10 +793,6 @@ export class NodeView extends View {
       if (viewObserver.viewDidRemoveChildNode !== void 0) {
         viewObserver.viewDidRemoveChildNode(childNode, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidRemoveChildNode !== void 0) {
-      viewController.viewDidRemoveChildNode(childNode, this);
     }
   }
 

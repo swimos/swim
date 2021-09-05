@@ -19,7 +19,6 @@ import {ViewContextType, View, ViewAnimator, ViewFastener} from "@swim/view";
 import {
   GraphicsViewInit,
   GraphicsView,
-  GraphicsViewController,
   LayerView,
   TypesetView,
   AnyTextRunView,
@@ -131,8 +130,6 @@ export class GaugeView extends LayerView {
     }
   }
 
-  override readonly viewController!: GraphicsViewController & GaugeViewObserver | null;
-
   override readonly viewObservers!: ReadonlyArray<GaugeViewObserver>;
 
   @ViewAnimator({type: Number, state: 0, updateFlags: View.NeedsLayout})
@@ -209,10 +206,6 @@ export class GaugeView extends LayerView {
   }
 
   protected willSetTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGaugeTitle !== void 0) {
-      viewController.viewWillSetGaugeTitle(newTitleView, oldTitleView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -239,10 +232,6 @@ export class GaugeView extends LayerView {
       if (viewObserver.viewDidSetGaugeTitle !== void 0) {
         viewObserver.viewDidSetGaugeTitle(newTitleView, oldTitleView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGaugeTitle !== void 0) {
-      viewController.viewDidSetGaugeTitle(newTitleView, oldTitleView, this);
     }
   }
 
@@ -327,10 +316,6 @@ export class GaugeView extends LayerView {
 
   protected willSetDial(newDialView: DialView | null, oldDialView: DialView | null,
                         targetView: View | null, dialFastener: ViewFastener<this, DialView>): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetDial !== void 0) {
-      viewController.viewWillSetDial(newDialView, oldDialView, targetView, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -359,10 +344,6 @@ export class GaugeView extends LayerView {
       if (viewObserver.viewDidSetDial !== void 0) {
         viewObserver.viewDidSetDial(newDialView, oldDialView, targetView, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetDial !== void 0) {
-      viewController.viewDidSetDial(newDialView, oldDialView, targetView, this);
     }
   }
 

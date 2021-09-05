@@ -22,7 +22,6 @@ import {ViewNodeType, NodeViewConstructor, NodeView} from "../node/NodeView";
 import {AttributeAnimatorMemberInit, AttributeAnimator} from "../attribute/AttributeAnimator";
 import {ElementViewInit, ElementViewConstructor, ElementView} from "../element/ElementView";
 import type {HtmlViewObserver} from "./HtmlViewObserver";
-import type {HtmlViewController} from "./HtmlViewController";
 import type {StyleView} from "./StyleView";
 
 export interface ViewHtml extends HTMLElement {
@@ -46,7 +45,6 @@ export interface HtmlViewStyleInit extends StyleMapInit {
 }
 
 export interface HtmlViewInit extends ElementViewInit {
-  viewController?: HtmlViewController;
   attributes?: HtmlViewAttributesInit;
   style?: HtmlViewStyleInit;
 }
@@ -227,8 +225,6 @@ export class HtmlView extends ElementView {
   }
 
   override readonly node!: HTMLElement;
-
-  override readonly viewController!: HtmlViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<HtmlViewObserver>;
 

@@ -38,9 +38,7 @@ if (navigator.standalone) {
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-const deckView = swim.DeckView.create().flexGrow(1);
-
-deckView.setViewController(new swim.TitleDeckViewController());
+const deckView = swim.TitleDeckView.create().flexGrow(1);
 
 const deckBar = deckView.bar.view;
 

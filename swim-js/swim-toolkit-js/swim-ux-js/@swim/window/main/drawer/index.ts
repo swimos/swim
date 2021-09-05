@@ -18,6 +18,5 @@ export {
   DrawerView,
 } from "./DrawerView";
 export {DrawerViewObserver} from "./DrawerViewObserver";
-export {DrawerViewController} from "./DrawerViewController";
 
 export {DrawerButton} from "./DrawerButton";

@@ -17,13 +17,10 @@ import {HtmlViewConstructor, HtmlViewInit, HtmlView} from "@swim/dom";
 import {AnyTreeSeed, TreeSeed} from "./TreeSeed";
 import {AnyTreeVein, TreeVein} from "./TreeVein";
 import type {TreeStemObserver} from "./TreeStemObserver";
-import type {TreeStemController} from "./TreeStemController";
 
 export type AnyTreeStem = TreeStem | TreeStemInit | HTMLElement;
 
 export interface TreeStemInit extends HtmlViewInit {
-  viewController?: TreeStemController;
-
   veins?: AnyTreeVein[];
 }
 
@@ -40,8 +37,6 @@ export class TreeStem extends HtmlView {
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
   }
-
-  override readonly viewController!: TreeStemController | null;
 
   override readonly viewObservers!: ReadonlyArray<TreeStemObserver>;
 

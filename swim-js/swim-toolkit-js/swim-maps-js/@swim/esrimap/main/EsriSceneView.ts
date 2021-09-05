@@ -25,7 +25,6 @@ import type {AnyGeoPerspective} from "@swim/map";
 import {EsriView} from "./EsriView";
 import {EsriSceneViewport} from "./EsriSceneViewport";
 import type {EsriSceneViewObserver} from "./EsriSceneViewObserver";
-import type {EsriSceneViewController} from "./EsriSceneViewController";
 
 export class EsriSceneView extends EsriView {
   constructor(map: __esri.SceneView) {
@@ -43,8 +42,6 @@ export class EsriSceneView extends EsriView {
     this.initMap(map);
   }
 
-  override readonly viewController!: EsriSceneViewController | null;
-
   override readonly viewObservers!: ReadonlyArray<EsriSceneViewObserver>;
 
   override readonly map!: __esri.SceneView;
@@ -56,10 +53,6 @@ export class EsriSceneView extends EsriView {
   override readonly geoViewport!: EsriSceneViewport;
 
   protected willSetGeoViewport(newGeoViewport: EsriSceneViewport, oldGeoViewport: EsriSceneViewport): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGeoViewport !== void 0) {
-      viewController.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -80,10 +73,6 @@ export class EsriSceneView extends EsriView {
       if (viewObserver.viewDidSetGeoViewport !== void 0) {
         viewObserver.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGeoViewport !== void 0) {
-      viewController.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
     }
   }
 

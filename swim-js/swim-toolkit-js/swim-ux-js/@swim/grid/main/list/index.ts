@@ -14,8 +14,6 @@
 
 export {ListItem} from "./ListItem";
 export {ListItemObserver} from "./ListItemObserver";
-export {ListItemController} from "./ListItemController";
 
 export {ListView} from "./ListView";
 export {ListViewObserver} from "./ListViewObserver";
-export {ListViewController} from "./ListViewController";

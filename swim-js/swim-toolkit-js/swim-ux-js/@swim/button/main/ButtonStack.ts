@@ -32,7 +32,6 @@ import {Graphics, VectorIcon} from "@swim/graphics";
 import {FloatingButton} from "./FloatingButton";
 import {ButtonItem} from "./ButtonItem";
 import type {ButtonStackObserver} from "./ButtonStackObserver";
-import type {ButtonStackController} from "./ButtonStackController";
 
 export type ButtonStackState = "collapsed" | "expanding" | "expanded" | "collapsing";
 
@@ -77,8 +76,6 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
       this.append(button, "button");
     }
   }
-
-  override readonly viewController!: ButtonStackController | null;
 
   override readonly viewObservers!: ReadonlyArray<ButtonStackObserver>;
 
@@ -347,6 +344,7 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
         if (button instanceof FloatingButton) {
           button.pushIcon(this.closeIcon, timing);
         }
+        this.onExpand();
       }
       if (timing !== false) {
         if (this.stackPhase.value !== 1) {
@@ -368,10 +366,6 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
       configurable: true,
     });
 
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.buttonStackWillExpand !== void 0) {
-      viewController.buttonStackWillExpand(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -379,6 +373,10 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
         viewObserver.buttonStackWillExpand(this);
       }
     }
+  }
+
+  protected onExpand(): void {
+    this.modalService.presentModal(this);
   }
 
   protected didExpand(): void {
@@ -396,10 +394,6 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
         viewObserver.buttonStackDidExpand(this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.buttonStackDidExpand !== void 0) {
-      viewController.buttonStackDidExpand(this);
-    }
   }
 
   collapse(timing?: AnyTiming | boolean): void {
@@ -415,6 +409,7 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
         if (button instanceof FloatingButton && button.iconCount > 1) {
           button.popIcon(timing);
         }
+        this.onCollapse();
       }
       if (timing !== false) {
         if (this.stackPhase.value !== 0) {
@@ -436,10 +431,6 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
       configurable: true,
     });
 
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.buttonStackWillCollapse !== void 0) {
-      viewController.buttonStackWillCollapse(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -447,6 +438,10 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
         viewObserver.buttonStackWillCollapse(this);
       }
     }
+  }
+
+  protected onCollapse(): void {
+    this.modalService.dismissModal(this);
   }
 
   protected didCollapse(): void {
@@ -463,10 +458,6 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
       if (viewObserver.buttonStackDidCollapse !== void 0) {
         viewObserver.buttonStackDidCollapse(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.buttonStackDidCollapse !== void 0) {
-      viewController.buttonStackDidCollapse(this);
     }
   }
 
@@ -497,10 +488,6 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
   }
 
   protected willShow(): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.buttonStackWillShow !== void 0) {
-      viewController.buttonStackWillShow(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -522,10 +509,6 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
         viewObserver.buttonStackDidShow(this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.buttonStackDidShow !== void 0) {
-      viewController.buttonStackDidShow(this);
-    }
   }
 
   hide(timing?: AnyTiming | boolean): void {
@@ -546,10 +529,6 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
   }
 
   protected willHide(): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.buttonStackWillHide !== void 0) {
-      viewController.buttonStackWillHide(this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -569,10 +548,6 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
       if (viewObserver.buttonStackDidHide !== void 0) {
         viewObserver.buttonStackDidHide(this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.buttonStackDidHide !== void 0) {
-      viewController.buttonStackDidHide(this);
     }
   }
 
@@ -594,6 +569,7 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
           if (button instanceof FloatingButton) {
             button.pushIcon(this.closeIcon);
           }
+          this.onExpand();
         }
       }
     }

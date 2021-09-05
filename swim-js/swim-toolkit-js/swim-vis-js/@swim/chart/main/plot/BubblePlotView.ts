@@ -16,7 +16,7 @@ import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
 import {ViewAnimator} from "@swim/view";
-import type {GraphicsViewController, CanvasContext, FillViewInit, FillView, StrokeViewInit, StrokeView} from "@swim/graphics";
+import type {CanvasContext, FillViewInit, FillView, StrokeViewInit, StrokeView} from "@swim/graphics";
 import {ScatterPlotType, ScatterPlotViewInit, ScatterPlotView} from "./ScatterPlotView";
 import type {BubblePlotViewObserver} from "./BubblePlotViewObserver";
 
@@ -43,8 +43,6 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
     }
   }
 
-  override readonly viewController!: GraphicsViewController<BubblePlotView<X, Y>> & BubblePlotViewObserver<X, Y> | null;
-
   override readonly viewObservers!: ReadonlyArray<BubblePlotViewObserver<X, Y>>;
 
   override get plotType(): ScatterPlotType {
@@ -52,10 +50,6 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
   }
 
   protected willSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetPlotRadius !== void 0) {
-      viewController.viewWillSetPlotRadius(newRadius, oldRadius, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -77,10 +71,6 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
         viewObserver.viewDidSetPlotRadius(newRadius, oldRadius, this);
       }
     }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetPlotRadius !== void 0) {
-      viewController.viewDidSetPlotRadius(newRadius, oldRadius, this);
-    }
   }
 
   @ViewAnimator<BubblePlotView<X, Y>, Length | null, AnyLength | null>({
@@ -97,10 +87,6 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
   readonly radius!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   protected willSetFill(newFill: Color | null, oldFill: Color | null): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetPlotFill !== void 0) {
-      viewController.viewWillSetPlotFill(newFill, oldFill, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -121,10 +107,6 @@ export class BubblePlotView<X, Y> extends ScatterPlotView<X, Y> implements FillV
       if (viewObserver.viewDidSetPlotFill !== void 0) {
         viewObserver.viewDidSetPlotFill(newFill, oldFill, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetPlotFill !== void 0) {
-      viewController.viewDidSetPlotFill(newFill, oldFill, this);
     }
   }
 

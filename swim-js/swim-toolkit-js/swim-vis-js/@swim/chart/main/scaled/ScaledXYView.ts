@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {GraphicsView, GraphicsViewController} from "@swim/graphics";
+import {GraphicsView} from "@swim/graphics";
 import type {ScaledXView} from "./ScaledXView";
 import type {ScaledYView} from "./ScaledYView";
 import type {ScaledXYViewObserver} from "./ScaledXYViewObserver";
 import {ScaledView} from "../"; // forward import
 
 export interface ScaledXYView<X, Y> extends GraphicsView, ScaledXView<X>, ScaledYView<Y> {
-  readonly viewController: GraphicsViewController<ScaledXYView<X, Y>> & ScaledXYViewObserver<X, Y> | null;
-
   readonly viewObservers: ReadonlyArray<ScaledXYViewObserver<X, Y>>;
 }
 

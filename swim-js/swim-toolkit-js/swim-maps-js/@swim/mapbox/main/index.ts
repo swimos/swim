@@ -16,4 +16,3 @@ export {MapboxViewport} from "./MapboxViewport";
 
 export {MapboxView} from "./MapboxView";
 export {MapboxViewObserver} from "./MapboxViewObserver";
-export {MapboxViewController} from "./MapboxViewController";

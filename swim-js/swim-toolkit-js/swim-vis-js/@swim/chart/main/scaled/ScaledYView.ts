@@ -14,13 +14,11 @@
 
 import type {Domain, Range, AnyTiming, ContinuousScale} from "@swim/mapping";
 import type {ViewAnimator} from "@swim/view";
-import {GraphicsView, GraphicsViewController} from "@swim/graphics";
+import {GraphicsView} from "@swim/graphics";
 import type {ScaledYViewObserver} from "./ScaledYViewObserver";
 import {ScaledView} from "../"; // forward import
 
 export interface ScaledYView<Y> extends GraphicsView {
-  readonly viewController: GraphicsViewController<ScaledYView<Y>> & ScaledYViewObserver<Y> | null;
-
   readonly viewObservers: ReadonlyArray<ScaledYViewObserver<Y>>;
 
   readonly yScale: ViewAnimator<this, ContinuousScale<Y, number> | null, string>;

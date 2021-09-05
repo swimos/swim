@@ -23,7 +23,6 @@ import type {CanvasView} from "@swim/graphics";
 import {AnyGeoPerspective, MapView} from "@swim/map";
 import {GoogleMapViewport} from "./GoogleMapViewport";
 import type {GoogleMapViewObserver} from "./GoogleMapViewObserver";
-import type {GoogleMapViewController} from "./GoogleMapViewController";
 
 export class GoogleMapView extends MapView {
   constructor(map: google.maps.Map) {
@@ -45,8 +44,6 @@ export class GoogleMapView extends MapView {
     this.onMapIdle = this.onMapIdle.bind(this);
     this.initMap(map);
   }
-
-  override readonly viewController!: GoogleMapViewController | null;
 
   override readonly viewObservers!: ReadonlyArray<GoogleMapViewObserver>;
 
@@ -96,10 +93,6 @@ export class GoogleMapView extends MapView {
   override readonly geoViewport!: GoogleMapViewport;
 
   protected willSetGeoViewport(newGeoViewport: GoogleMapViewport, oldGeoViewport: GoogleMapViewport): void {
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewWillSetGeoViewport !== void 0) {
-      viewController.viewWillSetGeoViewport(newGeoViewport, oldGeoViewport, this);
-    }
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -120,10 +113,6 @@ export class GoogleMapView extends MapView {
       if (viewObserver.viewDidSetGeoViewport !== void 0) {
         viewObserver.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
       }
-    }
-    const viewController = this.viewController;
-    if (viewController !== null && viewController.viewDidSetGeoViewport !== void 0) {
-      viewController.viewDidSetGeoViewport(newGeoViewport, oldGeoViewport, this);
     }
   }
 
