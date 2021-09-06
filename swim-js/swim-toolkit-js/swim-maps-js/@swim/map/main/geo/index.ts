@@ -30,5 +30,5 @@ export {GeoViewObserver} from "./GeoViewObserver";
 export {GeoTrait} from "./GeoTrait";
 export {GeoTraitObserver} from "./GeoTraitObserver";
 
-export {GeoComponent} from "./GeoComponent";
-export {GeoComponentObserver} from "./GeoComponentObserver";
+export {GeoController} from "./GeoController";
+export {GeoControllerObserver} from "./GeoControllerObserver";

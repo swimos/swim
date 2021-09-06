@@ -18,5 +18,5 @@ export {RowViewObserver} from "./RowViewObserver";
 export {RowTrait} from "./RowTrait";
 export {RowTraitObserver} from "./RowTraitObserver";
 
-export {RowComponent} from "./RowComponent";
-export {RowComponentObserver} from "./RowComponentObserver";
+export {RowController} from "./RowController";
+export {RowControllerObserver} from "./RowControllerObserver";

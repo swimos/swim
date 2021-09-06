@@ -33,10 +33,10 @@ export {RightAxisTrait} from "./RightAxisTrait";
 export {BottomAxisTrait} from "./BottomAxisTrait";
 export {LeftAxisTrait} from "./LeftAxisTrait";
 
-export {AxisComponent} from "./AxisComponent";
-export {AxisComponentObserver} from "./AxisComponentObserver";
+export {AxisController} from "./AxisController";
+export {AxisControllerObserver} from "./AxisControllerObserver";
 
-export {TopAxisComponent} from "./TopAxisComponent";
-export {RightAxisComponent} from "./RightAxisComponent";
-export {BottomAxisComponent} from "./BottomAxisComponent";
-export {LeftAxisComponent} from "./LeftAxisComponent";
+export {TopAxisController} from "./TopAxisController";
+export {RightAxisController} from "./RightAxisController";
+export {BottomAxisController} from "./BottomAxisController";
+export {LeftAxisController} from "./LeftAxisController";

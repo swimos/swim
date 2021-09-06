@@ -26,5 +26,5 @@ export {
 } from "./PieTrait";
 export {PieTraitObserver} from "./PieTraitObserver";
 
-export {PieComponent} from "./PieComponent";
-export {PieComponentObserver} from "./PieComponentObserver";
+export {PieController} from "./PieController";
+export {PieControllerObserver} from "./PieControllerObserver";

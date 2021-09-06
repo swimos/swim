@@ -23,7 +23,7 @@
       "@swim/view": ["../../../../swim-ui-js/@swim/view/main"],
       "@swim/dom": ["../../../../swim-ui-js/@swim/dom/main"],
       "@swim/graphics": ["../../../../swim-ui-js/@swim/graphics/main"],
-      "@swim/component": ["../../../../swim-ui-js/@swim/component/main"],
+      "@swim/controller": ["../../../../swim-ui-js/@swim/controller/main"],
       "@swim/gauge": ["../../gauge/main"],
       "@swim/pie": ["../../pie/main"],
       "@swim/chart": ["../../chart/main"]

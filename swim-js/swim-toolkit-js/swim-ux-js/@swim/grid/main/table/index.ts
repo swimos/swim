@@ -18,5 +18,5 @@ export {TableViewObserver} from "./TableViewObserver";
 export {TableTrait} from "./TableTrait";
 export {TableTraitObserver} from "./TableTraitObserver";
 
-export {TableComponent} from "./TableComponent";
-export {TableComponentObserver} from "./TableComponentObserver";
+export {TableController} from "./TableController";
+export {TableControllerObserver} from "./TableControllerObserver";

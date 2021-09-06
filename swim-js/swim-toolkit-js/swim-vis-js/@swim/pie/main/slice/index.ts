@@ -28,5 +28,5 @@ export {
 } from "./SliceTrait";
 export {SliceTraitObserver} from "./SliceTraitObserver";
 
-export {SliceComponent} from "./SliceComponent";
-export {SliceComponentObserver} from "./SliceComponentObserver";
+export {SliceController} from "./SliceController";
+export {SliceControllerObserver} from "./SliceControllerObserver";

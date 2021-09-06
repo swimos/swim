@@ -32,6 +32,6 @@
     "@swim/view": "4.0.0-dev.20210826",
     "@swim/dom": "4.0.0-dev.20210826",
     "@swim/graphics": "4.0.0-dev.20210826",
-    "@swim/component": "4.0.0-dev.20210826"
+    "@swim/controller": "4.0.0-dev.20210826"
   }
 }

@@ -17,7 +17,7 @@ mapboxgl.accessToken = "pk.eyJ1Ijoic3dpbWl0IiwiYSI6ImNqY2c3NXZkYzFoa2QycXQ1eXl1M
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
-class ExampleMapboxComponent extends swim.MapComponent {
+class ExampleMapboxController extends swim.MapController {
   createMapView(containerView) {
     const map = new mapboxgl.Map({
       container: containerView.node,
@@ -37,14 +37,14 @@ class ExampleMapboxComponent extends swim.MapComponent {
   }
   createLayer(layerTrait) {
     if (layerTrait instanceof ExampleGridTrait) {
-      return new ExampleGridComponent(swim.GeoTile.root());
+      return new ExampleGridController(swim.GeoTile.root());
     } else {
       return super.createLayer(layerTrait);
     }
   }
 }
 
-class ExampleGridComponent extends swim.GeoGridComponent {
+class ExampleGridController extends swim.GeoGridController {
   initGeoView(layerView) {
     super.initGeoView(layerView);
     layerView.gridOutlineColor("#008f11");
@@ -53,7 +53,7 @@ class ExampleGridComponent extends swim.GeoGridComponent {
     super.projectGeoView(viewContext, layerView);
   }
   createTile(tileTrait) {
-    return new ExampleGridComponent(tileTrait.geoTile);
+    return new ExampleGridController(tileTrait.geoTile);
   }
   initTileView(tileView) {
     super.initTileView(tileView);
@@ -97,10 +97,10 @@ const mapTrait = new swim.MapTrait();
 mapModel.setTrait("map", mapTrait);
 mapModel.appendChildModel(layerModel, "layer");
 
-const mapComponent = new ExampleMapboxComponent();
-mapComponent.mount();
-mapComponent.map.setTrait(mapTrait);
-mapComponent.container.setView(bodyView);
+const mapController = new ExampleMapboxController();
+mapController.mount();
+mapController.map.setTrait(mapTrait);
+mapController.container.setView(bodyView);
 
     </script>
   </body>

@@ -22,5 +22,5 @@ export {
 } from "./CellTrait";
 export {CellTraitObserver} from "./CellTraitObserver";
 
-export {CellComponent} from "./CellComponent";
-export {CellComponentObserver} from "./CellComponentObserver";
+export {CellController} from "./CellController";
+export {CellControllerObserver} from "./CellControllerObserver";

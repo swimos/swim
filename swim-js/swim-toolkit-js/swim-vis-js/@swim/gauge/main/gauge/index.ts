@@ -26,5 +26,5 @@ export {
 } from "./GaugeTrait";
 export {GaugeTraitObserver} from "./GaugeTraitObserver";
 
-export {GaugeComponent} from "./GaugeComponent";
-export {GaugeComponentObserver} from "./GaugeComponentObserver";
+export {GaugeController} from "./GaugeController";
+export {GaugeControllerObserver} from "./GaugeControllerObserver";

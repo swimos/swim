@@ -22,5 +22,5 @@ export {
 } from "./ColTrait";
 export {ColTraitObserver} from "./ColTraitObserver";
 
-export {ColComponent} from "./ColComponent";
-export {ColComponentObserver} from "./ColComponentObserver";
+export {ColController} from "./ColController";
+export {ColControllerObserver} from "./ColControllerObserver";

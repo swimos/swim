@@ -20,5 +20,5 @@ export {
 export {GeoGridTrait} from "./GeoGridTrait";
 export {GeoGridTraitObserver} from "./GeoGridTraitObserver";
 
-export {GeoGridComponent} from "./GeoGridComponent";
-export {GeoGridComponentObserver} from "./GeoGridComponentObserver";
+export {GeoGridController} from "./GeoGridController";
+export {GeoGridControllerObserver} from "./GeoGridControllerObserver";

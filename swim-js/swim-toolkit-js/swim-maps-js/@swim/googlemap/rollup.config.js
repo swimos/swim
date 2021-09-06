@@ -32,7 +32,7 @@ const main = {
       "@swim/view": "swim",
       "@swim/dom": "swim",
       "@swim/graphics": "swim",
-      "@swim/component": "swim",
+      "@swim/controller": "swim",
       "@swim/map": "swim",
     },
     sourcemap: true,
@@ -61,7 +61,7 @@ const main = {
     "@swim/view",
     "@swim/dom",
     "@swim/graphics",
-    "@swim/component",
+    "@swim/controller",
     "@swim/map",
   ],
   plugins: [

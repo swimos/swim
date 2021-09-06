@@ -76,20 +76,20 @@ export {LinePlotTraitObserver} from "./LinePlotTraitObserver";
 export {AreaPlotTrait} from "./AreaPlotTrait";
 export {AreaPlotTraitObserver} from "./AreaPlotTraitObserver";
 
-export {PlotComponent} from "./PlotComponent";
-export {PlotComponentObserver} from "./PlotComponentObserver";
+export {PlotController} from "./PlotController";
+export {PlotControllerObserver} from "./PlotControllerObserver";
 
-export {ScatterPlotComponent} from "./ScatterPlotComponent";
-export {ScatterPlotComponentObserver} from "./ScatterPlotComponentObserver";
+export {ScatterPlotController} from "./ScatterPlotController";
+export {ScatterPlotControllerObserver} from "./ScatterPlotControllerObserver";
 
-export {SeriesPlotComponent} from "./SeriesPlotComponent";
-export {SeriesPlotComponentObserver} from "./SeriesPlotComponentObserver";
+export {SeriesPlotController} from "./SeriesPlotController";
+export {SeriesPlotControllerObserver} from "./SeriesPlotControllerObserver";
 
-export {BubblePlotComponent} from "./BubblePlotComponent";
-export {BubblePlotComponentObserver} from "./BubblePlotComponentObserver";
+export {BubblePlotController} from "./BubblePlotController";
+export {BubblePlotControllerObserver} from "./BubblePlotControllerObserver";
 
-export {LinePlotComponent} from "./LinePlotComponent";
-export {LinePlotComponentObserver} from "./LinePlotComponentObserver";
+export {LinePlotController} from "./LinePlotController";
+export {LinePlotControllerObserver} from "./LinePlotControllerObserver";
 
-export {AreaPlotComponent} from "./AreaPlotComponent";
-export {AreaPlotComponentObserver} from "./AreaPlotComponentObserver";
+export {AreaPlotController} from "./AreaPlotController";
+export {AreaPlotControllerObserver} from "./AreaPlotControllerObserver";

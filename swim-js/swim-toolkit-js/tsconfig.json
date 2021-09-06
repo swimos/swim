@@ -8,7 +8,7 @@
     {"path": "./swim-ui-js/@swim/view"},
     {"path": "./swim-ui-js/@swim/dom"},
     {"path": "./swim-ui-js/@swim/graphics"},
-    {"path": "./swim-ui-js/@swim/component"},
+    {"path": "./swim-ui-js/@swim/controller"},
     {"path": "./swim-ui-js/@swim/ui"},
 
     {"path": "./swim-ux-js/@swim/button"},

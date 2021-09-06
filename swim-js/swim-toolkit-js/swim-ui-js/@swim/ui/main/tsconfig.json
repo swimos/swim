@@ -23,7 +23,7 @@
       "@swim/view": ["../../view/main"],
       "@swim/dom": ["../../dom/main"],
       "@swim/graphics": ["../../graphics/main"],
-      "@swim/component": ["../../component/main"]
+      "@swim/controller": ["../../controller/main"]
     },
     "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
@@ -34,6 +34,6 @@
     {"path": "../../view/main"},
     {"path": "../../dom/main"},
     {"path": "../../graphics/main"},
-    {"path": "../../component/main"}
+    {"path": "../../controller/main"}
   ]
 }

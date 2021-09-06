@@ -29,5 +29,5 @@ export {
 } from "./DialTrait";
 export {DialTraitObserver} from "./DialTraitObserver";
 
-export {DialComponent} from "./DialComponent";
-export {DialComponentObserver} from "./DialComponentObserver";
+export {DialController} from "./DialController";
+export {DialControllerObserver} from "./DialControllerObserver";

@@ -66,8 +66,8 @@ const ui = [
     ],
   },
   {
-    id: "component",
-    name: "@swim/component",
+    id: "controller",
+    name: "@swim/controller",
     targets: [
       {
         id: "main",
@@ -83,7 +83,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["model", "style", "theme", "view", "dom", "graphics", "component"],
+        deps: ["model", "style", "theme", "view", "dom", "graphics", "controller"],
       },
     ],
   },

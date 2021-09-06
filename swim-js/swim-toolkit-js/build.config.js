@@ -409,9 +409,9 @@ const ui = [
     ],
   },
   {
-    id: "component",
-    name: "@swim/component",
-    path: "swim-ui-js/@swim/component",
+    id: "controller",
+    name: "@swim/controller",
+    path: "swim-ui-js/@swim/controller",
     targets: [
       {
         id: "main",
@@ -428,7 +428,7 @@ const ui = [
     targets: [
       {
         id: "main",
-        deps: ["model", "style", "theme", "view", "dom", "graphics", "component"],
+        deps: ["model", "style", "theme", "view", "dom", "graphics", "controller"],
       },
     ],
   },
@@ -464,7 +464,7 @@ const ux = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "component", "button"],
+        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "button"],
       },
     ],
   },
@@ -513,7 +513,7 @@ const vis = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "component"],
+        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller"],
       },
     ],
   },
@@ -524,7 +524,7 @@ const vis = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "component"],
+        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller"],
       },
     ],
   },
@@ -535,7 +535,7 @@ const vis = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "component"],
+        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller"],
       },
     ],
   },
@@ -562,7 +562,7 @@ const maps = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "component"],
+        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller"],
       },
     ],
   },
@@ -573,7 +573,7 @@ const maps = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "component", "map"],
+        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "map"],
       },
     ],
   },
@@ -584,7 +584,7 @@ const maps = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "component", "map"],
+        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "map"],
       },
     ],
   },
@@ -595,7 +595,7 @@ const maps = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "component", "map"],
+        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "map"],
       },
     ],
   },
@@ -606,7 +606,7 @@ const maps = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "component", "map"],
+        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "uri", "math", "geo", "time", "warp", "client", "model", "style", "theme", "view", "dom", "graphics", "controller", "map"],
       },
     ],
   },

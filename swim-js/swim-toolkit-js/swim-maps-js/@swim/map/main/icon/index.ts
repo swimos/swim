@@ -22,5 +22,5 @@ export {GeoIconViewObserver} from "./GeoIconViewObserver";
 export {GeoIconTrait} from "./GeoIconTrait";
 export {GeoIconTraitObserver} from "./GeoIconTraitObserver";
 
-export {GeoIconComponent} from "./GeoIconComponent";
-export {GeoIconComponentObserver} from "./GeoIconComponentObserver";
+export {GeoIconController} from "./GeoIconController";
+export {GeoIconControllerObserver} from "./GeoIconControllerObserver";

@@ -39,11 +39,11 @@ export {GeoLineTraitObserver} from "./GeoLineTraitObserver";
 export {GeoAreaTrait} from "./GeoAreaTrait";
 export {GeoAreaTraitObserver} from "./GeoAreaTraitObserver";
 
-export {GeoPathComponent} from "./GeoPathComponent";
-export {GeoPathComponentObserver} from "./GeoPathComponentObserver";
+export {GeoPathController} from "./GeoPathController";
+export {GeoPathControllerObserver} from "./GeoPathControllerObserver";
 
-export {GeoLineComponent} from "./GeoLineComponent";
-export {GeoLineComponentObserver} from "./GeoLineComponentObserver";
+export {GeoLineController} from "./GeoLineController";
+export {GeoLineControllerObserver} from "./GeoLineControllerObserver";
 
-export {GeoAreaComponent} from "./GeoAreaComponent";
-export {GeoAreaComponentObserver} from "./GeoAreaComponentObserver";
+export {GeoAreaController} from "./GeoAreaController";
+export {GeoAreaControllerObserver} from "./GeoAreaControllerObserver";

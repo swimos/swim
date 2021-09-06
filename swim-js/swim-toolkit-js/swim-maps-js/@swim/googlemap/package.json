@@ -35,7 +35,7 @@
     "@swim/view": "4.0.0-dev.20210826",
     "@swim/dom": "4.0.0-dev.20210826",
     "@swim/graphics": "4.0.0-dev.20210826",
-    "@swim/component": "4.0.0-dev.20210826",
+    "@swim/controller": "4.0.0-dev.20210826",
     "@swim/map": "4.0.0-dev.20210826",
     "@types/google.maps": ">= 3.0"
   }
