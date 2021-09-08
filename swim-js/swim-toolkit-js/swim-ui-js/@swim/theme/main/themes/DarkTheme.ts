@@ -96,8 +96,16 @@ const DarkSecondary = FeelVector.of(
   [Look.accentColor, DarkSecondaryColor],
 );
 
+const DarkUnselected = FeelVector.of(
+  [Look.color, DarkMutedColor],
+  [Look.iconColor, DarkMutedColor],
+  [Look.backgroundColor, DarkBackgroundColor.darker(1)],
+);
+
 const DarkSelected = FeelVector.of(
-  [Look.backgroundColor, Color.black(1)],
+  [Look.color, DarkColor],
+  [Look.iconColor, DarkIconColor],
+  [Look.backgroundColor, DarkBackgroundColor.darker(1)],
 );
 
 const DarkDisabled = FeelVector.of(
@@ -201,6 +209,7 @@ const DarkTheme = ThemeMatrix.forCols(
   [Feel.primary, DarkPrimary],
   [Feel.secondary, DarkSecondary],
 
+  [Feel.unselected, DarkUnselected],
   [Feel.selected, DarkSelected],
   [Feel.disabled, DarkDisabled],
   [Feel.inactive, DarkInactive],

@@ -959,8 +959,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
 
   protected abstract renderPlot(context: CanvasContext, frame: R2Box): void;
 
-  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    let hit: GraphicsView | null = null;
+  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const hitMode = this.hitMode.state;
     if (hitMode !== "none") {
       const renderer = viewContext.renderer;
@@ -969,15 +968,21 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
         context.save();
         x *= renderer.pixelRatio;
         y *= renderer.pixelRatio;
+        let hit: GraphicsView | null;
         if (hitMode === "domain") {
           hit = this.hitTestDomain(x, y, renderer);
         } else {
           hit = this.hitTestPlot(x, y, renderer);
         }
         context.restore();
+        return hit;
       }
     }
-    return hit;
+    return null;
+  }
+
+  protected override hitTestChildViews(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    return null;
   }
 
   protected hitTestDomain(x: number, y: number, renderer: CanvasRenderer): GraphicsView | null {

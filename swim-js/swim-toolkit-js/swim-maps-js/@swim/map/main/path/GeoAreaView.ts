@@ -225,20 +225,18 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     }
   }
 
-  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    let hit = super.doHitTest(x, y, viewContext);
-    if (hit === null) {
-      const renderer = viewContext.renderer;
-      if (renderer instanceof CanvasRenderer) {
-        const context = renderer.context;
-        context.save();
-        x *= renderer.pixelRatio;
-        y *= renderer.pixelRatio;
-        hit = this.hitTestArea(x, y, context, this.viewFrame);
-        context.restore();
-      }
+  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      x *= renderer.pixelRatio;
+      y *= renderer.pixelRatio;
+      const hit = this.hitTestArea(x, y, context, this.viewFrame);
+      context.restore();
+      return hit;
     }
-    return hit;
+    return null;
   }
 
   protected hitTestArea(x: number, y: number, context: CanvasContext, frame: R2Box): GraphicsView | null {
@@ -263,7 +261,7 @@ export class GeoAreaView extends GeoPathView implements FillView, StrokeView {
     return null;
   }
 
-  static create(): GeoAreaView {
+  static override create(): GeoAreaView {
     return new GeoAreaView();
   }
 

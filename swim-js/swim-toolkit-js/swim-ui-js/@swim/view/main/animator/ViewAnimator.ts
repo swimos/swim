@@ -16,7 +16,7 @@ import {__extends} from "tslib";
 import {FromAny} from "@swim/util";
 import type {AnyTiming, Timing} from "@swim/mapping";
 import {AnyLength, Length, AnyAngle, Angle, AnyTransform, Transform} from "@swim/math";
-import {AnyFont, Font, AnyColor, Color} from "@swim/style";
+import {AnyFont, Font, AnyColor, Color, AnyFocus, Focus, AnyPresence, Presence, AnyExpansion, Expansion} from "@swim/style";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewFlags, ViewPrecedence, View} from "../View";
 import {Animator} from "./Animator";
@@ -28,6 +28,9 @@ import {LengthViewAnimator} from "../"; // forward import
 import {ColorViewAnimator} from "../"; // forward import
 import {FontViewAnimator} from "../"; // forward import
 import {TransformViewAnimator} from "../"; // forward import
+import {FocusViewAnimatorInit, FocusViewAnimator} from "../"; // forward import
+import {PresenceViewAnimatorInit, PresenceViewAnimator} from "../"; // forward import
+import {ExpansionViewAnimatorInit, ExpansionViewAnimator} from "../"; // forward import
 
 export type ViewAnimatorMemberType<V, K extends keyof V> =
   V[K] extends ViewAnimator<any, infer T, any> ? T : never;
@@ -213,6 +216,9 @@ export const ViewAnimator = function <V extends View, T, U>(
   <V extends View, T extends string | null | undefined = string | null | undefined, U extends string | null | undefined = string | null | undefined>(descriptor: {type: typeof String} & ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
   <V extends View, T extends boolean | null | undefined = boolean | null | undefined, U extends boolean | string | null | undefined = boolean | string | null | undefined>(descriptor: {type: typeof Boolean} & ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
   <V extends View, T extends number | null | undefined = number | null | undefined, U extends number | string | null | undefined = number | string | null | undefined>(descriptor: {type: typeof Number} & ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
+  <V extends View, T extends Focus | null | undefined = Focus | null | undefined, U extends AnyFocus | null | undefined = AnyFocus | null | undefined>(descriptor: {type: typeof Focus} & ViewAnimatorDescriptor<V, T, U> & FocusViewAnimatorInit): PropertyDecorator;
+  <V extends View, T extends Presence | null | undefined = Presence | null | undefined, U extends AnyPresence | null | undefined = AnyPresence | null | undefined>(descriptor: {type: typeof Presence} & ViewAnimatorDescriptor<V, T, U> & PresenceViewAnimatorInit): PropertyDecorator;
+  <V extends View, T extends Expansion | null | undefined = Expansion | null | undefined, U extends AnyExpansion | null | undefined = AnyExpansion | null | undefined>(descriptor: {type: typeof Expansion} & ViewAnimatorDescriptor<V, T, U> & ExpansionViewAnimatorInit): PropertyDecorator;
   <V extends View, T, U = never>(descriptor: ViewAnimatorDescriptorFromAny<V, T, U>): PropertyDecorator;
   <V extends View, T, U = never, I = {}>(descriptor: ViewAnimatorDescriptorExtends<V, T, U, I>): PropertyDecorator;
   <V extends View, T, U = never>(descriptor: ViewAnimatorDescriptor<V, T, U>): PropertyDecorator;
@@ -630,6 +636,12 @@ ViewAnimator.getClass = function (type: unknown): ViewAnimatorClass | null {
     return FontViewAnimator;
   } else if (type === Transform) {
     return TransformViewAnimator;
+  } else if (type === Focus) {
+    return FocusViewAnimator;
+  } else if (type === Presence) {
+    return PresenceViewAnimator;
+  } else if (type === Expansion) {
+    return ExpansionViewAnimator;
   }
   return null;
 };

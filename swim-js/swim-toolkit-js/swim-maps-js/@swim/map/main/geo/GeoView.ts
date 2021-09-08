@@ -16,6 +16,7 @@ import {Arrays} from "@swim/util";
 import {GeoBox} from "@swim/geo";
 import {
   ViewContextType,
+  ViewContext,
   ViewFlags,
   View,
   ViewObserverType,
@@ -64,86 +65,93 @@ export abstract class GeoView extends GraphicsView {
     return processFlags;
   }
 
-  /** @hidden */
-  protected override doProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    let cascadeFlags = processFlags;
-    this.setViewFlags(this.viewFlags & ~View.NeedsProcess | (View.TraversingFlag | View.ProcessingFlag));
-    try {
-      this.willProcess(cascadeFlags, viewContext);
-      if (((this.viewFlags | processFlags) & View.NeedsResize) !== 0) {
-        cascadeFlags |= View.NeedsResize;
-        this.setViewFlags(this.viewFlags & ~View.NeedsResize);
-        this.willResize(viewContext);
-      }
-      if (((this.viewFlags | processFlags) & View.NeedsScroll) !== 0) {
-        cascadeFlags |= View.NeedsScroll;
-        this.setViewFlags(this.viewFlags & ~View.NeedsScroll);
-        this.willScroll(viewContext);
-      }
-      if (((this.viewFlags | processFlags) & View.NeedsChange) !== 0) {
-        cascadeFlags |= View.NeedsChange;
-        this.setViewFlags(this.viewFlags & ~View.NeedsChange);
-        this.willChange(viewContext);
-      }
-      if (((this.viewFlags | processFlags) & View.NeedsAnimate) !== 0) {
-        cascadeFlags |= View.NeedsAnimate;
-        this.setViewFlags(this.viewFlags & ~View.NeedsAnimate);
-        this.willAnimate(viewContext);
-      }
-      if (((this.viewFlags | processFlags) & View.NeedsLayout) !== 0) {
-        cascadeFlags |= View.NeedsLayout;
-        this.setViewFlags(this.viewFlags & ~View.NeedsLayout);
-        this.willLayout(viewContext);
-      }
-      if (((this.viewFlags | processFlags) & View.NeedsProject) !== 0) {
-        cascadeFlags |= View.NeedsProject;
-        this.setViewFlags(this.viewFlags & ~View.NeedsProject);
-        this.willProject(viewContext);
-      }
+  override cascadeProcess(processFlags: ViewFlags, baseViewContext: ViewContext): void {
+    const viewContext = this.extendViewContext(baseViewContext);
+    processFlags &= ~View.NeedsProcess;
+    processFlags |= this.viewFlags & View.UpdateMask;
+    processFlags = this.needsProcess(processFlags, viewContext);
+    if ((processFlags & View.ProcessMask) !== 0) {
+      let cascadeFlags = processFlags;
+      this.setViewFlags(this.viewFlags & ~View.NeedsProcess | (View.TraversingFlag | View.ProcessingFlag));
+      try {
+        this.willProcess(cascadeFlags, viewContext);
+        if (((this.viewFlags | processFlags) & View.NeedsResize) !== 0) {
+          cascadeFlags |= View.NeedsResize;
+          this.setViewFlags(this.viewFlags & ~View.NeedsResize);
+          this.willResize(viewContext);
+        }
+        if (((this.viewFlags | processFlags) & View.NeedsScroll) !== 0) {
+          cascadeFlags |= View.NeedsScroll;
+          this.setViewFlags(this.viewFlags & ~View.NeedsScroll);
+          this.willScroll(viewContext);
+        }
+        if (((this.viewFlags | processFlags) & View.NeedsChange) !== 0) {
+          cascadeFlags |= View.NeedsChange;
+          this.setViewFlags(this.viewFlags & ~View.NeedsChange);
+          this.willChange(viewContext);
+        }
+        if (((this.viewFlags | processFlags) & View.NeedsAnimate) !== 0) {
+          cascadeFlags |= View.NeedsAnimate;
+          this.setViewFlags(this.viewFlags & ~View.NeedsAnimate);
+          this.willAnimate(viewContext);
+        }
+        if (((this.viewFlags | processFlags) & View.NeedsLayout) !== 0) {
+          cascadeFlags |= View.NeedsLayout;
+          this.setViewFlags(this.viewFlags & ~View.NeedsLayout);
+          this.willLayout(viewContext);
+        }
+        if (((this.viewFlags | processFlags) & View.NeedsProject) !== 0) {
+          cascadeFlags |= View.NeedsProject;
+          this.setViewFlags(this.viewFlags & ~View.NeedsProject);
+          this.willProject(viewContext);
+        }
 
-      this.onProcess(cascadeFlags, viewContext);
-      if ((cascadeFlags & View.NeedsResize) !== 0) {
-        this.onResize(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsScroll) !== 0) {
-        this.onScroll(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsChange) !== 0) {
-        this.onChange(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsAnimate) !== 0) {
-        this.onAnimate(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsLayout) !== 0) {
-        this.onLayout(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsProject) !== 0) {
-        this.onProject(viewContext);
-      }
+        this.onProcess(cascadeFlags, viewContext);
+        if ((cascadeFlags & View.NeedsResize) !== 0) {
+          this.onResize(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsScroll) !== 0) {
+          this.onScroll(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsChange) !== 0) {
+          this.onChange(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsAnimate) !== 0) {
+          this.onAnimate(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsLayout) !== 0) {
+          this.onLayout(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsProject) !== 0) {
+          this.onProject(viewContext);
+        }
 
-      this.doProcessChildViews(cascadeFlags, viewContext);
+        if ((cascadeFlags & View.ProcessMask) !== 0) {
+          this.processChildViews(cascadeFlags, viewContext, this.processChildView);
+        }
 
-      if ((cascadeFlags & View.NeedsProject) !== 0) {
-        this.didProject(viewContext);
+        if ((cascadeFlags & View.NeedsProject) !== 0) {
+          this.didProject(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsLayout) !== 0) {
+          this.didLayout(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsAnimate) !== 0) {
+          this.didAnimate(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsChange) !== 0) {
+          this.didChange(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsScroll) !== 0) {
+          this.didScroll(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsResize) !== 0) {
+          this.didResize(viewContext);
+        }
+        this.didProcess(cascadeFlags, viewContext);
+      } finally {
+        this.setViewFlags(this.viewFlags & ~(View.TraversingFlag | View.ProcessingFlag));
       }
-      if ((cascadeFlags & View.NeedsLayout) !== 0) {
-        this.didLayout(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsAnimate) !== 0) {
-        this.didAnimate(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsChange) !== 0) {
-        this.didChange(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsScroll) !== 0) {
-        this.didScroll(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsResize) !== 0) {
-        this.didResize(viewContext);
-      }
-      this.didProcess(cascadeFlags, viewContext);
-    } finally {
-      this.setViewFlags(this.viewFlags & ~(View.TraversingFlag | View.ProcessingFlag));
     }
   }
 

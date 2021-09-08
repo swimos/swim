@@ -35,4 +35,8 @@ export abstract class NumberViewAnimatorConstraint<V extends View> extends ViewA
       return value;
     }
   }
+
+  override equalState(newState: number | null | undefined, oldState: number | null | undefined): boolean {
+    return newState === oldState;
+  }
 }

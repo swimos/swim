@@ -15,7 +15,7 @@
 import {Arrays} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {R2Box} from "@swim/math";
-import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
+import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix, Theme} from "@swim/theme";
 import {ToAttributeString, ToStyleString, ToCssValue} from "@swim/style";
 import {
   ViewContextType,
@@ -24,6 +24,7 @@ import {
   ViewConstructor,
   View,
   ViewObserverType,
+  Viewport,
   ViewProperty,
   ViewAnimator,
 } from "@swim/view";
@@ -39,6 +40,7 @@ import type {
   ViewWillSetStyle,
   ViewDidSetStyle,
 } from "./ElementViewObserver";
+import {DomManager} from "../"; // forward import
 
 export interface ViewElement extends Element, ElementCSSInlineStyle {
   view?: ElementView;
@@ -101,11 +103,37 @@ export class ElementView extends NodeView implements StyleContext {
       enumerable: true,
       configurable: true,
     });
+    this.initElement(node);
   }
 
   override readonly node!: Element & ElementCSSInlineStyle;
 
   override readonly viewObservers!: ReadonlyArray<ElementViewObserver>;
+
+  protected initElement(node: Element): void {
+    const themeName = node.getAttribute("swim-theme");
+    if (themeName !== null && themeName !== "") {
+      let theme: ThemeMatrix | undefined;
+      if (themeName === "auto") {
+        const viewport = Viewport.detect();
+        const colorScheme = viewport.colorScheme;
+        if (colorScheme === "dark") {
+          theme = Theme.dark;
+        } else {
+          theme = Theme.light;
+        }
+      } else if (themeName.indexOf('.') < 0) {
+        theme = (Theme as any)[themeName];
+      } else {
+        theme = DomManager.eval(themeName) as ThemeMatrix | undefined;
+      }
+      if (theme instanceof ThemeMatrix) {
+        this.theme.setState(theme, View.Extrinsic);
+      } else {
+        throw new TypeError("unknown swim-theme: " + themeName);
+      }
+    }
+  }
 
   override initView(init: ElementViewInit): void {
     super.initView(init);

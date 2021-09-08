@@ -12,11 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Timing} from "@swim/mapping";
 import {Angle, Transform} from "@swim/math";
-import {AnyColor, Color} from "@swim/style";
-import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {AnyColor, Color, AnyExpansion, Expansion} from "@swim/style";
+import {Look} from "@swim/theme";
+import {
+  ViewContextType,
+  ViewFlags,
+  View,
+  ViewAnimator,
+  ExpansionViewAnimator,
+} from "@swim/view";
 import {HtmlView, SvgView} from "@swim/dom";
 
 export class DisclosureButton extends HtmlView {
@@ -52,33 +57,30 @@ export class DisclosureButton extends HtmlView {
     return icon.getChildView("arrow") as SvgView;
   }
 
-  @ViewAnimator({type: Number, inherit: true, updateFlags: View.NeedsAnimate})
-  readonly disclosurePhase!: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
+  @ViewAnimator({type: Expansion, inherit: true, updateFlags: View.NeedsAnimate})
+  readonly disclosure!: ExpansionViewAnimator<this, Expansion, AnyExpansion>;
 
-  @ViewAnimator({type: Color, inherit: true, state: null, updateFlags: View.NeedsAnimate})
+  @ViewAnimator({type: Color, inherit: true, look: Look.color, updateFlags: View.NeedsAnimate})
   readonly collapsedColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Color, inherit: true, state: null, updateFlags: View.NeedsAnimate})
+  @ViewAnimator({type: Color, inherit: true, look: Look.accentColor, updateFlags: View.NeedsAnimate})
   readonly expandedColor!: ViewAnimator<this, Color | null, AnyColor | null>;
-
-  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
-    super.onApplyTheme(theme, mood, timing);
-    this.collapsedColor.setState(theme.getOr(Look.color, mood, null), timing, View.Intrinsic);
-    this.expandedColor.setState(theme.getOr(Look.accentColor, mood, null), timing, View.Intrinsic);
-  }
 
   protected override onAnimate(viewContext: ViewContextType<this>): void {
     super.onAnimate(viewContext);
-    if (this.disclosurePhase.isUpdated() || this.collapsedColor.isUpdated() || this.expandedColor.isUpdated()) {
-      const disclosurePhase = this.disclosurePhase.takeValue()!;
+    if (this.disclosure.isUpdated() || this.collapsedColor.isUpdated() || this.expandedColor.isUpdated()) {
+      const disclosure = this.disclosure.takeValue()!;
+      const phase = disclosure.phase;
       const collapsedColor = this.collapsedColor.takeValue();
       const expandedColor = this.expandedColor.takeValue();
       if (collapsedColor !== null && expandedColor !== null && this.arrow.fill.takesPrecedence(View.Intrinsic)) {
         const colorInterpolator = collapsedColor.interpolateTo(expandedColor);
-        this.arrow.fill.setState(colorInterpolator(disclosurePhase), View.Intrinsic);
+        this.arrow.fill.setState(colorInterpolator(phase), View.Intrinsic);
       }
-      const transform = Transform.translate(12, 12).rotate(Angle.deg(-180 * disclosurePhase));
+      const transform = Transform.translate(12, 12).rotate(Angle.deg(-180 * phase));
       this.arrow.transform.setState(transform, View.Intrinsic);
     }
   }
+
+  static override readonly mountFlags: ViewFlags = HtmlView.mountFlags | View.NeedsAnimate;
 }

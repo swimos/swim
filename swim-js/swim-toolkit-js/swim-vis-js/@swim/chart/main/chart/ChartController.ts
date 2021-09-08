@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Timing} from "@swim/mapping";
 import type {Trait} from "@swim/model";
-import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {Controller, ControllerViewTrait, ControllerFastener} from "@swim/controller";
 import type {GraphView} from "../graph/GraphView";
 import type {GraphTrait} from "../graph/GraphTrait";
@@ -171,14 +169,9 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
     }
   }
 
-  protected themeChartView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, chartView: ChartView<X, Y>): void {
-    // hook
-  }
-
   /** @hidden */
   static ChartFastener = ControllerViewTrait.define<ChartController<unknown, unknown>, ChartView<unknown, unknown>, ChartTrait<unknown, unknown>>({
     viewType: ChartView,
-    observeView: true,
     willSetView(newChartView: ChartView<unknown, unknown> | null, oldChartView: ChartView<unknown, unknown> | null): void {
       this.owner.willSetChartView(newChartView, oldChartView);
     },
@@ -187,9 +180,6 @@ export class ChartController<X, Y> extends GraphController<X, Y> {
     },
     didSetView(newChartView: ChartView<unknown, unknown> | null, oldChartView: ChartView<unknown, unknown> | null): void {
       this.owner.didSetChartView(newChartView, oldChartView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, chartView: ChartView<unknown, unknown>): void {
-      this.owner.themeChartView(theme, mood, timing, chartView);
     },
     createView(): ChartView<unknown, unknown> | null {
       return this.owner.createChartView();

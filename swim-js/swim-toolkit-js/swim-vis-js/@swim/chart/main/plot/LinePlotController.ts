@@ -15,7 +15,7 @@
 import {AnyTiming, Timing} from "@swim/mapping";
 import type {Length} from "@swim/math";
 import type {Color} from "@swim/style";
-import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
+import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";
 import {ControllerViewTrait, ControllerFastener} from "@swim/controller";
 import type {DataPointController} from "../data/DataPointController";
@@ -161,10 +161,6 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
     }
   }
 
-  protected themePlotView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, plotView: LinePlotView<X, Y>): void {
-    // hook
-  }
-
   protected setPlotStroke(stroke: Look<Color> | Color | null, plotTrait: LinePlotTrait<X, Y>, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
@@ -259,9 +255,6 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
     },
     didSetView(newPlotView: LinePlotView<unknown, unknown> | null, oldPlotView: LinePlotView<unknown, unknown> | null): void {
       this.owner.didSetPlotView(newPlotView, oldPlotView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, plotView: LinePlotView<unknown, unknown>): void {
-      this.owner.themePlotView(theme, mood, timing, plotView);
     },
     viewWillSetPlotStroke(newStroke: Color | null, oldStroke: Color | null, plotView: LinePlotView<unknown, unknown>): void {
       this.owner.willSetPlotStroke(newStroke, oldStroke, plotView);

@@ -286,7 +286,7 @@ export class LayerView extends GraphicsView {
   }
 
   /** @hidden */
-  protected override doMountChildViews(): void {
+  protected override mountChildViews(): void {
     const childViews = this.childViews;
     let i = 0;
     while (i < childViews.length) {
@@ -302,7 +302,7 @@ export class LayerView extends GraphicsView {
   }
 
   /** @hidden */
-  protected override doUnmountChildViews(): void {
+  protected override unmountChildViews(): void {
     const childViews = this.childViews;
     let i = 0;
     while (i < childViews.length) {
@@ -318,7 +318,7 @@ export class LayerView extends GraphicsView {
   }
 
   /** @hidden */
-  protected override doPowerChildViews(): void {
+  protected override powerChildViews(): void {
     const childViews = this.childViews;
     let i = 0;
     while (i < childViews.length) {
@@ -334,7 +334,7 @@ export class LayerView extends GraphicsView {
   }
 
   /** @hidden */
-  protected override doUnpowerChildViews(): void {
+  protected override unpowerChildViews(): void {
     const childViews = this.childViews;
     let i = 0;
     while (i < childViews.length) {
@@ -425,22 +425,18 @@ export class LayerView extends GraphicsView {
     return hitBounds;
   }
 
-  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    let hit: GraphicsView | null = null;
+  protected override hitTestChildViews(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const childViews = this.childViews;
     for (let i = childViews.length - 1; i >= 0; i -= 1) {
       const childView = childViews[i]!;
-      if (childView instanceof GraphicsView && !childView.isHidden() && !childView.isCulled()) {
-        const hitBounds = childView.hitBounds;
-        if (hitBounds.contains(x, y)) {
-          hit = childView.hitTest(x, y, viewContext);
-          if (hit !== null) {
-            break;
-          }
+      if (childView instanceof GraphicsView) {
+        const hit = childView.cascadeHitTest(x, y, viewContext);
+        if (hit !== null) {
+          return hit;
         }
       }
     }
-    return hit;
+    return null;
   }
 
   static create(): LayerView {

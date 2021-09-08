@@ -197,7 +197,7 @@ export abstract class Animator<T> implements AnimationTrack {
       if (timing === void 0 || timing === false) {
         timing = false;
       } else if (timing === true) {
-        timing = this.timing ?? false;
+        timing = this.timing !== null ? this.timing : false;
       } else {
         timing = Timing.fromAny(timing);
       }

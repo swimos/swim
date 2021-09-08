@@ -14,12 +14,14 @@
 
 import {AnyTiming, Timing} from "@swim/mapping";
 import {Length, Angle, Transform} from "@swim/math";
+import {AnyExpansion, Expansion} from "@swim/style";
 import {Look, Feel, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {
   ViewContextType,
   ViewContext,
   View,
   ViewAnimator,
+  ExpansionViewAnimator,
   ViewFastener,
   PositionGestureInput,
   PositionGestureDelegate,
@@ -189,8 +191,8 @@ export class FloatingButton extends ButtonMembrane implements PositionGestureDel
     this.icon = newIconFastener;
   }
 
-  @ViewAnimator({type: Number, inherit: true})
-  readonly stackPhase!: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
+  @ViewAnimator({type: Expansion, inherit: true})
+  readonly disclosure!: ExpansionViewAnimator<this, Expansion | undefined, AnyExpansion | undefined>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
@@ -200,8 +202,8 @@ export class FloatingButton extends ButtonMembrane implements PositionGestureDel
     let shadow = theme.getOr(Look.shadow, Mood.floating, null);
     if (shadow !== null) {
       const shadowColor = shadow.color;
-      const stackPhase = this.stackPhase.getValueOr(1);
-      shadow = shadow.withColor(shadowColor.alpha(shadowColor.alpha() * stackPhase));
+      const phase = this.disclosure.getPhaseOr(1);
+      shadow = shadow.withColor(shadowColor.alpha(shadowColor.alpha() * phase));
     }
     this.boxShadow.setState(shadow, timing, View.Intrinsic);
   }
@@ -212,8 +214,8 @@ export class FloatingButton extends ButtonMembrane implements PositionGestureDel
     let shadow = this.getLookOr(Look.shadow, Mood.floating, null);
     if (shadow !== null) {
       const shadowColor = shadow.color;
-      const stackPhase = this.stackPhase.getValueOr(1);
-      shadow = shadow.withColor(shadowColor.alpha(shadowColor.alpha() * stackPhase));
+      const phase = this.disclosure.getPhaseOr(1);
+      shadow = shadow.withColor(shadowColor.alpha(shadowColor.alpha() * phase));
     }
     this.boxShadow.setState(shadow, View.Intrinsic);
   }

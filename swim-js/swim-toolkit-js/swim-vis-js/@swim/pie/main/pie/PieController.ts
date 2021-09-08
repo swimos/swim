@@ -14,7 +14,6 @@
 
 import {AnyTiming, Timing} from "@swim/mapping";
 import type {Trait} from "@swim/model";
-import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import type {GraphicsView} from "@swim/graphics";
 import {
   Controller,
@@ -168,10 +167,6 @@ export class PieController extends CompositeController {
     }
   }
 
-  protected themePieView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, pieView: PieView): void {
-    // hook
-  }
-
   protected createTitleView(title: PieTitle, pieTrait: PieTrait): GraphicsView | string | null {
     if (typeof title === "function") {
       return title(pieTrait);
@@ -242,9 +237,6 @@ export class PieController extends CompositeController {
     },
     didSetView(newPieView: PieView | null, oldPieView: PieView | null): void {
       this.owner.didSetPieView(newPieView, oldPieView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, pieView: PieView): void {
-      this.owner.themePieView(theme, mood, timing, pieView);
     },
     viewDidSetPieTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
       this.owner.title.setView(newTitleView);

@@ -34,7 +34,7 @@
     "@swim/controller": "4.0.0-dev.20210826",
     "@swim/button": "4.0.0-dev.20210826",
     "@swim/token": "4.0.0-dev.20210826",
-    "@swim/grid": "4.0.0-dev.20210826",
+    "@swim/table": "4.0.0-dev.20210826",
     "@swim/window": "4.0.0-dev.20210826",
     "@swim/deck": "4.0.0-dev.20210826"
   }

@@ -192,18 +192,18 @@ export abstract class Trait implements ModelDownlinkContext {
   protected onSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
     if (newModel !== null) {
       if (newModel.isMounted()) {
-        this.doMount();
+        this.mountTrait();
         if (newModel.isPowered()) {
-          this.doPower();
+          this.powerTrait();
         }
       }
     } else if (this.isMounted()) {
       try {
         if (this.isPowered()) {
-          this.doUnpower();
+          this.unpowerTrait();
         }
       } finally {
-        this.doUnmount();
+        this.unmountTrait();
       }
     }
   }
@@ -588,7 +588,7 @@ export abstract class Trait implements ModelDownlinkContext {
   }
 
   /** @hidden */
-  abstract doMount(): void;
+  abstract mountTrait(): void;
 
   protected willMount(): void {
     const traitObservers = this.traitObservers;
@@ -615,7 +615,7 @@ export abstract class Trait implements ModelDownlinkContext {
   }
 
   /** @hidden */
-  abstract doUnmount(): void;
+  abstract unmountTrait(): void;
 
   protected willUnmount(): void {
     const traitObservers = this.traitObservers;
@@ -650,7 +650,7 @@ export abstract class Trait implements ModelDownlinkContext {
   }
 
   /** @hidden */
-  abstract doPower(): void;
+  abstract powerTrait(): void;
 
   protected willPower(): void {
     const traitObservers = this.traitObservers;
@@ -677,7 +677,7 @@ export abstract class Trait implements ModelDownlinkContext {
   }
 
   /** @hidden */
-  abstract doUnpower(): void;
+  abstract unpowerTrait(): void;
 
   protected willUnpower(): void {
     const traitObservers = this.traitObservers;
@@ -846,18 +846,6 @@ export abstract class Trait implements ModelDownlinkContext {
     }
   }
 
-  protected willAnalyzeChildModels(analyzeFlags: ModelFlags, modelContext: TraitContextType<this>): void {
-    // hook
-  }
-
-  protected onAnalyzeChildModels(analyzeFlags: ModelFlags, modelContext: TraitContextType<this>): void {
-    // hook
-  }
-
-  protected didAnalyzeChildModels(analyzeFlags: ModelFlags, modelContext: TraitContextType<this>): void {
-    // hook
-  }
-
   protected analyzeChildModels(analyzeFlags: ModelFlags, modelContext: TraitContextType<this>,
                                analyzeChildModel: (this: TraitModelType<this>, childModel: Model, analyzeFlags: ModelFlags,
                                                    modelContext: TraitContextType<this>) => void,
@@ -866,18 +854,6 @@ export abstract class Trait implements ModelDownlinkContext {
                                                                         modelContext: TraitContextType<this>) => void) => void): void {
     const model = this.model as TraitModelType<this>;
     analyzeChildModels.call(model, analyzeFlags, modelContext, analyzeChildModel);
-  }
-
-  protected willAnalyzeChildModel(childModel: Model, analyzeFlags: ModelFlags, modelContext: TraitContextType<this>): void {
-    // hook
-  }
-
-  protected onAnalyzeChildModel(childModel: Model, analyzeFlags: ModelFlags, modelContext: TraitContextType<this>): void {
-    // hook
-  }
-
-  protected didAnalyzeChildModel(childModel: Model, analyzeFlags: ModelFlags, modelContext: TraitContextType<this>): void {
-    // hook
   }
 
   isRefreshing(): boolean {
@@ -949,18 +925,6 @@ export abstract class Trait implements ModelDownlinkContext {
     }
   }
 
-  protected willRefreshChildModels(refreshFlags: ModelFlags, modelContext: TraitContextType<this>): void {
-    // hook
-  }
-
-  protected onRefreshChildModels(refreshFlags: ModelFlags, modelContext: TraitContextType<this>): void {
-    // hook
-  }
-
-  protected didRefreshChildModels(refreshFlags: ModelFlags, modelContext: TraitContextType<this>): void {
-    // hook
-  }
-
   protected refreshChildModels(refreshFlags: ModelFlags, modelContext: TraitContextType<this>,
                                refreshChildModel: (this: TraitModelType<this>, childModel: Model, refreshFlags: ModelFlags,
                                                    modelContext: TraitContextType<this>) => void,
@@ -969,18 +933,6 @@ export abstract class Trait implements ModelDownlinkContext {
                                                                         modelContext: TraitContextType<this>) => void) => void): void {
     const model = this.model as TraitModelType<this>;
     refreshChildModels.call(model, refreshFlags, modelContext, refreshChildModel);
-  }
-
-  protected willRefreshChildModel(childModel: Model, refreshFlags: ModelFlags, modelContext: TraitContextType<this>): void {
-    // hook
-  }
-
-  protected onRefreshChildModel(childModel: Model, refreshFlags: ModelFlags, modelContext: TraitContextType<this>): void {
-    // hook
-  }
-
-  protected didRefreshChildModel(childModel: Model, refreshFlags: ModelFlags, modelContext: TraitContextType<this>): void {
-    // hook
   }
 
   isConsuming(): boolean {

@@ -861,49 +861,22 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
     }
   }
 
-  protected willProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    // hook
-  }
-
-  protected onProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    this.processChildViews(processFlags, viewContext, this.processChildView);
-  }
-
-  protected didProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    // hook
-  }
-
   protected processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
                               processChildView: (this: this, childView: View, processFlags: ViewFlags,
                                                  viewContext: ViewContextType<this>) => void): void {
     type self = this;
-    function doProcessChildView(this: self, childView: View): void {
+    function processView(this: self, childView: View): void {
       processChildView.call(this, childView, processFlags, viewContext);
       if ((childView.viewFlags & View.RemovingFlag) !== 0) {
         childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
         this.removeChildView(childView);
       }
     }
-    this.forEachChildView(doProcessChildView, this);
+    this.forEachChildView(processView, this);
   }
 
-  /** @hidden */
   protected processChildView(childView: View, processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    this.willProcessChildView(childView, processFlags, viewContext);
-    this.onProcessChildView(childView, processFlags, viewContext);
-    this.didProcessChildView(childView, processFlags, viewContext);
-  }
-
-  protected willProcessChildView(childView: View, processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    // hook
-  }
-
-  protected onProcessChildView(childView: View, processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     childView.cascadeProcess(processFlags, viewContext);
-  }
-
-  protected didProcessChildView(childView: View, processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    // hook
   }
 
   isDisplaying(): boolean {
@@ -952,49 +925,22 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
     }
   }
 
-  protected willDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    // hook
-  }
-
-  protected onDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    this.displayChildViews(displayFlags, viewContext, this.displayChildView);
-  }
-
-  protected didDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    // hook
-  }
-
   protected displayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>,
                               displayChildView: (this: this, childView: View, displayFlags: ViewFlags,
                                                  viewContext: ViewContextType<this>) => void): void {
     type self = this;
-    function doDisplayChildView(this: self, childView: View): void {
+    function displayView(this: self, childView: View): void {
       displayChildView.call(this, childView, displayFlags, viewContext);
       if ((childView.viewFlags & View.RemovingFlag) !== 0) {
         childView.setViewFlags(childView.viewFlags & ~View.RemovingFlag);
         this.removeChildView(childView);
       }
     }
-    this.forEachChildView(doDisplayChildView, this);
+    this.forEachChildView(displayView, this);
   }
 
-  /** @hidden */
   protected displayChildView(childView: View, displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    this.willDisplayChildView(childView, displayFlags, viewContext);
-    this.onDisplayChildView(childView, displayFlags, viewContext);
-    this.didDisplayChildView(childView, displayFlags, viewContext);
-  }
-
-  protected willDisplayChildView(childView: View, displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    // hook
-  }
-
-  protected onDisplayChildView(childView: View, displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     childView.cascadeDisplay(displayFlags, viewContext);
-  }
-
-  protected didDisplayChildView(childView: View, displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    // hook
   }
 
   declare readonly mood: ViewProperty<this, MoodVector | null>; // defined by ViewProperty

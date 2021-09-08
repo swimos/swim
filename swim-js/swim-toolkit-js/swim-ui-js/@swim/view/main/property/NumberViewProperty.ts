@@ -31,4 +31,8 @@ export abstract class NumberViewProperty<V extends View> extends ViewProperty<V,
       return value;
     }
   }
+
+  override equalState(newState: number | null | undefined, oldState: number | null | undefined): boolean {
+    return newState === oldState;
+  }
 }

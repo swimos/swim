@@ -29,4 +29,12 @@ export abstract class LengthAttributeAnimator<V extends ElementView> extends Att
       return null;
     }
   }
+
+  override equalState(newState: Length | null, oldState: Length | null): boolean {
+    if (newState !== void 0 && newState !== null) {
+      return newState.equals(oldState);
+    } else {
+      return newState === oldState;
+    }
+  }
 }

@@ -186,7 +186,7 @@ export abstract class GenericController extends Controller {
       try {
         this.willMount();
         this.onMount();
-        this.doMountChildControllers();
+        this.mountChildControllers();
         this.didMount();
       } finally {
         this.setControllerFlags(this.controllerFlags & ~Controller.TraversingFlag);
@@ -208,16 +208,16 @@ export abstract class GenericController extends Controller {
   }
 
   /** @hidden */
-  protected doMountChildControllers(): void {
+  protected mountChildControllers(): void {
     type self = this;
-    function doMountChildController(this: self, childController: Controller): void {
+    function mountChildController(this: self, childController: Controller): void {
       childController.cascadeMount();
       if ((childController.controllerFlags & Controller.RemovingFlag) !== 0) {
         childController.setControllerFlags(childController.controllerFlags & ~Controller.RemovingFlag);
         this.removeChildController(childController);
       }
     }
-    this.forEachChildController(doMountChildController, this);
+    this.forEachChildController(mountChildController, this);
   }
 
   override cascadeUnmount(): void {
@@ -225,7 +225,7 @@ export abstract class GenericController extends Controller {
       this.setControllerFlags(this.controllerFlags & ~Controller.MountedFlag | Controller.TraversingFlag);
       try {
         this.willUnmount();
-        this.doUnmountChildControllers();
+        this.unmountChildControllers();
         this.onUnmount();
         this.didUnmount();
       } finally {
@@ -248,16 +248,16 @@ export abstract class GenericController extends Controller {
   }
 
   /** @hidden */
-  protected doUnmountChildControllers(): void {
+  protected unmountChildControllers(): void {
     type self = this;
-    function doUnmountChildController(this: self, childController: Controller): void {
+    function unmountChildController(this: self, childController: Controller): void {
       childController.cascadeUnmount();
       if ((childController.controllerFlags & Controller.RemovingFlag) !== 0) {
         childController.setControllerFlags(childController.controllerFlags & ~Controller.RemovingFlag);
         this.removeChildController(childController);
       }
     }
-    this.forEachChildController(doUnmountChildController, this);
+    this.forEachChildController(unmountChildController, this);
   }
 
   override cascadePower(): void {
@@ -266,7 +266,7 @@ export abstract class GenericController extends Controller {
       try {
         this.willPower();
         this.onPower();
-        this.doPowerChildControllers();
+        this.powerChildControllers();
         this.didPower();
       } finally {
         this.setControllerFlags(this.controllerFlags & ~Controller.TraversingFlag);
@@ -277,16 +277,16 @@ export abstract class GenericController extends Controller {
   }
 
   /** @hidden */
-  protected doPowerChildControllers(): void {
+  protected powerChildControllers(): void {
     type self = this;
-    function doPowerChildController(this: self, childController: Controller): void {
+    function powerChildController(this: self, childController: Controller): void {
       childController.cascadePower();
       if ((childController.controllerFlags & Controller.RemovingFlag) !== 0) {
         childController.setControllerFlags(childController.controllerFlags & ~Controller.RemovingFlag);
         this.removeChildController(childController);
       }
     }
-    this.forEachChildController(doPowerChildController, this);
+    this.forEachChildController(powerChildController, this);
   }
 
   override cascadeUnpower(): void {
@@ -294,7 +294,7 @@ export abstract class GenericController extends Controller {
       this.setControllerFlags(this.controllerFlags & ~Controller.PoweredFlag | Controller.TraversingFlag);
       try {
         this.willUnpower();
-        this.doUnpowerChildControllers();
+        this.unpowerChildControllers();
         this.onUnpower();
         this.didUnpower();
       } finally {
@@ -306,126 +306,120 @@ export abstract class GenericController extends Controller {
   }
 
   /** @hidden */
-  protected doUnpowerChildControllers(): void {
+  protected unpowerChildControllers(): void {
     type self = this;
-    function doUnpowerChildController(this: self, childController: Controller): void {
+    function unpowerChildController(this: self, childController: Controller): void {
       childController.cascadeUnpower();
       if ((childController.controllerFlags & Controller.RemovingFlag) !== 0) {
         childController.setControllerFlags(childController.controllerFlags & ~Controller.RemovingFlag);
         this.removeChildController(childController);
       }
     }
-    this.forEachChildController(doUnpowerChildController, this);
+    this.forEachChildController(unpowerChildController, this);
   }
 
-  override cascadeCompile(compileFlags: ControllerFlags, controllerContext: ControllerContext): void {
-    const extendedControllerContext = this.extendControllerContext(controllerContext);
+  override cascadeCompile(compileFlags: ControllerFlags, baseControllerContext: ControllerContext): void {
+    const controllerContext = this.extendControllerContext(baseControllerContext);
     compileFlags &= ~Controller.NeedsCompile;
     compileFlags |= this.controllerFlags & Controller.UpdateMask;
-    compileFlags = this.needsCompile(compileFlags, extendedControllerContext);
+    compileFlags = this.needsCompile(compileFlags, controllerContext);
     if ((compileFlags & Controller.CompileMask) !== 0) {
-      this.doCompile(compileFlags, extendedControllerContext);
+      let cascadeFlags = compileFlags;
+      this.setControllerFlags(this.controllerFlags & ~Controller.NeedsCompile
+                                                   | (Controller.TraversingFlag | Controller.CompilingFlag));
+      try {
+        this.willCompile(cascadeFlags, controllerContext);
+        if (((this.controllerFlags | compileFlags) & Controller.NeedsResolve) !== 0) {
+          cascadeFlags |= Controller.NeedsResolve;
+          this.setControllerFlags(this.controllerFlags & ~Controller.NeedsResolve);
+          this.willResolve(controllerContext);
+        }
+        if (((this.controllerFlags | compileFlags) & Controller.NeedsGenerate) !== 0) {
+          cascadeFlags |= Controller.NeedsGenerate;
+          this.setControllerFlags(this.controllerFlags & ~Controller.NeedsGenerate);
+          this.willGenerate(controllerContext);
+        }
+        if (((this.controllerFlags | compileFlags) & Controller.NeedsAssemble) !== 0) {
+          cascadeFlags |= Controller.NeedsAssemble;
+          this.setControllerFlags(this.controllerFlags & ~Controller.NeedsAssemble);
+          this.willAssemble(controllerContext);
+        }
+
+        this.onCompile(cascadeFlags, controllerContext);
+        if ((cascadeFlags & Controller.NeedsResolve) !== 0) {
+          this.onResolve(controllerContext);
+        }
+        if ((cascadeFlags & Controller.NeedsGenerate) !== 0) {
+          this.onGenerate(controllerContext);
+        }
+        if ((cascadeFlags & Controller.NeedsAssemble) !== 0) {
+          this.onAssemble(controllerContext);
+        }
+
+        if ((cascadeFlags & Controller.CompileMask) !== 0) {
+          this.compileChildControllers(cascadeFlags, controllerContext, this.compileChildController);
+        }
+
+        if ((cascadeFlags & Controller.NeedsAssemble) !== 0) {
+          this.didAssemble(controllerContext);
+        }
+        if ((cascadeFlags & Controller.NeedsGenerate) !== 0) {
+          this.didGenerate(controllerContext);
+        }
+        if ((cascadeFlags & Controller.NeedsResolve) !== 0) {
+          this.didResolve(controllerContext);
+        }
+        this.didCompile(cascadeFlags, controllerContext);
+      } finally {
+        this.setControllerFlags(this.controllerFlags & ~(Controller.TraversingFlag | Controller.CompilingFlag));
+      }
     }
   }
 
-  /** @hidden */
-  protected doCompile(compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    let cascadeFlags = compileFlags;
-    this.setControllerFlags(this.controllerFlags & ~Controller.NeedsCompile
-                                                 | (Controller.TraversingFlag | Controller.CompilingFlag));
-    try {
-      this.willCompile(cascadeFlags, controllerContext);
-      if (((this.controllerFlags | compileFlags) & Controller.NeedsResolve) !== 0) {
-        cascadeFlags |= Controller.NeedsResolve;
-        this.setControllerFlags(this.controllerFlags & ~Controller.NeedsResolve);
-        this.willResolve(controllerContext);
-      }
-      if (((this.controllerFlags | compileFlags) & Controller.NeedsGenerate) !== 0) {
-        cascadeFlags |= Controller.NeedsGenerate;
-        this.setControllerFlags(this.controllerFlags & ~Controller.NeedsGenerate);
-        this.willGenerate(controllerContext);
-      }
-      if (((this.controllerFlags | compileFlags) & Controller.NeedsAssemble) !== 0) {
-        cascadeFlags |= Controller.NeedsAssemble;
-        this.setControllerFlags(this.controllerFlags & ~Controller.NeedsAssemble);
-        this.willAssemble(controllerContext);
-      }
-
-      this.onCompile(cascadeFlags, controllerContext);
-      if ((cascadeFlags & Controller.NeedsResolve) !== 0) {
-        this.onResolve(controllerContext);
-      }
-      if ((cascadeFlags & Controller.NeedsGenerate) !== 0) {
-        this.onGenerate(controllerContext);
-      }
-      if ((cascadeFlags & Controller.NeedsAssemble) !== 0) {
-        this.onAssemble(controllerContext);
-      }
-
-      this.doCompileChildControllers(cascadeFlags, controllerContext);
-
-      if ((cascadeFlags & Controller.NeedsAssemble) !== 0) {
-        this.didAssemble(controllerContext);
-      }
-      if ((cascadeFlags & Controller.NeedsGenerate) !== 0) {
-        this.didGenerate(controllerContext);
-      }
-      if ((cascadeFlags & Controller.NeedsResolve) !== 0) {
-        this.didResolve(controllerContext);
-      }
-      this.didCompile(cascadeFlags, controllerContext);
-    } finally {
-      this.setControllerFlags(this.controllerFlags & ~(Controller.TraversingFlag | Controller.CompilingFlag));
-    }
-  }
-
-  override cascadeExecute(executeFlags: ControllerFlags, controllerContext: ControllerContext): void {
-    const extendedControllerContext = this.extendControllerContext(controllerContext);
+  override cascadeExecute(executeFlags: ControllerFlags, baseControllerContext: ControllerContext): void {
+    const controllerContext = this.extendControllerContext(baseControllerContext);
     executeFlags &= ~Controller.NeedsExecute;
     executeFlags |= this.controllerFlags & Controller.UpdateMask;
-    executeFlags = this.needsExecute(executeFlags, extendedControllerContext);
+    executeFlags = this.needsExecute(executeFlags, controllerContext);
     if ((executeFlags & Controller.ExecuteMask) !== 0) {
-      this.doExecute(executeFlags, extendedControllerContext);
-    }
-  }
+      let cascadeFlags = executeFlags;
+      this.setControllerFlags(this.controllerFlags & ~Controller.NeedsExecute
+                                                   | (Controller.TraversingFlag | Controller.ExecutingFlag));
+      try {
+        this.willExecute(cascadeFlags, controllerContext);
+        if (((this.controllerFlags | executeFlags) & Controller.NeedsRevise) !== 0) {
+          cascadeFlags |= Controller.NeedsRevise;
+          this.setControllerFlags(this.controllerFlags & ~Controller.NeedsRevise);
+          this.willRevise(controllerContext);
+        }
+        if (((this.controllerFlags | executeFlags) & Controller.NeedsCompute) !== 0) {
+          cascadeFlags |= Controller.NeedsCompute;
+          this.setControllerFlags(this.controllerFlags & ~Controller.NeedsCompute);
+          this.willCompute(controllerContext);
+        }
 
-  /** @hidden */
-  protected doExecute(executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    let cascadeFlags = executeFlags;
-    this.setControllerFlags(this.controllerFlags & ~Controller.NeedsExecute
-                                                 | (Controller.TraversingFlag | Controller.ExecutingFlag));
-    try {
-      this.willExecute(cascadeFlags, controllerContext);
-      if (((this.controllerFlags | executeFlags) & Controller.NeedsRevise) !== 0) {
-        cascadeFlags |= Controller.NeedsRevise;
-        this.setControllerFlags(this.controllerFlags & ~Controller.NeedsRevise);
-        this.willRevise(controllerContext);
-      }
-      if (((this.controllerFlags | executeFlags) & Controller.NeedsCompute) !== 0) {
-        cascadeFlags |= Controller.NeedsCompute;
-        this.setControllerFlags(this.controllerFlags & ~Controller.NeedsCompute);
-        this.willCompute(controllerContext);
-      }
+        this.onExecute(cascadeFlags, controllerContext);
+        if ((cascadeFlags & Controller.NeedsRevise) !== 0) {
+          this.onRevise(controllerContext);
+        }
+        if ((cascadeFlags & Controller.NeedsCompute) !== 0) {
+          this.onCompute(controllerContext);
+        }
 
-      this.onExecute(cascadeFlags, controllerContext);
-      if ((cascadeFlags & Controller.NeedsRevise) !== 0) {
-        this.onRevise(controllerContext);
-      }
-      if ((cascadeFlags & Controller.NeedsCompute) !== 0) {
-        this.onCompute(controllerContext);
-      }
+        if ((cascadeFlags & Controller.ExecuteMask) !== 0) {
+          this.executeChildControllers(cascadeFlags, controllerContext, this.executeChildController);
+        }
 
-      this.doExecuteChildControllers(cascadeFlags, controllerContext);
-
-      if ((cascadeFlags & Controller.NeedsCompute) !== 0) {
-        this.didCompute(controllerContext);
+        if ((cascadeFlags & Controller.NeedsCompute) !== 0) {
+          this.didCompute(controllerContext);
+        }
+        if ((cascadeFlags & Controller.NeedsRevise) !== 0) {
+          this.didRevise(controllerContext);
+        }
+        this.didExecute(cascadeFlags, controllerContext);
+      } finally {
+        this.setControllerFlags(this.controllerFlags & ~(Controller.TraversingFlag | Controller.ExecutingFlag));
       }
-      if ((cascadeFlags & Controller.NeedsRevise) !== 0) {
-        this.didRevise(controllerContext);
-      }
-      this.didExecute(cascadeFlags, controllerContext);
-    } finally {
-      this.setControllerFlags(this.controllerFlags & ~(Controller.TraversingFlag | Controller.ExecutingFlag));
     }
   }
 

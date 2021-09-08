@@ -26,16 +26,16 @@
       "@swim/controller": ["../../../../swim-ui-js/@swim/controller/main"],
       "@swim/button": ["../../button/main"],
       "@swim/token": ["../../token/main"],
-      "@swim/grid": ["../../grid/main"],
+      "@swim/table": ["../../table/main"],
       "@swim/window": ["../../window/main"],
       "@swim/deck": ["../../deck/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../button/main"},
     {"path": "../../token/main"},
-    {"path": "../../grid/main"},
+    {"path": "../../table/main"},
     {"path": "../../window/main"},
     {"path": "../../deck/main"}
   ]

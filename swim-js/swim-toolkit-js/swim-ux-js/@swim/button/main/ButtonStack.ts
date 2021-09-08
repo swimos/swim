@@ -15,6 +15,7 @@
 import {Lazy} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {Length} from "@swim/math";
+import {Expansion} from "@swim/style";
 import {Look} from "@swim/theme";
 import {
   ViewContextType,
@@ -23,6 +24,7 @@ import {
   ModalState,
   Modal,
   ViewAnimator,
+  ExpansionViewAnimator,
   PositionGestureInput,
   PositionGesture,
   PositionGestureDelegate,
@@ -33,16 +35,9 @@ import {FloatingButton} from "./FloatingButton";
 import {ButtonItem} from "./ButtonItem";
 import type {ButtonStackObserver} from "./ButtonStackObserver";
 
-export type ButtonStackState = "collapsed" | "expanding" | "expanded" | "collapsing";
-
 export class ButtonStack extends HtmlView implements Modal, PositionGestureDelegate {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "stackState", {
-      value: "collapsed",
-      enumerable: true,
-      configurable: true,
-    });
     Object.defineProperty(this, "stackHeight", {
       value: 0,
       enumerable: true,
@@ -79,8 +74,6 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
 
   override readonly viewObservers!: ReadonlyArray<ButtonStackObserver>;
 
-  readonly stackState!: ButtonStackState
-
   /** @hidden */
   readonly stackHeight!: number;
 
@@ -91,28 +84,26 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
   /** @hidden */
   readonly gesture!: PositionGesture<HtmlView> | null;
 
-  isExpanded(): boolean {
-    return this.stackState === "expanded" || this.stackState === "expanding";
-  }
-
-  isCollapsed(): boolean {
-    return this.stackState === "collapsed" || this.stackState === "collapsing";
-  }
-
-  @ViewAnimator<ButtonStack, number>({
-    type: Number,
-    state: 0,
+  @ViewAnimator<ButtonStack, Expansion>({
+    type: Expansion,
+    state: Expansion.collapsed(),
     updateFlags: View.NeedsLayout,
-    onEnd(stackPhase: number): void {
-      const stackState = this.owner.stackState;
-      if (stackState === "expanding" && stackPhase === 1) {
-        this.owner.didExpand();
-      } else if (stackState === "collapsing" && stackPhase === 0) {
-        this.owner.didCollapse();
-      }
+    willExpand(): void {
+      this.owner.willExpand();
+      this.owner.onExpand();
+    },
+    didExpand(): void {
+      this.owner.didExpand();
+    },
+    willCollapse(): void {
+      this.owner.willCollapse();
+      this.owner.onCollapse();
+    },
+    didCollapse(): void {
+      this.owner.didCollapse();
     },
   })
-  readonly stackPhase!: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
+  readonly disclosure!: ExpansionViewAnimator<this>;
 
   @ViewAnimator({type: Number, state: 28, updateFlags: View.NeedsLayout})
   readonly buttonSpacing!: ViewAnimator<this, number>;
@@ -138,30 +129,19 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
   }
 
   get modalState(): ModalState {
-    const stackState = this.stackState;
-    if (stackState === "collapsed") {
-      return "hidden";
-    } else if (stackState === "expanding") {
-      return "showing";
-    } else if (stackState === "expanded") {
-      return "shown";
-    } else if (stackState === "collapsing") {
-      return "hiding";
-    } else {
-      return void 0 as any; // unreachable
-    }
+    return this.disclosure.modalState!;
   }
 
   get modality(): boolean | number {
-    return this.stackPhase.getValue();
+    return this.disclosure.phase!;
   }
 
   showModal(options: ModalOptions, timing?: AnyTiming | boolean): void {
-    this.expand(timing);
+    this.disclosure.expand(timing);
   }
 
   hideModal(timing?: AnyTiming | boolean): void {
-    this.collapse(timing);
+    this.disclosure.collapse(timing);
   }
 
   get button(): HtmlView | null {
@@ -224,7 +204,7 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
   }
 
   protected layoutStack(): void {
-    const stackPhase = this.stackPhase.getValue();
+    const phase = this.disclosure.getPhase();
     const childNodes = this.node.childNodes;
     const childCount = childNodes.length;
     const button = this.button;
@@ -257,8 +237,8 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
         const dy = itemHeight instanceof Length
                  ? itemHeight.pxValue()
                  : childView.node.offsetHeight;
-        childView.display.setState(stackPhase === 0 ? "none" : "flex", View.Intrinsic);
-        childView.bottom.setState(stackPhase * y, View.Intrinsic);
+        childView.display.setState(phase === 0 ? "none" : "flex", View.Intrinsic);
+        childView.bottom.setState(phase * y, View.Intrinsic);
         childView.zIndex.setState(zIndex, View.Intrinsic);
         y += dy;
         stackHeight += dy;
@@ -302,8 +282,8 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
     });
     button.addViewObserver(gesture);
     if (button instanceof FloatingButton) {
-      button.stackPhase.setState(1, View.Intrinsic);
-      if (this.isExpanded()) {
+      button.disclosure.setState(Expansion.expanded(), View.Intrinsic);
+      if (this.disclosure.isExpanded() || this.disclosure.isExpanding()) {
         button.pushIcon(this.closeIcon);
       }
     }
@@ -331,41 +311,7 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
     // hook
   }
 
-  expand(timing?: AnyTiming | boolean): void {
-    if (this.stackState !== "expanded" || this.stackPhase.value !== 1) {
-      if (timing === void 0 || timing === true) {
-        timing = this.getLookOr(Look.timing, false);
-      } else {
-        timing = Timing.fromAny(timing);
-      }
-      if (this.stackState !== "expanding") {
-        this.willExpand();
-        const button = this.button;
-        if (button instanceof FloatingButton) {
-          button.pushIcon(this.closeIcon, timing);
-        }
-        this.onExpand();
-      }
-      if (timing !== false) {
-        if (this.stackPhase.value !== 1) {
-          this.stackPhase.setState(1, timing, View.Intrinsic);
-        } else {
-          setTimeout(this.didExpand.bind(this));
-        }
-      } else {
-        this.stackPhase.setState(1, View.Intrinsic);
-        this.didExpand();
-      }
-    }
-  }
-
   protected willExpand(): void {
-    Object.defineProperty(this, "stackState", {
-      value: "expanding",
-      enumerable: true,
-      configurable: true,
-    });
-
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -376,17 +322,16 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
   }
 
   protected onExpand(): void {
+    const button = this.button;
+    if (button instanceof FloatingButton) {
+      const timing = this.disclosure.timing;
+      button.pushIcon(this.closeIcon, timing !== null ? timing : void 0);
+    }
+
     this.modalService.presentModal(this);
   }
 
   protected didExpand(): void {
-    Object.defineProperty(this, "stackState", {
-      value: "expanded",
-      enumerable: true,
-      configurable: true,
-    });
-    this.requireUpdate(View.NeedsLayout);
-
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -396,41 +341,7 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
     }
   }
 
-  collapse(timing?: AnyTiming | boolean): void {
-    if (this.stackState !== "collapsed" || this.stackPhase.value !== 0) {
-      if (timing === void 0 || timing === true) {
-        timing = this.getLookOr(Look.timing, false);
-      } else {
-        timing = Timing.fromAny(timing);
-      }
-      if (this.stackState !== "collapsing") {
-        this.willCollapse();
-        const button = this.button;
-        if (button instanceof FloatingButton && button.iconCount > 1) {
-          button.popIcon(timing);
-        }
-        this.onCollapse();
-      }
-      if (timing !== false) {
-        if (this.stackPhase.value !== 0) {
-          this.stackPhase.setState(0, timing, View.Intrinsic);
-        } else {
-          setTimeout(this.didCollapse.bind(this));
-        }
-      } else {
-        this.stackPhase.setState(0, View.Intrinsic);
-        this.didCollapse();
-      }
-    }
-  }
-
   protected willCollapse(): void {
-    Object.defineProperty(this, "stackState", {
-      value: "collapsing",
-      enumerable: true,
-      configurable: true,
-    });
-
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -442,31 +353,21 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
 
   protected onCollapse(): void {
     this.modalService.dismissModal(this);
+
+    const button = this.button;
+    if (button instanceof FloatingButton && button.iconCount > 1) {
+      const timing = this.disclosure.timing;
+      button.popIcon(timing !== null ? timing : void 0);
+    }
   }
 
   protected didCollapse(): void {
-    Object.defineProperty(this, "stackState", {
-      value: "collapsed",
-      enumerable: true,
-      configurable: true,
-    });
-    this.requireUpdate(View.NeedsLayout);
-
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
       if (viewObserver.buttonStackDidCollapse !== void 0) {
         viewObserver.buttonStackDidCollapse(this);
       }
-    }
-  }
-
-  toggle(timing?: AnyTiming | boolean): void {
-    const stackState = this.stackState;
-    if (stackState === "collapsed" || stackState === "collapsing") {
-      this.expand(timing);
-    } else if (stackState === "expanded" || stackState === "expanding") {
-      this.collapse(timing);
     }
   }
 
@@ -556,20 +457,14 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
   }
 
   didMovePress(input: PositionGestureInput, event: Event | null): void {
-    if (!input.defaultPrevented && this.stackState !== "expanded") {
+    if (!input.defaultPrevented && !this.disclosure.isExpanded()) {
       const stackHeight = this.stackHeight;
-      const stackPhase = Math.min(Math.max(0, -(input.y - input.y0) / (0.5 * stackHeight)), 1);
-      this.stackPhase.setState(stackPhase, View.Intrinsic);
-      this.requireUpdate(View.NeedsLayout);
-      if (stackPhase > 0.1) {
+      const phase = Math.min(Math.max(0, -(input.y - input.y0) / (0.5 * stackHeight)), 1);
+      this.disclosure.setPhase(phase);
+      if (phase > 0.1) {
         input.clearHoldTimer();
-        if (this.stackState === "collapsed") {
-          this.willExpand();
-          const button = this.button;
-          if (button instanceof FloatingButton) {
-            button.pushIcon(this.closeIcon);
-          }
-          this.onExpand();
+        if (!this.disclosure.isExpanding()) {
+          this.disclosure.setState(this.disclosure.value.expanding());
         }
       }
     }
@@ -577,18 +472,18 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
 
   didEndPress(input: PositionGestureInput, event: Event | null): void {
     if (!input.defaultPrevented) {
-      const stackPhase = this.stackPhase.getValue();
+      const phase = this.disclosure.getPhase();
       if (input.t - input.t0 < input.holdDelay) {
-        if (stackPhase < 0.1 || this.stackState === "expanded") {
-          this.collapse();
+        if (phase < 0.1 || this.disclosure.isExpanded()) {
+          this.disclosure.collapse();
         } else {
-          this.expand();
+          this.disclosure.expand();
         }
       } else {
-        if (stackPhase < 0.5) {
-          this.collapse();
-        } else if (stackPhase >= 0.5) {
-          this.expand();
+        if (phase < 0.5) {
+          this.disclosure.collapse();
+        } else if (phase >= 0.5) {
+          this.disclosure.expand();
         }
       }
     }
@@ -596,20 +491,20 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
 
   didCancelPress(input: PositionGestureInput, event: Event | null): void {
     if (input.buttons === 2) {
-      this.toggle();
+      this.disclosure.toggle();
     } else {
-      const stackPhase = this.stackPhase.getValue();
-      if (stackPhase < 0.1 || this.stackState === "expanded") {
-        this.collapse();
+      const phase = this.disclosure.getPhase();
+      if (phase < 0.1 || this.disclosure.isExpanded()) {
+        this.disclosure.collapse();
       } else {
-        this.expand();
+        this.disclosure.expand();
       }
     }
   }
 
   didLongPress(input: PositionGestureInput): void {
     input.preventDefault();
-    this.toggle();
+    this.disclosure.toggle();
   }
 
   protected onClick(event: MouseEvent): void {

@@ -20,4 +20,8 @@ export abstract class StringViewAnimator<V extends View> extends ViewAnimator<V,
   override fromAny(value: string | null | undefined): string | null | undefined {
     return value;
   }
+
+  override equalState(newState: string | null | undefined, oldState: string | null | undefined): boolean {
+    return newState === oldState;
+  }
 }

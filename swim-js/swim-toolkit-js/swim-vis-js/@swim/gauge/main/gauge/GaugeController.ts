@@ -14,7 +14,6 @@
 
 import {AnyTiming, Timing} from "@swim/mapping";
 import type {Trait} from "@swim/model";
-import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import type {GraphicsView} from "@swim/graphics";
 import {
   Controller,
@@ -168,10 +167,6 @@ export class GaugeController extends CompositeController {
     }
   }
 
-  protected themeGaugeView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, gaugeView: GaugeView): void {
-    // hook
-  }
-
   protected createTitleView(title: GaugeTitle, gaugeTrait: GaugeTrait): GraphicsView | string | null {
     if (typeof title === "function") {
       return title(gaugeTrait);
@@ -242,9 +237,6 @@ export class GaugeController extends CompositeController {
     },
     didSetView(newGaugeView: GaugeView | null, oldGaugeView: GaugeView | null): void {
       this.owner.didSetGaugeView(newGaugeView, oldGaugeView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, gaugeView: GaugeView): void {
-      this.owner.themeGaugeView(theme, mood, timing, gaugeView);
     },
     viewDidSetGaugeTitle(newTitleView: GraphicsView | null, oldTitleView: GraphicsView | null): void {
       this.owner.title.setView(newTitleView);

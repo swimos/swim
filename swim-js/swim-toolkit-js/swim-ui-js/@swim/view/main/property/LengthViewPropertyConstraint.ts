@@ -29,4 +29,12 @@ export abstract class LengthViewPropertyConstraint<V extends View> extends ViewP
   override fromAny(value: AnyLength | null | undefined): Length | null | undefined {
     return value !== void 0 && value !== null ? Length.fromAny(value) : null;
   }
+
+  override equalState(newState: Length | null | undefined, oldState: Length | null | undefined): boolean {
+    if (newState !== void 0 && newState !== null) {
+      return newState.equals(oldState);
+    } else {
+      return newState === oldState;
+    }
+  }
 }

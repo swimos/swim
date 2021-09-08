@@ -35,4 +35,8 @@ export abstract class NumberViewPropertyConstraint<V extends View> extends ViewP
       return value;
     }
   }
+
+  override equalState(newState: number | null | undefined, oldState: number | null | undefined): boolean {
+    return newState === oldState;
+  }
 }

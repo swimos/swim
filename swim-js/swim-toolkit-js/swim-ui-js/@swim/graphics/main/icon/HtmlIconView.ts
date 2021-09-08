@@ -51,6 +51,11 @@ export class HtmlIconView extends HtmlView implements IconView {
     return SvgIconView.create();
   }
 
+  get svgView(): SvgIconView | null {
+    const svgView = this.getChildView("svg");
+    return svgView instanceof SvgIconView ? svgView : null;
+  }
+
   @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout})
   readonly xAlign!: ViewAnimator<this, number>;
 
@@ -68,11 +73,6 @@ export class HtmlIconView extends HtmlView implements IconView {
 
   @ViewAnimator({extends: IconViewAnimator, type: Object, state: null, updateFlags: View.NeedsLayout})
   readonly graphics!: ViewAnimator<this, Graphics | null>;
-
-  get svgView(): SvgIconView | null {
-    const svgView = this.getChildView("svg");
-    return svgView instanceof SvgIconView ? svgView : null;
-  }
 
   protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);

@@ -525,16 +525,13 @@ export class DataPointView<X, Y> extends LayerView {
     }
   }
 
-  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    let hit = super.doHitTest(x, y, viewContext);
-    if (hit === null) {
-      const renderer = viewContext.renderer;
-      if (renderer instanceof CanvasRenderer) {
-        const context = renderer.context;
-        hit = this.hitTestPoint(x, y, context, this.viewFrame);
-      }
+  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      return this.hitTestPoint(x, y, context, this.viewFrame);
     }
-    return hit;
+    return null;
   }
 
   protected hitTestPoint(x: number, y: number, context: CanvasContext, frame: R2Box): GraphicsView | null {

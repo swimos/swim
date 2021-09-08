@@ -16,7 +16,7 @@ export * from "@swim/button";
 
 export * from "@swim/token";
 
-export * from "@swim/grid";
+export * from "@swim/table";
 
 export * from "@swim/window";
 

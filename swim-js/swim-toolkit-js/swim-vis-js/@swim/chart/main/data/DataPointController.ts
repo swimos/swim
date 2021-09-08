@@ -16,7 +16,7 @@ import {AnyTiming, Timing} from "@swim/mapping";
 import type {AnyLength, Length} from "@swim/math";
 import {Model} from "@swim/model";
 import type {AnyColor, Color} from "@swim/style";
-import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
+import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
 import {ControllerProperty, ControllerView, ControllerViewTrait, CompositeController} from "@swim/controller";
@@ -155,10 +155,6 @@ export class DataPointController<X, Y> extends CompositeController {
         controllerObserver.controllerDidSetDataPointView(newDataPointView, oldDataPointView, this);
       }
     }
-  }
-
-  protected themeDataPointView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, dataPointView: DataPointView<X, Y>): void {
-    // hook
   }
 
   protected setX(x: X, dataPointTrait: DataPointTrait<X, Y>, timing?: AnyTiming | boolean): void {
@@ -480,9 +476,6 @@ export class DataPointController<X, Y> extends CompositeController {
     },
     didSetView(newDataPointView: DataPointView<unknown, unknown> | null, oldDataPointView: DataPointView<unknown, unknown> | null): void {
       this.owner.didSetDataPointView(newDataPointView, oldDataPointView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, dataPointView: DataPointView<unknown, unknown>): void {
-      this.owner.themeDataPointView(theme, mood, timing, dataPointView);
     },
     viewWillSetDataPointX(newX: unknown | undefined, oldX: unknown | undefined, dataPointView: DataPointView<unknown, unknown>): void {
       this.owner.willSetX(newX, oldX, dataPointView);

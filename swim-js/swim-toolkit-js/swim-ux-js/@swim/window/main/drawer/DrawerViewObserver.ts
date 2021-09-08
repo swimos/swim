@@ -16,23 +16,23 @@ import type {HtmlViewObserver} from "@swim/dom";
 import type {DrawerPlacement, DrawerView} from "./DrawerView";
 
 export interface DrawerViewObserver<V extends DrawerView = DrawerView> extends HtmlViewObserver<V> {
-  drawerWillSetPlacement?(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement, view: V): void;
+  viewWillSetPlacement?(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement, view: V): void;
 
-  drawerDidSetPlacement?(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement, view: V): void;
+  viewDidSetPlacement?(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement, view: V): void;
 
-  drawerWillShow?(view: V): void;
+  viewWillPresent?(view: V): void;
 
-  drawerDidShow?(view: V): void;
+  viewDidPresent?(view: V): void;
 
-  drawerWillHide?(view: V): void;
+  viewWillDismiss?(view: V): void;
 
-  drawerDidHide?(view: V): void;
+  viewDidDismiss?(view: V): void;
 
-  drawerWillExpand?(view: V): void;
+  viewWillExpand?(view: V): void;
 
-  drawerDidExpand?(view: V): void;
+  viewDidExpand?(view: V): void;
 
-  drawerWillCollapse?(view: V): void;
+  viewWillCollapse?(view: V): void;
 
-  drawerDidCollapse?(view: V): void;
+  viewDidCollapse?(view: V): void;
 }

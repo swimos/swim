@@ -38,34 +38,71 @@ if (navigator.standalone) {
 
 const bodyView = swim.HtmlView.fromNode(document.body);
 
+const drawerView = swim.DrawerView.create()
+  .flexDirection("column")
+  .userSelect("none")
+  .placement("left");
+drawerView.modifyTheme(swim.Feel.default, [[swim.Feel.raised, 1]]);
+drawerView.backgroundColor.setLook(swim.Look.backgroundColor)
+
 const drawerButton = bodyView.append(swim.DrawerButton)
   .position("absolute")
   .top("50%")
   .right("50%")
   .bottom("50%")
   .left("50%");
-
-const drawerView = swim.DrawerView.create().drawerPlacement("left");
 drawerButton.setDrawerView(drawerView);
 
-const listView = drawerView.append(swim.ListView);
+const listLayout = swim.TableLayout.fromAny({
+  cols: [
+    {
+      key: "icon",
+      shrink: 0,
+      basis: 60,
+      persistent: true,
+    },
+    {
+      key: "name",
+      grow: 1,
+      basis: 240,
+      textColor: swim.Look.color,
+    },
+  ],
+});
 
-const item1 = listView.append(swim.ListItem, "agents")
-  .icon(swim.VectorIcon.create(24, 24, "M7.5,21C7.1,21,6.8,20.8,6.6,20.5L2.2,12.6C2.1,12.4,2,12.2,2,12C2,11.8,2.1,11.6,2.2,11.4L6.6,3.5C6.8,3.2,7.1,3,7.5,3L16.5,3C16.9,3,17.2,3.2,17.4,3.5L21.8,11.4C21.9,11.6,22,11.8,22,12C22,12.2,21.9,12.4,21.8,12.6L17.4,20.5C17.2,20.8,16.9,21,16.5,21L7.5,21ZM19.9,12L15.9,5L8.1,5L4.2,12L8.1,19L15.9,19L19.9,12ZM7.4,16.4L11.1,7L12.9,7L16.6,16.4L7.4,16.4ZM10,14.7L14,14.7L12,9.3L10,14.7Z"))
-  .label("Agents");
+const listView = drawerView.append(swim.TableView)
+  .flexGrow(1)
+  .backgroundColor(swim.Color.transparent())
+  .layout(listLayout)
+  .rowHeight(44);
+listView.modifyTheme(swim.Feel.default, [[swim.Feel.unselected, 1]]);
 
-const item2 = listView.append(swim.ListItem, "fabric")
-  .icon(swim.VectorIcon.create(24, 24, "M10,2C8.9,2,8,2.9,8,4L8,7C8,8.1,8.9,9,10,9L11,9L11,11L2,11L2,13L6,13L6,15L5,15C3.9,15,3,15.9,3,17L3,20C3,21.1,3.9,22,5,22L9,22C10.1,22,11,21.1,11,20L11,17C11,15.9,10.1,15,9,15L8,15L8,13L16,13L16,15L15,15C13.9,15,13,15.9,13,17L13,20C13,21.1,13.9,22,15,22L19,22C20.1,22,21,21.1,21,20L21,17C21,15.9,20.1,15,19,15L18,15L18,13L22,13L22,11L13,11L13,9L14,9C15.1,9,16,8.1,16,7L16,4C16,2.9,15.1,2,14,2L10,2L10,2ZM10,4L14,4L14,7L10,7L10,4L10,4ZM5,17L9,17L9,20L5,20L5,17L5,17ZM15,17L19,17L19,20L15,20L15,17Z"))
-  .label("Fabric");
+const item1 = listView.append(swim.RowView, "agents");
+const leaf1 = item1.leaf.injectView();
+leaf1.append(swim.IconCellView, "icon")
+  .iconWidth(24)
+  .iconHeight(24)
+  .graphics(swim.VectorIcon.create(24, 24, "M7.5,21C7.1,21,6.8,20.8,6.6,20.5L2.2,12.6C2.1,12.4,2,12.2,2,12C2,11.8,2.1,11.6,2.2,11.4L6.6,3.5C6.8,3.2,7.1,3,7.5,3L16.5,3C16.9,3,17.2,3.2,17.4,3.5L21.8,11.4C21.9,11.6,22,11.8,22,12C22,12.2,21.9,12.4,21.8,12.6L17.4,20.5C17.2,20.8,16.9,21,16.5,21L7.5,21ZM19.9,12L15.9,5L8.1,5L4.2,12L8.1,19L15.9,19L19.9,12ZM7.4,16.4L11.1,7L12.9,7L16.6,16.4L7.4,16.4ZM10,14.7L14,14.7L12,9.3L10,14.7Z"));
+leaf1.append(swim.TextCellView, "name").content("Agents");
 
-const settingsItem = drawerView.append(swim.ListItem)
-  .icon(swim.VectorIcon.create(20, 20, "M17.7,11C17.7,10.7,17.7,10.3,17.7,10C17.7,9.7,17.7,9.3,17.6,9L19.8,7.4C20,7.2,20.1,7,19.9,6.7L17.9,3.3C17.8,3,17.5,3,17.3,3L14.7,4C14.2,3.6,13.6,3.3,13,3.1L12.6,0.4C12.5,0.2,12.3,0,12.1,0L7.9,0C7.7,0,7.5,0.2,7.4,0.4L7.1,3.1C6.4,3.3,5.8,3.7,5.3,4L2.8,3C2.5,3,2.3,3,2.1,3.3L0.1,6.7C-0.1,7,0,7.2,0.2,7.4L2.4,9C2.3,9.3,2.3,9.7,2.3,10C2.3,10.3,2.3,10.7,2.4,11L0.2,12.6C0,12.8,-0.1,13.1,0.1,13.3L2.1,16.7C2.2,16.9,2.5,17,2.7,16.9L5.3,15.9C5.8,16.4,6.4,16.7,7,16.9L7.4,19.6C7.5,19.8,7.7,20,7.9,20L12.1,20C12.3,20,12.5,19.8,12.6,19.6L12.9,16.9C13.6,16.7,14.2,16.3,14.7,15.9L17.2,16.9C17.5,17,17.7,16.9,17.9,16.7L19.9,13.3C20.1,13,20,12.8,19.8,12.6L17.7,11L17.7,11ZM10,13.8C7.9,13.8,6.1,12.1,6.1,10C6.1,7.9,7.9,6.3,10,6.3C12.1,6.3,13.9,7.9,13.9,10C13.9,12.1,12.1,13.8,10,13.8Z"))
-  .label("Settings");
-settingsItem.icon.view.iconWidth(20).iconHeight(20);
+const item2 = listView.append(swim.RowView, "fabric");
+const leaf2 = item2.leaf.injectView();
+leaf2.append(swim.IconCellView, "icon")
+  .iconWidth(24)
+  .iconHeight(24)
+  .graphics(swim.VectorIcon.create(24, 24, "M10,2C8.9,2,8,2.9,8,4L8,7C8,8.1,8.9,9,10,9L11,9L11,11L2,11L2,13L6,13L6,15L5,15C3.9,15,3,15.9,3,17L3,20C3,21.1,3.9,22,5,22L9,22C10.1,22,11,21.1,11,20L11,17C11,15.9,10.1,15,9,15L8,15L8,13L16,13L16,15L15,15C13.9,15,13,15.9,13,17L13,20C13,21.1,13.9,22,15,22L19,22C20.1,22,21,21.1,21,20L21,17C21,15.9,20.1,15,19,15L18,15L18,13L22,13L22,11L13,11L13,9L14,9C15.1,9,16,8.1,16,7L16,4C16,2.9,15.1,2,14,2L10,2L10,2ZM10,4L14,4L14,7L10,7L10,4L10,4ZM5,17L9,17L9,20L5,20L5,17L5,17ZM15,17L19,17L19,20L15,20L15,17Z"));
+leaf2.append(swim.TextCellView, "name").content("Fabric");
 
-listView.selectItem(item1);
+const settingsItem = drawerView.append(swim.RowView).layout(listLayout).rowHeight(44);
+settingsItem.modifyTheme(swim.Feel.default, [[swim.Feel.unselected, 1]]);
+const settingsLeaf = settingsItem.leaf.injectView();
+settingsLeaf.append(swim.IconCellView, "icon")
+  .iconWidth(20)
+  .iconHeight(20)
+  .graphics(swim.VectorIcon.create(20, 20, "M17.7,11C17.7,10.7,17.7,10.3,17.7,10C17.7,9.7,17.7,9.3,17.6,9L19.8,7.4C20,7.2,20.1,7,19.9,6.7L17.9,3.3C17.8,3,17.5,3,17.3,3L14.7,4C14.2,3.6,13.6,3.3,13,3.1L12.6,0.4C12.5,0.2,12.3,0,12.1,0L7.9,0C7.7,0,7.5,0.2,7.4,0.4L7.1,3.1C6.4,3.3,5.8,3.7,5.3,4L2.8,3C2.5,3,2.3,3,2.1,3.3L0.1,6.7C-0.1,7,0,7.2,0.2,7.4L2.4,9C2.3,9.3,2.3,9.7,2.3,10C2.3,10.3,2.3,10.7,2.4,11L0.2,12.6C0,12.8,-0.1,13.1,0.1,13.3L2.1,16.7C2.2,16.9,2.5,17,2.7,16.9L5.3,15.9C5.8,16.4,6.4,16.7,7,16.9L7.4,19.6C7.5,19.8,7.7,20,7.9,20L12.1,20C12.3,20,12.5,19.8,12.6,19.6L12.9,16.9C13.6,16.7,14.2,16.3,14.7,15.9L17.2,16.9C17.5,17,17.7,16.9,17.9,16.7L19.9,13.3C20.1,13,20,12.8,19.8,12.6L17.7,11L17.7,11ZM10,13.8C7.9,13.8,6.1,12.1,6.1,10C6.1,7.9,7.9,6.3,10,6.3C12.1,6.3,13.9,7.9,13.9,10C13.9,12.1,12.1,13.8,10,13.8Z"));
+settingsLeaf.append(swim.TextCellView, "name").content("Settings");
 
-drawerView.show();
+leaf1.highlight.focus();
 
 bodyView.append(drawerView);
 

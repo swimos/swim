@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {R2Box, Transform} from "@swim/math";
-import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
+import {ViewContextType, ViewContext, ViewFlags, View, ViewAnimator} from "@swim/view";
 import type {AnyGraphicsRenderer, GraphicsRendererType, GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import type {GraphicsViewContext} from "../graphics/GraphicsViewContext";
 import {GraphicsViewInit, GraphicsView} from "../graphics/GraphicsView";
@@ -205,26 +205,11 @@ export class RasterView extends LayerView {
     });
   }
 
-  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+  override cascadeHitTest(x: number, y: number, baseViewContext: ViewContext): GraphicsView | null {
     const compositeFrame = this.compositeFrame;
     x -= Math.floor(compositeFrame.xMin);
     y -= Math.floor(compositeFrame.yMin);
-
-    let hit: GraphicsView | null = null;
-    const childViews = this.childViews;
-    for (let i = childViews.length - 1; i >= 0; i -= 1) {
-      const childView = childViews[i];
-      if (childView instanceof GraphicsView && !childView.isHidden() && !childView.isCulled()) {
-        const hitBounds = childView.hitBounds;
-        if (hitBounds.contains(x, y)) {
-          hit = childView.hitTest(x, y, viewContext);
-          if (hit !== null) {
-            break;
-          }
-        }
-      }
-    }
-    return hit;
+    return super.cascadeHitTest(x, y, baseViewContext);
   }
 
   override get parentTransform(): Transform {

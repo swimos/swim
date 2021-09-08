@@ -21,4 +21,12 @@ export abstract class TransformViewAnimator<V extends View> extends ViewAnimator
   override fromAny(value: AnyTransform | null | undefined): Transform | null | undefined {
     return value !== void 0 && value !== null ? Transform.fromAny(value) : null;
   }
+
+  override equalState(newState: Transform | null | undefined, oldState: Transform | null | undefined): boolean {
+    if (newState !== void 0 && newState !== null) {
+      return newState.equals(oldState);
+    } else {
+      return newState === oldState;
+    }
+  }
 }

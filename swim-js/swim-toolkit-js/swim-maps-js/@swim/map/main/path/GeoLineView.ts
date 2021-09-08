@@ -159,20 +159,18 @@ export class GeoLineView extends GeoPathView implements StrokeView {
     }
   }
 
-  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    let hit = super.doHitTest(x, y, viewContext);
-    if (hit === null) {
-      const renderer = viewContext.renderer;
-      if (renderer instanceof CanvasRenderer) {
-        const context = renderer.context;
-        context.save();
-        x *= renderer.pixelRatio;
-        y *= renderer.pixelRatio;
-        hit = this.hitTestLine(x, y, context, this.viewFrame);
-        context.restore();
-      }
+  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      x *= renderer.pixelRatio;
+      y *= renderer.pixelRatio;
+      const hit = this.hitTestLine(x, y, context, this.viewFrame);
+      context.restore();
+      return hit;
     }
-    return hit;
+    return null;
   }
 
   protected hitTestLine(x: number, y: number, context: CanvasContext, frame: R2Box): GraphicsView | null {
@@ -196,7 +194,7 @@ export class GeoLineView extends GeoPathView implements StrokeView {
     return null;
   }
 
-  static create(): GeoLineView {
+  static override create(): GeoLineView {
     return new GeoLineView();
   }
 

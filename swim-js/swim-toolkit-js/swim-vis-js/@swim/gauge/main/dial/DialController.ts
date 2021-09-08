@@ -14,7 +14,7 @@
 
 import {AnyTiming, Timing} from "@swim/mapping";
 import {Model} from "@swim/model";
-import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
+import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
 import {ControllerProperty, ControllerView, ControllerViewTrait, CompositeController} from "@swim/controller";
@@ -147,10 +147,6 @@ export class DialController extends CompositeController {
         controllerObserver.controllerDidSetDialView(newDialView, oldDialView, this);
       }
     }
-  }
-
-  protected themeDialView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, dialView: DialView): void {
-    // hook
   }
 
   protected setValue(value: number, dialTrait: DialTrait, timing?: AnyTiming | boolean): void {
@@ -372,9 +368,6 @@ export class DialController extends CompositeController {
     },
     didSetView(newDialView: DialView | null, oldDialView: DialView | null): void {
       this.owner.didSetDialView(newDialView, oldDialView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, dialView: DialView): void {
-      this.owner.themeDialView(theme, mood, timing, dialView);
     },
     viewWillSetDialValue(newValue: number, oldValue: number, dialView: DialView): void {
       this.owner.willSetValue(newValue, oldValue, dialView);

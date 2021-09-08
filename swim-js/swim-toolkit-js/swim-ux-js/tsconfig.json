@@ -4,7 +4,7 @@
   "references": [
     {"path": "./@swim/button"},
     {"path": "./@swim/token"},
-    {"path": "./@swim/grid"},
+    {"path": "./@swim/table"},
     {"path": "./@swim/window"},
     {"path": "./@swim/deck"},
     {"path": "./@swim/ux"}

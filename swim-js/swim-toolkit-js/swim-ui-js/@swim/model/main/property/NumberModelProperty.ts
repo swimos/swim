@@ -31,4 +31,8 @@ export abstract class NumberModelProperty<M extends Model> extends ModelProperty
       return value;
     }
   }
+
+  override equalState(newState: number | null | undefined, oldState: number | null | undefined): boolean {
+    return newState === oldState;
+  }
 }

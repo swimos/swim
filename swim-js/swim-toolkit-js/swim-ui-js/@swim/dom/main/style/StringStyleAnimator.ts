@@ -28,4 +28,8 @@ export abstract class StringStyleAnimator<V extends StyleContext> extends StyleA
   override fromAny(value: string): string | undefined {
     return value;
   }
+
+  override equalState(newState: string | undefined, oldState: string | undefined): boolean {
+    return newState === oldState;
+  }
 }

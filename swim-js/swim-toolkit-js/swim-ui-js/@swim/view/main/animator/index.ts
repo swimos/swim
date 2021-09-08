@@ -60,3 +60,18 @@ export {ColorViewAnimator} from "./ColorViewAnimator";
 export {FontViewAnimator} from "./FontViewAnimator";
 
 export {TransformViewAnimator} from "./TransformViewAnimator";
+
+export {
+  FocusViewAnimatorInit,
+  FocusViewAnimator,
+} from "./FocusViewAnimator";
+
+export {
+  PresenceViewAnimatorInit,
+  PresenceViewAnimator,
+} from "./PresenceViewAnimator";
+
+export {
+  ExpansionViewAnimatorInit,
+  ExpansionViewAnimator,
+} from "./ExpansionViewAnimator";

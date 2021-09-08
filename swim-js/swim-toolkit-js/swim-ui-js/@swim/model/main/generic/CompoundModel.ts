@@ -268,7 +268,7 @@ export class CompoundModel extends GenericModel {
   }
 
   /** @hidden */
-  protected override doMountChildModels(): void {
+  protected override mountChildModels(): void {
     const childModels = this.childModels;
     let i = 0;
     while (i < childModels.length) {
@@ -284,7 +284,7 @@ export class CompoundModel extends GenericModel {
   }
 
   /** @hidden */
-  protected override doUnmountChildModels(): void {
+  protected override unmountChildModels(): void {
     const childModels = this.childModels;
     let i = 0;
     while (i < childModels.length) {
@@ -300,7 +300,7 @@ export class CompoundModel extends GenericModel {
   }
 
   /** @hidden */
-  protected override doPowerChildModels(): void {
+  protected override powerChildModels(): void {
     const childModels = this.childModels;
     let i = 0;
     while (i < childModels.length) {
@@ -316,7 +316,7 @@ export class CompoundModel extends GenericModel {
   }
 
   /** @hidden */
-  protected override doUnpowerChildModels(): void {
+  protected override unpowerChildModels(): void {
     const childModels = this.childModels;
     let i = 0;
     while (i < childModels.length) {

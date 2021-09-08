@@ -31,10 +31,7 @@ export {
 
 export {ButtonItem} from "./ButtonItem";
 
-export {
-  ButtonStackState,
-  ButtonStack,
-} from "./ButtonStack";
+export {ButtonStack} from "./ButtonStack";
 export {ButtonStackObserver} from "./ButtonStackObserver";
 
 export {IconButton} from "./IconButton";

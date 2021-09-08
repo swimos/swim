@@ -12,10 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Timing} from "@swim/mapping";
 import type {GeoBox} from "@swim/geo";
 import type {Trait} from "@swim/model";
-import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {Controller, ControllerViewTrait, ControllerFastener} from "@swim/controller";
 import type {GeoViewContext} from "../geo/GeoViewContext";
 import type {GeoView} from "../geo/GeoView";
@@ -169,10 +167,6 @@ export class GeoLayerController extends GeoController {
     }
   }
 
-  protected themeGeoView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, geoView: GeoView): void {
-    // hook
-  }
-
   protected projectGeoView(viewContext: GeoViewContext, geoView: GeoView): void {
     // hook
   }
@@ -196,9 +190,6 @@ export class GeoLayerController extends GeoController {
     },
     didSetView(newGeoView: GeoView | null, oldGeoView: GeoView | null): void {
       this.owner.didSetGeoView(newGeoView, oldGeoView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, geoView: GeoView): void {
-      this.owner.themeGeoView(theme, mood, timing, geoView);
     },
     viewWillProject(viewContext: GeoViewContext, geoView: GeoView): void {
       this.owner.projectGeoView(viewContext, geoView);

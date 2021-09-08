@@ -42,4 +42,8 @@ export abstract class NumberStyleAnimatorConstraint<V extends StyleContext> exte
       return isFinite(number) ? number : void 0;
     }
   }
+
+  override equalState(newState: number | undefined, oldState: number | undefined): boolean {
+    return newState === oldState;
+  }
 }

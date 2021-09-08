@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Timing} from "@swim/mapping";
-import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {ControllerViewTrait, CompositeController} from "@swim/controller";
 import type {AxisView} from "./AxisView";
 import {AxisTrait} from "./AxisTrait";
@@ -116,13 +114,8 @@ export abstract class AxisController<D> extends CompositeController {
     }
   }
 
-  protected themeAxisView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, axisView: AxisView<D>): void {
-    // hook
-  }
-
   /** @hidden */
   static AxisFastener = ControllerViewTrait.define<AxisController<unknown>, AxisView<unknown>, AxisTrait<unknown>>({
-    observeView: true,
     willSetView(newAxisView: AxisView<unknown> | null, oldAxisView: AxisView<unknown> | null): void {
       this.owner.willSetAxisView(newAxisView, oldAxisView);
     },
@@ -131,9 +124,6 @@ export abstract class AxisController<D> extends CompositeController {
     },
     didSetView(newAxisView: AxisView<unknown> | null, oldAxisView: AxisView<unknown> | null): void {
       this.owner.didSetAxisView(newAxisView, oldAxisView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, axisView: AxisView<unknown>): void {
-      this.owner.themeAxisView(theme, mood, timing, axisView);
     },
     createView(): AxisView<unknown> | null {
       return this.owner.createAxisView();

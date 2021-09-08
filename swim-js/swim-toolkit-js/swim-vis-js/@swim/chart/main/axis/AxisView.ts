@@ -449,15 +449,15 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
     this.updateTicks();
   }
 
-  protected override willDisplayChildView(childView: View, displayFlags: ViewFlags,
-                                          viewContext: ViewContextType<this>): void {
-    super.willDisplayChildView(childView, displayFlags, viewContext);
+  protected override displayChildView(childView: View, displayFlags: ViewFlags,
+                                      viewContext: ViewContextType<this>): void {
     if ((displayFlags & View.NeedsLayout) !== 0 && childView instanceof TickView) {
       const scale = this.scale.value;
       if (scale !== null) {
         this.layoutTick(childView, this.origin.getValue(), this.viewFrame, scale);
       }
     }
+    super.displayChildView(childView, displayFlags, viewContext);
   }
 
   protected abstract layoutTick(tick: TickView<D>, origin: R2Point, frame: R2Box,

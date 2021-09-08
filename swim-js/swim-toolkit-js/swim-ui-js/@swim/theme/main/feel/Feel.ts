@@ -53,6 +53,7 @@ export abstract class Feel implements Mood {
   static primary: Feel; // defined by feels
   static secondary: Feel; // defined by feels
 
+  static unselected: Feel; // defined by feels
   static selected: Feel; // defined by feels
   static disabled: Feel; // defined by feels
   static inactive: Feel; // defined by feels

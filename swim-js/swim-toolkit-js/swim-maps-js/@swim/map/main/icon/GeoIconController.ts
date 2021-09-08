@@ -14,7 +14,7 @@
 
 import {AnyTiming, Timing} from "@swim/mapping";
 import type {GeoPoint} from "@swim/geo";
-import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
+import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";
 import type {Graphics, IconLayout} from "@swim/graphics";
 import {ControllerViewTrait} from "@swim/controller";
@@ -122,10 +122,6 @@ export class GeoIconController extends GeoController {
         controllerObserver.controllerDidSetGeoView(newGeoView, oldGeoView, this);
       }
     }
-  }
-
-  protected themeGeoView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, geoView: GeoIconView): void {
-    // hook
   }
 
   protected setGeoCenter(geoCenter: GeoPoint | null, geoTrait: GeoIconTrait, timing?: AnyTiming | boolean): void {
@@ -264,9 +260,6 @@ export class GeoIconController extends GeoController {
     },
     didSetView(newGeoView: GeoIconView | null, oldGeoView: GeoIconView | null): void {
       this.owner.didSetGeoView(newGeoView, oldGeoView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, geoView: GeoIconView): void {
-      this.owner.themeGeoView(theme, mood, timing, geoView);
     },
     viewWillSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null, geoView: GeoIconView): void {
       this.owner.willSetGeoCenter(newGeoCenter, oldGeoCenter, geoView);

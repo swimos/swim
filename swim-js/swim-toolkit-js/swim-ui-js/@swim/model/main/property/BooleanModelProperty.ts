@@ -20,4 +20,8 @@ export abstract class BooleanModelProperty<M extends Model> extends ModelPropert
   override fromAny(value: boolean | string | null | undefined): boolean | null | undefined {
     return !!value;
   }
+
+  override equalState(newState: boolean | null | undefined, oldState: boolean | null | undefined): boolean {
+    return newState === oldState;
+  }
 }

@@ -344,15 +344,6 @@ export class GeoTreeView extends GeoView {
     }, this);
   }
 
-  /** @hidden */
-  protected override doProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    if ((processFlags & View.ProcessMask) !== 0) {
-      this.willProcessChildViews(processFlags, viewContext);
-      this.onProcessChildViews(processFlags, viewContext);
-      this.didProcessChildViews(processFlags, viewContext);
-    }
-  }
-
   protected override processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
                                        processChildView: (this: this, childView: View, processFlags: ViewFlags,
                                                           viewContext: ViewContextType<this>) => void): void {
@@ -484,7 +475,7 @@ export class GeoTreeView extends GeoView {
 
   declare readonly geoBounds: GeoBox; // getter defined below to work around useDefineForClassFields lunacy
 
-  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const geoPoint = viewContext.geoViewport.unproject(x, y);
     return this.hitTestTree(this.root, x, y, geoPoint, viewContext);
   }
@@ -509,7 +500,7 @@ export class GeoTreeView extends GeoView {
       for (let i = 0; i < childViews.length; i += 1) {
         const childView = childViews[i]!;
         if (childView.hitBounds.contains(x, y)) {
-          hit = childView.hitTest(x, y, viewContext);
+          hit = childView.cascadeHitTest(x, y, viewContext);
           if (hit !== null) {
             break;
           }

@@ -340,18 +340,16 @@ export class GeoIconView extends GeoLayerView implements IconView {
 
   declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
-  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    let hit = super.doHitTest(x, y, viewContext);
-    if (hit === null) {
-      const renderer = viewContext.renderer;
-      if (renderer instanceof CanvasRenderer) {
-        const context = renderer.context;
-        context.save();
-        hit = this.hitTestIcon(x, y, renderer, this.viewBounds);
-        context.restore();
-      }
+  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      const hit = this.hitTestIcon(x, y, renderer, this.viewBounds);
+      context.restore();
+      return hit;
     }
-    return hit;
+    return null;
   }
 
   protected hitTestIcon(x: number, y: number, renderer: CanvasRenderer, frame: R2Box): GraphicsView | null {
@@ -375,7 +373,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
     return GeoRippleView.ripple(this, options);
   }
 
-  static create(): GeoIconView {
+  static override create(): GeoIconView {
     return new GeoIconView();
   }
 

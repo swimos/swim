@@ -15,7 +15,7 @@
 import {AnyTiming, Timing} from "@swim/mapping";
 import type {Length} from "@swim/math";
 import type {Color} from "@swim/style";
-import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
+import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";
 import {ControllerViewTrait, ControllerFastener} from "@swim/controller";
 import type {DataPointController} from "../data/DataPointController";
@@ -152,10 +152,6 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
     }
   }
 
-  protected themePlotView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, plotView: BubblePlotView<X, Y>): void {
-    // hook
-  }
-
   protected setPlotRadius(radius: Length | null, plotTrait: BubblePlotTrait<X, Y>, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
@@ -250,9 +246,6 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
     },
     didSetView(newPlotView: BubblePlotView<unknown, unknown> | null, oldPlotView: BubblePlotView<unknown, unknown> | null): void {
       this.owner.didSetPlotView(newPlotView, oldPlotView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, plotView: BubblePlotView<unknown, unknown>): void {
-      this.owner.themePlotView(theme, mood, timing, plotView);
     },
     viewWillSetPlotRadius(newRadius: Length | null, oldRadius: Length | null, plotView: BubblePlotView<unknown, unknown>): void {
       this.owner.willSetPlotRadius(newRadius, oldRadius, plotView);

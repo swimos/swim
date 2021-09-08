@@ -274,7 +274,7 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
     }
   }
 
-  static create(): GeoRippleView {
+  static override create(): GeoRippleView {
     return new GeoRippleView();
   }
 }

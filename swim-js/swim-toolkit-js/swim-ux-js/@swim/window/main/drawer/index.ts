@@ -14,7 +14,6 @@
 
 export {
   DrawerPlacement,
-  DrawerState,
   DrawerView,
 } from "./DrawerView";
 export {DrawerViewObserver} from "./DrawerViewObserver";

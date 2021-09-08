@@ -14,7 +14,7 @@
 
 import {AnyTiming, Timing} from "@swim/mapping";
 import {Model} from "@swim/model";
-import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
+import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";
 import type {GraphicsView} from "@swim/graphics";
 import {ControllerProperty, ControllerView, ControllerViewTrait, CompositeController} from "@swim/controller";
@@ -145,10 +145,6 @@ export class SliceController extends CompositeController {
         controllerObserver.controllerDidSetSliceView(newSliceView, oldSliceView, this);
       }
     }
-  }
-
-  protected themeSliceView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, sliceView: SliceView): void {
-    // hook
   }
 
   protected setValue(value: number, sliceTrait: SliceTrait, timing?: AnyTiming | boolean): void {
@@ -326,9 +322,6 @@ export class SliceController extends CompositeController {
     },
     didSetView(newSliceView: SliceView | null, oldSliceView: SliceView | null): void {
       this.owner.didSetSliceView(newSliceView, oldSliceView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, sliceView: SliceView): void {
-      this.owner.themeSliceView(theme, mood, timing, sliceView);
     },
     viewWillSetSliceValue(newValue: number, oldValue: number, sliceView: SliceView): void {
       this.owner.willSetValue(newValue, oldValue, sliceView);

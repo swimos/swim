@@ -403,20 +403,18 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
 
   override readonly viewBounds!: R2Box;
 
-  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    let hit = super.doHitTest(x, y, viewContext);
-    if (hit === null) {
-      const renderer = viewContext.renderer;
-      if (renderer instanceof CanvasRenderer) {
-        const context = renderer.context;
-        context.save();
-        x *= renderer.pixelRatio;
-        y *= renderer.pixelRatio;
-        hit = this.hitTestPlot(x, y, context, this.viewFrame);
-        context.restore();
-      }
+  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      context.save();
+      x *= renderer.pixelRatio;
+      y *= renderer.pixelRatio;
+      const hit = this.hitTestPlot(x, y, context, this.viewFrame);
+      context.restore();
+      return hit;
     }
-    return hit;
+    return null;
   }
 
   protected hitTestPlot(x: number, y: number, context: CanvasContext, frame: R2Box): GraphicsView | null {
@@ -455,7 +453,7 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
     return GeoRippleView.ripple(this, options);
   }
 
-  static create(): GeoPlotView {
+  static override create(): GeoPlotView {
     return new GeoPlotView();
   }
 

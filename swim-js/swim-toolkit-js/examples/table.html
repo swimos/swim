@@ -73,11 +73,12 @@ tableView.layout.setState(tableLayout);
 
 function createRowView(i) {
   const rowView = swim.RowView.create();
-  const nameCell = rowView.append(swim.CellView, "name");
+  const leafView = rowView.leaf.injectView();
+  const nameCell = leafView.append(swim.TextCellView, "name");
   nameCell.content.setView("Row " + i);
-  const kpi1Cell = rowView.append(swim.CellView, "kpi1");
+  const kpi1Cell = leafView.append(swim.TextCellView, "kpi1");
   kpi1Cell.content.setView("" + i);
-  const kpi2Cell = rowView.append(swim.CellView, "kpi2");
+  const kpi2Cell = leafView.append(swim.TextCellView, "kpi2");
   kpi2Cell.content.setView("" + -i);
   return rowView;
 }

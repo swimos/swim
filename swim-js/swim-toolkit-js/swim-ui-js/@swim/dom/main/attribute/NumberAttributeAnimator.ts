@@ -30,4 +30,8 @@ export abstract class NumberAttributeAnimator<V extends ElementView> extends Att
       return isFinite(number) ? number : void 0;
     }
   }
+
+  override equalState(newState: number | undefined, oldState: number | undefined): boolean {
+    return newState === oldState;
+  }
 }

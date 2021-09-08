@@ -96,8 +96,16 @@ const LightSecondary = FeelVector.of(
   [Look.accentColor, LightSecondaryColor],
 );
 
+const LightUnselected = FeelVector.of(
+  [Look.color, LightMutedColor],
+  [Look.iconColor, LightMutedColor],
+  [Look.backgroundColor, LightBackgroundColor.darker(0.5)],
+);
+
 const LightSelected = FeelVector.of(
-  [Look.backgroundColor, Color.black(1 / 2)],
+  [Look.color, LightColor],
+  [Look.iconColor, LightIconColor],
+  [Look.backgroundColor, LightBackgroundColor.darker(0.5)],
 );
 
 const LightDisabled = FeelVector.of(
@@ -202,6 +210,7 @@ const LightTheme = ThemeMatrix.forCols(
   [Feel.primary, LightPrimary],
   [Feel.secondary, LightSecondary],
 
+  [Feel.unselected, LightUnselected],
   [Feel.selected, LightSelected],
   [Feel.disabled, LightDisabled],
   [Feel.inactive, LightInactive],

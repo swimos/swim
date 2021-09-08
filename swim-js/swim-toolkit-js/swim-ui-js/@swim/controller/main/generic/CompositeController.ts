@@ -268,7 +268,7 @@ export class CompositeController extends GenericController {
   }
 
   /** @hidden */
-  protected override doMountChildControllers(): void {
+  protected override mountChildControllers(): void {
     const childControllers = this.childControllers;
     let i = 0;
     while (i < childControllers.length) {
@@ -284,7 +284,7 @@ export class CompositeController extends GenericController {
   }
 
   /** @hidden */
-  protected override doUnmountChildControllers(): void {
+  protected override unmountChildControllers(): void {
     const childControllers = this.childControllers;
     let i = 0;
     while (i < childControllers.length) {
@@ -300,7 +300,7 @@ export class CompositeController extends GenericController {
   }
 
   /** @hidden */
-  protected override doPowerChildControllers(): void {
+  protected override powerChildControllers(): void {
     const childControllers = this.childControllers;
     let i = 0;
     while (i < childControllers.length) {
@@ -316,7 +316,7 @@ export class CompositeController extends GenericController {
   }
 
   /** @hidden */
-  protected override doUnpowerChildControllers(): void {
+  protected override unpowerChildControllers(): void {
     const childControllers = this.childControllers;
     let i = 0;
     while (i < childControllers.length) {

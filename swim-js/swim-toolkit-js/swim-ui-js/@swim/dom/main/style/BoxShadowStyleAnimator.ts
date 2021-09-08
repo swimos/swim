@@ -25,4 +25,12 @@ export abstract class BoxShadowStyleAnimator<V extends StyleContext> extends Sty
   override fromAny(value: AnyBoxShadow): BoxShadow | null {
     return BoxShadow.fromAny(value);
   }
+
+  override equalState(newState: BoxShadow | null, oldState: BoxShadow | null): boolean {
+    if (newState !== void 0 && newState !== null) {
+      return newState.equals(oldState);
+    } else {
+      return newState === oldState;
+    }
+  }
 }

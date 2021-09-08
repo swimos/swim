@@ -33,4 +33,12 @@ export abstract class LengthStyleAnimator<V extends StyleContext> extends StyleA
       return null;
     }
   }
+
+  override equalState(newState: Length | null, oldState: Length | null): boolean {
+    if (newState !== void 0 && newState !== null) {
+      return newState.equals(oldState);
+    } else {
+      return newState === oldState;
+    }
+  }
 }

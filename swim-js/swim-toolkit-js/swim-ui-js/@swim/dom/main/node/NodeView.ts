@@ -862,7 +862,7 @@ export class NodeView extends View {
       try {
         this.willMount();
         this.onMount();
-        this.doMountChildViews();
+        this.mountChildViews();
         this.didMount();
       } finally {
         this.setViewFlags(this.viewFlags & ~View.TraversingFlag);
@@ -886,7 +886,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  protected doMountChildViews(): void {
+  protected mountChildViews(): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -908,7 +908,7 @@ export class NodeView extends View {
       this.setViewFlags(this.viewFlags & ~View.MountedFlag | View.TraversingFlag);
       try {
         this.willUnmount();
-        this.doUnmountChildViews();
+        this.unmountChildViews();
         this.onUnmount();
         this.didUnmount();
       } finally {
@@ -933,7 +933,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  protected doUnmountChildViews(): void {
+  protected unmountChildViews(): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -956,7 +956,7 @@ export class NodeView extends View {
       try {
         this.willPower();
         this.onPower();
-        this.doPowerChildViews();
+        this.powerChildViews();
         this.didPower();
       } finally {
         this.setViewFlags(this.viewFlags & ~View.TraversingFlag);
@@ -967,7 +967,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  protected doPowerChildViews(): void {
+  protected powerChildViews(): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -989,7 +989,7 @@ export class NodeView extends View {
       this.setViewFlags(this.viewFlags & ~View.PoweredFlag | View.TraversingFlag);
       try {
         this.willUnpower();
-        this.doUnpowerChildViews();
+        this.unpowerChildViews();
         this.onUnpower();
         this.didUnpower();
       } finally {
@@ -1001,7 +1001,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  protected doUnpowerChildViews(): void {
+  protected unpowerChildViews(): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -1023,12 +1023,12 @@ export class NodeView extends View {
     if (culled && (viewFlags & View.CulledFlag) === 0) {
       this.setViewFlags(viewFlags | View.CulledFlag);
       if ((viewFlags & View.CullFlag) === 0) {
-        this.doCull();
+        this.cullView();
       }
     } else if (!culled && (viewFlags & View.CulledFlag) !== 0) {
       this.setViewFlags(viewFlags & ~View.CulledFlag);
       if ((viewFlags & View.CullFlag) === 0) {
-        this.doUncull();
+        this.uncullView();
       }
     }
   }
@@ -1037,18 +1037,18 @@ export class NodeView extends View {
     if ((this.viewFlags & View.CullFlag) === 0) {
       this.setViewFlags(this.viewFlags | View.CullFlag);
       if ((this.viewFlags & View.CulledFlag) === 0) {
-        this.doCull();
+        this.cullView();
       }
     }
   }
 
   /** @hidden */
-  protected doCull(): void {
+  protected cullView(): void {
     this.setViewFlags(this.viewFlags | View.TraversingFlag);
     try {
       this.willCull();
       this.onCull();
-      this.doCullChildViews();
+      this.cullChildViews();
       this.didCull();
     } finally {
       this.setViewFlags(this.viewFlags & ~View.TraversingFlag);
@@ -1056,7 +1056,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  protected doCullChildViews(): void {
+  protected cullChildViews(): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -1077,17 +1077,17 @@ export class NodeView extends View {
     if ((this.viewFlags & View.CullFlag) !== 0) {
       this.setViewFlags(this.viewFlags & ~View.CullFlag);
       if ((this.viewFlags & View.CulledFlag) === 0) {
-        this.doUncull();
+        this.uncullView();
       }
     }
   }
 
   /** @hidden */
-  protected doUncull(): void {
+  protected uncullView(): void {
     this.setViewFlags(this.viewFlags | View.TraversingFlag);
     try {
       this.willUncull();
-      this.doUncullChildViews();
+      this.uncullChildViews();
       this.onUncull();
       this.didUncull();
     } finally {
@@ -1096,7 +1096,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  protected doUncullChildViews(): void {
+  protected uncullChildViews(): void {
     const childNodes = this.node.childNodes;
     let i = 0;
     while (i < childNodes.length) {
@@ -1113,75 +1113,72 @@ export class NodeView extends View {
     }
   }
 
-  override cascadeProcess(processFlags: ViewFlags, viewContext: ViewContext): void {
-    const extendedViewContext = this.extendViewContext(viewContext);
+  override cascadeProcess(processFlags: ViewFlags, baseViewContext: ViewContext): void {
+    const viewContext = this.extendViewContext(baseViewContext);
     processFlags &= ~View.NeedsProcess;
     processFlags |= this.viewFlags & View.UpdateMask;
-    processFlags = this.needsProcess(processFlags, extendedViewContext);
+    processFlags = this.needsProcess(processFlags, viewContext);
     if ((processFlags & View.ProcessMask) !== 0) {
-      this.doProcess(processFlags, extendedViewContext);
-    }
-  }
+      let cascadeFlags = processFlags;
+      this.setViewFlags(this.viewFlags & ~(View.NeedsProcess | View.NeedsProject)
+                                       |  (View.TraversingFlag | View.ProcessingFlag));
+      try {
+        this.willProcess(cascadeFlags, viewContext);
+        if (((this.viewFlags | processFlags) & View.NeedsResize) !== 0) {
+          cascadeFlags |= View.NeedsResize;
+          this.setViewFlags(this.viewFlags & ~View.NeedsResize);
+          this.willResize(viewContext);
+        }
+        if (((this.viewFlags | processFlags) & View.NeedsScroll) !== 0) {
+          cascadeFlags |= View.NeedsScroll;
+          this.setViewFlags(this.viewFlags & ~View.NeedsScroll);
+          this.willScroll(viewContext);
+        }
+        if (((this.viewFlags | processFlags) & View.NeedsChange) !== 0) {
+          cascadeFlags |= View.NeedsChange;
+          this.setViewFlags(this.viewFlags & ~View.NeedsChange);
+          this.willChange(viewContext);
+        }
+        if (((this.viewFlags | processFlags) & View.NeedsAnimate) !== 0) {
+          cascadeFlags |= View.NeedsAnimate;
+          this.setViewFlags(this.viewFlags & ~View.NeedsAnimate);
+          this.willAnimate(viewContext);
+        }
 
-  /** @hidden */
-  protected doProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    let cascadeFlags = processFlags;
-    this.setViewFlags(this.viewFlags & ~(View.NeedsProcess | View.NeedsProject)
-                                     |  (View.TraversingFlag | View.ProcessingFlag));
-    try {
-      this.willProcess(cascadeFlags, viewContext);
-      if (((this.viewFlags | processFlags) & View.NeedsResize) !== 0) {
-        cascadeFlags |= View.NeedsResize;
-        this.setViewFlags(this.viewFlags & ~View.NeedsResize);
-        this.willResize(viewContext);
-      }
-      if (((this.viewFlags | processFlags) & View.NeedsScroll) !== 0) {
-        cascadeFlags |= View.NeedsScroll;
-        this.setViewFlags(this.viewFlags & ~View.NeedsScroll);
-        this.willScroll(viewContext);
-      }
-      if (((this.viewFlags | processFlags) & View.NeedsChange) !== 0) {
-        cascadeFlags |= View.NeedsChange;
-        this.setViewFlags(this.viewFlags & ~View.NeedsChange);
-        this.willChange(viewContext);
-      }
-      if (((this.viewFlags | processFlags) & View.NeedsAnimate) !== 0) {
-        cascadeFlags |= View.NeedsAnimate;
-        this.setViewFlags(this.viewFlags & ~View.NeedsAnimate);
-        this.willAnimate(viewContext);
-      }
+        this.onProcess(cascadeFlags, viewContext);
+        if ((cascadeFlags & View.NeedsResize) !== 0) {
+          this.onResize(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsScroll) !== 0) {
+          this.onScroll(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsChange) !== 0) {
+          this.onChange(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsAnimate) !== 0) {
+          this.onAnimate(viewContext);
+        }
 
-      this.onProcess(cascadeFlags, viewContext);
-      if ((cascadeFlags & View.NeedsResize) !== 0) {
-        this.onResize(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsScroll) !== 0) {
-        this.onScroll(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsChange) !== 0) {
-        this.onChange(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsAnimate) !== 0) {
-        this.onAnimate(viewContext);
-      }
+        if ((cascadeFlags & View.ProcessMask) !== 0) {
+          this.processChildViews(cascadeFlags, viewContext, this.processChildView);
+        }
 
-      this.doProcessChildViews(cascadeFlags, viewContext);
-
-      if ((cascadeFlags & View.NeedsAnimate) !== 0) {
-        this.didAnimate(viewContext);
+        if ((cascadeFlags & View.NeedsAnimate) !== 0) {
+          this.didAnimate(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsChange) !== 0) {
+          this.didChange(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsScroll) !== 0) {
+          this.didScroll(viewContext);
+        }
+        if ((cascadeFlags & View.NeedsResize) !== 0) {
+          this.didResize(viewContext);
+        }
+        this.didProcess(cascadeFlags, viewContext);
+      } finally {
+        this.setViewFlags(this.viewFlags & ~(View.TraversingFlag | View.ProcessingFlag));
       }
-      if ((cascadeFlags & View.NeedsChange) !== 0) {
-        this.didChange(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsScroll) !== 0) {
-        this.didScroll(viewContext);
-      }
-      if ((cascadeFlags & View.NeedsResize) !== 0) {
-        this.didResize(viewContext);
-      }
-      this.didProcess(cascadeFlags, viewContext);
-    } finally {
-      this.setViewFlags(this.viewFlags & ~(View.TraversingFlag | View.ProcessingFlag));
     }
   }
 
@@ -1193,15 +1190,6 @@ export class NodeView extends View {
   protected override onChange(viewContext: ViewContextType<this>): void {
     super.onChange(viewContext);
     this.changeViewProperties();
-  }
-
-  /** @hidden */
-  protected doProcessChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    if ((processFlags & View.ProcessMask) !== 0) {
-      this.willProcessChildViews(processFlags, viewContext);
-      this.onProcessChildViews(processFlags, viewContext);
-      this.didProcessChildViews(processFlags, viewContext);
-    }
   }
 
   protected override processChildViews(processFlags: ViewFlags, viewContext: ViewContextType<this>,
@@ -1223,51 +1211,39 @@ export class NodeView extends View {
     }
   }
 
-  override cascadeDisplay(displayFlags: ViewFlags, viewContext: ViewContext): void {
-    const extendedViewContext = this.extendViewContext(viewContext);
+  override cascadeDisplay(displayFlags: ViewFlags, baseViewContext: ViewContext): void {
+    const viewContext = this.extendViewContext(baseViewContext);
     displayFlags &= ~View.NeedsDisplay;
     displayFlags |= this.viewFlags & View.UpdateMask;
-    displayFlags = this.needsDisplay(displayFlags, extendedViewContext);
+    displayFlags = this.needsDisplay(displayFlags, viewContext);
     if ((displayFlags & View.DisplayMask) !== 0) {
-      this.doDisplay(displayFlags, extendedViewContext);
-    }
-  }
+      let cascadeFlags = displayFlags;
+      this.setViewFlags(this.viewFlags & ~(View.NeedsDisplay | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite)
+                                       |  (View.TraversingFlag | View.DisplayingFlag));
+      try {
+        this.willDisplay(cascadeFlags, viewContext);
+        if (((this.viewFlags | displayFlags) & View.NeedsLayout) !== 0) {
+          cascadeFlags |= View.NeedsLayout;
+          this.setViewFlags(this.viewFlags & ~View.NeedsLayout);
+          this.willLayout(viewContext);
+        }
 
-  /** @hidden */
-  protected doDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    let cascadeFlags = displayFlags;
-    this.setViewFlags(this.viewFlags & ~(View.NeedsDisplay | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite)
-                                     |  (View.TraversingFlag | View.DisplayingFlag));
-    try {
-      this.willDisplay(cascadeFlags, viewContext);
-      if (((this.viewFlags | displayFlags) & View.NeedsLayout) !== 0) {
-        cascadeFlags |= View.NeedsLayout;
-        this.setViewFlags(this.viewFlags & ~View.NeedsLayout);
-        this.willLayout(viewContext);
+        this.onDisplay(cascadeFlags, viewContext);
+        if ((cascadeFlags & View.NeedsLayout) !== 0) {
+          this.onLayout(viewContext);
+        }
+
+        if ((cascadeFlags & View.DisplayMask) !== 0 && !this.isCulled()) {
+          this.displayChildViews(cascadeFlags, viewContext, this.displayChildView);
+        }
+
+        if ((cascadeFlags & View.NeedsLayout) !== 0) {
+          this.didLayout(viewContext);
+        }
+        this.didDisplay(cascadeFlags, viewContext);
+      } finally {
+        this.setViewFlags(this.viewFlags & ~(View.TraversingFlag | View.DisplayingFlag));
       }
-
-      this.onDisplay(cascadeFlags, viewContext);
-      if ((cascadeFlags & View.NeedsLayout) !== 0) {
-        this.onLayout(viewContext);
-      }
-
-      this.doDisplayChildViews(cascadeFlags, viewContext);
-
-      if ((cascadeFlags & View.NeedsLayout) !== 0) {
-        this.didLayout(viewContext);
-      }
-      this.didDisplay(cascadeFlags, viewContext);
-    } finally {
-      this.setViewFlags(this.viewFlags & ~(View.TraversingFlag | View.DisplayingFlag));
-    }
-  }
-
-  /** @hidden */
-  protected doDisplayChildViews(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
-    if ((displayFlags & View.DisplayMask) !== 0 && !this.isCulled()) {
-      this.willDisplayChildViews(displayFlags, viewContext);
-      this.onDisplayChildViews(displayFlags, viewContext);
-      this.didDisplayChildViews(displayFlags, viewContext);
     }
   }
 

@@ -16,7 +16,7 @@
       "@swim/dom": ["../../../../swim-ui-js/@swim/dom/main"],
       "@swim/graphics": ["../../../../swim-ui-js/@swim/graphics/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/util/main"},

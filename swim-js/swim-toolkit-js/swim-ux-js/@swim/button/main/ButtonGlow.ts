@@ -57,7 +57,7 @@ export class ButtonGlow extends HtmlView {
       const node = this.owner.node;
       return node instanceof HTMLElement ? Length.px(node.offsetLeft) : null;
     },
-    onEnd(left: Length | null): void {
+    onEnd(): void {
       this.owner.didGlow();
     },
   })

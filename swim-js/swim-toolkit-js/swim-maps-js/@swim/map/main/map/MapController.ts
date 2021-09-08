@@ -15,7 +15,6 @@
 import {AnyTiming, Timing} from "@swim/mapping";
 import type {GeoBox} from "@swim/geo";
 import type {Trait} from "@swim/model";
-import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {HtmlView} from "@swim/dom";
 import {CanvasView} from "@swim/graphics";
 import {
@@ -167,10 +166,6 @@ export abstract class MapController extends CompositeController {
     }
   }
 
-  protected themeMapView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, mapView: MapView): void {
-    // hook
-  }
-
   protected setGeoPerspective(geoPerspective: GeoPerspective | null, mapTrait: MapTrait): void {
     if (geoPerspective !== null) {
       const mapView = this.map.view;
@@ -215,9 +210,6 @@ export abstract class MapController extends CompositeController {
     },
     didSetView(newMapView: MapView | null, oldMapView: MapView | null): void {
       this.owner.didSetMapView(newMapView, oldMapView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, mapView: MapView): void {
-      this.owner.themeMapView(theme, mood, timing, mapView);
     },
     viewWillSetGeoViewport(newGeoViewport: GeoViewport, oldGeoViewport: GeoViewport, mapView: MapView): void {
       this.owner.willSetGeoViewport(newGeoViewport, oldGeoViewport, mapView);

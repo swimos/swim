@@ -29,4 +29,12 @@ export abstract class ColorStyleAnimator<V extends StyleContext> extends StyleAn
       return null;
     }
   }
+
+  override equalState(newState: Color | null, oldState: Color | null): boolean {
+    if (newState !== void 0 && newState !== null) {
+      return newState.equals(oldState);
+    } else {
+      return newState === oldState;
+    }
+  }
 }

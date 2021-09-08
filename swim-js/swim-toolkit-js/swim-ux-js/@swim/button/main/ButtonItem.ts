@@ -13,8 +13,9 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/mapping";
+import {AnyExpansion, Expansion} from "@swim/style";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import {ViewContextType, View, ViewAnimator} from "@swim/view";
+import {ViewContextType, View, ViewAnimator, ExpansionViewAnimator} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {HtmlIconView} from "@swim/graphics";
 import {FloatingButton} from "./FloatingButton";
@@ -56,8 +57,8 @@ export class ButtonItem extends HtmlView {
     return childView instanceof HtmlView ? childView : null;
   }
 
-  @ViewAnimator({type: Number, inherit: true})
-  readonly stackPhase!: ViewAnimator<this, number | undefined>; // 0 = collapsed; 1 = expanded
+  @ViewAnimator({type: Expansion, inherit: true})
+  readonly disclosure!: ExpansionViewAnimator<this, Expansion | undefined, AnyExpansion | undefined>;
 
   protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
     super.onApplyTheme(theme, mood, timing);
@@ -69,7 +70,7 @@ export class ButtonItem extends HtmlView {
 
   protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
-    const phase = this.stackPhase.getValueOr(1);
+    const phase = this.disclosure.getPhaseOr(1);
     const button = this.button;
     if (button !== null) {
       this.width.setState(button.width.state, View.Intrinsic);
@@ -119,7 +120,7 @@ export class ButtonItem extends HtmlView {
     label.fontWeight.setState("500", View.Intrinsic);
     label.lineHeight.setState(40, View.Intrinsic);
     label.whiteSpace.setState("nowrap", View.Intrinsic);
-    label.opacity.setState(this.stackPhase.getValueOr(0), View.Intrinsic);
+    label.opacity.setState(this.disclosure.getPhaseOr(0), View.Intrinsic);
   }
 
   protected onRemoveLabel(label: HtmlView): void {

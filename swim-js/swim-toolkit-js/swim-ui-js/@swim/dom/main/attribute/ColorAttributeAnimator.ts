@@ -29,4 +29,12 @@ export abstract class ColorAttributeAnimator<V extends ElementView> extends Attr
       return null;
     }
   }
+
+  override equalState(newState: Color | null, oldState: Color | null): boolean {
+    if (newState !== void 0 && newState !== null) {
+      return newState.equals(oldState);
+    } else {
+      return newState === oldState;
+    }
+  }
 }

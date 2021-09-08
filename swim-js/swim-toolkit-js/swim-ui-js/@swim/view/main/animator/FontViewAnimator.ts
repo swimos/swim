@@ -21,4 +21,12 @@ export abstract class FontViewAnimator<V extends View> extends ViewAnimator<V, F
   override fromAny(value: AnyFont | null | undefined): Font | null | undefined {
     return value !== void 0 && value !== null ? Font.fromAny(value) : value;
   }
+
+  override equalState(newState: Font | null | undefined, oldState: Font | null | undefined): boolean {
+    if (newState !== void 0 && newState !== null) {
+      return newState.equals(oldState);
+    } else {
+      return newState === oldState;
+    }
+  }
 }

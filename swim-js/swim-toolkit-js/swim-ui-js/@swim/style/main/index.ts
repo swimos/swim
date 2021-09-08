@@ -24,4 +24,10 @@ export * from "./gradient";
 
 export * from "./shadow";
 
+export * from "./focus";
+
+export * from "./presence";
+
+export * from "./expansion";
+
 export * from "./value";

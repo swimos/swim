@@ -239,16 +239,13 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     }
   }
 
-  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    let hit = super.doHitTest(x, y, viewContext);
-    if (hit === null) {
-      const renderer = viewContext.renderer;
-      if (renderer instanceof CanvasRenderer) {
-        const context = renderer.context;
-        hit = this.hitTestCircle(x, y, context, this.viewFrame, renderer.pixelRatio);
-      }
+  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const context = renderer.context;
+      return this.hitTestCircle(x, y, context, this.viewFrame, renderer.pixelRatio);
     }
-    return hit;
+    return null;
   }
 
   protected hitTestCircle(x: number, y: number, context: CanvasContext,
@@ -291,7 +288,7 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     return GeoRippleView.ripple(this, options);
   }
 
-  static create(): GeoCircleView {
+  static override create(): GeoCircleView {
     return new GeoCircleView();
   }
 

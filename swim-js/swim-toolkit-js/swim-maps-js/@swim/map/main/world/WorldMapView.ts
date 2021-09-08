@@ -117,7 +117,7 @@ export class WorldMapView extends MapView {
     super.detachContainer(containerView);
   }
 
-  static create(geoViewport?: WorldMapViewport): WorldMapView {
+  static override create(geoViewport?: WorldMapViewport): WorldMapView {
     if (geoViewport === void 0) {
       geoViewport = new EquirectangularMapViewport(R2Box.undefined());
     }

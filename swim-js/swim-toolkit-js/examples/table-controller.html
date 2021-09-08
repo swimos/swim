@@ -60,9 +60,9 @@ tableModel.appendChildModel(colBModel);
 function createRowModel(i) {
   const rowModel = new swim.CompoundModel();
   const rowTrait = new swim.RowTrait();
-  const cellATrait = new swim.CellTrait()
+  const cellATrait = new swim.TextCellTrait()
     .content(i + "A");
-  const cellBTrait = new swim.CellTrait()
+  const cellBTrait = new swim.TextCellTrait()
     .content(i + "B");
   rowModel.setTrait("col", rowTrait);
   rowModel.setTrait("a", cellATrait);

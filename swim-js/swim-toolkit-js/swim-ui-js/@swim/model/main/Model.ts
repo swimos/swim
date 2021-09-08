@@ -1072,68 +1072,12 @@ export abstract class Model implements ModelDownlinkContext {
     }
   }
 
-  /** @hidden */
-  protected doAnalyzeChildModels(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    if ((analyzeFlags & Model.AnalyzeMask) !== 0) {
-      this.willAnalyzeChildModels(analyzeFlags, modelContext);
-      this.onAnalyzeChildModels(analyzeFlags, modelContext);
-      this.didAnalyzeChildModels(analyzeFlags, modelContext);
-    }
-  }
-
-  protected willAnalyzeChildModels(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).willAnalyzeChildModels(analyzeFlags, modelContext);
-    }
-  }
-
-  protected onAnalyzeChildModels(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).onAnalyzeChildModels(analyzeFlags, modelContext);
-    }
-    this.analyzeChildModels(analyzeFlags, modelContext, this.analyzeChildModel);
-  }
-
-  protected didAnalyzeChildModels(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).didAnalyzeChildModels(analyzeFlags, modelContext);
-    }
-  }
-
   protected abstract analyzeChildModels(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>,
                                         analyzeChildModel: (this: this, childModel: Model, analyzeFlags: ModelFlags,
                                                             modelContext: ModelContextType<this>) => void): void;
 
-  /** @hidden */
   protected analyzeChildModel(childModel: Model, analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    this.willAnalyzeChildModel(childModel, analyzeFlags, modelContext);
-    this.onAnalyzeChildModel(childModel, analyzeFlags, modelContext);
-    this.didAnalyzeChildModel(childModel, analyzeFlags, modelContext);
-  }
-
-  protected willAnalyzeChildModel(childModel: Model, analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).willAnalyzeChildModel(childModel, analyzeFlags, modelContext);
-    }
-  }
-
-  protected onAnalyzeChildModel(childModel: Model, analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).onAnalyzeChildModel(childModel, analyzeFlags, modelContext);
-    }
     childModel.cascadeAnalyze(analyzeFlags, modelContext);
-  }
-
-  protected didAnalyzeChildModel(childModel: Model, analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).didAnalyzeChildModel(childModel, analyzeFlags, modelContext);
-    }
   }
 
   isRefreshing(): boolean {
@@ -1241,68 +1185,12 @@ export abstract class Model implements ModelDownlinkContext {
     }
   }
 
-  /** @hidden */
-  protected doRefreshChildModels(refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    if ((refreshFlags & Model.RefreshMask)) {
-      this.willRefreshChildModels(refreshFlags, modelContext);
-      this.onRefreshChildModels(refreshFlags, modelContext);
-      this.didRefreshChildModels(refreshFlags, modelContext);
-    }
-  }
-
-  protected willRefreshChildModels(refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).willRefreshChildModels(refreshFlags, modelContext);
-    }
-  }
-
-  protected onRefreshChildModels(refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).onRefreshChildModels(refreshFlags, modelContext);
-    }
-    this.refreshChildModels(refreshFlags, modelContext, this.refreshChildModel);
-  }
-
-  protected didRefreshChildModels(refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).didRefreshChildModels(refreshFlags, modelContext);
-    }
-  }
-
   protected abstract refreshChildModels(refreshFlags: ModelFlags, modelContext: ModelContextType<this>,
                                         refreshChildModel: (this: this, childModel: Model, refreshFlags: ModelFlags,
                                                             modelContext: ModelContextType<this>) => void): void;
 
-  /** @hidden */
   protected refreshChildModel(childModel: Model, refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    this.willRefreshChildModel(childModel, refreshFlags, modelContext);
-    this.onRefreshChildModel(childModel, refreshFlags, modelContext);
-    this.didRefreshChildModel(childModel, refreshFlags, modelContext);
-  }
-
-  protected willRefreshChildModel(childModel: Model, refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).willRefreshChildModel(childModel, refreshFlags, modelContext);
-    }
-  }
-
-  protected onRefreshChildModel(childModel: Model, refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).onRefreshChildModel(childModel, refreshFlags, modelContext);
-    }
     childModel.cascadeRefresh(refreshFlags, modelContext);
-  }
-
-  protected didRefreshChildModel(childModel: Model, refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).didRefreshChildModel(childModel, refreshFlags, modelContext);
-    }
   }
 
   isConsuming(): boolean {

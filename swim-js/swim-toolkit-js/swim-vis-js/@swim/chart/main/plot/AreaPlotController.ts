@@ -14,7 +14,7 @@
 
 import {AnyTiming, Timing} from "@swim/mapping";
 import type {Color} from "@swim/style";
-import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
+import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";
 import {ControllerViewTrait, ControllerFastener} from "@swim/controller";
 import type {DataPointController} from "../data/DataPointController";
@@ -155,10 +155,6 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
     }
   }
 
-  protected themePlotView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, plotView: AreaPlotView<X, Y>): void {
-    // hook
-  }
-
   protected setPlotFill(fill: Look<Color> | Color | null, plotTrait: AreaPlotTrait<X, Y>, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
@@ -214,9 +210,6 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
     },
     didSetView(newPlotView: AreaPlotView<unknown, unknown> | null, oldPlotView: AreaPlotView<unknown, unknown> | null): void {
       this.owner.didSetPlotView(newPlotView, oldPlotView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, plotView: AreaPlotView<unknown, unknown>): void {
-      this.owner.themePlotView(theme, mood, timing, plotView);
     },
     viewWillSetPlotFill(newFill: Color | null, oldFill: Color | null, plotView: AreaPlotView<unknown, unknown>): void {
       this.owner.willSetPlotFill(newFill, oldFill, plotView);

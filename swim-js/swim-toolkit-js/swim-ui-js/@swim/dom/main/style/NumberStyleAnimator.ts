@@ -38,4 +38,8 @@ export abstract class NumberStyleAnimator<V extends StyleContext> extends StyleA
       return isFinite(number) ? number : void 0;
     }
   }
+
+  override equalState(newState: number | undefined, oldState: number | undefined): boolean {
+    return newState === oldState;
+  }
 }

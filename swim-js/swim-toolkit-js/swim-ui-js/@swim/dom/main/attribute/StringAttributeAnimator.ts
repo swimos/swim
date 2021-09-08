@@ -24,4 +24,8 @@ export abstract class StringAttributeAnimator<V extends ElementView> extends Att
   override fromAny(value: string): string | undefined {
     return value;
   }
+
+  override equalState(newState: string | undefined, oldState: string | undefined): boolean {
+    return newState === oldState;
+  }
 }

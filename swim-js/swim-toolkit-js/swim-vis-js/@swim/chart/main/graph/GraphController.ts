@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Timing} from "@swim/mapping";
 import type {Length} from "@swim/math";
 import type {Trait} from "@swim/model";
 import type {Color} from "@swim/style";
-import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import type {GraphicsView} from "@swim/graphics";
 import {Controller, ControllerViewTrait, ControllerFastener, CompositeController} from "@swim/controller";
 import type {DataPointView} from "../data/DataPointView";
@@ -150,14 +148,9 @@ export class GraphController<X, Y> extends CompositeController {
     }
   }
 
-  protected themeGraphView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, graphView: GraphView<X, Y>): void {
-    // hook
-  }
-
   /** @hidden */
   static GraphFastener = ControllerViewTrait.define<GraphController<unknown, unknown>, GraphView<unknown, unknown>, GraphTrait<unknown, unknown>>({
     viewType: GraphView,
-    observeView: true,
     willSetView(newGraphView: GraphView<unknown, unknown> | null, oldGraphView: GraphView<unknown, unknown> | null): void {
       this.owner.willSetGraphView(newGraphView, oldGraphView);
     },
@@ -166,9 +159,6 @@ export class GraphController<X, Y> extends CompositeController {
     },
     didSetView(newGraphView: GraphView<unknown, unknown> | null, oldGraphView: GraphView<unknown, unknown> | null): void {
       this.owner.didSetGraphView(newGraphView, oldGraphView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, graphView: GraphView<unknown, unknown>): void {
-      this.owner.themeGraphView(theme, mood, timing, graphView);
     },
     createView(): GraphView<unknown, unknown> | null {
       return this.owner.createGraphView();

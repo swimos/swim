@@ -24,4 +24,8 @@ export abstract class BooleanAttributeAnimator<V extends ElementView> extends At
   override fromAny(value: boolean | string): boolean | undefined {
     return !!value;
   }
+
+  override equalState(newState: boolean | undefined, oldState: boolean | undefined): boolean {
+    return newState === oldState;
+  }
 }

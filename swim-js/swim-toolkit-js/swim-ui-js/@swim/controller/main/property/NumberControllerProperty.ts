@@ -31,4 +31,8 @@ export abstract class NumberControllerProperty<C extends Controller> extends Con
       return value;
     }
   }
+
+  override equalState(newState: number | null | undefined, oldState: number | null | undefined): boolean {
+    return newState === oldState;
+  }
 }

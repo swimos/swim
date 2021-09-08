@@ -29,4 +29,12 @@ export abstract class TransformAttributeAnimator<V extends ElementView> extends 
       return null;
     }
   }
+
+  override equalState(newState: Transform | null, oldState: Transform | null): boolean {
+    if (newState !== void 0 && newState !== null) {
+      return newState.equals(oldState);
+    } else {
+      return newState === oldState;
+    }
+  }
 }

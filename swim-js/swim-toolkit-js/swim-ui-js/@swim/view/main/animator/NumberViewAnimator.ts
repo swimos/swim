@@ -31,4 +31,8 @@ export abstract class NumberViewAnimator<V extends View> extends ViewAnimator<V,
       return value;
     }
   }
+
+  override equalState(newState: number | null | undefined, oldState: number | null | undefined): boolean {
+    return newState === oldState;
+  }
 }

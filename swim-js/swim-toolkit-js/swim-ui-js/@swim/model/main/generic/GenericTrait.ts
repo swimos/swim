@@ -175,7 +175,7 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  override doMount(): void {
+  override mountTrait(): void {
     if ((this.traitFlags & Trait.MountedFlag) === 0) {
       this.setTraitFlags(this.traitFlags | Trait.MountedFlag);
       this.willMount();
@@ -197,7 +197,7 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  override doUnmount(): void {
+  override unmountTrait(): void {
     if ((this.traitFlags & Trait.MountedFlag) !== 0) {
       this.setTraitFlags(this.traitFlags & ~Trait.MountedFlag);
       this.willUnmount();
@@ -216,7 +216,7 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  override doPower(): void {
+  override powerTrait(): void {
     if ((this.traitFlags & Trait.PoweredFlag) === 0) {
       this.setTraitFlags(this.traitFlags | Trait.PoweredFlag);
       this.willPower();
@@ -228,7 +228,7 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  override doUnpower(): void {
+  override unpowerTrait(): void {
     if ((this.traitFlags & Trait.PoweredFlag) !== 0) {
       this.setTraitFlags(this.traitFlags & ~Trait.PoweredFlag);
       this.willUnpower();

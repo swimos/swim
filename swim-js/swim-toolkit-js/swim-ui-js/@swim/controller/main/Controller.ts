@@ -638,27 +638,6 @@ export abstract class Controller {
     }
   }
 
-  /** @hidden */
-  protected doCompileChildControllers(compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    if ((compileFlags & Controller.CompileMask) !== 0) {
-      this.willCompileChildControllers(compileFlags, controllerContext);
-      this.onCompileChildControllers(compileFlags, controllerContext);
-      this.didCompileChildControllers(compileFlags, controllerContext);
-    }
-  }
-
-  protected willCompileChildControllers(compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    // hook
-  }
-
-  protected onCompileChildControllers(compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    this.compileChildControllers(compileFlags, controllerContext, this.compileChildController);
-  }
-
-  protected didCompileChildControllers(compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    // hook
-  }
-
   protected compileChildControllers(compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>,
                                     compileChildController: (this: this, childController: Controller, compileFlags: ControllerFlags,
                                                              controllerContext: ControllerContextType<this>) => void): void {
@@ -673,23 +652,8 @@ export abstract class Controller {
     this.forEachChildController(doCompileChildController, this);
   }
 
-  /** @hidden */
   protected compileChildController(childController: Controller, compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    this.willCompileChildController(childController, compileFlags, controllerContext);
-    this.onCompileChildController(childController, compileFlags, controllerContext);
-    this.didCompileChildController(childController, compileFlags, controllerContext);
-  }
-
-  protected willCompileChildController(childController: Controller, compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    // hook
-  }
-
-  protected onCompileChildController(childController: Controller, compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
     childController.cascadeCompile(compileFlags, controllerContext);
-  }
-
-  protected didCompileChildController(childController: Controller, compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    // hook
   }
 
   isExecuting(): boolean {
@@ -762,27 +726,6 @@ export abstract class Controller {
     }
   }
 
-  /** @hidden */
-  protected doExecuteChildControllers(executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    if ((executeFlags & Controller.ExecuteMask) !== 0) {
-      this.willExecuteChildControllers(executeFlags, controllerContext);
-      this.onExecuteChildControllers(executeFlags, controllerContext);
-      this.didExecuteChildControllers(executeFlags, controllerContext);
-    }
-  }
-
-  protected willExecuteChildControllers(executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    // hook
-  }
-
-  protected onExecuteChildControllers(executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    this.executeChildControllers(executeFlags, controllerContext, this.executeChildController);
-  }
-
-  protected didExecuteChildControllers(executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    // hook
-  }
-
   protected executeChildControllers(executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>,
                                     executeChildController: (this: this, childController: Controller, executeFlags: ControllerFlags,
                                                              controllerContext: ControllerContextType<this>) => void): void {
@@ -799,21 +742,7 @@ export abstract class Controller {
 
   /** @hidden */
   protected executeChildController(childController: Controller, executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    this.willExecuteChildController(childController, executeFlags, controllerContext);
-    this.onExecuteChildController(childController, executeFlags, controllerContext);
-    this.didExecuteChildController(childController, executeFlags, controllerContext);
-  }
-
-  protected willExecuteChildController(childController: Controller, executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    // hook
-  }
-
-  protected onExecuteChildController(childController: Controller, executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
     childController.cascadeExecute(executeFlags, controllerContext);
-  }
-
-  protected didExecuteChildController(childController: Controller, executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>): void {
-    // hook
   }
 
   abstract hasControllerService(serviceName: string): boolean;

@@ -21,4 +21,12 @@ export abstract class ColorViewAnimator<V extends View> extends ViewAnimator<V, 
   override fromAny(value: AnyColor | null): Color | null {
     return value !== void 0 && value !== null ? Color.fromAny(value) : value;
   }
+
+  override equalState(newState: Color | null | undefined, oldState: Color | null | undefined): boolean {
+    if (newState !== void 0 && newState !== null) {
+      return newState.equals(oldState);
+    } else {
+      return newState === oldState;
+    }
+  }
 }

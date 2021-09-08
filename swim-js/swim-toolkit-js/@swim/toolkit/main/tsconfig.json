@@ -35,7 +35,7 @@
 
       "@swim/button": ["../../../swim-ux-js/@swim/button/main"],
       "@swim/token": ["../../../swim-ux-js/@swim/token/main"],
-      "@swim/grid": ["../../../swim-ux-js/@swim/grid/main"],
+      "@swim/table": ["../../../swim-ux-js/@swim/table/main"],
       "@swim/window": ["../../../swim-ux-js/@swim/window/main"],
       "@swim/deck": ["../../../swim-ux-js/@swim/deck/main"],
       "@swim/ux": ["../../../swim-ux-js/@swim/ux/main"],
@@ -52,7 +52,7 @@
       "@swim/esrimap": ["../../../swim-maps-js/@swim/esrimap/main"],
       "@swim/maps": ["../../../swim-maps-js/@swim/maps/main"]
     },
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": "../lib/main/.tsbuildinfo"
   },
   "references": [
     {"path": "../../../swim-ui-js/@swim/model/main"},
@@ -66,7 +66,7 @@
 
     {"path": "../../../swim-ux-js/@swim/button/main"},
     {"path": "../../../swim-ux-js/@swim/token/main"},
-    {"path": "../../../swim-ux-js/@swim/grid/main"},
+    {"path": "../../../swim-ux-js/@swim/table/main"},
     {"path": "../../../swim-ux-js/@swim/window/main"},
     {"path": "../../../swim-ux-js/@swim/ux/main"},
 

@@ -199,8 +199,8 @@ export abstract class GenericModel extends Model {
       try {
         this.willMount();
         this.onMount();
-        this.doMountTraits();
-        this.doMountChildModels();
+        this.mountTraits();
+        this.mountChildModels();
         this.didMount();
       } finally {
         this.setModelFlags(this.modelFlags & ~Model.TraversingFlag);
@@ -223,24 +223,24 @@ export abstract class GenericModel extends Model {
   }
 
   /** @hidden */
-  protected doMountTraits(): void {
+  protected mountTraits(): void {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).doMount();
+      (traits[i]! as any).mountTrait();
     }
   }
 
   /** @hidden */
-  protected doMountChildModels(): void {
+  protected mountChildModels(): void {
     type self = this;
-    function doMountChildModel(this: self, childModel: Model): void {
+    function mountChildModel(this: self, childModel: Model): void {
       childModel.cascadeMount();
       if ((childModel.modelFlags & Model.RemovingFlag) !== 0) {
         childModel.setModelFlags(childModel.modelFlags & ~Model.RemovingFlag);
         this.removeChildModel(childModel);
       }
     }
-    this.forEachChildModel(doMountChildModel, this);
+    this.forEachChildModel(mountChildModel, this);
   }
 
   override cascadeUnmount(): void {
@@ -248,8 +248,8 @@ export abstract class GenericModel extends Model {
       this.setModelFlags(this.modelFlags & ~Model.MountedFlag | Model.TraversingFlag);
       try {
         this.willUnmount();
-        this.doUnmountChildModels();
-        this.doUnmountTraits();
+        this.unmountChildModels();
+        this.unmountTraits();
         this.onUnmount();
         this.didUnmount();
       } finally {
@@ -271,24 +271,24 @@ export abstract class GenericModel extends Model {
   }
 
   /** @hidden */
-  protected doUnmountTraits(): void {
+  protected unmountTraits(): void {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).doUnmount();
+      (traits[i]! as any).unmountTrait();
     }
   }
 
   /** @hidden */
-  protected doUnmountChildModels(): void {
+  protected unmountChildModels(): void {
     type self = this;
-    function doUnmountChildModel(this: self, childModel: Model): void {
+    function unmountChildModel(this: self, childModel: Model): void {
       childModel.cascadeUnmount();
       if ((childModel.modelFlags & Model.RemovingFlag) !== 0) {
         childModel.setModelFlags(childModel.modelFlags & ~Model.RemovingFlag);
         this.removeChildModel(childModel);
       }
     }
-    this.forEachChildModel(doUnmountChildModel, this);
+    this.forEachChildModel(unmountChildModel, this);
   }
 
   override cascadePower(): void {
@@ -297,8 +297,8 @@ export abstract class GenericModel extends Model {
       try {
         this.willPower();
         this.onPower();
-        this.doPowerTraits();
-        this.doPowerChildModels();
+        this.powerTraits();
+        this.powerChildModels();
         this.didPower();
       } finally {
         this.setModelFlags(this.modelFlags & ~Model.TraversingFlag);
@@ -309,24 +309,24 @@ export abstract class GenericModel extends Model {
   }
 
   /** @hidden */
-  protected doPowerTraits(): void {
+  protected powerTraits(): void {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).doPower();
+      (traits[i]! as any).powerTrait();
     }
   }
 
   /** @hidden */
-  protected doPowerChildModels(): void {
+  protected powerChildModels(): void {
     type self = this;
-    function doPowerChildModel(this: self, childModel: Model): void {
+    function powerChildModel(this: self, childModel: Model): void {
       childModel.cascadePower();
       if ((childModel.modelFlags & Model.RemovingFlag) !== 0) {
         childModel.setModelFlags(childModel.modelFlags & ~Model.RemovingFlag);
         this.removeChildModel(childModel);
       }
     }
-    this.forEachChildModel(doPowerChildModel, this);
+    this.forEachChildModel(powerChildModel, this);
   }
 
   override cascadeUnpower(): void {
@@ -334,8 +334,8 @@ export abstract class GenericModel extends Model {
       this.setModelFlags(this.modelFlags & ~Model.PoweredFlag | Model.TraversingFlag);
       try {
         this.willUnpower();
-        this.doUnpowerChildModels();
-        this.doUnpowerTraits();
+        this.unpowerChildModels();
+        this.unpowerTraits();
         this.onUnpower();
         this.didUnpower();
       } finally {
@@ -347,83 +347,80 @@ export abstract class GenericModel extends Model {
   }
 
   /** @hidden */
-  protected doUnpowerTraits(): void {
+  protected unpowerTraits(): void {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).doUnpower();
+      (traits[i]! as any).unpowerTrait();
     }
   }
 
   /** @hidden */
-  protected doUnpowerChildModels(): void {
+  protected unpowerChildModels(): void {
     type self = this;
-    function doUnpowerChildModel(this: self, childModel: Model): void {
+    function unpowerChildModel(this: self, childModel: Model): void {
       childModel.cascadeUnpower();
       if ((childModel.modelFlags & Model.RemovingFlag) !== 0) {
         childModel.setModelFlags(childModel.modelFlags & ~Model.RemovingFlag);
         this.removeChildModel(childModel);
       }
     }
-    this.forEachChildModel(doUnpowerChildModel, this);
+    this.forEachChildModel(unpowerChildModel, this);
   }
 
-  override cascadeAnalyze(analyzeFlags: ModelFlags, modelContext: ModelContext): void {
-    const extendedModelContext = this.extendModelContext(modelContext);
+  override cascadeAnalyze(analyzeFlags: ModelFlags, baesModelContext: ModelContext): void {
+    const modelContext = this.extendModelContext(baesModelContext);
     analyzeFlags &= ~Model.NeedsAnalyze;
     analyzeFlags |= this.modelFlags & Model.UpdateMask;
-    analyzeFlags = this.needsAnalyze(analyzeFlags, extendedModelContext);
+    analyzeFlags = this.needsAnalyze(analyzeFlags, modelContext);
     if ((analyzeFlags & Model.AnalyzeMask) !== 0) {
-      this.doAnalyze(analyzeFlags, extendedModelContext);
-    }
-  }
+      let cascadeFlags = analyzeFlags;
+      this.setModelFlags(this.modelFlags & ~Model.NeedsAnalyze | (Model.TraversingFlag | Model.AnalyzingFlag));
+      try {
+        this.willAnalyze(cascadeFlags, modelContext);
+        if (((this.modelFlags | analyzeFlags) & Model.NeedsMutate) !== 0) {
+          cascadeFlags |= Model.NeedsMutate;
+          this.setModelFlags(this.modelFlags & ~Model.NeedsMutate);
+          this.willMutate(modelContext);
+        }
+        if (((this.modelFlags | analyzeFlags) & Model.NeedsAggregate) !== 0) {
+          cascadeFlags |= Model.NeedsAggregate;
+          this.setModelFlags(this.modelFlags & ~Model.NeedsAggregate);
+          this.willAggregate(modelContext);
+        }
+        if (((this.modelFlags | analyzeFlags) & Model.NeedsCorrelate) !== 0) {
+          cascadeFlags |= Model.NeedsCorrelate;
+          this.setModelFlags(this.modelFlags & ~Model.NeedsCorrelate);
+          this.willCorrelate(modelContext);
+        }
 
-  /** @hidden */
-  protected doAnalyze(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    let cascadeFlags = analyzeFlags;
-    this.setModelFlags(this.modelFlags & ~Model.NeedsAnalyze | (Model.TraversingFlag | Model.AnalyzingFlag));
-    try {
-      this.willAnalyze(cascadeFlags, modelContext);
-      if (((this.modelFlags | analyzeFlags) & Model.NeedsMutate) !== 0) {
-        cascadeFlags |= Model.NeedsMutate;
-        this.setModelFlags(this.modelFlags & ~Model.NeedsMutate);
-        this.willMutate(modelContext);
-      }
-      if (((this.modelFlags | analyzeFlags) & Model.NeedsAggregate) !== 0) {
-        cascadeFlags |= Model.NeedsAggregate;
-        this.setModelFlags(this.modelFlags & ~Model.NeedsAggregate);
-        this.willAggregate(modelContext);
-      }
-      if (((this.modelFlags | analyzeFlags) & Model.NeedsCorrelate) !== 0) {
-        cascadeFlags |= Model.NeedsCorrelate;
-        this.setModelFlags(this.modelFlags & ~Model.NeedsCorrelate);
-        this.willCorrelate(modelContext);
-      }
+        this.onAnalyze(cascadeFlags, modelContext);
+        if ((cascadeFlags & Model.NeedsMutate) !== 0) {
+          this.onMutate(modelContext);
+        }
+        if ((cascadeFlags & Model.NeedsAggregate) !== 0) {
+          this.onAggregate(modelContext);
+        }
+        if ((cascadeFlags & Model.NeedsCorrelate) !== 0) {
+          this.onCorrelate(modelContext);
+        }
 
-      this.onAnalyze(cascadeFlags, modelContext);
-      if ((cascadeFlags & Model.NeedsMutate) !== 0) {
-        this.onMutate(modelContext);
-      }
-      if ((cascadeFlags & Model.NeedsAggregate) !== 0) {
-        this.onAggregate(modelContext);
-      }
-      if ((cascadeFlags & Model.NeedsCorrelate) !== 0) {
-        this.onCorrelate(modelContext);
-      }
+        if ((cascadeFlags & Model.AnalyzeMask) !== 0) {
+          this.analyzeChildModels(cascadeFlags, modelContext, this.analyzeChildModel);
+        }
 
-      this.doAnalyzeChildModels(cascadeFlags, modelContext);
-
-      if ((cascadeFlags & Model.NeedsCorrelate) !== 0) {
-        this.didCorrelate(modelContext);
+        if ((cascadeFlags & Model.NeedsCorrelate) !== 0) {
+          this.didCorrelate(modelContext);
+        }
+        if ((cascadeFlags & Model.NeedsAggregate) !== 0) {
+          this.didAggregate(modelContext);
+        }
+        if ((cascadeFlags & Model.NeedsMutate) !== 0) {
+          this.didMutate(modelContext);
+        }
+        this.didAnalyze(cascadeFlags, modelContext);
+      } finally {
+        this.setModelFlags(this.modelFlags & ~(Model.TraversingFlag | Model.AnalyzingFlag));
       }
-      if ((cascadeFlags & Model.NeedsAggregate) !== 0) {
-        this.didAggregate(modelContext);
-      }
-      if ((cascadeFlags & Model.NeedsMutate) !== 0) {
-        this.didMutate(modelContext);
-      }
-      this.didAnalyze(cascadeFlags, modelContext);
-    } finally {
-      this.setModelFlags(this.modelFlags & ~(Model.TraversingFlag | Model.AnalyzingFlag));
     }
   }
 
@@ -460,52 +457,49 @@ export abstract class GenericModel extends Model {
     }
   }
 
-  override cascadeRefresh(refreshFlags: ModelFlags, modelContext: ModelContext): void {
-    const extendedModelContext = this.extendModelContext(modelContext);
+  override cascadeRefresh(refreshFlags: ModelFlags, baseModelContext: ModelContext): void {
+    const modelContext = this.extendModelContext(baseModelContext);
     refreshFlags &= ~Model.NeedsRefresh;
     refreshFlags |= this.modelFlags & Model.UpdateMask;
-    refreshFlags = this.needsRefresh(refreshFlags, extendedModelContext);
+    refreshFlags = this.needsRefresh(refreshFlags, modelContext);
     if ((refreshFlags & Model.RefreshMask) !== 0) {
-      this.doRefresh(refreshFlags, extendedModelContext);
-    }
-  }
+      let cascadeFlags = refreshFlags;
+      this.setModelFlags(this.modelFlags & ~Model.NeedsRefresh | (Model.TraversingFlag | Model.RefreshingFlag));
+      try {
+        this.willRefresh(cascadeFlags, modelContext);
+        if (((this.modelFlags | refreshFlags) & Model.NeedsValidate) !== 0) {
+          cascadeFlags |= Model.NeedsValidate;
+          this.setModelFlags(this.modelFlags & ~Model.NeedsValidate);
+          this.willValidate(modelContext);
+        }
+        if (((this.modelFlags | refreshFlags) & Model.NeedsReconcile) !== 0) {
+          cascadeFlags |= Model.NeedsReconcile;
+          this.setModelFlags(this.modelFlags & ~Model.NeedsReconcile);
+          this.willReconcile(modelContext);
+        }
 
-  /** @hidden */
-  protected doRefresh(refreshFlags: ModelFlags, modelContext: ModelContextType<this>): void {
-    let cascadeFlags = refreshFlags;
-    this.setModelFlags(this.modelFlags & ~Model.NeedsRefresh | (Model.TraversingFlag | Model.RefreshingFlag));
-    try {
-      this.willRefresh(cascadeFlags, modelContext);
-      if (((this.modelFlags | refreshFlags) & Model.NeedsValidate) !== 0) {
-        cascadeFlags |= Model.NeedsValidate;
-        this.setModelFlags(this.modelFlags & ~Model.NeedsValidate);
-        this.willValidate(modelContext);
-      }
-      if (((this.modelFlags | refreshFlags) & Model.NeedsReconcile) !== 0) {
-        cascadeFlags |= Model.NeedsReconcile;
-        this.setModelFlags(this.modelFlags & ~Model.NeedsReconcile);
-        this.willReconcile(modelContext);
-      }
+        this.onRefresh(cascadeFlags, modelContext);
+        if ((cascadeFlags & Model.NeedsValidate) !== 0) {
+          this.onValidate(modelContext);
+        }
+        if ((cascadeFlags & Model.NeedsReconcile) !== 0) {
+          this.onReconcile(modelContext);
+        }
 
-      this.onRefresh(cascadeFlags, modelContext);
-      if ((cascadeFlags & Model.NeedsValidate) !== 0) {
-        this.onValidate(modelContext);
-      }
-      if ((cascadeFlags & Model.NeedsReconcile) !== 0) {
-        this.onReconcile(modelContext);
-      }
+        if ((cascadeFlags & Model.RefreshMask)) {
+          this.refreshChildModels(cascadeFlags, modelContext, this.refreshChildModel);
+        }
 
-      this.doRefreshChildModels(cascadeFlags, modelContext);
-
-      if ((cascadeFlags & Model.NeedsReconcile) !== 0) {
-        this.didReconcile(modelContext);
+        if ((cascadeFlags & Model.NeedsReconcile) !== 0) {
+          this.didReconcile(modelContext);
+        }
+        if ((cascadeFlags & Model.NeedsValidate) !== 0) {
+          this.didValidate(modelContext);
+        }
+        this.didRefresh(cascadeFlags, modelContext);
+      } finally {
+        this.setModelFlags(this.modelFlags & ~(Model.TraversingFlag | Model.RefreshingFlag));
       }
-      if ((cascadeFlags & Model.NeedsValidate) !== 0) {
-        this.didValidate(modelContext);
-      }
-      this.didRefresh(cascadeFlags, modelContext);
-    } finally {
-      this.setModelFlags(this.modelFlags & ~(Model.TraversingFlag | Model.RefreshingFlag));
     }
   }
 

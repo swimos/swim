@@ -88,12 +88,8 @@ export class GraphView<X, Y> extends ScaledView<X, Y> {
     context.clip();
   }
 
-  protected override doHitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
-    let hit = super.doHitTest(x, y, viewContext);
-    if (hit === null) {
-      hit = this;
-    }
-    return hit;
+  protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
+    return this;
   }
 
   static override create<X, Y>(): GraphView<X, Y> {

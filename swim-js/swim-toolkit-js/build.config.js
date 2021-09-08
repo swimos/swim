@@ -458,9 +458,9 @@ const ux = [
     ],
   },
   {
-    id: "grid",
-    name: "@swim/grid",
-    path: "swim-ux-js/@swim/grid",
+    id: "table",
+    name: "@swim/table",
+    path: "swim-ux-js/@swim/table",
     targets: [
       {
         id: "main",
@@ -499,7 +499,7 @@ const ux = [
     targets: [
       {
         id: "main",
-        deps: ["button", "token", "grid", "window", "deck"],
+        deps: ["button", "token", "table", "window", "deck"],
       },
     ],
   },

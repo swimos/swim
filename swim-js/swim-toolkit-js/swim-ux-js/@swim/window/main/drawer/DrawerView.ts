@@ -14,7 +14,8 @@
 
 import {AnyTiming, Timing} from "@swim/mapping";
 import {AnyLength, Length} from "@swim/math";
-import {Look, Feel, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
+import {AnyPresence, Presence, AnyExpansion, Expansion} from "@swim/style";
+import {Look, Mood} from "@swim/theme";
 import {
   ViewContextType,
   View,
@@ -23,21 +24,18 @@ import {
   ModalState,
   Modal,
   ViewProperty,
-  ViewPropertyConstraint,
   ViewAnimator,
   ViewAnimatorConstraint,
+  PresenceViewAnimator,
+  ExpansionViewAnimator,
 } from "@swim/view";
 import {HtmlViewInit, HtmlView} from "@swim/dom";
 import type {DrawerViewObserver} from "./DrawerViewObserver";
 
 export type DrawerPlacement = "top" | "right" | "bottom" | "left";
 
-export type DrawerState = "hidden" | "hiding"
-                        | "shown" | "showing"
-                        | "collapsed" | "collapsing";
-
 export interface DrawerViewInit extends HtmlViewInit {
-  drawerPlacement?: DrawerPlacement;
+  placement?: DrawerPlacement;
   collapsedWidth?: AnyLength;
   expandedWidth?: AnyLength;
 }
@@ -45,45 +43,29 @@ export interface DrawerViewInit extends HtmlViewInit {
 export class DrawerView extends HtmlView implements Modal {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "displayState", {
-      value: DrawerView.HiddenState,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "placement", {
-      value: "left",
-      enumerable: true,
-      configurable: true,
-    });
     Object.defineProperty(this, "modality", {
       value: true,
       enumerable: true,
       configurable: true,
     });
     this.initDrawer();
-    this.initTheme();
   }
 
   protected initDrawer(): void {
     this.addClass("drawer");
-    this.display.setState("none", View.Intrinsic);
-    this.flexDirection.setState("column", View.Intrinsic);
+    this.display.setState("flex", View.Intrinsic);
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("auto", View.Intrinsic);
     this.overscrollBehaviorY.setState("contain", View.Intrinsic);
     this.overflowScrolling.setState("touch", View.Intrinsic);
   }
 
-  protected initTheme(): void {
-    this.modifyTheme(Feel.default, [[Feel.raised, 1]]);
-  }
-
   override readonly viewObservers!: ReadonlyArray<DrawerViewObserver>;
 
   override initView(init: DrawerViewInit): void {
     super.initView(init);
-    if (init.drawerPlacement !== void 0) {
-      this.drawerPlacement(init.drawerPlacement);
+    if (init.placement !== void 0) {
+      this.placement(init.placement);
     }
     if (init.collapsedWidth !== void 0) {
       this.collapsedWidth(init.collapsedWidth);
@@ -93,250 +75,190 @@ export class DrawerView extends HtmlView implements Modal {
     }
   }
 
-  /** @hidden */
-  readonly displayState!: number;
-
-  /** @hidden */
-  setDisplayState(displayState: number): void {
-    Object.defineProperty(this, "displayState", {
-      value: displayState,
-      enumerable: true,
-      configurable: true,
-    });
-  }
-
-  get drawerState(): DrawerState {
-    switch (this.displayState) {
-      case DrawerView.HiddenState: return "hidden";
-      case DrawerView.HidingState:
-      case DrawerView.HideState: return "hiding";
-      case DrawerView.ShownState: return "shown";
-      case DrawerView.ShowingState:
-      case DrawerView.ShowState: return "showing";
-      case DrawerView.CollapsedState: return "collapsed";
-      case DrawerView.CollapsingState:
-      case DrawerView.CollapseState: return "collapsing";
-      case DrawerView.ExpandingState:
-      case DrawerView.ExpandState: return "shown";
-      default: throw new Error("" + this.displayState);
-    }
-  }
-
-  isShown(): boolean {
-    switch (this.displayState) {
-      case DrawerView.ShownState:
-      case DrawerView.ShowingState:
-      case DrawerView.ShowState:
-      case DrawerView.ExpandingState:
-      case DrawerView.ExpandState: return true;
-      default: return false;
-    }
-  }
-
-  isHidden(): boolean {
-    switch (this.displayState) {
-      case DrawerView.HiddenState:
-      case DrawerView.HidingState:
-      case DrawerView.HideState: return true;
-      default: return false;
-    }
-  }
-
-  isCollapsed(): boolean {
-    switch (this.displayState) {
-      case DrawerView.CollapsedState:
-      case DrawerView.CollapsingState:
-      case DrawerView.CollapseState: return true;
-      default: return false;
-    }
-  }
-
   @ViewAnimatorConstraint({type: Length, state: Length.px(60)})
   readonly collapsedWidth!: ViewAnimatorConstraint<this, Length, AnyLength>;
 
   @ViewAnimatorConstraint({type: Length, state: Length.px(200)})
   readonly expandedWidth!: ViewAnimatorConstraint<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Number, state: 0, updateFlags: View.NeedsResize | View.NeedsAnimate | View.NeedsLayout})
-  readonly drawerSlide!: ViewAnimator<this, number>; // 0 = hidden; 1 = shown
-
-  @ViewAnimator({type: Number, state: 1, updateFlags: View.NeedsResize | View.NeedsAnimate | View.NeedsLayout})
-  readonly drawerStretch!: ViewAnimator<this, number>; // 0 = collapsed; 1 = expanded
-
-  @ViewPropertyConstraint({type: Length, state: null})
-  readonly effectiveWidth!: ViewPropertyConstraint<this, Length | null, AnyLength | null>;
-
-  @ViewPropertyConstraint({type: Length, state: null})
-  readonly effectiveHeight!: ViewPropertyConstraint<this, Length | null, AnyLength | null>;
-
-  /** @hidden */
-  readonly placement!: DrawerPlacement;
-
-  drawerPlacement(): DrawerPlacement;
-  drawerPlacement(drawerPlacement: DrawerPlacement): this;
-  drawerPlacement(newPlacement?: DrawerPlacement): DrawerPlacement | this {
-    const oldPlacement = this.placement;
-    if (newPlacement === void 0) {
-      return oldPlacement;
-    } else {
-      if (oldPlacement !== newPlacement) {
-        this.willSetDrawerPlacement(newPlacement, oldPlacement);
-        Object.defineProperty(this, "placement", {
-          value: newPlacement,
-          enumerable: true,
-          configurable: true,
-        });
-        this.onSetDrawerPlacement(newPlacement, oldPlacement);
-        this.didSetDrawerPlacement(newPlacement, oldPlacement);
-      }
-      return this;
-    }
-  }
-
   isHorizontal(): boolean {
-    return this.placement === "top" || this.placement === "bottom";
+    return this.placement.state === "top" || this.placement.state === "bottom";
   }
 
   isVertical(): boolean {
-    return this.placement === "left" || this.placement === "right";
+    return this.placement.state === "left" || this.placement.state === "right";
   }
+
+  protected willSetPlacement(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillSetPlacement !== void 0) {
+        viewObserver.viewWillSetPlacement(newPlacement, oldPlacement, this);
+      }
+    }
+  }
+
+  protected onSetPlacement(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
+    // hook
+  }
+
+  protected didSetPlacement(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidSetPlacement !== void 0) {
+        viewObserver.viewDidSetPlacement(newPlacement, oldPlacement, this);
+      }
+    }
+  }
+
+  @ViewProperty<DrawerView, DrawerPlacement>({
+    type: String,
+    state: "left",
+    updateFlags: View.NeedsResize | View.NeedsLayout,
+    willSetState(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
+      this.owner.willSetPlacement(newPlacement, oldPlacement);
+    },
+    didSetState(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
+      this.owner.onSetPlacement(newPlacement, oldPlacement);
+      this.owner.didSetPlacement(newPlacement, oldPlacement);
+    },
+  })
+  readonly placement!: ViewProperty<this, DrawerPlacement>;
+
+  protected willPresent(): void {
+    const viewObservers = this.viewObservers!;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillPresent !== void 0) {
+        viewObserver.viewWillPresent(this);
+      }
+    }
+  }
+
+  protected didPresent(): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidPresent !== void 0) {
+        viewObserver.viewDidPresent(this);
+      }
+    }
+  }
+
+  protected willDismiss(): void {
+    this.modalService.dismissModal(this);
+
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillDismiss !== void 0) {
+        viewObserver.viewWillDismiss(this);
+      }
+    }
+  }
+
+  protected didDismiss(): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidDismiss !== void 0) {
+        viewObserver.viewDidDismiss(this);
+      }
+    }
+  }
+
+  @ViewAnimator<DrawerView, Presence, AnyPresence>({
+    type: Presence,
+    state: Presence.presented(),
+    updateFlags: View.NeedsLayout,
+    willPresent(): void {
+      this.owner.willPresent();
+    },
+    didPresent(): void {
+      this.owner.didPresent();
+    },
+    willDismiss(): void {
+      this.owner.willDismiss();
+    },
+    didDismiss(): void {
+      this.owner.didDismiss();
+    },
+  })
+  readonly slide!: PresenceViewAnimator<this, Presence, AnyPresence>;
+
+  protected willExpand(): void {
+    this.modalService.dismissModal(this);
+
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillExpand !== void 0) {
+        viewObserver.viewWillExpand(this);
+      }
+    }
+  }
+
+  protected didExpand(): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidExpand !== void 0) {
+        viewObserver.viewDidExpand(this);
+      }
+    }
+  }
+
+  protected willCollapse(): void {
+    this.modalService.dismissModal(this);
+
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillCollapse !== void 0) {
+        viewObserver.viewWillCollapse(this);
+      }
+    }
+  }
+
+  protected didCollapse(): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidCollapse !== void 0) {
+        viewObserver.viewDidCollapse(this);
+      }
+    }
+  }
+
+  @ViewAnimator<DrawerView, Expansion, AnyExpansion>({
+    type: Expansion,
+    state: Expansion.expanded(),
+    updateFlags: View.NeedsResize | View.NeedsLayout,
+    willExpand(): void {
+      this.owner.willExpand();
+    },
+    didExpand(): void {
+      this.owner.didExpand();
+    },
+    willCollapse(): void {
+      this.owner.willCollapse();
+    },
+    didCollapse(): void {
+      this.owner.didCollapse();
+    },
+  })
+  readonly stretch!: ExpansionViewAnimator<this, Expansion, AnyExpansion>;
 
   @ViewProperty({type: Object, inherit: true, state: null})
   readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
 
-  protected willSetDrawerPlacement(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.drawerWillSetPlacement !== void 0) {
-        viewObserver.drawerWillSetPlacement(newPlacement, oldPlacement, this);
-      }
-    }
-  }
-
-  protected onSetDrawerPlacement(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
-    this.requireUpdate(View.NeedsResize | View.NeedsAnimate | View.NeedsLayout);
-  }
-
-  protected didSetDrawerPlacement(newPlacement: DrawerPlacement, oldPlacement: DrawerPlacement): void {
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.drawerDidSetPlacement !== void 0) {
-        viewObserver.drawerDidSetPlacement(newPlacement, oldPlacement, this);
-      }
-    }
-  }
-
-  /** @hidden */
-  protected updateDrawerSlide(drawerSlide: number): void {
-    const placement = this.placement;
-    if (placement === "top") {
-      this.updateDrawerSlideTop(drawerSlide);
-    } else if (placement === "right") {
-      this.updateDrawerSlideRight(drawerSlide);
-    } else if (placement === "bottom") {
-      this.updateDrawerSlideBottom(drawerSlide);
-    } else if (placement === "left") {
-      this.updateDrawerSlideLeft(drawerSlide);
-    }
-  }
-
-  /** @hidden */
-  protected updateDrawerSlideTop(drawerSlide: number): void {
-    let height: Length | number | null = this.height.value;
-    height = height instanceof Length ? height.pxValue() : this.node.offsetHeight;
-    this.top.setState(Length.px((drawerSlide - 1) * height), View.Intrinsic);
-    this.effectiveWidth.setState(this.width.value);
-    this.effectiveHeight.setState(Length.px(drawerSlide * height), View.Intrinsic);
-  }
-
-  /** @hidden */
-  protected updateDrawerSlideRight(drawerSlide: number): void {
-    let width: Length | number | null = this.width.value;
-    width = width instanceof Length ? width.pxValue() : this.node.offsetWidth;
-    this.right.setState(Length.px((drawerSlide - 1) * width), View.Intrinsic);
-    this.effectiveWidth.setState(Length.px(drawerSlide * width), View.Intrinsic);
-    this.effectiveHeight.setState(this.height.value, View.Intrinsic);
-  }
-
-  /** @hidden */
-  protected updateDrawerSlideBottom(drawerSlide: number): void {
-    let height: Length | number | null = this.height.value;
-    height = height instanceof Length ? height.pxValue() : this.node.offsetHeight;
-    this.bottom.setState(Length.px((drawerSlide - 1) * height), View.Intrinsic);
-    this.effectiveWidth.setState(this.width.value, View.Intrinsic);
-    this.effectiveHeight.setState(Length.px(drawerSlide * height), View.Intrinsic);
-  }
-
-  /** @hidden */
-  protected updateDrawerSlideLeft(drawerSlide: number): void {
-    let width: Length | number | null = this.width.value;
-    width = width instanceof Length ? width.pxValue() : this.node.offsetWidth;
-    this.left.setState(Length.px((drawerSlide - 1) * width), View.Intrinsic);
-    this.effectiveWidth.setState(Length.px(drawerSlide * width), View.Intrinsic);
-    this.effectiveHeight.setState(this.height.value, View.Intrinsic);
-  }
-
-  /** @hidden */
-  protected updateDrawerStretch(drawerStretch: number): void {
-    if (this.isVertical()) {
-      const collapsedWidth = this.collapsedWidth.getValue();
-      const expandedWidth = this.expandedWidth.getValue();
-      const width = collapsedWidth.times(1 - drawerStretch).plus(expandedWidth.times(drawerStretch));
-      this.width.setState(width, View.Intrinsic);
-      this.effectiveWidth.setState(width, View.Intrinsic);
-    }
-  }
-
-  protected override onApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean): void {
-    super.onApplyTheme(theme, mood, timing);
-    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
-      this.backgroundColor.setState(theme.getOr(Look.backgroundColor, mood, null), timing, View.Intrinsic);
-    }
-  }
-
-  protected override onAnimate(viewContext: ViewContextType<this>): void {
-    const displayState = this.displayState;
-    if (displayState === DrawerView.ShowState) {
-      this.willShow();
-    } else if (displayState === DrawerView.HideState) {
-      this.willHide();
-    } else if (displayState === DrawerView.ExpandState) {
-      this.willExpand();
-    } else if (displayState === DrawerView.CollapseState) {
-      this.willCollapse();
-    }
-    super.onAnimate(viewContext);
-    const drawerStretch = this.drawerStretch.takeUpdatedValue();
-    if (drawerStretch !== void 0) {
-      this.updateDrawerStretch(drawerStretch);
-    }
-    const drawerSlide = this.drawerSlide.takeUpdatedValue();
-    if (drawerSlide !== void 0) {
-      this.updateDrawerSlide(drawerSlide);
-    }
-  }
-
-  protected override didAnimate(viewContext: ViewContextType<this>): void {
-    const displayState = this.displayState;
-    const drawerStretch = this.drawerStretch.value;
-    const drawerSlide = this.drawerSlide.value;
-    if (displayState === DrawerView.ShowingState && drawerSlide === 1) {
-      this.didShow();
-    } else if (displayState === DrawerView.HidingState && drawerSlide === 0) {
-      this.didHide();
-    } else if (displayState === DrawerView.ExpandingState && drawerStretch === 1) {
-      this.didExpand();
-    } else if (displayState === DrawerView.CollapsingState && drawerStretch === 0) {
-      this.didCollapse();
-    }
-    super.didAnimate(viewContext);
-  }
-
   protected override onLayout(viewContext: ViewContextType<this>): void {
     super.onLayout(viewContext);
-    this.place(viewContext);
+    this.display.setState(!this.slide.isDismissed() ? "flex" : "none", View.Intrinsic);
+    this.layoutDrawer(viewContext);
+
     if (viewContext.viewIdiom === "mobile") {
       this.boxShadow.setState(this.getLookOr(Look.shadow, Mood.floating, null), View.Intrinsic);
     } else {
@@ -344,21 +266,22 @@ export class DrawerView extends HtmlView implements Modal {
     }
   }
 
-  protected place(viewContext: ViewContextType<this>): void {
-    const placement = this.placement;
+  protected layoutDrawer(viewContext: ViewContextType<this>): void {
+    const placement = this.placement.state;
     if (placement === "top") {
-      this.placeTop(viewContext);
+      this.layoutDrawerTop(viewContext);
     } else if (placement === "right") {
-      this.placeRight(viewContext);
+      this.layoutDrawerRight(viewContext);
     } else if (placement === "bottom") {
-      this.placeBottom(viewContext);
+      this.layoutDrawerBottom(viewContext);
     } else if (placement === "left") {
-      this.placeLeft(viewContext);
+      this.layoutDrawerLeft(viewContext);
     }
   }
 
-  /** @hidden */
-  protected placeTop(viewContext: ViewContextType<this>): void {
+  protected layoutDrawerTop(viewContext: ViewContextType<this>): void {
+    const slidePhase = this.slide.getPhase();
+
     this.addClass("drawer-top")
         .removeClass("drawer-right")
         .removeClass("drawer-bottom")
@@ -367,11 +290,15 @@ export class DrawerView extends HtmlView implements Modal {
     this.position.setState("fixed", View.Intrinsic);
     this.width.setState(null, View.Intrinsic);
     this.height.setState(null, View.Intrinsic);
-    this.top.setState(null, View.Intrinsic);
+    this.left.setState(Length.zero(), View.Intrinsic);
     this.right.setState(Length.zero(), View.Intrinsic);
     this.bottom.setState(null, View.Intrinsic);
-    this.left.setState(Length.zero(), View.Intrinsic);
-    this.updateDrawerSlideTop(this.drawerSlide.getValue());
+
+    let height: Length | null = this.height.value;
+    if (height === null) {
+      height = Length.px(this.node.offsetHeight);
+    }
+    this.top.setState(height.times(slidePhase - 1), View.Intrinsic);
 
     let edgeInsets = this.edgeInsets.superState;
     if ((edgeInsets === void 0 || edgeInsets === null) || edgeInsets === null) {
@@ -384,27 +311,39 @@ export class DrawerView extends HtmlView implements Modal {
       insetLeft: edgeInsets.insetLeft,
     }, View.Intrinsic);
 
-    if (this.isCollapsed()) {
+    if (this.stretch.isCollapsed()) {
       this.expand();
     }
   }
 
-  /** @hidden */
-  protected placeRight(viewContext: ViewContextType<this>): void {
+  protected layoutDrawerRight(viewContext: ViewContextType<this>): void {
+    const stretchPhase = this.stretch.getPhase();
+    const slidePhase = this.slide.getPhase();
+
     this.removeClass("drawer-top")
         .addClass("drawer-right")
         .removeClass("drawer-bottom")
         .removeClass("drawer-left");
 
     this.position.setState("fixed", View.Intrinsic);
-    this.width.setState(null, View.Intrinsic);
     this.height.setState(null, View.Intrinsic);
     this.top.setState(Length.zero(), View.Intrinsic);
-    this.right.setState(null, View.Intrinsic);
     this.bottom.setState(Length.zero(), View.Intrinsic);
     this.left.setState(null, View.Intrinsic);
-    this.updateDrawerStretch(this.drawerStretch.getValue());
-    this.updateDrawerSlideRight(this.drawerSlide.getValue());
+
+    let width: Length | null;
+    if (this.width.takesPrecedence(View.Intrinsic)) {
+      const collapsedWidth = this.collapsedWidth.getValue();
+      const expandedWidth = this.expandedWidth.getValue();
+      width = collapsedWidth.times(1 - stretchPhase).plus(expandedWidth.times(stretchPhase));
+    } else {
+      width = this.width.value;
+      if (width === null) {
+        width = Length.px(this.node.offsetWidth);
+      }
+    }
+    this.width.setState(width, View.Intrinsic);
+    this.right.setState(width.times(slidePhase - 1), View.Intrinsic);
 
     let edgeInsets = this.edgeInsets.superState;
     if ((edgeInsets === void 0 || edgeInsets === null) || edgeInsets === null) {
@@ -420,8 +359,9 @@ export class DrawerView extends HtmlView implements Modal {
     }, View.Intrinsic);
   }
 
-  /** @hidden */
-  protected placeBottom(viewContext: ViewContextType<this>): void {
+  protected layoutDrawerBottom(viewContext: ViewContextType<this>): void {
+    const slidePhase = this.slide.getPhase();
+
     this.removeClass("drawer-top")
         .removeClass("drawer-right")
         .addClass("drawer-bottom")
@@ -430,11 +370,15 @@ export class DrawerView extends HtmlView implements Modal {
     this.position.setState("fixed", View.Intrinsic);
     this.width.setState(null, View.Intrinsic);
     this.height.setState(null, View.Intrinsic);
-    this.top.setState(null, View.Intrinsic);
-    this.right.setState(Length.zero(), View.Intrinsic);
-    this.bottom.setState(null, View.Intrinsic);
     this.left.setState(Length.zero(), View.Intrinsic);
-    this.updateDrawerSlideBottom(this.drawerSlide.getValue());
+    this.right.setState(Length.zero(), View.Intrinsic);
+    this.top.setState(null, View.Intrinsic);
+
+    let height: Length | null = this.height.value;
+    if (height === null) {
+      height = Length.px(this.node.offsetHeight);
+    }
+    this.bottom.setState(height.times(slidePhase - 1), View.Intrinsic);
 
     let edgeInsets = this.edgeInsets.superState;
     if ((edgeInsets === void 0 || edgeInsets === null) || edgeInsets === null) {
@@ -447,27 +391,39 @@ export class DrawerView extends HtmlView implements Modal {
       insetLeft: edgeInsets.insetLeft,
     }, View.Intrinsic);
 
-    if (this.isCollapsed()) {
+    if (this.stretch.isCollapsed()) {
       this.expand();
     }
   }
 
-  /** @hidden */
-  protected placeLeft(viewContext: ViewContextType<this>): void {
+  protected layoutDrawerLeft(viewContext: ViewContextType<this>): void {
+    const stretchPhase = this.stretch.getPhase();
+    const slidePhase = this.slide.getPhase();
+
     this.removeClass("drawer-top")
         .removeClass("drawer-right")
         .removeClass("drawer-bottom")
         .addClass("drawer-left");
 
     this.position.setState("fixed", View.Intrinsic);
-    this.width.setState(null, View.Intrinsic);
     this.height.setState(null, View.Intrinsic);
     this.top.setState(Length.zero(), View.Intrinsic);
-    this.right.setState(null, View.Intrinsic);
     this.bottom.setState(Length.zero(), View.Intrinsic);
-    this.left.setState(null, View.Intrinsic);
-    this.updateDrawerStretch(this.drawerStretch.getValue());
-    this.updateDrawerSlideLeft(this.drawerSlide.getValue());
+    this.right.setState(null, View.Intrinsic);
+
+    let width: Length | null;
+    if (this.width.takesPrecedence(View.Intrinsic)) {
+      const collapsedWidth = this.collapsedWidth.getValue();
+      const expandedWidth = this.expandedWidth.getValue();
+      width = collapsedWidth.times(1 - stretchPhase).plus(expandedWidth.times(stretchPhase));
+    } else {
+      width = this.width.value;
+      if (width === null) {
+        width = Length.px(this.node.offsetWidth);
+      }
+    }
+    this.width.setState(width, View.Intrinsic);
+    this.left.setState(width.times(slidePhase - 1), View.Intrinsic);
 
     let edgeInsets = this.edgeInsets.superState;
     if ((edgeInsets === void 0 || edgeInsets === null) || edgeInsets === null) {
@@ -488,20 +444,7 @@ export class DrawerView extends HtmlView implements Modal {
   }
 
   get modalState(): ModalState {
-    switch (this.displayState) {
-      case DrawerView.HiddenState: return "hidden";
-      case DrawerView.HidingState:
-      case DrawerView.HideState: return "hiding";
-      case DrawerView.ShownState: return "shown";
-      case DrawerView.ShowingState:
-      case DrawerView.ShowState: return "showing";
-      case DrawerView.CollapsedState:
-      case DrawerView.CollapsingState:
-      case DrawerView.CollapseState:
-      case DrawerView.ExpandingState:
-      case DrawerView.ExpandState: return "shown";
-      default: throw new Error("" + this.displayState);
-    }
+    return this.slide.modalState!;
   }
 
   readonly modality!: boolean | number;
@@ -514,247 +457,62 @@ export class DrawerView extends HtmlView implements Modal {
         configurable: true,
       });
     }
-    this.show(timing);
+    this.present(timing);
   }
 
   hideModal(timing?: AnyTiming | boolean): void {
-    this.hide(timing);
+    this.dismiss(timing);
   }
 
-  show(timing?: AnyTiming | boolean): void {
-    if (!this.isShown() || this.drawerSlide.value !== 1 || this.drawerStretch.value !== 1) {
-      if (timing === void 0 || timing === true) {
-        timing = this.getLookOr(Look.timing, false);
-      } else {
-        timing = Timing.fromAny(timing);
-      }
-      this.setDisplayState(DrawerView.ShowState);
-      if (timing !== false) {
-        this.drawerStretch.setState(1, timing, View.Intrinsic);
-        this.drawerSlide.setState(1, timing, View.Intrinsic);
-      } else {
-        this.willShow();
-        this.drawerStretch.setState(1, View.Intrinsic);
-        this.drawerSlide.setState(1, View.Intrinsic);
-        this.didShow();
-      }
+  present(timing?: AnyTiming | boolean): void {
+    if (timing === void 0 || timing === true) {
+      timing = this.getLookOr(Look.timing, false);
+    } else {
+      timing = Timing.fromAny(timing);
     }
+    this.stretch.expand(timing);
+    this.slide.present(timing);
   }
 
-  protected willShow(): void {
-    this.setDisplayState(DrawerView.ShowingState);
-
-    const viewObservers = this.viewObservers!;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.drawerWillShow !== void 0) {
-        viewObserver.drawerWillShow(this);
-      }
+  dismiss(timing?: AnyTiming | boolean): void {
+    if (timing === void 0 || timing === true) {
+      timing = this.getLookOr(Look.timing, false);
+    } else {
+      timing = Timing.fromAny(timing);
     }
-
-    this.display.setState("flex", View.Intrinsic);
-    this.place(this.viewContext as ViewContextType<this>);
-  }
-
-  protected didShow(): void {
-    this.setDisplayState(DrawerView.ShownState);
-    this.requireUpdate(View.NeedsResize | View.NeedsAnimate | View.NeedsLayout);
-
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.drawerDidShow !== void 0) {
-        viewObserver.drawerDidShow(this);
-      }
-    }
-  }
-
-  hide(timing?: AnyTiming | boolean): void {
-    if (!this.isHidden() || this.drawerSlide.value !== 0) {
-      if (timing === void 0 || timing === true) {
-        timing = this.getLookOr(Look.timing, false);
-      } else {
-        timing = Timing.fromAny(timing);
-      }
-      this.setDisplayState(DrawerView.HideState);
-      if (timing !== false) {
-        this.drawerSlide.setState(0, timing, View.Intrinsic);
-      } else {
-        this.willHide();
-        this.drawerSlide.setState(0, View.Intrinsic);
-        this.didHide();
-      }
-    }
-  }
-
-  protected willHide(): void {
-    this.setDisplayState(DrawerView.HidingState);
-    this.modalService.dismissModal(this);
-
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.drawerWillHide !== void 0) {
-        viewObserver.drawerWillHide(this);
-      }
-    }
-  }
-
-  protected didHide(): void {
-    this.setDisplayState(DrawerView.HiddenState);
-    this.requireUpdate(View.NeedsResize | View.NeedsAnimate | View.NeedsLayout);
-
-    this.display.setState("none", View.Intrinsic);
-
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.drawerDidHide !== void 0) {
-        viewObserver.drawerDidHide(this);
-      }
-    }
+    this.slide.dismiss(timing);
   }
 
   expand(timing?: AnyTiming | boolean): void {
-    if (!this.isShown() || this.drawerSlide.value !== 1 || this.drawerStretch.value !== 1) {
-      if (timing === void 0 || timing === true) {
-        timing = this.getLookOr(Look.timing, false);
-      } else {
-        timing = Timing.fromAny(timing);
-      }
-      this.setDisplayState(DrawerView.ExpandState);
-      if (timing !== false) {
-        if (this.drawerStretch.value !== 1) {
-          this.drawerSlide.setState(1, timing, View.Intrinsic);
-          this.drawerStretch.setState(1, timing, View.Intrinsic);
-        } else {
-          this.drawerSlide.setState(1, timing, View.Intrinsic);
-        }
-      } else {
-        this.willExpand();
-        this.drawerSlide.setState(1, View.Intrinsic);
-        this.drawerStretch.setState(1, View.Intrinsic);
-        this.didExpand();
-      }
+    if (timing === void 0 || timing === true) {
+      timing = this.getLookOr(Look.timing, false);
+    } else {
+      timing = Timing.fromAny(timing);
     }
-  }
-
-  protected willExpand(): void {
-    this.setDisplayState(DrawerView.ExpandingState);
-    this.modalService.dismissModal(this);
-
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.drawerWillExpand !== void 0) {
-        viewObserver.drawerWillExpand(this);
-      }
-    }
-  }
-
-  protected didExpand(): void {
-    this.setDisplayState(DrawerView.ShownState);
-    this.requireUpdate(View.NeedsResize | View.NeedsAnimate | View.NeedsLayout);
-
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.drawerDidExpand !== void 0) {
-        viewObserver.drawerDidExpand(this);
-      }
-    }
+    this.stretch.expand(timing);
+    this.slide.present(timing);
   }
 
   collapse(timing?: AnyTiming | boolean): void {
-    if (this.isVertical() && (!this.isCollapsed() || this.drawerSlide.value !== 1 || this.drawerStretch.value !== 0)) {
-      if (timing === void 0 || timing === true) {
-        timing = this.getLookOr(Look.timing, false);
-      } else {
-        timing = Timing.fromAny(timing);
-      }
-      this.setDisplayState(DrawerView.CollapseState);
-      if (this.drawerSlide.value === 0) {
-        this.drawerStretch.setState(0, View.Intrinsic);
-      }
-      if (timing !== false) {
-        if (this.drawerStretch.value !== 0) {
-          this.drawerSlide.setState(1, timing, View.Intrinsic);
-          this.drawerStretch.setState(0, timing, View.Intrinsic);
-        } else {
-          this.drawerSlide.setState(1, timing, View.Intrinsic);
-        }
-      } else {
-        this.willCollapse();
-        this.drawerSlide.setState(1, View.Intrinsic);
-        this.drawerStretch.setState(0, View.Intrinsic);
-        this.didCollapse();
-      }
+    if (timing === void 0 || timing === true) {
+      timing = this.getLookOr(Look.timing, false);
+    } else {
+      timing = Timing.fromAny(timing);
     }
-  }
-
-  protected willCollapse(): void {
-    this.setDisplayState(DrawerView.CollapsingState);
-    this.modalService.dismissModal(this);
-
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.drawerWillCollapse !== void 0) {
-        viewObserver.drawerWillCollapse(this);
-      }
-    }
-
-    this.display.setState("flex", View.Intrinsic);
-  }
-
-  protected didCollapse(): void {
-    this.setDisplayState(DrawerView.CollapsedState);
-    this.requireUpdate(View.NeedsResize | View.NeedsAnimate | View.NeedsLayout);
-
-    const viewObservers = this.viewObservers;
-    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-      const viewObserver = viewObservers[i]!;
-      if (viewObserver.drawerDidCollapse !== void 0) {
-        viewObserver.drawerDidCollapse(this);
-      }
-    }
+    this.stretch.collapse(timing);
+    this.slide.present(timing);
   }
 
   toggle(timing?: AnyTiming | boolean): void {
-    const drawerState = this.drawerState;
-    if (this.viewIdiom === "mobile" && (drawerState === "hidden" || drawerState === "hiding")) {
-      this.modalService.presentModal(this, {modal: true});
-    } else if (drawerState === "hidden" || drawerState === "hiding") {
-      this.show(timing);
-    } else if (drawerState === "collapsed" || drawerState === "collapsing") {
-      this.expand(timing);
-    } else if (this.viewIdiom === "mobile") {
-      this.hide(timing);
+    if (timing === void 0 || timing === true) {
+      timing = this.getLookOr(Look.timing, false);
     } else {
-      this.collapse(timing);
+      timing = Timing.fromAny(timing);
+    }
+    if (this.viewIdiom === "mobile" || this.isHorizontal()) {
+      this.slide.toggle();
+    } else {
+      this.stretch.toggle();
     }
   }
-
-  /** @hidden */
-  static readonly HiddenState: number = 0;
-  /** @hidden */
-  static readonly HidingState: number = 1;
-  /** @hidden */
-  static readonly HideState: number = 2;
-  /** @hidden */
-  static readonly ShownState: number = 3;
-  /** @hidden */
-  static readonly ShowingState: number = 4;
-  /** @hidden */
-  static readonly ShowState: number = 5;
-  /** @hidden */
-  static readonly CollapsedState: number = 6;
-  /** @hidden */
-  static readonly CollapsingState: number = 7;
-  /** @hidden */
-  static readonly CollapseState: number = 8;
-  /** @hidden */
-  static readonly ExpandingState: number = 9;
-  /** @hidden */
-  static readonly ExpandState: number = 10;
 }

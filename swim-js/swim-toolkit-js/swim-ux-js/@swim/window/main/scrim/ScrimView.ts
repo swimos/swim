@@ -70,7 +70,7 @@ export class ScrimView extends HtmlView implements ModalManagerObserver {
     propertyNames: "background-color",
     type: Color,
     state: null,
-    onBegin(backgroundColor: Color | null): void {
+    onBegin(): void {
       const displayState = this.owner.displayState;
       if (displayState === ScrimView.ShowState) {
         this.owner.willShow();
@@ -78,7 +78,7 @@ export class ScrimView extends HtmlView implements ModalManagerObserver {
         this.owner.willHide();
       }
     },
-    onEnd(backgroundColor: Color | null): void {
+    onEnd(): void {
       const displayState = this.owner.displayState;
       if (displayState === ScrimView.ShowingState) {
         this.owner.didShow();

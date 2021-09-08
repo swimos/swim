@@ -16,7 +16,7 @@ import {AnyTiming, Timing} from "@swim/mapping";
 import type {Length} from "@swim/math";
 import type {GeoPath} from "@swim/geo";
 import type {Color} from "@swim/style";
-import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
+import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";
 import {ControllerViewTrait} from "@swim/controller";
 import {GeoAreaView} from "./GeoAreaView";
@@ -143,10 +143,6 @@ export class GeoAreaController extends GeoPathController {
         controllerObserver.controllerDidSetGeoView(newGeoView, oldGeoView, this);
       }
     }
-  }
-
-  protected themeGeoView(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, geoView: GeoAreaView): void {
-    // hook
   }
 
   protected setGeoPath(geoPath: GeoPath | null, geoTrait: GeoAreaTrait, timing?: AnyTiming | boolean): void {
@@ -325,9 +321,6 @@ export class GeoAreaController extends GeoPathController {
     },
     didSetView(newGeoView: GeoAreaView | null, oldGeoView: GeoAreaView | null): void {
       this.owner.didSetGeoView(newGeoView, oldGeoView);
-    },
-    viewDidApplyTheme(theme: ThemeMatrix, mood: MoodVector, timing: Timing | boolean, geoView: GeoAreaView): void {
-      this.owner.themeGeoView(theme, mood, timing, geoView);
     },
     viewWillSetGeoPath(newGeoPath: GeoPath | null, oldGeoPath: GeoPath | null, geoView: GeoAreaView): void {
       this.owner.willSetGeoPath(newGeoPath, oldGeoPath, geoView);
