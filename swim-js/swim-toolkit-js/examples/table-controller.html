@@ -69,13 +69,9 @@ tableModel.appendChildModel(colBModel);
 function createRowModel(i) {
   const rowModel = new swim.CompoundModel();
   const rowTrait = new swim.RowTrait();
-  const cellATrait = new swim.TextCellTrait()
-    .content(i + "A");
-  const cellBTrait = new swim.TextCellTrait()
-    .content(i + "B");
   rowModel.setTrait("col", rowTrait);
-  rowModel.setTrait("a", cellATrait);
-  rowModel.setTrait("b", cellBTrait);
+  rowTrait.getOrCreateCell("a", swim.TextCellTrait).content(i + "A");
+  rowTrait.getOrCreateCell("b", swim.TextCellTrait).content(i + "B");
   return rowModel;
 }
 for (let i = 1; i <= 100; i += 1) {

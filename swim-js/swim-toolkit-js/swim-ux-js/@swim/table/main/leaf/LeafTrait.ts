@@ -12,7 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Model, TraitModelType, Trait, TraitFastener, GenericTrait} from "@swim/model";
+import {
+  Model,
+  TraitModelType,
+  TraitConstructor,
+  TraitClass,
+  Trait,
+  TraitFastener,
+  GenericTrait,
+} from "@swim/model";
 import {CellTrait} from "../cell/CellTrait";
 import type {LeafTraitObserver} from "./LeafTraitObserver";
 
@@ -26,6 +34,29 @@ export class LeafTrait extends GenericTrait {
   }
 
   override readonly traitObservers!: ReadonlyArray<LeafTraitObserver>;
+
+  getCell(key: string): CellTrait | null;
+  getCell<R extends CellTrait>(key: string, cellTraitClass: TraitClass<R>): R | null;
+  getCell(key: string, cellTraitClass?: TraitClass<CellTrait>): CellTrait | null {
+    if (cellTraitClass === void 0) {
+      cellTraitClass = CellTrait;
+    }
+    const cellTrait = this.getTrait(key);
+    return cellTrait instanceof cellTraitClass ? cellTrait : null;
+  }
+
+  getOrCreateCell<R extends CellTrait>(key: string, cellTraitConstructor: TraitConstructor<R>): R {
+    let cellTrait = this.getTrait(key) as R | null;
+    if (!(cellTrait instanceof cellTraitConstructor)) {
+      cellTrait = new cellTraitConstructor();
+      this.setTrait(key, cellTrait);
+    }
+    return cellTrait;
+  }
+
+  setCell(key: string, cellTrait: CellTrait): void {
+    this.setTrait(key, cellTrait);
+  }
 
   insertCell(cellTrait: CellTrait, targetTrait: Trait | null = null): void {
     const cellFasteners = this.cellFasteners as TraitFastener<this, CellTrait>[];

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Trait} from "@swim/model";
-import type {PositionGestureInput} from "@swim/view";
-import type {HtmlView} from "@swim/dom";
+import type {TraitConstructor, TraitClass, Trait} from "@swim/model";
+import type {ViewClass, PositionGestureInput} from "@swim/view";
+import type {NodeViewConstructor, HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
 import {
   Controller,
@@ -438,6 +438,29 @@ export class LeafController extends CompositeController {
     }
   }
 
+  getCellTrait(key: string): CellTrait | null;
+  getCellTrait<R extends CellTrait>(key: string, cellTraitClass: TraitClass<R>): R | null;
+  getCellTrait(key: string, cellTraitClass?: TraitClass<CellTrait>): CellTrait | null {
+    const leafTrait = this.leaf.trait;
+    return leafTrait !== null ? leafTrait.getCell(key, cellTraitClass!) : null;
+  }
+
+  getOrCreateCellTrait<R extends CellTrait>(key: string, cellTraitConstructor: TraitConstructor<R>): R {
+    const leafTrait = this.leaf.trait;
+    if (leafTrait === null) {
+      throw new Error("no leaf trait");
+    }
+    return leafTrait.getOrCreateCell(key, cellTraitConstructor);
+  }
+
+  setCellTrait(key: string, cellTrait: CellTrait): void {
+    const leafTrait = this.leaf.trait;
+    if (leafTrait === null) {
+      throw new Error("no leaf trait");
+    }
+    leafTrait.setCell(key, cellTrait);
+  }
+
   insertCellTrait(cellTrait: CellTrait, targetTrait: Trait | null = null): void {
     const cellFasteners = this.cellFasteners as ControllerFastener<this, CellController>[];
     let targetController: CellController | null = null;
@@ -531,6 +554,37 @@ export class LeafController extends CompositeController {
         controllerObserver.controllerDidSetCellTrait(newCellTrait, oldCellTrait, cellFastener);
       }
     }
+  }
+
+  getCellView(key: string): CellView | null;
+  getCellView<V extends CellView>(key: string, cellViewClass: ViewClass<V>): V | null;
+  getCellView(key: string, cellViewClass?: ViewClass<CellView>): CellView | null {
+    const leafView = this.leaf.view;
+    return leafView !== null ? leafView.getCell(key, cellViewClass!) : null;
+  }
+
+  getOrCreateCellView<V extends CellView>(key: string, cellViewConstructor: NodeViewConstructor<V>): V {
+    let leafView = this.leaf.view;
+    if (leafView === null) {
+      leafView = this.leaf.createView();
+      if (leafView === null) {
+        throw new Error("no leaf view");
+      }
+      this.leaf.setView(leafView);
+    }
+    return leafView.getOrCreateCell(key, cellViewConstructor);
+  }
+
+  setCellView(key: string, cellView: CellView): void {
+    let leafView = this.leaf.view;
+    if (leafView === null) {
+      leafView = this.leaf.createView();
+      if (leafView === null) {
+        throw new Error("no leaf view");
+      }
+      this.leaf.setView(leafView);
+    }
+    leafView.setCell(key, cellView);
   }
 
   protected createCellView(cellController: CellController): CellView | null {

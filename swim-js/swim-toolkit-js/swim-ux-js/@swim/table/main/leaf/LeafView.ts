@@ -18,6 +18,7 @@ import {Look, Feel} from "@swim/theme";
 import {
   ViewContextType,
   ViewFlags,
+  ViewClass,
   View,
   ViewProperty,
   ViewAnimator,
@@ -28,7 +29,7 @@ import {
   PositionGesture,
   PositionGestureDelegate,
 } from "@swim/view";
-import {ViewNode, HtmlView} from "@swim/dom";
+import {ViewNode, NodeViewConstructor, HtmlView} from "@swim/dom";
 import {ButtonGlow} from "@swim/button";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import {CellView} from "../cell/CellView";
@@ -197,6 +198,29 @@ export class LeafView extends HtmlView implements PositionGestureDelegate {
     },
   })
   readonly highlight!: FocusViewAnimator<this>;
+
+  getCell(key: string): CellView | null;
+  getCell<V extends CellView>(key: string, cellViewClass: ViewClass<V>): V | null;
+  getCell(key: string, cellViewClass?: ViewClass<CellView>): CellView | null {
+    if (cellViewClass === void 0) {
+      cellViewClass = CellView;
+    }
+    const cellView = this.getChildView(key);
+    return cellView instanceof cellViewClass ? cellView : null;
+  }
+
+  getOrCreateCell<V extends CellView>(key: string, cellViewConstructor: NodeViewConstructor<V>): V {
+    let cellView = this.getChildView(key) as V | null;
+    if (!(cellView instanceof cellViewConstructor)) {
+      cellView = HtmlView.fromConstructor(cellViewConstructor);
+      this.setChildView(key, cellView);
+    }
+    return cellView;
+  }
+
+  setCell(key: string, cellView: CellView): void {
+    this.setChildView(key, cellView);
+  }
 
   insertCell(cellView: CellView, targetView: View | null = null): void {
     const cellFasteners = this.cellFasteners as ViewFastener<this, CellView>[];

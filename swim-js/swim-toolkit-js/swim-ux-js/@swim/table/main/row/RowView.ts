@@ -19,6 +19,7 @@ import {
   ViewContextType,
   ViewContext,
   ViewFlags,
+  ViewClass,
   View,
   ViewProperty,
   ViewAnimator,
@@ -26,8 +27,9 @@ import {
   ViewFastener,
   PositionGestureInput,
 } from "@swim/view";
-import {HtmlView} from "@swim/dom";
+import {NodeViewConstructor, HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
+import type {CellView} from "../cell/CellView";
 import {LeafView} from "../leaf/LeafView";
 import type {RowViewObserver} from "./RowViewObserver";
 import type {TableViewContext} from "../table/TableViewContext";
@@ -79,6 +81,29 @@ export class RowView extends HtmlView {
 
   @ViewAnimator({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
   readonly rowHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
+
+  getCell(key: string): CellView | null;
+  getCell<V extends CellView>(key: string, cellViewClass: ViewClass<V>): V | null;
+  getCell(key: string, cellViewClass?: ViewClass<CellView>): CellView | null {
+    const leafView = this.leaf.view;
+    return leafView !== null ? leafView.getCell(key, cellViewClass!) : null;
+  }
+
+  getOrCreateCell<V extends CellView>(key: string, cellViewConstructor: NodeViewConstructor<V>): V {
+    const leafView = this.leaf.injectView();
+    if (leafView === null) {
+      throw new Error("no leaf view");
+    }
+    return leafView.getOrCreateCell(key, cellViewConstructor);
+  }
+
+  setCell(key: string, cellView: CellView): void {
+    const leafView = this.leaf.injectView();
+    if (leafView === null) {
+      throw new Error("no leaf view");
+    }
+    leafView.setCell(key, cellView);
+  }
 
   protected createLeaf(): LeafView | null {
     return LeafView.create();
