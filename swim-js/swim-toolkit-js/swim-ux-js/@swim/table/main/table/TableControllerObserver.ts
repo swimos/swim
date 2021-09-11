@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {PositionGestureInput} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
 import type {ControllerObserver, ControllerFastener} from "@swim/controller";
@@ -23,6 +24,8 @@ import type {CellController} from "../cell/CellController";
 import type {ColView} from "../col/ColView";
 import type {ColTrait} from "../col/ColTrait";
 import type {ColController} from "../col/ColController";
+import type {LeafView} from "../leaf/LeafView";
+import type {LeafTrait} from "../leaf/LeafTrait";
 import type {RowView} from "../row/RowView";
 import type {RowTrait} from "../row/RowTrait";
 import type {RowController} from "../row/RowController";
@@ -75,6 +78,30 @@ export interface TableControllerObserver<C extends TableController = TableContro
 
   controllerDidSetRowView?(newRowView: RowView | null, oldRowView: RowView | null, rowFastener: ControllerFastener<C, RowController>): void;
 
+  controllerWillSetLeafTrait?(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidSetLeafTrait?(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerWillSetLeafView?(newLeafView: LeafView | null, oldLeafView: LeafView | null, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidSetLeafView?(newLeafView: LeafView | null, oldLeafView: LeafView | null, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerWillHighlightLeafView?(leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidHighlightLeafView?(leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerWillUnhighlightLeafView?(leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidUnhighlightLeafView?(leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidEnterLeafView?(leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidLeaveLeafView?(leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidPressLeafView?(input: PositionGestureInput, event: Event | null, leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidLongPressLeafView?(input: PositionGestureInput, leafView: LeafView, rowFastener: ControllerFastener<C, RowController>): void;
+
   controllerWillSetCell?(newCellController: CellController | null, oldCellController: CellController | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
 
   controllerDidSetCell?(newCellController: CellController | null, oldCellController: CellController | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
@@ -94,4 +121,24 @@ export interface TableControllerObserver<C extends TableController = TableContro
   controllerWillSetCellIcon?(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
 
   controllerDidSetCellIcon?(newCellIcon: Graphics | null, oldCellIcon: Graphics | null, cellFastener: ControllerFastener<RowController, CellController>, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerWillSetTree?(newTreeController: TableController | null, oldTreeController: TableController | null, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidSetTree?(newTreeController: TableController | null, oldTreeController: TableController | null, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerWillSetTreeTrait?(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidSetTreeTrait?(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerWillSetTreeView?(newTreeView: TableView | null, oldTreeView: TableView | null, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidSetTreeView?(newTreeView: TableView | null, oldTreeView: TableView | null, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerWillExpandRowView?(rowView: RowView, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidExpandRowView?(rowView: RowView, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerWillCollapseRowView?(rowView: RowView, rowFastener: ControllerFastener<C, RowController>): void;
+
+  controllerDidCollapseRowView?(rowView: RowView, rowFastener: ControllerFastener<C, RowController>): void;
 }

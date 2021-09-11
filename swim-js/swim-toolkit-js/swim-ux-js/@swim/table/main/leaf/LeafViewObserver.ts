@@ -30,6 +30,10 @@ export interface LeafViewObserver<V extends LeafView = LeafView> extends HtmlVie
 
   viewDidUnhighlight?(view: V): void;
 
+  viewDidEnter?(view: V): void;
+
+  viewDidLeave?(view: V): void;
+
   viewDidPress?(input: PositionGestureInput, event: Event | null, view: V): void;
 
   viewDidLongPress?(input: PositionGestureInput, view: V): void;

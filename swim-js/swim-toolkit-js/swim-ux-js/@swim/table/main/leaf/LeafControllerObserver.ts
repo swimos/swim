@@ -40,6 +40,10 @@ export interface LeafControllerObserver<C extends LeafController = LeafControlle
 
   controllerDidUnhighlightLeafView?(leafView: LeafView, controller: C): void;
 
+  controllerDidEnterLeafView?(leafView: LeafView, controller: C): void;
+
+  controllerDidLeaveLeafView?(leafView: LeafView, controller: C): void;
+
   controllerDidPressLeafView?(input: PositionGestureInput, event: Event | null, leafView: LeafView, controller: C): void;
 
   controllerDidLongPressLeafView?(input: PositionGestureInput, leafView: LeafView, controller: C): void;

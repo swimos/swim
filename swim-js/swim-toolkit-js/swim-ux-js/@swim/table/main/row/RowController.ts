@@ -142,6 +142,10 @@ export class RowController extends LeafController {
     }
   }
 
+  protected onExpandRowView(rowView: RowView): void {
+    // hook
+  }
+
   protected didExpandRowView(rowView: RowView): void {
     const controllerObservers = this.controllerObservers;
     for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
@@ -160,6 +164,10 @@ export class RowController extends LeafController {
         controllerObserver.controllerWillCollapseRowView(rowView, this);
       }
     }
+  }
+
+  protected onCollapseRowView(rowView: RowView): void {
+    // hook
   }
 
   protected didCollapseRowView(rowView: RowView): void {
@@ -187,6 +195,7 @@ export class RowController extends LeafController {
     },
     viewWillExpand(rowView: RowView): void {
       this.owner.willExpandRowView(rowView);
+      this.owner.onExpandRowView(rowView);
     },
     viewDidExpand(rowView: RowView): void {
       this.owner.didExpandRowView(rowView);
@@ -195,6 +204,7 @@ export class RowController extends LeafController {
       this.owner.willCollapseRowView(rowView);
     },
     viewDidCollapse(rowView: RowView): void {
+      this.owner.onCollapseRowView(rowView);
       this.owner.didCollapseRowView(rowView);
     },
     createView(): RowView | null {

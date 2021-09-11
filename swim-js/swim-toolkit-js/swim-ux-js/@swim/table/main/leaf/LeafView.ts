@@ -55,9 +55,13 @@ export class LeafView extends HtmlView implements PositionGestureDelegate {
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
     this.backgroundColor.setLook(Look.backgroundColor, View.Intrinsic);
-    const highlight = this.highlight.value;
-    this.modifyMood(Feel.default, [[Feel.transparent, 1 - highlight.phase],
-                                   [Feel.selected, highlight.phase]], false);
+
+    const highlightPhase = this.highlight.getPhase();
+    const hoverPhase = this.hover.getPhase();
+    const backgroundPhase = Math.max(highlightPhase, hoverPhase);
+    this.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
+                                   [Feel.hovering, hoverPhase * (1 - highlightPhase)],
+                                   [Feel.selected, highlightPhase]], false);
   }
 
   override readonly viewObservers!: ReadonlyArray<LeafViewObserver>;
@@ -95,6 +99,24 @@ export class LeafView extends HtmlView implements PositionGestureDelegate {
   protected createGesture(): PositionGesture<LeafView> {
     return new PositionGesture(this, this);
   }
+
+  protected didSetHover(newHover: Focus, oldHover: Focus): void {
+    const highlightPhase = this.highlight.getPhase();
+    const hoverPhase = newHover.phase;
+    const backgroundPhase = Math.max(highlightPhase, hoverPhase);
+    this.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
+                                   [Feel.hovering, hoverPhase * (1 - highlightPhase)],
+                                   [Feel.selected, highlightPhase]], false);
+  }
+
+  @ViewAnimator<LeafView, Focus, AnyFocus>({
+    type: Focus,
+    state: Focus.unfocused(),
+    didSetValue(newHover: Focus, oldHover: Focus): void {
+      this.owner.didSetHover(newHover, oldHover);
+    },
+  })
+  readonly hover!: FocusViewAnimator<this>;
 
   protected willHighlight(): void {
     const viewObservers = this.viewObservers;
@@ -145,8 +167,12 @@ export class LeafView extends HtmlView implements PositionGestureDelegate {
   }
 
   protected didSetHighlight(newHighlight: Focus, oldHighlight: Focus): void {
-    this.modifyMood(Feel.default, [[Feel.transparent, 1 - newHighlight.phase],
-                                   [Feel.selected, newHighlight.phase]], false);
+    const highlightPhase = newHighlight.phase;
+    const hoverPhase = this.hover.getPhase();
+    const backgroundPhase = Math.max(highlightPhase, hoverPhase);
+    this.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
+                                   [Feel.hovering, hoverPhase * (1 - highlightPhase)],
+                                   [Feel.selected, highlightPhase]], false);
   }
 
   @ViewAnimator<LeafView, Focus, AnyFocus>({
@@ -161,9 +187,9 @@ export class LeafView extends HtmlView implements PositionGestureDelegate {
     },
     willUnfocus(): void {
       this.owner.willUnhighlight();
-      this.owner.onUnhighlight();
     },
     didUnfocus(): void {
+      this.owner.onUnhighlight();
       this.owner.didUnhighlight();
     },
     didSetValue(newHighlight: Focus, oldHighlight: Focus): void {
@@ -461,6 +487,26 @@ export class LeafView extends HtmlView implements PositionGestureDelegate {
     if (input.detail instanceof ButtonGlow) {
       input.detail.fade(input.x, input.y);
       input.detail = void 0;
+    }
+  }
+
+  didStartHovering(): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidEnter !== void 0) {
+        viewObserver.viewDidEnter(this);
+      }
+    }
+  }
+
+  didStopHovering(): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidLeave !== void 0) {
+        viewObserver.viewDidLeave(this);
+      }
     }
   }
 

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Trait} from "@swim/model";
-import {View} from "@swim/view";
+import {View, PositionGestureInput} from "@swim/view";
 import type {HtmlView} from "@swim/dom";
 import type {Graphics} from "@swim/graphics";
 import {
@@ -32,6 +32,8 @@ import type {CellController} from "../cell/CellController";
 import type {ColView} from "../col/ColView";
 import type {ColTrait} from "../col/ColTrait";
 import {ColController} from "../col/ColController";
+import type {LeafView} from "../leaf/LeafView";
+import type {LeafTrait} from "../leaf/LeafTrait";
 import type {RowView} from "../row/RowView";
 import type {RowTrait} from "../row/RowTrait";
 import {RowController} from "../row/RowController";
@@ -916,12 +918,210 @@ export class TableController extends CompositeController {
   }
 
   protected didSetRowView(newRowView: RowView | null, oldRowView: RowView | null,
-                           rowFastener: ControllerFastener<this, RowController>): void {
+                          rowFastener: ControllerFastener<this, RowController>): void {
     const controllerObservers = this.controllerObservers;
     for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
       const controllerObserver = controllerObservers[i]!;
       if (controllerObserver.controllerDidSetRowView !== void 0) {
         controllerObserver.controllerDidSetRowView(newRowView, oldRowView, rowFastener);
+      }
+    }
+  }
+
+  protected initLeafTrait(leafTrait: LeafTrait | null, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected attachLeafTrait(leafTrait: LeafTrait | null, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected detachLeafTrait(leafTrait: LeafTrait | null, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected willSetLeafTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null,
+                             rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillSetLeafTrait !== void 0) {
+        controllerObserver.controllerWillSetLeafTrait(newLeafTrait, oldLeafTrait, rowFastener);
+      }
+    }
+  }
+
+  protected onSetLeafTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null,
+                           rowFastener: ControllerFastener<this, RowController>): void {
+    if (oldLeafTrait !== null) {
+      this.detachLeafTrait(oldLeafTrait, rowFastener);
+    }
+    if (newLeafTrait !== null) {
+      this.attachLeafTrait(newLeafTrait, rowFastener);
+      this.initLeafTrait(newLeafTrait, rowFastener);
+    }
+  }
+
+  protected didSetLeafTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null,
+                            rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidSetLeafTrait !== void 0) {
+        controllerObserver.controllerDidSetLeafTrait(newLeafTrait, oldLeafTrait, rowFastener);
+      }
+    }
+  }
+
+  protected initLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected attachLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected detachLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected willSetLeafView(newLeafView: LeafView | null, oldLeafView: LeafView | null,
+                            rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillSetLeafView !== void 0) {
+        controllerObserver.controllerWillSetLeafView(newLeafView, oldLeafView, rowFastener);
+      }
+    }
+  }
+
+  protected onSetLeafView(newLeafView: LeafView | null, oldLeafView: LeafView | null,
+                          rowFastener: ControllerFastener<this, RowController>): void {
+    if (oldLeafView !== null) {
+      this.detachLeafView(oldLeafView, rowFastener);
+    }
+    if (newLeafView !== null) {
+      this.attachLeafView(newLeafView, rowFastener);
+      this.initLeafView(newLeafView, rowFastener);
+    }
+  }
+
+  protected didSetLeafView(newLeafView: LeafView | null, oldLeafView: LeafView | null,
+                           rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidSetLeafView !== void 0) {
+        controllerObserver.controllerDidSetLeafView(newLeafView, oldLeafView, rowFastener);
+      }
+    }
+  }
+
+  protected willHighlightLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillHighlightLeafView !== void 0) {
+        controllerObserver.controllerWillHighlightLeafView(leafView, rowFastener);
+      }
+    }
+  }
+
+  protected onHighlightLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected didHighlightLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidHighlightLeafView !== void 0) {
+        controllerObserver.controllerDidHighlightLeafView(leafView, rowFastener);
+      }
+    }
+  }
+
+  protected willUnhighlightLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillUnhighlightLeafView !== void 0) {
+        controllerObserver.controllerWillUnhighlightLeafView(leafView, rowFastener);
+      }
+    }
+  }
+
+  protected onUnhighlightLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected didUnhighlightLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidUnhighlightLeafView !== void 0) {
+        controllerObserver.controllerDidUnhighlightLeafView(leafView, rowFastener);
+      }
+    }
+  }
+
+  protected onEnterLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected didEnterLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidEnterLeafView !== void 0) {
+        controllerObserver.controllerDidEnterLeafView(leafView, rowFastener);
+      }
+    }
+  }
+
+  protected onLeaveLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected didLeaveLeafView(leafView: LeafView, rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidLeaveLeafView !== void 0) {
+        controllerObserver.controllerDidLeaveLeafView(leafView, rowFastener);
+      }
+    }
+  }
+
+  protected onPressLeafView(input: PositionGestureInput, event: Event | null, leafView: LeafView,
+                             rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected didPressLeafView(input: PositionGestureInput, event: Event | null, leafView: LeafView,
+                             rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidPressLeafView !== void 0) {
+        controllerObserver.controllerDidPressLeafView(input, event, leafView, rowFastener);
+      }
+    }
+  }
+
+  protected onLongPressLeafView(input: PositionGestureInput, leafView: LeafView,
+                                rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected didLongPressLeafView(input: PositionGestureInput, leafView: LeafView,
+                                 rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidLongPressLeafView !== void 0) {
+        controllerObserver.controllerDidLongPressLeafView(input, leafView, rowFastener);
       }
     }
   }
@@ -1196,6 +1396,210 @@ export class TableController extends CompositeController {
     }
   }
 
+  protected initTree(treeController: TableController, rowFastener: ControllerFastener<this, RowController>): void {
+    const treeTrait = treeController.table.trait;
+    if (treeTrait !== null) {
+      this.initTreeTrait(treeTrait, rowFastener);
+    }
+    const treeView = treeController.table.view;
+    if (treeView !== null) {
+      this.initTreeView(treeView, rowFastener);
+    }
+  }
+
+  protected attachTree(treeController: TableController, rowFastener: ControllerFastener<this, RowController>): void {
+    const treeTrait = treeController.table.trait;
+    if (treeTrait !== null) {
+      this.attachTreeTrait(treeTrait, rowFastener);
+    }
+    const treeView = treeController.table.view;
+    if (treeView !== null) {
+      this.attachTreeView(treeView, rowFastener);
+    }
+  }
+
+  protected detachTree(treeController: TableController, rowFastener: ControllerFastener<this, RowController>): void {
+    const treeTrait = treeController.table.trait;
+    if (treeTrait !== null) {
+      this.detachTreeTrait(treeTrait, rowFastener);
+    }
+    const treeView = treeController.table.view;
+    if (treeView !== null) {
+      this.detachTreeView(treeView, rowFastener);
+    }
+  }
+
+  protected willSetTree(newTreeController: TableController | null, oldTreeController: TableController | null,
+                        rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillSetTree !== void 0) {
+        controllerObserver.controllerWillSetTree(newTreeController, oldTreeController, rowFastener);
+      }
+    }
+  }
+
+  protected onSetTree(newTreeController: TableController | null, oldTreeController: TableController | null,
+                      rowFastener: ControllerFastener<this, RowController>): void {
+    if (oldTreeController !== null) {
+      this.detachTree(oldTreeController, rowFastener);
+    }
+    if (newTreeController !== null) {
+      this.attachTree(newTreeController, rowFastener);
+      this.initTree(newTreeController, rowFastener);
+    }
+  }
+
+  protected didSetTree(newTreeController: TableController | null, oldTreeController: TableController | null,
+                       rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidSetTree !== void 0) {
+        controllerObserver.controllerDidSetTree(newTreeController, oldTreeController, rowFastener);
+      }
+    }
+  }
+
+  protected initTreeTrait(treeTrait: TableTrait | null, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected attachTreeTrait(treeTrait: TableTrait | null, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected detachTreeTrait(treeTrait: TableTrait | null, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected willSetTreeTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null,
+                             rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillSetTreeTrait !== void 0) {
+        controllerObserver.controllerWillSetTreeTrait(newTreeTrait, oldTreeTrait, rowFastener);
+      }
+    }
+  }
+
+  protected onSetTreeTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null,
+                           rowFastener: ControllerFastener<this, RowController>): void {
+    if (oldTreeTrait !== null) {
+      this.detachTreeTrait(oldTreeTrait, rowFastener);
+    }
+    if (newTreeTrait !== null) {
+      this.attachTreeTrait(oldTreeTrait, rowFastener);
+      this.initTreeTrait(newTreeTrait, rowFastener);
+    }
+  }
+
+  protected didSetTreeTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null,
+                            rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidSetTreeTrait !== void 0) {
+        controllerObserver.controllerDidSetTreeTrait(newTreeTrait, oldTreeTrait, rowFastener);
+      }
+    }
+  }
+
+  protected initTreeView(treeView: TableView, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected attachTreeView(treeView: TableView, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected detachTreeView(treeView: TableView, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected willSetTreeView(newTreeView: TableView | null, oldTreeView: TableView | null,
+                            rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillSetTreeView !== void 0) {
+        controllerObserver.controllerWillSetTreeView(newTreeView, oldTreeView, rowFastener);
+      }
+    }
+  }
+
+  protected onSetTreeView(newTreeView: TableView | null, oldTreeView: TableView | null,
+                          rowFastener: ControllerFastener<this, RowController>): void {
+    if (oldTreeView !== null) {
+      this.detachTreeView(oldTreeView, rowFastener);
+    }
+    if (newTreeView !== null) {
+      this.attachTreeView(newTreeView, rowFastener);
+      this.initTreeView(newTreeView, rowFastener);
+    }
+  }
+
+  protected didSetTreeView(newTreeView: TableView | null, oldTreeView: TableView | null,
+                           rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidSetTreeView !== void 0) {
+        controllerObserver.controllerDidSetTreeView(newTreeView, oldTreeView, rowFastener);
+      }
+    }
+  }
+
+  protected willExpandRowView(rowView: RowView, rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillExpandRowView !== void 0) {
+        controllerObserver.controllerWillExpandRowView(rowView, rowFastener);
+      }
+    }
+  }
+
+  protected onExpandRowView(rowView: RowView, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected didExpandRowView(rowView: RowView, rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidExpandRowView !== void 0) {
+        controllerObserver.controllerDidExpandRowView(rowView, rowFastener);
+      }
+    }
+  }
+
+  protected willCollapseRowView(rowView: RowView, rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillCollapseRowView !== void 0) {
+        controllerObserver.controllerWillCollapseRowView(rowView, rowFastener);
+      }
+    }
+  }
+
+  protected onCollapseRowView(rowView: RowView, rowFastener: ControllerFastener<this, RowController>): void {
+    // hook
+  }
+
+  protected didCollapseRowView(rowView: RowView, rowFastener: ControllerFastener<this, RowController>): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidCollapseRowView !== void 0) {
+        controllerObserver.controllerDidCollapseRowView(rowView, rowFastener);
+      }
+    }
+  }
+
   /** @hidden */
   static RowFastener = ControllerFastener.define<TableController, RowController, never, ControllerObserverType<RowController>>({
     type: RowController,
@@ -1223,6 +1627,50 @@ export class TableController extends CompositeController {
     controllerDidSetRowView(newRowView: RowView | null, oldRowView: RowView | null): void {
       this.owner.onSetRowView(newRowView, oldRowView, this);
       this.owner.didSetRowView(newRowView, oldRowView, this);
+    },
+    controllerWillSetLeafTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null): void {
+      this.owner.willSetLeafTrait(newLeafTrait, oldLeafTrait, this);
+    },
+    controllerDidSetLeafTrait(newLeafTrait: LeafTrait | null, oldLeafTrait: LeafTrait | null): void {
+      this.owner.onSetLeafTrait(newLeafTrait, oldLeafTrait, this);
+      this.owner.didSetLeafTrait(newLeafTrait, oldLeafTrait, this);
+    },
+    controllerWillSetLeafView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
+      this.owner.willSetLeafView(newLeafView, oldLeafView, this);
+    },
+    controllerDidSetLeafView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
+      this.owner.onSetLeafView(newLeafView, oldLeafView, this);
+      this.owner.didSetLeafView(newLeafView, oldLeafView, this);
+    },
+    controllerWillHighlightLeafView(leafView: LeafView): void {
+      this.owner.willHighlightLeafView(leafView, this);
+      this.owner.onHighlightLeafView(leafView, this);
+    },
+    controllerDidHighlightLeafView(leafView: LeafView): void {
+      this.owner.didHighlightLeafView(leafView, this);
+    },
+    controllerWillUnhighlightLeafView(leafView: LeafView): void {
+      this.owner.willUnhighlightLeafView(leafView, this);
+    },
+    controllerDidUnhighlightLeafView(leafView: LeafView): void {
+      this.owner.onUnhighlightLeafView(leafView, this);
+      this.owner.didUnhighlightLeafView(leafView, this);
+    },
+    controllerDidEnterLeafView(leafView: LeafView): void {
+      this.owner.onEnterLeafView(leafView, this);
+      this.owner.didEnterLeafView(leafView, this);
+    },
+    controllerDidLeaveLeafView(leafView: LeafView): void {
+      this.owner.onLeaveLeafView(leafView, this);
+      this.owner.didLeaveLeafView(leafView, this);
+    },
+    controllerDidPressLeafView(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
+      this.owner.onPressLeafView(input, event, leafView, this);
+      this.owner.didPressLeafView(input, event, leafView, this);
+    },
+    controllerDidLongPressLeafView(input: PositionGestureInput, leafView: LeafView): void {
+      this.owner.onLongPressLeafView(input, leafView, this);
+      this.owner.didLongPressLeafView(input, leafView, this);
     },
     controllerWillSetCell(newCellController: CellController | null, oldCellController: CellController | null,
                           cellFastener: ControllerFastener<RowController, CellController>): void {
@@ -1268,6 +1716,41 @@ export class TableController extends CompositeController {
                              cellFastener: ControllerFastener<RowController, CellController>): void {
       this.owner.onSetCellIcon(newCellIcon, oldCellIcon, cellFastener, this);
       this.owner.didSetCellIcon(newCellIcon, oldCellIcon, cellFastener, this);
+    },
+    controllerWillSetTree(newTreeController: TableController | null, oldTreeController: TableController | null): void {
+      this.owner.willSetTree(newTreeController, oldTreeController, this);
+    },
+    controllerDidSetTree(newTreeController: TableController | null, oldTreeController: TableController | null): void {
+      this.owner.onSetTree(newTreeController, oldTreeController, this);
+      this.owner.didSetTree(newTreeController, oldTreeController, this);
+    },
+    controllerWillSetTreeTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null): void {
+      this.owner.willSetTreeTrait(newTreeTrait, oldTreeTrait, this);
+    },
+    controllerDidSetTreeTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null): void {
+      this.owner.onSetTreeTrait(newTreeTrait, oldTreeTrait, this);
+      this.owner.didSetTreeTrait(newTreeTrait, oldTreeTrait, this);
+    },
+    controllerWillSetTreeView(newTreeView: TableView | null, oldTreeView: TableView | null): void {
+      this.owner.willSetTreeView(newTreeView, oldTreeView, this);
+    },
+    controllerDidSetTreeView(newTreeView: TableView | null, oldTreeView: TableView | null): void {
+      this.owner.onSetTreeView(newTreeView, oldTreeView, this);
+      this.owner.didSetTreeView(newTreeView, oldTreeView, this);
+    },
+    controllerWillExpandRowView(rowView: RowView): void {
+      this.owner.willExpandRowView(rowView, this);
+      this.owner.onExpandRowView(rowView, this);
+    },
+    controllerDidExpandRowView(rowView: RowView): void {
+      this.owner.didExpandRowView(rowView, this);
+    },
+    controllerWillCollapseRowView(rowView: RowView): void {
+      this.owner.willCollapseRowView(rowView, this);
+    },
+    controllerDidCollapseRowView(rowView: RowView): void {
+      this.owner.onCollapseRowView(rowView, this);
+      this.owner.didCollapseRowView(rowView, this);
     },
   });
 

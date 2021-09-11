@@ -252,6 +252,39 @@ export class TableView extends HtmlView {
     }
   }
 
+  protected onEnterLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
+    // hook
+  }
+
+  protected didEnterLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidEnterLeaf !== void 0) {
+        viewObserver.viewDidEnterLeaf(leafView, rowFastener);
+      }
+    }
+  }
+
+  protected onLeaveLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
+    // hook
+  }
+
+  protected didLeaveLeaf(leafView: LeafView, rowFastener: ViewFastener<this, RowView>): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidLeaveLeaf !== void 0) {
+        viewObserver.viewDidLeaveLeaf(leafView, rowFastener);
+      }
+    }
+  }
+
+  protected onPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView,
+                        rowFastener: ViewFastener<this, RowView>): void {
+    // hook
+  }
+
   protected didPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView,
                          rowFastener: ViewFastener<this, RowView>): void {
     const viewObservers = this.viewObservers;
@@ -261,6 +294,11 @@ export class TableView extends HtmlView {
         viewObserver.viewDidPressLeaf(input, event, leafView, rowFastener);
       }
     }
+  }
+
+  protected onLongPressLeaf(input: PositionGestureInput, leafView: LeafView,
+                            rowFastener: ViewFastener<this, RowView>): void {
+    // hook
   }
 
   protected didLongPressLeaf(input: PositionGestureInput, leafView: LeafView,
@@ -301,42 +339,50 @@ export class TableView extends HtmlView {
     }
   }
 
-  protected willExpandTree(rowFastener: ViewFastener<this, RowView>): void {
+  protected willExpandRow(rowFastener: ViewFastener<this, RowView>): void {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillExpandTree !== void 0) {
-        viewObserver.viewWillExpandTree(rowFastener);
+      if (viewObserver.viewWillExpandRow !== void 0) {
+        viewObserver.viewWillExpandRow(rowFastener);
       }
     }
   }
 
-  protected didExpandTree(rowFastener: ViewFastener<this, RowView>): void {
+  protected onExpandRow(rowFastener: ViewFastener<this, RowView>): void {
+    // hook
+  }
+
+  protected didExpandRow(rowFastener: ViewFastener<this, RowView>): void {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidExpandTree !== void 0) {
-        viewObserver.viewDidExpandTree(rowFastener);
+      if (viewObserver.viewDidExpandRow !== void 0) {
+        viewObserver.viewDidExpandRow(rowFastener);
       }
     }
   }
 
-  protected willCollapseTree(rowFastener: ViewFastener<this, RowView>): void {
+  protected willCollapseRow(rowFastener: ViewFastener<this, RowView>): void {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillCollapseTree !== void 0) {
-        viewObserver.viewWillCollapseTree(rowFastener);
+      if (viewObserver.viewWillCollapseRow !== void 0) {
+        viewObserver.viewWillCollapseRow(rowFastener);
       }
     }
   }
 
-  protected didCollapseTree(rowFastener: ViewFastener<this, RowView>): void {
+  protected onCollapseRow(rowFastener: ViewFastener<this, RowView>): void {
+    // hook
+  }
+
+  protected didCollapseRow(rowFastener: ViewFastener<this, RowView>): void {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidCollapseTree !== void 0) {
-        viewObserver.viewDidCollapseTree(rowFastener);
+      if (viewObserver.viewDidCollapseRow !== void 0) {
+        viewObserver.viewDidCollapseRow(rowFastener);
       }
     }
   }
@@ -362,10 +408,20 @@ export class TableView extends HtmlView {
       this.owner.onSetLeaf(newLeafView, oldLeafView, this);
       this.owner.didSetLeaf(newLeafView, oldLeafView, this);
     },
+    viewDidEnterLeaf(leafView: LeafView): void {
+      this.owner.onEnterLeaf(leafView, this);
+      this.owner.didEnterLeaf(leafView, this);
+    },
+    viewDidLeaveLeaf(leafView: LeafView): void {
+      this.owner.onLeaveLeaf(leafView, this);
+      this.owner.didLeaveLeaf(leafView, this);
+    },
     viewDidPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
+      this.owner.onPressLeaf(input, event, leafView, this);
       this.owner.didPressLeaf(input, event, leafView, this);
     },
     viewDidLongPressLeaf(input: PositionGestureInput, leafView: LeafView): void {
+      this.owner.onLongPressLeaf(input, leafView, this);
       this.owner.didLongPressLeaf(input, leafView, this);
     },
     viewWillSetTree(newTreeView: TableView | null, oldTreeView: TableView | null): void {
@@ -375,16 +431,18 @@ export class TableView extends HtmlView {
       this.owner.didSetTree(newTreeView, oldTreeView, this);
     },
     viewWillExpand(): void {
-      this.owner.willExpandTree(this);
+      this.owner.willExpandRow(this);
+      this.owner.onExpandRow(this);
     },
     viewDidExpand(): void {
-      this.owner.didExpandTree(this);
+      this.owner.didExpandRow(this);
     },
     viewWillCollapse(): void {
-      this.owner.willCollapseTree(this);
+      this.owner.willCollapseRow(this);
     },
     viewDidCollapse(): void {
-      this.owner.didCollapseTree(this);
+      this.owner.onCollapseRow(this);
+      this.owner.didCollapseRow(this);
     },
   });
 

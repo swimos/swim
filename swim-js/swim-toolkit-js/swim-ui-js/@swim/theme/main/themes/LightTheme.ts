@@ -99,13 +99,13 @@ const LightSecondary = FeelVector.of(
 const LightUnselected = FeelVector.of(
   [Look.color, LightMutedColor],
   [Look.iconColor, LightMutedColor],
-  [Look.backgroundColor, LightBackgroundColor.darker(0.5)],
+  [Look.backgroundColor, LightBackgroundColor.darker(1 / 2)],
 );
 
 const LightSelected = FeelVector.of(
   [Look.color, LightColor],
   [Look.iconColor, LightIconColor],
-  [Look.backgroundColor, LightBackgroundColor.darker(0.5)],
+  [Look.backgroundColor, LightBackgroundColor.darker(1 / 2)],
 );
 
 const LightDisabled = FeelVector.of(
@@ -188,15 +188,14 @@ const LightEmbossed = FeelVector.of(
 
 const LightNested = FeelVector.of(
   [Look.backgroundColor, Color.black(1 / 24)],
-  [Look.accentColor, Color.black(-1 / 8)],
   [Look.borderColor, Color.black(1 / 24)],
 );
 
 const LightHovering = FeelVector.of(
-  [Look.statusColor, Color.black(1)],
-  [Look.accentColor, Color.black(1)],
+  [Look.statusColor, Color.black(1 / 4)],
+  [Look.accentColor, Color.black(1 / 4)],
 
-  [Look.backgroundColor, Color.black(1)],
+  [Look.backgroundColor, Color.black(1 / 4)],
 );
 
 const LightNavigating = FeelVector.of(

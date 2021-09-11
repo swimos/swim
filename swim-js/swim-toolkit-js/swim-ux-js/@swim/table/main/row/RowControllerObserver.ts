@@ -29,14 +29,6 @@ export interface RowControllerObserver<C extends RowController = RowController> 
 
   controllerDidSetRowView?(newRowView: RowView | null, oldRowView: RowView | null, controller: C): void;
 
-  controllerWillExpandRowView?(rowView: RowView, controller: C): void;
-
-  controllerDidExpandRowView?(rowView: RowView, controller: C): void;
-
-  controllerWillCollapseRowView?(rowView: RowView, controller: C): void;
-
-  controllerDidCollapseRowView?(rowView: RowView, controller: C): void;
-
   controllerWillSetTree?(newTreeController: TableController | null, oldTreeController: TableController | null, controller: C): void;
 
   controllerDidSetTree?(newTreeController: TableController | null, oldTreeController: TableController | null, controller: C): void;
@@ -48,4 +40,12 @@ export interface RowControllerObserver<C extends RowController = RowController> 
   controllerWillSetTreeView?(newTreeView: TableView | null, oldTreeView: TableView | null, controller: C): void;
 
   controllerDidSetTreeView?(newTreeView: TableView | null, oldTreeView: TableView | null, controller: C): void;
+
+  controllerWillExpandRowView?(rowView: RowView, controller: C): void;
+
+  controllerDidExpandRowView?(rowView: RowView, controller: C): void;
+
+  controllerWillCollapseRowView?(rowView: RowView, controller: C): void;
+
+  controllerDidCollapseRowView?(rowView: RowView, controller: C): void;
 }

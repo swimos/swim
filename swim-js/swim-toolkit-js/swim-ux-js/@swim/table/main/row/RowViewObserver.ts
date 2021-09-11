@@ -31,6 +31,10 @@ export interface RowViewObserver<V extends RowView = RowView> extends HtmlViewOb
 
   viewDidUnhighlightLeaf?(leafView: LeafView, view: V): void;
 
+  viewDidEnterLeaf?(leafView: LeafView, view: V): void;
+
+  viewDidLeaveLeaf?(leafView: LeafView, view: V): void;
+
   viewDidPressLeaf?(input: PositionGestureInput, event: Event | null, leafView: LeafView, view: V): void;
 
   viewDidLongPressLeaf?(input: PositionGestureInput, leafView: LeafView, view: V): void;

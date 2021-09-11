@@ -142,6 +142,10 @@ export class RowView extends HtmlView {
     }
   }
 
+  protected onHighlightLeaf(leafView: LeafView): void {
+    // hook
+  }
+
   protected didHighlightLeaf(leafView: LeafView): void {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -162,6 +166,10 @@ export class RowView extends HtmlView {
     }
   }
 
+  protected onUnhighlightLeaf(leafView: LeafView): void {
+    // hook
+  }
+
   protected didUnhighlightLeaf(leafView: LeafView): void {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -172,6 +180,38 @@ export class RowView extends HtmlView {
     }
   }
 
+  protected onEnterLeaf(leafView: LeafView): void {
+    // hook
+  }
+
+  protected didEnterLeaf(leafView: LeafView): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidEnterLeaf !== void 0) {
+        viewObserver.viewDidEnterLeaf(leafView, this);
+      }
+    }
+  }
+
+  protected onLeaveLeaf(leafView: LeafView): void {
+    // hook
+  }
+
+  protected didLeaveLeaf(leafView: LeafView): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidLeaveLeaf !== void 0) {
+        viewObserver.viewDidLeaveLeaf(leafView, this);
+      }
+    }
+  }
+
+  protected onPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
+    // hook
+  }
+
   protected didPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -180,6 +220,10 @@ export class RowView extends HtmlView {
         viewObserver.viewDidPressLeaf(input, event, leafView, this);
       }
     }
+  }
+
+  protected onLongPressLeaf(input: PositionGestureInput, leafView: LeafView): void {
+    // hook
   }
 
   protected didLongPressLeaf(input: PositionGestureInput, leafView: LeafView): void {
@@ -208,6 +252,7 @@ export class RowView extends HtmlView {
     },
     viewWillHighlight(leafView: LeafView): void {
       this.owner.willHighlightLeaf(leafView);
+      this.owner.onHighlightLeaf(leafView);
     },
     viewDidHighlight(leafView: LeafView): void {
       this.owner.didHighlightLeaf(leafView);
@@ -216,12 +261,23 @@ export class RowView extends HtmlView {
       this.owner.willUnhighlightLeaf(leafView);
     },
     viewDidUnhighlight(leafView: LeafView): void {
+      this.owner.onUnhighlightLeaf(leafView);
       this.owner.didUnhighlightLeaf(leafView);
     },
+    viewDidEnter(leafView: LeafView): void {
+      this.owner.onEnterLeaf(leafView);
+      this.owner.didEnterLeaf(leafView);
+    },
+    viewDidLeave(leafView: LeafView): void {
+      this.owner.onLeaveLeaf(leafView);
+      this.owner.didLeaveLeaf(leafView);
+    },
     viewDidPress(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
+      this.owner.onPressLeaf(input, event, leafView);
       this.owner.didPressLeaf(input, event, leafView);
     },
     viewDidLongPress(input: PositionGestureInput, leafView: LeafView): void {
+      this.owner.onLongPressLeaf(input, leafView);
       this.owner.didLongPressLeaf(input, leafView);
     },
     createView(): LeafView | null {
@@ -497,9 +553,9 @@ export class RowView extends HtmlView {
     },
     willCollapse(): void {
       this.owner.willCollapse();
-      this.owner.onCollapse();
     },
     didCollapse(): void {
+      this.owner.onCollapse();
       this.owner.didCollapse();
     },
     didSetValue(newDisclosure: Expansion, oldDisclosure: Expansion): void {

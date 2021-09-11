@@ -23,31 +23,35 @@ export interface TableViewObserver<V extends TableView = TableView> extends Html
 
   viewDidSetRow?(newRowView: RowView | null, oldRowView: RowView | null, targetView: View | null, view: V): void;
 
-  viewWillSetLeaf?(newLeafView: LeafView | null, oldLeafView: LeafView | null, rowFastener: ViewFastener<TableView, RowView>): void;
+  viewWillSetLeaf?(newLeafView: LeafView | null, oldLeafView: LeafView | null, rowFastener: ViewFastener<V, RowView>): void;
 
-  viewDidSetLeaf?(newLeafView: LeafView | null, oldLeafView: LeafView | null, rowFastener: ViewFastener<TableView, RowView>): void;
+  viewDidSetLeaf?(newLeafView: LeafView | null, oldLeafView: LeafView | null, rowFastener: ViewFastener<V, RowView>): void;
 
-  viewWillHighlightLeaf?(leafView: LeafView, rowFastener: ViewFastener<TableView, RowView>): void;
+  viewWillHighlightLeaf?(leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
 
-  viewDidHighlightLeaf?(leafView: LeafView, rowFastener: ViewFastener<TableView, RowView>): void;
+  viewDidHighlightLeaf?(leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
 
-  viewWillUnhighlightLeaf?(leafView: LeafView, rowFastener: ViewFastener<TableView, RowView>): void;
+  viewWillUnhighlightLeaf?(leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
 
-  viewDidUnhighlightLeaf?(leafView: LeafView, rowFastener: ViewFastener<TableView, RowView>): void;
+  viewDidUnhighlightLeaf?(leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
 
-  viewDidPressLeaf?(input: PositionGestureInput, event: Event | null, leafView: LeafView, rowFastener: ViewFastener<TableView, RowView>): void;
+  viewDidEnterLeaf?(leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
 
-  viewDidLongPressLeaf?(input: PositionGestureInput, leafView: LeafView, rowFastener: ViewFastener<TableView, RowView>): void;
+  viewDidLeaveLeaf?(leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
 
-  viewWillSetTree?(newTreeView: TableView | null, oldTreeView: TableView | null, rowFastener: ViewFastener<TableView, RowView>): void;
+  viewDidPressLeaf?(input: PositionGestureInput, event: Event | null, leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
 
-  viewDidSetTree?(newTreeView: TableView | null, oldTreeView: TableView | null, rowFastener: ViewFastener<TableView, RowView>): void;
+  viewDidLongPressLeaf?(input: PositionGestureInput, leafView: LeafView, rowFastener: ViewFastener<V, RowView>): void;
 
-  viewWillExpandTree?(rowFastener: ViewFastener<TableView, RowView>): void;
+  viewWillSetTree?(newTreeView: TableView | null, oldTreeView: TableView | null, rowFastener: ViewFastener<V, RowView>): void;
 
-  viewDidExpandTree?(rowFastener: ViewFastener<TableView, RowView>): void;
+  viewDidSetTree?(newTreeView: TableView | null, oldTreeView: TableView | null, rowFastener: ViewFastener<V, RowView>): void;
 
-  viewWillCollapseTree?(rowFastener: ViewFastener<TableView, RowView>): void;
+  viewWillExpandRow?(rowFastener: ViewFastener<V, RowView>): void;
 
-  viewDidCollapseTree?(rowFastener: ViewFastener<TableView, RowView>): void;
+  viewDidExpandRow?(rowFastener: ViewFastener<V, RowView>): void;
+
+  viewWillCollapseRow?(rowFastener: ViewFastener<V, RowView>): void;
+
+  viewDidCollapseRow?(rowFastener: ViewFastener<V, RowView>): void;
 }

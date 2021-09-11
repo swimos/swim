@@ -30,6 +30,15 @@ class ExampleTableController extends swim.TableController {
   initTableView(tableView) {
     super.initTableView(tableView);
   }
+  onEnterLeafView(leafView, rowFastener) {
+    leafView.hover.focus(false);
+  }
+  onLeaveLeafView(leafView, rowFastener) {
+    leafView.hover.unfocus();
+  }
+  onPressLeafView(input, event, leafView, rowFastener) {
+    leafView.highlight.toggle();
+  }
   initCellView(cellView, cellFastener, rowFastener) {
     super.initCellView(cellView, cellFastener, rowFastener);
     if (cellFastener.key === "a") {

@@ -166,6 +166,10 @@ export class LeafController extends CompositeController {
     }
   }
 
+  protected onHighlightLeafView(leafView: LeafView): void {
+    // hook
+  }
+
   protected didHighlightLeafView(leafView: LeafView): void {
     const controllerObservers = this.controllerObservers;
     for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
@@ -186,6 +190,10 @@ export class LeafController extends CompositeController {
     }
   }
 
+  protected onUnhighlightLeafView(leafView: LeafView): void {
+    // hook
+  }
+
   protected didUnhighlightLeafView(leafView: LeafView): void {
     const controllerObservers = this.controllerObservers;
     for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
@@ -196,6 +204,38 @@ export class LeafController extends CompositeController {
     }
   }
 
+  protected onEnterLeafView(leafView: LeafView): void {
+    // hook
+  }
+
+  protected didEnterLeafView(leafView: LeafView): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidEnterLeafView !== void 0) {
+        controllerObserver.controllerDidEnterLeafView(leafView, this);
+      }
+    }
+  }
+
+  protected onLeaveLeafView(leafView: LeafView): void {
+    // hook
+  }
+
+  protected didLeaveLeafView(leafView: LeafView): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidLeaveLeafView !== void 0) {
+        controllerObserver.controllerDidLeaveLeafView(leafView, this);
+      }
+    }
+  }
+
+  protected onPressLeafView(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
+    // hook
+  }
+
   protected didPressLeafView(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
     const controllerObservers = this.controllerObservers;
     for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
@@ -204,6 +244,10 @@ export class LeafController extends CompositeController {
         controllerObserver.controllerDidPressLeafView(input, event, leafView, this);
       }
     }
+  }
+
+  protected onLongPressLeafView(input: PositionGestureInput, leafView: LeafView): void {
+    // hook
   }
 
   protected didLongPressLeafView(input: PositionGestureInput, leafView: LeafView): void {
@@ -231,6 +275,7 @@ export class LeafController extends CompositeController {
     },
     viewWillHighlight(leafView: LeafView): void {
       this.owner.willHighlightLeafView(leafView);
+      this.owner.onHighlightLeafView(leafView);
     },
     viewDidHighlight(leafView: LeafView): void {
       this.owner.didHighlightLeafView(leafView);
@@ -239,12 +284,23 @@ export class LeafController extends CompositeController {
       this.owner.willUnhighlightLeafView(leafView);
     },
     viewDidUnhighlight(leafView: LeafView): void {
+      this.owner.onUnhighlightLeafView(leafView);
       this.owner.didUnhighlightLeafView(leafView);
     },
+    viewDidEnter(leafView: LeafView): void {
+      this.owner.onEnterLeafView(leafView);
+      this.owner.didEnterLeafView(leafView);
+    },
+    viewDidLeave(leafView: LeafView): void {
+      this.owner.onLeaveLeafView(leafView);
+      this.owner.didLeaveLeafView(leafView);
+    },
     viewDidPress(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
+      this.owner.onPressLeafView(input, event, leafView);
       this.owner.didPressLeafView(input, event, leafView);
     },
     viewDidLongPress(input: PositionGestureInput, leafView: LeafView): void {
+      this.owner.onLongPressLeafView(input, leafView);
       this.owner.didLongPressLeafView(input, leafView);
     },
     createView(): LeafView | null {
