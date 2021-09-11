@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {PositionGestureInput} from "@swim/view";
 import type {HtmlViewObserver} from "@swim/dom";
 import type {LeafView} from "../leaf/LeafView";
 import type {RowView} from "./RowView";
@@ -21,6 +22,18 @@ export interface RowViewObserver<V extends RowView = RowView> extends HtmlViewOb
   viewWillSetLeaf?(newLeafView: LeafView | null, oldLeafView: LeafView | null, view: V): void;
 
   viewDidSetLeaf?(newLeafView: LeafView | null, oldLeafView: LeafView | null, view: V): void;
+
+  viewWillHighlightLeaf?(leafView: LeafView, view: V): void;
+
+  viewDidHighlightLeaf?(leafView: LeafView, view: V): void;
+
+  viewWillUnhighlightLeaf?(leafView: LeafView, view: V): void;
+
+  viewDidUnhighlightLeaf?(leafView: LeafView, view: V): void;
+
+  viewDidPressLeaf?(input: PositionGestureInput, event: Event | null, leafView: LeafView, view: V): void;
+
+  viewDidLongPressLeaf?(input: PositionGestureInput, leafView: LeafView, view: V): void;
 
   viewWillSetTree?(newTreeView: TableView | null, oldTreeView: TableView | null, view: V): void;
 

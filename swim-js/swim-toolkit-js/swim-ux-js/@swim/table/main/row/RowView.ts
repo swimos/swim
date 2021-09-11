@@ -24,6 +24,7 @@ import {
   ViewAnimator,
   ExpansionViewAnimator,
   ViewFastener,
+  PositionGestureInput,
 } from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
@@ -131,10 +132,71 @@ export class RowView extends HtmlView {
     }
   }
 
+  protected willHighlightLeaf(leafView: LeafView): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillHighlightLeaf !== void 0) {
+        viewObserver.viewWillHighlightLeaf(leafView, this);
+      }
+    }
+  }
+
+  protected didHighlightLeaf(leafView: LeafView): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidHighlightLeaf !== void 0) {
+        viewObserver.viewDidHighlightLeaf(leafView, this);
+      }
+    }
+  }
+
+  protected willUnhighlightLeaf(leafView: LeafView): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillUnhighlightLeaf !== void 0) {
+        viewObserver.viewWillUnhighlightLeaf(leafView, this);
+      }
+    }
+  }
+
+  protected didUnhighlightLeaf(leafView: LeafView): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidUnhighlightLeaf !== void 0) {
+        viewObserver.viewDidUnhighlightLeaf(leafView, this);
+      }
+    }
+  }
+
+  protected didPressLeaf(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidPressLeaf !== void 0) {
+        viewObserver.viewDidPressLeaf(input, event, leafView, this);
+      }
+    }
+  }
+
+  protected didLongPressLeaf(input: PositionGestureInput, leafView: LeafView): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidLongPressLeaf !== void 0) {
+        viewObserver.viewDidLongPressLeaf(input, leafView, this);
+      }
+    }
+  }
+
   @ViewFastener<RowView, LeafView>({
     key: true,
     type: LeafView,
     child: true,
+    observe: true,
     willSetView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
       this.owner.willSetLeaf(newLeafView, oldLeafView);
     },
@@ -143,6 +205,24 @@ export class RowView extends HtmlView {
     },
     didSetView(newLeafView: LeafView | null, oldLeafView: LeafView | null): void {
       this.owner.didSetLeaf(newLeafView, oldLeafView);
+    },
+    viewWillHighlight(leafView: LeafView): void {
+      this.owner.willHighlightLeaf(leafView);
+    },
+    viewDidHighlight(leafView: LeafView): void {
+      this.owner.didHighlightLeaf(leafView);
+    },
+    viewWillUnhighlight(leafView: LeafView): void {
+      this.owner.willUnhighlightLeaf(leafView);
+    },
+    viewDidUnhighlight(leafView: LeafView): void {
+      this.owner.didUnhighlightLeaf(leafView);
+    },
+    viewDidPress(input: PositionGestureInput, event: Event | null, leafView: LeafView): void {
+      this.owner.didPressLeaf(input, event, leafView);
+    },
+    viewDidLongPress(input: PositionGestureInput, leafView: LeafView): void {
+      this.owner.didLongPressLeaf(input, leafView);
     },
     createView(): LeafView | null {
       return this.owner.createLeaf();
