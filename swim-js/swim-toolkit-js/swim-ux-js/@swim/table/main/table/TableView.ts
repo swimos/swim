@@ -23,6 +23,7 @@ import {
   ViewEdgeInsets,
   ViewProperty,
   ViewAnimator,
+  ViewAnimatorConstraint,
   ExpansionViewAnimator,
   ViewFastener,
   PositionGestureInput,
@@ -85,11 +86,11 @@ export class TableView extends HtmlView {
   })
   readonly depth!: ViewProperty<this, number>;
 
-  @ViewAnimator({type: Length, inherit: true, state: Length.zero(), updateFlags: View.NeedsLayout})
-  readonly rowSpacing!: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimatorConstraint({type: Length, inherit: true, state: Length.zero(), updateFlags: View.NeedsLayout})
+  readonly rowSpacing!: ViewAnimatorConstraint<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, inherit: true, state: Length.px(24), updateFlags: View.NeedsLayout})
-  readonly rowHeight!: ViewAnimator<this, Length, AnyLength>;
+  @ViewAnimatorConstraint({type: Length, inherit: true, state: Length.px(24), updateFlags: View.NeedsLayout})
+  readonly rowHeight!: ViewAnimatorConstraint<this, Length, AnyLength>;
 
   @ViewAnimator({type: Expansion, inherit: true, state: null})
   readonly disclosure!: ExpansionViewAnimator<this, Expansion | null, AnyExpansion | null>;

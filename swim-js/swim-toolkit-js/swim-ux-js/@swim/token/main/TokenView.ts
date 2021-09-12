@@ -829,6 +829,7 @@ export class TokenView extends HtmlView {
   }
 
   protected onClickHead(event: MouseEvent): void {
+    this.toggle();
     const labelView = this.label.view;
     if (labelView !== null && this.isExpanded()) {
       labelView.node.focus();

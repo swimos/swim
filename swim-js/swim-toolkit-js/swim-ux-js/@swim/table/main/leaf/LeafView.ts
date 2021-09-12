@@ -22,6 +22,7 @@ import {
   View,
   ViewProperty,
   ViewAnimator,
+  ViewAnimatorConstraint,
   FocusViewAnimator,
   ExpansionViewAnimator,
   ViewFastener,
@@ -85,11 +86,11 @@ export class LeafView extends HtmlView implements PositionGestureDelegate {
   })
   readonly depth!: ViewProperty<this, number>;
 
-  @ViewAnimator({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly rowSpacing!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ViewAnimatorConstraint({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
+  readonly rowSpacing!: ViewAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly rowHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ViewAnimatorConstraint({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
+  readonly rowHeight!: ViewAnimatorConstraint<this, Length | null, AnyLength | null>;
 
   @ViewAnimator({type: Expansion, inherit: true, state: null, updateFlags: View.NeedsLayout})
   readonly stretch!: ExpansionViewAnimator<this, Expansion | null, AnyExpansion | null>;

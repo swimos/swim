@@ -23,6 +23,7 @@ import {
   View,
   ViewProperty,
   ViewAnimator,
+  ViewAnimatorConstraint,
   ExpansionViewAnimator,
   ViewFastener,
   PositionGestureInput,
@@ -76,11 +77,11 @@ export class RowView extends HtmlView {
   })
   readonly depth!: ViewProperty<this, number>;
 
-  @ViewAnimator({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly rowSpacing!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ViewAnimatorConstraint({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
+  readonly rowSpacing!: ViewAnimatorConstraint<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
-  readonly rowHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
+  @ViewAnimatorConstraint({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
+  readonly rowHeight!: ViewAnimatorConstraint<this, Length | null, AnyLength | null>;
 
   getCell(key: string): CellView | null;
   getCell<V extends CellView>(key: string, cellViewClass: ViewClass<V>): V | null;

@@ -148,7 +148,10 @@ export class DrawerView extends HtmlView implements Modal {
   }
 
   protected willDismiss(): void {
-    this.modalService.dismissModal(this);
+    const modalManager = this.modalService.manager;
+    if (modalManager !== void 0) {
+      modalManager.dismissModal(this);
+    }
 
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -189,7 +192,10 @@ export class DrawerView extends HtmlView implements Modal {
   readonly slide!: PresenceViewAnimator<this, Presence, AnyPresence>;
 
   protected willExpand(): void {
-    this.modalService.dismissModal(this);
+    const modalManager = this.modalService.manager;
+    if (modalManager !== void 0) {
+      modalManager.dismissModal(this);
+    }
 
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -211,7 +217,10 @@ export class DrawerView extends HtmlView implements Modal {
   }
 
   protected willCollapse(): void {
-    this.modalService.dismissModal(this);
+    const modalManager = this.modalService.manager;
+    if (modalManager !== void 0) {
+      modalManager.dismissModal(this);
+    }
 
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -301,7 +310,7 @@ export class DrawerView extends HtmlView implements Modal {
     this.top.setState(height.times(slidePhase - 1), View.Intrinsic);
 
     let edgeInsets = this.edgeInsets.superState;
-    if ((edgeInsets === void 0 || edgeInsets === null) || edgeInsets === null) {
+    if (edgeInsets === void 0 || edgeInsets === null) {
       edgeInsets = viewContext.viewport.safeArea;
     }
     this.edgeInsets.setState({
@@ -470,7 +479,6 @@ export class DrawerView extends HtmlView implements Modal {
     } else {
       timing = Timing.fromAny(timing);
     }
-    this.stretch.expand(timing);
     this.slide.present(timing);
   }
 
@@ -490,7 +498,6 @@ export class DrawerView extends HtmlView implements Modal {
       timing = Timing.fromAny(timing);
     }
     this.stretch.expand(timing);
-    this.slide.present(timing);
   }
 
   collapse(timing?: AnyTiming | boolean): void {
@@ -500,7 +507,6 @@ export class DrawerView extends HtmlView implements Modal {
       timing = Timing.fromAny(timing);
     }
     this.stretch.collapse(timing);
-    this.slide.present(timing);
   }
 
   toggle(timing?: AnyTiming | boolean): void {
@@ -510,9 +516,19 @@ export class DrawerView extends HtmlView implements Modal {
       timing = Timing.fromAny(timing);
     }
     if (this.viewIdiom === "mobile" || this.isHorizontal()) {
-      this.slide.toggle();
+      if (this.slide.isPresented()) {
+        this.slide.dismiss(timing);
+      } else {
+        this.stretch.expand(timing);
+        this.slide.present(timing);
+        const modalManager = this.modalService.manager;
+        if (modalManager !== void 0) {
+          modalManager.presentModal(this, {modal: true});
+        }
+      }
     } else {
-      this.stretch.toggle();
+      this.stretch.toggle(timing);
+      this.slide.present(timing);
     }
   }
 }
