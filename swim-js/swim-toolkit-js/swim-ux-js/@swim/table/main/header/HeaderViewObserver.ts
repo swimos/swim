@@ -12,16 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./layout";
+import type {View} from "@swim/view";
+import type {HtmlViewObserver} from "@swim/dom";
+import type {ColView} from "../col/ColView";
+import type {HeaderView} from "./HeaderView";
 
-export * from "./cell";
+export interface HeaderViewObserver<V extends HeaderView = HeaderView> extends HtmlViewObserver<V> {
+  viewWillSetCol?(newColView: ColView | null, oldColView: ColView | null, targetView: View | null, view: V): void;
 
-export * from "./leaf";
-
-export * from "./row";
-
-export * from "./col";
-
-export * from "./header";
-
-export * from "./table";
+  viewDidSetCol?(newColView: ColView | null, oldColView: ColView | null, targetView: View | null, view: V): void;
+}

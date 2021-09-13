@@ -14,14 +14,19 @@
 
 import type {Trait, TraitObserver} from "@swim/model";
 import type {TableLayout} from "../layout/TableLayout";
-import type {ColTrait} from "../col/ColTrait";
 import type {RowTrait} from "../row/RowTrait";
+import type {ColTrait} from "../col/ColTrait";
+import type {HeaderTrait} from "../header/HeaderTrait";
 import type {TableTrait} from "./TableTrait";
 
 export interface TableTraitObserver<R extends TableTrait = TableTrait> extends TraitObserver<R> {
   traitWillSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, trait: R): void;
 
   traitDidSetTableLayout?(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null, trait: R): void;
+
+  traitWillSetHeader?(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null, trait: R): void;
+
+  traitDidSetHeader?(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null, trait: R): void;
 
   traitWillSetCol?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null, trait: R): void;
 

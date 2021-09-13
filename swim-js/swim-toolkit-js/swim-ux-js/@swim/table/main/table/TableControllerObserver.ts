@@ -21,14 +21,17 @@ import type {ColLayout} from "../layout/ColLayout";
 import type {CellView} from "../cell/CellView";
 import type {CellTrait} from "../cell/CellTrait";
 import type {CellController} from "../cell/CellController";
-import type {ColView} from "../col/ColView";
-import type {ColTrait} from "../col/ColTrait";
-import type {ColController} from "../col/ColController";
 import type {LeafView} from "../leaf/LeafView";
 import type {LeafTrait} from "../leaf/LeafTrait";
 import type {RowView} from "../row/RowView";
 import type {RowTrait} from "../row/RowTrait";
 import type {RowController} from "../row/RowController";
+import type {ColView} from "../col/ColView";
+import type {ColTrait} from "../col/ColTrait";
+import type {ColController} from "../col/ColController";
+import type {HeaderView} from "../header/HeaderView";
+import type {HeaderTrait} from "../header/HeaderTrait";
+import type {HeaderController} from "../header/HeaderController";
 import type {TableView} from "./TableView";
 import type {TableTrait} from "./TableTrait";
 import type {TableController} from "./TableController";
@@ -45,6 +48,18 @@ export interface TableControllerObserver<C extends TableController = TableContro
   controllerWillSetTableView?(newTableView: TableView | null, oldTableView: TableView | null, controller: C): void;
 
   controllerDidSetTableView?(newTableView: TableView | null, oldTableView: TableView | null, controller: C): void;
+
+  controllerWillSetHeader?(newColController: HeaderController | null, oldColController: HeaderController | null, controller: C): void;
+
+  controllerDidSetHeader?(newColController: HeaderController | null, oldColController: HeaderController | null, controller: C): void;
+
+  controllerWillSetHeaderTrait?(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, controller: C): void;
+
+  controllerDidSetHeaderTrait?(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, controller: C): void;
+
+  controllerWillSetHeaderView?(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, controller: C): void;
+
+  controllerDidSetHeaderView?(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, controller: C): void;
 
   controllerWillSetCol?(newColController: ColController | null, oldColController: ColController | null, colFastener: ControllerFastener<C, ColController>): void;
 

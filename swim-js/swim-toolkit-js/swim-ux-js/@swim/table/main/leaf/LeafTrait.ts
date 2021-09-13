@@ -235,8 +235,8 @@ export class LeafTrait extends GenericTrait {
 
   protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
     if (newModel !== null) {
-      this.detectModels(newModel);
       this.detectTraits(newModel);
+      this.detectModels(newModel);
     }
     super.didSetModel(newModel, oldModel);
   }

@@ -16,8 +16,9 @@ import {AnyLength, Length} from "@swim/math";
 import {Model, TraitModelType, Trait, TraitProperty, TraitFastener, GenericTrait} from "@swim/model";
 import type {ColLayout} from "../layout/ColLayout";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
-import {ColTrait} from "../col/ColTrait";
 import {RowTrait} from "../row/RowTrait";
+import {ColTrait} from "../col/ColTrait";
+import {HeaderTrait} from "../header/HeaderTrait";
 import type {TableTraitObserver} from "./TableTraitObserver";
 
 export class TableTrait extends GenericTrait {
@@ -105,6 +106,70 @@ export class TableTrait extends GenericTrait {
     },
   })
   readonly colSpacing!: TraitProperty<this, Length | null, AnyLength | null>;
+
+  protected createHeader(): HeaderTrait | null {
+    return new HeaderTrait();
+  }
+
+  protected initHeader(headerTrait: HeaderTrait): void {
+    // hook
+  }
+
+  protected attachHeader(headerTrait: HeaderTrait): void {
+    // hook
+  }
+
+  protected detachHeader(headerTrait: HeaderTrait): void {
+    // hook
+  }
+
+  protected willSetHeader(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
+    const traitObservers = this.traitObservers;
+    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
+      const traitObserver = traitObservers[i]!;
+      if (traitObserver.traitWillSetHeader !== void 0) {
+        traitObserver.traitWillSetHeader(newHeaderTrait, oldHeaderTrait, targetTrait, this);
+      }
+    }
+  }
+
+  protected onSetHeader(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
+    if (oldHeaderTrait !== null) {
+      this.detachHeader(oldHeaderTrait);
+    }
+    if (newHeaderTrait !== null) {
+      this.attachHeader(newHeaderTrait);
+      this.initHeader(newHeaderTrait);
+    }
+  }
+
+  protected didSetHeader(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
+    const traitObservers = this.traitObservers;
+    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
+      const traitObserver = traitObservers[i]!;
+      if (traitObserver.traitDidSetHeader !== void 0) {
+        traitObserver.traitDidSetHeader(newHeaderTrait, oldHeaderTrait, targetTrait, this);
+      }
+    }
+  }
+
+  @TraitFastener<TableTrait, HeaderTrait>({
+    type: HeaderTrait,
+    sibling: false,
+    willSetTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
+      this.owner.willSetHeader(newHeaderTrait, oldHeaderTrait, targetTrait);
+    },
+    onSetTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
+      this.owner.onSetHeader(newHeaderTrait, oldHeaderTrait, targetTrait);
+    },
+    didSetTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
+      this.owner.didSetHeader(newHeaderTrait, oldHeaderTrait, targetTrait);
+    },
+    createTrait(): HeaderTrait | null {
+      return this.owner.createHeader();
+    },
+  })
+  readonly header!: TraitFastener<this, HeaderTrait>;
 
   insertCol(colTrait: ColTrait, targetTrait: Trait | null = null): void {
     const colFasteners = this.colFasteners as TraitFastener<this, ColTrait>[];
@@ -429,12 +494,34 @@ export class TableTrait extends GenericTrait {
     }
   }
 
+  protected detectHeaderTrait(trait: Trait): HeaderTrait | null {
+    return trait instanceof HeaderTrait ? trait : null;
+  }
+
   protected detectColTrait(trait: Trait): ColTrait | null {
     return trait instanceof ColTrait ? trait : null;
   }
 
+  protected detectTraits(model: TraitModelType<this>): void {
+    const traits = model.traits;
+    for (let i = 0, n = traits.length; i < n; i += 1) {
+      const trait = traits[i]!;
+      if (this.header.trait === null) {
+        const headerTrait = this.detectHeaderTrait(trait);
+        if (headerTrait !== null) {
+          this.header.setTrait(headerTrait);
+        }
+      }
+      const colTrait = this.detectColTrait(trait);
+      if (colTrait !== null) {
+        this.insertCol(colTrait);
+      }
+    }
+  }
+
   protected override didSetModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
     if (newModel !== null) {
+      this.detectTraits(newModel);
       this.detectModels(newModel);
     }
     super.didSetModel(newModel, oldModel);
@@ -468,6 +555,12 @@ export class TableTrait extends GenericTrait {
 
   protected override onInsertTrait(trait: Trait, targetTrait: Trait | null): void {
     super.onInsertTrait(trait, targetTrait);
+    if (this.header.trait === null) {
+      const headerTrait = this.detectHeaderTrait(trait);
+      if (headerTrait !== null) {
+        this.header.setTrait(headerTrait, targetTrait);
+      }
+    }
     const colTrait = this.detectColTrait(trait);
     if (colTrait !== null) {
       this.insertCol(colTrait, targetTrait);
@@ -476,6 +569,10 @@ export class TableTrait extends GenericTrait {
 
   protected override onRemoveTrait(trait: Trait): void {
     super.onRemoveTrait(trait);
+    const headerTrait = this.detectHeaderTrait(trait);
+    if (headerTrait !== null && this.header.trait === headerTrait) {
+      this.header.setTrait(null);
+    }
     const colTrait = this.detectColTrait(trait);
     if (colTrait !== null) {
       this.removeCol(colTrait);

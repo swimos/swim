@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Look} from "@swim/theme";
 import {View, ViewFastener} from "@swim/view";
 import {HtmlView} from "@swim/dom";
 import type {ColViewObserver} from "./ColViewObserver";
@@ -37,6 +38,7 @@ export class ColView extends HtmlView {
     labelView.textOverflow.setState("ellipsis", View.Intrinsic);
     labelView.overflowX.setState("hidden", View.Intrinsic);
     labelView.overflowY.setState("hidden", View.Intrinsic);
+    labelView.color.setLook(Look.neutralColor, View.Intrinsic);
     if (value !== void 0) {
       labelView.text(value);
     }

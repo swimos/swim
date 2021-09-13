@@ -12,16 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./layout";
+import type {Trait, TraitObserver} from "@swim/model";
+import type {ColTrait} from "../col/ColTrait";
+import type {HeaderTrait} from "./HeaderTrait";
 
-export * from "./cell";
+export interface HeaderTraitObserver<R extends HeaderTrait = HeaderTrait> extends TraitObserver<R> {
+  traitWillSetCol?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null, trait: R): void;
 
-export * from "./leaf";
-
-export * from "./row";
-
-export * from "./col";
-
-export * from "./header";
-
-export * from "./table";
+  traitDidSetCol?(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null, trait: R): void;
+}

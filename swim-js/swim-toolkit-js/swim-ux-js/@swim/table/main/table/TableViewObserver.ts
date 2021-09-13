@@ -16,9 +16,14 @@ import type {View, ViewFastener, PositionGestureInput} from "@swim/view";
 import type {HtmlViewObserver} from "@swim/dom";
 import type {LeafView} from "../leaf/LeafView";
 import type {RowView} from "../row/RowView";
+import type {HeaderView} from "../header/HeaderView";
 import type {TableView} from "./TableView";
 
 export interface TableViewObserver<V extends TableView = TableView> extends HtmlViewObserver<V> {
+  viewWillSetHeader?(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, view: V): void;
+
+  viewDidSetHeader?(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, view: V): void;
+
   viewWillSetRow?(newRowView: RowView | null, oldRowView: RowView | null, targetView: View | null, view: V): void;
 
   viewDidSetRow?(newRowView: RowView | null, oldRowView: RowView | null, targetView: View | null, view: V): void;

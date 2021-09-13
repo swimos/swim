@@ -34,7 +34,7 @@ class ExampleTableController extends swim.TableController {
     leafView.hover.focus(false);
   }
   onLeaveLeafView(leafView, rowFastener) {
-    leafView.hover.unfocus();
+    leafView.hover.unfocus(false);
   }
   onPressLeafView(input, event, leafView, rowFastener) {
     leafView.highlight.toggle();
@@ -47,29 +47,24 @@ class ExampleTableController extends swim.TableController {
   }
 }
 
-const colAModel = new swim.CompoundModel();
-const colATrait = new swim.ColTrait()
-  .layout({key: "a", grow: 2, textColor: swim.Look.mutedColor})
-  .label("A");
-colAModel.setTrait("colA", colATrait);
-
-const colBModel = new swim.CompoundModel();
-const colBTrait = new swim.ColTrait()
-  .layout({key: "b", grow: 1})
-  .label("B");
-colBModel.setTrait("colB", colBTrait);
-
 const tableModel = new swim.CompoundModel();
 tableModel.mount();
 const tableTrait = new swim.TableTrait();
 tableModel.setTrait("table", tableTrait);
-tableModel.appendChildModel(colAModel);
-tableModel.appendChildModel(colBModel);
+tableTrait.header.injectTrait();
+const colATrait = new swim.ColTrait()
+  .layout({key: "a", grow: 2, textColor: swim.Look.mutedColor})
+  .label("A");
+tableTrait.setTrait("a", colATrait);
+const colBTrait = new swim.ColTrait()
+  .layout({key: "b", grow: 1})
+  .label("B");
+tableTrait.setTrait("b", colBTrait);
 
 function createRowModel(i) {
   const rowModel = new swim.CompoundModel();
   const rowTrait = new swim.RowTrait();
-  rowModel.setTrait("col", rowTrait);
+  rowModel.setTrait("row", rowTrait);
   rowTrait.getOrCreateCell("a", swim.TextCellTrait).content(i + "A");
   rowTrait.getOrCreateCell("b", swim.TextCellTrait).content(i + "B");
   return rowModel;

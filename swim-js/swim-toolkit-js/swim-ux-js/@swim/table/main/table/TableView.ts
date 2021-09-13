@@ -32,6 +32,7 @@ import {HtmlView} from "@swim/dom";
 import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import type {LeafView} from "../leaf/LeafView";
 import {RowView} from "../row/RowView";
+import {HeaderView} from "../header/HeaderView";
 import type {TableViewContext} from "./TableViewContext";
 import type {TableViewObserver} from "./TableViewObserver";
 
@@ -100,6 +101,80 @@ export class TableView extends HtmlView {
 
   @ViewAnimator({type: Expansion, inherit: true, state: null, updateFlags: View.NeedsLayout})
   readonly stretch!: ExpansionViewAnimator<this, Expansion | null, AnyExpansion | null>;
+
+  protected createHeader(): HeaderView | null {
+    return HeaderView.create();
+  }
+
+  protected initHeader(headerView: HeaderView): void {
+    headerView.display.setState("none", View.Intrinsic);
+    headerView.position.setState("absolute", View.Intrinsic);
+    headerView.left.setState(0, View.Intrinsic);
+    headerView.top.setState(null, View.Intrinsic);
+    const layout = this.layout.state;
+    headerView.width.setState(layout !== null ? layout.width : null, View.Intrinsic);
+    headerView.setCulled(true);
+  }
+
+  protected attachHeader(headerView: HeaderView): void {
+    // hook
+  }
+
+  protected detachHeader(headerView: HeaderView): void {
+    // hook
+  }
+
+  protected willSetHeader(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewWillSetHeader !== void 0) {
+        viewObserver.viewWillSetHeader(newHeaderView, oldHeaderView, this);
+      }
+    }
+  }
+
+  protected onSetHeader(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
+    if (oldHeaderView !== null) {
+      this.detachHeader(oldHeaderView);
+    }
+    if (newHeaderView !== null) {
+      this.attachHeader(newHeaderView);
+      this.initHeader(newHeaderView);
+    }
+  }
+
+  protected didSetHeader(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidSetHeader !== void 0) {
+        viewObserver.viewDidSetHeader(newHeaderView, oldHeaderView, this);
+      }
+    }
+  }
+
+  @ViewFastener<TableView, HeaderView>({
+    key: true,
+    type: HeaderView,
+    child: true,
+    willSetView(newTreeView: HeaderView | null, oldTreeView: HeaderView | null): void {
+      this.owner.willSetHeader(newTreeView, oldTreeView);
+    },
+    onSetView(newTreeView: HeaderView | null, oldTreeView: HeaderView | null): void {
+      this.owner.onSetHeader(newTreeView, oldTreeView);
+    },
+    didSetView(newTreeView: HeaderView | null, oldTreeView: HeaderView | null): void {
+      this.owner.didSetHeader(newTreeView, oldTreeView);
+    },
+    createView(): HeaderView | null {
+      return this.owner.createHeader();
+    },
+    insertView(parentView: View, childView: HeaderView, targetView: View | null, key: string | undefined): void {
+      parentView.prependChildView(childView, key);
+    }
+  })
+  readonly header!: ViewFastener<this, HeaderView>;
 
   insertRow(rowView: RowView, targetView: View | null = null): void {
     const rowFasteners = this.rowFasteners as ViewFastener<this, RowView>[];
@@ -690,7 +765,7 @@ export class TableView extends HtmlView {
     type self = this;
     function layoutChildView(this: self, childView: View, displayFlags: ViewFlags,
                              viewContext: ViewContextType<self>): void {
-      if (childView instanceof RowView) {
+      if (childView instanceof RowView || childView instanceof HeaderView) {
         if (rowIndex !== 0) {
           yValue += rowSpacing * disclosingPhase;
           yState += rowSpacing;
@@ -722,7 +797,7 @@ export class TableView extends HtmlView {
         visibleViews.push(childView);
       }
       displayChildView.call(this, childView, displayFlags, viewContext);
-      if (childView instanceof RowView) {
+      if (childView instanceof RowView || childView instanceof HeaderView) {
         let heightValue: Length | number | null = childView.height.value;
         heightValue = heightValue instanceof Length ? heightValue.pxValue() : childView.node.offsetHeight;
         let heightState: Length | number | null = childView.height.state;

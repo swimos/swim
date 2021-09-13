@@ -29,14 +29,17 @@ import type {CellView} from "../cell/CellView";
 import {TextCellView} from "../cell/TextCellView";
 import type {CellTrait} from "../cell/CellTrait";
 import type {CellController} from "../cell/CellController";
-import type {ColView} from "../col/ColView";
-import type {ColTrait} from "../col/ColTrait";
-import {ColController} from "../col/ColController";
 import type {LeafView} from "../leaf/LeafView";
 import type {LeafTrait} from "../leaf/LeafTrait";
 import type {RowView} from "../row/RowView";
 import type {RowTrait} from "../row/RowTrait";
 import {RowController} from "../row/RowController";
+import type {ColView} from "../col/ColView";
+import type {ColTrait} from "../col/ColTrait";
+import {ColController} from "../col/ColController";
+import type {HeaderView} from "../header/HeaderView";
+import type {HeaderTrait} from "../header/HeaderTrait";
+import {HeaderController} from "../header/HeaderController";
 import {TableView} from "./TableView";
 import {TableTrait} from "./TableTrait";
 import type {TableControllerObserver} from "./TableControllerObserver";
@@ -71,6 +74,11 @@ export class TableController extends CompositeController {
   }
 
   protected attachTableTrait(tableTrait: TableTrait): void {
+    const headerTrait = tableTrait.header.trait;
+    if (headerTrait !== null) {
+      this.insertHeaderTrait(headerTrait);
+    }
+
     const colFasteners = tableTrait.colFasteners;
     for (let i = 0, n = colFasteners.length; i < n; i += 1) {
       const colTrait = colFasteners[i]!.trait;
@@ -103,6 +111,11 @@ export class TableController extends CompositeController {
       if (colTrait !== null) {
         this.removeColTrait(colTrait);
       }
+    }
+
+    const headerTrait = tableTrait.header.trait;
+    if (headerTrait !== null) {
+      this.removeHeaderTrait(headerTrait);
     }
   }
 
@@ -175,6 +188,11 @@ export class TableController extends CompositeController {
   }
 
   protected attachTableView(tableView: TableView): void {
+    const headerController = this.header.controller;
+    if (headerController !== null) {
+      headerController.header.injectView(tableView);
+    }
+
     const rowFasteners = this.rowFasteners;
     for (let i = 0, n = rowFasteners.length; i < n; i += 1) {
       const rowController = rowFasteners[i]!.controller;
@@ -234,6 +252,12 @@ export class TableController extends CompositeController {
     didSetView(newTableView: TableView | null, oldTableView: TableView | null): void {
       this.owner.didSetTableView(newTableView, oldTableView);
     },
+    viewDidSetHeader(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null, targetView: View | null): void {
+      const headerController = this.owner.header.controller;
+      if (headerController !== null) {
+        headerController.header.setView(newHeaderView);
+      }
+    },
     createView(): TableView | null {
       return this.owner.createTableView();
     },
@@ -254,6 +278,16 @@ export class TableController extends CompositeController {
     traitDidSetTableLayout(newTableLayout: TableLayout | null, oldTableLayout: TableLayout | null): void {
       this.owner.onSetTableLayout(newTableLayout, oldTableLayout);
       this.owner.didSetTableLayout(newTableLayout, oldTableLayout);
+    },
+    traitWillSetHeader(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
+      if (oldHeaderTrait !== null) {
+        this.owner.removeHeaderTrait(oldHeaderTrait);
+      }
+    },
+    traitDidSetHeader(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null, targetTrait: Trait | null): void {
+      if (newHeaderTrait !== null) {
+        this.owner.insertHeaderTrait(newHeaderTrait, targetTrait);
+      }
     },
     traitWillSetCol(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait): void {
       if (oldColTrait !== null) {
@@ -281,6 +315,245 @@ export class TableController extends CompositeController {
     extends: TableController.TableFastener,
   })
   readonly table!: ControllerViewTrait<this, TableView, TableTrait>;
+
+  protected createHeader(headerTrait: HeaderTrait): HeaderController | null {
+    return new HeaderController();
+  }
+
+  protected initHeader(headerController: HeaderController): void {
+    const tableTrait = this.table.trait;
+    if (tableTrait !== null) {
+      const headerTrait = tableTrait.header.trait;
+      if (headerTrait !== null) {
+        headerController.header.setTrait(headerTrait);
+      }
+    }
+
+    const headerTrait = headerController.header.trait;
+    if (headerTrait !== null) {
+      this.initHeaderTrait(headerTrait);
+    }
+    const treeView = headerController.header.view;
+    if (treeView !== null) {
+      this.initHeaderView(treeView);
+    }
+  }
+
+  protected attachHeader(headerController: HeaderController): void {
+    const headerTrait = headerController.header.trait;
+    if (headerTrait !== null) {
+      this.attachHeaderTrait(headerTrait);
+    }
+    const treeView = headerController.header.view;
+    if (treeView !== null) {
+      this.attachHeaderView(treeView);
+    }
+  }
+
+  protected detachHeader(headerController: HeaderController): void {
+    const headerTrait = headerController.header.trait;
+    if (headerTrait !== null) {
+      this.detachHeaderTrait(headerTrait);
+    }
+    const treeView = headerController.header.view;
+    if (treeView !== null) {
+      this.detachHeaderView(treeView);
+    }
+  }
+
+  protected willSetHeader(newHeaderController: HeaderController | null, oldHeaderController: HeaderController | null): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillSetHeader !== void 0) {
+        controllerObserver.controllerWillSetHeader(newHeaderController, oldHeaderController, this);
+      }
+    }
+  }
+
+  protected onSetHeader(newHeaderController: HeaderController | null, oldHeaderController: HeaderController | null): void {
+    if (oldHeaderController !== null) {
+      this.detachHeader(oldHeaderController);
+    }
+    if (newHeaderController !== null) {
+      this.attachHeader(newHeaderController);
+      this.initHeader(newHeaderController);
+    }
+  }
+
+  protected didSetHeader(newHeaderController: HeaderController | null, oldHeaderController: HeaderController | null): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidSetHeader !== void 0) {
+        controllerObserver.controllerDidSetHeader(newHeaderController, oldHeaderController, this);
+      }
+    }
+  }
+
+  protected insertHeaderTrait(headerTrait: HeaderTrait, targetTrait: Trait | null = null): void {
+    const childControllers = this.childControllers;
+    let targetController: HeaderController | null = null;
+    for (let i = 0, n = childControllers.length; i < n; i += 1) {
+      const childController = childControllers[i]!;
+      if (childController instanceof HeaderController) {
+        if (childController.header.trait === headerTrait) {
+          return;
+        } else if (childController.header.trait === targetTrait) {
+          targetController = childController;
+        }
+      }
+    }
+    const headerController = this.createHeader(headerTrait);
+    if (headerController instanceof HeaderController) {
+      headerController.header.setTrait(headerTrait);
+      this.header.setController(headerController, targetController);
+      this.insertChildController(headerController, targetController);
+      if (headerController.header.view === null) {
+        const headerView = headerController.header.createView();
+        let targetView: HeaderView | null = null;
+        if (targetController !== null) {
+          targetView = targetController.header.view;
+        }
+        const tableView = this.table.view;
+        if (tableView !== null) {
+          headerController.header.injectView(tableView, headerView, targetView, null);
+        } else {
+          headerController.header.setView(headerView, targetView);
+        }
+      }
+    }
+  }
+
+  protected removeHeaderTrait(headerTrait: HeaderTrait): void {
+    const childControllers = this.childControllers;
+    for (let i = 0, n = childControllers.length; i < n; i += 1) {
+      const childController = childControllers[i]!;
+      if (childController instanceof HeaderController && childController.header.trait === headerTrait) {
+        this.header.setController(null);
+        childController.remove();
+        return;
+      }
+    }
+  }
+
+  protected initHeaderTrait(headerTrait: HeaderTrait): void {
+    // hook
+  }
+
+  protected attachHeaderTrait(headerTrait: HeaderTrait): void {
+    // hook
+  }
+
+  protected detachHeaderTrait(headerTrait: HeaderTrait): void {
+    // hook
+  }
+
+  protected willSetHeaderTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillSetHeaderTrait !== void 0) {
+        controllerObserver.controllerWillSetHeaderTrait(newHeaderTrait, oldHeaderTrait, this);
+      }
+    }
+  }
+
+  protected onSetHeaderTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null): void {
+    if (oldHeaderTrait !== null) {
+      this.detachHeaderTrait(oldHeaderTrait);
+    }
+    if (newHeaderTrait !== null) {
+      this.attachHeaderTrait(newHeaderTrait);
+      this.initHeaderTrait(newHeaderTrait);
+    }
+  }
+
+  protected didSetHeaderTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidSetHeaderTrait !== void 0) {
+        controllerObserver.controllerDidSetHeaderTrait(newHeaderTrait, oldHeaderTrait, this);
+      }
+    }
+  }
+
+  protected initHeaderView(headerView: HeaderView): void {
+    // hook
+  }
+
+  protected attachHeaderView(headerView: HeaderView): void {
+    // hook
+  }
+
+  protected detachHeaderView(headerView: HeaderView): void {
+    headerView.remove();
+  }
+
+  protected willSetHeaderView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillSetHeaderView !== void 0) {
+        controllerObserver.controllerWillSetHeaderView(newHeaderView, oldHeaderView, this);
+      }
+    }
+  }
+
+  protected onSetHeaderView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
+    if (oldHeaderView !== null) {
+      this.detachHeaderView(oldHeaderView);
+    }
+    if (newHeaderView !== null) {
+      this.attachHeaderView(newHeaderView);
+      this.initHeaderView(newHeaderView);
+    }
+  }
+
+  protected didSetHeaderView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidSetHeaderView !== void 0) {
+        controllerObserver.controllerDidSetHeaderView(newHeaderView, oldHeaderView, this);
+      }
+    }
+  }
+
+  /** @hidden */
+  static HeaderFastener = ControllerFastener.define<TableController, HeaderController>({
+    type: HeaderController,
+    observe: true,
+    willSetController(newHeaderController: HeaderController | null, oldHeaderController: HeaderController | null): void {
+      this.owner.willSetHeader(newHeaderController, oldHeaderController);
+    },
+    onSetController(newHeaderController: HeaderController | null, oldHeaderController: HeaderController | null): void {
+      this.owner.onSetHeader(newHeaderController, oldHeaderController);
+    },
+    didSetController(newHeaderController: HeaderController | null, oldHeaderController: HeaderController | null): void {
+      this.owner.didSetHeader(newHeaderController, oldHeaderController);
+    },
+    controllerWillSetHeaderTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null): void {
+      this.owner.willSetHeaderTrait(newHeaderTrait, oldHeaderTrait);
+    },
+    controllerDidSetHeaderTrait(newHeaderTrait: HeaderTrait | null, oldHeaderTrait: HeaderTrait | null): void {
+      this.owner.onSetHeaderTrait(newHeaderTrait, oldHeaderTrait);
+      this.owner.didSetHeaderTrait(newHeaderTrait, oldHeaderTrait);
+    },
+    controllerWillSetHeaderView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
+      this.owner.willSetHeaderView(newHeaderView, oldHeaderView);
+    },
+    controllerDidSetHeaderView(newHeaderView: HeaderView | null, oldHeaderView: HeaderView | null): void {
+      this.owner.onSetHeaderView(newHeaderView, oldHeaderView);
+      this.owner.didSetHeaderView(newHeaderView, oldHeaderView);
+    },
+  });
+
+  @ControllerFastener<TableController, HeaderController>({
+    extends: TableController.HeaderFastener,
+  })
+  readonly header!: ControllerFastener<this, HeaderController>;
 
   insertCol(colController: ColController, targetController: Controller | null = null): void {
     const colFasteners = this.colFasteners as ControllerFastener<this, ColController>[];
@@ -1791,12 +2064,20 @@ export class TableController extends CompositeController {
     }
   }
 
+  protected detectHeaderController(controller: Controller): HeaderController | null {
+    return controller instanceof HeaderController ? controller : null;
+  }
+
   protected detectRowController(controller: Controller): RowController | null {
     return controller instanceof RowController ? controller : null;
   }
 
   protected override onInsertChildController(childController: Controller, targetController: Controller | null): void {
     super.onInsertChildController(childController, targetController);
+    const headerController = this.detectHeaderController(childController);
+    if (headerController !== null) {
+      this.header.setController(headerController, targetController);
+    }
     const rowController = this.detectRowController(childController);
     if (rowController !== null) {
       this.insertRow(rowController, targetController);
@@ -1805,6 +2086,10 @@ export class TableController extends CompositeController {
 
   protected override onRemoveChildController(childController: Controller): void {
     super.onRemoveChildController(childController);
+    const headerController = this.detectHeaderController(childController);
+    if (headerController !== null) {
+      this.header.setController(null);
+    }
     const rowController = this.detectRowController(childController);
     if (rowController !== null) {
       this.removeRow(rowController);

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import type {Trait} from "@swim/model";
+import type {View} from "@swim/view";
 import {Controller, ControllerViewTrait, ControllerFastener} from "@swim/controller";
 import {LeafController} from "../leaf/LeafController";
 import {RowView} from "./RowView";
@@ -207,6 +208,12 @@ export class RowController extends LeafController {
       this.owner.onCollapseRowView(rowView);
       this.owner.didCollapseRowView(rowView);
     },
+    viewDidSetTree(newTreeView: TableView | null, oldTreeView: TableView | null, targetView: View | null): void {
+      const treeController = this.owner.tree.controller;
+      if (treeController !== null) {
+        treeController.table.setView(newTreeView);
+      }
+    },
     createView(): RowView | null {
       return this.owner.createRowView();
     },
@@ -221,10 +228,14 @@ export class RowController extends LeafController {
     didSetTrait(newRowTrait: RowTrait | null, oldRowTrait: RowTrait | null): void {
       this.owner.didSetRowTrait(newRowTrait, oldRowTrait);
     },
+    traitWillSetTree(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
+      if (oldTreeTrait !== null) {
+        this.owner.removeTreeTrait(oldTreeTrait);
+      }
+    },
     traitDidSetTree(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
-      const treeController = this.owner.tree.controller;
-      if (treeController !== null) {
-        treeController.table.setTrait(newTreeTrait);
+      if (newTreeTrait !== null) {
+        this.owner.insertTreeTrait(newTreeTrait, targetTrait);
       }
     },
   });
