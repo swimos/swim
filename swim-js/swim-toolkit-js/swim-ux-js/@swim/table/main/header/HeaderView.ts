@@ -46,7 +46,6 @@ export class HeaderView extends HtmlView {
     this.position.setState("relative", View.Intrinsic);
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
-    this.backgroundColor.setLook(Look.backgroundColor, View.Intrinsic);
   }
 
   override readonly viewObservers!: ReadonlyArray<HeaderViewObserver>;

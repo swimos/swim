@@ -399,6 +399,7 @@ export abstract class GraphicsView extends View {
     this.mountViewFasteners();
     this.mountGestures();
     this.mountTheme();
+    this.updateTheme(false);
   }
 
   protected override didMount(): void {
@@ -986,13 +987,13 @@ export abstract class GraphicsView extends View {
     }
   }
 
-  protected updateTheme(): void {
+  protected updateTheme(timing?: AnyTiming | boolean): void {
     this.changeMood();
     this.changeTheme();
     const theme = this.theme.state;
     const mood = this.mood.state;
     if (theme !== null && mood !== null) {
-      this.applyTheme(theme, mood);
+      this.applyTheme(theme, mood, timing);
     }
   }
 

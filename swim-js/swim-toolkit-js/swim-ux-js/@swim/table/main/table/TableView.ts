@@ -73,7 +73,7 @@ export class TableView extends HtmlView {
   readonly edgeInsets!: ViewProperty<this, ViewEdgeInsets | null>;
 
   protected didSetDepth(newDepth: number, oldDepth: number): void {
-    this.modifyTheme(Feel.default, [[Feel.nested, newDepth !== 0 ? 1 : void 0]]);
+    this.modifyTheme(Feel.default, [[Feel.nested, newDepth !== 0 ? 1 : void 0]], false);
   }
 
   @ViewProperty<TableView, number>({

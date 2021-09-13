@@ -50,7 +50,6 @@ export class LeafView extends HtmlView {
     this.position.setState("relative", View.Intrinsic);
     this.overflowX.setState("hidden", View.Intrinsic);
     this.overflowY.setState("hidden", View.Intrinsic);
-    this.backgroundColor.setLook(Look.backgroundColor, View.Intrinsic);
 
     const highlightPhase = this.highlight.getPhase();
     const hoverPhase = this.hover.getPhase();
@@ -58,6 +57,7 @@ export class LeafView extends HtmlView {
     this.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
                                    [Feel.hovering, hoverPhase * (1 - highlightPhase)],
                                    [Feel.selected, highlightPhase]], false);
+    this.backgroundColor.setLook(Look.backgroundColor, View.Intrinsic);
   }
 
   override readonly viewObservers!: ReadonlyArray<LeafViewObserver>;

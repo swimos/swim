@@ -195,6 +195,7 @@ export class ElementView extends NodeView implements StyleContext {
   protected override onMount(): void {
     super.onMount();
     this.mountTheme();
+    this.updateTheme(false);
   }
 
   protected override onChange(viewContext: ViewContextType<this>): void {
@@ -350,13 +351,13 @@ export class ElementView extends NodeView implements StyleContext {
     }
   }
 
-  protected updateTheme(): void {
+  protected updateTheme(timing?: AnyTiming | boolean): void {
     this.changeMood();
     this.changeTheme();
     const theme = this.theme.state;
     const mood = this.mood.state;
     if (theme !== null && mood !== null) {
-      this.applyTheme(theme, mood);
+      this.applyTheme(theme, mood, timing);
     }
   }
 
