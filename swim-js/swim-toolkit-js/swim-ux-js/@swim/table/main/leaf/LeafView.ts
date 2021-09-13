@@ -28,7 +28,6 @@ import {
   ViewFastener,
   PositionGestureInput,
   PositionGesture,
-  PositionGestureDelegate,
 } from "@swim/view";
 import {ViewNode, NodeViewConstructor, HtmlView} from "@swim/dom";
 import {ButtonGlow} from "@swim/button";
@@ -36,14 +35,9 @@ import {AnyTableLayout, TableLayout} from "../layout/TableLayout";
 import {CellView} from "../cell/CellView";
 import type {LeafViewObserver} from "./LeafViewObserver";
 
-export class LeafView extends HtmlView implements PositionGestureDelegate {
+export class LeafView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "gesture", {
-      value: this.createGesture(),
-      enumerable: true,
-      configurable: true,
-    });
     Object.defineProperty(this, "cellFasteners", {
       value: [],
       enumerable: true,
@@ -94,13 +88,6 @@ export class LeafView extends HtmlView implements PositionGestureDelegate {
 
   @ViewAnimator({type: Expansion, inherit: true, state: null, updateFlags: View.NeedsLayout})
   readonly stretch!: ExpansionViewAnimator<this, Expansion | null, AnyExpansion | null>;
-
-  /** @hidden */
-  readonly gesture!: PositionGesture<LeafView>;
-
-  protected createGesture(): PositionGesture<LeafView> {
-    return new PositionGesture(this, this);
-  }
 
   protected didSetHover(newHover: Focus, oldHover: Focus): void {
     const highlightPhase = this.highlight.getPhase();
@@ -465,57 +452,11 @@ export class LeafView extends HtmlView implements PositionGestureDelegate {
     }
   }
 
-  didBeginPress(input: PositionGestureInput, event: Event | null): void {
-    if (this.glows) {
-      this.glow(input);
-    }
+  protected onEnter(): void {
+    // hook
   }
 
-  didMovePress(input: PositionGestureInput, event: Event | null): void {
-    if (input.isRunaway()) {
-      this.gesture.cancelPress(input, event);
-    } else if (!this.clientBounds.contains(input.x, input.y)) {
-      this.gesture.beginHover(input, event);
-      if (input.detail instanceof ButtonGlow) {
-        input.detail.fade(input.x, input.y);
-        input.detail = void 0;
-      }
-    }
-  }
-
-  didEndPress(input: PositionGestureInput, event: Event | null): void {
-    if (!this.clientBounds.contains(input.x, input.y)) {
-      this.gesture.endHover(input, event);
-      if (input.detail instanceof ButtonGlow) {
-        input.detail.fade(input.x, input.y);
-        input.detail = void 0;
-      }
-    } else if (input.detail instanceof ButtonGlow) {
-      input.detail.pulse(input.x, input.y);
-    }
-
-    let target = input.target;
-    while (target !== null && target !== this.node) {
-      const targetView = (target as ViewNode).view;
-      if (targetView instanceof CellView) {
-        targetView.didPress(input, event);
-        break;
-      }
-      target = target instanceof Node ? target.parentNode : null;
-    }
-  }
-
-  didCancelPress(input: PositionGestureInput, event: Event | null): void {
-    if (!this.clientBounds.contains(input.x, input.y)) {
-      this.gesture.endHover(input, event);
-    }
-    if (input.detail instanceof ButtonGlow) {
-      input.detail.fade(input.x, input.y);
-      input.detail = void 0;
-    }
-  }
-
-  didStartHovering(): void {
+  protected didEnter(): void {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -525,7 +466,11 @@ export class LeafView extends HtmlView implements PositionGestureDelegate {
     }
   }
 
-  didStopHovering(): void {
+  protected onLeave(): void {
+    // hook
+  }
+
+  protected didLeave(): void {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
@@ -535,37 +480,118 @@ export class LeafView extends HtmlView implements PositionGestureDelegate {
     }
   }
 
-  didPress(input: PositionGestureInput, event: Event | null): void {
-    if (!input.defaultPrevented) {
-      const viewObservers = this.viewObservers;
-      for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-        const viewObserver = viewObservers[i]!;
-        if (viewObserver.viewDidPress !== void 0) {
-          viewObserver.viewDidPress(input, event, this);
-        }
+  protected onPress(input: PositionGestureInput, event: Event | null): void {
+    // hook
+  }
+
+  protected didPress(input: PositionGestureInput, event: Event | null): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidPress !== void 0) {
+        viewObserver.viewDidPress(input, event, this);
       }
     }
   }
 
-  didLongPress(input: PositionGestureInput): void {
-    let target = input.target;
-    while (target !== null && target !== this.node) {
-      const targetView = (target as ViewNode).view;
-      if (targetView instanceof CellView) {
-        targetView.didLongPress(input);
-        break;
-      }
-      target = target instanceof Node ? target.parentNode : null;
-    }
+  protected onLongPress(input: PositionGestureInput): void {
+    // hook
+  }
 
-    if (!input.defaultPrevented) {
-      const viewObservers = this.viewObservers;
-      for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-        const viewObserver = viewObservers[i]!;
-        if (viewObserver.viewDidLongPress !== void 0) {
-          viewObserver.viewDidLongPress(input, this);
-        }
+  protected didLongPress(input: PositionGestureInput): void {
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidLongPress !== void 0) {
+        viewObserver.viewDidLongPress(input, this);
       }
     }
   }
+
+  /** @hidden */
+  static Gesture = PositionGesture.define<LeafView, LeafView>({
+    didBeginPress(input: PositionGestureInput, event: Event | null): void {
+      if (this.owner.glows) {
+        this.owner.glow(input);
+      }
+    },
+    didMovePress(input: PositionGestureInput, event: Event | null): void {
+      if (input.isRunaway()) {
+        this.cancelPress(input, event);
+      } else if (!this.owner.clientBounds.contains(input.x, input.y)) {
+        this.beginHover(input, event);
+        if (input.detail instanceof ButtonGlow) {
+          input.detail.fade(input.x, input.y);
+          input.detail = void 0;
+        }
+      }
+    },
+    didEndPress(input: PositionGestureInput, event: Event | null): void {
+      if (!this.owner.clientBounds.contains(input.x, input.y)) {
+        this.endHover(input, event);
+        if (input.detail instanceof ButtonGlow) {
+          input.detail.fade(input.x, input.y);
+          input.detail = void 0;
+        }
+      } else if (input.detail instanceof ButtonGlow) {
+        input.detail.pulse(input.x, input.y);
+      }
+
+      let target = input.target;
+      while (target !== null && target !== this.owner.node) {
+        const targetView = (target as ViewNode).view;
+        if (targetView instanceof CellView) {
+          targetView.onPress(input, event);
+          targetView.didPress(input, event);
+          break;
+        }
+        target = target instanceof Node ? target.parentNode : null;
+      }
+    },
+    didCancelPress(input: PositionGestureInput, event: Event | null): void {
+      if (!this.owner.clientBounds.contains(input.x, input.y)) {
+        this.endHover(input, event);
+      }
+      if (input.detail instanceof ButtonGlow) {
+        input.detail.fade(input.x, input.y);
+        input.detail = void 0;
+      }
+    },
+    didStartHovering(): void {
+      this.owner.onEnter();
+      this.owner.didEnter();
+    },
+    didStopHovering(): void {
+      this.owner.onLeave();
+      this.owner.didLeave();
+    },
+    didPress(input: PositionGestureInput, event: Event | null): void {
+      if (!input.defaultPrevented) {
+        this.owner.onPress(input, event);
+        this.owner.didPress(input, event);
+      }
+    },
+    didLongPress(input: PositionGestureInput): void {
+      let target = input.target;
+      while (target !== null && target !== this.owner.node) {
+        const targetView = (target as ViewNode).view;
+        if (targetView instanceof CellView) {
+          targetView.onLongPress(input);
+          targetView.didLongPress(input);
+          break;
+        }
+        target = target instanceof Node ? target.parentNode : null;
+      }
+      if (!input.defaultPrevented) {
+        this.owner.onLongPress(input);
+        this.owner.didLongPress(input);
+      }
+    },
+  });
+
+  @PositionGesture<LeafView, LeafView>({
+    extends: LeafView.Gesture,
+    self: true,
+  })
+  readonly gesture!: PositionGesture<this, LeafView>;
 }

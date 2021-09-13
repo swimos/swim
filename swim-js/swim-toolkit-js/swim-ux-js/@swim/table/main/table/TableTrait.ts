@@ -209,7 +209,7 @@ export class TableTrait extends GenericTrait {
     didSetTrait(newColTrait: ColTrait | null, oldColTrait: ColTrait | null, targetTrait: Trait | null): void {
       this.owner.didSetCol(newColTrait, oldColTrait, targetTrait, this);
     },
-    traitDidSetColLayout(newColLayout: ColLayout | null, oldColLayout: ColLayout | null): void {
+    traitDidSetLayout(newColLayout: ColLayout | null, oldColLayout: ColLayout | null): void {
       this.owner.onSetColLayout(newColLayout, oldColLayout, this);
     },
   });

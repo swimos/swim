@@ -13,20 +13,15 @@
 // limitations under the License.
 
 import {HtmlViewInit, HtmlView} from "@swim/dom";
-import {PositionGestureInput, PositionGesture, PositionGestureDelegate} from "@swim/view";
+import {PositionGestureInput, PositionGesture} from "@swim/view";
 import {ButtonGlow} from "./ButtonGlow";
 
 export interface ButtonMembraneInit extends HtmlViewInit {
 }
 
-export class ButtonMembrane extends HtmlView implements PositionGestureDelegate {
+export class ButtonMembrane extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "gesture", {
-      value: this.createGesture(),
-      enumerable: true,
-      configurable: true,
-    });
     this.initMembrane(node);
   }
 
@@ -36,13 +31,6 @@ export class ButtonMembrane extends HtmlView implements PositionGestureDelegate 
 
   override initView(init: ButtonMembraneInit): void {
     super.initView(init);
-  }
-
-  /** @hidden */
-  readonly gesture!: PositionGesture<ButtonMembrane>;
-
-  protected createGesture(): PositionGesture<ButtonMembrane> {
-    return new PositionGesture(this, this);
   }
 
   get glows(): boolean {
@@ -59,12 +47,6 @@ export class ButtonMembrane extends HtmlView implements PositionGestureDelegate 
     }
   }
 
-  didBeginPress(input: PositionGestureInput, event: Event | null): void {
-    if (this.glows) {
-      this.glow(input);
-    }
-  }
-
   protected glow(input: PositionGestureInput): void {
     if (input.detail instanceof ButtonGlow) {
       input.detail.fade(input.x, input.y);
@@ -77,37 +59,49 @@ export class ButtonMembrane extends HtmlView implements PositionGestureDelegate 
     }
   }
 
-  didMovePress(input: PositionGestureInput, event: Event | null): void {
-    if (input.isRunaway()) {
-      this.gesture.cancelPress(input, event);
-    } else if (!this.clientBounds.contains(input.x, input.y)) {
-      this.gesture.beginHover(input, event);
+  /** @hidden */
+  static Gesture = PositionGesture.define<ButtonMembrane, HtmlView>({
+    didBeginPress(input: PositionGestureInput, event: Event | null): void {
+      if (this.owner.glows) {
+        this.owner.glow(input);
+      }
+    },
+    didMovePress(input: PositionGestureInput, event: Event | null): void {
+      if (input.isRunaway()) {
+        this.cancelPress(input, event);
+      } else if (!this.owner.clientBounds.contains(input.x, input.y)) {
+        this.beginHover(input, event);
+        if (input.detail instanceof ButtonGlow) {
+          input.detail.fade(input.x, input.y);
+          input.detail = void 0;
+        }
+      }
+    },
+    didEndPress(input: PositionGestureInput, event: Event | null): void {
+      if (!this.owner.clientBounds.contains(input.x, input.y)) {
+        this.endHover(input, event);
+        if (input.detail instanceof ButtonGlow) {
+          input.detail.fade(input.x, input.y);
+          input.detail = void 0;
+        }
+      } else if (input.detail instanceof ButtonGlow) {
+        input.detail.pulse(input.x, input.y);
+      }
+    },
+    didCancelPress(input: PositionGestureInput, event: Event | null): void {
+      if (!this.owner.clientBounds.contains(input.x, input.y)) {
+        this.endHover(input, event);
+      }
       if (input.detail instanceof ButtonGlow) {
         input.detail.fade(input.x, input.y);
         input.detail = void 0;
       }
-    }
-  }
+    },
+  });
 
-  didEndPress(input: PositionGestureInput, event: Event | null): void {
-    if (!this.clientBounds.contains(input.x, input.y)) {
-      this.gesture.endHover(input, event);
-      if (input.detail instanceof ButtonGlow) {
-        input.detail.fade(input.x, input.y);
-        input.detail = void 0;
-      }
-    } else if (input.detail instanceof ButtonGlow) {
-      input.detail.pulse(input.x, input.y);
-    }
-  }
-
-  didCancelPress(input: PositionGestureInput, event: Event | null): void {
-    if (!this.clientBounds.contains(input.x, input.y)) {
-      this.gesture.endHover(input, event);
-    }
-    if (input.detail instanceof ButtonGlow) {
-      input.detail.fade(input.x, input.y);
-      input.detail = void 0;
-    }
-  }
+  @PositionGesture<ButtonMembrane, HtmlView>({
+    extends: ButtonMembrane.Gesture,
+    self: true,
+  })
+  readonly gesture!: PositionGesture<this, HtmlView>;
 }

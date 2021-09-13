@@ -15,8 +15,8 @@
 import type {Timing} from "@swim/mapping";
 import {Color} from "@swim/style";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
-import {View, ViewFastener, PositionGesture} from "@swim/view";
-import {StyleRule, StyleSheet, HtmlView, StyleView, SvgView} from "@swim/dom";
+import {View, ViewFastener} from "@swim/view";
+import {StyleRule, StyleSheet, HtmlView, StyleView} from "@swim/dom";
 import {TokenViewInit, TokenView} from "./TokenView";
 import type {InputTokenViewObserver} from "./InputTokenViewObserver";
 
@@ -72,10 +72,6 @@ export class InputTokenView extends TokenView {
     labelView.appearance.setState("none", View.Intrinsic);
     labelView.outlineStyle.setState("none", View.Intrinsic);
     labelView.pointerEvents.setState("auto", View.Intrinsic);
-  }
-
-  protected override createBodyGesture(bodyView: SvgView): PositionGesture<SvgView> | null {
-    return null;
   }
 
   @ViewFastener<InputTokenView, StyleView>({

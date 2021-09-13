@@ -14,7 +14,7 @@
 
 import {Arrays} from "@swim/util";
 import type {Model, Trait} from "@swim/model";
-import type {View} from "@swim/view";
+import {View, GestureContextPrototype, GestureContext, Gesture} from "@swim/view";
 import type {ControllerContextType, ControllerContext} from "./ControllerContext";
 import type {ControllerObserverType, ControllerObserver} from "./ControllerObserver";
 import type {ControllerServiceConstructor, ControllerService} from "./service/ControllerService";
@@ -36,7 +36,7 @@ export interface ControllerInit {
   key?: string;
 }
 
-export interface ControllerPrototype {
+export interface ControllerPrototype extends GestureContextPrototype {
   /** @hidden */
   controllerServiceConstructors?: {[serviceName: string]: ControllerServiceConstructor<Controller, unknown> | undefined};
 
@@ -76,7 +76,7 @@ export interface ControllerClass<C extends Controller = Controller> extends Func
   readonly removeChildFlags: ControllerFlags;
 }
 
-export abstract class Controller {
+export abstract class Controller implements GestureContext {
   constructor() {
     Object.defineProperty(this, "controllerFlags", {
       value: 0,
@@ -894,6 +894,25 @@ export abstract class Controller {
       }
     }
     return controllerFastener;
+  }
+
+  abstract hasGesture(gestureName: string): boolean;
+
+  abstract getGesture(gestureName: string): Gesture<this, View> | null;
+
+  abstract setGesture(gestureName: string, gesture: Gesture<this, any> | null): void;
+
+  /** @hidden */
+  getLazyGesture(gestureName: string): Gesture<this, View> | null {
+    let gesture = this.getGesture(gestureName);
+    if (gesture === null) {
+      const constructor = GestureContext.getGestureConstructor(gestureName, Object.getPrototypeOf(this));
+      if (constructor !== null) {
+        gesture = new constructor(this, gestureName);
+        this.setGesture(gestureName, gesture);
+      }
+    }
+    return gesture;
   }
 
   /** @hidden */

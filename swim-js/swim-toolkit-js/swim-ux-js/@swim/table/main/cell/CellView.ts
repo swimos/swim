@@ -30,26 +30,30 @@ export class CellView extends HtmlView {
 
   override readonly viewObservers!: ReadonlyArray<CellViewObserver>;
 
+  onPress(input: PositionGestureInput, event: Event | null): void {
+    // hook
+  }
+
   didPress(input: PositionGestureInput, event: Event | null): void {
-    if (!input.defaultPrevented) {
-      const viewObservers = this.viewObservers;
-      for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-        const viewObserver = viewObservers[i]!;
-        if (viewObserver.viewDidPress !== void 0) {
-          viewObserver.viewDidPress(input, event, this);
-        }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidPress !== void 0) {
+        viewObserver.viewDidPress(input, event, this);
       }
     }
   }
 
+  onLongPress(input: PositionGestureInput): void {
+    // hook
+  }
+
   didLongPress(input: PositionGestureInput): void {
-    if (!input.defaultPrevented) {
-      const viewObservers = this.viewObservers;
-      for (let i = 0, n = viewObservers.length; i < n; i += 1) {
-        const viewObserver = viewObservers[i]!;
-        if (viewObserver.viewDidLongPress !== void 0) {
-          viewObserver.viewDidLongPress(input, this);
-        }
+    const viewObservers = this.viewObservers;
+    for (let i = 0, n = viewObservers.length; i < n; i += 1) {
+      const viewObserver = viewObservers[i]!;
+      if (viewObserver.viewDidLongPress !== void 0) {
+        viewObserver.viewDidLongPress(input, this);
       }
     }
   }

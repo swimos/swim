@@ -203,7 +203,7 @@ export const ModelProperty = function <M extends Model, T, U>(
     propertyName?: string,
   ): ModelProperty<M, T, U> | PropertyDecorator {
   if (this instanceof ModelProperty) { // constructor
-    return ModelPropertyConstructor.call(this as ModelProperty<Model, unknown, unknown>, owner as M, propertyName);
+    return ModelPropertyConstructor.call(this as ModelProperty<M, unknown, unknown>, owner as M, propertyName);
   } else { // decorator factory
     return ModelPropertyDecoratorFactory(owner as ModelPropertyDescriptor<M, T, U>);
   }

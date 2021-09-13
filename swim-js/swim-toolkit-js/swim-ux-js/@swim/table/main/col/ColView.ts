@@ -30,53 +30,57 @@ export class ColView extends HtmlView {
 
   override readonly viewObservers!: ReadonlyArray<ColViewObserver>;
 
-  protected createHeader(value?: string): HtmlView | null {
-    const headerView = HtmlView.span.create();
-    headerView.alignSelf.setState("center", View.Intrinsic);
+  protected createLabel(value?: string): HtmlView | null {
+    const labelView = HtmlView.span.create();
+    labelView.alignSelf.setState("center", View.Intrinsic);
+    labelView.whiteSpace.setState("nowrap", View.Intrinsic);
+    labelView.textOverflow.setState("ellipsis", View.Intrinsic);
+    labelView.overflowX.setState("hidden", View.Intrinsic);
+    labelView.overflowY.setState("hidden", View.Intrinsic);
     if (value !== void 0) {
-      headerView.text(value);
+      labelView.text(value);
     }
-    return headerView;
+    return labelView;
   }
 
-  protected initHeader(headerView: HtmlView): void {
+  protected initLabel(labelView: HtmlView): void {
     // hook
   }
 
-  protected attachHeader(headerView: HtmlView): void {
+  protected attachLabel(labelView: HtmlView): void {
     // hook
   }
 
-  protected detachHeader(headerView: HtmlView): void {
+  protected detachLabel(labelView: HtmlView): void {
     // hook
   }
 
-  protected willSetHeader(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
+  protected willSetLabel(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewWillSetColHeader !== void 0) {
-        viewObserver.viewWillSetColHeader(newHeaderView, oldHeaderView, this);
+      if (viewObserver.viewWillSetLabel !== void 0) {
+        viewObserver.viewWillSetLabel(newLabelView, oldLabelView, this);
       }
     }
   }
 
-  protected onSetHeader(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
-    if (oldHeaderView !== null) {
-      this.detachHeader(oldHeaderView);
+  protected onSetLabel(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
+    if (oldLabelView !== null) {
+      this.detachLabel(oldLabelView);
     }
-    if (newHeaderView !== null) {
-      this.attachHeader(newHeaderView);
-      this.initHeader(newHeaderView);
+    if (newLabelView !== null) {
+      this.attachLabel(newLabelView);
+      this.initLabel(newLabelView);
     }
   }
 
-  protected didSetHeader(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
+  protected didSetLabel(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
       const viewObserver = viewObservers[i]!;
-      if (viewObserver.viewDidSetColHeader !== void 0) {
-        viewObserver.viewDidSetColHeader(newHeaderView, oldHeaderView, this);
+      if (viewObserver.viewDidSetLabel !== void 0) {
+        viewObserver.viewDidSetLabel(newLabelView, oldLabelView, this);
       }
     }
   }
@@ -88,18 +92,18 @@ export class ColView extends HtmlView {
       if (value instanceof HtmlView) {
         return value;
       } else {
-        return this.owner.createHeader(value);
+        return this.owner.createLabel(value);
       }
     },
-    willSetView(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
-      this.owner.willSetHeader(newHeaderView, oldHeaderView);
+    willSetView(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
+      this.owner.willSetLabel(newLabelView, oldLabelView);
     },
-    onSetView(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
-      this.owner.onSetHeader(newHeaderView, oldHeaderView);
+    onSetView(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
+      this.owner.onSetLabel(newLabelView, oldLabelView);
     },
-    didSetView(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
-      this.owner.didSetHeader(newHeaderView, oldHeaderView);
+    didSetView(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
+      this.owner.didSetLabel(newLabelView, oldLabelView);
     },
   })
-  readonly header!: ViewFastener<this, HtmlView, string>;
+  readonly label!: ViewFastener<this, HtmlView, string>;
 }

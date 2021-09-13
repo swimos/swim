@@ -16,8 +16,8 @@ export {ColView} from "./ColView";
 export {ColViewObserver} from "./ColViewObserver";
 
 export {
-  ColHeader,
-  ColHeaderFunction,
+  ColLabel,
+  ColLabelFunction,
   ColTrait,
 } from "./ColTrait";
 export {ColTraitObserver} from "./ColTraitObserver";

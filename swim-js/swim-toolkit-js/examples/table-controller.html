@@ -50,13 +50,13 @@ class ExampleTableController extends swim.TableController {
 const colAModel = new swim.CompoundModel();
 const colATrait = new swim.ColTrait()
   .layout({key: "a", grow: 2, textColor: swim.Look.mutedColor})
-  .header("A");
+  .label("A");
 colAModel.setTrait("colA", colATrait);
 
 const colBModel = new swim.CompoundModel();
 const colBTrait = new swim.ColTrait()
   .layout({key: "b", grow: 1})
-  .header("B");
+  .label("B");
 colBModel.setTrait("colB", colBTrait);
 
 const tableModel = new swim.CompoundModel();

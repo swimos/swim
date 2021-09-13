@@ -205,7 +205,7 @@ export const TraitProperty = function <R extends Trait, T, U>(
     propertyName?: string,
   ): TraitProperty<R, T, U> | PropertyDecorator {
   if (this instanceof TraitProperty) { // constructor
-    return TraitPropertyConstructor.call(this as TraitProperty<Trait, unknown, unknown>, owner as R, propertyName);
+    return TraitPropertyConstructor.call(this as TraitProperty<R, unknown, unknown>, owner as R, propertyName);
   } else { // decorator factory
     return TraitPropertyDecoratorFactory(owner as TraitPropertyDescriptor<R, T, U>);
   }

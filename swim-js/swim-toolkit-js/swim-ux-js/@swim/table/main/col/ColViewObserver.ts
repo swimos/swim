@@ -16,7 +16,7 @@ import type {HtmlView, HtmlViewObserver} from "@swim/dom";
 import type {ColView} from "./ColView";
 
 export interface ColViewObserver<V extends ColView = ColView> extends HtmlViewObserver<V> {
-  viewWillSetColHeader?(newColHeaderView: HtmlView | null, oldColHeaderView: HtmlView | null, view: V): void;
+  viewWillSetLabel?(newLabelView: HtmlView | null, oldLabelView: HtmlView | null, view: V): void;
 
-  viewDidSetColHeader?(newColHeaderView: HtmlView | null, oldColHeaderView: HtmlView | null, view: V): void;
+  viewDidSetLabel?(newLabelView: HtmlView | null, oldLabelView: HtmlView | null, view: V): void;
 }

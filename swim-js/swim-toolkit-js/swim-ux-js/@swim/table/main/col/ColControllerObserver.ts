@@ -32,7 +32,7 @@ export interface ColControllerObserver<C extends ColController = ColController> 
 
   controllerDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, controller: C): void;
 
-  controllerWillSetColHeaderView?(newColHeaderView: HtmlView | null, oldColHeaderView: HtmlView | null, controller: C): void;
+  controllerWillSetColLabelView?(newColLabelView: HtmlView | null, oldColLabelView: HtmlView | null, controller: C): void;
 
-  controllerDidSetColHeaderView?(newColHeaderView: HtmlView | null, oldColHeaderView: HtmlView | null, controller: C): void;
+  controllerDidSetColLabelView?(newColLabelView: HtmlView | null, oldColLabelView: HtmlView | null, controller: C): void;
 }

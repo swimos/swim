@@ -33,7 +33,6 @@ import {
   ViewAnimator,
   ViewFastener,
   ScaleGestureInput,
-  ScaleGestureDelegate,
   ScaleGesture,
 } from "@swim/view";
 import {GraphicsViewInit, LayerView} from "@swim/graphics";
@@ -70,16 +69,15 @@ export interface ScaledViewInit<X, Y> extends GraphicsViewInit {
   xDomainTracking?: boolean;
   yDomainTracking?: boolean;
 
-  gestures?: [boolean, boolean] | boolean;
-  xGestures?: boolean;
-  yGestures?: boolean;
+  scaleGestures?: [boolean, boolean] | boolean;
+  xScaleGestures?: boolean;
+  yScaleGestures?: boolean;
 
-  scaleGesture?: ScaleGesture<X, Y>;
   rescaleTransition?: AnyTiming | boolean;
   reboundTransition?: AnyTiming | boolean;
 }
 
-export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView<X, Y>, ScaleGestureDelegate<X, Y> {
+export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView<X, Y> {
   constructor() {
     super();
     Object.defineProperty(this, "scaledFlags", {
@@ -184,20 +182,16 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
       this.yDomainTracking(init.yDomainTracking);
     }
 
-    if (init.gestures !== void 0) {
-      this.gestures(init.gestures);
+    if (init.scaleGestures !== void 0) {
+      this.scaleGestures(init.scaleGestures);
     }
-    if (init.xGestures !== void 0) {
-      this.xGestures(init.xGestures);
+    if (init.xScaleGestures !== void 0) {
+      this.xScaleGestures(init.xScaleGestures);
     }
-    if (init.yGestures !== void 0) {
-      this.yGestures(init.yGestures);
+    if (init.yScaleGestures !== void 0) {
+      this.yScaleGestures(init.yScaleGestures);
     }
 
-    if (init.scaleGesture !== void 0) {
-      this.scaleGesture.setState(init.scaleGesture);
-      init.scaleGesture.setView(this);
-    }
     if (init.rescaleTransition !== void 0) {
       this.rescaleTransition.setState(init.rescaleTransition);
     }
@@ -859,13 +853,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   preserveAspectRatio(preserveAspectRatio: boolean): this;
   preserveAspectRatio(preserveAspectRatio?: boolean): boolean | this {
     if (preserveAspectRatio === void 0) {
-      return (this.scaledFlags & ScaledView.PreserveAspectRatioFlag) !== 0;
+      return this.gesture.preserveAspectRatio;
     } else {
-      if (preserveAspectRatio) {
-        this.setScaledFlags(this.scaledFlags | ScaledView.PreserveAspectRatioFlag);
-      } else {
-        this.setScaledFlags(this.scaledFlags & ~ScaledView.PreserveAspectRatioFlag);
-      }
+      this.gesture.preserveAspectRatio = preserveAspectRatio;
       return this;
     }
   }
@@ -929,112 +919,64 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  gestures(): readonly [boolean, boolean];
-  gestures(gestures: readonly [boolean, boolean] | boolean): this;
-  gestures(xGestures: boolean, yGestures: boolean): this;
-  gestures(xGestures?: readonly [boolean, boolean] | boolean,
-           yGestures?: boolean): readonly [boolean, boolean] | this {
-    if (xGestures === void 0) {
-      return [(this.scaledFlags & ScaledView.XGesturesFlag) !== 0,
-              (this.scaledFlags & ScaledView.YGesturesFlag) !== 0];
+  scaleGestures(): readonly [boolean, boolean];
+  scaleGestures(scaleGestures: readonly [boolean, boolean] | boolean): this;
+  scaleGestures(xScaleGestures: boolean, yScaleGestures: boolean): this;
+  scaleGestures(xScaleGestures?: readonly [boolean, boolean] | boolean,
+                yScaleGestures?: boolean): readonly [boolean, boolean] | this {
+    if (xScaleGestures === void 0) {
+      return [(this.scaledFlags & ScaledView.XScaleGesturesFlag) !== 0,
+              (this.scaledFlags & ScaledView.YScaleGesturesFlag) !== 0];
     } else {
-      if (Array.isArray(xGestures)) {
-        yGestures = xGestures[1] as boolean;
-        xGestures = xGestures[0] as boolean;
-      } else if (yGestures === void 0) {
-        yGestures = xGestures as boolean;
+      if (Array.isArray(xScaleGestures)) {
+        yScaleGestures = xScaleGestures[1] as boolean;
+        xScaleGestures = xScaleGestures[0] as boolean;
+      } else if (yScaleGestures === void 0) {
+        yScaleGestures = xScaleGestures as boolean;
       }
-      if (xGestures as boolean) {
-        this.setScaledFlags(this.scaledFlags | ScaledView.XGesturesFlag);
-        this.didEnableXGestures();
+      if (xScaleGestures as boolean) {
+        this.setScaledFlags(this.scaledFlags | ScaledView.XScaleGesturesFlag);
       } else {
-        this.setScaledFlags(this.scaledFlags & ~ScaledView.XGesturesFlag);
-        this.didDisableXGestures();
+        this.setScaledFlags(this.scaledFlags & ~ScaledView.XScaleGesturesFlag);
       }
-      if (yGestures) {
-        this.setScaledFlags(this.scaledFlags | ScaledView.YGesturesFlag);
-        this.didEnableYGestures();
+      if (yScaleGestures) {
+        this.setScaledFlags(this.scaledFlags | ScaledView.YScaleGesturesFlag);
       } else {
-        this.setScaledFlags(this.scaledFlags & ~ScaledView.YGesturesFlag);
-        this.didDisableYGestures();
+        this.setScaledFlags(this.scaledFlags & ~ScaledView.YScaleGesturesFlag);
       }
       return this;
     }
   }
 
-  xGestures(): boolean;
-  xGestures(xGestures: boolean): this;
-  xGestures(xGestures?: boolean): boolean | this {
-    if (xGestures === void 0) {
-      return (this.scaledFlags & ScaledView.XGesturesFlag) !== 0;
+  xScaleGestures(): boolean;
+  xScaleGestures(xScaleGestures: boolean): this;
+  xScaleGestures(xScaleGestures?: boolean): boolean | this {
+    if (xScaleGestures === void 0) {
+      return (this.scaledFlags & ScaledView.XScaleGesturesFlag) !== 0;
     } else {
-      if (xGestures) {
-        this.setScaledFlags(this.scaledFlags | ScaledView.XGesturesFlag);
-        this.didEnableXGestures();
+      if (xScaleGestures) {
+        this.setScaledFlags(this.scaledFlags | ScaledView.XScaleGesturesFlag);
       } else {
-        this.setScaledFlags(this.scaledFlags & ~ScaledView.XGesturesFlag);
-        this.didDisableXGestures();
+        this.setScaledFlags(this.scaledFlags & ~ScaledView.XScaleGesturesFlag);
       }
       return this;
     }
   }
 
-  yGestures(): boolean;
-  yGestures(yGestures: boolean): this;
-  yGestures(yGestures?: boolean): boolean | this {
-    if (yGestures === void 0) {
-      return (this.scaledFlags & ScaledView.YGesturesFlag) !== 0;
+  yScaleGestures(): boolean;
+  yScaleGestures(yScaleGestures: boolean): this;
+  yScaleGestures(yScaleGestures?: boolean): boolean | this {
+    if (yScaleGestures === void 0) {
+      return (this.scaledFlags & ScaledView.YScaleGesturesFlag) !== 0;
     } else {
-      if (yGestures) {
-        this.setScaledFlags(this.scaledFlags | ScaledView.YGesturesFlag);
-        this.didEnableYGestures();
+      if (yScaleGestures) {
+        this.setScaledFlags(this.scaledFlags | ScaledView.YScaleGesturesFlag);
       } else {
-        this.setScaledFlags(this.scaledFlags & ~ScaledView.YGesturesFlag);
-        this.didDisableYGestures();
+        this.setScaledFlags(this.scaledFlags & ~ScaledView.YScaleGesturesFlag);
       }
       return this;
     }
   }
-
-  protected didEnableXGestures(): void {
-    if (this.scaleGesture.state === null) {
-      this.scaleGesture.setState(true);
-    }
-  }
-
-  protected didDisableXGestures(): void {
-    // hook
-  }
-
-  protected didEnableYGestures(): void {
-    if (this.scaleGesture.state === null) {
-      this.scaleGesture.setState(true);
-    }
-  }
-
-  protected didDisableYGestures(): void {
-    // hook
-  }
-
-  protected createScaleGesture(): ScaleGesture<X, Y> | null {
-    return new ScaleGesture(this, this);
-  }
-
-  @ViewProperty<ScaledView<X, Y>, ScaleGesture<X, Y> | null, boolean>({
-    type: ScaleGesture,
-    inherit: true,
-    state: null,
-    fromAny(value: ScaleGesture<X, Y> | boolean | null): ScaleGesture<X, Y> | null {
-      if (value === true) {
-        return this.owner.createScaleGesture();
-      } else if (value === false) {
-        return null;
-      } else {
-        return value;
-      }
-    }
-  })
-  readonly scaleGesture!: ViewProperty<this, ScaleGesture<X, Y> | null, boolean>;
 
   @ViewProperty<ScaledView<X, Y>, Timing | boolean | undefined, AnyTiming>({
     type: Timing,
@@ -1325,10 +1267,9 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     const xScale = !this.xScale.isInherited() ? this.xScale.ownState : null;
     const yScale = !this.yScale.isInherited() ? this.yScale.ownState : null;
     if (xScale !== null && yScale !== null) {
-      const scaleGesture = this.scaleGesture.state;
-      const isPressing = scaleGesture !== null && scaleGesture.isPressing();
+      const isPressing = this.gesture.isPressing();
       if (!isPressing) {
-        const isCoasting = scaleGesture !== null && scaleGesture.isCoasting();
+        const isCoasting = this.gesture.isCoasting();
         this.boundScales(xScale, yScale, isCoasting);
       }
     }
@@ -1469,7 +1410,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
 
     // fit aspect ratio
     const fitAspectRatio = this.fitAspectRatio.state;
-    if (fitAspectRatio !== void 0 && (this.scaledFlags & (ScaledView.PreserveAspectRatioFlag | ScaledView.FitMask)) !== 0) {
+    if (fitAspectRatio !== void 0 && (this.gesture.preserveAspectRatio || (this.scaledFlags & ScaledView.FitMask) !== 0)) {
       const xRange = oldXScale.range;
       const yRange = oldYScale.range;
       const oldDomainWidth = +newXDomain[1] - +newXDomain[0];
@@ -1652,10 +1593,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   protected willReboundX(xScale: ContinuousScale<X, number>): void {
-    const scaleGesture = this.scaleGesture.state;
-    if (scaleGesture !== null) {
-      scaleGesture.neutralizeX();
-    }
+    this.gesture.neutralizeX();
   }
 
   protected didReboundX(xScale: ContinuousScale<X, number>): void {
@@ -1663,71 +1601,97 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   protected willReboundY(yScale: ContinuousScale<Y, number>): void {
-    const scaleGesture = this.scaleGesture.state;
-    if (scaleGesture !== null) {
-      scaleGesture.neutralizeY();
-    }
+    this.gesture.neutralizeY();
   }
 
   protected didReboundY(yScale: ContinuousScale<Y, number>): void {
     // hook
   }
 
-  willStartInteracting(): void {
-    this.setScaledFlags(this.scaledFlags & ~ScaledView.BoundingMask | ScaledView.InteractingFlag);
-  }
-
-  didStopInteracting(): void {
-    const xScale = this.xScale.value;
-    const xDataDomain = this.xDataDomain;
-    if (xScale !== null && xDataDomain !== null) {
-      const xDomain = xScale.domain;
-      if (xDomain.contains(xDataDomain[0])) {
-        this.setScaledFlags(this.scaledFlags | ScaledView.XMinInRangeFlag);
+  /** @hidden */
+  static Gesture = ScaleGesture.define<ScaledView<unknown, unknown>, ScaledView<unknown, unknown>, unknown, unknown>({
+    getXScale(): ContinuousScale<unknown, number> | null {
+      if ((this.owner.scaledFlags & ScaledView.XScaleGesturesFlag) !== 0) {
+        return this.owner.xScale();
       } else {
-        this.setScaledFlags(this.scaledFlags & ~ScaledView.XMinInRangeFlag);
+        return null;
       }
-      if (xDomain.contains(xDataDomain[1])) {
-        this.setScaledFlags(this.scaledFlags | ScaledView.XMaxInRangeFlag);
+    },
+    setXScale(xScale: ContinuousScale<unknown, number> | null, timing?: AnyTiming | boolean): void {
+      if ((this.owner.scaledFlags & ScaledView.XScaleGesturesFlag) !== 0) {
+        this.owner.xScale(xScale, timing);
+      }
+    },
+    getYScale(): ContinuousScale<unknown, number> | null {
+      if ((this.owner.scaledFlags & ScaledView.YScaleGesturesFlag) !== 0) {
+        return this.owner.yScale();
       } else {
-        this.setScaledFlags(this.scaledFlags & ~ScaledView.XMaxInRangeFlag);
+        return null;
       }
-    }
-
-    const yScale = this.yScale.value;
-    const yDataDomain = this.yDataDomain;
-    if (yScale !== null && yDataDomain !== null) {
-      const yDomain = yScale.domain;
-      if (yDomain.contains(yDataDomain[0])) {
-        this.setScaledFlags(this.scaledFlags | ScaledView.YMinInRangeFlag);
-      } else {
-        this.setScaledFlags(this.scaledFlags & ~ScaledView.YMinInRangeFlag);
+    },
+    setYScale(yScale: ContinuousScale<unknown, number> | null, timing?: AnyTiming | boolean): void {
+      if ((this.owner.scaledFlags & ScaledView.YScaleGesturesFlag) !== 0) {
+        this.owner.yScale(yScale, timing);
       }
-      if (yDomain.contains(yDataDomain[1])) {
-        this.setScaledFlags(this.scaledFlags | ScaledView.YMaxInRangeFlag);
-      } else {
-        this.setScaledFlags(this.scaledFlags & ~ScaledView.YMaxInRangeFlag);
+    },
+    willStartInteracting(): void {
+      this.owner.setScaledFlags(this.owner.scaledFlags & ~ScaledView.BoundingMask | ScaledView.InteractingFlag);
+    },
+    didStopInteracting(): void {
+      const xScale = this.owner.xScale.value;
+      const xDataDomain = this.owner.xDataDomain;
+      if (xScale !== null && xDataDomain !== null) {
+        const xDomain = xScale.domain;
+        if (xDomain.contains(xDataDomain[0])) {
+          this.owner.setScaledFlags(this.owner.scaledFlags | ScaledView.XMinInRangeFlag);
+        } else {
+          this.owner.setScaledFlags(this.owner.scaledFlags & ~ScaledView.XMinInRangeFlag);
+        }
+        if (xDomain.contains(xDataDomain[1])) {
+          this.owner.setScaledFlags(this.owner.scaledFlags | ScaledView.XMaxInRangeFlag);
+        } else {
+          this.owner.setScaledFlags(this.owner.scaledFlags & ~ScaledView.XMaxInRangeFlag);
+        }
       }
-    }
-    this.setScaledFlags(this.scaledFlags & ~ScaledView.InteractingFlag | ScaledView.InteractedFlag);
-  }
+      const yScale = this.owner.yScale.value;
+      const yDataDomain = this.owner.yDataDomain;
+      if (yScale !== null && yDataDomain !== null) {
+        const yDomain = yScale.domain;
+        if (yDomain.contains(yDataDomain[0])) {
+          this.owner.setScaledFlags(this.owner.scaledFlags | ScaledView.YMinInRangeFlag);
+        } else {
+          this.owner.setScaledFlags(this.owner.scaledFlags & ~ScaledView.YMinInRangeFlag);
+        }
+        if (yDomain.contains(yDataDomain[1])) {
+          this.owner.setScaledFlags(this.owner.scaledFlags | ScaledView.YMaxInRangeFlag);
+        } else {
+          this.owner.setScaledFlags(this.owner.scaledFlags & ~ScaledView.YMaxInRangeFlag);
+        }
+      }
+      this.owner.setScaledFlags(this.owner.scaledFlags & ~ScaledView.InteractingFlag | ScaledView.InteractedFlag);
+    },
+    didStopPressing(): void {
+      this.owner.requireUpdate(View.NeedsLayout);
+    },
+    willBeginCoast(input: ScaleGestureInput<unknown, unknown>, event: Event | null): boolean | void {
+      if ((this.owner.scaledFlags & ScaledView.XScaleGesturesFlag) === 0) {
+        input.disableX = true;
+        input.vx = 0;
+        input.ax = 0;
+      }
+      if ((this.owner.scaledFlags & ScaledView.YScaleGesturesFlag) === 0) {
+        input.disableY = true;
+        input.vy = 0;
+        input.ay = 0;
+      }
+    },
+  });
 
-  didStopPressing(): void {
-    this.requireUpdate(View.NeedsLayout);
-  }
-
-  willBeginCoast(input: ScaleGestureInput<X, Y>, event: Event | null): boolean | void {
-    if ((this.scaledFlags & ScaledView.XGesturesFlag) === 0) {
-      input.disableX = true;
-      input.vx = 0;
-      input.ax = 0;
-    }
-    if ((this.scaledFlags & ScaledView.YGesturesFlag) === 0) {
-      input.disableY = true;
-      input.vy = 0;
-      input.ay = 0;
-    }
-  }
+  @ScaleGesture<ScaledView<unknown, unknown>, ScaledView<unknown, unknown>, unknown, unknown>({
+    extends: ScaledView.Gesture,
+    self: true,
+  })
+  readonly gesture!: ScaleGesture<this, ScaledView<X, Y>, X, Y>;
 
   /** @hidden */
   protected override mountViewFasteners(): void {
@@ -1782,48 +1746,46 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   /** @hidden */
-  static readonly PreserveAspectRatioFlag: ScaledFlags = 1 << 0;
+  static readonly XDomainTrackingFlag: ScaledFlags = 1 << 0;
   /** @hidden */
-  static readonly XDomainTrackingFlag: ScaledFlags = 1 << 1;
+  static readonly YDomainTrackingFlag: ScaledFlags = 1 << 1;
   /** @hidden */
-  static readonly YDomainTrackingFlag: ScaledFlags = 1 << 2;
+  static readonly XScaleGesturesFlag: ScaledFlags = 1 << 2;
   /** @hidden */
-  static readonly XGesturesFlag: ScaledFlags = 1 << 3;
+  static readonly YScaleGesturesFlag: ScaledFlags = 1 << 3;
   /** @hidden */
-  static readonly YGesturesFlag: ScaledFlags = 1 << 4;
+  static readonly XMinInRangeFlag: ScaledFlags = 1 << 4;
   /** @hidden */
-  static readonly XMinInRangeFlag: ScaledFlags = 1 << 5;
+  static readonly XMaxInRangeFlag: ScaledFlags = 1 << 5;
   /** @hidden */
-  static readonly XMaxInRangeFlag: ScaledFlags = 1 << 6;
+  static readonly YMinInRangeFlag: ScaledFlags = 1 << 6;
   /** @hidden */
-  static readonly YMinInRangeFlag: ScaledFlags = 1 << 7;
+  static readonly YMaxInRangeFlag: ScaledFlags = 1 << 7;
   /** @hidden */
-  static readonly YMaxInRangeFlag: ScaledFlags = 1 << 8;
+  static readonly InteractingFlag: ScaledFlags = 1 << 8;
   /** @hidden */
-  static readonly InteractingFlag: ScaledFlags = 1 << 9;
+  static readonly InteractedFlag: ScaledFlags = 1 << 9;
   /** @hidden */
-  static readonly InteractedFlag: ScaledFlags = 1 << 10;
+  static readonly XBoundingFlag: ScaledFlags = 1 << 10;
   /** @hidden */
-  static readonly XBoundingFlag: ScaledFlags = 1 << 11;
+  static readonly YBoundingFlag: ScaledFlags = 1 << 11;
   /** @hidden */
-  static readonly YBoundingFlag: ScaledFlags = 1 << 12;
+  static readonly XFitFlag: ScaledFlags = 1 << 12;
   /** @hidden */
-  static readonly XFitFlag: ScaledFlags = 1 << 13;
+  static readonly YFitFlag: ScaledFlags = 1 << 13;
   /** @hidden */
-  static readonly YFitFlag: ScaledFlags = 1 << 14;
+  static readonly XFitTweenFlag: ScaledFlags = 1 << 14;
   /** @hidden */
-  static readonly XFitTweenFlag: ScaledFlags = 1 << 15;
+  static readonly YFitTweenFlag: ScaledFlags = 1 << 15;
   /** @hidden */
-  static readonly YFitTweenFlag: ScaledFlags = 1 << 16;
-  /** @hidden */
-  static readonly RescaleFlag: ScaledFlags = 1 << 17;
+  static readonly RescaleFlag: ScaledFlags = 1 << 16;
 
   /** @hidden */
   static readonly DomainTrackingMask: ScaledFlags = ScaledView.XDomainTrackingFlag
                                                   | ScaledView.YDomainTrackingFlag;
   /** @hidden */
-  static readonly GesturesMask: ScaledFlags = ScaledView.XGesturesFlag
-                                            | ScaledView.YGesturesFlag;
+  static readonly ScaleGesturesMask: ScaledFlags = ScaledView.XScaleGesturesFlag
+                                                 | ScaledView.YScaleGesturesFlag;
   /** @hidden */
   static readonly XInRangeMask: ScaledFlags = ScaledView.XMinInRangeFlag
                                             | ScaledView.XMaxInRangeFlag;

@@ -24,9 +24,9 @@ import {
   ViewObserverType,
   ViewAnimator,
   ViewFastener,
-  PositionGestureDelegate,
+  PositionGesture,
 } from "@swim/view";
-import type {HtmlViewObserver} from "@swim/dom";
+import type {HtmlView, HtmlViewObserver} from "@swim/dom";
 import {
   Graphics,
   Icon,
@@ -42,7 +42,7 @@ import {ButtonMembraneInit, ButtonMembrane} from "./ButtonMembrane";
 export interface IconButtonInit extends ButtonMembraneInit, IconViewInit {
 }
 
-export class IconButton extends ButtonMembrane implements IconView, PositionGestureDelegate {
+export class IconButton extends ButtonMembrane implements IconView {
   constructor(node: HTMLElement) {
     super(node);
     this.iconCount = 0;
@@ -300,27 +300,35 @@ export class IconButton extends ButtonMembrane implements IconView, PositionGest
     }
   }
 
-  didStartHovering(): void {
-    if (this.hovers) {
-      this.modifyMood(Feel.default, [[Feel.hovering, 1]]);
-      const timing = this.getLook(Look.timing);
-      if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
-        this.backgroundColor.setState(this.getLookOr(Look.backgroundColor, null), timing, View.Intrinsic);
+  /** @hidden */
+  static override Gesture = PositionGesture.define<IconButton, HtmlView>({
+    extends: ButtonMembrane.Gesture,
+    didStartHovering(): void {
+      if (this.owner.hovers) {
+        this.owner.modifyMood(Feel.default, [[Feel.hovering, 1]]);
+        const timing = this.owner.getLook(Look.timing);
+        if (this.owner.backgroundColor.takesPrecedence(View.Intrinsic)) {
+          this.owner.backgroundColor.setState(this.owner.getLookOr(Look.backgroundColor, null), timing, View.Intrinsic);
+        }
       }
-    }
-  }
+    },
+    didStopHovering(): void {
+      this.owner.modifyMood(Feel.default, [[Feel.hovering, void 0]]);
+      const timing = this.owner.getLook(Look.timing);
+      if (this.owner.backgroundColor.takesPrecedence(View.Intrinsic)) {
+        let backgroundColor = this.owner.getLookOr(Look.backgroundColor, null);
+        if (backgroundColor !== null) {
+          backgroundColor = backgroundColor.alpha(0);
+        }
+        this.owner.backgroundColor.setState(backgroundColor, timing, View.Intrinsic);
+      }
+    },
+  }) as typeof ButtonMembrane.Gesture;
 
-  didStopHovering(): void {
-    this.modifyMood(Feel.default, [[Feel.hovering, void 0]]);
-    const timing = this.getLook(Look.timing);
-    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
-      let backgroundColor = this.getLookOr(Look.backgroundColor, null);
-      if (backgroundColor !== null) {
-        backgroundColor = backgroundColor.alpha(0);
-      }
-      this.backgroundColor.setState(backgroundColor, timing, View.Intrinsic);
-    }
-  }
+  @PositionGesture<IconButton, HtmlView>({
+    extends: IconButton.Gesture,
+  })
+  override readonly gesture!: PositionGesture<this, HtmlView>;
 
   protected onClick(event: MouseEvent): void {
     event.stopPropagation();

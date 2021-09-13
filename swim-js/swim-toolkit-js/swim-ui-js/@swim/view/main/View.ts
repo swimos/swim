@@ -56,6 +56,8 @@ import type {AnimationTrack} from "./animation/AnimationTrack";
 import type {AnimationTimeline} from "./animation/AnimationTimeline";
 import type {ViewAnimatorConstructor, ViewAnimator} from "./animator/ViewAnimator";
 import type {ViewFastenerConstructor, ViewFastener} from "./fastener/ViewFastener";
+import {GestureContextPrototype, GestureContext} from "./gesture/GestureContext";
+import type {Gesture} from "./gesture/Gesture";
 
 export type ViewMemberType<V, K extends keyof V> =
   V[K] extends ViewProperty<any, infer T, any> ? T :
@@ -89,7 +91,7 @@ export interface ViewFactory<V extends View = View, U = never> {
   fromAny?(value: V | U): V;
 }
 
-export interface ViewPrototype {
+export interface ViewPrototype extends GestureContextPrototype {
   /** @hidden */
   viewServiceConstructors?: {[serviceName: string]: ViewServiceConstructor<View, unknown> | undefined};
 
@@ -122,7 +124,7 @@ export interface ViewClass<V extends View = View> extends Function {
   readonly removeChildFlags: ViewFlags;
 }
 
-export abstract class View implements AnimationTimeline, ConstraintScope {
+export abstract class View implements AnimationTimeline, ConstraintScope, GestureContext {
   constructor() {
     Object.defineProperty(this, "viewFlags", {
       value: 0,
@@ -1098,6 +1100,25 @@ export abstract class View implements AnimationTimeline, ConstraintScope {
       }
     }
     return viewFastener;
+  }
+
+  abstract hasGesture(gestureName: string): boolean;
+
+  abstract getGesture(gestureName: string): Gesture<this, View> | null;
+
+  abstract setGesture(gestureName: string, gesture: Gesture<this, any> | null): void;
+
+  /** @hidden */
+  getLazyGesture(gestureName: string): Gesture<this, View> | null {
+    let gesture = this.getGesture(gestureName);
+    if (gesture === null) {
+      const constructor = GestureContext.getGestureConstructor(gestureName, Object.getPrototypeOf(this));
+      if (constructor !== null) {
+        gesture = new constructor(this, gestureName);
+        this.setGesture(gestureName, gesture);
+      }
+    }
+    return gesture;
   }
 
   constraint(lhs: AnyConstraintExpression, relation: ConstraintRelation,

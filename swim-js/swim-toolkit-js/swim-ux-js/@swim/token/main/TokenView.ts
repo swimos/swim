@@ -20,13 +20,11 @@ import {
   ViewContextType,
   ViewFlags,
   View,
-  ViewObserver,
   ViewProperty,
   ViewAnimator,
   ViewFastener,
   PositionGestureInput,
   PositionGesture,
-  PositionGestureDelegate,
 } from "@swim/view";
 import {HtmlViewInit, HtmlView, SvgView} from "@swim/dom";
 import {Graphics, PathContext, PathRenderer} from "@swim/graphics";
@@ -42,21 +40,6 @@ export class TokenView extends HtmlView {
     super(node);
     Object.defineProperty(this, "tokenState", {
       value: "expanded",
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "headGesture", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "bodyGesture", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "footGesture", {
-      value: null,
       enumerable: true,
       configurable: true,
     });
@@ -99,21 +82,6 @@ export class TokenView extends HtmlView {
     headView.fillRule.setState("evenodd", View.Intrinsic);
     headView.pointerEvents.setState("bounding-box", View.Intrinsic);
     headView.cursor.setState("pointer", View.Intrinsic);
-    const headGesture = this.createHeadGesture(headView);
-    if (headGesture !== null) {
-      Object.defineProperty(this, "headGesture", {
-        value: headGesture,
-        enumerable: true,
-        configurable: true,
-      });
-    }
-  }
-
-  /** @hidden */
-  readonly headGesture!: PositionGesture<SvgView> | null;
-
-  protected createHeadGesture(headView: SvgView): PositionGesture<SvgView> | null {
-    return new PositionGesture(headView, this.head);
   }
 
   protected initHeadIcon(headIconView: SvgView): void {
@@ -125,21 +93,6 @@ export class TokenView extends HtmlView {
     bodyView.addClass("body");
     bodyView.pointerEvents.setState("fill", View.Intrinsic);
     bodyView.cursor.setState("pointer", View.Intrinsic);
-    const bodyGesture = this.createBodyGesture(bodyView);
-    if (bodyGesture !== null) {
-      Object.defineProperty(this, "bodyGesture", {
-        value: bodyGesture,
-        enumerable: true,
-        configurable: true,
-      });
-    }
-  }
-
-  /** @hidden */
-  readonly bodyGesture!: PositionGesture<SvgView> | null;
-
-  protected createBodyGesture(bodyView: SvgView): PositionGesture<SvgView> | null {
-    return new PositionGesture(bodyView, this.body);
   }
 
   protected initFoot(footView: SvgView): void {
@@ -147,21 +100,6 @@ export class TokenView extends HtmlView {
     footView.fillRule.setState("evenodd", View.Intrinsic);
     footView.pointerEvents.setState("bounding-box", View.Intrinsic);
     footView.cursor.setState("pointer", View.Intrinsic);
-    const footGesture = this.createFootGesture(footView);
-    if (footGesture !== null) {
-      Object.defineProperty(this, "footGesture", {
-        value: footGesture,
-        enumerable: true,
-        configurable: true,
-      });
-    }
-  }
-
-  /** @hidden */
-  readonly footGesture!: PositionGesture<SvgView> | null;
-
-  protected createFootGesture(footView: SvgView): PositionGesture<SvgView> | null {
-    return new PositionGesture(footView, this.foot);
   }
 
   protected initFootIcon(footIconView: SvgView): void {
@@ -228,8 +166,7 @@ export class TokenView extends HtmlView {
     return Look.accentColor;
   }
 
-  @ViewFastener<TokenView, SvgView, never, ViewObserver & PositionGestureDelegate>({
-    extends: void 0,
+  @ViewFastener<TokenView, SvgView>({
     key: true,
     type: SvgView.path,
     child: false,
@@ -238,6 +175,7 @@ export class TokenView extends HtmlView {
       if (headView !== null) {
         this.owner.initHead(headView);
       }
+      this.owner.headGesture.setView(headView);
     },
     viewDidMount(headView: SvgView): void {
       headView.on("click", this.owner.onClickHead);
@@ -253,6 +191,11 @@ export class TokenView extends HtmlView {
         headIconView.fill.setState(iconColor, timing, View.Intrinsic);
       }
     },
+  })
+  readonly head!: ViewFastener<this, SvgView>;
+
+  /** @hidden */
+  static HeadGesture = PositionGesture.define<TokenView, SvgView>({
     didStartHovering(): void {
       const headView = this.view!;
       headView.modifyMood(Feel.default, [[Feel.hovering, 1]]);
@@ -276,35 +219,34 @@ export class TokenView extends HtmlView {
       }
     },
     didBeginPress(input: PositionGestureInput, event: Event | null): void {
-      const headGesture = this.owner.headGesture;
-      if (headGesture !== null && input.inputType !== "mouse") {
-        headGesture.beginHover(input, event);
+      if (input.inputType !== "mouse") {
+        this.beginHover(input, event);
       }
     },
     didMovePress(input: PositionGestureInput, event: Event | null): void {
-      const headGesture = this.owner.headGesture;
-      if (headGesture !== null && input.isRunaway()) {
-        headGesture.cancelPress(input, event);
+      if (input.isRunaway()) {
+        this.cancelPress(input, event);
       }
     },
     didEndPress(input: PositionGestureInput, event: Event | null): void {
-      const headGesture = this.owner.headGesture;
-      if (headGesture !== null && (input.inputType !== "mouse" || !this.view!.clientBounds.contains(input.x, input.y))) {
-        headGesture.endHover(input, event);
+      if (input.inputType !== "mouse" || !this.view!.clientBounds.contains(input.x, input.y)) {
+        this.endHover(input, event);
       }
     },
     didCancelPress(input: PositionGestureInput, event: Event | null): void {
-      const headGesture = this.owner.headGesture;
-      if (headGesture !== null && (input.inputType !== "mouse" || !this.view!.clientBounds.contains(input.x, input.y))) {
-        headGesture.endHover(input, event);
+      if (input.inputType !== "mouse" || !this.view!.clientBounds.contains(input.x, input.y)) {
+        this.endHover(input, event);
       }
     },
+  });
+
+  @PositionGesture<TokenView, SvgView>({
+    extends: TokenView.HeadGesture,
   })
-  readonly head!: ViewFastener<this, SvgView> & PositionGestureDelegate;
+  readonly headGesture!: PositionGesture<this, SvgView>;
 
   /** @hidden */
-  @ViewFastener<TokenView, SvgView, never, ViewObserver & PositionGestureDelegate>({
-    extends: void 0,
+  @ViewFastener<TokenView, SvgView>({
     key: true,
     type: SvgView.path,
     child: false,
@@ -320,7 +262,7 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  readonly headIcon!: ViewFastener<this, SvgView> & PositionGestureDelegate;
+  readonly headIcon!: ViewFastener<this, SvgView>;
 
   @ViewProperty<TokenView, Graphics | null, never, {embossed: boolean}>({
     extends: void 0,
@@ -331,8 +273,7 @@ export class TokenView extends HtmlView {
   })
   readonly icon!: ViewProperty<this, Graphics | null> & {embossed: boolean};
 
-  @ViewFastener<TokenView, SvgView, never, ViewObserver & PositionGestureDelegate>({
-    extends: void 0,
+  @ViewFastener<TokenView, SvgView>({
     key: true,
     type: SvgView.path,
     child: false,
@@ -341,6 +282,7 @@ export class TokenView extends HtmlView {
       if (bodyView !== null) {
         this.owner.initBody(bodyView);
       }
+      this.owner.bodyGesture.setView(bodyView);
     },
     viewDidMount(headView: SvgView): void {
       headView.on("click", this.owner.onClickBody);
@@ -355,6 +297,11 @@ export class TokenView extends HtmlView {
         labelView.color.setState(theme.getOr(Look.backgroundColor, mood, null), timing, View.Intrinsic);
       }
     },
+  })
+  readonly body!: ViewFastener<this, SvgView>;
+
+  /** @hidden */
+  static BodyGesture = PositionGesture.define<TokenView, SvgView>({
     didStartHovering(): void {
       const bodyView = this.view!;
       bodyView.modifyMood(Feel.default, [[Feel.hovering, 1]]);
@@ -376,34 +323,33 @@ export class TokenView extends HtmlView {
       }
     },
     didBeginPress(input: PositionGestureInput, event: Event | null): void {
-      const bodyGesture = this.owner.bodyGesture;
-      if (bodyGesture !== null && input.inputType !== "mouse") {
-        bodyGesture.beginHover(input, event);
+      if (input.inputType !== "mouse") {
+        this.beginHover(input, event);
       }
     },
     didMovePress(input: PositionGestureInput, event: Event | null): void {
-      const bodyGesture = this.owner.bodyGesture;
-      if (bodyGesture !== null && input.isRunaway()) {
-        bodyGesture.cancelPress(input, event);
+      if (input.isRunaway()) {
+        this.cancelPress(input, event);
       }
     },
     didEndPress(input: PositionGestureInput, event: Event | null): void {
-      const bodyGesture = this.owner.bodyGesture;
-      if (bodyGesture !== null && (input.inputType !== "mouse" || !this.view!.clientBounds.contains(input.x, input.y))) {
-        bodyGesture.endHover(input, event);
+      if (input.inputType !== "mouse" || !this.view!.clientBounds.contains(input.x, input.y)) {
+        this.endHover(input, event);
       }
     },
     didCancelPress(input: PositionGestureInput, event: Event | null): void {
-      const bodyGesture = this.owner.bodyGesture;
-      if (bodyGesture !== null && (input.inputType !== "mouse" || !this.view!.clientBounds.contains(input.x, input.y))) {
-        bodyGesture.endHover(input, event);
+      if (input.inputType !== "mouse" || !this.view!.clientBounds.contains(input.x, input.y)) {
+        this.endHover(input, event);
       }
     },
-  })
-  readonly body!: ViewFastener<this, SvgView> & PositionGestureDelegate;
+  });
 
-  @ViewFastener<TokenView, SvgView, never, ViewObserver & PositionGestureDelegate>({
-    extends: void 0,
+  @PositionGesture<TokenView, SvgView>({
+    extends: TokenView.BodyGesture,
+  })
+  readonly bodyGesture!: PositionGesture<this, SvgView>;
+
+  @ViewFastener<TokenView, SvgView>({
     key: true,
     type: SvgView.path,
     child: false,
@@ -412,6 +358,7 @@ export class TokenView extends HtmlView {
       if (footView !== null) {
         this.owner.initFoot(footView);
       }
+      this.owner.footGesture.setView(footView);
     },
     viewDidMount(footView: SvgView): void {
       footView.on("click", this.owner.onClickFoot);
@@ -427,6 +374,11 @@ export class TokenView extends HtmlView {
         footIconView.fill.setState(iconColor, timing, View.Intrinsic);
       }
     },
+  })
+  readonly foot!: ViewFastener<this, SvgView>;
+
+  /** @hidden */
+  static FootGesture = PositionGesture.define<TokenView, SvgView>({
     didStartHovering(): void {
       const footView = this.view!;
       footView.modifyMood(Feel.default, [[Feel.hovering, 1]]);
@@ -450,35 +402,34 @@ export class TokenView extends HtmlView {
       }
     },
     didBeginPress(input: PositionGestureInput, event: Event | null): void {
-      const footGesture = this.owner.footGesture;
-      if (footGesture !== null && input.inputType !== "mouse") {
-        footGesture.beginHover(input, event);
+      if (input.inputType !== "mouse") {
+        this.beginHover(input, event);
       }
     },
     didMovePress(input: PositionGestureInput, event: Event | null): void {
-      const footGesture = this.owner.footGesture;
-      if (footGesture !== null && input.isRunaway()) {
-        footGesture.cancelPress(input, event);
+      if (input.isRunaway()) {
+        this.cancelPress(input, event);
       }
     },
     didEndPress(input: PositionGestureInput, event: Event | null): void {
-      const footGesture = this.owner.footGesture;
-      if (footGesture !== null && (input.inputType !== "mouse" || !this.view!.clientBounds.contains(input.x, input.y))) {
-        footGesture.endHover(input, event);
+      if (input.inputType !== "mouse" || !this.view!.clientBounds.contains(input.x, input.y)) {
+        this.endHover(input, event);
       }
     },
     didCancelPress(input: PositionGestureInput, event: Event | null): void {
-      const footGesture = this.owner.footGesture;
-      if (footGesture !== null && (input.inputType !== "mouse" || !this.view!.clientBounds.contains(input.x, input.y))) {
-        footGesture.endHover(input, event);
+      if (input.inputType !== "mouse" || !this.view!.clientBounds.contains(input.x, input.y)) {
+        this.endHover(input, event);
       }
     },
+  });
+
+  @PositionGesture<TokenView, SvgView>({
+    extends: TokenView.FootGesture,
   })
-  readonly foot!: ViewFastener<this, SvgView> & PositionGestureDelegate;
+  readonly footGesture!: PositionGesture<this, SvgView>;
 
   /** @hidden */
-  @ViewFastener<TokenView, SvgView, never, ViewObserver & PositionGestureDelegate>({
-    extends: void 0,
+  @ViewFastener<TokenView, SvgView>({
     key: true,
     type: SvgView.path,
     child: false,
@@ -494,7 +445,7 @@ export class TokenView extends HtmlView {
       }
     },
   })
-  readonly footIcon!: ViewFastener<this, SvgView> & PositionGestureDelegate;
+  readonly footIcon!: ViewFastener<this, SvgView>;
 
   @ViewProperty<TokenView, Graphics | null, never, {embossed: boolean}>({
     extends: void 0,

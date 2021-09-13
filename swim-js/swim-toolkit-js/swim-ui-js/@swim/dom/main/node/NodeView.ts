@@ -30,6 +30,8 @@ import {
   ViewProperty,
   ViewAnimator,
   ViewFastener,
+  GestureContext,
+  Gesture,
 } from "@swim/view";
 import type {NodeViewObserver} from "./NodeViewObserver";
 import {TextViewConstructor, TextView} from "../"; // forward import
@@ -83,6 +85,11 @@ export class NodeView extends View {
       configurable: true,
     });
     Object.defineProperty(this, "viewFasteners", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "gestures", {
       value: null,
       enumerable: true,
       configurable: true,
@@ -575,6 +582,7 @@ export class NodeView extends View {
   protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
     this.insertViewFastener(childView, targetView);
+    this.insertGesture(childView, targetView);
   }
 
   insertChildNode(childNode: Node, targetNode: Node | null, key?: string): void {
@@ -715,6 +723,7 @@ export class NodeView extends View {
 
   protected override onRemoveChildView(childView: View): void {
     super.onRemoveChildView(childView);
+    this.removeGesture(childView);
     this.removeViewFastener(childView);
   }
 
@@ -878,6 +887,7 @@ export class NodeView extends View {
     this.mountViewProperties();
     this.mountViewAnimators();
     this.mountViewFasteners();
+    this.mountGestures();
   }
 
   protected override didMount(): void {
@@ -925,6 +935,7 @@ export class NodeView extends View {
   }
 
   protected override onUnmount(): void {
+    this.unmountGestures();
     this.unmountViewFasteners();
     this.unmountViewAnimators();
     this.unmountViewProperties();
@@ -1559,6 +1570,90 @@ export class NodeView extends View {
       const viewFastener = this.getViewFastener(fastenerName);
       if (viewFastener !== null && viewFastener.child === true) {
         viewFastener.doSetView(null, null);
+      }
+    }
+  }
+
+  /** @hidden */
+  readonly gestures!: {[gestureName: string]: Gesture<View, View> | undefined} | null;
+
+  override hasGesture(gestureName: string): boolean {
+    const gestures = this.gestures;
+    return gestures !== null && gestures[gestureName] !== void 0;
+  }
+
+  override getGesture(gestureName: string): Gesture<this, View> | null {
+    const gestures = this.gestures;
+    if (gestures !== null) {
+      const gesture = gestures[gestureName];
+      if (gesture !== void 0) {
+        return gesture as Gesture<this, View>;
+      }
+    }
+    return null;
+  }
+
+  override setGesture(gestureName: string, newGesture: Gesture<this, any> | null): void {
+    let gestures = this.gestures;
+    if (gestures === null) {
+      gestures = {};
+      Object.defineProperty(this, "gestures", {
+        value: gestures,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+    const oldGesture = gestures[gestureName];
+    if (oldGesture !== void 0 && this.isMounted()) {
+      oldGesture.unmount();
+    }
+    if (newGesture !== null) {
+      gestures[gestureName] = newGesture;
+      if (this.isMounted()) {
+        newGesture.mount();
+      }
+    } else {
+      delete gestures[gestureName];
+    }
+  }
+
+  /** @hidden */
+  protected mountGestures(): void {
+    const gestures = this.gestures;
+    for (const gestureName in gestures) {
+      const gesture = gestures[gestureName]!;
+      gesture.mount();
+    }
+    GestureContext.initGestures(this);
+  }
+
+  /** @hidden */
+  protected unmountGestures(): void {
+    const gestures = this.gestures;
+    for (const gestureName in gestures) {
+      const gesture = gestures[gestureName]!;
+      gesture.unmount();
+    }
+  }
+
+  /** @hidden */
+  protected insertGesture(childView: View, targetView: View | null): void {
+    const gestureName = childView.key;
+    if (gestureName !== void 0) {
+      const gesture = this.getLazyGesture(gestureName);
+      if (gesture !== null && gesture.child === true) {
+        gesture.setView(childView, targetView);
+      }
+    }
+  }
+
+  /** @hidden */
+  protected removeGesture(childView: View): void {
+    const gestureName = childView.key;
+    if (gestureName !== void 0) {
+      const gesture = this.getGesture(gestureName);
+      if (gesture !== null && gesture.child === true) {
+        gesture.setView(null, null);
       }
     }
   }

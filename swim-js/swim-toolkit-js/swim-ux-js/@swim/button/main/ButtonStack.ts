@@ -27,7 +27,6 @@ import {
   ExpansionViewAnimator,
   PositionGestureInput,
   PositionGesture,
-  PositionGestureDelegate,
 } from "@swim/view";
 import {StyleAnimator, ViewNode, HtmlView} from "@swim/dom";
 import {Graphics, VectorIcon} from "@swim/graphics";
@@ -35,16 +34,11 @@ import {FloatingButton} from "./FloatingButton";
 import {ButtonItem} from "./ButtonItem";
 import type {ButtonStackObserver} from "./ButtonStackObserver";
 
-export class ButtonStack extends HtmlView implements Modal, PositionGestureDelegate {
+export class ButtonStack extends HtmlView implements Modal {
   constructor(node: HTMLElement) {
     super(node);
     Object.defineProperty(this, "stackHeight", {
       value: 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "gesture", {
-      value: null,
       enumerable: true,
       configurable: true,
     });
@@ -82,7 +76,60 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
   }
 
   /** @hidden */
-  readonly gesture!: PositionGesture<HtmlView> | null;
+  static Gesture = PositionGesture.define<ButtonStack, HtmlView>({
+    didMovePress(input: PositionGestureInput, event: Event | null): void {
+      if (!input.defaultPrevented && !this.owner.disclosure.isExpanded()) {
+        const stackHeight = this.owner.stackHeight;
+        const phase = Math.min(Math.max(0, -(input.y - input.y0) / (0.5 * stackHeight)), 1);
+        this.owner.disclosure.setPhase(phase);
+        if (phase > 0.1) {
+          input.clearHoldTimer();
+          if (!this.owner.disclosure.isExpanding()) {
+            this.owner.disclosure.setState(this.owner.disclosure.value.expanding());
+          }
+        }
+      }
+    },
+    didEndPress(input: PositionGestureInput, event: Event | null): void {
+      if (!input.defaultPrevented) {
+        const phase = this.owner.disclosure.getPhase();
+        if (input.t - input.t0 < input.holdDelay) {
+          if (phase < 0.1 || this.owner.disclosure.isExpanded()) {
+            this.owner.disclosure.collapse();
+          } else {
+            this.owner.disclosure.expand();
+          }
+        } else {
+          if (phase < 0.5) {
+            this.owner.disclosure.collapse();
+          } else if (phase >= 0.5) {
+            this.owner.disclosure.expand();
+          }
+        }
+      }
+    },
+    didCancelPress(input: PositionGestureInput, event: Event | null): void {
+      if (input.buttons === 2) {
+        this.owner.disclosure.toggle();
+      } else {
+        const phase = this.owner.disclosure.getPhase();
+        if (phase < 0.1 || this.owner.disclosure.isExpanded()) {
+          this.owner.disclosure.collapse();
+        } else {
+          this.owner.disclosure.expand();
+        }
+      }
+    },
+    didLongPress(input: PositionGestureInput): void {
+      input.preventDefault();
+      this.owner.disclosure.toggle();
+    },
+  });
+
+  @PositionGesture<ButtonStack, HtmlView>({
+    extends: ButtonStack.Gesture,
+  })
+  readonly gesture!: PositionGesture<this, HtmlView>;
 
   @ViewAnimator<ButtonStack, Expansion>({
     type: Expansion,
@@ -274,13 +321,7 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
   }
 
   protected onInsertButton(button: HtmlView): void {
-    const gesture = new PositionGesture(button, this);
-    Object.defineProperty(this, "gesture", {
-      value: gesture,
-      enumerable: true,
-      configurable: true,
-    });
-    button.addViewObserver(gesture);
+    this.gesture.setView(button);
     if (button instanceof FloatingButton) {
       button.disclosure.setState(Expansion.expanded(), View.Intrinsic);
       if (this.disclosure.isExpanded() || this.disclosure.isExpanding()) {
@@ -291,12 +332,7 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
   }
 
   protected onRemoveButton(button: HtmlView): void {
-    button.removeViewObserver(this.gesture!);
-    Object.defineProperty(this, "gesture", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.gesture.setView(null);
   }
 
   protected onInsertItem(item: ButtonItem): void {
@@ -450,61 +486,6 @@ export class ButtonStack extends HtmlView implements Modal, PositionGestureDeleg
         viewObserver.buttonStackDidHide(this);
       }
     }
-  }
-
-  didBeginPress(input: PositionGestureInput, event: Event | null): void {
-    // hook
-  }
-
-  didMovePress(input: PositionGestureInput, event: Event | null): void {
-    if (!input.defaultPrevented && !this.disclosure.isExpanded()) {
-      const stackHeight = this.stackHeight;
-      const phase = Math.min(Math.max(0, -(input.y - input.y0) / (0.5 * stackHeight)), 1);
-      this.disclosure.setPhase(phase);
-      if (phase > 0.1) {
-        input.clearHoldTimer();
-        if (!this.disclosure.isExpanding()) {
-          this.disclosure.setState(this.disclosure.value.expanding());
-        }
-      }
-    }
-  }
-
-  didEndPress(input: PositionGestureInput, event: Event | null): void {
-    if (!input.defaultPrevented) {
-      const phase = this.disclosure.getPhase();
-      if (input.t - input.t0 < input.holdDelay) {
-        if (phase < 0.1 || this.disclosure.isExpanded()) {
-          this.disclosure.collapse();
-        } else {
-          this.disclosure.expand();
-        }
-      } else {
-        if (phase < 0.5) {
-          this.disclosure.collapse();
-        } else if (phase >= 0.5) {
-          this.disclosure.expand();
-        }
-      }
-    }
-  }
-
-  didCancelPress(input: PositionGestureInput, event: Event | null): void {
-    if (input.buttons === 2) {
-      this.disclosure.toggle();
-    } else {
-      const phase = this.disclosure.getPhase();
-      if (phase < 0.1 || this.disclosure.isExpanded()) {
-        this.disclosure.collapse();
-      } else {
-        this.disclosure.expand();
-      }
-    }
-  }
-
-  didLongPress(input: PositionGestureInput): void {
-    input.preventDefault();
-    this.disclosure.toggle();
   }
 
   protected onClick(event: MouseEvent): void {

@@ -62,9 +62,9 @@ export interface TableControllerObserver<C extends TableController = TableContro
 
   controllerDidSetColView?(newColView: ColView | null, oldColView: ColView | null, colFastener: ControllerFastener<C, ColController>): void;
 
-  controllerWillSetColHeaderView?(newColHeaderView: HtmlView | null, oldColHeaderView: HtmlView | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerWillSetColLabelView?(newColLabelView: HtmlView | null, oldColLabelView: HtmlView | null, colFastener: ControllerFastener<C, ColController>): void;
 
-  controllerDidSetColHeaderView?(newColHeaderView: HtmlView | null, oldColHeaderView: HtmlView | null, colFastener: ControllerFastener<C, ColController>): void;
+  controllerDidSetColLabelView?(newColLabelView: HtmlView | null, oldColLabelView: HtmlView | null, colFastener: ControllerFastener<C, ColController>): void;
 
   controllerWillSetRow?(newRowController: RowController | null, oldRowController: RowController | null, rowFastener: ControllerFastener<C, RowController>): void;
 

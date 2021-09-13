@@ -89,4 +89,13 @@ export class GestureInput {
   preventDefault(): void {
     this.defaultPrevented = true;
   }
+
+  /** @hidden */
+  static pointerInputType(inputType: string): GestureInputType {
+    if (inputType === "mouse" || inputType === "touch" || inputType === "pen") {
+      return inputType;
+    } else {
+      return "unknown";
+    }
+  }
 }

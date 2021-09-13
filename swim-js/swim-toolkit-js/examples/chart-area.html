@@ -32,7 +32,7 @@ const chartView = canvasView.append(swim.ChartView)
     .fitAspectRatio(1)
     .preserveAspectRatio(true)
     .domainTracking(true)
-    .gestures(true)
+    .scaleGestures(true)
     .font("12px sans-serif");
 
 const graphView = chartView.graph.injectView();

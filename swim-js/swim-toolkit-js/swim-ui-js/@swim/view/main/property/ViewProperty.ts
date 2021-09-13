@@ -204,7 +204,7 @@ export const ViewProperty = function <V extends View, T, U>(
     propertyName?: string,
   ): ViewProperty<V, T, U> | PropertyDecorator {
   if (this instanceof ViewProperty) { // constructor
-    return ViewPropertyConstructor.call(this as ViewProperty<View, unknown, unknown>, owner as V, propertyName);
+    return ViewPropertyConstructor.call(this as ViewProperty<V, unknown, unknown>, owner as V, propertyName);
   } else { // decorator factory
     return ViewPropertyDecoratorFactory(owner as ViewPropertyDescriptor<V, T, U>);
   }

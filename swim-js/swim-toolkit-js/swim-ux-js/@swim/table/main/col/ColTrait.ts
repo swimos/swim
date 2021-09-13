@@ -17,32 +17,32 @@ import type {HtmlView} from "@swim/dom";
 import {AnyColLayout, ColLayout} from "../layout/ColLayout";
 import type {ColTraitObserver} from "./ColTraitObserver";
 
-export type ColHeader = ColHeaderFunction | string;
-export type ColHeaderFunction = (colTrait: ColTrait) => HtmlView | string | null;
+export type ColLabel = ColLabelFunction | string;
+export type ColLabelFunction = (colTrait: ColTrait) => HtmlView | string | null;
 
 export class ColTrait extends GenericTrait {
   override readonly traitObservers!: ReadonlyArray<ColTraitObserver>;
 
-  protected willSetLayout(newLayout: ColLayout | null, oldHeader: ColLayout | null): void {
+  protected willSetLayout(newLayout: ColLayout | null, oldLabel: ColLayout | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.traitWillSetColLayout !== void 0) {
-        traitObserver.traitWillSetColLayout(newLayout, oldHeader, this);
+      if (traitObserver.traitWillSetLayout !== void 0) {
+        traitObserver.traitWillSetLayout(newLayout, oldLabel, this);
       }
     }
   }
 
-  protected onSetLayout(newLayout: ColLayout | null, oldHeader: ColLayout | null): void {
+  protected onSetLayout(newLayout: ColLayout | null, oldLabel: ColLayout | null): void {
     // hook
   }
 
-  protected didSetLayout(newLayout: ColLayout | null, oldHeader: ColLayout | null): void {
+  protected didSetLayout(newLayout: ColLayout | null, oldLabel: ColLayout | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.traitDidSetColLayout !== void 0) {
-        traitObserver.traitDidSetColLayout(newLayout, oldHeader, this);
+      if (traitObserver.traitDidSetLayout !== void 0) {
+        traitObserver.traitDidSetLayout(newLayout, oldLabel, this);
       }
     }
   }
@@ -60,39 +60,39 @@ export class ColTrait extends GenericTrait {
   })
   readonly layout!: TraitProperty<this, ColLayout | null, AnyColLayout | null>;
 
-  protected willSetHeader(newHeader: ColHeader | null, oldHeader: ColHeader | null): void {
+  protected willSetLabel(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.traitWillSetColHeader !== void 0) {
-        traitObserver.traitWillSetColHeader(newHeader, oldHeader, this);
+      if (traitObserver.traitWillSetLabel !== void 0) {
+        traitObserver.traitWillSetLabel(newLabel, oldLabel, this);
       }
     }
   }
 
-  protected onSetHeader(newHeader: ColHeader | null, oldHeader: ColHeader | null): void {
+  protected onSetLabel(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
     // hook
   }
 
-  protected didSetHeader(newHeader: ColHeader | null, oldHeader: ColHeader | null): void {
+  protected didSetLabel(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
     const traitObservers = this.traitObservers;
     for (let i = 0, n = traitObservers.length; i < n; i += 1) {
       const traitObserver = traitObservers[i]!;
-      if (traitObserver.traitDidSetColHeader !== void 0) {
-        traitObserver.traitDidSetColHeader(newHeader, oldHeader, this);
+      if (traitObserver.traitDidSetLabel !== void 0) {
+        traitObserver.traitDidSetLabel(newLabel, oldLabel, this);
       }
     }
   }
 
-  @TraitProperty<ColTrait, ColHeader | null>({
+  @TraitProperty<ColTrait, ColLabel | null>({
     state: null,
-    willSetState(newHeader: ColHeader | null, oldHeader: ColHeader | null): void {
-      this.owner.willSetHeader(newHeader, oldHeader);
+    willSetState(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
+      this.owner.willSetLabel(newLabel, oldLabel);
     },
-    didSetState(newHeader: ColHeader | null, oldHeader: ColHeader | null): void {
-      this.owner.onSetHeader(newHeader, oldHeader);
-      this.owner.didSetHeader(newHeader, oldHeader);
+    didSetState(newLabel: ColLabel | null, oldLabel: ColLabel | null): void {
+      this.owner.onSetLabel(newLabel, oldLabel);
+      this.owner.didSetLabel(newLabel, oldLabel);
     },
   })
-  readonly header!: TraitProperty<this, ColHeader | null>;
+  readonly label!: TraitProperty<this, ColLabel | null>;
 }

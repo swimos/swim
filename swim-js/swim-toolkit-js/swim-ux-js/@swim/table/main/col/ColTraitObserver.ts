@@ -14,14 +14,14 @@
 
 import type {TraitObserver} from "@swim/model";
 import type {ColLayout} from "../layout/ColLayout";
-import type {ColHeader, ColTrait} from "./ColTrait";
+import type {ColLabel, ColTrait} from "./ColTrait";
 
 export interface ColTraitObserver<R extends ColTrait = ColTrait> extends TraitObserver<R> {
-  traitWillSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, trait: R): void;
+  traitWillSetLayout?(newLayout: ColLayout | null, oldLayout: ColLayout | null, trait: R): void;
 
-  traitDidSetColLayout?(newColLayout: ColLayout | null, oldColLayout: ColLayout | null, trait: R): void;
+  traitDidSetLayout?(newLayout: ColLayout | null, oldLayout: ColLayout | null, trait: R): void;
 
-  traitWillSetColHeader?(newColHeader: ColHeader | null, oldColHeader: ColHeader | null, trait: R): void;
+  traitWillSetLabel?(newLabel: ColLabel | null, oldLabel: ColLabel | null, trait: R): void;
 
-  traitDidSetColHeader?(newColHeader: ColHeader | null, oldColHeader: ColHeader | null, trait: R): void;
+  traitDidSetLabel?(newLabel: ColLabel | null, oldLabel: ColLabel | null, trait: R): void;
 }

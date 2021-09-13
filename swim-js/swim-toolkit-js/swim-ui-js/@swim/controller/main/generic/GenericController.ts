@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {View} from "@swim/view";
+import {View, GestureContext, Gesture} from "@swim/view";
 import type {Model, Trait} from "@swim/model";
 import type {ControllerContextType, ControllerContext} from "../ControllerContext";
 import {ControllerFlags, Controller} from "../Controller";
@@ -69,6 +69,11 @@ export abstract class GenericController extends Controller {
       configurable: true,
     });
     Object.defineProperty(this, "controllerFasteners", {
+      value: null,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "gestures", {
       value: null,
       enumerable: true,
       configurable: true,
@@ -205,6 +210,7 @@ export abstract class GenericController extends Controller {
     this.mountControllerViews();
     this.mountControllerViewTraits();
     this.mountControllerFasteners();
+    this.mountGestures();
   }
 
   /** @hidden */
@@ -237,6 +243,7 @@ export abstract class GenericController extends Controller {
   }
 
   protected override onUnmount(): void {
+    this.unmountGestures();
     this.unmountControllerFasteners();
     this.unmountControllerViewTraits();
     this.unmountControllerViews();
@@ -883,6 +890,68 @@ export abstract class GenericController extends Controller {
       if (controllerFastener !== null && controllerFastener.child === true) {
         controllerFastener.doSetController(null, null);
       }
+    }
+  }
+
+  /** @hidden */
+  readonly gestures!: {[gestureName: string]: Gesture<Controller, View> | undefined} | null;
+
+  override hasGesture(gestureName: string): boolean {
+    const gestures = this.gestures;
+    return gestures !== null && gestures[gestureName] !== void 0;
+  }
+
+  override getGesture(gestureName: string): Gesture<this, View> | null {
+    const gestures = this.gestures;
+    if (gestures !== null) {
+      const gesture = gestures[gestureName];
+      if (gesture !== void 0) {
+        return gesture as Gesture<this, View>;
+      }
+    }
+    return null;
+  }
+
+  override setGesture(gestureName: string, newGesture: Gesture<this, any> | null): void {
+    let gestures = this.gestures;
+    if (gestures === null) {
+      gestures = {};
+      Object.defineProperty(this, "gestures", {
+        value: gestures,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+    const oldGesture = gestures[gestureName];
+    if (oldGesture !== void 0 && this.isMounted()) {
+      oldGesture.unmount();
+    }
+    if (newGesture !== null) {
+      gestures[gestureName] = newGesture;
+      if (this.isMounted()) {
+        newGesture.mount();
+      }
+    } else {
+      delete gestures[gestureName];
+    }
+  }
+
+  /** @hidden */
+  protected mountGestures(): void {
+    const gestures = this.gestures;
+    for (const gestureName in gestures) {
+      const gesture = gestures[gestureName]!;
+      gesture.mount();
+    }
+    GestureContext.initGestures(this);
+  }
+
+  /** @hidden */
+  protected unmountGestures(): void {
+    const gestures = this.gestures;
+    for (const gestureName in gestures) {
+      const gesture = gestures[gestureName]!;
+      gesture.unmount();
     }
   }
 }

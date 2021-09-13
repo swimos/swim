@@ -16,7 +16,7 @@ import type {HtmlView} from "@swim/dom";
 import {ControllerView, ControllerViewTrait, CompositeController} from "@swim/controller";
 import type {ColLayout} from "../layout/ColLayout";
 import {ColView} from "./ColView";
-import {ColHeader, ColTrait} from "./ColTrait";
+import {ColLabel, ColTrait} from "./ColTrait";
 import type {ColControllerObserver} from "./ColControllerObserver";
 
 export class ColController extends CompositeController {
@@ -29,14 +29,14 @@ export class ColController extends CompositeController {
   protected attachColTrait(colTrait: ColTrait): void {
     const colView = this.col.view;
     if (colView !== null) {
-      this.setHeaderView(colTrait.header.state, colTrait);
+      this.setLabelView(colTrait.label.state, colTrait);
     }
   }
 
   protected detachColTrait(colTrait: ColTrait): void {
     const colView = this.col.view;
     if (colView !== null) {
-      this.setHeaderView(null, colTrait);
+      this.setLabelView(null, colTrait);
     }
   }
 
@@ -103,16 +103,16 @@ export class ColController extends CompositeController {
   }
 
   protected attachColView(colView: ColView): void {
-    this.header.setView(colView.header.view);
+    this.label.setView(colView.label.view);
 
     const colTrait = this.col.trait;
     if (colTrait !== null) {
-      this.setHeaderView(colTrait.header.state, colTrait);
+      this.setLabelView(colTrait.label.state, colTrait);
     }
   }
 
   protected detachColView(colView: ColView): void {
-    this.header.setView(null);
+    this.label.setView(null);
   }
 
   protected willSetColView(newColView: ColView | null, oldColView: ColView | null): void {
@@ -145,64 +145,6 @@ export class ColController extends CompositeController {
     }
   }
 
-  protected createHeaderView(header: ColHeader, colTrait: ColTrait): HtmlView | string | null {
-    if (typeof header === "function") {
-      return header(colTrait);
-    } else {
-      return header;
-    }
-  }
-
-  protected setHeaderView(header: ColHeader | null, colTrait: ColTrait): void {
-    const colView = this.col.view;
-    if (colView !== null) {
-      const headerView = header !== null ? this.createHeaderView(header, colTrait) : null;
-      colView.header.setView(headerView);
-    }
-  }
-
-  protected initHeaderView(headerView: HtmlView): void {
-    // hook
-  }
-
-  protected attachHeaderView(headerView: HtmlView): void {
-    // hook
-  }
-
-  protected detachHeaderView(headerView: HtmlView): void {
-    // hook
-  }
-
-  protected willSetHeaderView(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerWillSetColHeaderView !== void 0) {
-        controllerObserver.controllerWillSetColHeaderView(newHeaderView, oldHeaderView, this);
-      }
-    }
-  }
-
-  protected onSetHeaderView(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
-    if (oldHeaderView !== null) {
-      this.detachHeaderView(oldHeaderView);
-    }
-    if (newHeaderView !== null) {
-      this.attachHeaderView(newHeaderView);
-      this.initHeaderView(newHeaderView);
-    }
-  }
-
-  protected didSetHeaderView(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
-    const controllerObservers = this.controllerObservers;
-    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
-      const controllerObserver = controllerObservers[i]!;
-      if (controllerObserver.controllerDidSetColHeaderView !== void 0) {
-        controllerObserver.controllerDidSetColHeaderView(newHeaderView, oldHeaderView, this);
-      }
-    }
-  }
-
   /** @hidden */
   static ColFastener = ControllerViewTrait.define<ColController, ColView, ColTrait>({
     viewType: ColView,
@@ -216,8 +158,8 @@ export class ColController extends CompositeController {
     didSetView(newColView: ColView | null, oldColView: ColView | null): void {
       this.owner.didSetColView(newColView, oldColView);
     },
-    viewDidSetColHeader(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
-      this.owner.header.setView(newHeaderView);
+    viewDidSetLabel(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
+      this.owner.label.setView(newLabelView);
     },
     createView(): ColView | null {
       return this.owner.createColView();
@@ -233,15 +175,15 @@ export class ColController extends CompositeController {
     didSetTrait(newColTrait: ColTrait | null, oldColTrait: ColTrait | null): void {
       this.owner.didSetColTrait(newColTrait, oldColTrait);
     },
-    traitWillSetColLayout(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
+    traitWillSetLayout(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
       this.owner.willSetLayout(newLayout, oldLayout);
     },
-    traitDidSetColLayout(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
+    traitDidSetLayout(newLayout: ColLayout | null, oldLayout: ColLayout | null): void {
       this.owner.onSetLayout(newLayout, oldLayout);
       this.owner.didSetLayout(newLayout, oldLayout);
     },
-    traitDidSetColHeader(newHeader: ColHeader | null, oldHeader: ColHeader | null, colTrait: ColTrait): void {
-      this.owner.setHeaderView(newHeader, colTrait);
+    traitDidSetLabel(newLabel: ColLabel | null, oldLabel: ColLabel | null, colTrait: ColTrait): void {
+      this.owner.setLabelView(newLabel, colTrait);
     },
   });
 
@@ -250,16 +192,74 @@ export class ColController extends CompositeController {
   })
   readonly col!: ControllerViewTrait<this, ColView, ColTrait>;
 
+  protected createLabelView(label: ColLabel, colTrait: ColTrait): HtmlView | string | null {
+    if (typeof label === "function") {
+      return label(colTrait);
+    } else {
+      return label;
+    }
+  }
+
+  protected setLabelView(label: ColLabel | null, colTrait: ColTrait): void {
+    const colView = this.col.view;
+    if (colView !== null) {
+      const labelView = label !== null ? this.createLabelView(label, colTrait) : null;
+      colView.label.setView(labelView);
+    }
+  }
+
+  protected initLabelView(labelView: HtmlView): void {
+    // hook
+  }
+
+  protected attachLabelView(labelView: HtmlView): void {
+    // hook
+  }
+
+  protected detachLabelView(labelView: HtmlView): void {
+    // hook
+  }
+
+  protected willSetLabelView(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerWillSetColLabelView !== void 0) {
+        controllerObserver.controllerWillSetColLabelView(newLabelView, oldLabelView, this);
+      }
+    }
+  }
+
+  protected onSetLabelView(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
+    if (oldLabelView !== null) {
+      this.detachLabelView(oldLabelView);
+    }
+    if (newLabelView !== null) {
+      this.attachLabelView(newLabelView);
+      this.initLabelView(newLabelView);
+    }
+  }
+
+  protected didSetLabelView(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
+    const controllerObservers = this.controllerObservers;
+    for (let i = 0, n = controllerObservers.length; i < n; i += 1) {
+      const controllerObserver = controllerObservers[i]!;
+      if (controllerObserver.controllerDidSetColLabelView !== void 0) {
+        controllerObserver.controllerDidSetColLabelView(newLabelView, oldLabelView, this);
+      }
+    }
+  }
+
   @ControllerView<ColController, HtmlView>({
-    willSetView(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
-      this.owner.willSetHeaderView(newHeaderView, oldHeaderView);
+    willSetView(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
+      this.owner.willSetLabelView(newLabelView, oldLabelView);
     },
-    onSetView(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
-      this.owner.onSetHeaderView(newHeaderView, oldHeaderView);
+    onSetView(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
+      this.owner.onSetLabelView(newLabelView, oldLabelView);
     },
-    didSetView(newHeaderView: HtmlView | null, oldHeaderView: HtmlView | null): void {
-      this.owner.didSetHeaderView(newHeaderView, oldHeaderView);
+    didSetView(newLabelView: HtmlView | null, oldLabelView: HtmlView | null): void {
+      this.owner.didSetLabelView(newLabelView, oldLabelView);
     },
   })
-  readonly header!: ControllerView<this, HtmlView>;
+  readonly label!: ControllerView<this, HtmlView>;
 }

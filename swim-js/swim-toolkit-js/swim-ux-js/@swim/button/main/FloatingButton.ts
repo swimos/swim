@@ -24,15 +24,15 @@ import {
   ExpansionViewAnimator,
   ViewFastener,
   PositionGestureInput,
-  PositionGestureDelegate,
+  PositionGesture,
 } from "@swim/view";
-import type {HtmlViewObserver} from "@swim/dom";
+import type {HtmlView} from "@swim/dom";
 import {Graphics, HtmlIconView} from "@swim/graphics";
 import {ButtonMembrane} from "./ButtonMembrane";
 
 export type FloatingButtonType = "regular" | "mini";
 
-export class FloatingButton extends ButtonMembrane implements PositionGestureDelegate {
+export class FloatingButton extends ButtonMembrane {
   constructor(node: HTMLElement) {
     super(node);
     Object.defineProperty(this, "buttonType", {
@@ -85,7 +85,34 @@ export class FloatingButton extends ButtonMembrane implements PositionGestureDel
   }
 
   /** @hidden */
-  static IconFastener = ViewFastener.define<FloatingButton, HtmlIconView, never, HtmlViewObserver & {iconIndex: number}>({
+  static override Gesture = PositionGesture.define<FloatingButton, HtmlView>({
+    extends: ButtonMembrane.Gesture,
+    didStartHovering(): void {
+      this.owner.modifyMood(Feel.default, [[Feel.hovering, 1]]);
+      if (this.owner.backgroundColor.takesPrecedence(View.Intrinsic)) {
+        const timing = this.owner.getLook(Look.timing);
+        this.owner.backgroundColor.setState(this.owner.getLookOr(Look.accentColor, null), timing, View.Intrinsic);
+      }
+    },
+    didStopHovering(): void {
+      this.owner.modifyMood(Feel.default, [[Feel.hovering, void 0]]);
+      if (this.owner.backgroundColor.takesPrecedence(View.Intrinsic)) {
+        const timing = this.owner.getLook(Look.timing);
+        this.owner.backgroundColor.setState(this.owner.getLookOr(Look.accentColor, null), timing, View.Intrinsic);
+      }
+    },
+    didMovePress(input: PositionGestureInput, event: Event | null): void {
+      // nop
+    },
+  }) as typeof ButtonMembrane.Gesture;
+
+  @PositionGesture<FloatingButton, HtmlView>({
+    extends: FloatingButton.Gesture,
+  })
+  override readonly gesture!: PositionGesture<this, HtmlView>;
+
+  /** @hidden */
+  static IconFastener = ViewFastener.define<FloatingButton, HtmlIconView, never, {iconIndex: number}>({
     extends: void 0,
     type: HtmlIconView,
     child: false,
@@ -218,25 +245,5 @@ export class FloatingButton extends ButtonMembrane implements PositionGestureDel
       shadow = shadow.withColor(shadowColor.alpha(shadowColor.alpha() * phase));
     }
     this.boxShadow.setState(shadow, View.Intrinsic);
-  }
-
-  didStartHovering(): void {
-    this.modifyMood(Feel.default, [[Feel.hovering, 1]]);
-    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
-      const timing = this.getLook(Look.timing);
-      this.backgroundColor.setState(this.getLookOr(Look.accentColor, null), timing, View.Intrinsic);
-    }
-  }
-
-  didStopHovering(): void {
-    this.modifyMood(Feel.default, [[Feel.hovering, void 0]]);
-    if (this.backgroundColor.takesPrecedence(View.Intrinsic)) {
-      const timing = this.getLook(Look.timing);
-      this.backgroundColor.setState(this.getLookOr(Look.accentColor, null), timing, View.Intrinsic);
-    }
-  }
-
-  override didMovePress(input: PositionGestureInput, event: Event | null): void {
-    // nop
   }
 }

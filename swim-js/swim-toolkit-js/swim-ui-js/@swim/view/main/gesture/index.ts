@@ -16,34 +16,53 @@ export {
   GestureInputType,
   GestureInput,
 } from "./GestureInput";
-export {GestureDelegate} from "./GestureDelegate";
+export {
+  GestureContextPrototype,
+  GestureContext,
+} from "./GestureContext";
+export {
+  GestureMemberType,
+  GestureMethod,
+  GestureFlags,
+  GestureInit,
+  GestureDescriptor,
+  GestureConstructor,
+  GestureClass,
+  Gesture,
+} from "./Gesture";
 
 export {PositionGestureInput} from "./PositionGestureInput";
-export {PositionGestureDelegate} from "./PositionGestureDelegate";
 export {
-  AbstractPositionGesture,
-  PointerPositionGesture,
-  TouchPositionGesture,
-  MousePositionGesture,
+  PositionGestureInit,
+  PositionGestureDescriptor,
+  PositionGestureConstructor,
+  PositionGestureClass,
   PositionGesture,
 } from "./PositionGesture";
+export {PointerPositionGesture} from "./PointerPositionGesture";
+export {TouchPositionGesture} from "./TouchPositionGesture";
+export {MousePositionGesture} from "./MousePositionGesture";
 
 export {MomentumGestureInput} from "./MomentumGestureInput";
-export {MomentumGestureDelegate} from "./MomentumGestureDelegate";
 export {
-  AbstractMomentumGesture,
-  PointerMomentumGesture,
-  TouchMomentumGesture,
-  MouseMomentumGesture,
+  MomentumGestureInit,
+  MomentumGestureDescriptor,
+  MomentumGestureConstructor,
+  MomentumGestureClass,
   MomentumGesture,
 } from "./MomentumGesture";
+export {PointerMomentumGesture} from "./PointerMomentumGesture";
+export {TouchMomentumGesture} from "./TouchMomentumGesture";
+export {MouseMomentumGesture} from "./MouseMomentumGesture";
 
 export {ScaleGestureInput} from "./ScaleGestureInput";
-export {ScaleGestureDelegate} from "./ScaleGestureDelegate";
 export {
-  AbstractScaleGesture,
-  PointerScaleGesture,
-  TouchScaleGesture,
-  MouseScaleGesture,
+  ScaleGestureInit,
+  ScaleGestureDescriptor,
+  ScaleGestureConstructor,
+  ScaleGestureClass,
   ScaleGesture,
 } from "./ScaleGesture";
+export {PointerScaleGesture} from "./PointerScaleGesture";
+export {TouchScaleGesture} from "./TouchScaleGesture";
+export {MouseScaleGesture} from "./MouseScaleGesture";

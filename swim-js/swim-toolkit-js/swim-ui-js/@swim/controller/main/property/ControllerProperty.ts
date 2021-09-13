@@ -203,7 +203,7 @@ export const ControllerProperty = function <C extends Controller, T, U>(
     propertyName?: string,
   ): ControllerProperty<C, T, U> | PropertyDecorator {
   if (this instanceof ControllerProperty) { // constructor
-    return ControllerPropertyConstructor.call(this as ControllerProperty<Controller, unknown, unknown>, owner as C, propertyName);
+    return ControllerPropertyConstructor.call(this as ControllerProperty<C, unknown, unknown>, owner as C, propertyName);
   } else { // decorator factory
     return ControllerPropertyDecoratorFactory(owner as ControllerPropertyDescriptor<C, T, U>);
   }
