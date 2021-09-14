@@ -2097,7 +2097,9 @@ export class CanvasView extends HtmlView {
       do {
         width = Math.floor(parentNode.offsetWidth);
         height = Math.floor(parentNode.offsetHeight);
-        if (width !== 0 && height !== 0) {
+        if (width === 0 || height === 0) { // not yet laid out
+          this.requireUpdate(View.NeedsResize);
+        } else if (width !== 0 && height !== 0) {
           break;
         }
         parentNode = parentNode.parentNode;

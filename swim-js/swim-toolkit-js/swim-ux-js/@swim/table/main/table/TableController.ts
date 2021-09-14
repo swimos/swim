@@ -191,6 +191,9 @@ export class TableController extends CompositeController {
     const headerController = this.header.controller;
     if (headerController !== null) {
       headerController.header.injectView(tableView);
+      if (tableView.header.view === null) {
+        tableView.header.setView(headerController.header.view);
+      }
     }
 
     const rowFasteners = this.rowFasteners;
@@ -484,7 +487,10 @@ export class TableController extends CompositeController {
   }
 
   protected attachHeaderView(headerView: HeaderView): void {
-    // hook
+    const tableView = this.table.view;
+    if (tableView !== null && tableView.header.view === null) {
+      tableView.header.setView(headerView);
+    }
   }
 
   protected detachHeaderView(headerView: HeaderView): void {

@@ -65,7 +65,7 @@ export class TextCellController extends CellController {
   }) as unknown as typeof CellController.CellFastener;
 
   @ControllerViewTrait<TextCellController, TextCellView, TextCellTrait>({
-    extends: CellController.CellFastener,
+    extends: TextCellController.CellFastener,
   })
   override readonly cell!: ControllerViewTrait<this, TextCellView, TextCellTrait>;
 

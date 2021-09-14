@@ -98,7 +98,7 @@ export class IconCellController extends CellController {
   }) as unknown as typeof CellController.CellFastener;
 
   @ControllerViewTrait<IconCellController, IconCellView, IconCellTrait>({
-    extends: CellController.CellFastener,
+    extends: IconCellController.CellFastener,
   })
   override readonly cell!: ControllerViewTrait<this, IconCellView, IconCellTrait>;
 }

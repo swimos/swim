@@ -24,6 +24,7 @@ import {
   ModalState,
   Modal,
   ViewProperty,
+  ViewPropertyConstraint,
   ViewAnimator,
   ViewAnimatorConstraint,
   PresenceViewAnimator,
@@ -80,6 +81,12 @@ export class DrawerView extends HtmlView implements Modal {
 
   @ViewAnimatorConstraint({type: Length, state: Length.px(200)})
   readonly expandedWidth!: ViewAnimatorConstraint<this, Length, AnyLength>;
+
+  @ViewPropertyConstraint({type: Length, state: null})
+  readonly effectiveWidth!: ViewPropertyConstraint<this, Length | null, AnyLength | null>;
+
+  @ViewPropertyConstraint({type: Length, state: null})
+  readonly effectiveHeight!: ViewPropertyConstraint<this, Length | null, AnyLength | null>;
 
   isHorizontal(): boolean {
     return this.placement.state === "top" || this.placement.state === "bottom";
@@ -309,6 +316,9 @@ export class DrawerView extends HtmlView implements Modal {
     }
     this.top.setState(height.times(slidePhase - 1), View.Intrinsic);
 
+    this.effectiveWidth.setState(this.width.value);
+    this.effectiveHeight.setState(height.times(slidePhase), View.Intrinsic);
+
     let edgeInsets = this.edgeInsets.superState;
     if (edgeInsets === void 0 || edgeInsets === null) {
       edgeInsets = viewContext.viewport.safeArea;
@@ -354,6 +364,9 @@ export class DrawerView extends HtmlView implements Modal {
     this.width.setState(width, View.Intrinsic);
     this.right.setState(width.times(slidePhase - 1), View.Intrinsic);
 
+    this.effectiveWidth.setState(width.times(slidePhase), View.Intrinsic);
+    this.effectiveHeight.setState(this.height.value, View.Intrinsic);
+
     let edgeInsets = this.edgeInsets.superState;
     if ((edgeInsets === void 0 || edgeInsets === null) || edgeInsets === null) {
       edgeInsets = viewContext.viewport.safeArea;
@@ -388,6 +401,9 @@ export class DrawerView extends HtmlView implements Modal {
       height = Length.px(this.node.offsetHeight);
     }
     this.bottom.setState(height.times(slidePhase - 1), View.Intrinsic);
+
+    this.effectiveWidth.setState(this.width.value, View.Intrinsic);
+    this.effectiveHeight.setState(height.times(slidePhase), View.Intrinsic);
 
     let edgeInsets = this.edgeInsets.superState;
     if ((edgeInsets === void 0 || edgeInsets === null) || edgeInsets === null) {
@@ -433,6 +449,9 @@ export class DrawerView extends HtmlView implements Modal {
     }
     this.width.setState(width, View.Intrinsic);
     this.left.setState(width.times(slidePhase - 1), View.Intrinsic);
+
+    this.effectiveWidth.setState(width.times(slidePhase), View.Intrinsic);
+    this.effectiveHeight.setState(this.height.value, View.Intrinsic);
 
     let edgeInsets = this.edgeInsets.superState;
     if ((edgeInsets === void 0 || edgeInsets === null) || edgeInsets === null) {
