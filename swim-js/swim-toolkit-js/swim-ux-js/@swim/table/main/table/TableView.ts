@@ -93,6 +93,12 @@ export class TableView extends HtmlView {
   @ViewAnimatorConstraint({type: Length, inherit: true, state: Length.px(24), updateFlags: View.NeedsLayout})
   readonly rowHeight!: ViewAnimatorConstraint<this, Length, AnyLength>;
 
+  @ViewProperty({type: Boolean, inherit: true, state: false})
+  readonly hovers!: ViewProperty<this, boolean>;
+
+  @ViewProperty({type: Boolean, inherit: true, state: true})
+  readonly glows!: ViewProperty<this, boolean>;
+
   @ViewAnimator({type: Expansion, inherit: true, state: null})
   readonly disclosure!: ExpansionViewAnimator<this, Expansion | null, AnyExpansion | null>;
 

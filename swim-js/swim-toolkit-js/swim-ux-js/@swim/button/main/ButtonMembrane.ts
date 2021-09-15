@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {HtmlViewInit, HtmlView} from "@swim/dom";
-import {PositionGestureInput, PositionGesture} from "@swim/view";
+import {ViewProperty, PositionGestureInput, PositionGesture} from "@swim/view";
 import {ButtonGlow} from "./ButtonGlow";
 
 export interface ButtonMembraneInit extends HtmlViewInit {
@@ -33,19 +33,8 @@ export class ButtonMembrane extends HtmlView {
     super.initView(init);
   }
 
-  get glows(): boolean {
-    return true;
-  }
-
-  setGlows(glows: boolean): void {
-    if (this.glows !== glows) {
-      Object.defineProperty(this, "glows", {
-        value: glows,
-        configurable: true,
-        enumerable: true,
-      });
-    }
-  }
+  @ViewProperty({type: Boolean, inherit: true, state: true})
+  readonly glows!: ViewProperty<this, boolean>;
 
   protected glow(input: PositionGestureInput): void {
     if (input.detail instanceof ButtonGlow) {
@@ -62,7 +51,7 @@ export class ButtonMembrane extends HtmlView {
   /** @hidden */
   static Gesture = PositionGesture.define<ButtonMembrane, HtmlView>({
     didBeginPress(input: PositionGestureInput, event: Event | null): void {
-      if (this.owner.glows) {
+      if (this.owner.glows.state) {
         this.owner.glow(input);
       }
     },
@@ -70,6 +59,7 @@ export class ButtonMembrane extends HtmlView {
       if (input.isRunaway()) {
         this.cancelPress(input, event);
       } else if (!this.owner.clientBounds.contains(input.x, input.y)) {
+        input.clearHoldTimer();
         this.beginHover(input, event);
         if (input.detail instanceof ButtonGlow) {
           input.detail.fade(input.x, input.y);

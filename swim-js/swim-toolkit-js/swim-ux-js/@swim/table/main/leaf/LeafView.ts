@@ -57,7 +57,6 @@ export class LeafView extends HtmlView {
     this.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
                                    [Feel.hovering, hoverPhase * (1 - highlightPhase)],
                                    [Feel.selected, highlightPhase]], false);
-    this.backgroundColor.setLook(Look.backgroundColor, View.Intrinsic);
   }
 
   override readonly viewObservers!: ReadonlyArray<LeafViewObserver>;
@@ -96,7 +95,16 @@ export class LeafView extends HtmlView {
     this.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
                                    [Feel.hovering, hoverPhase * (1 - highlightPhase)],
                                    [Feel.selected, highlightPhase]], false);
+    if (backgroundPhase !== 0) {
+      this.backgroundColor.setLook(Look.backgroundColor, View.Intrinsic);
+    } else {
+      this.backgroundColor.setLook(null, View.Intrinsic);
+      this.backgroundColor.setState(null, View.Intrinsic);
+    }
   }
+
+  @ViewProperty({type: Boolean, inherit: true, state: false})
+  readonly hovers!: ViewProperty<this, boolean>;
 
   @ViewAnimator<LeafView, Focus, AnyFocus>({
     type: Focus,
@@ -162,6 +170,12 @@ export class LeafView extends HtmlView {
     this.modifyMood(Feel.default, [[Feel.transparent, 1 - backgroundPhase],
                                    [Feel.hovering, hoverPhase * (1 - highlightPhase)],
                                    [Feel.selected, highlightPhase]], false);
+    if (backgroundPhase !== 0) {
+      this.backgroundColor.setLook(Look.backgroundColor, View.Intrinsic);
+    } else {
+      this.backgroundColor.setLook(null, View.Intrinsic);
+      this.backgroundColor.setState(null, View.Intrinsic);
+    }
   }
 
   @ViewAnimator<LeafView, Focus, AnyFocus>({
@@ -426,19 +440,8 @@ export class LeafView extends HtmlView {
     super.unmountViewFasteners();
   }
 
-  get glows(): boolean {
-    return true;
-  }
-
-  setGlows(glows: boolean): void {
-    if (this.glows !== glows) {
-      Object.defineProperty(this, "glows", {
-        value: glows,
-        configurable: true,
-        enumerable: true,
-      });
-    }
-  }
+  @ViewProperty({type: Boolean, inherit: true, state: true})
+  readonly glows!: ViewProperty<this, boolean>;
 
   protected glow(input: PositionGestureInput): void {
     if (input.detail instanceof ButtonGlow) {
@@ -453,7 +456,9 @@ export class LeafView extends HtmlView {
   }
 
   protected onEnter(): void {
-    // hook
+    if (this.hovers.state) {
+      this.hover.focus(false);
+    }
   }
 
   protected didEnter(): void {
@@ -467,7 +472,9 @@ export class LeafView extends HtmlView {
   }
 
   protected onLeave(): void {
-    // hook
+    if (this.hovers.state) {
+      this.hover.unfocus();
+    }
   }
 
   protected didLeave(): void {
@@ -511,7 +518,7 @@ export class LeafView extends HtmlView {
   /** @hidden */
   static Gesture = PositionGesture.define<LeafView, LeafView>({
     didBeginPress(input: PositionGestureInput, event: Event | null): void {
-      if (this.owner.glows) {
+      if (this.owner.glows.state) {
         this.owner.glow(input);
       }
     },
@@ -519,6 +526,7 @@ export class LeafView extends HtmlView {
       if (input.isRunaway()) {
         this.cancelPress(input, event);
       } else if (!this.owner.clientBounds.contains(input.x, input.y)) {
+        input.clearHoldTimer();
         this.beginHover(input, event);
         if (input.detail instanceof ButtonGlow) {
           input.detail.fade(input.x, input.y);
@@ -535,17 +543,6 @@ export class LeafView extends HtmlView {
         }
       } else if (input.detail instanceof ButtonGlow) {
         input.detail.pulse(input.x, input.y);
-      }
-
-      let target = input.target;
-      while (target !== null && target !== this.owner.node) {
-        const targetView = (target as ViewNode).view;
-        if (targetView instanceof CellView) {
-          targetView.onPress(input, event);
-          targetView.didPress(input, event);
-          break;
-        }
-        target = target instanceof Node ? target.parentNode : null;
       }
     },
     didCancelPress(input: PositionGestureInput, event: Event | null): void {
@@ -566,21 +563,37 @@ export class LeafView extends HtmlView {
       this.owner.didLeave();
     },
     didPress(input: PositionGestureInput, event: Event | null): void {
-      if (!input.defaultPrevented) {
-        this.owner.onPress(input, event);
-        this.owner.didPress(input, event);
+      if (this.owner.clientBounds.contains(input.x, input.y)) {
+        if (!input.defaultPrevented) {
+          let target = input.target;
+          while (target !== null && target !== this.owner.node) {
+            const targetView = (target as ViewNode).view;
+            if (targetView instanceof CellView) {
+              targetView.onPress(input, event);
+              targetView.didPress(input, event);
+              break;
+            }
+            target = target instanceof Node ? target.parentNode : null;
+          }
+        }
+        if (!input.defaultPrevented) {
+          this.owner.onPress(input, event);
+          this.owner.didPress(input, event);
+        }
       }
     },
     didLongPress(input: PositionGestureInput): void {
-      let target = input.target;
-      while (target !== null && target !== this.owner.node) {
-        const targetView = (target as ViewNode).view;
-        if (targetView instanceof CellView) {
-          targetView.onLongPress(input);
-          targetView.didLongPress(input);
-          break;
+      if (!input.defaultPrevented) {
+        let target = input.target;
+        while (target !== null && target !== this.owner.node) {
+          const targetView = (target as ViewNode).view;
+          if (targetView instanceof CellView) {
+            targetView.onLongPress(input);
+            targetView.didLongPress(input);
+            break;
+          }
+          target = target instanceof Node ? target.parentNode : null;
         }
-        target = target instanceof Node ? target.parentNode : null;
       }
       if (!input.defaultPrevented) {
         this.owner.onLongPress(input);

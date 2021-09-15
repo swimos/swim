@@ -83,6 +83,12 @@ export class RowView extends HtmlView {
   @ViewAnimatorConstraint({type: Length, inherit: true, state: null, updateFlags: View.NeedsLayout})
   readonly rowHeight!: ViewAnimatorConstraint<this, Length | null, AnyLength | null>;
 
+  @ViewProperty({type: Boolean, inherit: true, state: false})
+  readonly hovers!: ViewProperty<this, boolean>;
+
+  @ViewProperty({type: Boolean, inherit: true, state: true})
+  readonly glows!: ViewProperty<this, boolean>;
+
   getCell(key: string): CellView | null;
   getCell<V extends CellView>(key: string, cellViewClass: ViewClass<V>): V | null;
   getCell(key: string, cellViewClass?: ViewClass<CellView>): CellView | null {
