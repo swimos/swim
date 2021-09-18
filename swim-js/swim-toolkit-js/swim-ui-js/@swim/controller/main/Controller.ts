@@ -471,46 +471,29 @@ export abstract class Controller implements GestureContext {
   }
 
   requireUpdate(updateFlags: ControllerFlags, immediate: boolean = false): void {
-    updateFlags &= ~Controller.StatusMask;
-    if (updateFlags !== 0) {
-      this.willRequireUpdate(updateFlags, immediate);
-      const oldUpdateFlags = this.controllerFlags;
-      const newUpdateFlags = oldUpdateFlags | updateFlags;
-      const deltaUpdateFlags = newUpdateFlags & ~oldUpdateFlags & ~Controller.StatusMask;
-      if (deltaUpdateFlags !== 0) {
-        this.setControllerFlags(newUpdateFlags);
-        this.onRequireUpdate(updateFlags, immediate);
-        this.requestUpdate(this, deltaUpdateFlags, immediate);
-      }
-      this.didRequireUpdate(updateFlags, immediate);
+    const controllerFlags = this.controllerFlags;
+    const deltaUpdateFlags = updateFlags & ~controllerFlags & Controller.UpdateMask;
+    if (deltaUpdateFlags !== 0) {
+      this.setControllerFlags(controllerFlags | deltaUpdateFlags);
+      this.requestUpdate(this, deltaUpdateFlags, immediate);
     }
   }
 
-  protected willRequireUpdate(updateFlags: ControllerFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected onRequireUpdate(updateFlags: ControllerFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected didRequireUpdate(updateFlags: ControllerFlags, immediate: boolean): void {
-    // hook
+  protected needsUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): ControllerFlags {
+    return updateFlags;
   }
 
   requestUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): void {
-    this.willRequestUpdate(targetController, updateFlags, immediate);
-    let propagateFlags = updateFlags & (Controller.NeedsCompile | Controller.NeedsExecute);
-    if ((updateFlags & Controller.CompileMask) !== 0 && (this.controllerFlags & Controller.NeedsCompile) === 0) {
-      this.setControllerFlags(this.controllerFlags | Controller.NeedsCompile);
-      propagateFlags |= Controller.NeedsCompile;
+    updateFlags = this.needsUpdate(targetController, updateFlags, immediate);
+    let deltaUpdateFlags = this.controllerFlags & ~updateFlags & Controller.UpdateMask;
+    if ((updateFlags & Controller.CompileMask) !== 0) {
+      deltaUpdateFlags |= Controller.NeedsCompile;
     }
-    if ((updateFlags & Controller.ExecuteMask) !== 0 && (this.controllerFlags & Controller.NeedsExecute) === 0) {
-      this.setControllerFlags(this.controllerFlags | Controller.NeedsExecute);
-      propagateFlags |= Controller.NeedsExecute;
+    if ((updateFlags & Controller.ExecuteMask) !== 0) {
+      deltaUpdateFlags |= Controller.NeedsExecute;
     }
-    if ((propagateFlags & (Controller.NeedsCompile | Controller.NeedsExecute)) !== 0 || immediate) {
-      this.onRequestUpdate(targetController, updateFlags, immediate);
+    if (deltaUpdateFlags !== 0 || immediate) {
+      this.setControllerFlags(this.controllerFlags | deltaUpdateFlags);
       const parentController = this.parentController;
       if (parentController !== null) {
         parentController.requestUpdate(targetController, updateFlags, immediate);
@@ -521,19 +504,6 @@ export abstract class Controller implements GestureContext {
         }
       }
     }
-    this.didRequestUpdate(targetController, updateFlags, immediate);
-  }
-
-  protected willRequestUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected onRequestUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected didRequestUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): void {
-    // hook
   }
 
   isTraversing(): boolean {
@@ -548,7 +518,7 @@ export abstract class Controller implements GestureContext {
     return (this.controllerFlags & Controller.CompilingFlag) !== 0;
   }
 
-  needsCompile(compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>): ControllerFlags {
+  protected needsCompile(compileFlags: ControllerFlags, controllerContext: ControllerContextType<this>): ControllerFlags {
     return compileFlags;
   }
 
@@ -660,7 +630,7 @@ export abstract class Controller implements GestureContext {
     return (this.controllerFlags & Controller.ExecutingFlag) !== 0;
   }
 
-  needsExecute(executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>): ControllerFlags {
+  protected needsExecute(executeFlags: ControllerFlags, controllerContext: ControllerContextType<this>): ControllerFlags {
     return executeFlags;
   }
 

@@ -486,7 +486,7 @@ export class TokenView extends HtmlView {
   })
   readonly label!: ViewFastener<this, HtmlView>;
 
-  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsLayout) !== 0) {
       processFlags |= View.NeedsAnimate;
     }

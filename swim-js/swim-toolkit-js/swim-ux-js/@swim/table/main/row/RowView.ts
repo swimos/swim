@@ -640,7 +640,7 @@ export class RowView extends HtmlView {
     (viewContext as any).visibleFrame = this.visibleFrame;
   }
 
-  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsResize) !== 0) {
       processFlags |= View.NeedsScroll;
     }

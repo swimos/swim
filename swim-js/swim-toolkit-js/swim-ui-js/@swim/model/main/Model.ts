@@ -841,55 +841,33 @@ export abstract class Model implements ModelDownlinkContext {
   }
 
   requireUpdate(updateFlags: ModelFlags, immediate: boolean = false): void {
-    updateFlags &= ~Model.StatusMask;
-    if (updateFlags !== 0) {
-      this.willRequireUpdate(updateFlags, immediate);
-      const oldUpdateFlags = this.modelFlags;
-      const newUpdateFlags = oldUpdateFlags | updateFlags;
-      const deltaUpdateFlags = newUpdateFlags & ~oldUpdateFlags & ~Model.StatusMask;
-      if (deltaUpdateFlags !== 0) {
-        this.setModelFlags(newUpdateFlags);
-        this.onRequireUpdate(updateFlags, immediate);
-        this.requestUpdate(this, deltaUpdateFlags, immediate);
-      }
-      this.didRequireUpdate(updateFlags, immediate);
+    const modelFlags = this.modelFlags;
+    const deltaUpdateFlags = updateFlags & ~modelFlags & Model.UpdateMask;
+    if (deltaUpdateFlags !== 0) {
+      this.setModelFlags(modelFlags | deltaUpdateFlags);
+      this.requestUpdate(this, deltaUpdateFlags, immediate);
     }
   }
 
-  protected willRequireUpdate(updateFlags: ModelFlags, immediate: boolean): void {
+  protected needsUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): ModelFlags {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).willRequireUpdate(updateFlags, immediate);
+      updateFlags = (traits[i]! as any).needsUpdate(targetModel, updateFlags, immediate);
     }
-  }
-
-  protected onRequireUpdate(updateFlags: ModelFlags, immediate: boolean): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).onRequireUpdate(updateFlags, immediate);
-    }
-  }
-
-  protected didRequireUpdate(updateFlags: ModelFlags, immediate: boolean): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).didRequireUpdate(updateFlags, immediate);
-    }
+    return updateFlags;
   }
 
   requestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    this.willRequestUpdate(targetModel, updateFlags, immediate);
-    let propagateFlags = updateFlags & (Model.NeedsAnalyze | Model.NeedsRefresh);
-    if ((updateFlags & Model.AnalyzeMask) !== 0 && (this.modelFlags & Model.NeedsAnalyze) === 0) {
-      this.setModelFlags(this.modelFlags | Model.NeedsAnalyze);
-      propagateFlags |= Model.NeedsAnalyze;
+    updateFlags = this.needsUpdate(targetModel, updateFlags, immediate);
+    let deltaUpdateFlags = this.modelFlags & ~updateFlags & Model.UpdateMask;
+    if ((updateFlags & Model.AnalyzeMask) !== 0) {
+      deltaUpdateFlags |= Model.NeedsAnalyze;
     }
-    if ((updateFlags & Model.RefreshMask) !== 0 && (this.modelFlags & Model.NeedsRefresh) === 0) {
-      this.setModelFlags(this.modelFlags | Model.NeedsRefresh);
-      propagateFlags |= Model.NeedsRefresh;
+    if ((updateFlags & Model.RefreshMask) !== 0) {
+      deltaUpdateFlags |= Model.NeedsRefresh;
     }
-    if ((propagateFlags & (Model.NeedsAnalyze | Model.NeedsRefresh)) !== 0 || immediate) {
-      this.onRequestUpdate(targetModel, updateFlags, immediate);
+    if (deltaUpdateFlags !== 0 || immediate) {
+      this.setModelFlags(this.modelFlags | deltaUpdateFlags);
       const parentModel = this.parentModel;
       if (parentModel !== null) {
         parentModel.requestUpdate(targetModel, updateFlags, immediate);
@@ -899,28 +877,6 @@ export abstract class Model implements ModelDownlinkContext {
           refreshManager.requestUpdate(targetModel, updateFlags, immediate);
         }
       }
-    }
-    this.didRequestUpdate(targetModel, updateFlags, immediate);
-  }
-
-  protected willRequestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      updateFlags |= (traits[i]! as any).willRequestUpdate(targetModel, updateFlags, immediate);
-    }
-  }
-
-  protected onRequestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).onRequestUpdate(targetModel, updateFlags, immediate);
-    }
-  }
-
-  protected didRequestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    const traits = this.traits;
-    for (let i = 0, n = traits.length; i < n; i += 1) {
-      (traits[i]! as any).didRequestUpdate(targetModel, updateFlags, immediate);
     }
   }
 
@@ -936,7 +892,7 @@ export abstract class Model implements ModelDownlinkContext {
     return (this.modelFlags & Model.AnalyzingFlag) !== 0;
   }
 
-  needsAnalyze(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): ModelFlags {
+  protected needsAnalyze(analyzeFlags: ModelFlags, modelContext: ModelContextType<this>): ModelFlags {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
       analyzeFlags = (traits[i]! as any).needsAnalyze(analyzeFlags, modelContext);
@@ -1084,7 +1040,7 @@ export abstract class Model implements ModelDownlinkContext {
     return (this.modelFlags & Model.RefreshingFlag) !== 0;
   }
 
-  needsRefresh(refreshFlags: ModelFlags, modelContext: ModelContextType<this>): ModelFlags {
+  protected needsRefresh(refreshFlags: ModelFlags, modelContext: ModelContextType<this>): ModelFlags {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
       refreshFlags = (traits[i]! as any).needsRefresh(refreshFlags, modelContext);

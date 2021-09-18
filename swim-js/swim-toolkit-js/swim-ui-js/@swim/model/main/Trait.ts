@@ -710,16 +710,8 @@ export abstract class Trait implements ModelDownlinkContext {
     }
   }
 
-  protected willRequireUpdate(updateFlags: ModelFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected onRequireUpdate(updateFlags: ModelFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected didRequireUpdate(updateFlags: ModelFlags, immediate: boolean): void {
-    // hook
+  protected needsUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): ModelFlags {
+    return updateFlags;
   }
 
   requestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
@@ -729,18 +721,6 @@ export abstract class Trait implements ModelDownlinkContext {
     } else {
       throw new TypeError("no model");
     }
-  }
-
-  protected willRequestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected onRequestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected didRequestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    // hook
   }
 
   isTraversing(): boolean {
@@ -758,7 +738,7 @@ export abstract class Trait implements ModelDownlinkContext {
     return model !== null && model.isAnalyzing();
   }
 
-  needsAnalyze(analyzeFlags: ModelFlags, modelContext: TraitContextType<this>): ModelFlags {
+  protected needsAnalyze(analyzeFlags: ModelFlags, modelContext: TraitContextType<this>): ModelFlags {
     return analyzeFlags;
   }
 
@@ -861,7 +841,7 @@ export abstract class Trait implements ModelDownlinkContext {
     return model !== null && model.isRefreshing();
   }
 
-  needsRefresh(refreshFlags: ModelFlags, modelContext: TraitContextType<this>): ModelFlags {
+  protected needsRefresh(refreshFlags: ModelFlags, modelContext: TraitContextType<this>): ModelFlags {
     return refreshFlags;
   }
 

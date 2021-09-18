@@ -25,7 +25,7 @@ import type {MapViewObserver} from "./MapViewObserver";
 export abstract class MapView extends GeoLayerView {
   override readonly viewObservers!: ReadonlyArray<MapViewObserver>;
 
-  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsResize) !== 0) {
       processFlags |= View.NeedsProject;
     }

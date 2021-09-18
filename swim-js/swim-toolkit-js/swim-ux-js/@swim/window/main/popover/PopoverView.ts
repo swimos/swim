@@ -429,7 +429,7 @@ export class PopoverView extends HtmlView implements Modal {
     this.off("click", this.onClick);
   }
 
-  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & (View.NeedsScroll | View.NeedsAnimate)) !== 0) {
       this.requireUpdate(View.NeedsLayout);
     }

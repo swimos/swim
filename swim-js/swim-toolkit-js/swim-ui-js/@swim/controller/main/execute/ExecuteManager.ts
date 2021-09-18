@@ -117,16 +117,21 @@ export class ExecuteManager<C extends Controller = Controller> extends Controlle
   /** @hidden */
   updateDelay: number;
 
+  protected needsUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): ControllerFlags {
+    return updateFlags;
+  }
+
   requestUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): void {
-    this.willRequestUpdate(targetController, updateFlags, immediate);
+    updateFlags = this.needsUpdate(targetController, updateFlags, immediate);
+    let deltaUpdateFlags = this.rootFlags & ~updateFlags & Controller.UpdateMask;
     if ((updateFlags & Controller.CompileMask) !== 0) {
-      this.setRootFlags(this.rootFlags | Controller.NeedsCompile);
+      deltaUpdateFlags |= Controller.NeedsCompile;
     }
     if ((updateFlags & Controller.ExecuteMask) !== 0) {
-      this.setRootFlags(this.rootFlags | Controller.NeedsExecute);
+      deltaUpdateFlags |= Controller.NeedsExecute;
     }
-    if ((this.rootFlags & Controller.UpdateMask) !== 0) {
-      this.onRequestUpdate(targetController, updateFlags, immediate);
+    if (deltaUpdateFlags !== 0 || immediate) {
+      this.setRootFlags(this.rootFlags | deltaUpdateFlags);
       if (immediate && this.updateDelay <= ExecuteManager.MaxCompileInterval
           && (this.rootFlags & (Controller.TraversingFlag | Controller.ImmediateFlag)) === 0) {
         this.runImmediatePass();
@@ -134,19 +139,6 @@ export class ExecuteManager<C extends Controller = Controller> extends Controlle
         this.scheduleUpdate();
       }
     }
-    this.didRequestUpdate(targetController, updateFlags, immediate);
-  }
-
-  protected willRequestUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected onRequestUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected didRequestUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): void {
-    // hook
   }
 
   protected scheduleUpdate(): void {

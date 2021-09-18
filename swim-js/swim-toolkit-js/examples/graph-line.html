@@ -36,8 +36,8 @@ const graphView = canvasView.append(swim.GraphView)
     .fitAspectRatio(-1 / 4)
     .preserveAspectRatio(true)
     .domainTracking(true)
-    .xGestures(true)
-    .yGestures(true);
+    .xScaleGestures(true)
+    .yScaleGestures(true);
 
 const plotView = graphView.append(swim.LinePlotView)
     .hitMode("plot")

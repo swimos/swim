@@ -656,47 +656,30 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   }
 
   requireUpdate(updateFlags: ViewFlags, immediate: boolean = false): void {
-    updateFlags &= ~View.StatusMask;
-    if (updateFlags !== 0) {
-      this.willRequireUpdate(updateFlags, immediate);
-      const oldUpdateFlags = this.viewFlags;
-      const newUpdateFlags = oldUpdateFlags | updateFlags;
-      const deltaUpdateFlags = newUpdateFlags & ~oldUpdateFlags & ~View.StatusMask;
-      if (deltaUpdateFlags !== 0) {
-        this.setViewFlags(newUpdateFlags);
-        this.onRequireUpdate(updateFlags, immediate);
-        this.requestUpdate(this, deltaUpdateFlags, immediate);
-      }
-      this.didRequireUpdate(updateFlags, immediate);
+    const viewFlags = this.viewFlags;
+    const deltaUpdateFlags = updateFlags & ~viewFlags & View.UpdateMask;
+    if (deltaUpdateFlags !== 0) {
+      this.setViewFlags(viewFlags | deltaUpdateFlags);
+      this.requestUpdate(this, deltaUpdateFlags, immediate);
     }
   }
 
-  protected willRequireUpdate(updateFlags: ViewFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected onRequireUpdate(updateFlags: ViewFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected didRequireUpdate(updateFlags: ViewFlags, immediate: boolean): void {
-    // hook
+  protected needsUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): ViewFlags {
+    return updateFlags;
   }
 
   requestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
     if ((this.viewFlags & View.CulledMask) !== View.CulledFlag) { // if not culled root
-      this.willRequestUpdate(targetView, updateFlags, immediate);
-      let propagateFlags = updateFlags & (View.NeedsProcess | View.NeedsDisplay);
-      if ((updateFlags & View.ProcessMask) !== 0 && (this.viewFlags & View.NeedsProcess) === 0) {
-        this.setViewFlags(this.viewFlags | View.NeedsProcess);
-        propagateFlags |= View.NeedsProcess;
+      updateFlags = this.needsUpdate(targetView, updateFlags, immediate);
+      let deltaUpdateFlags = this.viewFlags & ~updateFlags & View.UpdateMask;
+      if ((updateFlags & View.ProcessMask) !== 0) {
+        deltaUpdateFlags |= View.NeedsProcess;
       }
-      if ((updateFlags & View.DisplayMask) !== 0 && (this.viewFlags & View.NeedsDisplay) === 0) {
-        this.setViewFlags(this.viewFlags | View.NeedsDisplay);
-        propagateFlags |= View.NeedsDisplay;
+      if ((updateFlags & View.DisplayMask) !== 0) {
+        deltaUpdateFlags |= View.NeedsDisplay;
       }
-      if ((propagateFlags & (View.NeedsProcess | View.NeedsDisplay)) !== 0 || immediate) {
-        this.onRequestUpdate(targetView, updateFlags, immediate);
+      if (deltaUpdateFlags !== 0 || immediate) {
+        this.setViewFlags(this.viewFlags | deltaUpdateFlags);
         const parentView = this.parentView;
         if (parentView !== null) {
           parentView.requestUpdate(targetView, updateFlags, immediate);
@@ -707,20 +690,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
           }
         }
       }
-      this.didRequestUpdate(targetView, updateFlags, immediate);
     }
-  }
-
-  protected willRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected onRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected didRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
-    // hook
   }
 
   isTraversing(): boolean {
@@ -735,7 +705,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
     return (this.viewFlags & View.ProcessingFlag) !== 0;
   }
 
-  needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     return processFlags;
   }
 
@@ -885,7 +855,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
     return (this.viewFlags & View.DisplayingFlag) !== 0;
   }
 
-  needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     return displayFlags;
   }
 

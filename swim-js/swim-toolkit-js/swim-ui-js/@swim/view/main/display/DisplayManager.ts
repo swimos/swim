@@ -104,16 +104,21 @@ export class DisplayManager<V extends View = View> extends ViewManager<V> {
   /** @hidden */
   updateDelay: number;
 
+  protected needsUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): ViewFlags {
+    return updateFlags;
+  }
+
   requestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
-    this.willRequestUpdate(targetView, updateFlags, immediate);
+    updateFlags = this.needsUpdate(targetView, updateFlags, immediate);
+    let deltaUpdateFlags = this.rootFlags & ~updateFlags & View.UpdateMask;
     if ((updateFlags & View.ProcessMask) !== 0) {
-      this.setRootFlags(this.rootFlags | View.NeedsProcess);
+      deltaUpdateFlags |= View.NeedsProcess;
     }
     if ((updateFlags & View.DisplayMask) !== 0) {
-      this.setRootFlags(this.rootFlags | View.NeedsDisplay);
+      deltaUpdateFlags |= View.NeedsDisplay;
     }
-    if ((this.rootFlags & View.UpdateMask) !== 0) {
-      this.onRequestUpdate(targetView, updateFlags, immediate);
+    if (deltaUpdateFlags !== 0 || immediate) {
+      this.setRootFlags(this.rootFlags | deltaUpdateFlags);
       if (immediate && this.updateDelay <= DisplayManager.MaxProcessInterval
           && (this.rootFlags & (View.TraversingFlag | View.ImmediateFlag)) === 0) {
         this.runImmediatePass();
@@ -121,19 +126,6 @@ export class DisplayManager<V extends View = View> extends ViewManager<V> {
         this.scheduleUpdate();
       }
     }
-    this.didRequestUpdate(targetView, updateFlags, immediate);
-  }
-
-  protected willRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected onRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected didRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
-    // hook
   }
 
   protected scheduleUpdate(): void {

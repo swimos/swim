@@ -115,12 +115,14 @@ export class GeoRasterView extends GeoLayerView {
     }
   }
 
-  protected override didRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
-    super.didRequestUpdate(targetView, updateFlags, immediate);
-    this.requireUpdate(View.NeedsRender | View.NeedsComposite);
+  protected override needsUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): ViewFlags {
+    updateFlags = super.needsUpdate(targetView, updateFlags, immediate);
+    updateFlags |= View.NeedsRender | View.NeedsComposite;
+    this.setViewFlags(this.viewFlags | (View.NeedsRender | View.NeedsComposite));
+    return updateFlags;
   }
 
-  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((this.viewFlags & View.ProcessMask) !== 0 || (processFlags & View.NeedsResize) !== 0) {
       this.requireUpdate(View.NeedsRender | View.NeedsComposite);
     } else {
@@ -134,7 +136,7 @@ export class GeoRasterView extends GeoLayerView {
     this.requireUpdate(View.NeedsLayout | View.NeedsRender | View.NeedsComposite);
   }
 
-  override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((this.viewFlags & View.DisplayMask) !== 0) {
       displayFlags |= View.NeedsRender | View.NeedsComposite;
     } else if ((displayFlags & View.NeedsComposite) !== 0) {

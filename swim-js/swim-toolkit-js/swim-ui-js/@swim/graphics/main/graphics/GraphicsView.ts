@@ -622,7 +622,7 @@ export abstract class GraphicsView extends View {
 
   declare readonly renderer: GraphicsRenderer | null; // getter defined below to work around useDefineForClassFields lunacy
 
-  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((this.viewFlags & View.NeedsAnimate) === 0) {
       processFlags &= ~View.NeedsAnimate;
     }

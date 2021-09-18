@@ -251,7 +251,7 @@ export class GeoPointView extends GeoLayerView {
     }
   }
 
-  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.NeedsProject) !== 0 && this.label.view !== null) {
       this.requireUpdate(View.NeedsLayout);
     }

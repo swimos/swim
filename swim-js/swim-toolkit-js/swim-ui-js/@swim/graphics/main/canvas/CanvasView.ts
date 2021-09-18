@@ -833,12 +833,14 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  protected override didRequestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
-    super.didRequestUpdate(targetView, updateFlags, immediate);
-    this.requireUpdate(View.NeedsRender | View.NeedsComposite);
+  protected override needsUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): ViewFlags {
+    updateFlags = super.needsUpdate(targetView, updateFlags, immediate);
+    updateFlags |= View.NeedsRender | View.NeedsComposite;
+    this.setViewFlags(this.viewFlags | (View.NeedsRender | View.NeedsComposite));
+    return updateFlags;
   }
 
-  override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((processFlags & View.ProcessMask) !== 0) {
       this.requireUpdate(View.NeedsRender | View.NeedsComposite);
     }
@@ -888,7 +890,7 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
+  protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     displayFlags |= View.NeedsRender | View.NeedsComposite;
     return displayFlags;
   }
@@ -2097,10 +2099,10 @@ export class CanvasView extends HtmlView {
       do {
         width = Math.floor(parentNode.offsetWidth);
         height = Math.floor(parentNode.offsetHeight);
-        if (width === 0 || height === 0) { // not yet laid out
-          this.requireUpdate(View.NeedsResize);
-        } else if (width !== 0 && height !== 0) {
+        if (width !== 0 && height !== 0) {
           break;
+        } else if ((width === 0 || height === 0) && HtmlView.isPositioned(parentNode)) {
+          this.requireUpdate(View.NeedsResize); // view might not yet have been laid out
         }
         parentNode = parentNode.parentNode;
       } while (parentNode instanceof HTMLElement);

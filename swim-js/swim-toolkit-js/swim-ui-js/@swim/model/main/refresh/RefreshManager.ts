@@ -117,16 +117,21 @@ export class RefreshManager<M extends Model = Model> extends ModelManager<M> {
   /** @hidden */
   updateDelay: number;
 
+  protected needsUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): ModelFlags {
+    return updateFlags;
+  }
+
   requestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    this.willRequestUpdate(targetModel, updateFlags, immediate);
+    updateFlags = this.needsUpdate(targetModel, updateFlags, immediate);
+    let deltaUpdateFlags = this.rootFlags & ~updateFlags & Model.UpdateMask;
     if ((updateFlags & Model.AnalyzeMask) !== 0) {
-      this.setRootFlags(this.rootFlags | Model.NeedsAnalyze);
+      deltaUpdateFlags |= Model.NeedsAnalyze;
     }
     if ((updateFlags & Model.RefreshMask) !== 0) {
-      this.setRootFlags(this.rootFlags | Model.NeedsRefresh);
+      deltaUpdateFlags |= Model.NeedsRefresh;
     }
-    if ((this.rootFlags & Model.UpdateMask) !== 0) {
-      this.onRequestUpdate(targetModel, updateFlags, immediate);
+    if (deltaUpdateFlags !== 0 || immediate) {
+      this.setRootFlags(this.rootFlags | deltaUpdateFlags);
       if (immediate && this.updateDelay <= RefreshManager.MaxAnalyzeInterval
           && (this.rootFlags & (Model.TraversingFlag | Model.ImmediateFlag)) === 0) {
         this.runImmediatePass();
@@ -134,19 +139,6 @@ export class RefreshManager<M extends Model = Model> extends ModelManager<M> {
         this.scheduleUpdate();
       }
     }
-    this.didRequestUpdate(targetModel, updateFlags, immediate);
-  }
-
-  protected willRequestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected onRequestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    // hook
-  }
-
-  protected didRequestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    // hook
   }
 
   protected scheduleUpdate(): void {
