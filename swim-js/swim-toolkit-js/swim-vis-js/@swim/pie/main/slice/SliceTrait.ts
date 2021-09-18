@@ -13,14 +13,16 @@
 // limitations under the License.
 
 import {TraitProperty, GenericTrait} from "@swim/model";
+import {AnyColor, Color} from "@swim/style";
+import {Look} from "@swim/theme";
 import type {GraphicsView} from "@swim/graphics";
 import type {SliceTraitObserver} from "./SliceTraitObserver";
 
 export type SliceLabel = SliceLabelFunction | string;
-export type SliceLabelFunction = (sliceTrait: SliceTrait) => GraphicsView | string | null;
+export type SliceLabelFunction = (sliceTrait: SliceTrait | null) => GraphicsView | string | null;
 
 export type SliceLegend = SliceLegendFunction | string;
-export type SliceLegendFunction = (sliceTrait: SliceTrait) => GraphicsView | string | null;
+export type SliceLegendFunction = (sliceTrait: SliceTrait | null) => GraphicsView | string | null;
 
 export class SliceTrait extends GenericTrait {
   override readonly traitObservers!: ReadonlyArray<SliceTraitObserver>;
@@ -61,6 +63,48 @@ export class SliceTrait extends GenericTrait {
     },
   })
   readonly value!: TraitProperty<this, number>;
+
+  protected willSetSliceColor(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
+    const traitObservers = this.traitObservers;
+    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
+      const traitObserver = traitObservers[i]!;
+      if (traitObserver.traitWillSetSliceColor !== void 0) {
+        traitObserver.traitWillSetSliceColor(newSliceColor, oldSliceColor, this);
+      }
+    }
+  }
+
+  protected onSetSliceColor(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
+    // hook
+  }
+
+  protected didSetSliceColor(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
+    const traitObservers = this.traitObservers;
+    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
+      const traitObserver = traitObservers[i]!;
+      if (traitObserver.traitDidSetSliceColor !== void 0) {
+        traitObserver.traitDidSetSliceColor(newSliceColor, oldSliceColor, this);
+      }
+    }
+  }
+
+  @TraitProperty<SliceTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+    state: null,
+    willSetState(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
+      this.owner.willSetSliceColor(newSliceColor, oldSliceColor);
+    },
+    didSetState(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
+      this.owner.onSetSliceColor(newSliceColor, oldSliceColor);
+      this.owner.didSetSliceColor(newSliceColor, oldSliceColor);
+    },
+    fromAny(sliceColor: Look<Color> | AnyColor | null): Look<Color> | Color | null {
+      if (sliceColor !== null && !(sliceColor instanceof Look)) {
+        sliceColor = Color.fromAny(sliceColor);
+      }
+      return sliceColor;
+    },
+  })
+  readonly sliceColor!: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 
   protected willSetLabel(newLabel: SliceLabel | null, oldLabel: SliceLabel | null): void {
     const traitObservers = this.traitObservers;

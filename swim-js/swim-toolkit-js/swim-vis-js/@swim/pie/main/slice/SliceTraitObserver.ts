@@ -13,12 +13,18 @@
 // limitations under the License.
 
 import type {TraitObserver} from "@swim/model";
+import type {Color} from "@swim/style";
+import type {Look} from "@swim/theme";
 import type {SliceLabel, SliceLegend, SliceTrait} from "./SliceTrait";
 
 export interface SliceTraitObserver<R extends SliceTrait = SliceTrait> extends TraitObserver<R> {
   traitWillSetSliceValue?(newValue: number, oldValue: number, trait: R): void;
 
   traitDidSetSliceValue?(newValue: number, oldValue: number, trait: R): void;
+
+  traitWillSetSliceColor?(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null, trait: R): void;
+
+  traitDidSetSliceColor?(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null, trait: R): void;
 
   traitWillSetSliceLabel?(newLabel: SliceLabel | null, oldLabel: SliceLabel | null, trait: R): void;
 

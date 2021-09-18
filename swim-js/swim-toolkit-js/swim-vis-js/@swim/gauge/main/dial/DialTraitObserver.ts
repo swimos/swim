@@ -13,6 +13,8 @@
 // limitations under the License.
 
 import type {TraitObserver} from "@swim/model";
+import type {Color} from "@swim/style";
+import type {Look} from "@swim/theme";
 import type {DialLabel, DialLegend, DialTrait} from "./DialTrait";
 
 export interface DialTraitObserver<R extends DialTrait = DialTrait> extends TraitObserver<R> {
@@ -23,6 +25,14 @@ export interface DialTraitObserver<R extends DialTrait = DialTrait> extends Trai
   traitWillSetDialLimit?(newLimit: number, oldLimit: number, trait: R): void;
 
   traitDidSetDialLimit?(newLimit: number, oldLimit: number, trait: R): void;
+
+  traitWillSetDialColor?(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null, trait: R): void;
+
+  traitDidSetDialColor?(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null, trait: R): void;
+
+  traitWillSetMeterColor?(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null, trait: R): void;
+
+  traitDidSetMeterColor?(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null, trait: R): void;
 
   traitWillSetDialLabel?(newLabel: DialLabel | null, oldLabel: DialLabel | null, trait: R): void;
 

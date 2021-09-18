@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {AnyTiming, Timing} from "@swim/mapping";
+import type {Color} from "@swim/style";
 import {Model} from "@swim/model";
 import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";
@@ -32,10 +33,18 @@ export class DialController extends CompositeController {
   protected attachDialTrait(dialTrait: DialTrait): void {
     const dialView = this.dial.view;
     if (dialView !== null) {
-      this.setValue(dialTrait.value.state, dialTrait);
-      this.setLimit(dialTrait.limit.state, dialTrait);
-      this.setLabelView(dialTrait.label.state, dialTrait);
-      this.setLegendView(dialTrait.legend.state, dialTrait);
+      this.setValue(dialTrait.value.state);
+      this.setLimit(dialTrait.limit.state);
+      const dialColor = dialTrait.dialColor.state;
+      if (dialColor !== null) {
+        this.setDialColor(dialColor);
+      }
+      const meterColor = dialTrait.meterColor.state;
+      if (meterColor !== null) {
+        this.setMeterColor(meterColor);
+      }
+      this.setLabelView(dialTrait.label.state);
+      this.setLegendView(dialTrait.legend.state);
     }
   }
 
@@ -102,14 +111,25 @@ export class DialController extends CompositeController {
       const limit = dialView.limit.value;
       this.updateLabel(value, limit, dialTrait);
       this.updateLegend(value, limit, dialTrait);
-      this.setValue(dialTrait.value.state, dialTrait);
-      this.setLimit(dialTrait.limit.state, dialTrait);
-      this.setLabelView(dialTrait.label.state, dialTrait);
-      this.setLegendView(dialTrait.legend.state, dialTrait);
+      this.setValue(dialTrait.value.state);
+      this.setLimit(dialTrait.limit.state);
+      this.setLabelView(dialTrait.label.state);
+      this.setLegendView(dialTrait.legend.state);
     }
   }
 
   protected attachDialView(dialView: DialView): void {
+    const dialTrait = this.dial.trait;
+    if (dialTrait !== null) {
+      const dialColor = dialTrait.dialColor.state;
+      if (dialColor !== null) {
+        this.setDialColor(dialColor);
+      }
+      const meterColor = dialTrait.meterColor.state;
+      if (meterColor !== null) {
+        this.setMeterColor(meterColor);
+      }
+    }
     this.label.setView(dialView.label.view);
     this.legend.setView(dialView.legend.view);
   }
@@ -149,7 +169,7 @@ export class DialController extends CompositeController {
     }
   }
 
-  protected setValue(value: number, dialTrait: DialTrait, timing?: AnyTiming | boolean): void {
+  protected setValue(value: number, timing?: AnyTiming | boolean): void {
     const dialView = this.dial.view;
     if (dialView !== null && dialView.value.takesPrecedence(View.Intrinsic)) {
       if (timing === void 0 || timing === true) {
@@ -193,7 +213,7 @@ export class DialController extends CompositeController {
     }
   }
 
-  protected setLimit(limit: number, dialTrait: DialTrait, timing?: AnyTiming | boolean): void {
+  protected setLimit(limit: number, timing?: AnyTiming | boolean): void {
     const dialView = this.dial.view;
     if (dialView !== null && dialView.limit.takesPrecedence(View.Intrinsic)) {
       if (timing === void 0 || timing === true) {
@@ -237,18 +257,56 @@ export class DialController extends CompositeController {
     }
   }
 
-  protected createLabelView(label: DialLabel, dialTrait: DialTrait): GraphicsView | string | null {
+  protected setDialColor(dialColor: Look<Color> | Color | null, timing?: AnyTiming | boolean): void {
+    const dialView = this.dial.view;
+    if (dialView !== null) {
+      if (timing === void 0 || timing === true) {
+        timing = this.dialTiming.state;
+        if (timing === true) {
+          timing = dialView.getLook(Look.timing, Mood.ambient);
+        }
+      } else {
+        timing = Timing.fromAny(timing);
+      }
+      if (dialColor instanceof Look) {
+        dialView.dialColor.setLook(dialColor, timing, View.Intrinsic);
+      } else {
+        dialView.dialColor.setState(dialColor, timing, View.Intrinsic);
+      }
+    }
+  }
+
+  protected setMeterColor(meterColor: Look<Color> | Color | null, timing?: AnyTiming | boolean): void {
+    const dialView = this.dial.view;
+    if (dialView !== null) {
+      if (timing === void 0 || timing === true) {
+        timing = this.dialTiming.state;
+        if (timing === true) {
+          timing = dialView.getLook(Look.timing, Mood.ambient);
+        }
+      } else {
+        timing = Timing.fromAny(timing);
+      }
+      if (meterColor instanceof Look) {
+        dialView.meterColor.setLook(meterColor, timing, View.Intrinsic);
+      } else {
+        dialView.meterColor.setState(meterColor, timing, View.Intrinsic);
+      }
+    }
+  }
+
+  protected createLabelView(label: DialLabel): GraphicsView | string | null {
     if (typeof label === "function") {
-      return label(dialTrait);
+      return label(this.dial.trait);
     } else {
       return label;
     }
   }
 
-  protected setLabelView(label: DialLabel | null, dialTrait: DialTrait): void {
+  protected setLabelView(label: DialLabel | null): void {
     const dialView = this.dial.view;
     if (dialView !== null) {
-      const labelView = label !== null ? this.createLabelView(label, dialTrait) : null;
+      const labelView = label !== null ? this.createLabelView(label) : null;
       dialView.label.setView(labelView);
     }
   }
@@ -295,18 +353,18 @@ export class DialController extends CompositeController {
     }
   }
 
-  protected createLegendView(legend: DialLegend, dialTrait: DialTrait): GraphicsView | string | null {
+  protected createLegendView(legend: DialLegend): GraphicsView | string | null {
     if (typeof legend === "function") {
-      return legend(dialTrait);
+      return legend(this.dial.trait);
     } else {
       return legend;
     }
   }
 
-  protected setLegendView(legend: DialLegend | null, dialTrait: DialTrait): void {
+  protected setLegendView(legend: DialLegend | null): void {
     const dialView = this.dial.view;
     if (dialView !== null) {
-      const legendView = legend !== null ? this.createLegendView(legend, dialTrait) : null;
+      const legendView = legend !== null ? this.createLegendView(legend) : null;
       dialView.legend.setView(legendView);
     }
   }
@@ -403,17 +461,23 @@ export class DialController extends CompositeController {
     didSetTrait(newDialTrait: DialTrait | null, oldDialTrait: DialTrait | null): void {
       this.owner.didSetDialTrait(newDialTrait, oldDialTrait);
     },
-    traitDidSetDialValue(newValue: number, oldValue: number, dialTrait: DialTrait): void {
-      this.owner.setValue(newValue, dialTrait);
+    traitDidSetDialValue(newValue: number, oldValue: number): void {
+      this.owner.setValue(newValue);
     },
-    traitDidSetDialLimit(newLimit: number, oldLimit: number, dialTrait: DialTrait): void {
-      this.owner.setLimit(newLimit, dialTrait);
+    traitDidSetDialLimit(newLimit: number, oldLimit: number): void {
+      this.owner.setLimit(newLimit);
     },
-    traitDidSetDialLabel(newLabel: DialLabel | null, oldLabel: DialLabel | null, dialTrait: DialTrait): void {
-      this.owner.setLabelView(newLabel, dialTrait);
+    traitDidSetDialColor(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null): void {
+      this.owner.setDialColor(newDialColor);
     },
-    traitDidSetDialLegend(newLegend: DialLegend | null, oldLegend: DialLegend | null, dialTrait: DialTrait): void {
-      this.owner.setLegendView(newLegend, dialTrait);
+    traitDidSetMeterColor(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null): void {
+      this.owner.setMeterColor(newMeterColor);
+    },
+    traitDidSetDialLabel(newLabel: DialLabel | null, oldLabel: DialLabel | null): void {
+      this.owner.setLabelView(newLabel);
+    },
+    traitDidSetDialLegend(newLegend: DialLegend | null, oldLegend: DialLegend | null): void {
+      this.owner.setLegendView(newLegend);
     },
   });
 

@@ -13,14 +13,16 @@
 // limitations under the License.
 
 import {TraitProperty, GenericTrait} from "@swim/model";
+import {AnyColor, Color} from "@swim/style";
+import {Look} from "@swim/theme";
 import type {GraphicsView} from "@swim/graphics";
 import type {DialTraitObserver} from "./DialTraitObserver";
 
 export type DialLabel = DialLabelFunction | string;
-export type DialLabelFunction = (dialTrait: DialTrait) => GraphicsView | string | null;
+export type DialLabelFunction = (dialTrait: DialTrait | null) => GraphicsView | string | null;
 
 export type DialLegend = DialLegendFunction | string;
-export type DialLegendFunction = (dialTrait: DialTrait) => GraphicsView | string | null;
+export type DialLegendFunction = (dialTrait: DialTrait | null) => GraphicsView | string | null;
 
 export class DialTrait extends GenericTrait {
   override readonly traitObservers!: ReadonlyArray<DialTraitObserver>;
@@ -98,6 +100,90 @@ export class DialTrait extends GenericTrait {
     },
   })
   readonly limit!: TraitProperty<this, number>;
+
+  protected willSetDialColor(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null): void {
+    const traitObservers = this.traitObservers;
+    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
+      const traitObserver = traitObservers[i]!;
+      if (traitObserver.traitWillSetDialColor !== void 0) {
+        traitObserver.traitWillSetDialColor(newDialColor, oldDialColor, this);
+      }
+    }
+  }
+
+  protected onSetDialColor(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null): void {
+    // hook
+  }
+
+  protected didSetDialColor(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null): void {
+    const traitObservers = this.traitObservers;
+    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
+      const traitObserver = traitObservers[i]!;
+      if (traitObserver.traitDidSetDialColor !== void 0) {
+        traitObserver.traitDidSetDialColor(newDialColor, oldDialColor, this);
+      }
+    }
+  }
+
+  @TraitProperty<DialTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+    state: null,
+    willSetState(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null): void {
+      this.owner.willSetDialColor(newDialColor, oldDialColor);
+    },
+    didSetState(newDialColor: Look<Color> | Color | null, oldDialColor: Look<Color> | Color | null): void {
+      this.owner.onSetDialColor(newDialColor, oldDialColor);
+      this.owner.didSetDialColor(newDialColor, oldDialColor);
+    },
+    fromAny(dialColor: Look<Color> | AnyColor | null): Look<Color> | Color | null {
+      if (dialColor !== null && !(dialColor instanceof Look)) {
+        dialColor = Color.fromAny(dialColor);
+      }
+      return dialColor;
+    },
+  })
+  readonly dialColor!: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
+
+  protected willSetMeterColor(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null): void {
+    const traitObservers = this.traitObservers;
+    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
+      const traitObserver = traitObservers[i]!;
+      if (traitObserver.traitWillSetMeterColor !== void 0) {
+        traitObserver.traitWillSetMeterColor(newMeterColor, oldMeterColor, this);
+      }
+    }
+  }
+
+  protected onSetMeterColor(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null): void {
+    // hook
+  }
+
+  protected didSetMeterColor(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null): void {
+    const traitObservers = this.traitObservers;
+    for (let i = 0, n = traitObservers.length; i < n; i += 1) {
+      const traitObserver = traitObservers[i]!;
+      if (traitObserver.traitDidSetMeterColor !== void 0) {
+        traitObserver.traitDidSetMeterColor(newMeterColor, oldMeterColor, this);
+      }
+    }
+  }
+
+  @TraitProperty<DialTrait, Look<Color> | Color | null, Look<Color> | AnyColor | null>({
+    state: null,
+    willSetState(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null): void {
+      this.owner.willSetMeterColor(newMeterColor, oldMeterColor);
+    },
+    didSetState(newMeterColor: Look<Color> | Color | null, oldMeterColor: Look<Color> | Color | null): void {
+      this.owner.onSetMeterColor(newMeterColor, oldMeterColor);
+      this.owner.didSetMeterColor(newMeterColor, oldMeterColor);
+    },
+    fromAny(meterColor: Look<Color> | AnyColor | null): Look<Color> | Color | null {
+      if (meterColor !== null && !(meterColor instanceof Look)) {
+        meterColor = Color.fromAny(meterColor);
+      }
+      return meterColor;
+    },
+  })
+  readonly meterColor!: TraitProperty<this, Look<Color> | Color | null, Look<Color> | AnyColor | null>;
 
   protected willSetLabel(newLabel: DialLabel | null, oldLabel: DialLabel | null): void {
     const traitObservers = this.traitObservers;

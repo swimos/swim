@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {AnyTiming, Timing} from "@swim/mapping";
+import type {Color} from "@swim/style";
 import {Model} from "@swim/model";
 import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";
@@ -32,9 +33,13 @@ export class SliceController extends CompositeController {
   protected attachSliceTrait(sliceTrait: SliceTrait): void {
     const sliceView = this.slice.view;
     if (sliceView !== null) {
-      this.setValue(sliceTrait.value.state, sliceTrait);
-      this.setLabelView(sliceTrait.label.state, sliceTrait);
-      this.setLegendView(sliceTrait.legend.state, sliceTrait);
+      this.setValue(sliceTrait.value.state);
+      const sliceColor = sliceTrait.sliceColor.state;
+      if (sliceColor !== null) {
+        this.setSliceColor(sliceColor);
+      }
+      this.setLabelView(sliceTrait.label.state);
+      this.setLegendView(sliceTrait.legend.state);
     }
   }
 
@@ -101,13 +106,20 @@ export class SliceController extends CompositeController {
     if (sliceTrait !== null) {
       this.updateLabel(value, sliceTrait);
       this.updateLegend(value, sliceTrait);
-      this.setValue(sliceTrait.value.state, sliceTrait);
-      this.setLabelView(sliceTrait.label.state, sliceTrait);
-      this.setLegendView(sliceTrait.legend.state, sliceTrait);
+      this.setValue(sliceTrait.value.state);
+      this.setLabelView(sliceTrait.label.state);
+      this.setLegendView(sliceTrait.legend.state);
     }
   }
 
   protected attachSliceView(sliceView: SliceView): void {
+    const sliceTrait = this.slice.trait;
+    if (sliceTrait !== null) {
+      const sliceColor = sliceTrait.sliceColor.state;
+      if (sliceColor !== null) {
+        this.setSliceColor(sliceColor);
+      }
+    }
     this.label.setView(sliceView.label.view);
     this.legend.setView(sliceView.legend.view);
   }
@@ -147,7 +159,7 @@ export class SliceController extends CompositeController {
     }
   }
 
-  protected setValue(value: number, sliceTrait: SliceTrait, timing?: AnyTiming | boolean): void {
+  protected setValue(value: number, timing?: AnyTiming | boolean): void {
     const sliceView = this.slice.view;
     if (sliceView !== null && sliceView.value.takesPrecedence(View.Intrinsic)) {
       if (timing === void 0 || timing === true) {
@@ -191,18 +203,37 @@ export class SliceController extends CompositeController {
     }
   }
 
-  protected createLabelView(label: SliceLabel, sliceTrait: SliceTrait): GraphicsView | string | null {
+  protected setSliceColor(sliceColor: Look<Color> | Color | null, timing?: AnyTiming | boolean): void {
+    const sliceView = this.slice.view;
+    if (sliceView !== null) {
+      if (timing === void 0 || timing === true) {
+        timing = this.sliceTiming.state;
+        if (timing === true) {
+          timing = sliceView.getLook(Look.timing, Mood.ambient);
+        }
+      } else {
+        timing = Timing.fromAny(timing);
+      }
+      if (sliceColor instanceof Look) {
+        sliceView.sliceColor.setLook(sliceColor, timing, View.Intrinsic);
+      } else {
+        sliceView.sliceColor.setState(sliceColor, timing, View.Intrinsic);
+      }
+    }
+  }
+
+  protected createLabelView(label: SliceLabel): GraphicsView | string | null {
     if (typeof label === "function") {
-      return label(sliceTrait);
+      return label(this.slice.trait);
     } else {
       return label;
     }
   }
 
-  protected setLabelView(label: SliceLabel | null, sliceTrait: SliceTrait): void {
+  protected setLabelView(label: SliceLabel | null): void {
     const sliceView = this.slice.view;
     if (sliceView !== null) {
-      const labelView = label !== null ? this.createLabelView(label, sliceTrait) : null;
+      const labelView = label !== null ? this.createLabelView(label) : null;
       sliceView.label.setView(labelView);
     }
   }
@@ -249,18 +280,18 @@ export class SliceController extends CompositeController {
     }
   }
 
-  protected createLegendView(legend: SliceLegend, sliceTrait: SliceTrait): GraphicsView | string | null {
+  protected createLegendView(legend: SliceLegend): GraphicsView | string | null {
     if (typeof legend === "function") {
-      return legend(sliceTrait);
+      return legend(this.slice.trait);
     } else {
       return legend;
     }
   }
 
-  protected setLegendView(legend: SliceLegend | null, sliceTrait: SliceTrait): void {
+  protected setLegendView(legend: SliceLegend | null): void {
     const sliceView = this.slice.view;
     if (sliceView !== null) {
-      const legendView = legend !== null ? this.createLegendView(legend, sliceTrait) : null;
+      const legendView = legend !== null ? this.createLegendView(legend) : null;
       sliceView.legend.setView(legendView);
     }
   }
@@ -350,14 +381,17 @@ export class SliceController extends CompositeController {
     didSetTrait(newSliceTrait: SliceTrait | null, oldSliceTrait: SliceTrait | null): void {
       this.owner.didSetSliceTrait(newSliceTrait, oldSliceTrait);
     },
-    traitDidSetSliceValue(newValue: number, oldValue: number, sliceTrait: SliceTrait): void {
-      this.owner.setValue(newValue, sliceTrait);
+    traitDidSetSliceValue(newValue: number, oldValue: number): void {
+      this.owner.setValue(newValue);
     },
-    traitDidSetSliceLabel(newLabel: SliceLabel | null, oldLabel: SliceLabel | null, sliceTrait: SliceTrait): void {
-      this.owner.setLabelView(newLabel, sliceTrait);
+    traitDidSetSliceColor(newSliceColor: Look<Color> | Color | null, oldSliceColor: Look<Color> | Color | null): void {
+      this.owner.setSliceColor(newSliceColor);
     },
-    traitDidSetSliceLegend(newLegend: SliceLegend | null, oldLegend: SliceLegend | null, sliceTrait: SliceTrait): void {
-      this.owner.setLegendView(newLegend, sliceTrait);
+    traitDidSetSliceLabel(newLabel: SliceLabel | null, oldLabel: SliceLabel | null): void {
+      this.owner.setLabelView(newLabel);
+    },
+    traitDidSetSliceLegend(newLegend: SliceLegend | null, oldLegend: SliceLegend | null): void {
+      this.owner.setLegendView(newLegend);
     },
   });
 

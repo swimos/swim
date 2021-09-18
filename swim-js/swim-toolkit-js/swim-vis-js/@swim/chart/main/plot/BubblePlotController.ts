@@ -55,8 +55,8 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
   protected attachPlotTrait(plotTrait: BubblePlotTrait<X, Y>): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
-      this.setPlotRadius(plotTrait.radius, plotTrait);
-      this.setPlotFill(plotTrait.fill, plotTrait);
+      this.setPlotRadius(plotTrait.radius);
+      this.setPlotFill(plotTrait.fill);
     }
   }
 
@@ -105,8 +105,8 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
   protected attachPlotView(plotView: BubblePlotView<X, Y>): void {
     const plotTrait = this.plot.trait;
     if (plotTrait !== null) {
-      this.setPlotRadius(plotTrait.radius, plotTrait);
-      this.setPlotFill(plotTrait.fill, plotTrait);
+      this.setPlotRadius(plotTrait.radius);
+      this.setPlotFill(plotTrait.fill);
     }
 
     const dataPointFasteners = this.dataPointFasteners;
@@ -152,7 +152,7 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
     }
   }
 
-  protected setPlotRadius(radius: Length | null, plotTrait: BubblePlotTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setPlotRadius(radius: Length | null, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
       if (timing === void 0 || timing === true) {
@@ -191,7 +191,7 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
     }
   }
 
-  protected setPlotFill(fill: Look<Color> | Color | null, plotTrait: BubblePlotTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setPlotFill(fill: Look<Color> | Color | null, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
       if (timing === void 0 || timing === true) {
@@ -275,11 +275,11 @@ export class BubblePlotController<X, Y> extends ScatterPlotController<X, Y> {
     didSetTrait(newPlotTrait: BubblePlotTrait<unknown, unknown> | null, oldPlotTrait: BubblePlotTrait<unknown, unknown> | null): void {
       this.owner.didSetPlotTrait(newPlotTrait, oldPlotTrait);
     },
-    traitDidSetPlotRadius(newRadius: Length | null, oldRadius: Length | null, plotTrait: BubblePlotTrait<unknown, unknown>): void {
-      this.owner.setPlotRadius(newRadius, plotTrait);
+    traitDidSetPlotRadius(newRadius: Length | null, oldRadius: Length | null): void {
+      this.owner.setPlotRadius(newRadius);
     },
-    traitDidSetPlotFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, plotTrait: BubblePlotTrait<unknown, unknown>): void {
-      this.owner.setPlotFill(newFill, plotTrait);
+    traitDidSetPlotFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
+      this.owner.setPlotFill(newFill);
     },
   });
 

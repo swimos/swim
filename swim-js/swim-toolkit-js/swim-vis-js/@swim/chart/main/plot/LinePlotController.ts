@@ -54,11 +54,11 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
     if (plotView !== null) {
       const stroke = plotTrait.stroke.state;
       if (stroke !== null) {
-        this.setPlotStroke(stroke, plotTrait);
+        this.setPlotStroke(stroke);
       }
       const strokeWidth = plotTrait.strokeWidth.state;
       if (strokeWidth !== null) {
-        this.setPlotStrokeWidth(strokeWidth, plotTrait);
+        this.setPlotStrokeWidth(strokeWidth);
       }
     }
   }
@@ -110,11 +110,11 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
     if (plotTrait !== null) {
       const stroke = plotTrait.stroke.state;
       if (stroke !== null) {
-        this.setPlotStroke(stroke, plotTrait);
+        this.setPlotStroke(stroke);
       }
       const strokeWidth = plotTrait.strokeWidth.state;
       if (strokeWidth !== null) {
-        this.setPlotStrokeWidth(strokeWidth, plotTrait);
+        this.setPlotStrokeWidth(strokeWidth);
       }
     }
 
@@ -161,7 +161,7 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
     }
   }
 
-  protected setPlotStroke(stroke: Look<Color> | Color | null, plotTrait: LinePlotTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setPlotStroke(stroke: Look<Color> | Color | null, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
       if (timing === void 0 || timing === true) {
@@ -204,7 +204,7 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
     }
   }
 
-  protected setPlotStrokeWidth(strokeWidth: Length | null, plotTrait: LinePlotTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setPlotStrokeWidth(strokeWidth: Length | null, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
       if (timing === void 0 || timing === true) {
@@ -284,11 +284,11 @@ export class LinePlotController<X, Y> extends SeriesPlotController<X, Y> {
     didSetTrait(newPlotTrait: LinePlotTrait<unknown, unknown> | null, oldPlotTrait: LinePlotTrait<unknown, unknown> | null): void {
       this.owner.didSetPlotTrait(newPlotTrait, oldPlotTrait);
     },
-    traitDidSetPlotStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null, plotTrait: LinePlotTrait<unknown, unknown>): void {
-      this.owner.setPlotStroke(newStroke, plotTrait);
+    traitDidSetPlotStroke(newStroke: Look<Color> | Color | null, oldStroke: Look<Color> | Color | null): void {
+      this.owner.setPlotStroke(newStroke);
     },
-    traitDidSetPlotStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null, plotTrait: LinePlotTrait<unknown, unknown>): void {
-      this.owner.setPlotStrokeWidth(newStrokeWidth, plotTrait);
+    traitDidSetPlotStrokeWidth(newStrokeWidth: Length | null, oldStrokeWidth: Length | null): void {
+      this.owner.setPlotStrokeWidth(newStrokeWidth);
     },
   });
 

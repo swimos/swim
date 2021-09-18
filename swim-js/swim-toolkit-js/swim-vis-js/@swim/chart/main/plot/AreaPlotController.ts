@@ -56,7 +56,7 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
     if (plotView !== null) {
       const fill = plotTrait.fill.state;
       if (fill !== null) {
-        this.setPlotFill(fill, plotTrait);
+        this.setPlotFill(fill);
       }
     }
   }
@@ -108,7 +108,7 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
     if (plotTrait !== null) {
       const fill = plotTrait.fill.state;
       if (fill !== null) {
-        this.setPlotFill(fill, plotTrait);
+        this.setPlotFill(fill);
       }
     }
 
@@ -155,7 +155,7 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
     }
   }
 
-  protected setPlotFill(fill: Look<Color> | Color | null, plotTrait: AreaPlotTrait<X, Y>, timing?: AnyTiming | boolean): void {
+  protected setPlotFill(fill: Look<Color> | Color | null, timing?: AnyTiming | boolean): void {
     const plotView = this.plot.view;
     if (plotView !== null) {
       if (timing === void 0 || timing === true) {
@@ -232,8 +232,8 @@ export class AreaPlotController<X, Y> extends SeriesPlotController<X, Y> {
     didSetTrait(newPlotTrait: AreaPlotTrait<unknown, unknown> | null, oldPlotTrait: AreaPlotTrait<unknown, unknown> | null): void {
       this.owner.didSetPlotTrait(newPlotTrait, oldPlotTrait);
     },
-    traitDidSetPlotFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null, plotTrait: AreaPlotTrait<unknown, unknown>): void {
-      this.owner.setPlotFill(newFill, plotTrait);
+    traitDidSetPlotFill(newFill: Look<Color> | Color | null, oldFill: Look<Color> | Color | null): void {
+      this.owner.setPlotFill(newFill);
     },
   });
 
