@@ -664,13 +664,13 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
     }
   }
 
-  protected needsUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): ViewFlags {
+  protected needsUpdate(updateFlags: ViewFlags, immediate: boolean): ViewFlags {
     return updateFlags;
   }
 
   requestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
     if ((this.viewFlags & View.CulledMask) !== View.CulledFlag) { // if not culled root
-      updateFlags = this.needsUpdate(targetView, updateFlags, immediate);
+      updateFlags = this.needsUpdate(updateFlags, immediate);
       let deltaUpdateFlags = this.viewFlags & ~updateFlags & View.UpdateMask;
       if ((updateFlags & View.ProcessMask) !== 0) {
         deltaUpdateFlags |= View.NeedsProcess;

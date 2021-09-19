@@ -115,8 +115,8 @@ export class RasterView extends LayerView {
     }
   }
 
-  protected override needsUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): ViewFlags {
-    updateFlags = super.needsUpdate(targetView, updateFlags, immediate);
+  protected override needsUpdate(updateFlags: ViewFlags, immediate: boolean): ViewFlags {
+    updateFlags = super.needsUpdate(updateFlags, immediate);
     updateFlags |= View.NeedsRender | View.NeedsComposite;
     this.setViewFlags(this.viewFlags | (View.NeedsRender | View.NeedsComposite));
     return updateFlags;

@@ -117,12 +117,12 @@ export class RefreshManager<M extends Model = Model> extends ModelManager<M> {
   /** @hidden */
   updateDelay: number;
 
-  protected needsUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): ModelFlags {
+  protected needsUpdate(updateFlags: ModelFlags, immediate: boolean): ModelFlags {
     return updateFlags;
   }
 
   requestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    updateFlags = this.needsUpdate(targetModel, updateFlags, immediate);
+    updateFlags = this.needsUpdate(updateFlags, immediate);
     let deltaUpdateFlags = this.rootFlags & ~updateFlags & Model.UpdateMask;
     if ((updateFlags & Model.AnalyzeMask) !== 0) {
       deltaUpdateFlags |= Model.NeedsAnalyze;

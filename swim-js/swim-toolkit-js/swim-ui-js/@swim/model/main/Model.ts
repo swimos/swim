@@ -849,16 +849,16 @@ export abstract class Model implements ModelDownlinkContext {
     }
   }
 
-  protected needsUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): ModelFlags {
+  protected needsUpdate(updateFlags: ModelFlags, immediate: boolean): ModelFlags {
     const traits = this.traits;
     for (let i = 0, n = traits.length; i < n; i += 1) {
-      updateFlags = (traits[i]! as any).needsUpdate(targetModel, updateFlags, immediate);
+      updateFlags = (traits[i]! as any).needsUpdate(updateFlags, immediate);
     }
     return updateFlags;
   }
 
   requestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
-    updateFlags = this.needsUpdate(targetModel, updateFlags, immediate);
+    updateFlags = this.needsUpdate(updateFlags, immediate);
     let deltaUpdateFlags = this.modelFlags & ~updateFlags & Model.UpdateMask;
     if ((updateFlags & Model.AnalyzeMask) !== 0) {
       deltaUpdateFlags |= Model.NeedsAnalyze;

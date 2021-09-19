@@ -104,12 +104,12 @@ export class DisplayManager<V extends View = View> extends ViewManager<V> {
   /** @hidden */
   updateDelay: number;
 
-  protected needsUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): ViewFlags {
+  protected needsUpdate(updateFlags: ViewFlags, immediate: boolean): ViewFlags {
     return updateFlags;
   }
 
   requestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
-    updateFlags = this.needsUpdate(targetView, updateFlags, immediate);
+    updateFlags = this.needsUpdate(updateFlags, immediate);
     let deltaUpdateFlags = this.rootFlags & ~updateFlags & View.UpdateMask;
     if ((updateFlags & View.ProcessMask) !== 0) {
       deltaUpdateFlags |= View.NeedsProcess;

@@ -710,7 +710,7 @@ export abstract class Trait implements ModelDownlinkContext {
     }
   }
 
-  protected needsUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): ModelFlags {
+  protected needsUpdate(updateFlags: ModelFlags, immediate: boolean): ModelFlags {
     return updateFlags;
   }
 

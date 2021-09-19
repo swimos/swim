@@ -117,12 +117,12 @@ export class ExecuteManager<C extends Controller = Controller> extends Controlle
   /** @hidden */
   updateDelay: number;
 
-  protected needsUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): ControllerFlags {
+  protected needsUpdate(updateFlags: ControllerFlags, immediate: boolean): ControllerFlags {
     return updateFlags;
   }
 
   requestUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): void {
-    updateFlags = this.needsUpdate(targetController, updateFlags, immediate);
+    updateFlags = this.needsUpdate(updateFlags, immediate);
     let deltaUpdateFlags = this.rootFlags & ~updateFlags & Controller.UpdateMask;
     if ((updateFlags & Controller.CompileMask) !== 0) {
       deltaUpdateFlags |= Controller.NeedsCompile;

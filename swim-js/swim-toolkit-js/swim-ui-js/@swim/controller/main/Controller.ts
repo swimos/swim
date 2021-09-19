@@ -479,12 +479,12 @@ export abstract class Controller implements GestureContext {
     }
   }
 
-  protected needsUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): ControllerFlags {
+  protected needsUpdate(updateFlags: ControllerFlags, immediate: boolean): ControllerFlags {
     return updateFlags;
   }
 
   requestUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): void {
-    updateFlags = this.needsUpdate(targetController, updateFlags, immediate);
+    updateFlags = this.needsUpdate(updateFlags, immediate);
     let deltaUpdateFlags = this.controllerFlags & ~updateFlags & Controller.UpdateMask;
     if ((updateFlags & Controller.CompileMask) !== 0) {
       deltaUpdateFlags |= Controller.NeedsCompile;
