@@ -873,7 +873,7 @@ export abstract class Model implements ModelDownlinkContext {
         parentModel.requestUpdate(targetModel, updateFlags, immediate);
       } else if (this.isMounted()) {
         const refreshManager = this.refreshService.manager;
-        if (refreshManager !== void 0) {
+        if (refreshManager !== void 0 && refreshManager !== null) {
           refreshManager.requestUpdate(targetModel, updateFlags, immediate);
         }
       }

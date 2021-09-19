@@ -34,11 +34,11 @@ export type ModelServiceFlags = number;
 
 export interface ModelServiceInit<T> {
   extends?: ModelServiceClass;
-  observe?: boolean;
   type?: unknown;
-  manager?: T;
   inherit?: string | boolean;
+  observe?: boolean;
 
+  manager?: T;
   initManager?(): T;
 }
 
@@ -94,11 +94,11 @@ export interface ModelService<M extends Model, T> {
   /** @hidden */
   removeTraitService(traitService: TraitService<Trait, T>): void;
 
-  readonly manager: T;
+  readonly superManager: T | undefined;
 
   readonly ownManager: T | undefined;
 
-  readonly superManager: T | undefined;
+  readonly manager: T;
 
   getManager(): NonNullable<T>;
 
@@ -113,11 +113,33 @@ export interface ModelService<M extends Model, T> {
   /** @hidden */
   initManager(): T;
 
+  isMounted(): boolean;
+
   /** @hidden */
   mount(): void;
 
   /** @hidden */
+  willMount(): void;
+
+  /** @hidden */
+  onMount(): void;
+
+  /** @hidden */
+  didMount(): void;
+
+  /** @hidden */
   unmount(): void;
+
+  /** @hidden */
+  willUnmount(): void;
+
+  /** @hidden */
+  onUnmount(): void;
+
+  /** @hidden */
+  didUnmount(): void;
+
+  toString(): string;
 }
 
 export const ModelService = function <M extends Model, T>(
@@ -151,6 +173,8 @@ export const ModelService = function <M extends Model, T>(
   define<M extends Model, T>(descriptor: ModelServiceDescriptor<M, T>): ModelServiceConstructor<M, T>;
 
   /** @hidden */
+  MountedFlag: ModelServiceFlags;
+  /** @hidden */
   InheritedFlag: ModelServiceFlags;
 };
 __extends(ModelService, Object);
@@ -168,7 +192,7 @@ function ModelServiceConstructor<M extends Model, T>(this: ModelService<M, T>, o
     enumerable: true,
   });
   Object.defineProperty(this, "inherit", {
-    value: this.inherit ?? false, // seed from prototype
+    value: true,
     enumerable: true,
     configurable: true,
   });
@@ -323,18 +347,18 @@ ModelService.prototype.removeTraitService = function <T>(this: ModelService<Mode
   });
 };
 
-Object.defineProperty(ModelService.prototype, "ownManager", {
+Object.defineProperty(ModelService.prototype, "superManager", {
   get: function <T>(this: ModelService<Model, T>): T | undefined {
-    return !this.isInherited() ? this.manager : void 0;
+    const superService = this.superService;
+    return superService !== null ? superService.manager : void 0;
   },
   enumerable: true,
   configurable: true,
 });
 
-Object.defineProperty(ModelService.prototype, "superManager", {
+Object.defineProperty(ModelService.prototype, "ownManager", {
   get: function <T>(this: ModelService<Model, T>): T | undefined {
-    const superService = this.superService;
-    return superService !== null ? superService.manager : void 0;
+    return !this.isInherited() ? this.manager : void 0;
   },
   enumerable: true,
   configurable: true,
@@ -357,15 +381,57 @@ ModelService.prototype.getManagerOr = function <T, E>(this: ModelService<Model, 
 };
 
 ModelService.prototype.initManager = function <T>(this: ModelService<Model, T>): T {
-  return void 0 as unknown as T;
+  return this.manager;
+};
+
+ModelService.prototype.isMounted = function (this: ModelService<Model, unknown>): boolean {
+  return (this.serviceFlags & ModelService.MountedFlag) !== 0;
 };
 
 ModelService.prototype.mount = function (this: ModelService<Model, unknown>): void {
+  if ((this.serviceFlags & ModelService.MountedFlag) === 0) {
+    this.willMount();
+    this.setServiceFlags(this.serviceFlags | ModelService.MountedFlag);
+    this.onMount();
+    this.didMount();
+  }
+};
+
+ModelService.prototype.willMount = function (this: ModelService<Model, unknown>): void {
+  // hook
+};
+
+ModelService.prototype.onMount = function (this: ModelService<Model, unknown>): void {
   this.bindSuperService();
 };
 
+ModelService.prototype.didMount = function (this: ModelService<Model, unknown>): void {
+  // hook
+};
+
 ModelService.prototype.unmount = function (this: ModelService<Model, unknown>): void {
+  if ((this.serviceFlags & ModelService.MountedFlag) !== 0) {
+    this.willUnmount();
+    this.setServiceFlags(this.serviceFlags & ~ModelService.MountedFlag);
+    this.onUnmount();
+    this.didUnmount();
+  }
+};
+
+ModelService.prototype.willUnmount = function (this: ModelService<Model, unknown>): void {
+  // hook
+};
+
+ModelService.prototype.onUnmount = function (this: ModelService<Model, unknown>): void {
   this.unbindSuperService();
+};
+
+ModelService.prototype.didUnmount = function (this: ModelService<Model, unknown>): void {
+  // hook
+};
+
+ModelService.prototype.toString = function (this: ModelService<Model, unknown>): string {
+  return this.name;
 };
 
 ModelService.getClass = function (type: unknown): ModelServiceClass | null {
@@ -383,10 +449,10 @@ ModelService.getClass = function (type: unknown): ModelServiceClass | null {
 
 ModelService.define = function <M extends Model, T, I>(descriptor: ModelServiceDescriptor<M, T, I>): ModelServiceConstructor<M, T, I> {
   let _super: ModelServiceClass | null | undefined = descriptor.extends;
-  const manager = descriptor.manager;
   const inherit = descriptor.inherit;
-  const initManager = descriptor.initManager;
+  const manager = descriptor.manager;
   delete descriptor.extends;
+  delete descriptor.inherit;
   delete descriptor.manager;
 
   if (_super === void 0) {
@@ -402,6 +468,20 @@ ModelService.define = function <M extends Model, T, I>(descriptor: ModelServiceD
     } as ModelService<M, T>;
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, serviceName) || _this;
+    if (manager !== void 0) {
+      Object.defineProperty(_this, "manager", {
+        value: manager,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+    if (inherit !== void 0) {
+      Object.defineProperty(_this, "inherit", {
+        value: inherit,
+        enumerable: true,
+        configurable: true,
+      });
+    }
     return _this;
   } as unknown as ModelServiceConstructor<M, T, I>;
 
@@ -411,18 +491,8 @@ ModelService.define = function <M extends Model, T, I>(descriptor: ModelServiceD
   _constructor.prototype.constructor = _constructor;
   Object.setPrototypeOf(_constructor.prototype, _super.prototype);
 
-  if (manager !== void 0 && initManager === void 0) {
-    _prototype.initManager = function (): T {
-      return manager;
-    };
-  }
-  Object.defineProperty(_prototype, "inherit", {
-    value: inherit ?? true,
-    enumerable: true,
-    configurable: true,
-  });
-
   return _constructor;
 }
 
-ModelService.InheritedFlag = 1 << 0;
+ModelService.MountedFlag = 1 << 0;
+ModelService.InheritedFlag = 1 << 1;

@@ -14,30 +14,36 @@
 
 import {Controller} from "../Controller";
 import {StorageManager} from "../storage/StorageManager";
-import {WebStorageManager} from "../storage/WebStorageManager";
-import {EphemeralStorageManager} from "../storage/EphemeralStorageManager";
 import {ControllerService} from "./ControllerService";
 import {ControllerManagerService} from "./ControllerManagerService";
 
-export abstract class StorageService<C extends Controller> extends ControllerManagerService<C, StorageManager<C>> {
+export abstract class StorageService<C extends Controller, CM extends StorageManager<C> | null | undefined = StorageManager<C>> extends ControllerManagerService<C, CM> {
   get(key: string): string | undefined {
-    return this.manager.get(key);
+    let manager: StorageManager<C> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = StorageManager.global();
+    }
+    return manager.get(key);
   }
 
   set(key: string, newValue: string | undefined): string | undefined {
-    return this.manager.set(key, newValue);
+    let manager: StorageManager<C> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = StorageManager.global();
+    }
+    return manager.set(key, newValue);
   }
 
   clear(): void {
-    this.manager.clear();
+    let manager: StorageManager<C> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = StorageManager.global();
+    }
+    manager.clear();
   }
 
-  override initManager(): StorageManager<C> {
-    let manager: StorageManager<C> | null = WebStorageManager.local();
-    if (manager === null) {
-      manager = new EphemeralStorageManager();
-    }
-    return manager;
+  override initManager(): CM {
+    return StorageManager.global() as CM;
   }
 }
 
@@ -45,4 +51,5 @@ ControllerService({
   extends: StorageService,
   type: StorageManager,
   observe: false,
+  manager: StorageManager.global(),
 })(Controller.prototype, "storageService");

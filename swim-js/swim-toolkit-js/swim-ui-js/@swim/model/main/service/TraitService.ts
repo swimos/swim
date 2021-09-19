@@ -30,11 +30,11 @@ export type TraitServiceMemberType<R, K extends keyof R> =
 
 export interface TraitServiceInit<T> {
   extends?: TraitServiceClass;
-  observe?: boolean;
   type?: unknown;
-  manager?: T;
   inherit?: string | boolean;
+  observe?: boolean;
 
+  manager?: T;
   initManager?(): T;
 
   /** @hidden */
@@ -96,11 +96,11 @@ export interface TraitService<R extends Trait, T> {
 
   readonly superService: ModelService<Model, T> | null;
 
-  readonly manager: T;
+  readonly superManager: T | undefined;
 
   readonly ownManager: T | undefined;
 
-  readonly superManager: T | undefined;
+  readonly manager: T;
 
   getManager(): NonNullable<T>;
 
@@ -120,6 +120,8 @@ export interface TraitService<R extends Trait, T> {
 
   /** @hidden */
   initManager?(): T;
+
+  toString(): string;
 }
 
 export const TraitService = function <R extends Trait, T>(
@@ -166,7 +168,7 @@ function TraitServiceConstructor<R extends Trait, T>(this: TraitService<R, T>, o
     configurable: true,
   });
   Object.defineProperty(this, "inherit", {
-    value: this.inherit ?? false, // seed from prototype
+    value: true,
     enumerable: true,
     configurable: true,
   });
@@ -291,18 +293,18 @@ Object.defineProperty(TraitService.prototype, "superService", {
   configurable: true,
 });
 
-Object.defineProperty(TraitService.prototype, "ownManager", {
+Object.defineProperty(TraitService.prototype, "superManager", {
   get: function <T>(this: TraitService<Trait, T>): T | undefined {
-    return !this.isInherited() ? this.manager : void 0;
+    const modelService = this.modelService;
+    return modelService !== null ? modelService.superManager : void 0;
   },
   enumerable: true,
   configurable: true,
 });
 
-Object.defineProperty(TraitService.prototype, "superManager", {
+Object.defineProperty(TraitService.prototype, "ownManager", {
   get: function <T>(this: TraitService<Trait, T>): T | undefined {
-    const modelService = this.modelService;
-    return modelService !== null ? modelService.superManager : void 0;
+    return !this.isInherited() ? this.manager : void 0;
   },
   enumerable: true,
   configurable: true,
@@ -338,14 +340,19 @@ TraitService.prototype.detach = function (this: TraitService<Trait, unknown>): v
   this.unbindModelService();
 };
 
+TraitService.prototype.toString = function (this: TraitService<Trait, unknown>): string {
+  return this.name;
+};
+
 TraitService.define = function <R extends Trait, T, I>(descriptor: TraitServiceDescriptor<R, T, I>): TraitServiceConstructor<R, T, I> {
   let _super: TraitServiceClass | null | undefined = descriptor.extends;
   const type = descriptor.type;
-  const manager = descriptor.manager;
   const inherit = descriptor.inherit;
-  let initManager = descriptor.initManager;
+  const manager = descriptor.manager;
+  const initManager = descriptor.initManager;
   let modelService = descriptor.modelService;
   delete descriptor.extends;
+  delete descriptor.inherit;
   delete descriptor.manager;
   delete descriptor.modelService;
 
@@ -359,6 +366,20 @@ TraitService.define = function <R extends Trait, T, I>(descriptor: TraitServiceD
     } as TraitService<R, T>;
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, serviceName) || _this;
+    if (manager !== void 0) {
+      Object.defineProperty(_this, "manager", {
+        value: manager,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+    if (inherit !== void 0) {
+      Object.defineProperty(_this, "inherit", {
+        value: inherit,
+        enumerable: true,
+        configurable: true,
+      });
+    }
     return _this;
   } as unknown as TraitServiceConstructor<R, T, I>;
 
@@ -368,24 +389,13 @@ TraitService.define = function <R extends Trait, T, I>(descriptor: TraitServiceD
   _constructor.prototype.constructor = _constructor;
   Object.setPrototypeOf(_constructor.prototype, _super.prototype);
 
-  if (manager !== void 0 && initManager === void 0) {
-    initManager = function (): T {
-      return manager;
-    };
-    _prototype.initManager = initManager;
-  }
-  Object.defineProperty(_prototype, "inherit", {
-    value: inherit ?? true,
-    enumerable: true,
-    configurable: true,
-  });
   if (_prototype.modelServiceConstructor === void 0) {
     if (modelService === void 0) {
       modelService = {
         extends: void 0,
         type,
-        manager,
         inherit,
+        manager,
       };
       if (initManager !== void 0) {
         modelService.initManager = initManager;

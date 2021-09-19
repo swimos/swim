@@ -18,21 +18,33 @@ import {HistoryManager} from "../history/HistoryManager";
 import {ControllerService} from "./ControllerService";
 import {ControllerManagerService} from "./ControllerManagerService";
 
-export abstract class HistoryService<C extends Controller> extends ControllerManagerService<C, HistoryManager<C>> {
+export abstract class HistoryService<C extends Controller, CM extends HistoryManager<C> | null | undefined = HistoryManager<C>> extends ControllerManagerService<C, CM> {
   get historyState(): HistoryState {
-    return this.manager.historyState;
+    let manager: HistoryManager<C> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = HistoryManager.global();
+    }
+    return manager.historyState;
   }
 
   pushHistory(deltaState: HistoryStateInit): void {
-    this.manager.pushHistory(deltaState);
+    let manager: HistoryManager<C> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = HistoryManager.global();
+    }
+    manager.pushHistory(deltaState);
   }
 
   replaceHistory(deltaState: HistoryStateInit): void {
-    this.manager.replaceHistory(deltaState);
+    let manager: HistoryManager<C> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = HistoryManager.global();
+    }
+    manager.replaceHistory(deltaState);
   }
 
-  override initManager(): HistoryManager<C> {
-    return HistoryManager.global();
+  override initManager(): CM {
+    return HistoryManager.global() as CM;
   }
 }
 
@@ -40,4 +52,5 @@ ControllerService({
   extends: HistoryService,
   type: HistoryManager,
   observe: false,
+  manager: HistoryManager.global(),
 })(Controller.prototype, "historyService");

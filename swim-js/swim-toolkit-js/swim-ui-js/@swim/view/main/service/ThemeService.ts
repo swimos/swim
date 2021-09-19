@@ -18,25 +18,41 @@ import {ThemeManager} from "../theme/ThemeManager";
 import {ViewService} from "./ViewService";
 import {ViewManagerService} from "./ViewManagerService";
 
-export abstract class ThemeService<V extends View> extends ViewManagerService<V, ThemeManager<V>> {
+export abstract class ThemeService<V extends View, VM extends ThemeManager<V> | null | undefined = ThemeManager<V>> extends ViewManagerService<V, VM> {
   get mood(): MoodVector {
-    return this.manager.mood;
+    let manager: ThemeManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = ThemeManager.global();
+    }
+    return manager.mood;
   }
 
   setMood(mood: MoodVector): void {
-    this.manager.setMood(mood);
+    let manager: ThemeManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = ThemeManager.global();
+    }
+    manager.setMood(mood);
   }
 
   get theme(): ThemeMatrix {
-    return this.manager.theme;
+    let manager: ThemeManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = ThemeManager.global();
+    }
+    return manager.theme;
   }
 
   setTheme(theme: ThemeMatrix): void {
-    this.manager.setTheme(theme);
+    let manager: ThemeManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = ThemeManager.global();
+    }
+    manager.setTheme(theme);
   }
 
-  override initManager(): ThemeManager<V> {
-    return ThemeManager.global();
+  override initManager(): VM {
+    return ThemeManager.global() as VM;
   }
 }
 
@@ -44,4 +60,5 @@ ViewService({
   extends: ThemeService,
   type: ThemeManager,
   observe: false,
+  manager: ThemeManager.global(),
 })(View.prototype, "themeService");

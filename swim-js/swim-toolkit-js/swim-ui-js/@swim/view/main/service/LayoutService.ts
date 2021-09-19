@@ -17,9 +17,9 @@ import {LayoutManager} from "../layout/LayoutManager";
 import {ViewService} from "./ViewService";
 import {ViewManagerService} from "./ViewManagerService";
 
-export abstract class LayoutService<V extends View> extends ViewManagerService<V, LayoutManager<V>> {
-  override initManager(): LayoutManager<V> {
-    return LayoutManager.global();
+export abstract class LayoutService<V extends View, VM extends LayoutManager<V> | null | undefined = LayoutManager<V>> extends ViewManagerService<V, VM> {
+  override initManager(): VM {
+    return LayoutManager.global() as VM;
   }
 }
 
@@ -27,4 +27,5 @@ ViewService({
   extends: LayoutService,
   type: LayoutManager,
   observe: false,
+  manager: LayoutManager.global(),
 })(View.prototype, "layoutService");

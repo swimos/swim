@@ -20,13 +20,17 @@ import {ModelService} from "./ModelService";
 import {ModelManagerService} from "./ModelManagerService";
 import {TraitService} from "./TraitService";
 
-export abstract class WarpService<M extends Model> extends ModelManagerService<M, WarpManager<M>> {
+export abstract class WarpService<M extends Model, MM extends WarpManager<M> | null | undefined = WarpManager<M>> extends ModelManagerService<M, MM> {
   get client(): WarpClient {
-    return this.manager.client;
+    let manager: WarpManager<M> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = WarpManager.global();
+    }
+    return manager.client;
   }
 
-  override initManager(): WarpManager<M> {
-    return WarpManager.global();
+  override initManager(): MM {
+    return WarpManager.global() as MM;
   }
 }
 
@@ -34,14 +38,17 @@ ModelService({
   extends: WarpService,
   type: WarpManager,
   observe: false,
+  manager: WarpManager.global(),
 })(Model.prototype, "warpService");
 
 TraitService({
   type: WarpManager,
   observe: false,
+  manager: WarpManager.global(),
   modelService: {
     extends: WarpService,
     type: WarpManager,
     observe: false,
+    manager: WarpManager.global(),
   },
 })(Trait.prototype, "warpService");

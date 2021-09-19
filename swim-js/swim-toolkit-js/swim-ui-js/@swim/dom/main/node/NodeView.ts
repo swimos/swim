@@ -1734,7 +1734,7 @@ export class NodeView extends View {
   /** @hidden */
   activateLayout(): void {
     const layoutManager = this.layoutService.manager;
-    if (layoutManager !== void 0) {
+    if (layoutManager !== void 0 && layoutManager !== null) {
       const constraints = this.constraints;
       for (let i = 0, n = constraints.length; i < n; i += 1) {
         layoutManager.activateConstraint(constraints[i]!);
@@ -1745,7 +1745,7 @@ export class NodeView extends View {
   /** @hidden */
   deactivateLayout(): void {
     const layoutManager = this.layoutService.manager;
-    if (layoutManager !== void 0) {
+    if (layoutManager !== void 0 && layoutManager !== null) {
       const constraints = this.constraints;
       for (let i = 0, n = constraints.length; i < n; i += 1) {
         layoutManager.deactivateConstraint(constraints[i]!);

@@ -13,30 +13,38 @@
 // limitations under the License.
 
 import type {ModelContext} from "../ModelContext";
-import {Model} from "../Model";
+import {ModelFlags, Model} from "../Model";
 import {RefreshManager} from "../refresh/RefreshManager";
 import {ModelService} from "./ModelService";
 import {ModelManagerService} from "./ModelManagerService";
 
-export abstract class RefreshService<M extends Model> extends ModelManagerService<M, RefreshManager<M>> {
+export abstract class RefreshService<M extends Model, MM extends RefreshManager<M> | null | undefined = RefreshManager<M>> extends ModelManagerService<M, MM> {
   get modelContext(): ModelContext {
-    let manager = this.manager;
-    if (manager === void 0) {
+    let manager: RefreshManager<M> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
       manager = RefreshManager.global();
     }
     return manager.modelContext;
   }
 
   updatedModelContext(): ModelContext {
-    let manager = this.manager;
-    if (manager === void 0) {
+    let manager: RefreshManager<M> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
       manager = RefreshManager.global();
     }
     return manager.updatedModelContext();
   }
 
-  override initManager(): RefreshManager<M> {
-    return RefreshManager.global();
+  requestUpdate(targetModel: Model, updateFlags: ModelFlags, immediate: boolean): void {
+    let manager: RefreshManager<M> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = RefreshManager.global();
+    }
+    manager.requestUpdate(targetModel, updateFlags, immediate);
+  }
+
+  override initManager(): MM {
+    return RefreshManager.global() as MM;
   }
 }
 
@@ -44,4 +52,5 @@ ModelService({
   extends: RefreshService,
   type: RefreshManager,
   observe: false,
+  manager: RefreshManager.global(),
 })(Model.prototype, "refreshService");

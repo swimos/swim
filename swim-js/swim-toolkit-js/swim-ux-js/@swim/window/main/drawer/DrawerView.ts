@@ -156,7 +156,7 @@ export class DrawerView extends HtmlView implements Modal {
 
   protected willDismiss(): void {
     const modalManager = this.modalService.manager;
-    if (modalManager !== void 0) {
+    if (modalManager !== void 0 && modalManager !== null) {
       modalManager.dismissModal(this);
     }
 
@@ -200,7 +200,7 @@ export class DrawerView extends HtmlView implements Modal {
 
   protected willExpand(): void {
     const modalManager = this.modalService.manager;
-    if (modalManager !== void 0) {
+    if (modalManager !== void 0 && modalManager !== null) {
       modalManager.dismissModal(this);
     }
 
@@ -225,7 +225,7 @@ export class DrawerView extends HtmlView implements Modal {
 
   protected willCollapse(): void {
     const modalManager = this.modalService.manager;
-    if (modalManager !== void 0) {
+    if (modalManager !== void 0 && modalManager !== null) {
       modalManager.dismissModal(this);
     }
 
@@ -541,7 +541,7 @@ export class DrawerView extends HtmlView implements Modal {
         this.stretch.expand(timing);
         this.slide.present(timing);
         const modalManager = this.modalService.manager;
-        if (modalManager !== void 0) {
+        if (modalManager !== void 0 && modalManager !== null) {
           modalManager.presentModal(this, {modal: true});
         }
       }

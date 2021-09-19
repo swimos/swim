@@ -13,30 +13,38 @@
 // limitations under the License.
 
 import type {ControllerContext} from "../ControllerContext";
-import {Controller} from "../Controller";
+import {ControllerFlags, Controller} from "../Controller";
 import {ExecuteManager} from "../execute/ExecuteManager";
 import {ControllerService} from "./ControllerService";
 import {ControllerManagerService} from "./ControllerManagerService";
 
-export abstract class ExecuteService<C extends Controller> extends ControllerManagerService<C, ExecuteManager<C>> {
+export abstract class ExecuteService<C extends Controller, CM extends ExecuteManager<C> | null | undefined = ExecuteManager<C>> extends ControllerManagerService<C, CM> {
   get controllerContext(): ControllerContext {
-    let manager = this.manager;
-    if (manager === void 0) {
+    let manager: ExecuteManager<C> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
       manager = ExecuteManager.global();
     }
     return manager.controllerContext;
   }
 
   updatedControllerContext(): ControllerContext {
-    let manager = this.manager;
-    if (manager === void 0) {
+    let manager: ExecuteManager<C> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
       manager = ExecuteManager.global();
     }
     return manager.updatedControllerContext();
   }
 
-  override initManager(): ExecuteManager<C> {
-    return ExecuteManager.global();
+  requestUpdate(targetController: Controller, updateFlags: ControllerFlags, immediate: boolean): void {
+    let manager: ExecuteManager<C> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = ExecuteManager.global();
+    }
+    manager.requestUpdate(targetController, updateFlags, immediate);
+  }
+
+  override initManager(): CM {
+    return ExecuteManager.global() as CM;
   }
 }
 
@@ -44,4 +52,5 @@ ControllerService({
   extends: ExecuteService,
   type: ExecuteManager,
   observe: false,
+  manager: ExecuteManager.global(),
 })(Controller.prototype, "executeService");

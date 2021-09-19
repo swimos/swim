@@ -35,11 +35,11 @@ export type ViewServiceFlags = number;
 
 export interface ViewServiceInit<T> {
   extends?: ViewServiceClass;
-  observe?: boolean;
   type?: unknown;
-  manager?: T;
   inherit?: string | boolean;
+  observe?: boolean;
 
+  manager?: T;
   initManager?(): T;
 }
 
@@ -86,11 +86,11 @@ export interface ViewService<V extends View, T> {
   /** @hidden */
   unbindSuperService(): void;
 
-  readonly manager: T;
+  readonly superManager: T | undefined;
 
   readonly ownManager: T | undefined;
 
-  readonly superManager: T | undefined;
+  readonly manager: T;
 
   getManager(): NonNullable<T>;
 
@@ -105,11 +105,33 @@ export interface ViewService<V extends View, T> {
   /** @hidden */
   initManager(): T;
 
+  isMounted(): boolean;
+
   /** @hidden */
   mount(): void;
 
   /** @hidden */
+  willMount(): void;
+
+  /** @hidden */
+  onMount(): void;
+
+  /** @hidden */
+  didMount(): void;
+
+  /** @hidden */
   unmount(): void;
+
+  /** @hidden */
+  willUnmount(): void;
+
+  /** @hidden */
+  onUnmount(): void;
+
+  /** @hidden */
+  didUnmount(): void;
+
+  toString(): string;
 }
 
 export const ViewService = function <V extends View, T>(
@@ -145,6 +167,8 @@ export const ViewService = function <V extends View, T>(
   define<V extends View, T>(descriptor: ViewServiceDescriptor<V, T>): ViewServiceConstructor<V, T>;
 
   /** @hidden */
+  MountedFlag: ViewServiceFlags;
+  /** @hidden */
   InheritedFlag: ViewServiceFlags;
 };
 __extends(ViewService, Object);
@@ -162,7 +186,7 @@ function ViewServiceConstructor<V extends View, T>(this: ViewService<V, T>, owne
     enumerable: true,
   });
   Object.defineProperty(this, "inherit", {
-    value: this.inherit ?? false, // seed from prototype
+    value: true,
     enumerable: true,
     configurable: true,
   });
@@ -281,18 +305,18 @@ ViewService.prototype.unbindSuperService = function (this: ViewService<View, unk
   this.setServiceFlags(this.serviceFlags & ~ViewService.InheritedFlag);
 };
 
-Object.defineProperty(ViewService.prototype, "ownManager", {
+Object.defineProperty(ViewService.prototype, "superManager", {
   get: function <T>(this: ViewService<View, T>): T | undefined {
-    return !this.isInherited() ? this.manager : void 0;
+    const superService = this.superService;
+    return superService !== null ? superService.manager : void 0;
   },
   enumerable: true,
   configurable: true,
 });
 
-Object.defineProperty(ViewService.prototype, "superManager", {
+Object.defineProperty(ViewService.prototype, "ownManager", {
   get: function <T>(this: ViewService<View, T>): T | undefined {
-    const superService = this.superService;
-    return superService !== null ? superService.manager : void 0;
+    return !this.isInherited() ? this.manager : void 0;
   },
   enumerable: true,
   configurable: true,
@@ -315,15 +339,57 @@ ViewService.prototype.getManagerOr = function <T, E>(this: ViewService<View, T>,
 };
 
 ViewService.prototype.initManager = function <T>(this: ViewService<View, T>): T {
-  return void 0 as unknown as T;
+  return this.manager;
+};
+
+ViewService.prototype.isMounted = function (this: ViewService<View, unknown>): boolean {
+  return (this.serviceFlags & ViewService.MountedFlag) !== 0;
 };
 
 ViewService.prototype.mount = function (this: ViewService<View, unknown>): void {
+  if ((this.serviceFlags & ViewService.MountedFlag) === 0) {
+    this.willMount();
+    this.setServiceFlags(this.serviceFlags | ViewService.MountedFlag);
+    this.onMount();
+    this.didMount();
+  }
+};
+
+ViewService.prototype.willMount = function (this: ViewService<View, unknown>): void {
+  // hook
+};
+
+ViewService.prototype.onMount = function (this: ViewService<View, unknown>): void {
   this.bindSuperService();
 };
 
+ViewService.prototype.didMount = function (this: ViewService<View, unknown>): void {
+  // hook
+};
+
 ViewService.prototype.unmount = function (this: ViewService<View, unknown>): void {
+  if ((this.serviceFlags & ViewService.MountedFlag) !== 0) {
+    this.willUnmount();
+    this.setServiceFlags(this.serviceFlags & ~ViewService.MountedFlag);
+    this.onUnmount();
+    this.didUnmount();
+  }
+};
+
+ViewService.prototype.willUnmount = function (this: ViewService<View, unknown>): void {
+  // hook
+};
+
+ViewService.prototype.onUnmount = function (this: ViewService<View, unknown>): void {
   this.unbindSuperService();
+};
+
+ViewService.prototype.didUnmount = function (this: ViewService<View, unknown>): void {
+  // hook
+};
+
+ViewService.prototype.toString = function (this: ViewService<View, unknown>): string {
+  return this.name;
 };
 
 ViewService.getClass = function (type: unknown): ViewServiceClass | null {
@@ -345,10 +411,10 @@ ViewService.getClass = function (type: unknown): ViewServiceClass | null {
 
 ViewService.define = function <V extends View, T, I>(descriptor: ViewServiceDescriptor<V, T, I>): ViewServiceConstructor<V, T, I> {
   let _super: ViewServiceClass | null | undefined = descriptor.extends;
-  const manager = descriptor.manager;
   const inherit = descriptor.inherit;
-  const initManager = descriptor.initManager;
+  const manager = descriptor.manager;
   delete descriptor.extends;
+  delete descriptor.inherit;
   delete descriptor.manager;
 
   if (_super === void 0) {
@@ -364,6 +430,20 @@ ViewService.define = function <V extends View, T, I>(descriptor: ViewServiceDesc
     } as ViewService<V, T>;
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, serviceName) || _this;
+    if (manager !== void 0) {
+      Object.defineProperty(_this, "manager", {
+        value: manager,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+    if (inherit !== void 0) {
+      Object.defineProperty(_this, "inherit", {
+        value: inherit,
+        enumerable: true,
+        configurable: true,
+      });
+    }
     return _this;
   } as unknown as ViewServiceConstructor<V, T, I>;
 
@@ -373,18 +453,8 @@ ViewService.define = function <V extends View, T, I>(descriptor: ViewServiceDesc
   _constructor.prototype.constructor = _constructor;
   Object.setPrototypeOf(_constructor.prototype, _super.prototype);
 
-  if (manager !== void 0 && initManager === void 0) {
-    _prototype.initManager = function (): T {
-      return manager;
-    };
-  }
-  Object.defineProperty(_prototype, "inherit", {
-    value: inherit ?? true,
-    enumerable: true,
-    configurable: true,
-  });
-
   return _constructor;
 }
 
-ViewService.InheritedFlag = 1 << 0;
+ViewService.MountedFlag = 1 << 0;
+ViewService.InheritedFlag = 1 << 1;

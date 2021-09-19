@@ -951,7 +951,7 @@ export abstract class GraphicsView extends View {
         let superMood = this.mood.superState;
         if (superMood === void 0 || superMood === null ) {
           const themeManager = this.themeService.manager;
-          if (themeManager !== void 0) {
+          if (themeManager !== void 0 && themeManager !== null) {
             superMood = themeManager.mood;
           }
         }
@@ -973,7 +973,7 @@ export abstract class GraphicsView extends View {
         let superTheme = this.theme.superState;
         if (superTheme === void 0 || superTheme === null) {
           const themeManager = this.themeService.manager;
-          if (themeManager !== void 0) {
+          if (themeManager !== void 0 && themeManager !== null) {
             superTheme = themeManager.theme;
           }
         }
@@ -1580,7 +1580,7 @@ export abstract class GraphicsView extends View {
   /** @hidden */
   activateLayout(): void {
     const layoutManager = this.layoutService.manager;
-    if (layoutManager !== void 0) {
+    if (layoutManager !== void 0 && layoutManager !== null) {
       const constraints = this.constraints;
       for (let i = 0, n = constraints.length; i < n; i += 1) {
         layoutManager.activateConstraint(constraints[i]!);
@@ -1591,7 +1591,7 @@ export abstract class GraphicsView extends View {
   /** @hidden */
   deactivateLayout(): void {
     const layoutManager = this.layoutService.manager;
-    if (layoutManager !== void 0) {
+    if (layoutManager !== void 0 && layoutManager !== null) {
       const constraints = this.constraints;
       for (let i = 0, n = constraints.length; i < n; i += 1) {
         layoutManager.deactivateConstraint(constraints[i]!);

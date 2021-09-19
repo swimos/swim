@@ -31,11 +31,11 @@ export type ControllerServiceFlags = number;
 
 export interface ControllerServiceInit<T> {
   extends?: ControllerServiceClass;
-  observe?: boolean;
   type?: unknown;
-  manager?: T;
   inherit?: string | boolean;
+  observe?: boolean;
 
+  manager?: T;
   initManager?(): T;
 }
 
@@ -82,11 +82,11 @@ export interface ControllerService<C extends Controller, T> {
   /** @hidden */
   unbindSuperService(): void;
 
-  readonly manager: T;
+  readonly superManager: T | undefined;
 
   readonly ownManager: T | undefined;
 
-  readonly superManager: T | undefined;
+  readonly manager: T;
 
   getManager(): NonNullable<T>;
 
@@ -101,11 +101,33 @@ export interface ControllerService<C extends Controller, T> {
   /** @hidden */
   initManager(): T;
 
+  isMounted(): boolean;
+
   /** @hidden */
   mount(): void;
 
   /** @hidden */
+  willMount(): void;
+
+  /** @hidden */
+  onMount(): void;
+
+  /** @hidden */
+  didMount(): void;
+
+  /** @hidden */
   unmount(): void;
+
+  /** @hidden */
+  willUnmount(): void;
+
+  /** @hidden */
+  onUnmount(): void;
+
+  /** @hidden */
+  didUnmount(): void;
+
+  toString(): string;
 }
 
 export const ControllerService = function <C extends Controller, T>(
@@ -139,6 +161,8 @@ export const ControllerService = function <C extends Controller, T>(
   define<C extends Controller, T>(descriptor: ControllerServiceDescriptor<C, T>): ControllerServiceConstructor<C, T>;
 
   /** @hidden */
+  MountedFlag: ControllerServiceFlags;
+  /** @hidden */
   InheritedFlag: ControllerServiceFlags;
 };
 __extends(ControllerService, Object);
@@ -156,7 +180,7 @@ function ControllerServiceConstructor<C extends Controller, T>(this: ControllerS
     enumerable: true,
   });
   Object.defineProperty(this, "inherit", {
-    value: this.inherit ?? false, // seed from prototype
+    value: true,
     enumerable: true,
     configurable: true,
   });
@@ -275,18 +299,18 @@ ControllerService.prototype.unbindSuperService = function (this: ControllerServi
   this.setServiceFlags(this.serviceFlags & ~ControllerService.InheritedFlag);
 };
 
-Object.defineProperty(ControllerService.prototype, "ownManager", {
+Object.defineProperty(ControllerService.prototype, "superManager", {
   get: function <T>(this: ControllerService<Controller, T>): T | undefined {
-    return !this.isInherited() ? this.manager : void 0;
+    const superService = this.superService;
+    return superService !== null ? superService.manager : void 0;
   },
   enumerable: true,
   configurable: true,
 });
 
-Object.defineProperty(ControllerService.prototype, "superManager", {
+Object.defineProperty(ControllerService.prototype, "ownManager", {
   get: function <T>(this: ControllerService<Controller, T>): T | undefined {
-    const superService = this.superService;
-    return superService !== null ? superService.manager : void 0;
+    return !this.isInherited() ? this.manager : void 0;
   },
   enumerable: true,
   configurable: true,
@@ -309,7 +333,7 @@ ControllerService.prototype.getManagerOr = function <T, E>(this: ControllerServi
 };
 
 ControllerService.prototype.initManager = function <T>(this: ControllerService<Controller, T>): T {
-  return void 0 as unknown as T;
+  return this.manager;
 };
 
 ControllerService.prototype.mount = function (this: ControllerService<Controller, unknown>): void {
@@ -318,6 +342,56 @@ ControllerService.prototype.mount = function (this: ControllerService<Controller
 
 ControllerService.prototype.unmount = function (this: ControllerService<Controller, unknown>): void {
   this.unbindSuperService();
+};
+
+ControllerService.prototype.isMounted = function (this: ControllerService<Controller, unknown>): boolean {
+  return (this.serviceFlags & ControllerService.MountedFlag) !== 0;
+};
+
+ControllerService.prototype.mount = function (this: ControllerService<Controller, unknown>): void {
+  if ((this.serviceFlags & ControllerService.MountedFlag) === 0) {
+    this.willMount();
+    this.setServiceFlags(this.serviceFlags | ControllerService.MountedFlag);
+    this.onMount();
+    this.didMount();
+  }
+};
+
+ControllerService.prototype.willMount = function (this: ControllerService<Controller, unknown>): void {
+  // hook
+};
+
+ControllerService.prototype.onMount = function (this: ControllerService<Controller, unknown>): void {
+  this.bindSuperService();
+};
+
+ControllerService.prototype.didMount = function (this: ControllerService<Controller, unknown>): void {
+  // hook
+};
+
+ControllerService.prototype.unmount = function (this: ControllerService<Controller, unknown>): void {
+  if ((this.serviceFlags & ControllerService.MountedFlag) !== 0) {
+    this.willUnmount();
+    this.setServiceFlags(this.serviceFlags & ~ControllerService.MountedFlag);
+    this.onUnmount();
+    this.didUnmount();
+  }
+};
+
+ControllerService.prototype.willUnmount = function (this: ControllerService<Controller, unknown>): void {
+  // hook
+};
+
+ControllerService.prototype.onUnmount = function (this: ControllerService<Controller, unknown>): void {
+  this.unbindSuperService();
+};
+
+ControllerService.prototype.didUnmount = function (this: ControllerService<Controller, unknown>): void {
+  // hook
+};
+
+ControllerService.prototype.toString = function (this: ControllerService<Controller, unknown>): string {
+  return this.name;
 };
 
 ControllerService.getClass = function (type: unknown): ControllerServiceClass | null {
@@ -335,10 +409,10 @@ ControllerService.getClass = function (type: unknown): ControllerServiceClass | 
 
 ControllerService.define = function <C extends Controller, T, I>(descriptor: ControllerServiceDescriptor<C, T, I>): ControllerServiceConstructor<C, T, I> {
   let _super: ControllerServiceClass | null | undefined = descriptor.extends;
-  const manager = descriptor.manager;
   const inherit = descriptor.inherit;
-  const initManager = descriptor.initManager;
+  const manager = descriptor.manager;
   delete descriptor.extends;
+  delete descriptor.inherit;
   delete descriptor.manager;
 
   if (_super === void 0) {
@@ -354,6 +428,20 @@ ControllerService.define = function <C extends Controller, T, I>(descriptor: Con
     } as ControllerService<C, T>;
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, serviceName) || _this;
+    if (manager !== void 0) {
+      Object.defineProperty(_this, "manager", {
+        value: manager,
+        enumerable: true,
+        configurable: true,
+      });
+    }
+    if (inherit !== void 0) {
+      Object.defineProperty(_this, "inherit", {
+        value: inherit,
+        enumerable: true,
+        configurable: true,
+      });
+    }
     return _this;
   } as unknown as ControllerServiceConstructor<C, T, I>;
 
@@ -363,18 +451,8 @@ ControllerService.define = function <C extends Controller, T, I>(descriptor: Con
   _constructor.prototype.constructor = _constructor;
   Object.setPrototypeOf(_constructor.prototype, _super.prototype);
 
-  if (manager !== void 0 && initManager === void 0) {
-    _prototype.initManager = function (): T {
-      return manager;
-    };
-  }
-  Object.defineProperty(_prototype, "inherit", {
-    value: inherit ?? true,
-    enumerable: true,
-    configurable: true,
-  });
-
   return _constructor;
 }
 
-ControllerService.InheritedFlag = 1 << 0;
+ControllerService.MountedFlag = 1 << 0;
+ControllerService.InheritedFlag = 1 << 1;

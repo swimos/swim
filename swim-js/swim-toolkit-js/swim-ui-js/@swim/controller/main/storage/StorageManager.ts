@@ -12,9 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Lazy} from "@swim/util";
 import {Controller} from "../Controller";
 import {ControllerManager} from "../manager/ControllerManager";
 import type {StorageManagerObserver} from "./StorageManagerObserver";
+import {WebStorageManager} from "../"; // forward import
+import {EphemeralStorageManager} from "../"; // forward import
 
 export abstract class StorageManager<C extends Controller = Controller> extends ControllerManager<C> {
   abstract get(key: string): string | undefined;
@@ -78,4 +81,13 @@ export abstract class StorageManager<C extends Controller = Controller> extends 
   }
 
   override readonly controllerManagerObservers!: ReadonlyArray<StorageManagerObserver>;
+
+  @Lazy
+  static global<C extends Controller>(): StorageManager<C> {
+    let manager: StorageManager<C> | null = WebStorageManager.local();
+    if (manager === null) {
+      manager = new EphemeralStorageManager();
+    }
+    return manager;
+  }
 }

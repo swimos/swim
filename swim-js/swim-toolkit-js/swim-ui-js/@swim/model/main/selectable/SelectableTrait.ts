@@ -46,7 +46,7 @@ export class SelectableTrait extends GenericTrait {
       });
       if (this.isMounted()) {
         const selectionManager = this.selectionService.manager;
-        if (selectionManager !== void 0) {
+        if (selectionManager !== void 0 && selectionManager !== null) {
           selectionManager.select(this.model!, options);
         }
       }
@@ -93,7 +93,7 @@ export class SelectableTrait extends GenericTrait {
       });
       if (this.isMounted()) {
         const selectionManager = this.selectionService.manager;
-        if (selectionManager !== void 0) {
+        if (selectionManager !== void 0 && selectionManager !== null) {
           selectionManager.unselect(this.model!);
         }
       }
@@ -133,7 +133,7 @@ export class SelectableTrait extends GenericTrait {
 
   unselectAll(): void {
     const selectionManager = this.selectionService.manager;
-    if (selectionManager !== void 0) {
+    if (selectionManager !== void 0 && selectionManager !== null) {
       selectionManager.unselectAll();
     }
   }
@@ -160,7 +160,7 @@ export class SelectableTrait extends GenericTrait {
   protected override didMount(): void {
     if (this.selected) {
       const selectionManager = this.selectionService.manager;
-      if (selectionManager !== void 0) {
+      if (selectionManager !== void 0 && selectionManager !== null) {
         selectionManager.select(this.model!);
       }
     }
@@ -170,7 +170,7 @@ export class SelectableTrait extends GenericTrait {
   protected override willUnmount(): void {
     super.willUnmount();
     const selectionManager = this.selectionService.manager;
-    if (selectionManager !== void 0) {
+    if (selectionManager !== void 0 && selectionManager !== null) {
       selectionManager.unselect(this.model!);
     }
   }

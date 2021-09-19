@@ -18,33 +18,57 @@ import {ModalManager} from "../modal/ModalManager";
 import {ViewService} from "./ViewService";
 import {ViewManagerService} from "./ViewManagerService";
 
-export abstract class ModalService<V extends View> extends ViewManagerService<V, ModalManager<V>> {
+export abstract class ModalService<V extends View, VM extends ModalManager<V> | null | undefined = ModalManager<V>> extends ViewManagerService<V, VM> {
   presentModal(modal: Modal, options?: ModalOptions): void {
-    this.manager.presentModal(modal, options);
+    let manager: ModalManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = ModalManager.global();
+    }
+    manager.presentModal(modal, options);
   }
 
   dismissModal(modal: Modal): void {
-    this.manager.dismissModal(modal);
+    let manager: ModalManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = ModalManager.global();
+    }
+    manager.dismissModal(modal);
   }
 
   dismissModals(): void {
-    this.manager.dismissModals();
+    let manager: ModalManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = ModalManager.global();
+    }
+    manager.dismissModals();
   }
 
   toggleModal(modal: Modal, options?: ModalOptions): void {
-    this.manager.toggleModal(modal, options);
+    let manager: ModalManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = ModalManager.global();
+    }
+    manager.toggleModal(modal, options);
   }
 
   updateModality(): void {
-    this.manager.updateModality();
+    let manager: ModalManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = ModalManager.global();
+    }
+    manager.updateModality();
   }
 
   displaceModals(event: Event | null): void {
-    this.manager.displaceModals(event);
+    let manager: ModalManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = ModalManager.global();
+    }
+    manager.displaceModals(event);
   }
 
-  override initManager(): ModalManager<V> {
-    return ModalManager.global();
+  override initManager(): VM {
+    return ModalManager.global() as VM;
   }
 }
 
@@ -52,4 +76,5 @@ ViewService({
   extends: ModalService,
   type: ModalManager,
   observe: false,
+  manager: ModalManager.global(),
 })(View.prototype, "modalService");

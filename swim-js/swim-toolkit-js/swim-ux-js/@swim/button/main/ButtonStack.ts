@@ -245,7 +245,7 @@ export class ButtonStack extends HtmlView implements Modal {
     super.onLayout(viewContext);
     this.layoutStack();
     const modalManager = this.modalService.manager;
-    if (modalManager !== void 0) {
+    if (modalManager !== void 0 && modalManager !== null) {
       modalManager.updateModality();
     }
   }

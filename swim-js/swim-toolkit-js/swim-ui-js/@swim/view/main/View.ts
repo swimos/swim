@@ -685,7 +685,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
           parentView.requestUpdate(targetView, updateFlags, immediate);
         } else if (this.isMounted()) {
           const displayManager = this.displayService.manager;
-          if (displayManager !== void 0) {
+          if (displayManager !== void 0 && displayManager !== null) {
             displayManager.requestUpdate(targetView, updateFlags, immediate);
           }
         }
@@ -1119,7 +1119,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   /** @hidden */
   activateConstraint(constraint: Constraint): void {
     const layoutManager = this.layoutService.manager;
-    if (layoutManager !== void 0) {
+    if (layoutManager !== void 0 && layoutManager !== null) {
       layoutManager.activateConstraint(constraint);
       this.requireUpdate(View.NeedsLayout);
     }
@@ -1128,7 +1128,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   /** @hidden */
   deactivateConstraint(constraint: Constraint): void {
     const layoutManager = this.layoutService.manager;
-    if (layoutManager !== void 0) {
+    if (layoutManager !== void 0 && layoutManager !== null) {
       layoutManager.deactivateConstraint(constraint);
       this.requireUpdate(View.NeedsLayout);
     }
@@ -1157,7 +1157,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   /** @hidden */
   activateConstraintVariable(constraintVariable: ConstraintVariable): void {
     const layoutManager = this.layoutService.manager;
-    if (layoutManager !== void 0) {
+    if (layoutManager !== void 0 && layoutManager !== null) {
       layoutManager.activateConstraintVariable(constraintVariable);
       this.requireUpdate(View.NeedsLayout);
     }
@@ -1166,7 +1166,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   /** @hidden */
   deactivateConstraintVariable(constraintVariable: ConstraintVariable): void {
     const layoutManager = this.layoutService.manager;
-    if (layoutManager !== void 0) {
+    if (layoutManager !== void 0 && layoutManager !== null) {
       layoutManager.deactivateConstraintVariable(constraintVariable);
       this.requireUpdate(View.NeedsLayout);
     }
@@ -1175,7 +1175,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   /** @hidden */
   setConstraintVariable(constraintVariable: ConstraintVariable, state: number): void {
     const layoutManager = this.layoutService.manager;
-    if (layoutManager !== void 0) {
+    if (layoutManager !== void 0 && layoutManager !== null) {
       layoutManager.setConstraintVariable(constraintVariable, state);
     }
   }

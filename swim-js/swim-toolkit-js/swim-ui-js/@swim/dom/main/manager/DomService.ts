@@ -22,4 +22,9 @@ export abstract class DomService<V extends NodeView> extends ViewManagerService<
   }
 }
 
-ViewService({extends: DomService, type: DomManager, observe: false})(NodeView.prototype, "domService");
+ViewService({
+  extends: DomService,
+  type: DomManager,
+  observe: false,
+  manager: null,
+})(NodeView.prototype, "domService");

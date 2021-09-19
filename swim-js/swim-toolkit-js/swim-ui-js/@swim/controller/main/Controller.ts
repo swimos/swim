@@ -499,7 +499,7 @@ export abstract class Controller implements GestureContext {
         parentController.requestUpdate(targetController, updateFlags, immediate);
       } else if (this.isMounted()) {
         const executeManager = this.executeService.manager;
-        if (executeManager !== void 0) {
+        if (executeManager !== void 0 && executeManager !== null) {
           executeManager.requestUpdate(targetController, updateFlags, immediate);
         }
       }

@@ -315,7 +315,7 @@ export class ElementView extends NodeView implements StyleContext {
         let superMood = this.mood.superState;
         if (superMood === void 0 || superMood === null) {
           const themeManager = this.themeService.manager;
-          if (themeManager !== void 0) {
+          if (themeManager !== void 0 && themeManager !== null) {
             superMood = themeManager.mood;
           }
         }
@@ -337,7 +337,7 @@ export class ElementView extends NodeView implements StyleContext {
         let superTheme = this.theme.superState;
         if (superTheme === void 0 || superTheme === null) {
           const themeManager = this.themeService.manager;
-          if (themeManager !== void 0) {
+          if (themeManager !== void 0 && themeManager !== null) {
             superTheme = themeManager.theme;
           }
         }
@@ -370,7 +370,7 @@ export class ElementView extends NodeView implements StyleContext {
   protected mountTheme(): void {
     if (NodeView.isRootView(this.node)) {
       const themeManager = this.themeService.manager;
-      if (themeManager !== void 0) {
+      if (themeManager !== void 0 && themeManager !== null) {
         if (this.mood.takesPrecedence(View.Intrinsic) && this.mood.state === null) {
           this.mood.setState(themeManager.mood, View.Intrinsic);
         }

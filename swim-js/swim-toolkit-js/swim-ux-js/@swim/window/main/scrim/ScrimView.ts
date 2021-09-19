@@ -167,7 +167,7 @@ export class ScrimView extends HtmlView implements ModalManagerObserver {
   protected override onMount(): void {
     super.onMount();
     const modalManager = this.modalService.manager;
-    if (modalManager !== void 0) {
+    if (modalManager !== void 0 && modalManager !== null) {
       modalManager.addViewManagerObserver(this);
       this.modalManagerDidUpdateModality(modalManager.modality, 0, modalManager);
     }
@@ -175,7 +175,7 @@ export class ScrimView extends HtmlView implements ModalManagerObserver {
 
   protected override onUnmount(): void {
     const modalManager = this.modalService.manager;
-    if (modalManager !== void 0) {
+    if (modalManager !== void 0 && modalManager !== null) {
       modalManager.removeViewManagerObserver(this);
     }
     this.hide(false);
@@ -200,7 +200,7 @@ export class ScrimView extends HtmlView implements ModalManagerObserver {
 
   protected onClick(event: Event): void {
     const modalManager = this.modalService.manager;
-    if (modalManager !== void 0) {
+    if (modalManager !== void 0 && modalManager !== null) {
       modalManager.displaceModals(event);
     }
   }

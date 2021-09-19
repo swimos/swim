@@ -20,41 +20,41 @@ import {ViewportManager} from "../viewport/ViewportManager";
 import {ViewService} from "./ViewService";
 import {ViewManagerService} from "./ViewManagerService";
 
-export abstract class ViewportService<V extends View> extends ViewManagerService<V, ViewportManager<V>> {
+export abstract class ViewportService<V extends View, VM extends ViewportManager<V> | null | undefined = ViewportManager<V>> extends ViewManagerService<V, VM> {
   get viewContext(): ViewContext {
-    let manager = this.manager;
-    if (manager === void 0) {
+    let manager: ViewportManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
       manager = ViewportManager.global();
     }
     return manager.viewContext;
   }
 
   get viewport(): Viewport {
-    let manager = this.manager;
-    if (manager === void 0) {
+    let manager: ViewportManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
       manager = ViewportManager.global();
     }
     return manager.viewport;
   }
 
   get viewIdiom(): ViewIdiom {
-    let manager = this.manager;
-    if (manager === void 0) {
+    let manager: ViewportManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
       manager = ViewportManager.global();
     }
     return manager.viewIdiom;
   }
 
   setViewIdiom(viewIdiom: ViewIdiom): void {
-    let manager = this.manager;
-    if (manager === void 0) {
+    let manager: ViewportManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
       manager = ViewportManager.global();
     }
     manager.setViewIdiom(viewIdiom);
   }
 
-  override initManager(): ViewportManager<V> {
-    return ViewportManager.global();
+  override initManager(): VM {
+    return ViewportManager.global() as VM;
   }
 }
 
@@ -62,4 +62,5 @@ ViewService({
   extends: ViewportService,
   type: ViewportManager,
   observe: false,
+  manager: ViewportManager.global(),
 })(View.prototype, "viewportService");

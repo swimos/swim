@@ -13,22 +13,30 @@
 // limitations under the License.
 
 import type {ViewContext} from "../ViewContext";
-import {View} from "../View";
+import {ViewFlags, View} from "../View";
 import {DisplayManager} from "../display/DisplayManager";
 import {ViewService} from "./ViewService";
 import {ViewManagerService} from "./ViewManagerService";
 
-export abstract class DisplayService<V extends View> extends ViewManagerService<V, DisplayManager<V>> {
+export abstract class DisplayService<V extends View, VM extends DisplayManager<V> | null | undefined = DisplayManager<V>> extends ViewManagerService<V, VM> {
   updatedViewContext(viewContext: ViewContext): ViewContext {
-    let manager = this.manager;
-    if (manager === void 0) {
+    let manager: DisplayManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
       manager = DisplayManager.global();
     }
     return manager.updatedViewContext(viewContext);
   }
 
-  override initManager(): DisplayManager<V> {
-    return DisplayManager.global();
+  requestUpdate(targetView: View, updateFlags: ViewFlags, immediate: boolean): void {
+    let manager: DisplayManager<V> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = DisplayManager.global();
+    }
+    manager.requestUpdate(targetView, updateFlags, immediate);
+  }
+
+  override initManager(): VM {
+    return DisplayManager.global() as VM;
   }
 }
 
@@ -36,4 +44,5 @@ ViewService({
   extends: DisplayService,
   type: DisplayManager,
   observe: false,
+  manager: DisplayManager.global(),
 })(View.prototype, "displayService");

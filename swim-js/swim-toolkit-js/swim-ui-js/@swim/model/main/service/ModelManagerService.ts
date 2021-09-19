@@ -14,33 +14,33 @@
 
 import type {Model} from "../Model";
 import type {ModelManager} from "../manager/ModelManager";
-import type {ModelManagerObserverType} from "../manager/ModelManagerObserver";
+import type {ModelManagerObserver} from "../manager/ModelManagerObserver";
 import {ModelService} from "./ModelService";
 
-export abstract class ModelManagerService<M extends Model, MM extends ModelManager<M>> extends ModelService<M, MM> {
-  override mount(): void {
-    super.mount();
+export abstract class ModelManagerService<M extends Model, MM extends ModelManager<M> | null | undefined> extends ModelService<M, MM> {
+  override didMount(): void {
     const manager = this.manager;
-    if (manager !== void 0) {
+    if (manager !== void 0 && manager !== null) {
       if (!this.isInherited()) {
         manager.insertRootModel(this.owner);
       }
       if (this.observe !== false) {
-        manager.addModelManagerObserver(this as ModelManagerObserverType<MM>);
+        manager.addModelManagerObserver(this as ModelManagerObserver);
       }
     }
+    super.didMount();
   }
 
-  override unmount(): void {
+  override willUnmount(): void {
+    super.willUnmount();
     const manager = this.manager;
-    if (manager !== void 0) {
+    if (manager !== void 0 && manager !== null) {
       if (this.observe !== false) {
-        manager.removeModelManagerObserver(this as ModelManagerObserverType<MM>);
+        manager.removeModelManagerObserver(this as ModelManagerObserver);
       }
       if (!this.isInherited()) {
         manager.removeRootModel(this.owner);
       }
     }
-    super.unmount();
   }
 }

@@ -14,33 +14,33 @@
 
 import type {View} from "../View";
 import type {ViewManager} from "../manager/ViewManager";
-import type {ViewManagerObserverType} from "../manager/ViewManagerObserver";
+import type {ViewManagerObserver} from "../manager/ViewManagerObserver";
 import {ViewService} from "./ViewService";
 
-export abstract class ViewManagerService<V extends View, VM extends ViewManager<V>> extends ViewService<V, VM> {
-  override mount(): void {
-    super.mount();
+export abstract class ViewManagerService<V extends View, VM extends ViewManager<V> | null | undefined> extends ViewService<V, VM> {
+  override didMount(): void {
     const manager = this.manager;
-    if (manager !== void 0) {
+    if (manager !== void 0 && manager !== null) {
       if (!this.isInherited()) {
         manager.insertRootView(this.owner);
       }
       if (this.observe !== false) {
-        manager.addViewManagerObserver(this as ViewManagerObserverType<VM>);
+        manager.addViewManagerObserver(this as ViewManagerObserver);
       }
     }
+    super.didMount();
   }
 
-  override unmount(): void {
+  override willUnmount(): void {
+    super.willUnmount();
     const manager = this.manager;
-    if (manager !== void 0) {
+    if (manager !== void 0 && manager !== null) {
       if (this.observe !== false) {
-        manager.removeViewManagerObserver(this as ViewManagerObserverType<VM>);
+        manager.removeViewManagerObserver(this as ViewManagerObserver);
       }
       if (!this.isInherited()) {
         manager.removeRootView(this.owner);
       }
     }
-    super.unmount();
   }
 }

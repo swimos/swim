@@ -17,25 +17,41 @@ import {SelectionOptions, SelectionManager} from "../selection/SelectionManager"
 import {ModelService} from "./ModelService";
 import {ModelManagerService} from "./ModelManagerService";
 
-export class SelectionService<M extends Model> extends ModelManagerService<M, SelectionManager<M>> {
+export class SelectionService<M extends Model, MM extends SelectionManager<M> | null | undefined = SelectionManager<M>> extends ModelManagerService<M, MM> {
   get selections(): ReadonlyArray<Model> {
-    return this.manager.selections;
+    let manager: SelectionManager<M> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = SelectionManager.global();
+    }
+    return manager.selections;
   }
 
   select(model: Model, options?: SelectionOptions, index?: number): void {
-    this.manager.select(model, options, index);
+    let manager: SelectionManager<M> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = SelectionManager.global();
+    }
+    manager.select(model, options, index);
   }
 
   unselect(model: Model): void {
-    this.manager.unselect(model);
+    let manager: SelectionManager<M> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = SelectionManager.global();
+    }
+    manager.unselect(model);
   }
 
   unselectAll(): void {
-    this.manager.unselectAll();
+    let manager: SelectionManager<M> | null | undefined = this.manager;
+    if (manager === void 0 || manager === null) {
+      manager = SelectionManager.global();
+    }
+    manager.unselectAll();
   }
 
-  override initManager(): SelectionManager<M> {
-    return SelectionManager.global();
+  override initManager(): MM {
+    return SelectionManager.global() as MM;
   }
 }
 
@@ -43,4 +59,5 @@ ModelService({
   extends: SelectionService,
   type: SelectionManager,
   observe: false,
+  manager: SelectionManager.global(),
 })(Model.prototype, "selectionService");
