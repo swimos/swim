@@ -1135,11 +1135,15 @@ export class CanvasView extends HtmlView {
   }
 
   get hitBounds(): R2Box {
-    return this.viewFrame;
+    if (!this.isIntangible()) {
+      return this.viewFrame;
+    } else {
+      return R2Box.undefined();
+    }
   }
 
   cascadeHitTest(x: number, y: number, baseViewContext?: ViewContext): GraphicsView | null {
-    if (!this.isHidden() && !this.isCulled()) {
+    if (!this.isHidden() && !this.isCulled() && !this.isIntangible()) {
       const hitBounds = this.hitBounds;
       if (hitBounds.contains(x, y)) {
         if (baseViewContext === void 0) {

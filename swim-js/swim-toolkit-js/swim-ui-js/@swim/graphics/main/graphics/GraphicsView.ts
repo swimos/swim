@@ -1671,14 +1671,18 @@ export abstract class GraphicsView extends View {
    * in this view.
    */
   get hitBounds(): R2Box {
-    return this.viewBounds;
+    if (!this.isIntangible()) {
+      return this.viewBounds;
+    } else {
+      return R2Box.undefined();
+    }
   }
 
   deriveHitBounds(): R2Box {
     let hitBounds: R2Box | undefined;
     type self = this;
     function accumulateHitBounds(this: self, childView: View): void {
-      if (childView instanceof GraphicsView && !childView.isHidden()) {
+      if (childView instanceof GraphicsView && !childView.isHidden() && !childView.isIntangible()) {
         const childHitBounds = childView.hitBounds;
         if (hitBounds === void 0) {
           hitBounds = childHitBounds;
@@ -1695,7 +1699,7 @@ export abstract class GraphicsView extends View {
   }
 
   cascadeHitTest(x: number, y: number, baseViewContext: ViewContext): GraphicsView | null {
-    if (!this.isHidden() && !this.isCulled()) {
+    if (!this.isHidden() && !this.isCulled() && !this.isIntangible()) {
       const hitBounds = this.hitBounds;
       if (hitBounds.contains(x, y)) {
         const viewContext = this.extendViewContext(baseViewContext);

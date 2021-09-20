@@ -499,11 +499,9 @@ export class GeoTreeView extends GeoView {
       const childViews = tree.views;
       for (let i = 0; i < childViews.length; i += 1) {
         const childView = childViews[i]!;
-        if (childView.hitBounds.contains(x, y)) {
-          hit = childView.cascadeHitTest(x, y, viewContext);
-          if (hit !== null) {
-            break;
-          }
+        hit = childView.cascadeHitTest(x, y, viewContext);
+        if (hit !== null) {
+          break;
         }
       }
     }

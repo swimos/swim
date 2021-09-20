@@ -226,16 +226,20 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
   declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
   override get hitBounds(): R2Box {
-    const viewCenter = this.viewCenter.value;
-    const frame = this.viewFrame;
-    if (viewCenter !== null && viewCenter.isDefined() && frame.isDefined()) {
-      const size = Math.min(frame.width, frame.height);
-      const radius = this.radius.getValue().pxValue(size);
-      const hitRadius = Math.max(this.hitRadius.getStateOr(radius), radius);
-      return new R2Box(viewCenter.x - hitRadius, viewCenter.y - hitRadius,
-                       viewCenter.x + hitRadius, viewCenter.y + hitRadius);
+    if (!this.isIntangible()) {
+      const viewCenter = this.viewCenter.value;
+      const frame = this.viewFrame;
+      if (viewCenter !== null && viewCenter.isDefined() && frame.isDefined()) {
+        const size = Math.min(frame.width, frame.height);
+        const radius = this.radius.getValue().pxValue(size);
+        const hitRadius = Math.max(this.hitRadius.getStateOr(radius), radius);
+        return new R2Box(viewCenter.x - hitRadius, viewCenter.y - hitRadius,
+                         viewCenter.x + hitRadius, viewCenter.y + hitRadius);
+      } else {
+        return this.viewBounds;
+      }
     } else {
-      return this.viewBounds;
+      return R2Box.undefined();
     }
   }
 

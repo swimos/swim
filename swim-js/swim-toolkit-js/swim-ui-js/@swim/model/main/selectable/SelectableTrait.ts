@@ -146,16 +146,18 @@ export class SelectableTrait extends GenericTrait {
     }
   }
 
-  @TraitService<SelectableTrait, SelectionManager>({
+  @TraitService<SelectableTrait, SelectionManager | null>({
     type: SelectionManager,
     observe: false,
+    manager: null,
     modelService: {
       extends: SelectionService,
       type: SelectionManager,
       observe: false,
+      manager: null,
     },
   })
-  readonly selectionService!: TraitService<this, SelectionManager>;
+  readonly selectionService!: TraitService<this, SelectionManager | null>;
 
   protected override didMount(): void {
     if (this.selected) {

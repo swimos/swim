@@ -312,9 +312,13 @@ export class GeoPointView extends GeoLayerView {
   declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
   override get hitBounds(): R2Box {
-    const {x, y} = this.viewPoint.getValue();
-    const hitRadius = this.hitRadius.getStateOr(0);
-    return new R2Box(x - hitRadius, y - hitRadius, x + hitRadius, y + hitRadius);
+    if (!this.isIntangible()) {
+      const {x, y} = this.viewPoint.getValue();
+      const hitRadius = this.hitRadius.getStateOr(0);
+      return new R2Box(x - hitRadius, y - hitRadius, x + hitRadius, y + hitRadius);
+    } else {
+      return R2Box.undefined();
+    }
   }
 
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {

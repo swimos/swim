@@ -410,7 +410,7 @@ export class LayerView extends GraphicsView {
     const childViews = this.childViews;
     for (let i = 0, n = childViews.length; i < n; i += 1) {
       const childView = childViews[i]!;
-      if (childView instanceof GraphicsView && !childView.isHidden()) {
+      if (childView instanceof GraphicsView && !childView.isHidden() && !childView.isIntangible()) {
         const childHitBounds = childView.hitBounds;
         if (hitBounds === void 0) {
           hitBounds = childHitBounds;
