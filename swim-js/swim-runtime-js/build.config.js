@@ -337,7 +337,7 @@ const runtime = [
 ];
 
 export default {
-  version: "4.0.0-dev.20210826",
+  version: "4.0.0-dev.20210920",
   projects: core.concat(host).concat(runtime),
   gaID: "UA-79441805-2",
 };

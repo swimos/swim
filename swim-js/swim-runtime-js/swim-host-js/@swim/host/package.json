@@ -1,6 +1,6 @@
 {
   "name": "@swim/host",
-  "version": "4.0.0-dev.20210826",
+  "version": "4.0.0-dev.20210920",
   "description": "Multiplexed streaming WARP framework that runs in Node.js and web browsers",
   "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-host-js/@swim/host",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -14,17 +14,17 @@
     "@types/ws": "7"
   },
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20210826",
-    "@swim/codec": "4.0.0-dev.20210826",
-    "@swim/mapping": "4.0.0-dev.20210826",
-    "@swim/collections": "4.0.0-dev.20210826",
-    "@swim/structure": "4.0.0-dev.20210826",
-    "@swim/streamlet": "4.0.0-dev.20210826",
-    "@swim/dataflow": "4.0.0-dev.20210826",
-    "@swim/recon": "4.0.0-dev.20210826",
-    "@swim/uri": "4.0.0-dev.20210826",
-    "@swim/warp": "4.0.0-dev.20210826",
-    "@swim/client": "4.0.0-dev.20210826",
+    "@swim/util": "4.0.0-dev.20210920",
+    "@swim/codec": "4.0.0-dev.20210920",
+    "@swim/mapping": "4.0.0-dev.20210920",
+    "@swim/collections": "4.0.0-dev.20210920",
+    "@swim/structure": "4.0.0-dev.20210920",
+    "@swim/streamlet": "4.0.0-dev.20210920",
+    "@swim/dataflow": "4.0.0-dev.20210920",
+    "@swim/recon": "4.0.0-dev.20210920",
+    "@swim/uri": "4.0.0-dev.20210920",
+    "@swim/warp": "4.0.0-dev.20210920",
+    "@swim/client": "4.0.0-dev.20210920",
     "ws": ">= 7.4.6"
   }
 }

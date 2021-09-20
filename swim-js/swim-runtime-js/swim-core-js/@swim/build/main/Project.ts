@@ -165,7 +165,7 @@ export class Project {
     }
   }
 
-  publish(options?: {tag?: string, "dry-run"?: boolean}): Promise<unknown> {
+  publish(options?: {tag?: string, access?: string, "dry-run"?: boolean}): Promise<unknown> {
     let output = Unicode.stringOutput(OutputSettings.styled());
     output = OutputStyle.greenBold(output);
     output = output.write("publishing");
@@ -182,6 +182,9 @@ export class Project {
       if (options !== void 0) {
         if (options.tag !== void 0) {
           args.push("--tag", options.tag);
+        }
+        if (options.access !== void 0) {
+          args.push("--access", options.access);
         }
         if (options["dry-run"]) {
           args.push("--dry-run");

@@ -93,7 +93,7 @@ export class ReconExam extends Exam {
   writes(item: Item, expected: Uint8Array | string): void {
     if (typeof expected === "string") {
       const output = Utf8.encodedOutput(Binary.output());
-      Unicode.writeString(expected, output);
+      Unicode.writeString(output, expected);
       expected = output.bind();
     }
     const size = Recon.structureWriter().sizeOfItem(item);
@@ -105,7 +105,7 @@ export class ReconExam extends Exam {
       const actual = new Uint8Array(n);
       let buffer = Binary.outputBuffer(actual);
       buffer = buffer.withLimit(i);
-      let writer = Recon.write(item, Utf8.decodedOutput(buffer).asPart(true));
+      let writer = Recon.write(Utf8.decodedOutput(buffer).asPart(true), item);
       buffer = buffer.withLimit(buffer.capacity);
       writer = writer.pull(Utf8.decodedOutput(buffer).asPart(false));
       if (writer.isDone()) {
@@ -127,7 +127,7 @@ export class ReconExam extends Exam {
   writesBlock(item: Item, expected: Uint8Array | string): void {
     if (typeof expected === "string") {
       const output = Utf8.encodedOutput(Binary.output());
-      Unicode.writeString(expected, output);
+      Unicode.writeString(output, expected);
       expected = output.bind();
     }
     const size = Recon.structureWriter().sizeOfBlockItem(item);
@@ -139,7 +139,7 @@ export class ReconExam extends Exam {
       const actual = new Uint8Array(n);
       let buffer = Binary.outputBuffer(actual);
       buffer = buffer.withLimit(i);
-      let writer = Recon.writeBlock(item, Utf8.decodedOutput(buffer).asPart(true));
+      let writer = Recon.writeBlock(Utf8.decodedOutput(buffer).asPart(true), item);
       buffer = buffer.withLimit(buffer.capacity);
       writer = writer.pull(Utf8.decodedOutput(buffer).asPart(false));
       if (writer.isDone()) {

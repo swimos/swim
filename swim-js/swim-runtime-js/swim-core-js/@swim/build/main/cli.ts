@@ -107,6 +107,7 @@ function runPublish(this: Cmd, args: {[name: string]: string | undefined}): void
     function publishProject(project: Project): Promise<unknown> | void {
       const options = {
         tag: typeof args.tag === "string" ? args.tag : void 0,
+        access: typeof args.access === "string" ? args.access : void 0,
         "dry-run": "dry-run" in args,
       };
       return project.publish(options);
@@ -187,8 +188,9 @@ const publishCmd: Cmd = Cmd.create("publish")
     .withDesc("publish packages to npm")
     .withOpt(Opt.create("projects").withFlag("p").withArg("project(,project)*").withDesc("comma-separated list of projects to publish"))
     .withOpt(Opt.create("recursive").withFlag("r").withDesc("recursively publish project dependencies"))
-    .withOpt(Opt.create("dry-run").withDesc("does everything publish would do except actually publishing to the registry"))
     .withOpt(Opt.create("tag").withArg("tag").withDesc("registers the published package with the given tag"))
+    .withOpt(Opt.create("access").withArg("public|restricted").withDesc("tells the registry whether this package should be published as public or restricted"))
+    .withOpt(Opt.create("dry-run").withDesc("does everything publish would do except actually publishing to the registry"))
     .withHelpCmd()
     .onExec(runPublish);
 

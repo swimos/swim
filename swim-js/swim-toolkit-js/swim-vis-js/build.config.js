@@ -41,6 +41,6 @@ const vis = [
 ];
 
 export default {
-  version: "4.0.0-dev.20210826",
+  version: "4.0.0-dev.20210920",
   projects: vis,
 };

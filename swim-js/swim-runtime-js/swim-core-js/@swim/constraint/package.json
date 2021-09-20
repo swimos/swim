@@ -1,6 +1,6 @@
 {
   "name": "@swim/constraint",
-  "version": "4.0.0-dev.20210826",
+  "version": "4.0.0-dev.20210920",
   "description": "Incremental solver for systems of linear constraint equations",
   "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/constraint",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,7 +11,7 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20210826",
-    "@swim/codec": "4.0.0-dev.20210826"
+    "@swim/util": "4.0.0-dev.20210920",
+    "@swim/codec": "4.0.0-dev.20210920"
   }
 }
