@@ -154,8 +154,8 @@ export class GeoRasterView extends GeoLayerView {
   }
 
   protected override onRender(viewContext: ViewContextType<this>): void {
-    super.onRender(viewContext);
     this.clearCanvas();
+    super.onRender(viewContext);
   }
 
   protected override didComposite(viewContext: ViewContextType<this>): void {

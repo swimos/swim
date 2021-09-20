@@ -1135,11 +1135,7 @@ export class CanvasView extends HtmlView {
   }
 
   get hitBounds(): R2Box {
-    if (!this.isIntangible()) {
-      return this.viewFrame;
-    } else {
-      return R2Box.undefined();
-    }
+    return this.viewFrame;
   }
 
   cascadeHitTest(x: number, y: number, baseViewContext?: ViewContext): GraphicsView | null {

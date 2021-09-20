@@ -13,7 +13,8 @@
 // limitations under the License.
 
 import {Arrays} from "@swim/util";
-import {GeoBox} from "@swim/geo";
+import {GeoBox, GeoProjection} from "@swim/geo";
+import {AnyColor, Color} from "@swim/style";
 import {
   ViewContextType,
   ViewContext,
@@ -22,8 +23,9 @@ import {
   ViewObserverType,
   ViewWillProject,
   ViewDidProject,
+  ViewAnimator,
 } from "@swim/view";
-import {GraphicsViewInit, GraphicsView} from "@swim/graphics";
+import {GraphicsViewInit, GraphicsView, CanvasContext, CanvasRenderer} from "@swim/graphics";
 import type {GeoViewport} from "./GeoViewport";
 import type {GeoViewContext} from "./GeoViewContext";
 import type {GeoViewObserver} from "./GeoViewObserver";
@@ -179,6 +181,44 @@ export abstract class GeoView extends GraphicsView {
     }
   }
 
+  @ViewAnimator({type: Color, state: null, inherit: true})
+  readonly geoBoundsColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+
+  protected override onRender(viewContext: ViewContextType<this>): void {
+    super.onRender(viewContext);
+    const outlineColor = this.geoBoundsColor.value;
+    if (outlineColor !== null) {
+      this.renderGeoBounds(viewContext, outlineColor, 1);
+    }
+  }
+
+  protected renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
+      const context = renderer.context;
+      context.save();
+      this.renderGeoOutline(this.geoBounds, viewContext.geoViewport, context, outlineColor, outlineWidth);
+      context.restore();
+    }
+  }
+
+  protected renderGeoOutline(geoBox: GeoBox, geoProjection: GeoProjection, context: CanvasContext,
+                             outlineColor: Color, outlineWidth: number): void {
+    const southWest = geoProjection.project(geoBox.southWest.normalized());
+    const northWest = geoProjection.project(geoBox.northWest.normalized());
+    const northEast = geoProjection.project(geoBox.northEast.normalized());
+    const southEast = geoProjection.project(geoBox.southEast.normalized());
+    context.beginPath();
+    context.moveTo(southWest.x, southWest.y);
+    context.lineTo(northWest.x, northWest.y);
+    context.lineTo(northEast.x, northEast.y);
+    context.lineTo(southEast.x, southEast.y);
+    context.closePath();
+    context.lineWidth = outlineWidth;
+    context.strokeStyle = outlineColor.toString();
+    context.stroke();
+  }
+
   protected override onSetHidden(hidden: boolean): void {
     const parentView = this.parentView;
     if (parentView instanceof GeoView) {
@@ -191,6 +231,17 @@ export abstract class GeoView extends GraphicsView {
 
   onSetChildViewHidden(childView: GeoView, hidden: boolean): void {
     // hook
+  }
+
+  onSetChildViewUnbounded(childView: GeoView, unbounded: boolean): void {
+    // hook
+  }
+
+  protected override onSetUnbounded(unbounded: boolean): void {
+    const parentView = this.parentView;
+    if (parentView instanceof GeoView) {
+      parentView.onSetChildViewUnbounded(this, unbounded);
+    }
   }
 
   cullGeoFrame(geoFrame: GeoBox = this.geoFrame): void {
@@ -258,7 +309,7 @@ export abstract class GeoView extends GraphicsView {
     let geoBounds = this.ownGeoBounds;
     type self = this;
     function accumulateGeoBounds(this: self, childView: View): void {
-      if (childView instanceof GeoView && !childView.isHidden()) {
+      if (childView instanceof GeoView && !childView.isHidden() && !childView.isUnbounded()) {
         const childGeoBounds = childView.geoBounds;
         if (childGeoBounds.isDefined()) {
           if (geoBounds !== null) {

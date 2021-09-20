@@ -20,7 +20,7 @@ import {GeoViewInit, GeoView} from "../geo/GeoView";
 import {GeoTree} from "./GeoTree";
 
 export interface GeoTreeViewInit extends GeoViewInit {
-  treeOutlineColor?: AnyColor;
+  geoTreeColor?: AnyColor;
 }
 
 export class GeoTreeView extends GeoView {
@@ -40,13 +40,10 @@ export class GeoTreeView extends GeoView {
 
   override initView(init: GeoTreeViewInit): void {
     super.initView(init);
-    if (init.treeOutlineColor !== void 0) {
-      this.treeOutlineColor(init.treeOutlineColor);
+    if (init.geoTreeColor !== void 0) {
+      this.geoTreeColor(init.geoTreeColor);
     }
   }
-
-  @ViewAnimator({type: Color})
-  readonly treeOutlineColor!: ViewAnimator<this, Color | undefined, AnyColor | undefined>;
 
   /** @hidden */
   readonly root!: GeoTree;
@@ -377,53 +374,46 @@ export class GeoTreeView extends GeoView {
     }
   }
 
+  @ViewAnimator({type: Color, state: null})
+  readonly geoTreeColor!: ViewAnimator<this, Color | null, AnyColor | null>;
+
   protected override onRender(viewContext: ViewContextType<this>): void {
-    const outlineColor = this.getViewAnimator("treeOutlineColor") as ViewAnimator<this, Color, AnyColor> | null;
-    if (outlineColor !== null && outlineColor.value !== void 0) {
-      this.renderTree(viewContext, outlineColor.value);
+    super.onRender(viewContext);
+    const outlineColor = this.geoTreeColor.value;
+    if (outlineColor !== null) {
+      this.renderGeoTree(viewContext, outlineColor);
     }
   }
 
-  protected renderTree(viewContext: ViewContextType<this>, outlineColor: Color): void {
+  protected renderGeoTree(viewContext: ViewContextType<this>, outlineColor: Color): void {
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
       const context = renderer.context;
       context.save();
-      this.renderTreeOutline(this.root, context, viewContext.geoViewport, outlineColor);
+      this.renderGeoTreeOutline(this.root, viewContext.geoViewport, context, outlineColor);
       context.restore();
     }
   }
 
-  protected renderTreeOutline(tree: GeoTree, context: CanvasContext,
-                              geoProjection: GeoProjection, outlineColor: Color): void {
+  protected renderGeoTreeOutline(tree: GeoTree, geoProjection: GeoProjection,
+                                 context: CanvasContext, outlineColor: Color): void {
     if (tree.southWest !== null) {
-      this.renderTreeOutline(tree.southWest, context, geoProjection, outlineColor);
+      this.renderGeoTreeOutline(tree.southWest, geoProjection, context, outlineColor);
     }
     if (tree.northWest !== null) {
-      this.renderTreeOutline(tree.northWest, context, geoProjection, outlineColor);
+      this.renderGeoTreeOutline(tree.northWest, geoProjection, context, outlineColor);
     }
     if (tree.southEast !== null) {
-      this.renderTreeOutline(tree.southEast, context, geoProjection, outlineColor);
+      this.renderGeoTreeOutline(tree.southEast, geoProjection, context, outlineColor);
     }
     if (tree.northEast !== null) {
-      this.renderTreeOutline(tree.northEast, context, geoProjection, outlineColor);
+      this.renderGeoTreeOutline(tree.northEast, geoProjection, context, outlineColor);
     }
     const minDepth = 2;
     if (tree.depth >= minDepth) {
-      const southWest = geoProjection.project(tree.geoFrame.southWest.normalized());
-      const northWest = geoProjection.project(tree.geoFrame.northWest.normalized());
-      const northEast = geoProjection.project(tree.geoFrame.northEast.normalized());
-      const southEast = geoProjection.project(tree.geoFrame.southEast.normalized());
-      context.beginPath();
-      context.moveTo(southWest.x, southWest.y);
-      context.lineTo(northWest.x, northWest.y);
-      context.lineTo(northEast.x, northEast.y);
-      context.lineTo(southEast.x, southEast.y);
-      context.closePath();
       const u = (tree.depth - minDepth) / (tree.maxDepth - minDepth);
-      context.lineWidth = 4 * (1 - u) + 0.5 * u;
-      context.strokeStyle = outlineColor.toString();
-      context.stroke();
+      const outlineWidth = 4 * (1 - u) + 0.5 * u;
+      this.renderGeoOutline(tree.geoFrame, geoProjection, context, outlineColor, outlineWidth);
     }
   }
 

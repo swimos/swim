@@ -655,6 +655,35 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
     }
   }
 
+  isUnbounded(): boolean {
+    return (this.viewFlags & View.UnboundedFlag) !== 0;
+  }
+
+  setUnbounded(unboundedFlag: boolean): void {
+    if (unboundedFlag !== ((this.viewFlags & View.UnboundedFlag) !== 0)) {
+      this.willSetUnbounded(unboundedFlag);
+      if (unboundedFlag) {
+        this.setViewFlags(this.viewFlags | View.UnboundedFlag);
+      } else {
+        this.setViewFlags(this.viewFlags & ~View.UnboundedFlag);
+      }
+      this.onSetUnbounded(unboundedFlag);
+      this.didSetUnbounded(unboundedFlag);
+    }
+  }
+
+  protected willSetUnbounded(unboundedFlag: boolean): void {
+    // hook
+  }
+
+  protected onSetUnbounded(unboundedFlag: boolean): void {
+    // hook
+  }
+
+  protected didSetUnbounded(unboundedFlag: boolean): void {
+    // hook
+  }
+
   isIntangible(): boolean {
     return (this.viewFlags & View.IntangibleFlag) !== 0;
   }
@@ -1501,17 +1530,19 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   /** @hidden */
   static readonly HiddenFlag: ViewFlags = 1 << 5;
   /** @hidden */
-  static readonly IntangibleFlag: ViewFlags = 1 << 6;
+  static readonly UnboundedFlag: ViewFlags = 1 << 6;
   /** @hidden */
-  static readonly TraversingFlag: ViewFlags = 1 << 7;
+  static readonly IntangibleFlag: ViewFlags = 1 << 7;
   /** @hidden */
-  static readonly ProcessingFlag: ViewFlags = 1 << 8;
+  static readonly TraversingFlag: ViewFlags = 1 << 8;
   /** @hidden */
-  static readonly DisplayingFlag: ViewFlags = 1 << 9;
+  static readonly ProcessingFlag: ViewFlags = 1 << 9;
   /** @hidden */
-  static readonly RemovingFlag: ViewFlags = 1 << 10;
+  static readonly DisplayingFlag: ViewFlags = 1 << 10;
   /** @hidden */
-  static readonly ImmediateFlag: ViewFlags = 1 << 11;
+  static readonly RemovingFlag: ViewFlags = 1 << 11;
+  /** @hidden */
+  static readonly ImmediateFlag: ViewFlags = 1 << 12;
   /** @hidden */
   static readonly CulledMask: ViewFlags = View.CullFlag
                                         | View.CulledFlag;
@@ -1527,6 +1558,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
                                         | View.CullFlag
                                         | View.CulledFlag
                                         | View.HiddenFlag
+                                        | View.UnboundedFlag
                                         | View.IntangibleFlag
                                         | View.TraversingFlag
                                         | View.ProcessingFlag
@@ -1534,12 +1566,12 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
                                         | View.RemovingFlag
                                         | View.ImmediateFlag;
 
-  static readonly NeedsProcess: ViewFlags = 1 << 12;
-  static readonly NeedsResize: ViewFlags = 1 << 13;
-  static readonly NeedsScroll: ViewFlags = 1 << 14;
-  static readonly NeedsChange: ViewFlags = 1 << 15;
-  static readonly NeedsAnimate: ViewFlags = 1 << 16;
-  static readonly NeedsProject: ViewFlags = 1 << 17;
+  static readonly NeedsProcess: ViewFlags = 1 << 13;
+  static readonly NeedsResize: ViewFlags = 1 << 14;
+  static readonly NeedsScroll: ViewFlags = 1 << 15;
+  static readonly NeedsChange: ViewFlags = 1 << 16;
+  static readonly NeedsAnimate: ViewFlags = 1 << 17;
+  static readonly NeedsProject: ViewFlags = 1 << 18;
   /** @hidden */
   static readonly ProcessMask: ViewFlags = View.NeedsProcess
                                          | View.NeedsResize
@@ -1548,11 +1580,11 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
                                          | View.NeedsAnimate
                                          | View.NeedsProject;
 
-  static readonly NeedsDisplay: ViewFlags = 1 << 18;
-  static readonly NeedsLayout: ViewFlags = 1 << 19;
-  static readonly NeedsRender: ViewFlags = 1 << 20;
-  static readonly NeedsRasterize: ViewFlags = 1 << 21;
-  static readonly NeedsComposite: ViewFlags = 1 << 22;
+  static readonly NeedsDisplay: ViewFlags = 1 << 19;
+  static readonly NeedsLayout: ViewFlags = 1 << 20;
+  static readonly NeedsRender: ViewFlags = 1 << 21;
+  static readonly NeedsRasterize: ViewFlags = 1 << 22;
+  static readonly NeedsComposite: ViewFlags = 1 << 23;
   /** @hidden */
   static readonly DisplayMask: ViewFlags = View.NeedsDisplay
                                          | View.NeedsLayout

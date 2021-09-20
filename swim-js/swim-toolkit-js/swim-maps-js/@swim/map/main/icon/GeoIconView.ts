@@ -131,19 +131,19 @@ export class GeoIconView extends GeoLayerView implements IconView {
   })
   readonly viewCenter!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout | View.NeedsRasterize | View.NeedsComposite})
+  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite})
   readonly xAlign!: ViewAnimator<this, number>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout | View.NeedsRasterize | View.NeedsComposite})
+  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite})
   readonly yAlign!: ViewAnimator<this, number>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout | View.NeedsRasterize | View.NeedsComposite})
+  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite})
   readonly iconWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout | View.NeedsRasterize | View.NeedsComposite})
+  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite})
   readonly iconHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Color, state: null, updateFlags: View.NeedsRasterize | View.NeedsComposite})
+  @ViewAnimator({type: Color, state: null, updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite})
   readonly iconColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
@@ -157,7 +157,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
   }
 
   protected onSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
-    this.requireUpdate(View.NeedsRasterize | View.NeedsComposite);
+    this.requireUpdate(View.NeedsRender | View.NeedsRasterize | View.NeedsComposite);
   }
 
   protected didSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
@@ -249,6 +249,16 @@ export class GeoIconView extends GeoLayerView implements IconView {
       enumerable: true,
       configurable: true,
     });
+  }
+
+  protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
+      const context = renderer.context;
+      context.save();
+      this.renderViewOutline(this.viewBounds, context, outlineColor, outlineWidth);
+      context.restore();
+    }
   }
 
   protected override onRasterize(viewContext: ViewContextType<this>): void {

@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export {
-  GeoGridViewInit,
-  GeoGridView,
-} from "./GeoGridView";
+export {GeoGridView} from "./GeoGridView";
 
 export {GeoGridTrait} from "./GeoGridTrait";
 export {GeoGridTraitObserver} from "./GeoGridTraitObserver";

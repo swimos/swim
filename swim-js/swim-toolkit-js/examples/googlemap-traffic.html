@@ -34,7 +34,8 @@ mapView.container.setView(containerView);
 mapView.canvas.view.pointerEventsEnabled(true);
 
 const layerView = mapView.append(swim.GeoTreeView);
-//layerView.treeOutlineColor("#008f11");
+//layerView.geoBoundsColor("#008f11");
+//layerView.geoTreeColor("#008f11");
 
 const host = swim.hostRef("warps://traffic.swim.services");
 
@@ -46,26 +47,27 @@ const intersectionsLink = host.downlinkMap()
       const lng = value.get("lng").numberValue();
       const lat = value.get("lat").numberValue();
 
-      let intersectionView = layerView.getChildView(key);
-      if (intersectionView === null) {
+      let intersectionLayerView = layerView.getChildView(key);
+      if (intersectionLayerView === null && lng !== 0 && lat !== 0 && isFinite(lng) && isFinite(lat)) {
         const intersectionId = value.get("id").stringValue();
-        intersectionView = new swim.GeoCircleView()
+        intersectionLayerView = new swim.GeoLayerView();
+        const intersectionMarkerView = new swim.GeoCircleView()
             .geoCenter([lng, lat])
             .radius(5)
             .fill(INTERSECTION_COLOR);
-        layerView.setChildView(key, intersectionView);
-        linkIntersection(intersectionId, host.nodeRef(key), intersectionView);
+        intersectionLayerView.setChildView("marker", intersectionMarkerView);
+        layerView.setChildView(key, intersectionLayerView);
+        linkIntersection(intersectionId, host.nodeRef(key), intersectionLayerView, intersectionMarkerView);
       }
     })
     .open();
 
-function linkIntersection(intersectionId, node, intersectionView) {
+function linkIntersection(intersectionId, node, intersectionLayerView, intersectionMarkerView) {
   let approaches = {};
   let phases = {};
   let detectors = {};
   let intersectionPopover = null;
-  intersectionView.on("click", function (event) {
-    event.stopPropagation();
+  intersectionMarkerView.on("pointerup", function (event) {
     if (!intersectionPopover) {
       intersectionPopover = swim.PopoverView.create()
           .width(240)
@@ -73,10 +75,13 @@ function linkIntersection(intersectionId, node, intersectionView) {
           .borderRadius(5)
           .backgroundColor(swim.Color.parse("#071013").alpha(0.9))
           .backdropFilter("blur(2px)");
-      intersectionPopover.setSource(intersectionView);
+      intersectionPopover.setSource(intersectionMarkerView);
       intersectionPopover.hideModal();
     }
     bodyView.modalService.toggleModal(intersectionPopover, {multi: event.shiftKey});
+  });
+  intersectionMarkerView.on("click", function (event) {
+    event.stopPropagation();
   });
 
   const schematicLink = node.downlinkValue()
@@ -114,7 +119,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
                 detectorApproaches.push(approachView);
                 detectors[detectorId] = detectorApproaches;
               }
-              layerView.setChildView(approachKey, approachView);
+              intersectionLayerView.setChildView(approachKey, approachView);
             }
           }
         })
@@ -147,7 +152,7 @@ function linkIntersection(intersectionId, node, intersectionView) {
           updateApproach(approachView);
         }
         if (occupied) {
-          intersectionView.ripple({
+          intersectionMarkerView.ripple({
             color: RIPPLE_COLOR,
             opacity: 0.25,
             timing: 2000,

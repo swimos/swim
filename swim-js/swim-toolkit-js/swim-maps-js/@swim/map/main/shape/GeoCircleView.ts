@@ -177,6 +177,16 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     }
   }
 
+  protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
+    const renderer = viewContext.renderer;
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
+      const context = renderer.context;
+      context.save();
+      this.renderViewOutline(this.viewBounds, context, outlineColor, outlineWidth);
+      context.restore();
+    }
+  }
+
   protected renderCircle(context: CanvasContext, frame: R2Box): void {
     const viewCenter = this.viewCenter.value;
     if (viewCenter !== null && viewCenter.isDefined()) {
@@ -226,20 +236,16 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
   declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
   override get hitBounds(): R2Box {
-    if (!this.isIntangible()) {
-      const viewCenter = this.viewCenter.value;
-      const frame = this.viewFrame;
-      if (viewCenter !== null && viewCenter.isDefined() && frame.isDefined()) {
-        const size = Math.min(frame.width, frame.height);
-        const radius = this.radius.getValue().pxValue(size);
-        const hitRadius = Math.max(this.hitRadius.getStateOr(radius), radius);
-        return new R2Box(viewCenter.x - hitRadius, viewCenter.y - hitRadius,
-                         viewCenter.x + hitRadius, viewCenter.y + hitRadius);
-      } else {
-        return this.viewBounds;
-      }
+    const viewCenter = this.viewCenter.value;
+    const frame = this.viewFrame;
+    if (viewCenter !== null && viewCenter.isDefined() && frame.isDefined()) {
+      const size = Math.min(frame.width, frame.height);
+      const radius = this.radius.getValue().pxValue(size);
+      const hitRadius = Math.max(this.hitRadius.getStateOr(radius), radius);
+      return new R2Box(viewCenter.x - hitRadius, viewCenter.y - hitRadius,
+                       viewCenter.x + hitRadius, viewCenter.y + hitRadius);
     } else {
-      return R2Box.undefined();
+      return this.viewBounds;
     }
   }
 

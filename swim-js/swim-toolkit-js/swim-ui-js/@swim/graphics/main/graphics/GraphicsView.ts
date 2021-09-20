@@ -16,6 +16,7 @@ import {Arrays} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import type {ConstraintVariable, Constraint} from "@swim/constraint";
 import {R2Box, Transform} from "@swim/math";
+import type {Color} from "@swim/style";
 import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";
 import {
   ViewContextType,
@@ -45,6 +46,7 @@ import {
 import type {GraphicsRenderer} from "./GraphicsRenderer";
 import type {GraphicsViewContext} from "./GraphicsViewContext";
 import type {GraphicsViewObserver} from "./GraphicsViewObserver";
+import type {CanvasContext} from "../canvas/CanvasContext";
 import {CanvasView} from "../"; // forward import
 
 export interface GraphicsViewEventMap {
@@ -849,6 +851,19 @@ export abstract class GraphicsView extends View {
     }
   }
 
+  protected renderViewOutline(viewBox: R2Box, context: CanvasContext,
+                              outlineColor: Color, outlineWidth: number): void {
+    context.beginPath();
+    context.moveTo(viewBox.xMin, viewBox.yMin);
+    context.lineTo(viewBox.xMin, viewBox.yMax);
+    context.lineTo(viewBox.xMax, viewBox.yMax);
+    context.lineTo(viewBox.xMax, viewBox.yMin);
+    context.closePath();
+    context.lineWidth = outlineWidth;
+    context.strokeStyle = outlineColor.toString();
+    context.stroke();
+  }
+
   @ViewProperty({type: MoodMatrix, state: null})
   readonly moodModifier!: ViewProperty<this, MoodMatrix | null>;
 
@@ -1648,7 +1663,7 @@ export abstract class GraphicsView extends View {
     let viewBounds: R2Box | null = this.ownViewBounds;
     type self = this;
     function accumulateViewBounds(this: self, childView: View): void {
-      if (childView instanceof GraphicsView && !childView.isHidden()) {
+      if (childView instanceof GraphicsView && !childView.isHidden() && !childView.isUnbounded()) {
         const childViewBounds = childView.viewBounds;
         if (childViewBounds.isDefined()) {
           if (viewBounds !== null) {
@@ -1671,11 +1686,7 @@ export abstract class GraphicsView extends View {
    * in this view.
    */
   get hitBounds(): R2Box {
-    if (!this.isIntangible()) {
-      return this.viewBounds;
-    } else {
-      return R2Box.undefined();
-    }
+    return this.viewBounds;
   }
 
   deriveHitBounds(): R2Box {

@@ -440,12 +440,16 @@ export class GeoLayerView extends GeoView {
     this.updateGeoBounds();
   }
 
+  override onSetChildViewUnbounded(childView: GeoView, unbounded: boolean): void {
+    this.updateGeoBounds();
+  }
+
   override deriveGeoBounds(): GeoBox {
     let geoBounds = this.ownGeoBounds;
     const childViews = this.childViews;
     for (let i = 0, n = childViews.length; i < n; i += 1) {
       const childView = childViews[i]!;
-      if (childView instanceof GeoView && !childView.isHidden()) {
+      if (childView instanceof GeoView && !childView.isHidden() && !childView.isUnbounded()) {
         const childGeoBounds = childView.geoBounds;
         if (childGeoBounds.isDefined()) {
           if (geoBounds !== null) {
@@ -467,7 +471,7 @@ export class GeoLayerView extends GeoView {
     const childViews = this.childViews;
     for (let i = 0, n = childViews.length; i < n; i += 1) {
       const childView = childViews[i]!;
-      if (childView instanceof GraphicsView && !childView.isHidden()) {
+      if (childView instanceof GraphicsView && !childView.isHidden() && !childView.isUnbounded()) {
         const childViewBounds = childView.viewBounds;
         if (childViewBounds.isDefined()) {
           if (viewBounds !== null) {
