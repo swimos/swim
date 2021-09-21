@@ -179,7 +179,7 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
 
   protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled() && !this.isUnbounded()) {
       const context = renderer.context;
       context.save();
       this.renderViewOutline(this.viewBounds, context, outlineColor, outlineWidth);
@@ -221,7 +221,7 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
   override get popoverFrame(): R2Box {
     const viewCenter = this.viewCenter.value;
     const frame = this.viewFrame;
-    if (viewCenter !== null && viewCenter.isDefined() && frame.isDefined()) {
+    if (viewCenter !== null && viewCenter.isDefined()) {
       const size = Math.min(frame.width, frame.height);
       const inversePageTransform = this.pageTransform.inverse();
       const px = inversePageTransform.transformX(viewCenter.x, viewCenter.y);
@@ -238,7 +238,7 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
   override get hitBounds(): R2Box {
     const viewCenter = this.viewCenter.value;
     const frame = this.viewFrame;
-    if (viewCenter !== null && viewCenter.isDefined() && frame.isDefined()) {
+    if (viewCenter !== null && viewCenter.isDefined()) {
       const size = Math.min(frame.width, frame.height);
       const radius = this.radius.getValue().pxValue(size);
       const hitRadius = Math.max(this.hitRadius.getStateOr(radius), radius);
@@ -321,7 +321,7 @@ Object.defineProperty(GeoCircleView.prototype, "viewBounds", {
   get(this: GeoCircleView): R2Box {
     const viewCenter = this.viewCenter.value;
     const frame = this.viewFrame;
-    if (viewCenter !== null && viewCenter.isDefined() && frame.isDefined()) {
+    if (viewCenter !== null && viewCenter.isDefined()) {
       const size = Math.min(frame.width, frame.height);
       const radius = this.radius.getValue().pxValue(size);
       return new R2Box(viewCenter.x - radius, viewCenter.y - radius,

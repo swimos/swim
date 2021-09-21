@@ -277,7 +277,7 @@ ViewService.prototype.bindSuperService = function (this: ViewService<View, unkno
       configurable: true,
     });
   }
-  if (this.manager === void 0) {
+  if (this.manager === void 0 || this.manager === null) {
     if (superService !== null) {
       this.setServiceFlags(this.serviceFlags | ViewService.InheritedFlag);
       Object.defineProperty(this, "manager", {

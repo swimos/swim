@@ -199,27 +199,24 @@ export class RasterView extends LayerView {
     return this.rasterFrame;
   }
 
-  override setViewFrame(viewFrame: R2Box | null): void {
-    Object.defineProperty(this, "ownViewFrame", {
-      value: viewFrame,
-      enumerable: true,
-      configurable: true,
-    });
-  }
-
   override cascadeHitTest(x: number, y: number, baseViewContext: ViewContext): GraphicsView | null {
     const compositeFrame = this.compositeFrame;
-    x -= Math.floor(compositeFrame.xMin);
-    y -= Math.floor(compositeFrame.yMin);
-    return super.cascadeHitTest(x, y, baseViewContext);
+    if (compositeFrame.isDefined()) {
+      x -= Math.floor(compositeFrame.xMin);
+      y -= Math.floor(compositeFrame.yMin);
+      return super.cascadeHitTest(x, y, baseViewContext);
+    }
+    return null;
   }
 
   override get parentTransform(): Transform {
     const compositeFrame = this.compositeFrame;
-    const dx = Math.floor(compositeFrame.xMin);
-    const dy = Math.floor(compositeFrame.yMin);
-    if (dx !== 0 || dy !== 0) {
-      return Transform.translate(-dx, -dy);
+    if (compositeFrame.isDefined()) {
+      const dx = Math.floor(compositeFrame.xMin);
+      const dy = Math.floor(compositeFrame.yMin);
+      if (dx !== 0 || dy !== 0) {
+        return Transform.translate(-dx, -dy);
+      }
     }
     return Transform.identity();
   }
@@ -230,22 +227,24 @@ export class RasterView extends LayerView {
 
   protected resizeCanvas(canvas: HTMLCanvasElement): void {
     const compositeFrame = this.compositeFrame;
-    const xMin = compositeFrame.xMin - Math.floor(compositeFrame.xMin);
-    const yMin = compositeFrame.yMin - Math.floor(compositeFrame.yMin);
-    const xMax = Math.ceil(xMin + compositeFrame.width);
-    const yMax = Math.ceil(yMin + compositeFrame.height);
-    const rasterFrame = new R2Box(xMin, yMin, xMax, yMax);
-    if (!this.rasterFrame.equals(rasterFrame)) {
-      const pixelRatio = this.pixelRatio;
-      canvas.width = xMax * pixelRatio;
-      canvas.height = yMax * pixelRatio;
-      canvas.style.width = xMax + "px";
-      canvas.style.height = yMax + "px";
-      Object.defineProperty(this, "rasterFrame", {
-        value: rasterFrame,
-        enumerable: true,
-        configurable: true,
-      });
+    if (compositeFrame.isDefined()) {
+      const xMin = compositeFrame.xMin - Math.floor(compositeFrame.xMin);
+      const yMin = compositeFrame.yMin - Math.floor(compositeFrame.yMin);
+      const xMax = Math.ceil(xMin + compositeFrame.width);
+      const yMax = Math.ceil(yMin + compositeFrame.height);
+      const rasterFrame = new R2Box(xMin, yMin, xMax, yMax);
+      if (!this.rasterFrame.equals(rasterFrame)) {
+        const pixelRatio = this.pixelRatio;
+        canvas.width = xMax * pixelRatio;
+        canvas.height = yMax * pixelRatio;
+        canvas.style.width = xMax + "px";
+        canvas.style.height = yMax + "px";
+        Object.defineProperty(this, "rasterFrame", {
+          value: rasterFrame,
+          enumerable: true,
+          configurable: true,
+        });
+      }
     }
   }
 
@@ -272,18 +271,20 @@ export class RasterView extends LayerView {
   }
 
   protected compositeImage(viewContext: ViewContextType<this>): void {
-    const compositor = viewContext.compositor;
-    const renderer = viewContext.renderer;
-    if (compositor instanceof CanvasRenderer && renderer instanceof CanvasRenderer) {
-      const compositeFrame = this.compositeFrame;
-      const context = compositor.context;
-      context.save();
-      context.globalAlpha = this.opacity.getValue();
-      context.globalCompositeOperation = this.compositeOperation.getValue();
-      const x = Math.floor(compositeFrame.x);
-      const y = Math.floor(compositeFrame.y);
-      context.drawImage(this.canvas, x, y, compositeFrame.width, compositeFrame.height);
-      context.restore();
+    const compositeFrame = this.compositeFrame;
+    if (compositeFrame.isDefined()) {
+      const compositor = viewContext.compositor;
+      const renderer = viewContext.renderer;
+      if (compositor instanceof CanvasRenderer && renderer instanceof CanvasRenderer) {
+        const context = compositor.context;
+        context.save();
+        context.globalAlpha = this.opacity.getValue();
+        context.globalCompositeOperation = this.compositeOperation.getValue();
+        const x = Math.floor(compositeFrame.x);
+        const y = Math.floor(compositeFrame.y);
+        context.drawImage(this.canvas, x, y, compositeFrame.width, compositeFrame.height);
+        context.restore();
+      }
     }
   }
 

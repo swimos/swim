@@ -19,7 +19,7 @@ import {AnyColor, Color} from "@swim/style";
 import {Look, Mood} from "@swim/theme";
 import {ViewContextType, View, ViewAnimator, ViewFastener} from "@swim/view";
 import {StrokeView, CanvasContext, CanvasRenderer} from "@swim/graphics";
-import type {GeoView} from "../geo/GeoView";
+import {GeoView} from "../geo/GeoView";
 import {GeoLayerView} from "../layer/GeoLayerView";
 import type {GeoRippleViewObserver} from "./GeoRippleViewObserver";
 
@@ -261,12 +261,16 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
     return this;
   }
 
-  static ripple(parentView: GeoView, options?: GeoRippleOptions): GeoRippleView | null {
-    if (!document.hidden && !parentView.isHidden() && !parentView.isCulled() &&
-        parentView.geoBounds.intersects(parentView.geoViewport.geoFrame)) {
+  static ripple(sourceView: GeoView, options?: GeoRippleOptions): GeoRippleView | null {
+    if (!document.hidden && !sourceView.isHidden() && !sourceView.isCulled() &&
+        sourceView.geoBounds.intersects(sourceView.geoViewport.geoFrame)) {
       const rippleView = GeoRippleView.create();
-      rippleView.source.setView(parentView);
-      parentView.appendChildView(rippleView);
+      rippleView.source.setView(sourceView);
+      let containerView = sourceView.getBaseView(GeoView);
+      if (containerView === null) {
+        containerView = sourceView;
+      }
+      containerView.appendChildView(rippleView);
       rippleView.ripple(options);
       return rippleView;
     } else {

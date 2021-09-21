@@ -271,7 +271,7 @@ ControllerService.prototype.bindSuperService = function (this: ControllerService
       configurable: true,
     });
   }
-  if (this.manager === void 0) {
+  if (this.manager === void 0 || this.manager === null) {
     if (superService !== null) {
       this.setServiceFlags(this.serviceFlags | ControllerService.InheritedFlag);
       Object.defineProperty(this, "manager", {

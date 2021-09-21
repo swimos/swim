@@ -288,7 +288,7 @@ ModelService.prototype.bindSuperService = function (this: ModelService<Model, un
       configurable: true,
     });
   }
-  if (this.manager === void 0) {
+  if (this.manager === void 0 || this.manager === null) {
     if (superService !== null) {
       this.setServiceFlags(this.serviceFlags | ModelService.InheritedFlag);
       Object.defineProperty(this, "manager", {

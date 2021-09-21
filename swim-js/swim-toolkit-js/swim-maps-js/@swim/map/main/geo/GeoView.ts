@@ -194,7 +194,7 @@ export abstract class GeoView extends GraphicsView {
 
   protected renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled() && !this.isUnbounded()) {
       const context = renderer.context;
       context.save();
       this.renderGeoOutline(this.geoBounds, viewContext.geoViewport, context, outlineColor, outlineWidth);
@@ -204,19 +204,21 @@ export abstract class GeoView extends GraphicsView {
 
   protected renderGeoOutline(geoBox: GeoBox, geoProjection: GeoProjection, context: CanvasContext,
                              outlineColor: Color, outlineWidth: number): void {
-    const southWest = geoProjection.project(geoBox.southWest.normalized());
-    const northWest = geoProjection.project(geoBox.northWest.normalized());
-    const northEast = geoProjection.project(geoBox.northEast.normalized());
-    const southEast = geoProjection.project(geoBox.southEast.normalized());
-    context.beginPath();
-    context.moveTo(southWest.x, southWest.y);
-    context.lineTo(northWest.x, northWest.y);
-    context.lineTo(northEast.x, northEast.y);
-    context.lineTo(southEast.x, southEast.y);
-    context.closePath();
-    context.lineWidth = outlineWidth;
-    context.strokeStyle = outlineColor.toString();
-    context.stroke();
+    if (geoBox.isDefined()) {
+      const southWest = geoProjection.project(geoBox.southWest.normalized());
+      const northWest = geoProjection.project(geoBox.northWest.normalized());
+      const northEast = geoProjection.project(geoBox.northEast.normalized());
+      const southEast = geoProjection.project(geoBox.southEast.normalized());
+      context.beginPath();
+      context.moveTo(southWest.x, southWest.y);
+      context.lineTo(northWest.x, northWest.y);
+      context.lineTo(northEast.x, northEast.y);
+      context.lineTo(southEast.x, southEast.y);
+      context.closePath();
+      context.lineWidth = outlineWidth;
+      context.strokeStyle = outlineColor.toString();
+      context.stroke();
+    }
   }
 
   protected override onSetHidden(hidden: boolean): void {

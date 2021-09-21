@@ -133,7 +133,7 @@ export class GoogleMapView extends MapView {
     return false;
   }
 
-  override willProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
+  protected override willProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     if ((this.viewFlags & View.NeedsProject) !== 0 && this.updateGeoViewport()) {
       (viewContext as any).geoViewport = this.geoViewport;
     }

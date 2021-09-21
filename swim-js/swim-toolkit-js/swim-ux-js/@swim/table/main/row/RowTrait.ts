@@ -63,7 +63,7 @@ export class RowTrait extends LeafTrait {
   }
 
   @TraitFastener<RowTrait, TableTrait>({
-    type: TableTrait,
+    // avoid cyclic reference to type: TableTrait
     sibling: false,
     willSetTrait(newTreeTrait: TableTrait | null, oldTreeTrait: TableTrait | null, targetTrait: Trait | null): void {
       this.owner.willSetTree(newTreeTrait, oldTreeTrait, targetTrait);

@@ -853,15 +853,17 @@ export abstract class GraphicsView extends View {
 
   protected renderViewOutline(viewBox: R2Box, context: CanvasContext,
                               outlineColor: Color, outlineWidth: number): void {
-    context.beginPath();
-    context.moveTo(viewBox.xMin, viewBox.yMin);
-    context.lineTo(viewBox.xMin, viewBox.yMax);
-    context.lineTo(viewBox.xMax, viewBox.yMax);
-    context.lineTo(viewBox.xMax, viewBox.yMin);
-    context.closePath();
-    context.lineWidth = outlineWidth;
-    context.strokeStyle = outlineColor.toString();
-    context.stroke();
+    if (viewBox.isDefined()) {
+      context.beginPath();
+      context.moveTo(viewBox.xMin, viewBox.yMin);
+      context.lineTo(viewBox.xMin, viewBox.yMax);
+      context.lineTo(viewBox.xMax, viewBox.yMax);
+      context.lineTo(viewBox.xMax, viewBox.yMin);
+      context.closePath();
+      context.lineWidth = outlineWidth;
+      context.strokeStyle = outlineColor.toString();
+      context.stroke();
+    }
   }
 
   @ViewProperty({type: MoodMatrix, state: null})

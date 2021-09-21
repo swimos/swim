@@ -452,7 +452,7 @@ export class RowController extends LeafController {
 
   /** @hidden */
   static TreeFastener = ControllerFastener.define<RowController, TableController>({
-    type: TableController,
+    // avoid cyclic reference to type: TableController
     observe: true,
     willSetController(newTreeController: TableController | null, oldTreeController: TableController | null): void {
       this.owner.willSetTree(newTreeController, oldTreeController);

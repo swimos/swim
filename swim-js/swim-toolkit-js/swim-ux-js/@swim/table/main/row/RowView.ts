@@ -429,7 +429,7 @@ export class RowView extends HtmlView {
 
   @ViewFastener<RowView, TableView>({
     key: true,
-    type: TableView,
+    // avoid cyclic reference to type: TableView
     child: true,
     willSetView(newTreeView: TableView | null, oldTreeView: TableView | null): void {
       this.owner.willSetTree(newTreeView, oldTreeView);

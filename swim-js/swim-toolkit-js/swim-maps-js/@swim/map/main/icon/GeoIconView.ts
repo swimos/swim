@@ -253,7 +253,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
 
   protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
     const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled()) {
+    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled() && !this.isUnbounded()) {
       const context = renderer.context;
       context.save();
       this.renderViewOutline(this.viewBounds, context, outlineColor, outlineWidth);
@@ -328,7 +328,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
   override get popoverFrame(): R2Box {
     const viewCenter = this.viewCenter.value;
     const frame = this.viewFrame;
-    if (viewCenter !== null && viewCenter.isDefined() && frame.isDefined()) {
+    if (viewCenter !== null && viewCenter.isDefined()) {
       const viewSize = Math.min(frame.width, frame.height);
       const inversePageTransform = this.pageTransform.inverse();
       const px = inversePageTransform.transformX(viewCenter.x, viewCenter.y);
@@ -412,7 +412,7 @@ Object.defineProperty(GeoIconView.prototype, "viewBounds", {
     if (iconBounds === null) {
       const viewCenter = this.viewCenter.value;
       const frame = this.viewFrame;
-      if (viewCenter !== null && viewCenter.isDefined() && frame.isDefined()) {
+      if (viewCenter !== null && viewCenter.isDefined()) {
         const viewSize = Math.min(frame.width, frame.height);
         let iconWidthValue: Length | number | null = this.iconWidth.value;
         iconWidthValue = iconWidthValue instanceof Length ? iconWidthValue.pxValue(viewSize) : viewSize;
