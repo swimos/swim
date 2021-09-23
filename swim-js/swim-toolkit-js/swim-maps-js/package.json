@@ -28,7 +28,7 @@
     "@swim/graphics": "4.0.0-dev.20210920",
 
     "@rollup/plugin-node-resolve": "13",
-    "@types/arcgis-js-api": "4.20",
+    "@types/arcgis-js-api": "4.21",
     "@types/eslint": "7",
     "@types/google.maps": "3.45",
     "@types/leaflet": "1.7",
@@ -37,7 +37,7 @@
     "@typescript-eslint/eslint-plugin": "4",
     "@typescript-eslint/parser": "4",
     "eslint": "7",
-    "rollup": "2.56",
+    "rollup": "2.57",
     "rollup-plugin-sourcemaps": "0.6",
     "terser": "5",
     "tslib": "2",
