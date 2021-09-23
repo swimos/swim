@@ -168,7 +168,10 @@ export class GeoRasterView extends GeoLayerView {
     if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled() && !this.isUnbounded()) {
       const context = renderer.context;
       context.save();
-      this.renderViewOutline(this.rasterFrame, context, outlineColor, outlineWidth);
+      const pixelRatio = this.pixelRatio;
+      const {xMin, yMin, xMax, yMax} = this.rasterFrame;
+      const outlineFrame = new R2Box(xMin + pixelRatio, yMin + pixelRatio, xMax - pixelRatio, yMax - pixelRatio);
+      this.renderViewOutline(outlineFrame, context, outlineColor, outlineWidth);
       context.restore();
     }
   }
@@ -225,8 +228,11 @@ export class GeoRasterView extends GeoLayerView {
       }
       const width = canvasWidth / pixelRatio;
       const height = canvasHeight / pixelRatio;
+      const xPadding = (canvasWidth - newCanvasWidth) / (2 * pixelRatio);
+      const yPadding = (canvasHeight - newCanvasHeight) / (2 * pixelRatio);
 
-      return new R2Box(xMin, yMin, xMin + width, yMin + height);
+      return new R2Box(xMin - xPadding, yMin - yPadding,
+                       xMin - xPadding + width, yMin - yPadding + height);
     }
     return R2Box.undefined();
   }
