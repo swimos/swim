@@ -1,6 +1,6 @@
 {
   "name": "@swim/streamlet",
-  "version": "4.0.0-dev.20210920",
+  "version": "4.0.0-dev.20210923",
   "description": "Stateful, streaming component model for application componets that continuously consume input state from streaming inlets, and continuously produce output state on streaming outlets",
   "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/streamlet",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,7 +11,7 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20210920",
-    "@swim/collections": "4.0.0-dev.20210920"
+    "@swim/util": "4.0.0-dev.20210923",
+    "@swim/collections": "4.0.0-dev.20210923"
   }
 }

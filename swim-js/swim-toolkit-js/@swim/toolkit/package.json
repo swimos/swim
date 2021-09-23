@@ -1,6 +1,6 @@
 {
   "name": "@swim/toolkit",
-  "version": "4.0.0-dev.20210920",
+  "version": "4.0.0-dev.20210923",
   "description": "Framework for building pervasively real-time user interface applications",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,9 +11,9 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/ui": "4.0.0-dev.20210920",
-    "@swim/ux": "4.0.0-dev.20210920",
-    "@swim/vis": "4.0.0-dev.20210920",
-    "@swim/maps": "4.0.0-dev.20210920"
+    "@swim/ui": "4.0.0-dev.20210923",
+    "@swim/ux": "4.0.0-dev.20210923",
+    "@swim/vis": "4.0.0-dev.20210923",
+    "@swim/maps": "4.0.0-dev.20210923"
   }
 }

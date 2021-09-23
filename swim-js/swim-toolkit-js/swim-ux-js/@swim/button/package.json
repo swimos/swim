@@ -1,6 +1,6 @@
 {
   "name": "@swim/button",
-  "version": "4.0.0-dev.20210920",
+  "version": "4.0.0-dev.20210923",
   "description": "Button-like user interface controls",
   "homepage": "https://github.com/swimos/swim",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,17 +11,17 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20210920",
-    "@swim/codec": "4.0.0-dev.20210920",
-    "@swim/mapping": "4.0.0-dev.20210920",
-    "@swim/constraint": "4.0.0-dev.20210920",
-    "@swim/structure": "4.0.0-dev.20210920",
-    "@swim/math": "4.0.0-dev.20210920",
-    "@swim/time": "4.0.0-dev.20210920",
-    "@swim/style": "4.0.0-dev.20210920",
-    "@swim/theme": "4.0.0-dev.20210920",
-    "@swim/view": "4.0.0-dev.20210920",
-    "@swim/dom": "4.0.0-dev.20210920",
-    "@swim/graphics": "4.0.0-dev.20210920"
+    "@swim/util": "4.0.0-dev.20210923",
+    "@swim/codec": "4.0.0-dev.20210923",
+    "@swim/mapping": "4.0.0-dev.20210923",
+    "@swim/constraint": "4.0.0-dev.20210923",
+    "@swim/structure": "4.0.0-dev.20210923",
+    "@swim/math": "4.0.0-dev.20210923",
+    "@swim/time": "4.0.0-dev.20210923",
+    "@swim/style": "4.0.0-dev.20210923",
+    "@swim/theme": "4.0.0-dev.20210923",
+    "@swim/view": "4.0.0-dev.20210923",
+    "@swim/dom": "4.0.0-dev.20210923",
+    "@swim/graphics": "4.0.0-dev.20210923"
   }
 }
