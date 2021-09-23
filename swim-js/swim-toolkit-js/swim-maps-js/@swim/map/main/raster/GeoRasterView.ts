@@ -204,22 +204,21 @@ export class GeoRasterView extends GeoLayerView {
       const newCanvasWidth = (xMax - xMin) * pixelRatio;
       const newCanvasHeight = (yMax - yMin) * pixelRatio;
 
-      const minTextureSize = 32 * pixelRatio;
+      const minTextureSize = GeoRasterView.MinTextureSize * pixelRatio;
       const maxCanvasWidth = Math.max(minTextureSize, GeoRasterView.nextPowerOfTwo(newCanvasWidth));
       const maxCanvasHeight = Math.max(minTextureSize, GeoRasterView.nextPowerOfTwo(newCanvasHeight));
 
       const canvas = this.canvas;
       const oldCanvasWidth = canvas.width;
       const oldCanvasHeight = canvas.height;
-      const minShrinkRatio = 0.4;
       let canvasWidth: number;
-      if (newCanvasWidth / oldCanvasWidth < minShrinkRatio) {
+      if (newCanvasWidth / oldCanvasWidth < GeoRasterView.MinTextureShrinkRatio) {
         canvasWidth = maxCanvasWidth;
       } else {
         canvasWidth = Math.max(maxCanvasWidth, oldCanvasWidth);
       }
       let canvasHeight: number;
-      if (newCanvasHeight / oldCanvasHeight < minShrinkRatio) {
+      if (newCanvasHeight / oldCanvasHeight < GeoRasterView.MinTextureShrinkRatio) {
         canvasHeight = maxCanvasHeight;
       } else {
         canvasHeight = Math.max(maxCanvasHeight, oldCanvasHeight);
@@ -315,6 +314,11 @@ export class GeoRasterView extends GeoLayerView {
   static override create(): GeoRasterView {
     return new GeoRasterView();
   }
+
+  /** @hidden */
+  static MinTextureSize: number = 16;
+  /** @hidden */
+  static MinTextureShrinkRatio: number = 0.4;
 
   static override readonly mountFlags: ViewFlags = GeoLayerView.mountFlags | View.NeedsRender | View.NeedsComposite;
   static override readonly powerFlags: ViewFlags = GeoLayerView.powerFlags | View.NeedsRender | View.NeedsComposite;
