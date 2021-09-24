@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Transform} from "@swim/math";
 import {DrawingRenderer} from "../drawing/DrawingRenderer";
 import type {PathContext} from "./PathContext";
 
@@ -26,6 +27,10 @@ export class PathRenderer extends DrawingRenderer {
   }
 
   readonly context!: PathContext;
+
+  override get transform(): Transform {
+    return Transform.identity();
+  }
 
   override get pixelRatio(): number {
     return 1;

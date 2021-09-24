@@ -739,7 +739,7 @@ export abstract class Model implements ModelDownlinkContext {
   }
 
   protected onMount(): void {
-    this.requestUpdate(this, this.modelFlags & ~Model.StatusMask, false);
+    this.requestUpdate(this, this.modelFlags & Model.UpdateMask, false);
     this.requireUpdate(this.mountFlags);
   }
 
@@ -800,7 +800,7 @@ export abstract class Model implements ModelDownlinkContext {
   }
 
   protected onPower(): void {
-    this.requestUpdate(this, this.modelFlags & ~Model.StatusMask, false);
+    this.requestUpdate(this, this.modelFlags & Model.UpdateMask, false);
     this.requireUpdate(this.powerFlags);
   }
 

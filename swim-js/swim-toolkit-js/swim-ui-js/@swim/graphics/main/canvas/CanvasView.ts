@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Arrays} from "@swim/util";
-import {R2Box} from "@swim/math";
+import {R2Box, Transform} from "@swim/math";
 import {
   ViewContextType,
   ViewContext,
@@ -660,7 +660,9 @@ export class CanvasView extends HtmlView {
     if (rendererType === "canvas") {
       const context = this.node.getContext("2d");
       if (context !== null) {
-        return new CanvasRenderer(context, this.pixelRatio, this.theme.state, this.mood.state);
+        const pixelRatio = this.pixelRatio;
+        return new CanvasRenderer(context, Transform.affine(pixelRatio, 0, 0, pixelRatio, 0, 0),
+                                  pixelRatio, this.theme.state, this.mood.state);
       } else {
         throw new Error("Failed to create canvas rendering context");
       }

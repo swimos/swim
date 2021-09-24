@@ -119,7 +119,8 @@ export class GraphicsIconView extends LayerView implements IconView {
     //if (graphics !== null) {
     //  const context = renderer.context;
     //  graphics.render(renderer, frame);
-    //  if (context.isPointInPath(x * renderer.pixelRatio, y * renderer.pixelRatio)) {
+    //  const p = renderer.transform.transform(x, y);
+    //  if (context.isPointInPath(p.x, p.y)) {
     //    return this;
     //  }
     //}

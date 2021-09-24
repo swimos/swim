@@ -1628,12 +1628,7 @@ export abstract class GraphicsView extends View {
   get viewFrame(): R2Box {
     let viewFrame = this.ownViewFrame;
     if (viewFrame === null) {
-      const parentView = this.parentView;
-      if (parentView instanceof GraphicsView || parentView instanceof CanvasView) {
-        viewFrame = parentView.viewFrame;
-      } else {
-        viewFrame = R2Box.undefined();
-      }
+      viewFrame = this.deriveViewFrame();
     }
     return viewFrame;
   }
@@ -1648,6 +1643,15 @@ export abstract class GraphicsView extends View {
       enumerable: true,
       configurable: true,
     });
+  }
+
+  protected deriveViewFrame(): R2Box {
+    const parentView = this.parentView;
+    if (parentView instanceof GraphicsView || parentView instanceof CanvasView) {
+      return parentView.viewFrame;
+    } else {
+      return R2Box.undefined();
+    }
   }
 
   /**

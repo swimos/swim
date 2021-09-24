@@ -966,8 +966,6 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
       if (renderer instanceof CanvasRenderer) {
         const context = renderer.context;
         context.save();
-        x *= renderer.pixelRatio;
-        y *= renderer.pixelRatio;
         let hit: GraphicsView | null;
         if (hitMode === "domain") {
           hit = this.hitTestDomain(x, y, renderer);
@@ -988,7 +986,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   protected hitTestDomain(x: number, y: number, renderer: CanvasRenderer): GraphicsView | null {
     const xScale = this.xScale.value;
     if (xScale !== null) {
-      const d = xScale.inverse(x / renderer.pixelRatio - this.viewFrame.xMin);
+      const d = xScale.inverse(x);
       const v0 = this.dataPointFasteners.previousValue(d);
       const v1 = this.dataPointFasteners.nextValue(d);
       const x0 = v0 !== void 0 ? v0.view!.x.value : void 0;

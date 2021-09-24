@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import type {Timing} from "@swim/mapping";
-import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box} from "@swim/math";
+import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
@@ -294,7 +294,9 @@ export class GeoIconView extends GeoLayerView implements IconView {
       iconContext.clearRect(0, 0, width, height);
 
       iconContext.beginPath();
-      const iconRenderer = new CanvasRenderer(iconContext, pixelRatio, this.theme.state, this.mood.state);
+      const transform = Transform.affine(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      const iconRenderer = new CanvasRenderer(iconContext, transform, pixelRatio,
+                                              this.theme.state, this.mood.state);
       const iconFrame = new R2Box(0, 0, width, height);
       graphics.render(iconRenderer, iconFrame);
     } else {

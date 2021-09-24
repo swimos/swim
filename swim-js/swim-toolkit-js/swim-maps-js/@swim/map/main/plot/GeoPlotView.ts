@@ -408,9 +408,8 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
       context.save();
-      x *= renderer.pixelRatio;
-      y *= renderer.pixelRatio;
-      const hit = this.hitTestPlot(x, y, context, this.viewFrame);
+      const p = renderer.transform.transform(x, y);
+      const hit = this.hitTestPlot(p.x, p.y, context, this.viewFrame);
       context.restore();
       return hit;
     }

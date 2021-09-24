@@ -214,7 +214,8 @@ export class LinePlotView<X, Y> extends SeriesPlotView<X, Y> implements StrokeVi
     }, this);
 
     context.lineWidth = hitWidth;
-    if (context.isPointInStroke(x, y)) {
+    const p = renderer.transform.transform(x, y);
+    if (context.isPointInStroke(p.x, p.y)) {
       const hitMode = this.hitMode.state;
       if (hitMode === "plot") {
         return this;

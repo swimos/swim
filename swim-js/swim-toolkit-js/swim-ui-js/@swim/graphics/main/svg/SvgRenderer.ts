@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import {Transform} from "@swim/math";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
 import type {SvgContext} from "./SvgContext";
@@ -37,6 +38,10 @@ export class SvgRenderer extends PaintingRenderer {
   }
 
   override readonly context!: SvgContext;
+
+  override get transform(): Transform {
+    return Transform.identity();
+  }
 
   override get pixelRatio(): number {
     return 1;

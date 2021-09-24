@@ -485,7 +485,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   }
 
   protected onMount(): void {
-    this.requestUpdate(this, this.viewFlags & ~View.StatusMask, false);
+    this.requestUpdate(this, this.viewFlags & View.UpdateMask, false);
     this.requireUpdate(this.mountFlags);
     if (this.animationTracks.length !== 0 && !this.isCulled()) {
       this.requireUpdate(View.NeedsAnimate);
@@ -549,7 +549,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   }
 
   protected onPower(): void {
-    this.requestUpdate(this, this.viewFlags & ~View.StatusMask, false);
+    this.requestUpdate(this, this.viewFlags & View.UpdateMask, false);
     this.requireUpdate(this.powerFlags);
   }
 
@@ -638,7 +638,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   }
 
   protected onUncull(): void {
-    this.requestUpdate(this, this.viewFlags & ~View.StatusMask, false);
+    this.requestUpdate(this, this.viewFlags & View.UpdateMask, false);
     this.requireUpdate(this.uncullFlags);
     if (this.animationTracks.length !== 0) {
       this.requireUpdate(View.NeedsAnimate);

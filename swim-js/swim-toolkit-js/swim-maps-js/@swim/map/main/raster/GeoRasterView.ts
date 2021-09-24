@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {R2Box} from "@swim/math";
-import type {Color} from "@swim/style";
+import {R2Box, Transform} from "@swim/math";
 import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
 import {
   AnyGraphicsRenderer,
@@ -47,8 +46,8 @@ export class GeoRasterView extends GeoLayerView {
       enumerable: true,
       configurable: true,
     });
-    Object.defineProperty(this, "rasterFrame", {
-      value: R2Box.undefined(),
+    Object.defineProperty(this, "ownRasterFrame", {
+      value: null,
       enumerable: true,
       configurable: true,
     });
@@ -79,7 +78,11 @@ export class GeoRasterView extends GeoLayerView {
 
   get compositor(): GraphicsRenderer | null {
     const parentView = this.parentView;
-    return parentView instanceof GraphicsView ? parentView.renderer : null;
+    if (parentView instanceof GraphicsView) {
+      return parentView.renderer;
+    } else {
+      return null;
+    }
   }
 
   override readonly renderer!: GraphicsRenderer | null;
@@ -93,14 +96,15 @@ export class GeoRasterView extends GeoLayerView {
       enumerable: true,
       configurable: true,
     });
-    this.resetRenderer();
+    this.requireUpdate(View.NeedsRender | View.NeedsComposite);
   }
 
   protected createRenderer(rendererType: GraphicsRendererType = "canvas"): GraphicsRenderer | null {
     if (rendererType === "canvas") {
       const context = this.canvas.getContext("2d");
       if (context !== null) {
-        return new CanvasRenderer(context, this.pixelRatio, this.theme.state, this.mood.state);
+        return new CanvasRenderer(context, Transform.identity(), this.pixelRatio,
+                                  this.theme.state, this.mood.state);
       } else {
         throw new Error("Failed to create canvas rendering context");
       }
@@ -151,29 +155,16 @@ export class GeoRasterView extends GeoLayerView {
   }
 
   protected override onRender(viewContext: ViewContextType<this>): void {
-    this.updateRasterFrame();
-    this.resizeCanvas(this.canvas);
-    this.resetRenderer();
-    this.clearCanvas();
+    const rasterFrame = this.rasterFrame;
+    this.resizeCanvas(this.canvas, rasterFrame);
+    this.resetRenderer(rasterFrame);
+    this.clearCanvas(rasterFrame);
     super.onRender(viewContext);
   }
 
   protected override didComposite(viewContext: ViewContextType<this>): void {
     this.compositeImage(viewContext);
     super.didComposite(viewContext);
-  }
-
-  protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
-    const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled() && !this.isUnbounded()) {
-      const context = renderer.context;
-      context.save();
-      const pixelRatio = this.pixelRatio;
-      const {xMin, yMin, xMax, yMax} = this.rasterFrame;
-      const outlineFrame = new R2Box(xMin + pixelRatio, yMin + pixelRatio, xMax - pixelRatio, yMax - pixelRatio);
-      this.renderViewOutline(outlineFrame, context, outlineColor, outlineWidth);
-      context.restore();
-    }
   }
 
   protected override onSetHidden(hidden: boolean): void {
@@ -194,91 +185,52 @@ export class GeoRasterView extends GeoLayerView {
   declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
   /** @hidden */
-  readonly rasterFrame!: R2Box;
+  readonly ownRasterFrame!: R2Box | null;
 
-  protected deriveRasterFrame(): R2Box {
-    const viewBounds = this.viewBounds;
-    if (viewBounds.isDefined()) {
-      const pixelRatio = this.pixelRatio;
-      const xMin = Math.floor(viewBounds.xMin);
-      const yMin = Math.floor(viewBounds.yMin);
-      const xMax = Math.ceil(viewBounds.xMax);
-      const yMax = Math.ceil(viewBounds.yMax);
-      const newCanvasWidth = (xMax - xMin) * pixelRatio;
-      const newCanvasHeight = (yMax - yMin) * pixelRatio;
-
-      const minTextureSize = GeoRasterView.MinTextureSize * pixelRatio;
-      const maxCanvasWidth = Math.max(minTextureSize, GeoRasterView.nextPowerOfTwo(newCanvasWidth));
-      const maxCanvasHeight = Math.max(minTextureSize, GeoRasterView.nextPowerOfTwo(newCanvasHeight));
-
-      const canvas = this.canvas;
-      const oldCanvasWidth = canvas.width;
-      const oldCanvasHeight = canvas.height;
-      let canvasWidth: number;
-      if (newCanvasWidth / oldCanvasWidth < GeoRasterView.MinTextureShrinkRatio) {
-        canvasWidth = maxCanvasWidth;
-      } else {
-        canvasWidth = Math.max(maxCanvasWidth, oldCanvasWidth);
-      }
-      let canvasHeight: number;
-      if (newCanvasHeight / oldCanvasHeight < GeoRasterView.MinTextureShrinkRatio) {
-        canvasHeight = maxCanvasHeight;
-      } else {
-        canvasHeight = Math.max(maxCanvasHeight, oldCanvasHeight);
-      }
-      const width = canvasWidth / pixelRatio;
-      const height = canvasHeight / pixelRatio;
-      const xPadding = (canvasWidth - newCanvasWidth) / (2 * pixelRatio);
-      const yPadding = (canvasHeight - newCanvasHeight) / (2 * pixelRatio);
-
-      return new R2Box(xMin - xPadding, yMin - yPadding,
-                       xMin - xPadding + width, yMin - yPadding + height);
+  get rasterFrame(): R2Box {
+    let rasterFrame = this.ownRasterFrame;
+    if (rasterFrame === null) {
+      rasterFrame = this.deriveRasterFrame();
     }
-    return R2Box.undefined();
+    return rasterFrame;
   }
 
   /** @hidden */
-  static nextPowerOfTwo(n: number): number {
-    n = Math.max(32, n) - 1;
-    n |= n >> 1; n |= n >> 2; n |= n >> 4; n |= n >> 8; n |= n >> 16;
-    return n + 1;
-  }
-
-  protected updateRasterFrame(): void {
-    Object.defineProperty(this, "rasterFrame", {
-      value: this.deriveRasterFrame(),
+  setRasterFrame(rasterFrame: R2Box | null): void {
+    Object.defineProperty(this, "ownRasterFrame", {
+      value: rasterFrame,
       enumerable: true,
       configurable: true,
     });
+  }
+
+  protected deriveRasterFrame(): R2Box {
+    return this.viewBounds;
   }
 
   protected createCanvas(): HTMLCanvasElement {
     return document.createElement("canvas");
   }
 
-  protected resizeCanvas(canvas: HTMLCanvasElement): void {
-    const rasterFrame = this.rasterFrame;
-    if (rasterFrame.isDefined()) {
-      const pixelRatio = this.pixelRatio;
-      const newWidth = rasterFrame.width;
-      const newHeight = rasterFrame.height;
-      const newCanvasWidth = newWidth * pixelRatio;
-      const newCanvasHeight = newHeight * pixelRatio;
-      const oldCanvasWidth = canvas.width;
-      const oldCanvasHeight = canvas.height;
-      if (newCanvasWidth !== oldCanvasWidth || newCanvasHeight !== oldCanvasHeight) {
-        canvas.width = newCanvasWidth;
-        canvas.height = newCanvasHeight;
-        canvas.style.width = newWidth + "px";
-        canvas.style.height = newHeight + "px";
-      }
+  protected resizeCanvas(canvas: HTMLCanvasElement, rasterFrame: R2Box): void {
+    const pixelRatio = this.pixelRatio;
+    const newWidth = rasterFrame.width;
+    const newHeight = rasterFrame.height;
+    const newCanvasWidth = newWidth * pixelRatio;
+    const newCanvasHeight = newHeight * pixelRatio;
+    const oldCanvasWidth = canvas.width;
+    const oldCanvasHeight = canvas.height;
+    if (newCanvasWidth !== oldCanvasWidth || newCanvasHeight !== oldCanvasHeight) {
+      canvas.width = newCanvasWidth;
+      canvas.height = newCanvasHeight;
+      canvas.style.width = newWidth + "px";
+      canvas.style.height = newHeight + "px";
     }
   }
 
-  clearCanvas(): void {
+  protected clearCanvas(rasterFrame: R2Box): void {
     const renderer = this.renderer;
     if (renderer instanceof CanvasRenderer) {
-      const rasterFrame = this.rasterFrame;
       renderer.context.clearRect(0, 0, rasterFrame.xMax, rasterFrame.yMax);
     } else if (renderer instanceof WebGLRenderer) {
       const context = renderer.context;
@@ -286,18 +238,16 @@ export class GeoRasterView extends GeoLayerView {
     }
   }
 
-  resetRenderer(): void {
-    const rasterFrame = this.rasterFrame;
-    if (rasterFrame.isDefined()) {
-      const renderer = this.renderer;
-      if (renderer instanceof CanvasRenderer) {
-        const pixelRatio = this.pixelRatio;
-        const dx = Math.floor(rasterFrame.xMin) * pixelRatio;
-        const dy = Math.floor(rasterFrame.yMin) * pixelRatio;
-        renderer.context.setTransform(pixelRatio, 0, 0, pixelRatio, -dx, -dy);
-      } else if (renderer instanceof WebGLRenderer) {
-        renderer.context.viewport(rasterFrame.x, rasterFrame.y, rasterFrame.xMax, rasterFrame.yMax);
-      }
+  protected resetRenderer(rasterFrame: R2Box): void {
+    const renderer = this.renderer;
+    if (renderer instanceof CanvasRenderer) {
+      const pixelRatio = this.pixelRatio;
+      const dx = rasterFrame.xMin * pixelRatio;
+      const dy = rasterFrame.yMin * pixelRatio;
+      renderer.context.setTransform(pixelRatio, 0, 0, pixelRatio, -dx, -dy);
+      renderer.setTransform(Transform.affine(pixelRatio, 0, 0, pixelRatio, -dx, -dy));
+    } else if (renderer instanceof WebGLRenderer) {
+      renderer.context.viewport(rasterFrame.x, rasterFrame.y, rasterFrame.xMax, rasterFrame.yMax);
     }
   }
 
@@ -307,7 +257,8 @@ export class GeoRasterView extends GeoLayerView {
       const context = compositor.context;
       const rasterFrame = this.rasterFrame;
       const canvas = this.canvas;
-      if (rasterFrame.isDefined() && rasterFrame.width !== 0 && rasterFrame.height !== 0 && canvas.width !== 0 && canvas.height !== 0) {
+      if (rasterFrame.isDefined() && rasterFrame.width !== 0 && rasterFrame.height !== 0 &&
+          canvas.width !== 0 && canvas.height !== 0) {
         context.save();
         context.globalAlpha = this.opacity.getValue();
         context.globalCompositeOperation = this.compositeOperation.getValue();
@@ -320,11 +271,6 @@ export class GeoRasterView extends GeoLayerView {
   static override create(): GeoRasterView {
     return new GeoRasterView();
   }
-
-  /** @hidden */
-  static MinTextureSize: number = 16;
-  /** @hidden */
-  static MinTextureShrinkRatio: number = 0.4;
 
   static override readonly mountFlags: ViewFlags = GeoLayerView.mountFlags | View.NeedsRender | View.NeedsComposite;
   static override readonly powerFlags: ViewFlags = GeoLayerView.powerFlags | View.NeedsRender | View.NeedsComposite;

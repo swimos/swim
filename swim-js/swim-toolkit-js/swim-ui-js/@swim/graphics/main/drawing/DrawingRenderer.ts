@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Transform} from "@swim/math";
 import {GraphicsRenderer} from "../graphics/GraphicsRenderer";
 import type {DrawingContext} from "./DrawingContext";
 
 export abstract class DrawingRenderer extends GraphicsRenderer {
   abstract readonly context: DrawingContext;
+
+  abstract readonly transform: Transform;
 
   abstract readonly pixelRatio: number;
 }

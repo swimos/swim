@@ -164,9 +164,8 @@ export class GeoLineView extends GeoPathView implements StrokeView {
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
       context.save();
-      x *= renderer.pixelRatio;
-      y *= renderer.pixelRatio;
-      const hit = this.hitTestLine(x, y, context, this.viewFrame);
+      const p = renderer.transform.transform(x, y);
+      const hit = this.hitTestLine(p.x, p.y, context, this.viewFrame);
       context.restore();
       return hit;
     }

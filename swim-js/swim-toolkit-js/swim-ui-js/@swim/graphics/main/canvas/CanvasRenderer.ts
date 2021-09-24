@@ -12,16 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Transform} from "@swim/math";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
 import type {CanvasContext} from "./CanvasContext";
 
 export class CanvasRenderer extends PaintingRenderer {
-  constructor(context: CanvasContext, pixelRatio: number,
+  constructor(context: CanvasContext, transform: Transform, pixelRatio: number,
               theme: ThemeMatrix | null, mood: MoodVector | null) {
     super();
     Object.defineProperty(this, "context", {
       value: context,
+      enumerable: true,
+      configurable: true,
+    });
+    Object.defineProperty(this, "transform", {
+      value: transform,
       enumerable: true,
       configurable: true,
     });
@@ -43,6 +49,16 @@ export class CanvasRenderer extends PaintingRenderer {
   }
 
   override readonly context!: CanvasContext;
+
+  override readonly transform!: Transform;
+
+  setTransform(transform: Transform): void {
+    Object.defineProperty(this, "transform", {
+      value: transform,
+      enumerable: true,
+      configurable: true,
+    });
+  }
 
   override readonly pixelRatio!: number;
 

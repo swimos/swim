@@ -369,7 +369,7 @@ export abstract class Controller implements GestureContext {
   }
 
   protected onMount(): void {
-    this.requestUpdate(this, this.controllerFlags & ~Controller.StatusMask, false);
+    this.requestUpdate(this, this.controllerFlags & Controller.UpdateMask, false);
     this.requireUpdate(this.mountFlags);
   }
 
@@ -430,7 +430,7 @@ export abstract class Controller implements GestureContext {
   }
 
   protected onPower(): void {
-    this.requestUpdate(this, this.controllerFlags & ~Controller.StatusMask, false);
+    this.requestUpdate(this, this.controllerFlags & Controller.UpdateMask, false);
     this.requireUpdate(this.powerFlags);
   }
 

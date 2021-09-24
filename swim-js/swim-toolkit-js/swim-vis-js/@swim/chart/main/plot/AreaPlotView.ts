@@ -161,7 +161,8 @@ export class AreaPlotView<X, Y> extends SeriesPlotView<X, Y> implements FillView
       context.closePath();
     }
 
-    if (context.isPointInPath(x, y)) {
+    const p = renderer.transform.transform(x, y);
+    if (context.isPointInPath(p.x, p.y)) {
       const hitMode = this.hitMode.state;
       if (hitMode === "plot") {
         return this;

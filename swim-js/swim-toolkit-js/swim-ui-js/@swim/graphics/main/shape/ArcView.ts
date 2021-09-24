@@ -172,9 +172,8 @@ export class ArcView extends LayerView implements FillView, StrokeView {
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
       context.save();
-      x *= renderer.pixelRatio;
-      y *= renderer.pixelRatio;
-      const hit = this.hitTestArc(x, y, context, this.viewFrame);
+      const p = renderer.transform.transform(x, y);
+      const hit = this.hitTestArc(p.x, p.y, context, this.viewFrame);
       context.restore();
       return hit;
     }

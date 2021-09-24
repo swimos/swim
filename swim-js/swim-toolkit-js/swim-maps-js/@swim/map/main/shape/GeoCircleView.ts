@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box, R2Circle} from "@swim/math";
+import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box, R2Circle, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ViewContextType, View, ViewProperty, ViewAnimator} from "@swim/view";
@@ -253,13 +253,13 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     const renderer = viewContext.renderer;
     if (renderer instanceof CanvasRenderer) {
       const context = renderer.context;
-      return this.hitTestCircle(x, y, context, this.viewFrame, renderer.pixelRatio);
+      return this.hitTestCircle(x, y, context, this.viewFrame, renderer.transform);
     }
     return null;
   }
 
   protected hitTestCircle(x: number, y: number, context: CanvasContext,
-                          frame: R2Box, pixelRatio: number): GraphicsView | null {
+                          frame: R2Box, transform: Transform): GraphicsView | null {
     const viewCenter = this.viewCenter.value;
     if (viewCenter !== null && viewCenter.isDefined()) {
       const size = Math.min(frame.width, frame.height);
@@ -276,14 +276,12 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
 
       const strokeWidth = this.strokeWidth.value;
       if (this.stroke.value !== null && strokeWidth !== null) {
-        x *= pixelRatio;
-        y *= pixelRatio;
-
+        const p = transform.transform(x, y);
         context.save();
         context.beginPath();
         context.arc(viewCenter.x, viewCenter.y, radius, 0, 2 * Math.PI);
         context.lineWidth = strokeWidth.pxValue(size);
-        if (context.isPointInStroke(x, y)) {
+        if (context.isPointInStroke(p.x, p.y)) {
           context.restore();
           return this;
         } else {
