@@ -59,10 +59,10 @@ export class RasterView extends LayerView {
     }
   }
 
-  @ViewAnimator({type: Number, state: 1})
+  @ViewAnimator({type: Number, state: 1, updateFlags: View.NeedsComposite})
   readonly opacity!: ViewAnimator<this, number>;
 
-  @ViewAnimator({type: String, state: "source-over"})
+  @ViewAnimator({type: String, state: "source-over", updateFlags: View.NeedsComposite})
   readonly compositeOperation!: ViewAnimator<this, CanvasCompositeOperation>;
 
   get pixelRatio(): number {
@@ -118,17 +118,16 @@ export class RasterView extends LayerView {
 
   protected override needsUpdate(updateFlags: ViewFlags, immediate: boolean): ViewFlags {
     updateFlags = super.needsUpdate(updateFlags, immediate);
-    if ((updateFlags & View.UpdateMask) !== 0) {
-      updateFlags |= View.NeedsRender | View.NeedsComposite;
-      this.setViewFlags(this.viewFlags | View.NeedsDisplay | View.NeedsRender | View.NeedsComposite);
+    const rasterFlags = updateFlags & (View.NeedsRender | View.NeedsComposite);
+    if (rasterFlags !== 0) {
+      updateFlags |= View.NeedsComposite;
+      this.setViewFlags(this.viewFlags | View.NeedsDisplay | View.NeedsComposite | rasterFlags);
     }
     return updateFlags;
   }
 
   protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
-    if ((this.viewFlags & View.ProcessMask) !== 0 || (processFlags & View.NeedsResize) !== 0) {
-      this.requireUpdate(View.NeedsRender | View.NeedsComposite);
-    } else {
+    if ((this.viewFlags & View.ProcessMask) === 0 && (processFlags & View.NeedsResize) === 0) {
       processFlags = 0;
     }
     return processFlags;
@@ -141,7 +140,7 @@ export class RasterView extends LayerView {
 
   protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
     if ((this.viewFlags & View.DisplayMask) !== 0) {
-      displayFlags |= View.NeedsRender | View.NeedsComposite;
+      displayFlags |= View.NeedsComposite;
     } else if ((displayFlags & View.NeedsComposite) !== 0) {
       displayFlags = View.NeedsDisplay | View.NeedsComposite;
     } else {
@@ -255,11 +254,13 @@ export class RasterView extends LayerView {
       const canvas = this.canvas;
       if (rasterFrame.isDefined() && rasterFrame.width !== 0 && rasterFrame.height !== 0 &&
           canvas.width !== 0 && canvas.height !== 0) {
-        context.save();
+        const globalAlpha = context.globalAlpha;
+        const globalCompositeOperation = context.globalCompositeOperation;
         context.globalAlpha = this.opacity.getValue();
         context.globalCompositeOperation = this.compositeOperation.getValue();
         context.drawImage(canvas, rasterFrame.x, rasterFrame.y, rasterFrame.width, rasterFrame.height);
-        context.restore();
+        context.globalAlpha = globalAlpha;
+        context.globalCompositeOperation = globalCompositeOperation;
       }
     }
   }

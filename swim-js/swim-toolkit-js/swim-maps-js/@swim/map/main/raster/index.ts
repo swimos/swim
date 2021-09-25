@@ -17,3 +17,4 @@ export {
   GeoRasterViewInit,
   GeoRasterView,
 } from "./GeoRasterView";
+export {GeoRasterViewObserver} from "./GeoRasterViewObserver";

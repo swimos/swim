@@ -34,6 +34,11 @@ export interface GeoRippleOptions {
 }
 
 export class GeoRippleView extends GeoLayerView implements StrokeView {
+  constructor() {
+    super();
+    this.setViewFlags(this.viewFlags | View.UnboundedFlag);
+  }
+
   override readonly viewObservers!: ReadonlyArray<GeoRippleViewObserver>;
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {

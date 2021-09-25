@@ -14,7 +14,7 @@
 
 import type {AnyTiming} from "@swim/mapping";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
-import {AnyGeoPoint, GeoPointInit, GeoPointTuple, GeoPoint, GeoBox} from "@swim/geo";
+import {AnyGeoPoint, GeoPointInit, GeoPointTuple, GeoPoint} from "@swim/geo";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewFlags, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";
 import {
@@ -75,7 +75,7 @@ export class GeoPointView extends GeoLayerView {
   }
 
   protected onSetGeoPoint(newGeoPoint: GeoPoint, oldGeoPoint: GeoPoint): void {
-    this.setGeoBounds(new GeoBox(newGeoPoint.lng, newGeoPoint.lat, newGeoPoint.lng, newGeoPoint.lat));
+    this.setGeoBounds(newGeoPoint.bounds);
     this.requireUpdate(View.NeedsProject);
   }
 

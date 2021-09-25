@@ -77,11 +77,7 @@ export interface TraitClass<R extends Trait = Trait> extends Function {
 
 export abstract class Trait implements ModelDownlinkContext {
   constructor() {
-    Object.defineProperty(this, "traitFlags", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.traitFlags = 0;
     Object.defineProperty(this, "traitObservers", {
       value: Arrays.empty,
       enumerable: true,
@@ -92,11 +88,8 @@ export abstract class Trait implements ModelDownlinkContext {
   readonly traitFlags!: TraitFlags;
 
   setTraitFlags(traitFlags: TraitFlags): void {
-    Object.defineProperty(this, "traitFlags", {
-      value: traitFlags,
-      enumerable: true,
-      configurable: true,
-    });
+    // Object.defineProperty is too expensive for traitFlags
+    (this as any).traitFlags = traitFlags;
   }
 
   readonly traitObservers!: ReadonlyArray<TraitObserver>;

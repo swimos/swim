@@ -78,11 +78,7 @@ export interface ControllerClass<C extends Controller = Controller> extends Func
 
 export abstract class Controller implements GestureContext {
   constructor() {
-    Object.defineProperty(this, "controllerFlags", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.controllerFlags = 0;
     Object.defineProperty(this, "controllerObservers", {
       value: Arrays.empty,
       enumerable: true,
@@ -97,11 +93,8 @@ export abstract class Controller implements GestureContext {
   readonly controllerFlags!: ControllerFlags;
 
   setControllerFlags(controllerFlags: ControllerFlags): void {
-    Object.defineProperty(this, "controllerFlags", {
-      value: controllerFlags,
-      enumerable: true,
-      configurable: true,
-    });
+    // Object.defineProperty is too expensive for controllerFlags
+    (this as any).controllerFlags = controllerFlags;
   }
 
   readonly controllerObservers!: ReadonlyArray<ControllerObserver>;

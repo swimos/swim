@@ -246,13 +246,7 @@ export class GeoArcView extends GeoLayerView implements FillView, StrokeView {
   }
 
   protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
-    const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled() && !this.isUnbounded()) {
-      const context = renderer.context;
-      context.save();
-      this.renderViewOutline(this.viewBounds, context, outlineColor, outlineWidth);
-      context.restore();
-    }
+    // nop
   }
 
   protected renderArc(context: CanvasContext, frame: R2Box): void {

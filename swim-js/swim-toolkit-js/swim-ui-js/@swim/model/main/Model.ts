@@ -77,11 +77,7 @@ export interface ModelClass<M extends Model = Model> extends Function {
 
 export abstract class Model implements ModelDownlinkContext {
   constructor() {
-    Object.defineProperty(this, "modelFlags", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.modelFlags = 0;
     Object.defineProperty(this, "modelObservers", {
       value: Arrays.empty,
       enumerable: true,
@@ -106,11 +102,8 @@ export abstract class Model implements ModelDownlinkContext {
   readonly modelFlags!: ModelFlags;
 
   setModelFlags(modelFlags: ModelFlags): void {
-    Object.defineProperty(this, "modelFlags", {
-      value: modelFlags,
-      enumerable: true,
-      configurable: true,
-    });
+    // Object.defineProperty is too expensive for modelFlags
+    (this as any).modelFlags = modelFlags;
   }
 
   readonly modelObservers!: ReadonlyArray<ModelObserver>;

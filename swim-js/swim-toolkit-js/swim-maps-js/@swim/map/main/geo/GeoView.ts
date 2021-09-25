@@ -287,9 +287,11 @@ export abstract class GeoView extends GraphicsView {
   }
 
   protected onSetGeoBounds(newGeoBounds: GeoBox, oldGeoBounds: GeoBox): void {
-    const parentView = this.parentView;
-    if (parentView instanceof GeoView) {
-      parentView.onSetChildViewGeoBounds(this, newGeoBounds, oldGeoBounds);
+    if (!this.isUnbounded()) {
+      const parentView = this.parentView;
+      if (parentView instanceof GeoView) {
+        parentView.onSetChildViewGeoBounds(this, newGeoBounds, oldGeoBounds);
+      }
     }
   }
 

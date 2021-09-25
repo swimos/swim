@@ -252,13 +252,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
   }
 
   protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
-    const renderer = viewContext.renderer;
-    if (renderer instanceof CanvasRenderer && !this.isHidden() && !this.isCulled() && !this.isUnbounded()) {
-      const context = renderer.context;
-      context.save();
-      this.renderViewOutline(this.viewBounds, context, outlineColor, outlineWidth);
-      context.restore();
-    }
+    // nop
   }
 
   protected override onRasterize(viewContext: ViewContextType<this>): void {

@@ -126,11 +126,7 @@ export interface ViewClass<V extends View = View> extends Function {
 
 export abstract class View implements AnimationTimeline, ConstraintScope, GestureContext {
   constructor() {
-    Object.defineProperty(this, "viewFlags", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.viewFlags = 0;
     Object.defineProperty(this, "viewObservers", {
       value: Arrays.empty,
       enumerable: true,
@@ -155,11 +151,8 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   readonly viewFlags!: ViewFlags;
 
   setViewFlags(viewFlags: ViewFlags): void {
-    Object.defineProperty(this, "viewFlags", {
-      value: viewFlags,
-      enumerable: true,
-      configurable: true,
-    });
+    // Object.defineProperty is too expensive for viewFlags
+    (this as any).viewFlags = viewFlags;
   }
 
   readonly viewObservers!: ReadonlyArray<ViewObserver>;

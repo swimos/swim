@@ -12,26 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from "./geo";
+import type {GeoPoint} from "@swim/geo";
+import type {GeoViewObserver} from "../geo/GeoViewObserver";
+import type {GeoRasterView} from "./GeoRasterView";
 
-export * from "./layer";
+export interface GeoRasterViewObserver<V extends GeoRasterView = GeoRasterView> extends GeoViewObserver<V> {
+  viewWillSetGeoAnchor?(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null, view: V): void;
 
-export * from "./effect";
-
-export * from "./raster";
-
-export * from "./tree";
-
-export * from "./grid";
-
-export * from "./shape";
-
-export * from "./path";
-
-export * from "./plot";
-
-export * from "./icon";
-
-export * from "./map";
-
-export * from "./world";
+  viewDidSetGeoAnchor?(newGeoAnchor: GeoPoint | null, oldGeoAnchor: GeoPoint | null, view: V): void;
+}
