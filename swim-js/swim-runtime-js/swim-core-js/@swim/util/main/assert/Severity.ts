@@ -24,16 +24,8 @@ import {Constructors} from "../runtime/Constructors";
  */
 export class Severity implements HashCode, Compare {
   private constructor(level: number, label: string) {
-    Object.defineProperty(this, "level", {
-      value: level,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "label", {
-      value: label,
-      enumerable: true,
-      configurable: true,
-    });
+    this.level = level;
+    this.label = label;
   }
 
   /**
@@ -42,12 +34,12 @@ export class Severity implements HashCode, Compare {
    * One of `TRACE_LEVEL`, `DEBUG_LEVEL`, `INFO_LEVEL`, `NOTE_LEVEL`,
    * `WARNING_LEVEL`, `ERROR_LEVEL`, `ALERT_LEVEL`, `FATAL_LEVEL`.
    */
-  readonly level!: number;
+  readonly level: number;
 
   /**
    * A descriptive label for this `Severity`.
    */
-  readonly label!: string;
+  readonly label: string;
 
   /**
    * Returns `true` if this `Severity` has `TRACE_LEVEL` of importance.

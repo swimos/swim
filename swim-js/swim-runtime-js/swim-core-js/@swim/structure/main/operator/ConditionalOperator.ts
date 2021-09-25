@@ -23,25 +23,16 @@ import {AnyInterpreter, Interpreter} from "../"; // forward import
 export class ConditionalOperator extends Operator {
   constructor(ifTerm: Item, thenTerm: Item, elseTerm: Item) {
     super();
-    Object.defineProperty(this, "ifTerm", {
-      value: ifTerm.commit(),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "thenTerm", {
-      value: thenTerm.commit(),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "elseTerm", {
-      value: elseTerm.commit(),
-      enumerable: true,
-    });
+    this.ifTerm = ifTerm.commit();
+    this.thenTerm = thenTerm.commit();
+    this.elseTerm = elseTerm.commit();
   }
 
-  readonly ifTerm!: Item;
+  readonly ifTerm: Item;
 
-  readonly thenTerm!: Item;
+  readonly thenTerm: Item;
 
-  readonly elseTerm!: Item;
+  readonly elseTerm: Item;
 
   override isConstant(): boolean {
     return this.ifTerm.isConstant() && this.thenTerm.isConstant()

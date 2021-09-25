@@ -25,13 +25,10 @@ import {AbstractInoutlet} from "./AbstractInoutlet";
 export class StreamletInoutlet<I, O> extends AbstractInoutlet<I, O> {
   constructor(streamlet: Streamlet<I, O>) {
     super();
-    Object.defineProperty(this, "streamlet", {
-      value: streamlet,
-      enumerable: true,
-    });
+    this.streamlet = streamlet;
   }
 
-  readonly streamlet!: Streamlet<I, O>;
+  readonly streamlet: Streamlet<I, O>;
 
   override get(): O | undefined {
     const streamlet = this.streamlet as GenericStreamlet<I, O>;

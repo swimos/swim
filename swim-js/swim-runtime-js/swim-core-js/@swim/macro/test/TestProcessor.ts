@@ -18,17 +18,11 @@ import {Processor} from "@swim/macro";
 export class TestProcessor extends Processor {
   constructor() {
     super();
-    Object.defineProperty(this, "inputs", {
-      value: {},
-      enumerable: true,
-    });
-    Object.defineProperty(this, "outputs", {
-      value: {},
-      enumerable: true,
-    });
+    this.inputs = {};
+    this.outputs = {};
   }
 
-  readonly inputs!: {readonly [path: string]: Item | undefined};
+  readonly inputs: {readonly [path: string]: Item | undefined};
 
   getInput(path: string): Item | null {
     const input = this.inputs[path];
@@ -54,7 +48,7 @@ export class TestProcessor extends Processor {
     }
   }
 
-  readonly outputs!: {readonly [path: string]: string | undefined};
+  readonly outputs: {readonly [path: string]: string | undefined};
 
   getOutput(path: string): string | null {
     const output = this.outputs[path];

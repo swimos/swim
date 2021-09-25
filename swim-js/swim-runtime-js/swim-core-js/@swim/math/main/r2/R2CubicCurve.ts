@@ -24,38 +24,14 @@ export class R2CubicCurve extends R2BezierCurve implements Debug {
   constructor(x0: number, y0: number, x1: number, y1: number,
               x2: number, y2: number, x3: number, y3: number) {
     super();
-    Object.defineProperty(this, "x0", {
-      value: x0,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y0", {
-      value: y0,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "x1", {
-      value: x1,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y1", {
-      value: y1,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "x2", {
-      value: x2,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y2", {
-      value: y2,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "x3", {
-      value: x3,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y3", {
-      value: y3,
-      enumerable: true,
-    });
+    this.x0 = x0;
+    this.y0 = y0;
+    this.x1 = x1;
+    this.y1 = y1;
+    this.x2 = x2;
+    this.y2 = y2;
+    this.x3 = x3;
+    this.y3 = y3;
   }
 
   isDefined(): boolean {
@@ -65,21 +41,21 @@ export class R2CubicCurve extends R2BezierCurve implements Debug {
         && isFinite(this.x3) && isFinite(this.y3);
   }
 
-  readonly x0!: number;
+  readonly x0: number;
 
-  readonly y0!: number;
+  readonly y0: number;
 
-  readonly x1!: number;
+  readonly x1: number;
 
-  readonly y1!: number;
+  readonly y1: number;
 
-  readonly x2!: number;
+  readonly x2: number;
 
-  readonly y2!: number;
+  readonly y2: number;
 
-  readonly x3!: number;
+  readonly x3: number;
 
-  readonly y3!: number;
+  readonly y3: number;
 
   override get xMin(): number {
     return Math.min(this.x0, this.x1, this.x2, this.x3);

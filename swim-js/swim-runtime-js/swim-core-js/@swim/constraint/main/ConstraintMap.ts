@@ -12,27 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {ConstraintKey} from "./ConstraintKey";
 
 /** @hidden */
 export class ConstraintMap<K extends ConstraintKey, V> {
   constructor(index?: {[id: number]: number | undefined}, array?: Array<[K, V]>) {
-    Object.defineProperty(this, "index", {
-      value: index !== void 0 ? index : {},
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "array", {
-      value: array !== void 0 ? array : [],
-      enumerable: true,
-    });
+    this.index = index !== void 0 ? index : {};
+    this.array = array !== void 0 ? array : [];
   }
 
   /** @hidden */
-  readonly index!: {[id: number]: number | undefined};
+  readonly index: {[id: number]: number | undefined};
 
   /** @hidden */
-  readonly array!: Array<[K, V]>;
+  readonly array: Array<[K, V]>;
 
   get size(): number {
     return this.array.length;
@@ -107,11 +101,7 @@ export class ConstraintMap<K extends ConstraintKey, V> {
   }
 
   clear(): void {
-    Object.defineProperty(this, "index", {
-      value: {},
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).index = {};
     this.array.length = 0;
   }
 

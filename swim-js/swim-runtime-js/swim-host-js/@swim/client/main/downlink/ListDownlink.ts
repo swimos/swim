@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Cursor} from "@swim/util";
+import type {Mutable, Cursor} from "@swim/util";
 import type {STree} from "@swim/collections";
 import {AnyValue, Value, Form, ValueCursor, ValueEntryCursor} from "@swim/structure";
 import type {AnyUri, Uri} from "@swim/uri";
@@ -77,15 +77,8 @@ export class ListDownlink<V, VU = never> extends Downlink {
       observer.didClear = init.didClear ?? observer.didClear;
       valueForm = init.valueForm !== void 0 ? init.valueForm : valueForm;
     }
-    Object.defineProperty(this, "ownValueForm", {
-      value: valueForm !== void 0 ? valueForm : Form.forValue() as unknown as Form<V, VU>,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "state0", {
-      value: state0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.ownValueForm = valueForm !== void 0 ? valueForm : Form.forValue() as unknown as Form<V, VU>;
+    this.state0 = state0;
   }
 
   /** @hidden */
@@ -95,10 +88,10 @@ export class ListDownlink<V, VU = never> extends Downlink {
   override readonly observers!: ReadonlyArray<ListDownlinkObserver<V, VU>>;
 
   /** @hidden */
-  readonly ownValueForm!: Form<V, VU>;
+  readonly ownValueForm: Form<V, VU>;
 
   /** @hidden */
-  readonly state0!: STree<Value, Value> | null;
+  readonly state0: STree<Value, Value> | null;
 
   override get type(): DownlinkType {
     return "list";
@@ -513,22 +506,14 @@ export class ListDownlink<V, VU = never> extends Downlink {
         throw new Error("downlink type mismatch");
       }
       model.addDownlink(this);
-      Object.defineProperty(this, "model", {
-        value: model as ListDownlinkModel,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).model = model as ListDownlinkModel;
       setTimeout(this.didAliasModel.bind(this));
     } else {
       model = new ListDownlinkModel(this.context, hostUri, nodeUri, laneUri, this.ownPrio,
                                     this.ownRate, this.ownBody, this.state0 ?? void 0);
       model.addDownlink(this);
       this.context.openDownlink(model);
-      Object.defineProperty(this, "model", {
-        value: model as ListDownlinkModel,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).model = model as ListDownlinkModel;
     }
     if (this.owner !== null) {
       this.owner.addDownlink(this);

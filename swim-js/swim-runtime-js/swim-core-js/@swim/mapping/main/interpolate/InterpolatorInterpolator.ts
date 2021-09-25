@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "./Interpolator";
 
 /** @hidden */
@@ -26,14 +27,8 @@ export const InterpolatorInterpolator = function <Y>(y0: Interpolator<Y>, y1: In
     }
   } as Interpolator<Interpolator<Y>>;
   Object.setPrototypeOf(interpolator, InterpolatorInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: y0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: y1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = y0;
+  (interpolator as Mutable<typeof interpolator>)[1] = y1;
   return interpolator;
 } as {
   <Y>(y0: Interpolator<Y>, y1: Interpolator<Y>): Interpolator<Interpolator<Y>>;

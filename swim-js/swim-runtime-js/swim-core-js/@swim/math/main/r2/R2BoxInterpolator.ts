@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {R2Box} from "./R2Box";
 
@@ -27,14 +28,8 @@ export const R2BoxInterpolator = function (s0: R2Box, s1: R2Box): Interpolator<R
     return new R2Box(xMin, yMin, xMax, yMax);
   } as Interpolator<R2Box>;
   Object.setPrototypeOf(interpolator, R2BoxInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: s0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: s1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = s0;
+  (interpolator as Mutable<typeof interpolator>)[1] = s1;
   return interpolator;
 } as {
   (s0: R2Box, s1: R2Box): Interpolator<R2Box>;

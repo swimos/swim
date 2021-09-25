@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HashCode, Compare, Lazy, Strings} from "@swim/util";
+import {Lazy, HashCode, Compare, Mutable, Strings} from "@swim/util";
 import {Output, Format, Debug, Display, Base16} from "@swim/codec";
 import type {Form} from "@swim/structure";
 import {UriException} from "./UriException";
@@ -43,36 +43,13 @@ export class Uri implements HashCode, Compare, Debug, Display {
   /** @hidden */
   constructor(scheme: UriScheme, authority: UriAuthority, path: UriPath,
               query: UriQuery, fragment: UriFragment) {
-    Object.defineProperty(this, "scheme", {
-      value: scheme,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "authority", {
-      value: authority,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "path", {
-      value: path,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "query", {
-      value: query,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "fragment", {
-      value: fragment,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "hashValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.scheme = scheme;
+    this.authority = authority;
+    this.path = path;
+    this.query = query;
+    this.fragment = fragment;
+    this.hashValue = void 0;
+    this.stringValue = void 0;
   }
 
   isDefined(): boolean {
@@ -85,7 +62,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
         && !this.query.isDefined() && !this.fragment.isDefined();
   }
 
-  readonly scheme!: UriScheme;
+  readonly scheme: UriScheme;
 
   withScheme(scheme: AnyUriScheme): Uri {
     scheme = UriScheme.fromAny(scheme);
@@ -112,7 +89,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return this.withScheme(UriScheme.create(schemeName));
   }
 
-  readonly authority!: UriAuthority;
+  readonly authority: UriAuthority;
 
   withAuthority(authority: AnyUriAuthority): Uri {
     authority = UriAuthority.fromAny(authority);
@@ -235,7 +212,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return this.withAuthority(this.authority.withPortNumber(portNumber));
   }
 
-  readonly path!: UriPath;
+  readonly path: UriPath;
 
   withPath(...components: AnyUriPath[]): Uri {
     const path = UriPath.of(...components);
@@ -302,7 +279,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return this.withPath(this.path.prependedSegment(segment));
   }
 
-  readonly query!: UriQuery;
+  readonly query: UriQuery;
 
   withQuery(query: AnyUriQuery): Uri {
     query = UriQuery.fromAny(query);
@@ -341,7 +318,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     return this.withQuery(this.query.prepended(key as any, value as any));
   }
 
-  readonly fragment!: UriFragment;
+  readonly fragment: UriFragment;
 
   withFragment(fragment: AnyUriFragment): Uri {
     fragment = UriFragment.fromAny(fragment);
@@ -471,17 +448,13 @@ export class Uri implements HashCode, Compare, Debug, Display {
   }
 
   /** @hidden */
-  readonly hashValue!: number | undefined;
+  readonly hashValue: number | undefined;
 
   hashCode(): number {
     let hashValue = this.hashValue;
     if (hashValue === void 0) {
       hashValue = Strings.hash(this.toString());
-      Object.defineProperty(this, "hashValue", {
-        value: hashValue,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).hashValue = hashValue;
     }
     return hashValue;
   }
@@ -497,7 +470,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   display<T>(output: Output<T>): Output<T> {
     const stringValue = this.stringValue;
@@ -525,11 +498,7 @@ export class Uri implements HashCode, Compare, Debug, Display {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       stringValue = Format.display(this);
-      Object.defineProperty(this, "stringValue", {
-        value: stringValue,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = stringValue;
     }
     return stringValue;
   }

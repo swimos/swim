@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import type {Uri} from "@swim/uri";
 import {AnyValue, Value} from "@swim/structure";
 import {
@@ -33,71 +33,38 @@ import type {DownlinkType, Downlink} from "./Downlink";
 export abstract class DownlinkModel implements HostDownlink {
   constructor(context: DownlinkContext, hostUri: Uri, nodeUri: Uri, laneUri: Uri,
               prio: number = 0, rate: number = 0, body: Value = Value.absent()) {
-    Object.defineProperty(this, "context", {
-      value: context,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "hostUri", {
-      value: hostUri,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "nodeUri", {
-      value: nodeUri,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "laneUri", {
-      value: laneUri,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "prio", {
-      value: prio,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "rate", {
-      value: rate,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "body", {
-      value: body,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "views", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "host", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "status", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.context = context;
+    this.hostUri = hostUri;
+    this.nodeUri = nodeUri;
+    this.laneUri = laneUri;
+    this.prio = prio;
+    this.rate = rate;
+    this.body = body;
+    this.views = Arrays.empty;
+    this.host = null;
+    this.status = 0;
   }
 
-  readonly context!: DownlinkContext;
+  readonly context: DownlinkContext;
 
-  readonly hostUri!: Uri;
+  readonly hostUri: Uri;
 
-  readonly nodeUri!: Uri;
+  readonly nodeUri: Uri;
 
-  readonly laneUri!: Uri;
+  readonly laneUri: Uri;
 
-  readonly prio!: number;
+  readonly prio: number;
 
-  readonly rate!: number;
+  readonly rate: number;
 
-  readonly body!: Value;
+  readonly body: Value;
 
-  readonly views!: ReadonlyArray<Downlink>;
+  readonly views: ReadonlyArray<Downlink>;
 
-  readonly host!: Host | null;
+  readonly host: Host | null;
 
   /** @hidden */
-  readonly status!: number;
+  readonly status: number;
 
   abstract readonly type: DownlinkType;
 
@@ -150,22 +117,14 @@ export abstract class DownlinkModel implements HostDownlink {
   }
 
   addDownlink(view: Downlink): void {
-    Object.defineProperty(this, "views", {
-      value: Arrays.inserted(view, this.views),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).views = Arrays.inserted(view, this.views);
   }
 
   removeDownlink(view: Downlink): void {
     const oldViews = this.views;
     const newViews = Arrays.removed(view, oldViews);
     if (oldViews !== newViews) {
-      Object.defineProperty(this, "views", {
-        value: newViews,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).views = newViews;
       view.closeUp();
       if (newViews.length === 0) {
         const unlinkDelay = this.unlinkDelay;
@@ -193,11 +152,7 @@ export abstract class DownlinkModel implements HostDownlink {
   }
 
   onLinkRequest(request: LinkRequest): void {
-    Object.defineProperty(this, "status", {
-      value: this.status | DownlinkModel.Linking,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).status |= DownlinkModel.Linking;
     const views = this.views;
     for (let i = 0, n = views.length; i < n; i += 1) {
       views[i]!.onLinkRequest(request);
@@ -205,11 +160,7 @@ export abstract class DownlinkModel implements HostDownlink {
   }
 
   onLinkedResponse(response: LinkedResponse, host: Host): void {
-    Object.defineProperty(this, "status", {
-      value: this.status & ~DownlinkModel.Linking | DownlinkModel.Linked,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).status = this.status & ~DownlinkModel.Linking | DownlinkModel.Linked;
     const views = this.views;
     for (let i = 0, n = views.length; i < n; i += 1) {
       views[i]!.onLinkedResponse(response);
@@ -217,11 +168,7 @@ export abstract class DownlinkModel implements HostDownlink {
   }
 
   onSyncRequest(request: SyncRequest): void {
-    Object.defineProperty(this, "status", {
-      value: this.status | DownlinkModel.Syncing,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).status |= DownlinkModel.Syncing;
     const views = this.views;
     for (let i = 0, n = views.length; i < n; i += 1) {
       views[i]!.onSyncRequest(request);
@@ -229,11 +176,7 @@ export abstract class DownlinkModel implements HostDownlink {
   }
 
   onSyncedResponse(response: SyncedResponse, host: Host): void {
-    Object.defineProperty(this, "status", {
-      value: this.status & ~DownlinkModel.Syncing | DownlinkModel.Synced,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).status = this.status & ~DownlinkModel.Syncing | DownlinkModel.Synced;
     const views = this.views;
     for (let i = 0, n = views.length; i < n; i += 1) {
       views[i]!.onSyncedResponse(response);
@@ -241,11 +184,7 @@ export abstract class DownlinkModel implements HostDownlink {
   }
 
   onUnlinkRequest(request: UnlinkRequest, host: Host): void {
-    Object.defineProperty(this, "status", {
-      value: this.status & ~(DownlinkModel.Linking | DownlinkModel.Syncing) | DownlinkModel.Unlinking,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).status = this.status & ~(DownlinkModel.Linking | DownlinkModel.Syncing) | DownlinkModel.Unlinking;
     const views = this.views;
     for (let i = 0, n = views.length; i < n; i += 1) {
       views[i]!.onUnlinkRequest(request);
@@ -253,11 +192,7 @@ export abstract class DownlinkModel implements HostDownlink {
   }
 
   onUnlinkedResponse(response: UnlinkedResponse, host: Host): void {
-    Object.defineProperty(this, "status", {
-      value: this.status & ~DownlinkModel.Unlinking,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).status &= ~DownlinkModel.Unlinking;
     const views = this.views;
     if (views.length === 0 || this.status !== 0) {
       for (let i = 0, n = views.length; i < n; i += 1) {
@@ -286,11 +221,7 @@ export abstract class DownlinkModel implements HostDownlink {
   }
 
   hostDidDisconnect(host: Host): void {
-    Object.defineProperty(this, "status", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).status = 0;
     let keepLinked = false;
     const views = this.views;
     for (let i = 0, n = views.length; i < n; i += 1) {
@@ -331,11 +262,7 @@ export abstract class DownlinkModel implements HostDownlink {
   }
 
   unlink(): void {
-    Object.defineProperty(this, "status", {
-      value: DownlinkModel.Unlinking,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).status = DownlinkModel.Unlinking;
     this.context.unlinkDownlink(this);
   }
 
@@ -350,11 +277,7 @@ export abstract class DownlinkModel implements HostDownlink {
   }
 
   openUp(host: Host): void {
-    Object.defineProperty(this, "host", {
-      value: host,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).host = host;
     const views = this.views;
     for (let i = 0, n = views.length; i < n; i += 1) {
       this.views[i]!.openUp(host);
@@ -363,11 +286,7 @@ export abstract class DownlinkModel implements HostDownlink {
 
   closeUp(): void {
     const views = this.views;
-    Object.defineProperty(this, "views", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).views = Arrays.empty;
     for (let i = 0, n = views.length; i < n; i += 1) {
       views[i]!.closeUp();
     }

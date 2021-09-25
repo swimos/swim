@@ -18,19 +18,13 @@ import {Inlet, AbstractOutlet, OutletInlet} from "@swim/streamlet";
 export class AndOutlet extends AbstractOutlet<Value> {
   constructor() {
     super();
-    Object.defineProperty(this, "operand1Inlet", {
-      value: new OutletInlet<Value>(this),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "operand2Inlet", {
-      value: new OutletInlet<Value>(this),
-      enumerable: true,
-    });
+    this.operand1Inlet = new OutletInlet<Value>(this);
+    this.operand2Inlet = new OutletInlet<Value>(this);
   }
 
-  readonly operand1Inlet!: Inlet<Value>;
+  readonly operand1Inlet: Inlet<Value>;
 
-  readonly operand2Inlet!: Inlet<Value>;
+  readonly operand2Inlet: Inlet<Value>;
 
   override get(): Value {
     const operand1Input = this.operand1Inlet.input;

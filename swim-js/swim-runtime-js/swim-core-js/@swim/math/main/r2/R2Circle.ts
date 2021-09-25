@@ -33,29 +33,20 @@ export interface R2CircleInit {
 export class R2Circle extends R2Shape implements Interpolate<R2Circle>, HashCode, Equivalent, Debug {
   constructor(cx: number, cy: number, r: number) {
     super();
-    Object.defineProperty(this, "cx", {
-      value: cx,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "cy", {
-      value: cy,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "r", {
-      value: r,
-      enumerable: true,
-    });
+    this.cx = cx;
+    this.cy = cy;
+    this.r = r;
   }
 
   isDefined(): boolean {
     return isFinite(this.cx) && isFinite(this.cy) && isFinite(this.r);
   }
 
-  readonly cx!: number;
+  readonly cx: number;
 
-  readonly cy!: number;
+  readonly cy: number;
 
-  readonly r!: number;
+  readonly r: number;
 
   override get xMin(): number {
     return this.cx - this.r;

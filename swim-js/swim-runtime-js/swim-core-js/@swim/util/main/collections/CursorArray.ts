@@ -16,26 +16,21 @@ import {Cursor} from "./Cursor";
 
 /** @hidden */
 export class CursorArray<T> extends Cursor<T> {
-  /** @hidden */
-  readonly array!: ReadonlyArray<T>;
-  /** @hidden */
-  index!: number;
-  /** @hidden */
-  readonly limit!: number;
-
   constructor(array: ReadonlyArray<T>, index: number, limit: number) {
     super();
-    Object.defineProperty(this, "array", {
-      value: array,
-    });
-    Object.defineProperty(this, "index", {
-      value: index,
-      configurable: true,
-    });
-    Object.defineProperty(this, "limit", {
-      value: limit,
-    });
+    this.array = array;
+    this.index = index;
+    this.limit = limit;
   }
+
+  /** @hidden */
+  readonly array: ReadonlyArray<T>;
+
+  /** @hidden */
+  index: number;
+
+  /** @hidden */
+  readonly limit: number;
 
   override isEmpty(): boolean {
     return this.index >= this.limit;
@@ -52,20 +47,14 @@ export class CursorArray<T> extends Cursor<T> {
   override step(): void {
     const index = this.index;
     if (index < this.limit) {
-      Object.defineProperty(this, "index", {
-        value: index + 1,
-        configurable: true,
-      });
+      this.index += 1;
     } else {
       throw new Error("empty");
     }
   }
 
   override skip(count: number): void {
-    Object.defineProperty(this, "index", {
-      value: Math.min(this.index + count, this.limit),
-      configurable: true,
-    });
+    this.index = Math.min(this.index + count, this.limit);
   }
 
   override hasNext(): boolean {
@@ -79,16 +68,10 @@ export class CursorArray<T> extends Cursor<T> {
   override next(): {value?: T, done: boolean} {
     const index = this.index;
     if (index < this.limit) {
-      Object.defineProperty(this, "index", {
-        value: index + 1,
-        configurable: true,
-      });
+      this.index += 1;
       return {value: this.array[index]!, done: this.index === this.limit};
     } else {
-      Object.defineProperty(this, "index", {
-        value: this.limit,
-        configurable: true,
-      });
+      this.index = this.limit;
       return {done: true};
     }
   }
@@ -104,16 +87,10 @@ export class CursorArray<T> extends Cursor<T> {
   override previous(): {value?: T, done: boolean} {
     const index = this.index - 1;
     if (index >= 0) {
-      Object.defineProperty(this, "index", {
-        value: index,
-        configurable: true,
-      });
+      this.index = index;
       return {value: this.array[index]!, done: index === 0};
     } else {
-      Object.defineProperty(this, "index", {
-        value: 0,
-        configurable: true,
-      });
+      this.index = 0;
       return {done: true};
     }
   }

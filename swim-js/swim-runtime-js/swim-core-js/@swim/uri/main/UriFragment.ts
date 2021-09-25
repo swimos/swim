@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HashCode, Compare, Lazy, Strings, HashGenCacheMap} from "@swim/util";
+import {Lazy, HashCode, Compare, Mutable, Strings, HashGenCacheMap} from "@swim/util";
 import {Output, Format, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
 
@@ -21,22 +21,15 @@ export type AnyUriFragment = UriFragment | string;
 export class UriFragment implements HashCode, Compare, Debug, Display {
   /** @hidden */
   constructor(identifier: string | undefined) {
-    Object.defineProperty(this, "identifier", {
-      value: identifier,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.identifier = identifier;
+    this.stringValue = void 0;
   }
 
   isDefined(): boolean {
     return this.identifier !== void 0;
   }
 
-  readonly identifier!: string | undefined;
+  readonly identifier: string | undefined;
 
   toAny(): string | undefined {
     return this.identifier;
@@ -84,17 +77,13 @@ export class UriFragment implements HashCode, Compare, Debug, Display {
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       stringValue = Format.display(this);
-      Object.defineProperty(this, "stringValue", {
-        value: stringValue,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = stringValue;
     }
     return stringValue;
   }

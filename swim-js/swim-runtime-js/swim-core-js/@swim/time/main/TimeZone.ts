@@ -22,19 +22,13 @@ export type AnyTimeZone = TimeZone | string | number;
 export class TimeZone implements HashCode, Debug {
   /** @hidden */
   private constructor(name: string | undefined, offset: number) {
-    Object.defineProperty(this, "name", {
-      value: name,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "offset", {
-      value: offset,
-      enumerable: true,
-    });
+    this.name = name;
+    this.offset = offset;
   }
 
-  readonly name!: string | undefined;
+  readonly name: string | undefined;
 
-  readonly offset!: number;
+  readonly offset: number;
 
   isUTC(): boolean {
     return this.offset === 0;

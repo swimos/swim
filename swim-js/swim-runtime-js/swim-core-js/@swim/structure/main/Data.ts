@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Random, Murmur3, Numbers, Constructors} from "@swim/util";
+import {Lazy, Mutable, Random, Murmur3, Numbers, Constructors} from "@swim/util";
 import {Input, OutputSettings, Output, Writer, Unicode, Base16, Base64} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item} from "./Item";
@@ -24,34 +24,22 @@ export type AnyData = Data | Uint8Array;
 export class Data extends Value {
   constructor(array: Uint8Array | null, size: number, flags: number) {
     super();
-    Object.defineProperty(this, "array", {
-      value: array,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "size", {
-      value: size,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: flags,
-      enumerable: true,
-      configurable: true,
-    });
+    this.array = array;
+    this.size = size;
+    this.flags = flags;
   }
 
   /** @hidden */
-  readonly array!: Uint8Array | null;
+  readonly array: Uint8Array | null;
 
   override isConstant(): boolean {
     return true;
   }
 
-  readonly size!: number;
+  readonly size: number;
 
   /** @hidden */
-  readonly flags!: number;
+  readonly flags: number;
 
   getByte(index: number): number {
     if (index < 0 || index >= this.size) {
@@ -81,16 +69,8 @@ export class Data extends Value {
     const newArray = new Uint8Array(Data.expand(n));
     newArray.set(oldArray, 0);
     newArray[index] = value;
-    Object.defineProperty(this, "array", {
-      value: newArray,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: this.flags & ~Data.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = newArray;
+    (this as Mutable<this>).flags &= ~Data.AliasedFlag;
     return this;
   }
 
@@ -121,21 +101,9 @@ export class Data extends Value {
       newArray.set(oldArray, 0);
     }
     newArray[n] = value;
-    Object.defineProperty(this, "array", {
-      value: newArray,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "size", {
-      value: n + 1,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: this.flags & ~Data.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = newArray;
+    (this as Mutable<this>).size = n + 1;
+    (this as Mutable<this>).flags &= ~Data.AliasedFlag;
     return this;
   }
 
@@ -149,20 +117,12 @@ export class Data extends Value {
       if (oldArray !== null) {
         newArray.set(oldArray, 0);
       }
-      Object.defineProperty(this, "array", {
-        value: newArray,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).array = newArray;
     } else {
       newArray = oldArray;
     }
     newArray[n] = value;
-    Object.defineProperty(this, "size", {
-      value: n + 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).size = n + 1;
     return this;
   }
 
@@ -204,21 +164,9 @@ export class Data extends Value {
       newArray.set(oldArray, 0);
     }
     newArray.set(array, n);
-    Object.defineProperty(this, "array", {
-      value: newArray,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "size", {
-      value: n + size,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: this.flags & ~Data.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = newArray;
+    (this as Mutable<this>).size = n + size;
+    (this as Mutable<this>).flags &= ~Data.AliasedFlag;
     return this;
   }
 
@@ -236,20 +184,12 @@ export class Data extends Value {
       if (oldArray !== null) {
         newArray.set(oldArray, 0);
       }
-      Object.defineProperty(this, "array", {
-        value: newArray,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).array = newArray;
     } else {
       newArray = oldArray;
     }
     newArray.set(array, n);
-    Object.defineProperty(this, "size", {
-      value: n + size,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).size = n + size;
     return this;
   }
 
@@ -257,21 +197,9 @@ export class Data extends Value {
     if ((this.flags & Data.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
-    Object.defineProperty(this, "array", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "size", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: Data.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = null;
+    (this as Mutable<this>).size = 0;
+    (this as Mutable<this>).flags = Data.AliasedFlag;
   }
 
   toUint8Array(): Uint8Array {
@@ -281,16 +209,8 @@ export class Data extends Value {
       return oldArray !== null ? oldArray.slice(0) : new Uint8Array(0);
     } else if ((flags & Data.AliasedFlag) !== 0 || this.size !== oldArray!.length) {
       const newArray = oldArray !== null ? oldArray.slice(0) : new Uint8Array(0);
-      Object.defineProperty(this, "array", {
-        value: newArray,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "flags", {
-        value: this.flags & ~Data.AliasedFlag,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).array = newArray;
+      (this as Mutable<this>).flags &= ~Data.AliasedFlag;
       return newArray;
     } else {
       return oldArray!;
@@ -323,11 +243,7 @@ export class Data extends Value {
   }
 
   override branch(): Data {
-    Object.defineProperty(this, "flags", {
-      value: this.flags | Data.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).flags |= Data.AliasedFlag;
     return new Data(this.array, this.size, Data.AliasedFlag);
   }
 
@@ -336,11 +252,7 @@ export class Data extends Value {
   }
 
   override commit(): this {
-    Object.defineProperty(this, "flags", {
-      value: this.flags | Data.ImmutableFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).flags |= Data.ImmutableFlag;
     return this;
   }
 

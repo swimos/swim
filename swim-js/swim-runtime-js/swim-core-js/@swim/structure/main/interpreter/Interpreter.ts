@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {InterpreterException} from "./InterpreterException";
 import {InterpreterSettings} from "./InterpreterSettings";
 import {AnyItem, Item} from "../Item";
@@ -22,38 +23,22 @@ export type AnyInterpreter = Interpreter | AnyItem;
 
 export class Interpreter {
   constructor(settings?: InterpreterSettings, scopeStack?: Item[] | null, scopeDepth?: number) {
-    Object.defineProperty(this, "settings", {
-      value: settings !== void 0 ? settings : InterpreterSettings.standard(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "scopeStack", {
-      value: scopeStack !== void 0 ? scopeStack : null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "scopeDepth", {
-      value: scopeDepth !== void 0 ? scopeDepth : 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.settings = settings !== void 0 ? settings : InterpreterSettings.standard();
+    this.scopeStack = scopeStack !== void 0 ? scopeStack : null;
+    this.scopeDepth = scopeDepth !== void 0 ? scopeDepth : 0;
   }
 
-  readonly settings!: InterpreterSettings;
+  readonly settings: InterpreterSettings;
 
   withSettings(settings: InterpreterSettings): this {
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).settings = settings;
     return this;
   }
 
   /** @hidden */
-  readonly scopeStack!: Item[] | null;
+  readonly scopeStack: Item[] | null;
 
-  readonly scopeDepth!: number;
+  readonly scopeDepth: number;
 
   peekScope(): Item {
     const scopeDepth = this.scopeDepth;
@@ -84,20 +69,12 @@ export class Interpreter {
           newScopeStack[i] = oldScopeStack[i]!;
         }
       }
-      Object.defineProperty(this, "scopeStack", {
-        value: newScopeStack,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).scopeStack = newScopeStack;
     } else {
       newScopeStack = oldScopeStack;
     }
     newScopeStack[scopeDepth] = scope;
-    Object.defineProperty(this, "scopeDepth", {
-      value: scopeDepth + 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).scopeDepth += 1;
   }
 
   popScope(): Item {
@@ -108,11 +85,7 @@ export class Interpreter {
     const scopeStack = this.scopeStack!;
     const scope = scopeStack[scopeDepth - 1]!;
     scopeStack[scopeDepth - 1] = void 0 as any;
-    Object.defineProperty(this, "scopeDepth", {
-      value: scopeDepth - 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).scopeDepth -= 1;
     return scope;
   }
 

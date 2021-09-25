@@ -19,43 +19,32 @@ import {BTreeNodeCursor} from "./"; // forward import
 
 /** @hidden */
 export class BTreeNode<K, V, U> extends BTreePage<K, V, U> {
-  /** @hidden */
-  readonly pages!: ReadonlyArray<BTreePage<K, V, U>>;
-  /** @hidden */
-  readonly knots!: ReadonlyArray<K>;
-
   constructor(pages: ReadonlyArray<BTreePage<K, V, U>>, knots: ReadonlyArray<K>,
               fold: U | undefined, size: number) {
     super();
-    Object.defineProperty(this, "pages", {
-      value: pages,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "knots", {
-      value: knots,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "fold", {
-      value: fold,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "size", {
-      value: size,
-      enumerable: true,
-    });
+    this.pages = pages;
+    this.knots = knots;
+    this.fold = fold;
+    this.size = size;
   }
+
+  /** @hidden */
+  readonly pages: ReadonlyArray<BTreePage<K, V, U>>;
+
+  /** @hidden */
+  readonly knots: ReadonlyArray<K>;
 
   override get arity(): number {
     return this.pages.length;
   }
 
-  override readonly size!: number;
+  override readonly size: number;
 
   override isEmpty(): boolean {
     return this.size === 0;
   }
 
-  override readonly fold!: U | undefined;
+  override readonly fold: U | undefined;
 
   override minKey(): K {
     return this.pages[0]!.minKey();

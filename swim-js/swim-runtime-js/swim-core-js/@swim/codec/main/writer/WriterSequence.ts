@@ -18,20 +18,14 @@ import {Writer} from "./Writer";
 /** @hidden */
 export class WriterSequence<O> extends Writer<never, O> {
   /** @hidden */
-  readonly head!: Writer<unknown, unknown>;
+  readonly head: Writer<unknown, unknown>;
   /** @hidden */
-  readonly tail!: Writer<unknown, O>;
+  readonly tail: Writer<unknown, O>;
 
   constructor(head: Writer<unknown, unknown>, tail: Writer<unknown, O>) {
     super();
-    Object.defineProperty(this, "head", {
-      value: head,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "tail", {
-      value: tail,
-      enumerable: true,
-    });
+    this.head = head;
+    this.tail = tail;
   }
 
   override pull(output: Output): Writer<never, O> {

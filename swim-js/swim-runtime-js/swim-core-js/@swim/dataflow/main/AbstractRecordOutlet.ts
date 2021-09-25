@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays, Cursor, Map} from "@swim/util";
+import {Mutable, Arrays, Cursor, Map} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {AnyItem, Item, Field, AnyValue, Value, Record, Text, Selector} from "@swim/structure";
 import {
@@ -34,39 +34,23 @@ import {RecordStreamlet} from "./"; // forward import
 export abstract class AbstractRecordOutlet extends Record implements RecordOutlet {
   constructor() {
     super();
-    Object.defineProperty(this, "effects", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "outlets", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "version", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
+    this.effects = new BTree();
+    this.outlets = new BTree();
+    this.outputs = Arrays.empty;
+    this.version = -1;
   }
 
   /** @hidden */
-  readonly effects!: BTree<Value, KeyEffect>;
+  readonly effects: BTree<Value, KeyEffect>;
 
   /** @hidden */
-  readonly outlets!: BTree<Value, KeyOutlet<Value, Value>>;
+  readonly outlets: BTree<Value, KeyOutlet<Value, Value>>;
 
   /** @hidden */
-  readonly outputs!: ReadonlyArray<Inlet<Record>>;
+  readonly outputs: ReadonlyArray<Inlet<Record>>;
 
   /** @hidden */
-  readonly version!: number;
+  readonly version: number;
 
   declare readonly streamletScope: StreamletScope<Value> | null; // getter defined below to work around useDefineForClassFields lunacy
 
@@ -109,11 +93,7 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
     let outlet = oldOutlets.get(key);
     if (outlet === void 0) {
       outlet = new KeyOutlet<Value, Value>(this, key);
-      Object.defineProperty(this, "outlets", {
-        value: oldOutlets.updated(key, outlet),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).outlets = oldOutlets.updated(key, outlet);
       this.decohereInputKey(key, KeyEffect.Update);
     }
     return outlet;
@@ -124,39 +104,23 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
   }
 
   bindOutput(output: Inlet<Record>): void {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.inserted(output, this.outputs),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.inserted(output, this.outputs);
   }
 
   unbindOutput(output: Inlet<Record>): void {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.removed(output, this.outputs),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.removed(output, this.outputs);
   }
 
   unbindOutputs(): void {
     const oldOutlets = this.outlets;
     if (oldOutlets.isEmpty()) {
-      Object.defineProperty(this, "outlets", {
-        value: new BTree(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).outlets = new BTree();
       oldOutlets.forEach(function (key: Value, keyOutlet: KeyOutlet<Value, Value>) {
         keyOutlet.unbindOutputs();
       }, this);
     }
     const oldOutputs = this.outputs;
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.empty;
     for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
       const output = oldOutputs[i]!;
       output.unbindInput();
@@ -166,21 +130,13 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
   disconnectOutputs(): void {
     const oldOutlets = this.outlets;
     if (oldOutlets.isEmpty()) {
-      Object.defineProperty(this, "outlets", {
-        value: new BTree(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).outlets = new BTree();
       oldOutlets.forEach(function (key: Value, keyOutlet: KeyOutlet<Value, Value>) {
         keyOutlet.disconnectOutputs();
       }, this);
     }
     const oldOutputs = this.outputs;
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.empty;
     for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
       const output = oldOutputs[i]!;
       output.unbindInput();
@@ -208,16 +164,8 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
     const oldEffects = this.effects;
     if (oldEffects.get(key) !== effect) {
       this.willDecohereInputKey(key, effect);
-      Object.defineProperty(this, "effects", {
-        value: oldEffects.updated(key, effect),
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).effects = oldEffects.updated(key, effect);
+      (this as Mutable<this>).version = -1;
       this.onDecohereInputKey(key, effect);
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {
@@ -239,11 +187,7 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
   decohereInput(): void {
     if (this.version >= 0) {
       this.willDecohereInput();
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = -1;
       this.onDecohereInput();
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {
@@ -263,11 +207,7 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
       const effect = oldEffects.get(key);
       if (effect !== void 0) {
         this.willRecohereInputKey(key, effect, version);
-        Object.defineProperty(this, "effects", {
-          value: oldEffects.removed(key),
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).effects = oldEffects.removed(key);
         this.onRecohereInputKey(key, effect, version);
         const outputs = this.outputs;
         for (let i = 0, n = outputs.length; i < n; i += 1) {
@@ -291,11 +231,7 @@ export abstract class AbstractRecordOutlet extends Record implements RecordOutle
       this.effects.forEach(function (key: Value): void {
         this.recohereInputKey(key, version);
       }, this);
-      Object.defineProperty(this, "version", {
-        value: version,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = version;
       this.onRecohereInput(version);
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {

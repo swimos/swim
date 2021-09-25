@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Map} from "@swim/util";
+import type {Mutable, Map} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {KeyEffect} from "./KeyEffect";
 import {AbstractMapInlet} from "./AbstractMapInlet";
@@ -20,15 +20,11 @@ import {AbstractMapInlet} from "./AbstractMapInlet";
 export class MapOutput<K, V> extends AbstractMapInlet<K, V, Map<K, V>> {
   constructor() {
     super();
-    Object.defineProperty(this, "state", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
+    this.state = new BTree();
   }
 
   /** @hidden */
-  readonly state!: BTree<K, V>;
+  readonly state: BTree<K, V>;
 
   get(): Map<K, V> {
     return this.state;
@@ -40,25 +36,13 @@ export class MapOutput<K, V> extends AbstractMapInlet<K, V, Map<K, V>> {
       if (input !== null) {
         const value = input.get(key);
         if (value !== void 0) {
-          Object.defineProperty(this, "state", {
-            value: this.state.updated(key, value),
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).state = this.state.updated(key, value);
         } else {
-          Object.defineProperty(this, "state", {
-            value: this.state.removed(key),
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).state = this.state.removed(key);
         }
       }
     } else if (effect === KeyEffect.Remove) {
-      Object.defineProperty(this, "state", {
-        value: this.state.removed(key),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).state = this.state.removed(key);
     }
   }
 }

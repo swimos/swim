@@ -12,34 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyOutputSettings, OutputSettings} from "../output/OutputSettings";
 import {Output} from "../output/Output";
 
 /** @hidden */
 export abstract class ByteOutput<T> extends Output<T> {
-  /** @hidden */
-  readonly array!: Uint8Array | null;
-  /** @hidden */
-  readonly size!: number;
-
   constructor(array: Uint8Array | null, size: number, settings: OutputSettings) {
     super();
-    Object.defineProperty(this, "array", {
-      value: array,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "size", {
-      value: size,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    this.array = array;
+    this.size = size;
+    this.settings = settings;
   }
+
+  /** @hidden */
+  readonly array: Uint8Array | null;
+
+  /** @hidden */
+  readonly size: number;
 
   override isCont(): boolean {
     return true;
@@ -75,20 +65,12 @@ export abstract class ByteOutput<T> extends Output<T> {
         if (oldArray !== null) {
           newArray.set(oldArray, 0);
         }
-        Object.defineProperty(this, "array", {
-          value: newArray,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).array = newArray;
       } else {
         newArray = oldArray;
       }
       newArray[n] = b;
-      Object.defineProperty(this, "size", {
-        value: n + 1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).size = n + 1;
       return this;
     } else {
       throw new TypeError("" + b);
@@ -109,11 +91,7 @@ export abstract class ByteOutput<T> extends Output<T> {
       if (oldArray !== null) {
         newArray.set(oldArray.slice(0, n), 0);
       }
-      Object.defineProperty(this, "array", {
-        value: newArray,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).array = newArray;
       return newArray;
     }
   }
@@ -127,15 +105,11 @@ export abstract class ByteOutput<T> extends Output<T> {
     }
   }
 
-  override readonly settings!: OutputSettings;
+  override readonly settings: OutputSettings;
 
   override withSettings(settings: AnyOutputSettings): Output<T> {
     settings = OutputSettings.fromAny(settings);
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).settings = settings;
     return this;
   }
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays, Iterator, Cursor} from "@swim/util";
+import {Mutable, Arrays, Iterator, Cursor} from "@swim/util";
 import type {Inlet} from "./Inlet";
 import type {Outlet} from "./Outlet";
 import {OutletCombinators} from "./OutletCombinators";
@@ -20,30 +20,18 @@ import type {Inoutlet} from "./Inoutlet";
 
 export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
   constructor() {
-    Object.defineProperty(this, "input", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "version", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
+    this.input = null;
+    this.outputs = Arrays.empty;
+    this.version = -1;
   }
 
-  readonly input!: Outlet<I> | null;
+  readonly input: Outlet<I> | null;
 
   /** @hidden */
-  readonly outputs!: ReadonlyArray<Inlet<O>>;
+  readonly outputs: ReadonlyArray<Inlet<O>>;
 
   /** @hidden */
-  readonly version!: number;
+  readonly version: number;
 
   bindInput(newInput: Outlet<I> | null): void {
     const oldInput = this.input;
@@ -51,11 +39,7 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
       if (oldInput !== null) {
         oldInput.unbindOutput(this);
       }
-      Object.defineProperty(this, "input", {
-        value: newInput,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = newInput;
       if (newInput !== null) {
         newInput.bindOutput(this);
       }
@@ -66,11 +50,7 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
     const oldInput = this.input;
     if (oldInput !== null) {
       oldInput.unbindOutput(this);
-      Object.defineProperty(this, "input", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = null;
     }
   }
 
@@ -78,11 +58,7 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
     const oldInput = this.input;
     if (oldInput !== null) {
       oldInput.unbindOutput(this);
-      Object.defineProperty(this, "input", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = null;
       oldInput.disconnectInputs();
     }
   }
@@ -94,28 +70,16 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
   }
 
   bindOutput(output: Inlet<O>): void {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.inserted(output, this.outputs),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.inserted(output, this.outputs);
   }
 
   unbindOutput(output: Inlet<O>): void {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.removed(output, this.outputs),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.removed(output, this.outputs);
   }
 
   unbindOutputs(): void {
     const oldOutputs = this.outputs;
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.empty;
     for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
       const output = oldOutputs[i]!;
       output.unbindInput();
@@ -124,11 +88,7 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
 
   disconnectOutputs(): void {
     const oldOutputs = this.outputs;
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.empty;
     for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
       const output = oldOutputs[i]!;
       output.unbindInput();
@@ -147,11 +107,7 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
   decohere(): void {
     if (this.version >= 0) {
       this.willDecohere();
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = -1;
       this.onDecohere();
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {
@@ -172,11 +128,7 @@ export abstract class AbstractInoutlet<I, O> implements Inoutlet<I, O> {
   recohere(version: number): void {
     if (this.version < 0) {
       this.willRecohere(version);
-      Object.defineProperty(this, "version", {
-        value: version,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = version;
       if (this.input !== null) {
         this.input.recohereInput(version);
       }

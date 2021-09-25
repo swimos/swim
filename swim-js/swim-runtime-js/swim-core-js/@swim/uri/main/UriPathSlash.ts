@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Output, Format} from "@swim/codec";
 import {UriPath} from "./UriPath";
 
@@ -20,20 +21,12 @@ export class UriPathSlash extends UriPath {
   /** @hidden */
   constructor(tail: UriPath) {
     super();
-    Object.defineProperty(this, "rest", {
-      value: tail,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.rest = tail;
+    this.stringValue = void 0;
   }
 
   /** @hidden */
-  readonly rest!: UriPath;
+  readonly rest: UriPath;
 
   override isDefined(): boolean {
     return true;
@@ -61,11 +54,7 @@ export class UriPathSlash extends UriPath {
 
   /** @hidden */
   override setTail(tail: UriPath): void {
-    Object.defineProperty(this, "rest", {
-      value: tail,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).rest = tail;
   }
 
   /** @hidden */
@@ -117,17 +106,13 @@ export class UriPathSlash extends UriPath {
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   override toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       stringValue = Format.display(this);
-      Object.defineProperty(this, "stringValue", {
-        value: stringValue,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = stringValue;
     }
     return stringValue;
   }

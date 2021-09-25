@@ -21,26 +21,17 @@ import {Base16} from "./Base16";
 /** @hidden */
 export class Base16Parser<O> extends Parser<O> {
   /** @hidden */
-  readonly output!: Output<O>;
+  readonly output: Output<O>;
   /** @hidden */
-  readonly p!: number;
+  readonly p: number;
   /** @hidden */
-  readonly step!: number;
+  readonly step: number;
 
   constructor(output: Output<O>, p: number = 0, step: number = 1) {
     super();
-    Object.defineProperty(this, "output", {
-      value: output,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "p", {
-      value: p,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "step", {
-      value: step,
-      enumerable: true,
-    });
+    this.output = output;
+    this.p = p;
+    this.step = step;
   }
 
   override feed(input: Input): Parser<O> {

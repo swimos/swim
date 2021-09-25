@@ -17,29 +17,18 @@ import {AnyUri, Uri} from "./Uri";
 
 export class UriCache {
   constructor(base: Uri, size: number = 32) {
-    Object.defineProperty(this, "base", {
-      value: base,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "resolveCache", {
-      value: new HashGenCacheMap(size),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "unresolveCache", {
-      value: new HashGenCacheMap(size),
-      enumerable: true,
-      configurable: true,
-    });
+    this.base = base;
+    this.resolveCache = new HashGenCacheMap(size);
+    this.unresolveCache = new HashGenCacheMap(size);
   }
 
-  readonly base!: Uri;
+  readonly base: Uri;
 
   /** @hidden */
-  readonly resolveCache!: HashGenCacheMap<Uri, Uri>;
+  readonly resolveCache: HashGenCacheMap<Uri, Uri>;
 
   /** @hidden */
-  readonly unresolveCache!: HashGenCacheMap<Uri, Uri>;
+  readonly unresolveCache: HashGenCacheMap<Uri, Uri>;
 
   resolve(relative: AnyUri): Uri {
     relative = Uri.fromAny(relative);

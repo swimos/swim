@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Domain} from "../mapping/Domain";
 import type {Interpolate} from "../interpolate/Interpolate";
 import type {Interpolator} from "../interpolate/Interpolator";
@@ -45,14 +46,8 @@ export const LinearDomain = function (x0: number, x1: number): LinearDomain {
     return dx !== 0 ? (x - x0) / dx : 0;
   } as LinearDomain;
   Object.setPrototypeOf(domain, LinearDomain.prototype);
-  Object.defineProperty(domain, 0, {
-    value: x0,
-    enumerable: true,
-  });
-  Object.defineProperty(domain, 1, {
-    value: x1,
-    enumerable: true,
-  });
+  (domain as Mutable<typeof domain>)[0] = x0;
+  (domain as Mutable<typeof domain>)[1] = x1;
   return domain;
 } as {
   (x0: number, x1: number): LinearDomain;

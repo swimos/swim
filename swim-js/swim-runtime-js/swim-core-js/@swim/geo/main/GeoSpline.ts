@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import {Debug, Format, Output} from "@swim/codec";
 import {R2Curve, R2Segment, R2Spline} from "@swim/math";
 import type {GeoProjection} from "./GeoProjection";
@@ -30,25 +30,15 @@ export type GeoSplinePoints = ReadonlyArray<AnyGeoPoint>;
 export class GeoSpline extends GeoCurve implements Debug {
   constructor(curves: ReadonlyArray<GeoCurve>, closed: boolean) {
     super();
-    Object.defineProperty(this, "curves", {
-      value: curves,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "closed", {
-      value: closed,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "boundingBox", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.curves = curves;
+    this.closed = closed;
+    this.boundingBox = null;
   }
 
-  readonly curves!: ReadonlyArray<GeoCurve>;
+  readonly curves: ReadonlyArray<GeoCurve>;
 
   /** @hidden */
-  readonly closed!: boolean;
+  readonly closed: boolean;
 
   isDefined(): boolean {
     return this.curves.length !== 0;
@@ -210,7 +200,7 @@ export class GeoSpline extends GeoCurve implements Debug {
   }
 
   /** @hidden */
-  readonly boundingBox!: GeoBox | null;
+  readonly boundingBox: GeoBox | null;
 
   override get bounds(): GeoBox {
     let boundingBox = this.boundingBox;
@@ -228,11 +218,7 @@ export class GeoSpline extends GeoCurve implements Debug {
         latMax = Math.max(curve.latMax, latMax);
       }
       boundingBox = new GeoBox(lngMin, latMin, lngMax, latMax);
-      Object.defineProperty(this, "boundingBox", {
-        value: boundingBox,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).boundingBox = boundingBox;
     }
     return boundingBox;
   }

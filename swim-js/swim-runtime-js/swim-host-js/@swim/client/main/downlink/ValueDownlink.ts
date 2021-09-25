@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays, Cursor} from "@swim/util";
+import {Mutable, Arrays, Cursor} from "@swim/util";
 import {AnyValue, Value, Form} from "@swim/structure";
 import {Inlet, Outlet, OutletCombinators} from "@swim/streamlet";
 import type {AnyUri, Uri} from "@swim/uri";
@@ -47,30 +47,11 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
       observer.didSet = init.didSet ?? observer.didSet;
       valueForm = init.valueForm !== void 0 ? init.valueForm : valueForm;
     }
-    Object.defineProperty(this, "ownValueForm", {
-      value: valueForm !== void 0 ? valueForm : Form.forValue() as unknown as Form<V, VU>,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "state0", {
-      value: state0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "input", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "version", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
+    this.ownValueForm = valueForm !== void 0 ? valueForm : Form.forValue() as unknown as Form<V, VU>;
+    this.state0 = state0;
+    this.input = null;
+    this.outputs = Arrays.empty;
+    this.version = -1;
   }
 
   /** @hidden */
@@ -80,10 +61,10 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
   override observers!: ReadonlyArray<ValueDownlinkObserver<V, VU>>;
 
   /** @hidden */
-  readonly ownValueForm!: Form<V, VU>;
+  readonly ownValueForm: Form<V, VU>;
 
   /** @hidden */
-  readonly state0!: Value;
+  readonly state0: Value;
 
   override get type(): DownlinkType {
     return "value";
@@ -220,22 +201,14 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
         throw new Error("downlink type mismatch");
       }
       model.addDownlink(this);
-      Object.defineProperty(this, "model", {
-        value: model as ValueDownlinkModel,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).model = model as ValueDownlinkModel;
       setTimeout(this.didAliasModel.bind(this));
     } else {
       model = new ValueDownlinkModel(this.context, hostUri, nodeUri, laneUri, this.ownPrio,
                                      this.ownRate, this.ownBody, this.state0);
       model.addDownlink(this);
       this.context.openDownlink(model);
-      Object.defineProperty(this, "model", {
-        value: model as ValueDownlinkModel,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).model = model as ValueDownlinkModel;
     }
     if (this.owner !== null) {
       this.owner.addDownlink(this);
@@ -243,13 +216,13 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
     return this;
   }
 
-  readonly input!: Outlet<V> | null;
+  readonly input: Outlet<V> | null;
 
   /** @hidden */
-  readonly outputs!: ReadonlyArray<Inlet<V>>;
+  readonly outputs: ReadonlyArray<Inlet<V>>;
 
   /** @hidden */
-  readonly version!: number;
+  readonly version: number;
 
   bindInput(newInput: Outlet<V> | null): void {
     const oldInput = this.input;
@@ -257,11 +230,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
       if (oldInput !== null) {
         oldInput.unbindOutput(this);
       }
-      Object.defineProperty(this, "input", {
-        value: newInput,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = newInput;
       if (newInput !== null) {
         newInput.bindOutput(this);
       }
@@ -272,11 +241,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
     const oldInput = this.input;
     if (oldInput !== null) {
       oldInput.unbindOutput(this);
-      Object.defineProperty(this, "input", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = null;
     }
   }
 
@@ -284,11 +249,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
     const oldInput = this.input;
     if (oldInput !== null) {
       oldInput.unbindOutput(this);
-      Object.defineProperty(this, "input", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = null;
       oldInput.disconnectInputs();
     }
   }
@@ -298,28 +259,16 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
   }
 
   bindOutput(output: Inlet<V>): void {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.inserted(output, this.outputs),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.inserted(output, this.outputs);
   }
 
   unbindOutput(output: Inlet<V>): void {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.removed(output, this.outputs),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.removed(output, this.outputs);
   }
 
   unbindOutputs(): void {
     const oldOutputs = this.outputs;
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.empty;
     for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
       const output = oldOutputs[i]!;
       output.unbindInput();
@@ -328,11 +277,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
 
   disconnectOutputs(): void {
     const oldOutputs = this.outputs;
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.empty;
     for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
       const output = oldOutputs[i]!;
       output.unbindInput();
@@ -351,11 +296,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
   decohere(): void {
     if (this.version >= 0) {
       this.willDecohere();
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = -1;
       this.onDecohere();
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {
@@ -376,11 +317,7 @@ export class ValueDownlink<V, VU = never> extends Downlink implements Inlet<V>, 
   recohere(version: number): void {
     if (this.version < 0) {
       this.willRecohere(version);
-      Object.defineProperty(this, "version", {
-        value: version,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = version;
       if (this.input !== null) {
         this.input.recohereInput(version);
       }

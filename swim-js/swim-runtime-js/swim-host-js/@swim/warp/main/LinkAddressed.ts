@@ -27,36 +27,31 @@ export interface LinkAddressedConstructor<E extends LinkAddressed<E>> {
 export abstract class LinkAddressed<E extends LinkAddressed<E>> extends Envelope {
   constructor(node: Uri, lane: Uri, prio: number, rate: number, body: Value) {
     super();
-    Object.defineProperty(this, "node", {
-      value: node,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "lane", {
-      value: lane,
-      enumerable: true,
-    });
+    this.node = node;
+    this.lane = lane;
     Object.defineProperty(this, "prio", {
       value: prio,
+      writable: true,
       enumerable: true,
+      configurable: true,
     });
     Object.defineProperty(this, "rate", {
       value: rate,
+      writable: true,
       enumerable: true,
+      configurable: true,
     });
-    Object.defineProperty(this, "body", {
-      value: body,
-      enumerable: true,
-    });
+    this.body = body;
   }
 
-  override readonly node!: Uri;
+  override readonly node: Uri;
 
   override withNode(node: AnyUri): E {
     node = Uri.fromAny(node);
     return this.copy(node as Uri, this.lane, this.prio, this.rate, this.body);
   }
 
-  override readonly lane!: Uri;
+  override readonly lane: Uri;
 
   override withLane(lane: AnyUri): E {
     lane = Uri.fromAny(lane);
@@ -75,7 +70,7 @@ export abstract class LinkAddressed<E extends LinkAddressed<E>> extends Envelope
     return this.copy(this.node, this.lane, this.prio, rate, this.body);
   }
 
-  override readonly body!: Value;
+  override readonly body: Value;
 
   override withBody(body: AnyValue): E {
     body = Value.fromAny(body);

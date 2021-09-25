@@ -34,22 +34,10 @@ export interface R2SegmentInit {
 export class R2Segment extends R2BezierCurve implements Interpolate<R2Segment>, HashCode, Debug {
   constructor(x0: number, y0: number, x1: number, y1: number) {
     super();
-    Object.defineProperty(this, "x0", {
-      value: x0,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y0", {
-      value: y0,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "x1", {
-      value: x1,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y1", {
-      value: y1,
-      enumerable: true,
-    });
+    this.x0 = x0;
+    this.y0 = y0;
+    this.x1 = x1;
+    this.y1 = y1;
   }
 
   isDefined(): boolean {
@@ -57,13 +45,13 @@ export class R2Segment extends R2BezierCurve implements Interpolate<R2Segment>, 
         && isFinite(this.x1) && isFinite(this.y1);
   }
 
-  readonly x0!: number;
+  readonly x0: number;
 
-  readonly y0!: number;
+  readonly y0: number;
 
-  readonly x1!: number;
+  readonly x1: number;
 
-  readonly y1!: number;
+  readonly y1: number;
 
   override get xMin(): number {
     return Math.min(this.x0, this.x1);

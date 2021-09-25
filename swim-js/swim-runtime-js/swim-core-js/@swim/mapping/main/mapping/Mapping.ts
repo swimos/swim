@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Equals, Equivalent} from "@swim/util";
+import type {Equals, Equivalent, Mutable} from "@swim/util";
 import type {Domain} from "./Domain";
 import type {Range} from "./Range";
  
@@ -37,14 +37,8 @@ export const Mapping = function <X, Y>(domain: Domain<X>, range: Range<Y>): Mapp
     return mapping.range(mapping.domain(x));
   } as Mapping<X, Y>;
   Object.setPrototypeOf(mapping, Mapping.prototype);
-  Object.defineProperty(mapping, "domain", {
-    value: domain,
-    enumerable: true,
-  });
-  Object.defineProperty(mapping, "range", {
-    value: range,
-    enumerable: true,
-  });
+  (mapping as Mutable<typeof mapping>).domain = domain;
+  (mapping as Mutable<typeof mapping>).range = range;
   return mapping;
 } as {
   <X, Y>(domain: Domain<X>, range: Range<Y>): Mapping<X, Y>;

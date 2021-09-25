@@ -21,29 +21,17 @@ export class ProcessorContext {
   constructor(processor: Processor, interpreter: Interpreter,
               directives: {readonly [name: string]: Directive | undefined} = {},
               converters: {readonly [name: string]: Converter | undefined} = {}) {
-    Object.defineProperty(this, "processor", {
-      value: processor,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "interpreter", {
-      value: interpreter,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "directives", {
-      value: directives,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "converters", {
-      value: converters,
-      enumerable: true,
-    });
+    this.processor = processor;
+    this.interpreter = interpreter;
+    this.directives = directives;
+    this.converters = converters;
   }
 
-  readonly processor!: Processor;
+  readonly processor: Processor;
 
-  readonly interpreter!: Interpreter;
+  readonly interpreter: Interpreter;
 
-  readonly directives!: {readonly [name: string]: Directive | undefined};
+  readonly directives: {readonly [name: string]: Directive | undefined};
 
   getDirective(name: string): Directive | null {
     const directive = this.directives[name];
@@ -60,7 +48,7 @@ export class ProcessorContext {
     delete directives[name];
   }
 
-  readonly converters!: {readonly [name: string]: Converter | undefined};
+  readonly converters: {readonly [name: string]: Converter | undefined};
 
   getConverter(name: string): Converter | null {
     const converter = this.converters[name];

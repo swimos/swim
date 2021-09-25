@@ -12,20 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AbstractInlet} from "./AbstractInlet";
 
 export class ValueOutput<I> extends AbstractInlet<I> {
   constructor(state?: I) {
     super();
-    Object.defineProperty(this, "state", {
-      value: state,
-      enumerable: true,
-      configurable: true,
-    });
+    this.state = state;
   }
 
   /** @hidden */
-  readonly state!: I | undefined;
+  readonly state: I | undefined;
 
   get(): I | undefined {
     return this.state;
@@ -34,11 +31,7 @@ export class ValueOutput<I> extends AbstractInlet<I> {
   protected override onRecohereOutput(version: number): void {
     const input = this.input;
     if (input !== null) {
-      Object.defineProperty(this, "state", {
-        value: input.get(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).state = input.get();
     }
   }
 }

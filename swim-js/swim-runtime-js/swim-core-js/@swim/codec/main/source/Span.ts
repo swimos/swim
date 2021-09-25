@@ -26,21 +26,13 @@ export class Span extends Tag {
   /** @hidden */
   constructor(start: Mark, end: Mark) {
     super();
-    Object.defineProperty(this, "start", {
-      value: start,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "end", {
-      value: end,
-      enumerable: true,
-      configurable: true,
-    });
+    this.start = start;
+    this.end = end;
   }
 
-  override readonly start!: Mark;
+  override readonly start: Mark;
 
-  override readonly end!: Mark;
+  override readonly end: Mark;
 
   override union(that: Tag): Tag {
     if (that instanceof Mark) {

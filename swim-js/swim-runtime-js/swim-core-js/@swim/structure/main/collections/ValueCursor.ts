@@ -18,22 +18,17 @@ import type {Form} from "../form/Form";
 
 /** @hidden */
 export class ValueCursor<V> extends Cursor<V> {
-  /** @hidden */
-  readonly cursor!: Cursor<Value>;
-  /** @hidden */
-  readonly form!: Form<V, unknown>;
-
   constructor(cursor: Cursor<Value>, form: Form<V, unknown>) {
     super();
-    Object.defineProperty(this, "cursor", {
-      value: cursor,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "form", {
-      value: form,
-      enumerable: true,
-    });
+    this.cursor = cursor;
+    this.form = form;
   }
+
+  /** @hidden */
+  readonly cursor: Cursor<Value>;
+
+  /** @hidden */
+  readonly form: Form<V, unknown>;
 
   override isEmpty(): boolean {
     return this.cursor.isEmpty();

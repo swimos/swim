@@ -35,22 +35,10 @@ export interface GeoBoxInit {
 export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, Equivalent, Debug {
   constructor(lngMin: number, latMin: number, lngMax: number, latMax: number) {
     super();
-    Object.defineProperty(this, "lngMin", {
-      value: lngMin,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "latMin", {
-      value: latMin,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "lngMax", {
-      value: lngMax,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "latMax", {
-      value: latMax,
-      enumerable: true,
-    });
+    this.lngMin = lngMin;
+    this.latMin = latMin;
+    this.lngMax = lngMax;
+    this.latMax = latMax;
   }
 
   isDefined(): boolean {
@@ -58,13 +46,13 @@ export class GeoBox extends GeoShape implements Interpolate<GeoBox>, HashCode, E
         && isFinite(this.lngMax) && isFinite(this.latMax);
   }
 
-  readonly lngMin!: number;
+  readonly lngMin: number;
 
-  readonly latMin!: number;
+  readonly latMin: number;
 
-  readonly lngMax!: number;
+  readonly lngMax: number;
 
-  readonly latMax!: number;
+  readonly latMax: number;
 
   get west(): number {
     return this.lngMin;

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Arrays} from "@swim/util";
+import {Mutable, Equals, Arrays} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 import {AnyArg, Arg} from "./Arg";
 
@@ -28,57 +28,30 @@ export interface OptInit {
 export class Opt implements Equals, Debug {
   constructor(name: string, flag: string | undefined, desc: string | undefined,
               args: ReadonlyArray<Arg>, defs: number) {
-    Object.defineProperty(this, "name", {
-      value: name,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "flag", {
-      value: flag,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "desc", {
-      value: desc,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "args", {
-      value: args,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "defs", {
-      value: defs,
-      enumerable: true,
-      configurable: true,
-    });
+    this.name = name;
+    this.flag = flag;
+    this.desc = desc;
+    this.args = args;
+    this.defs = defs;
   }
 
-  readonly name!: string;
+  readonly name: string;
 
-  readonly flag!: string | undefined;
+  readonly flag: string | undefined;
 
   withFlag(flag: string | undefined): this {
-    Object.defineProperty(this, "flag", {
-      value: flag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).flag = flag;
     return this;
   }
 
-  readonly desc!: string | undefined;
+  readonly desc: string | undefined;
 
   withDesc(desc: string | undefined): this {
-    Object.defineProperty(this, "desc", {
-      value: desc,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).desc = desc;
     return this;
   }
 
-  readonly args!: ReadonlyArray<Arg>;
+  readonly args: ReadonlyArray<Arg>;
 
   /** @hidden */
   withArg(arg: AnyArg): this {
@@ -87,14 +60,10 @@ export class Opt implements Equals, Debug {
     return this;
   }
 
-  readonly defs!: number;
+  readonly defs: number;
 
   def(): this {
-    Object.defineProperty(this, "defs", {
-      value: this.defs + 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).defs += 1;
     return this;
   }
 

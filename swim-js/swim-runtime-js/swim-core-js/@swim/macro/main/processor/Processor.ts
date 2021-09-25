@@ -32,19 +32,13 @@ import {CssConverter} from "../"; // forward import
 
 export class Processor {
   constructor() {
-    Object.defineProperty(this, "directives", {
-      value: {},
-      enumerable: true,
-    });
-    Object.defineProperty(this, "converters", {
-      value: {},
-      enumerable: true,
-    });
+    this.directives = {};
+    this.converters = {};
     this.initDirectives();
     this.initConverters();
   }
 
-  readonly directives!: {readonly [name: string]: Directive | undefined};
+  readonly directives: {readonly [name: string]: Directive | undefined};
 
   protected initDirectives(): void {
     this.addDirective("define", new DefineDirective());
@@ -86,7 +80,7 @@ export class Processor {
     delete directives[name];
   }
 
-  readonly converters!: {readonly [name: string]: Converter | undefined};
+  readonly converters: {readonly [name: string]: Converter | undefined};
 
   protected initConverters(): void {
     this.addConverter("recon", new ReconConverter());

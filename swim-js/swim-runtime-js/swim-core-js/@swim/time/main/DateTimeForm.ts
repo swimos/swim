@@ -25,7 +25,7 @@ export class DateTimeForm extends Form<DateTime, AnyDateTime> {
     });
   }
 
-  override readonly unit: DateTime | undefined;
+  override readonly unit!: DateTime | undefined;
 
   override withUnit(unit: DateTime | undefined): Form<DateTime, AnyDateTime> {
     if (unit !== this.unit) {

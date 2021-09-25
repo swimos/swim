@@ -12,30 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays, Cursor} from "@swim/util";
+import {Mutable, Arrays, Cursor} from "@swim/util";
 import type {Inlet} from "./Inlet";
 import type {Outlet} from "./Outlet";
 import {OutletCombinators} from "./OutletCombinators";
 
 export abstract class AbstractOutlet<O> implements Outlet<O> {
   constructor() {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "version", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
+    this.outputs = Arrays.empty;
+    this.version = -1;
   }
 
   /** @hidden */
-  readonly outputs!: ReadonlyArray<Inlet<O>>;
+  readonly outputs: ReadonlyArray<Inlet<O>>;
 
   /** @hidden */
-  readonly version!: number;
+  readonly version: number;
 
   abstract get(): O | undefined;
 
@@ -44,28 +36,16 @@ export abstract class AbstractOutlet<O> implements Outlet<O> {
   }
 
   bindOutput(output: Inlet<O>): void {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.inserted(output, this.outputs),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.inserted(output, this.outputs);
   }
 
   unbindOutput(output: Inlet<O>): void {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.removed(output, this.outputs),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.removed(output, this.outputs);
   }
 
   unbindOutputs(): void {
     const oldOutputs = this.outputs;
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.empty;
     for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
       const output = oldOutputs[i]!;
       output.unbindInput();
@@ -74,11 +54,7 @@ export abstract class AbstractOutlet<O> implements Outlet<O> {
 
   disconnectOutputs(): void {
     const oldOutputs = this.outputs;
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.empty;
     for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
       const output = oldOutputs[i]!;
       output.unbindInput();
@@ -93,11 +69,7 @@ export abstract class AbstractOutlet<O> implements Outlet<O> {
   decohereInput(): void {
     if (this.version >= 0) {
       this.willDecohereInput();
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = -1;
       this.onDecohereInput();
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {
@@ -110,11 +82,7 @@ export abstract class AbstractOutlet<O> implements Outlet<O> {
   recohereInput(version: number): void {
     if (this.version < 0) {
       this.willRecohereInput(version);
-      Object.defineProperty(this, "version", {
-        value: version,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = version;
       this.onRecohereInput(version);
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {

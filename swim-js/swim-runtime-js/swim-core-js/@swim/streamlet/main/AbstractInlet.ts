@@ -12,27 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {Inlet} from "./Inlet";
 import type {Outlet} from "./Outlet";
 
 export abstract class AbstractInlet<I> implements Inlet<I> {
   constructor() {
-    Object.defineProperty(this, "input", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "version", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
+    this.input = null;
+    this.version = -1;
   }
 
-  readonly input!: Outlet<I> | null;
+  readonly input: Outlet<I> | null;
 
   /** @hidden */
-  readonly version!: number;
+  readonly version: number;
 
   bindInput(newInput: Outlet<I> | null): void {
     const oldInput = this.input;
@@ -40,11 +33,7 @@ export abstract class AbstractInlet<I> implements Inlet<I> {
       if (oldInput !== null) {
         oldInput.unbindOutput(this);
       }
-      Object.defineProperty(this, "input", {
-        value: newInput,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = newInput;
       if (newInput !== null) {
         newInput.bindOutput(this);
       }
@@ -55,11 +44,7 @@ export abstract class AbstractInlet<I> implements Inlet<I> {
     const oldInput = this.input;
     if (oldInput !== null) {
       oldInput.unbindOutput(this);
-      Object.defineProperty(this, "input", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = null;
     }
   }
 
@@ -67,11 +52,7 @@ export abstract class AbstractInlet<I> implements Inlet<I> {
     const oldInput = this.input;
     if (oldInput !== null) {
       oldInput.unbindOutput(this);
-      Object.defineProperty(this, "input", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = null;
       oldInput.disconnectInputs();
     }
   }
@@ -83,11 +64,7 @@ export abstract class AbstractInlet<I> implements Inlet<I> {
   decohereOutput(): void {
     if (this.version >= 0) {
       this.willDecohereOutput();
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = -1;
       this.onDecohereOutput();
       this.didDecohereOutput();
     }
@@ -96,11 +73,7 @@ export abstract class AbstractInlet<I> implements Inlet<I> {
   recohereOutput(version: number): void {
     if (this.version < 0) {
       this.willRecohereOutput(version);
-      Object.defineProperty(this, "version", {
-        value: version,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = version;
       if (this.input !== null) {
         this.input.recohereInput(version);
       }

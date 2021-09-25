@@ -24,13 +24,10 @@ import {AbstractInlet} from "./AbstractInlet";
 export class StreamletInlet<I> extends AbstractInlet<I> {
   constructor(streamlet: Streamlet<I, unknown>) {
     super();
-    Object.defineProperty(this, "streamlet", {
-      value: streamlet,
-      enumerable: true,
-    });
+    this.streamlet = streamlet;
   }
 
-  readonly streamlet!: Streamlet<I, unknown>;
+  readonly streamlet: Streamlet<I, unknown>;
 
   protected override willDecohereOutput(): void {
     const streamlet = this.streamlet as GenericStreamlet<I, unknown>;

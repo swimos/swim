@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, HashCode, Booleans, Strings, Constructors} from "@swim/util";
+import {Mutable, Murmur3, HashCode, Booleans, Strings, Constructors} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 
 export type AnyArg = Arg | ArgInit | string;
@@ -25,43 +25,24 @@ export interface ArgInit {
 
 export class Arg implements HashCode, Debug {
   constructor(name: string, value: string | undefined, optional: boolean) {
-    Object.defineProperty(this, "name", {
-      value: name,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "optional", {
-      value: optional,
-      enumerable: true,
-      configurable: true,
-    });
+    this.name = name;
+    this.value = value;
+    this.optional = optional;
   }
 
-  readonly name!: string;
+  readonly name: string;
 
-  readonly value!: string | undefined;
+  readonly value: string | undefined;
 
   withValue(value: string | undefined): this {
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).value = value;
     return this;
   }
 
-  readonly optional!: boolean;
+  readonly optional: boolean;
 
   asOptional(optional: boolean): this {
-    Object.defineProperty(this, "optional", {
-      value: optional,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).optional = optional;
     return this;
   }
 

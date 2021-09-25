@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyItem, Item, Field, Slot, AnyValue, Value, AnyText, Text, AnyNum, Num, Form} from "@swim/structure";
 import {
   Inlet,
@@ -30,45 +31,25 @@ import {RecordStreamlet} from "./RecordStreamlet";
 export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends Value = I> extends RecordStreamlet<I, O> implements GenericStreamlet<I, O> {
   constructor(scope: StreamletScope<O> | null = null) {
     super();
-    Object.defineProperty(this, "streamletScope", {
-      value: scope,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "streamletContext", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "version", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
+    this.streamletScope = scope;
+    this.streamletContext = null;
+    this.version = -1;
   }
 
-  override readonly streamletScope!: StreamletScope<O> | null;
+  override readonly streamletScope: StreamletScope<O> | null;
 
   override setStreamletScope(scope: StreamletScope<O> | null): void {
-    Object.defineProperty(this, "streamletScope", {
-      value: scope,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).streamletScope = scope;
   }
 
-  override readonly streamletContext!: StreamletContext | null;
+  override readonly streamletContext: StreamletContext | null;
 
   override setStreamletContext(context: StreamletContext | null): void {
-    Object.defineProperty(this, "streamletContext", {
-      value: context,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).streamletContext = context;
   }
 
   /** @hidden */
-  readonly version!: number;
+  readonly version: number;
 
   override isEmpty(): boolean {
     return this.length !== 0;
@@ -234,11 +215,7 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
   override decohere(): void {
     if (this.version >= 0) {
       this.willDecohere();
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = -1;
       this.onDecohere();
       this.onDecohereOutlets();
       this.didDecohere();
@@ -248,11 +225,7 @@ export abstract class AbstractRecordStreamlet<I extends Value = Value, O extends
   override recohere(version: number): void {
     if (this.version < 0) {
       this.willRecohere(version);
-      Object.defineProperty(this, "version", {
-        value: version,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = version;
       this.onRecohereInlets(version);
       this.onRecohere(version);
       this.onRecohereOutlets(version);

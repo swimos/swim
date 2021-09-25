@@ -20,21 +20,15 @@ import {BinaryOperatorInterpolator} from "../"; // forward import
 export abstract class BinaryOperator extends Operator {
   constructor(operand1: Item, operand2: Item) {
     super();
-    Object.defineProperty(this, "operand1", {
-      value: operand1,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "operand2", {
-      value: operand2,
-      enumerable: true,
-    });
+    this.operand1 = operand1;
+    this.operand2 = operand2;
   }
 
-  readonly operand1!: Item;
+  readonly operand1: Item;
 
   abstract readonly operator: string;
 
-  readonly operand2!: Item;
+  readonly operand2: Item;
 
   override isConstant(): boolean {
     return this.operand1.isConstant() && this.operand2.isConstant();

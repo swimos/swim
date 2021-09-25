@@ -24,19 +24,13 @@ import {AnyInterpreter, Interpreter} from "../"; // forward import
 export class GetSelector extends Selector {
   constructor(key: Value, then: Selector) {
     super();
-    Object.defineProperty(this, "item", {
-      value: key.commit(),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "then", {
-      value: then,
-      enumerable: true,
-    });
+    this.item = key.commit();
+    this.then = then;
   }
 
-  readonly item!: Value;
+  readonly item: Value;
 
-  override readonly then!: Selector;
+  override readonly then: Selector;
 
   override forSelected<T>(interpreter: Interpreter,
                           callback: (interpreter: Interpreter) => T | undefined): T | undefined;

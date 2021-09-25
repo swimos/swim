@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {Uri} from "@swim/uri";
 import {Envelope, CommandMessage, AuthRequest} from "@swim/warp";
 import type {HostContext} from "./HostContext";
@@ -30,17 +31,13 @@ export interface WebSocketHostOptions extends HostOptions {
 export class WebSocketHost extends RemoteHost {
   constructor(context: HostContext, hostUri: Uri, options: WebSocketHostOptions = {}) {
     super(context, hostUri, options);
-    Object.defineProperty(this, "socket", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.socket = null;
   }
 
   override readonly options!: WebSocketHostOptions;
 
   /** @hidden */
-  readonly socket!: WebSocket | null;
+  readonly socket: WebSocket | null;
 
   get WebSocket(): WebSocketConstructor | null {
     if (this.options.WebSocket !== void 0) {
@@ -78,11 +75,7 @@ export class WebSocketHost extends RemoteHost {
       } else {
         socket = new WebSocket(hostUri.toString());
       }
-      Object.defineProperty(this, "socket", {
-        value: socket,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).socket = socket;
       socket.onopen = this.onWebSocketOpen.bind(this);
       socket.onmessage = this.onWebSocketMessage.bind(this);
       socket.onclose = this.onWebSocketClose.bind(this);
@@ -156,11 +149,7 @@ export class WebSocketHost extends RemoteHost {
       socket.onmessage = null;
       socket.onclose = null;
       socket.onerror = null;
-      Object.defineProperty(this, "socket", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).socket = null;
     }
     this.onDisconnect();
     this.clearIdle();

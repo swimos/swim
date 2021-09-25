@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Murmur3, Numbers, Constructors} from "@swim/util";
+import {Lazy, Mutable, Murmur3, Numbers, Constructors} from "@swim/util";
 import {Output, Parser, Diagnostic, Unicode} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item, Value, Record} from "@swim/structure";
@@ -25,48 +25,26 @@ import {AffineTransformParser} from "../"; // forward import
 export class AffineTransform extends Transform {
   constructor(x0: number, y0: number, x1: number, y1: number, tx: number, ty: number) {
     super();
-    Object.defineProperty(this, "x0", {
-      value: x0,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y0", {
-      value: y0,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "x1", {
-      value: x1,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y1", {
-      value: y1,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "tx", {
-      value: tx,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "ty", {
-      value: ty,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.x0 = x0;
+    this.y0 = y0;
+    this.x1 = x1;
+    this.y1 = y1;
+    this.tx = tx;
+    this.ty = ty;
+    this.stringValue = void 0;
   }
 
-  readonly x0!: number;
+  readonly x0: number;
 
-  readonly y0!: number;
+  readonly y0: number;
 
-  readonly x1!: number;
+  readonly x1: number;
 
-  readonly y1!: number;
+  readonly y1: number;
 
-  readonly tx!: number;
+  readonly tx: number;
 
-  readonly ty!: number;
+  readonly ty: number;
 
   override transform(that: Transform): Transform;
   override transform(x: number, y: number): R2Point;
@@ -194,7 +172,7 @@ export class AffineTransform extends Transform {
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   override toString(): string {
     let stringValue = this.stringValue;
@@ -202,11 +180,7 @@ export class AffineTransform extends Transform {
       stringValue = "matrix(" + this.x0 + "," + this.y0 + ","
                               + this.x1 + "," + this.y1 + ","
                               + this.tx + "," + this.ty + ")";
-      Object.defineProperty(this, "stringValue", {
-        value: stringValue,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = stringValue;
     }
     return stringValue;
   }

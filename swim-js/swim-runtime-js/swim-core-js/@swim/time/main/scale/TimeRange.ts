@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Range, Interpolate, Interpolator} from "@swim/mapping";
 import {DateTime} from "../DateTime";
 import {TimeDomain} from "./"; // forward import
@@ -41,14 +42,8 @@ export const TimeRange = function (y0: DateTime, y1: DateTime): TimeRange {
     return new DateTime(t0 + u * (t1 - t0), u === 0 ? range[0].zone : range[1].zone);
   } as TimeRange;
   Object.setPrototypeOf(range, TimeRange.prototype);
-  Object.defineProperty(range, 0, {
-    value: y0,
-    enumerable: true,
-  });
-  Object.defineProperty(range, 1, {
-    value: y1,
-    enumerable: true,
-  });
+  (range as Mutable<typeof range>)[0] = y0;
+  (range as Mutable<typeof range>)[1] = y1;
   return range;
 } as {
   (y0: DateTime, y1: DateTime): TimeRange;

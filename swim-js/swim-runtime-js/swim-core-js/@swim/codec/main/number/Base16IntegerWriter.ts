@@ -20,45 +20,27 @@ import type {Base16} from "./Base16";
 /** @hidden */
 export class Base16IntegerWriter extends Writer {
   /** @hidden */
-  readonly base16!: Base16;
+  readonly base16: Base16;
   /** @hidden */
-  readonly value!: unknown;
+  readonly value: unknown;
   /** @hidden */
-  readonly input!: number;
+  readonly input: number;
   /** @hidden */
-  readonly width!: number;
+  readonly width: number;
   /** @hidden */
-  readonly index!: number;
+  readonly index: number;
   /** @hidden */
-  readonly step!: number;
+  readonly step: number;
 
   constructor(base16: Base16, value: unknown, input: number,
               width: number, index: number = 0, step: number = 3) {
     super();
-    Object.defineProperty(this, "base16", {
-      value: base16,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "input", {
-      value: input,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "width", {
-      value: width,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "index", {
-      value: index,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "step", {
-      value: step,
-      enumerable: true,
-    });
+    this.base16 = base16;
+    this.value = value;
+    this.input = input;
+    this.width = width;
+    this.index = index;
+    this.step = step;
   }
 
   override pull(output: Output): Writer {

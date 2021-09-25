@@ -19,19 +19,13 @@ import {RecordOutlet} from "./RecordOutlet";
 export class RecordFieldUpdater extends AbstractInlet<Value> {
   constructor(record: Record, key: Value) {
     super();
-    Object.defineProperty(this, "record", {
-      value: record,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "key", {
-      value: key,
-      enumerable: true,
-    });
+    this.record = record;
+    this.key = key;
   }
 
-  readonly record!: Record;
+  readonly record: Record;
 
-  readonly key!: Value;
+  readonly key: Value;
 
   protected override onDecohereOutput(): void {
     const record = this.record;

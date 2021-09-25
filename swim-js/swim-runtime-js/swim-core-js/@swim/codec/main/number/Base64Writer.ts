@@ -20,39 +20,24 @@ import type {Base64} from "./Base64";
 /** @hidden */
 export class Base64Writer extends Writer {
   /** @hidden */
-  readonly base64!: Base64;
+  readonly base64: Base64;
   /** @hidden */
-  readonly value!: unknown;
+  readonly value: unknown;
   /** @hidden */
-  readonly input!: Uint8Array | null;
+  readonly input: Uint8Array | null;
   /** @hidden */
-  readonly index!: number;
+  readonly index: number;
   /** @hidden */
-  readonly step!: number;
+  readonly step: number;
 
   constructor(base64: Base64, value: unknown, input: Uint8Array | null,
               index: number = 0, step: number = 1) {
     super();
-    Object.defineProperty(this, "base64", {
-      value: base64,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "input", {
-      value: input,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "index", {
-      value: index,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "step", {
-      value: step,
-      enumerable: true,
-    });
+    this.base64 = base64;
+    this.value = value;
+    this.input = input;
+    this.index = index;
+    this.step = step;
   }
 
   override feed(value: unknown): Writer {

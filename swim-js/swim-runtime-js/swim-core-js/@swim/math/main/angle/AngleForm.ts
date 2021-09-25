@@ -19,17 +19,14 @@ import {AngleUnits, AnyAngle, Angle} from "./Angle";
 export class AngleForm extends Form<Angle, AnyAngle> {
   constructor(defaultUnits: AngleUnits | undefined, unit: Angle | undefined) {
     super();
-    Object.defineProperty(this, "defaultUnits", {
-      value: defaultUnits,
-      enumerable: true,
-    });
+    this.defaultUnits = defaultUnits;
     Object.defineProperty(this, "unit", {
       value: unit,
       enumerable: true,
     });
   }
 
-  readonly defaultUnits!: AngleUnits | undefined;
+  readonly defaultUnits: AngleUnits | undefined;
 
   override readonly unit!: Angle | undefined;
 

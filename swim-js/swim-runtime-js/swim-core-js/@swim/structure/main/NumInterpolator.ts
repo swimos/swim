@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {Num} from "./Num";
 
@@ -23,14 +24,8 @@ export const NumInterpolator = function (y0: Num, y1: Num): Interpolator<Num> {
     return Num.from(y0 + u * (y1 - y0));
   } as Interpolator<Num>;
   Object.setPrototypeOf(interpolator, NumInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: y0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: y1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = y0;
+  (interpolator as Mutable<typeof interpolator>)[1] = y1;
   return interpolator;
 } as {
   (y0: Num, y1: Num): Interpolator<Num>;

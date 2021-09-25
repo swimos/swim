@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {Length} from "../length/Length";
 import {TranslateTransform} from "./TranslateTransform";
@@ -26,15 +27,9 @@ export const TranslateTransformInterpolator = function (f0: TranslateTransform, 
     return new TranslateTransform(x, y);
   } as Interpolator<TranslateTransform>;
   Object.setPrototypeOf(interpolator, TranslateTransformInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: f0.x.units === f1.x.units && f0.y.units === f1.y.units
-         ? f0 : new TranslateTransform(f0.x.to(f1.x.units), f0.y.to(f1.y.units)),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: f1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = f0.x.units === f1.x.units && f0.y.units === f1.y.units
+                                                    ? f0 : new TranslateTransform(f0.x.to(f1.x.units), f0.y.to(f1.y.units));
+  (interpolator as Mutable<typeof interpolator>)[1] = f1;
   return interpolator;
 } as {
   (f0: TranslateTransform, f1: TranslateTransform): Interpolator<TranslateTransform>;

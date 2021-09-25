@@ -27,34 +27,25 @@ import {Exam} from "./Exam";
  */
 export class SpecTest {
   constructor(name: string, func: TestFunc, options: TestOptions) {
-    Object.defineProperty(this, "name", {
-      value: name,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "func", {
-      value: func,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "options", {
-      value: options,
-      enumerable: true,
-    });
+    this.name = name;
+    this.func = func;
+    this.options = options;
   }
 
   /**
    * The name of this test–typically the name of the underlying test function.
    */
-  readonly name!: string;
+  readonly name: string;
 
   /**
    * The function used to evaluate this test.
    */
-  readonly func!: TestFunc;
+  readonly func: TestFunc;
 
   /**
    * The options that govern the evaluation of this test.
    */
-  readonly options!: TestOptions;
+  readonly options: TestOptions;
 
   /**
    * Lifecycle callback invoked before each evaluation of the test function.

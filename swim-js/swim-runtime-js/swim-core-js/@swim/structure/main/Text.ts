@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Numbers, Strings, HashGenCacheSet} from "@swim/util";
+import {Lazy, Mutable, Numbers, Strings, HashGenCacheSet} from "@swim/util";
 import {OutputSettings, Output, Format} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {AnyItem, Item} from "./Item";
@@ -25,21 +25,15 @@ export type AnyText = Text | string;
 export class Text extends Value {
   private constructor(value: string) {
     super();
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "hashValue", {
-      value: void 0,
-      configurable: true,
-    });
+    this.value = value;
+    this.hashValue = void 0;
   }
 
   override isConstant(): boolean {
     return true;
   }
 
-  readonly value!: string;
+  readonly value: string;
 
   get size(): number {
     return this.value.length;
@@ -137,15 +131,13 @@ export class Text extends Value {
   }
 
   /** @hidden */
-  readonly hashValue!: number | undefined;
+  readonly hashValue: number | undefined;
 
   override hashCode(): number {
     let hashValue = this.hashValue;
     if (hashValue === void 0) {
       hashValue = Strings.hash(this.value);
-      Object.defineProperty(this, "hashValue", {
-        value: hashValue,
-      });
+      (this as Mutable<this>).hashValue = hashValue;
     }
     return hashValue;
   }

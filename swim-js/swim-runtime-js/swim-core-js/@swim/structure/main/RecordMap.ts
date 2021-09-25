@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy} from "@swim/util";
+import {Lazy, Mutable} from "@swim/util";
 import {AnyItem, Item} from "./Item";
 import {Field} from "./Field";
 import {Attr} from "./Attr";
@@ -29,38 +29,28 @@ export class RecordMap extends Record {
   constructor(array: Array<Item> | null, table: Array<Field> | null,
               length: number, fieldCount: number, flags: number) {
     super();
-    Object.defineProperty(this, "array", {
-      value: array,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "table", {
-      value: table,
-      enumerable: true,
-      configurable: true,
-    });
+    this.array = array;
+    this.table = table;
     Object.defineProperty(this, "length", {
       value: length,
+      writable: true,
       enumerable: true,
       configurable: true,
-    });
+    })
     Object.defineProperty(this, "fieldCount", {
       value: fieldCount,
+      writable: true,
       enumerable: true,
       configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: flags,
-      enumerable: true,
-      configurable: true,
-    });
+    })
+    this.flags = flags;
   }
 
   /** @hidden */
-  readonly array!: Array<Item> | null;
+  readonly array: Array<Item> | null;
 
   /** @hidden */
-  readonly table!: Array<Field> | null;
+  readonly table: Array<Field> | null;
 
   override isEmpty(): boolean {
     return this.length === 0;
@@ -75,7 +65,7 @@ export class RecordMap extends Record {
   }
 
   /** @hidden */
-  readonly flags!: number;
+  readonly flags: number;
 
   override isConstant(): boolean {
     const array = this.array;
@@ -365,51 +355,19 @@ export class RecordMap extends Record {
           newArray[i] = oldArray[i];
           i += 1;
         }
-        Object.defineProperty(this, "array", {
-          value: newArray,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "table", {
-          value: null,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "flags", {
-          value: this.flags & ~Record.AliasedFlag,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).array = newArray;
+        (this as Mutable<this>).table = null;
+        (this as Mutable<this>).flags &= ~Record.AliasedFlag;
         return;
       }
       newArray[i] = item;
     }
     newArray[n] = new Slot(key, newValue);
-    Object.defineProperty(this, "array", {
-      value: newArray,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "table", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "length", {
-      value: n + 1,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "fieldCount", {
-      value: this.fieldCount + 1,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: this.flags & ~Record.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = newArray;
+    (this as Mutable<this>).table = null;
+    (this as Mutable<this>).length = n + 1;
+    (this as Mutable<this>).fieldCount += 1;
+    (this as Mutable<this>).flags &= ~Record.AliasedFlag;
   }
 
   /** @hidden */
@@ -448,11 +406,7 @@ export class RecordMap extends Record {
       const item = array[i];
       if (item instanceof Field && item.key.equals(key)) {
         array[i] = item.updatedValue(newValue);
-        Object.defineProperty(this, "table", {
-          value: null,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).table = null;
         return;
       }
     }
@@ -501,51 +455,19 @@ export class RecordMap extends Record {
           newArray[i] = oldArray[i];
           i += 1;
         }
-        Object.defineProperty(this, "array", {
-          value: newArray,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "table", {
-          value: null,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "flags", {
-          value: this.flags & ~Record.AliasedFlag,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).array = newArray;
+        (this as Mutable<this>).table = null;
+        (this as Mutable<this>).flags &= ~Record.AliasedFlag;
         return;
       }
       newArray[i] = item;
     }
     newArray[n] = new Attr(key, newValue);
-    Object.defineProperty(this, "array", {
-      value: newArray,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "table", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "length", {
-      value: n + 1,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "fieldCount", {
-      value: this.fieldCount + 1,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: this.flags & ~Record.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = newArray;
+    (this as Mutable<this>).table = null;
+    (this as Mutable<this>).length = n + 1;
+    (this as Mutable<this>).fieldCount += 1;
+    (this as Mutable<this>).flags &= ~Record.AliasedFlag;
   }
 
   /** @hidden */
@@ -583,11 +505,7 @@ export class RecordMap extends Record {
       const item = array[i];
       if (item instanceof Field && item.key.equals(key)) {
         array[i] = new Attr(key, newValue);
-        Object.defineProperty(this, "table", {
-          value: null,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).table = null;
         return;
       }
     }
@@ -636,51 +554,19 @@ export class RecordMap extends Record {
           newArray[i] = oldArray[i];
           i += 1;
         }
-        Object.defineProperty(this, "array", {
-          value: newArray,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "table", {
-          value: null,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "flags", {
-          value: this.flags & ~Record.AliasedFlag,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).array = newArray;
+        (this as Mutable<this>).table = null;
+        (this as Mutable<this>).flags &= ~Record.AliasedFlag;
         return;
       }
       newArray[i] = item;
     }
     newArray[n] = new Slot(key, newValue);
-    Object.defineProperty(this, "array", {
-      value: newArray,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "table", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "length", {
-      value: n + 1,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "fieldCount", {
-      value: this.fieldCount + 1,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: this.flags & ~Record.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = newArray;
+    (this as Mutable<this>).table = null;
+    (this as Mutable<this>).length = n + 1;
+    (this as Mutable<this>).fieldCount += 1;
+    (this as Mutable<this>).flags &= ~Record.AliasedFlag;
   }
 
   /** @hidden */
@@ -718,11 +604,7 @@ export class RecordMap extends Record {
       const item = array[i];
       if (item instanceof Field && item.key.equals(key)) {
         array[i] = new Slot(key, newValue);
-        Object.defineProperty(this, "table", {
-          value: null,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).table = null;
         return;
       }
     }
@@ -761,36 +643,16 @@ export class RecordMap extends Record {
     }
     const oldItem = oldArray[index];
     newArray[index] = newItem;
-    Object.defineProperty(this, "array", {
-      value: newArray,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "table", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = newArray;
+    (this as Mutable<this>).table = null;
     if (newItem instanceof Field) {
       if (!(oldItem instanceof Field)) {
-        Object.defineProperty(this, "fieldCount", {
-          value: this.fieldCount + 1,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).fieldCount += 1;
       }
     } else if (oldItem instanceof Field) {
-      Object.defineProperty(this, "fieldCount", {
-        value: this.fieldCount - 1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).fieldCount -= 1;
     }
-    Object.defineProperty(this, "flags", {
-      value: this.flags & ~Record.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).flags &= ~Record.AliasedFlag;
   }
 
   /** @hidden */
@@ -799,29 +661,13 @@ export class RecordMap extends Record {
     const oldItem = array[index];
     array[index] = newItem;
     if (newItem instanceof Field) {
-      Object.defineProperty(this, "table", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).table = null;
       if (!(oldItem instanceof Field)) {
-        Object.defineProperty(this, "fieldCount", {
-          value: this.fieldCount + 1,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).fieldCount += 1;
       }
     } else if (oldItem instanceof Field) {
-      Object.defineProperty(this, "table", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "fieldCount", {
-        value: this.fieldCount - 1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).table = null;
+      (this as Mutable<this>).fieldCount -= 1;
     }
   }
 
@@ -929,31 +775,11 @@ export class RecordMap extends Record {
         n += 1;
       }
     }
-    Object.defineProperty(this, "array", {
-      value: newArray,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "table", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "length", {
-      value: m,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "fieldCount", {
-      value: n,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: this.flags & ~Record.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = newArray;
+    (this as Mutable<this>).table = null;
+    (this as Mutable<this>).length = m;
+    (this as Mutable<this>).fieldCount = n;
+    (this as Mutable<this>).flags &= ~Record.AliasedFlag;
   }
 
   /** @hidden */
@@ -979,28 +805,12 @@ export class RecordMap extends Record {
       m += 1;
       if (newItem instanceof Field) {
         n += 1;
-        Object.defineProperty(this, "table", {
-          value: null,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).table = null;
       }
     }
-    Object.defineProperty(this, "array", {
-      value: newArray,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "length", {
-      value: m,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "fieldCount", {
-      value: n,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = newArray;
+    (this as Mutable<this>).length = m;
+    (this as Mutable<this>).fieldCount = n;
   }
 
   splice(start: number, deleteCount: number = 0, ...newItems: AnyItem[]): Item[] {
@@ -1050,31 +860,11 @@ export class RecordMap extends Record {
         n += 1;
       }
     }
-    Object.defineProperty(this, "array", {
-      value: newArray,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "table", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "length", {
-      value: m,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "fieldCount", {
-      value: n,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: this.flags & ~Record.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = newArray;
+    (this as Mutable<this>).table = null;
+    (this as Mutable<this>).length = m;
+    (this as Mutable<this>).fieldCount = n;
+    (this as Mutable<this>).flags &= ~Record.AliasedFlag;
     return oldItems;
   }
 
@@ -1121,21 +911,9 @@ export class RecordMap extends Record {
         n += 1;
       }
     }
-    Object.defineProperty(this, "array", {
-      value: newArray,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "length", {
-      value: m,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "fieldCount", {
-      value: n,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = newArray;
+    (this as Mutable<this>).length = m;
+    (this as Mutable<this>).fieldCount = n;
     return oldItems;
   }
 
@@ -1162,31 +940,11 @@ export class RecordMap extends Record {
         for (let j = i + 1; j < n; j += 1, i += 1) {
           newArray[i] = oldArray[j];
         }
-        Object.defineProperty(this, "array", {
-          value: newArray,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "table", {
-          value: null,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "length", {
-          value: n - 1,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "fieldCount", {
-          value: this.fieldCount - 1,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "flags", {
-          value: this.flags & ~Record.AliasedFlag,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).array = newArray;
+        (this as Mutable<this>).table = null;
+        (this as Mutable<this>).length = n - 1;
+        (this as Mutable<this>).fieldCount -= 1;
+        (this as Mutable<this>).flags &= ~Record.AliasedFlag;
         return item;
       }
       newArray[i] = item;
@@ -1204,22 +962,10 @@ export class RecordMap extends Record {
         for (let j = i + 1; j < n; j += 1, i += 1) {
           array[i] = array[j]!;
         }
-        array[n - 1] = void 0 as any;
-        Object.defineProperty(this, "table", {
-          value: null,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "length", {
-          value: n - 1,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "fieldCount", {
-          value: this.fieldCount - 1,
-          enumerable: true,
-          configurable: true,
-        });
+        array[n - 1] = void 0 as unknown as Item;
+        (this as Mutable<this>).table = null;
+        (this as Mutable<this>).length = n - 1;
+        (this as Mutable<this>).fieldCount -= 1;
         return item;
       }
     }
@@ -1230,31 +976,11 @@ export class RecordMap extends Record {
     if ((this.flags & Record.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
-    Object.defineProperty(this, "array", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "table", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "length", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "fieldCount", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).array = null;
+    (this as Mutable<this>).table = null;
+    (this as Mutable<this>).length = 0;
+    (this as Mutable<this>).fieldCount = 0;
+    (this as Mutable<this>).flags = 0;
   }
 
   override isAliased(): boolean {
@@ -1266,11 +992,7 @@ export class RecordMap extends Record {
   }
 
   override alias(): void {
-    Object.defineProperty(this, "flags", {
-      value: this.flags | Record.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).flags |= Record.AliasedFlag;
   }
 
   override branch(): RecordMap {
@@ -1280,11 +1002,7 @@ export class RecordMap extends Record {
         array[i]!.alias();
       }
     }
-    Object.defineProperty(this, "flags", {
-      value: this.flags | Record.AliasedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).flags |= Record.AliasedFlag;
     return new RecordMap(this.array, this.table, this.length, this.fieldCount, Record.AliasedFlag);
   }
 
@@ -1300,11 +1018,7 @@ export class RecordMap extends Record {
 
   override commit(): this {
     if ((this.flags & Record.ImmutableFlag) === 0) {
-      Object.defineProperty(this, "flags", {
-        value: this.flags | Record.ImmutableFlag,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).flags |= Record.ImmutableFlag;
       const array = this.array!;
       for (let i = 0, n = this.length; i < n; i += 1) {
         array[i]!.commit();
@@ -1325,11 +1039,7 @@ export class RecordMap extends Record {
           RecordMap.put(table, item);
         }
       }
-      Object.defineProperty(this, "table", {
-        value: table,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).table = table;
     }
     return table;
   }

@@ -34,22 +34,10 @@ export interface GeoSegmentInit {
 export class GeoSegment extends GeoCurve implements Interpolate<GeoSegment>, HashCode, Debug {
   constructor(lng0: number, lat0: number, lng1: number, lat1: number) {
     super();
-    Object.defineProperty(this, "lng0", {
-      value: lng0,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "lat0", {
-      value: lat0,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "lng1", {
-      value: lng1,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "lat1", {
-      value: lat1,
-      enumerable: true,
-    });
+    this.lng0 = lng0;
+    this.lat0 = lat0;
+    this.lng1 = lng1;
+    this.lat1 = lat1;
   }
 
   isDefined(): boolean {
@@ -57,13 +45,13 @@ export class GeoSegment extends GeoCurve implements Interpolate<GeoSegment>, Has
         && isFinite(this.lng1) && isFinite(this.lat1);
   }
 
-  readonly lng0!: number;
+  readonly lng0: number;
 
-  readonly lat0!: number;
+  readonly lat0: number;
 
-  readonly lng1!: number;
+  readonly lng1: number;
 
-  readonly lat1!: number;
+  readonly lat1: number;
 
   override get lngMin(): number {
     return Math.min(this.lng0, this.lng1);

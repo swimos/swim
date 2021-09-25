@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Mapping} from "../mapping/Mapping";
 import type {Interpolator} from "../interpolate/Interpolator";
 import type {Timing} from "./Timing";
@@ -35,14 +36,8 @@ export const Tweening = function <Y>(domain: Timing, range: Interpolator<Y>): Tw
     return tweening.range(tweening.domain(u));
   } as Tweening<Y>;
   Object.setPrototypeOf(tweening, Tweening.prototype);
-  Object.defineProperty(tweening, "domain", {
-    value: domain,
-    enumerable: true,
-  });
-  Object.defineProperty(tweening, "range", {
-    value: range,
-    enumerable: true,
-  });
+  (tweening as Mutable<typeof tweening>).domain = domain;
+  (tweening as Mutable<typeof tweening>).range = range;
   return tweening;
 } as {
   <Y>(domain: Timing, range: Interpolator<Y>): Tweening<Y>

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Range} from "../mapping/Range";
 import type {Interpolate} from "../interpolate/Interpolate";
 import type {Interpolator} from "../interpolate/Interpolator";
@@ -42,14 +43,8 @@ export const LinearRange = function (y0: number, y1: number): LinearRange {
     return y0 + u * (y1 - y0);
   } as LinearRange;
   Object.setPrototypeOf(range, LinearRange.prototype);
-  Object.defineProperty(range, 0, {
-    value: y0,
-    enumerable: true,
-  });
-  Object.defineProperty(range, 1, {
-    value: y1,
-    enumerable: true,
-  });
+  (range as Mutable<typeof range>)[0] = y0;
+  (range as Mutable<typeof range>)[1] = y1;
   return range;
 } as {
   (y0: number, y1: number): LinearRange;

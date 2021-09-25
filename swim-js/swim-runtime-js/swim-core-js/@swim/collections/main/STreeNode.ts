@@ -19,32 +19,24 @@ import {STreeNodeCursor} from "./"; // forward import
 
 /** @hidden */
 export class STreeNode<V, I> extends STreePage<V, I> {
-  /** @hidden */
-  readonly pages!: ReadonlyArray<STreePage<V, I>>;
-  /** @hidden */
-  readonly knots!: ReadonlyArray<number>;
-
   constructor(pages: ReadonlyArray<STreePage<V, I>>, knots: ReadonlyArray<number>, size: number) {
     super();
-    Object.defineProperty(this, "pages", {
-      value: pages,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "knots", {
-      value: knots,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "size", {
-      value: size,
-      enumerable: true,
-    });
+    this.pages = pages;
+    this.knots = knots;
+    this.size = size;
   }
+
+  /** @hidden */
+  readonly pages: ReadonlyArray<STreePage<V, I>>;
+
+  /** @hidden */
+  readonly knots: ReadonlyArray<number>;
 
   override get arity(): number {
     return this.pages.length;
   }
 
-  override readonly size!: number;
+  override readonly size: number;
 
   override isEmpty(): boolean {
     return this.size === 0;

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {Transform} from "./Transform";
 import {TransformList} from "./TransformList";
@@ -47,10 +48,7 @@ export const TransformListInterpolator = function (f0: TransformList, f1: Transf
   for (let i = 0; i < interpolatorCount; i += 1) {
     interpolators[i] = transforms0[i]!.interpolateTo(transforms1[i]!);
   }
-  Object.defineProperty(interpolator, "interpolators", {
-    value: interpolators,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).interpolators = interpolators;
   return interpolator;
 } as {
   (f0: TransformList, f1: TransformList): TransformListInterpolator;

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {Item} from "./Item";
 
@@ -21,14 +22,8 @@ export const ItemInterpolator = function <Y extends Item>(y0: Y, y1: Y): Interpo
     return u < 1 ? interpolator[0] : interpolator[1];
   } as Interpolator<Y>;
   Object.setPrototypeOf(interpolator, ItemInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: y0.commit(),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: y1.commit(),
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = y0.commit();
+  (interpolator as Mutable<typeof interpolator>)[1] = y1.commit();
   return interpolator;
 } as {
   <Y extends Item>(y0: Y, y1: Y): Interpolator<Y>;

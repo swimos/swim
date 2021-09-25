@@ -19,13 +19,10 @@ import {LengthUnits, LengthBasis, Length} from "./Length";
 export class EmLength extends Length {
   constructor(value: number) {
     super();
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-    });
+    this.value = value;
   }
 
-  override readonly value!: number;
+  override readonly value: number;
 
   override get units(): LengthUnits {
     return "em";

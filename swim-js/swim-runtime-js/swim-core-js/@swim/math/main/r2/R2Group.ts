@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent, Equals, Lazy, Arrays} from "@swim/util";
+import {Lazy, Equals, Equivalent, Mutable, Arrays} from "@swim/util";
 import {Debug, Format, Output} from "@swim/codec";
 import type {R2Function} from "./R2Function";
 import {AnyR2Shape, R2Shape} from "./R2Shape";
@@ -21,18 +21,11 @@ import {R2Box} from "./R2Box";
 export class R2Group<S extends R2Shape = R2Shape> extends R2Shape implements Equals, Equivalent, Debug {
   constructor(shapes: ReadonlyArray<S>) {
     super();
-    Object.defineProperty(this, "shapes", {
-      value: shapes,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "boundingBox", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.shapes = shapes;
+    this.boundingBox = null;
   }
 
-  readonly shapes!: ReadonlyArray<S>;
+  readonly shapes: ReadonlyArray<S>;
 
   isDefined(): boolean {
     return this.shapes.length !== 0;
@@ -79,7 +72,7 @@ export class R2Group<S extends R2Shape = R2Shape> extends R2Shape implements Equ
   }
 
   /** @hidden */
-  readonly boundingBox!: R2Box | null;
+  readonly boundingBox: R2Box | null;
 
   override get bounds(): R2Box {
     let boundingBox = this.boundingBox;
@@ -97,11 +90,7 @@ export class R2Group<S extends R2Shape = R2Shape> extends R2Shape implements Equ
         yMax = Math.max(shape.yMax, yMax);
       }
       boundingBox = new R2Box(xMin, yMin, xMax, yMax);
-      Object.defineProperty(this, "boundingBox", {
-        value: boundingBox,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).boundingBox = boundingBox;
     }
     return boundingBox;
   }

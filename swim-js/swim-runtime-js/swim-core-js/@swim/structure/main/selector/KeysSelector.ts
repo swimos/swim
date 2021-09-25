@@ -26,13 +26,10 @@ import {AnyInterpreter, Interpreter} from "../"; // forward import
 export class KeysSelector extends Selector {
   constructor(then: Selector) {
     super();
-    Object.defineProperty(this, "then", {
-      value: then,
-      enumerable: true,
-    });
+    this.then = then;
   }
 
-  override readonly then!: Selector;
+  override readonly then: Selector;
 
   override forSelected<T>(interpreter: Interpreter,
                           callback: (interpreter: Interpreter) => T | undefined): T | undefined;

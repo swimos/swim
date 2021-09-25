@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {AnyValue, Value} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
@@ -48,41 +48,14 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
     if (options.keepOnline === void 0) {
       options.keepOnline = true;
     }
-    Object.defineProperty(this, "options", {
-      value: options,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "hosts", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "downlinks", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "downlinkCount", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "refs", {
-      value: [],
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "online", {
-      value: true,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "observers", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+
+    this.options = options;
+    this.hosts = new BTree();
+    this.downlinks = new BTree();
+    this.downlinkCount = 0;
+    this.refs = [];
+    this.online = true;
+    this.observers = Arrays.empty;
 
     this.onOnline = this.onOnline.bind(this);
     this.onOffline = this.onOffline.bind(this);
@@ -90,25 +63,25 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
   }
 
   /** @hidden */
-  readonly options!: WarpClientOptions;
+  readonly options: WarpClientOptions;
 
   /** @hidden */
-  readonly hosts!: BTree<Uri, Host>;
+  readonly hosts: BTree<Uri, Host>;
 
   /** @hidden */
-  readonly downlinks!: BTree<Uri, BTree<Uri, BTree<Uri, DownlinkModel>>>;
+  readonly downlinks: BTree<Uri, BTree<Uri, BTree<Uri, DownlinkModel>>>;
 
   /** @hidden */
-  readonly downlinkCount!: number;
+  readonly downlinkCount: number;
 
   /** @hidden */
-  readonly refs!: BaseRef[];
+  readonly refs: BaseRef[];
 
   /** @hidden */
-  readonly online!: boolean;
+  readonly online: boolean;
 
   /** @hidden */
-  readonly observers!: ReadonlyArray<WarpObserver>;
+  readonly observers: ReadonlyArray<WarpObserver>;
 
   isOnline(): boolean;
   isOnline(online: boolean): this;
@@ -117,11 +90,7 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
       return this.online;
     } else {
       if (this.online !== online) {
-        Object.defineProperty(this, "online", {
-          value: online,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).online = online;
         if (online) {
           this.hosts.forEach(function (hostUri: Uri, host: Host): void {
             host.open();
@@ -222,11 +191,7 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
       throw new Error("duplicate downlink");
     }
     nodeDownlinks.set(laneUri, downlink);
-    Object.defineProperty(this, "downlinkCount", {
-      value: this.downlinkCount + 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).downlinkCount += 1;
     const host = this.openHost(hostUri);
     host.openDownlink(downlink);
   }
@@ -250,11 +215,7 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
       const nodeDownlinks = hostDownlinks.get(nodeUri);
       if (nodeDownlinks !== void 0) {
         if (nodeDownlinks.get(laneUri)) {
-          Object.defineProperty(this, "downlinkCount", {
-            value: this.downlinkCount - 1,
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).downlinkCount -= 1;
           nodeDownlinks.delete(laneUri);
           if (nodeDownlinks.isEmpty()) {
             hostDownlinks.delete(nodeUri);
@@ -371,21 +332,13 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
 
   close(): void {
     const refs = this.refs;
-    Object.defineProperty(this, "refs", {
-      value: [],
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).refs = [];
     for (let i = 0; i < refs.length; i += 1) {
       refs[i]!.closeUp();
     }
     const downlinks = this.downlinks.clone();
     this.downlinks.clear();
-    Object.defineProperty(this, "downlinkCount", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).downlinkCount = 0;
     downlinks.forEach(function (hostUri: Uri, hostDownlinks: BTree<Uri, BTree<Uri, DownlinkModel>>): void {
       hostDownlinks.forEach(function (nodeUri: Uri, nodeDownlinks: BTree<Uri, DownlinkModel>): void {
         nodeDownlinks.forEach(function (laneUri: Uri, downlink: DownlinkModel): void {
@@ -405,11 +358,7 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
   }
 
   observe(observer: WarpObserver): this {
-    Object.defineProperty(this, "observers", {
-      value: Arrays.inserted(observer, this.observers),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).observers = Arrays.inserted(observer, this.observers);
     return this;
   }
 
@@ -436,17 +385,9 @@ export class WarpClient implements HostContext, RefContext, WarpRef {
           for (let j = i + 1; j < n; j += 1) {
             newObservers[j - 1] = oldObservers[j]!;
           }
-          Object.defineProperty(this, "observers", {
-            value: newObservers,
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).observers = newObservers;
         } else {
-          Object.defineProperty(this, "observers", {
-            value: Arrays.empty,
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).observers = Arrays.empty;
         }
         break;
       }

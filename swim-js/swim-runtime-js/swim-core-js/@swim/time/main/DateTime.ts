@@ -36,23 +36,17 @@ export interface DateTimeInit {
 
 export class DateTime implements Interpolate<DateTime>, HashCode, Equivalent, Compare, Display {
   constructor(time: number, zone: TimeZone = TimeZone.utc) {
-    Object.defineProperty(this, "time", {
-      value: time,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "zone", {
-      value: zone,
-      enumerable: true,
-    });
+    this.time = time;
+    this.zone = zone;
   }
 
   isDefined(): boolean {
     return isFinite(new Date(this.time).getTime());
   }
 
-  readonly time!: number;
+  readonly time: number;
 
-  readonly zone!: TimeZone;
+  readonly zone: TimeZone;
 
   get year(): number {
     return this.toUTCLocalDate().getUTCFullYear();

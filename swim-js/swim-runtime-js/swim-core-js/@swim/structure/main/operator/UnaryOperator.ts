@@ -20,13 +20,10 @@ import {UnaryOperatorInterpolator} from "../"; // forward import
 export abstract class UnaryOperator extends Operator {
   constructor(operand: Item) {
     super();
-    Object.defineProperty(this, "operand", {
-      value: operand,
-      enumerable: true,
-    });
+    this.operand = operand;
   }
 
-  readonly operand!: Item;
+  readonly operand: Item;
 
   abstract readonly operator: string;
 

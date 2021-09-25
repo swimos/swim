@@ -91,14 +91,8 @@ export abstract class Proof implements Display {
 export class ProofValid extends Proof {
   constructor(operator: string, message: string | undefined) {
     super();
-    Object.defineProperty(this, "operator", {
-      value: operator,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "message", {
-      value: message,
-      enumerable: true,
-    });
+    this.operator = operator;
+    this.message = message;
   }
 
   override isValid(): boolean {
@@ -108,9 +102,9 @@ export class ProofValid extends Proof {
   /**
    * The name of the asserted operator.
    */
-  readonly operator!: string;
+  readonly operator: string;
 
-  override readonly message!: string | undefined;
+  override readonly message: string | undefined;
 
   override display<T>(output: Output<T>): Output<T> {
     if (this.message !== void 0) {
@@ -132,14 +126,8 @@ export class ProofValid extends Proof {
 export class ProofInvalid extends Proof {
   constructor(operator: string, message: string | undefined) {
     super();
-    Object.defineProperty(this, "operator", {
-      value: operator,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "message", {
-      value: message,
-      enumerable: true,
-    });
+    this.operator = operator;
+    this.message = message;
   }
 
   override isValid(): boolean {
@@ -149,9 +137,9 @@ export class ProofInvalid extends Proof {
   /**
    * The name of the asserted operator.
    */
-  readonly operator!: string;
+  readonly operator: string;
 
-  override readonly message!: string | undefined;
+  override readonly message: string | undefined;
 
   override display<T>(output: Output<T>): Output<T> {
     if (this.message !== void 0) {
@@ -173,22 +161,10 @@ export class ProofInvalid extends Proof {
 export class ProofRefuted extends Proof {
   constructor(lhs: unknown, operator: string, rhs: unknown, message: string | undefined) {
     super();
-    Object.defineProperty(this, "lhs", {
-      value: lhs,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "operator", {
-      value: operator,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "rhs", {
-      value: rhs,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "message", {
-      value: message,
-      enumerable: true,
-    });
+    this.lhs = lhs;
+    this.operator = operator;
+    this.rhs = rhs;
+    this.message = message;
   }
 
   isValid(): boolean {
@@ -198,19 +174,19 @@ export class ProofRefuted extends Proof {
   /**
    * Returns the left-hand side of the contradictory expression.
    */
-  readonly lhs!: unknown;
+  readonly lhs: unknown;
 
   /**
    * The name of the asserted binary operator.
    */
-  readonly operator!: string;
+  readonly operator: string;
 
   /**
    * Returns the right-hand side of the contradictory expression.
    */
-  readonly rhs!: unknown;
+  readonly rhs: unknown;
 
-  override readonly message!: string | undefined;
+  override readonly message: string | undefined;
 
   override display<T>(output: Output<T>): Output<T> {
     if (this.message !== void 0) {
@@ -238,14 +214,8 @@ export class ProofRefuted extends Proof {
 export class ProofError extends Proof {
   constructor(error: unknown, message: string | undefined) {
     super();
-    Object.defineProperty(this, "error", {
-      value: error,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "message", {
-      value: message,
-      enumerable: true,
-    });
+    this.error = error;
+    this.message = message;
   }
 
   override isValid(): boolean {
@@ -255,9 +225,9 @@ export class ProofError extends Proof {
   /**
    * The exception that was thrown while evaluating the assertion.
    */
-  readonly error!: unknown;
+  readonly error: unknown;
 
-  override readonly message!: string | undefined;
+  override readonly message: string | undefined;
 
   override display<T>(output: Output<T>): Output<T> {
     if (this.message !== void 0) {
@@ -285,10 +255,7 @@ export class ProofError extends Proof {
 export class ProofPending extends Proof {
   constructor(message: string | undefined) {
     super();
-    Object.defineProperty(this, "message", {
-      value: message,
-      enumerable: true,
-    });
+    this.message = message;
   }
 
   override isValid(): boolean {
@@ -299,7 +266,7 @@ export class ProofPending extends Proof {
     return true;
   }
 
-  override readonly message!: string | undefined;
+  override readonly message: string | undefined;
 
   override display<T>(output: Output<T>): Output<T> {
     if (this.message !== void 0) {

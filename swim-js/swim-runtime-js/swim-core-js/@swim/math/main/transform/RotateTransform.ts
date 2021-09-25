@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Constructors} from "@swim/util";
+import {Mutable, Murmur3, Constructors} from "@swim/util";
 import {Output, Parser, Diagnostic, Unicode} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item, Value, Record} from "@swim/structure";
@@ -27,18 +27,11 @@ import {AffineTransform} from "../"; // forward import
 export class RotateTransform extends Transform {
   constructor(angle: Angle) {
     super();
-    Object.defineProperty(this, "angle", {
-      value: angle,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.angle = angle;
+    this.stringValue = void 0;
   }
 
-  readonly angle!: Angle;
+  readonly angle: Angle;
 
   override transform(that: Transform): Transform;
   override transform(x: number, y: number): R2Point;
@@ -131,17 +124,13 @@ export class RotateTransform extends Transform {
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   override toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       stringValue = "rotate(" + this.angle + ")";
-      Object.defineProperty(this, "stringValue", {
-        value: stringValue,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = stringValue;
     }
     return stringValue;
   }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Values} from "@swim/util";
+import {Mutable, Values} from "@swim/util";
 import {Mapping} from "./Mapping";
 import {Domain} from "../"; // forward import
 import type {LinearDomain} from "../scale/LinearDomain";
@@ -43,14 +43,8 @@ export const Range = function <Y>(y0: Y, y1: Y): Range<Y> {
     return u < 1 ? range[0] : range[1];
   } as Range<Y>;
   Object.setPrototypeOf(range, Range.prototype);
-  Object.defineProperty(range, 0, {
-    value: y0,
-    enumerable: true,
-  });
-  Object.defineProperty(range, 1, {
-    value: y1,
-    enumerable: true,
-  });
+  (range as Mutable<typeof range>)[0] = y0;
+  (range as Mutable<typeof range>)[1] = y1;
   return range;
 } as {
   <Y>(y0: Y, y1: Y): Range<Y>;

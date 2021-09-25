@@ -26,21 +26,15 @@ export interface UriUserInit {
 export class UriUser implements HashCode, Debug, Display {
   /** @hidden */
   constructor(username: string | undefined, password: string | undefined) {
-    Object.defineProperty(this, "username", {
-      value: username,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "password", {
-      value: password,
-      enumerable: true,
-    });
+    this.username = username;
+    this.password = password;
   }
 
   isDefined(): boolean {
     return this.username !== void 0;
   }
 
-  readonly username!: string | undefined;
+  readonly username: string | undefined;
 
   withUsername(username: string | undefined): UriUser {
     if (username !== this.username) {
@@ -50,7 +44,7 @@ export class UriUser implements HashCode, Debug, Display {
     }
   }
 
-  readonly password!: string | undefined;
+  readonly password: string | undefined;
 
   withPassword(password: string | undefined): UriUser {
     if (password !== this.password) {

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 import {ConstraintKey} from "./ConstraintKey";
 import {ConstraintMap} from "./ConstraintMap";
@@ -25,45 +26,20 @@ import type {ConstraintSolver} from "./ConstraintSolver";
 
 export class ConstraintBinding implements ConstraintVariable, Debug {
   constructor(owner: ConstraintScope, name: string, state: number, strength: ConstraintStrength) {
-    Object.defineProperty(this, "id", {
-      value: ConstraintKey.nextId(),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "owner", {
-      value: owner,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "name", {
-      value: name,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "state", {
-      value: state,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "strength", {
-      value: strength,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "constraintFlags", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "conditionCount", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.id = ConstraintKey.nextId();
+    this.owner = owner;
+    this.name = name;
+    this.state = state;
+    this.strength = strength;
+    this.constraintFlags = 0;
+    this.conditionCount = 0;
   }
 
-  readonly id!: number;
+  readonly id: number;
 
-  readonly owner!: ConstraintScope;
+  readonly owner: ConstraintScope;
 
-  readonly name!: string;
+  readonly name: string;
 
   /** @hidden */
   isExternal(): boolean {
@@ -84,17 +60,13 @@ export class ConstraintBinding implements ConstraintVariable, Debug {
     return false;
   }
 
-  readonly state!: number;
+  readonly state: number;
 
   setState(newState: number): void {
     const oldState = this.state;
     if (oldState !== newState) {
       this.willSetState(newState, oldState);
-      Object.defineProperty(this, "state", {
-        value: newState,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).state = newState;
       this.onSetState(newState, oldState);
       this.didSetState(newState, oldState);
     }
@@ -124,7 +96,7 @@ export class ConstraintBinding implements ConstraintVariable, Debug {
     }
   }
 
-  readonly strength!: ConstraintStrength;
+  readonly strength: ConstraintStrength;
 
   get coefficient(): number {
     return 1;
@@ -175,15 +147,11 @@ export class ConstraintBinding implements ConstraintVariable, Debug {
   }
 
   /** @hidden */
-  readonly constraintFlags!: number;
+  readonly constraintFlags: number;
 
   /** @hidden */
   setConstraintFlags(constraintFlags: number): void {
-    Object.defineProperty(this, "constraintFlags", {
-      value: constraintFlags,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).constraintFlags = constraintFlags;
   }
 
   isConstrained(): boolean {
@@ -208,18 +176,12 @@ export class ConstraintBinding implements ConstraintVariable, Debug {
   }
 
   /** @hidden */
-  readonly conditionCount!: number;
+  readonly conditionCount: number;
 
   /** @hidden */
   addConstraintCondition(constraint: Constraint, solver: ConstraintSolver): void {
-    const oldConditionCount = this.conditionCount;
-    const newConditionCount = oldConditionCount + 1;
-    Object.defineProperty(this, "conditionCount", {
-      value: newConditionCount,
-      enumerable: true,
-      configurable: true,
-    });
-    if (!this.isConstrained() && oldConditionCount === 0) {
+    (this as Mutable<this>).conditionCount += 1;
+    if (!this.isConstrained() && this.conditionCount === 1) {
       this.startConstraining();
       this.updateConstraintVariable();
     }
@@ -227,14 +189,8 @@ export class ConstraintBinding implements ConstraintVariable, Debug {
 
   /** @hidden */
   removeConstraintCondition(constraint: Constraint, solver: ConstraintSolver): void {
-    const oldConditionCount = this.conditionCount;
-    const newConditionCount = oldConditionCount - 1;
-    Object.defineProperty(this, "conditionCount", {
-      value: newConditionCount,
-      enumerable: true,
-      configurable: true,
-    });
-    if (!this.isConstrained() && newConditionCount === 0) {
+    (this as Mutable<this>).conditionCount -= 1;
+    if (!this.isConstrained() && this.conditionCount === 0) {
       this.stopConstraining();
     }
   }

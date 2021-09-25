@@ -20,23 +20,17 @@ import type {ConstraintVariable} from "./ConstraintVariable";
 /** @hidden */
 export class ConstraintSum implements ConstraintExpression, Debug {
   constructor(terms: ConstraintMap<ConstraintVariable, number>, constant: number) {
-    Object.defineProperty(this, "terms", {
-      value: terms,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "constant", {
-      value: constant,
-      enumerable: true,
-    });
+    this.terms = terms;
+    this.constant = constant;
   }
 
   isConstant(): boolean {
     return this.terms.isEmpty();
   }
 
-  readonly terms!: ConstraintMap<ConstraintVariable, number>;
+  readonly terms: ConstraintMap<ConstraintVariable, number>;
 
-  readonly constant!: number;
+  readonly constant: number;
 
   plus(that: AnyConstraintExpression): ConstraintExpression {
     return ConstraintExpression.sum(this, that);

@@ -21,13 +21,10 @@ export class UriHostIPv4 extends UriHost {
   /** @hidden */
   constructor(address: string) {
     super();
-    Object.defineProperty(this, "address", {
-      value: address,
-      enumerable: true,
-    });
+    this.address = address;
   }
 
-  override readonly address!: string;
+  override readonly address: string;
 
   override get ipv4(): string {
     return this.address;

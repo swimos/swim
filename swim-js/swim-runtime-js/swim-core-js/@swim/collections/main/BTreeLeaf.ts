@@ -19,20 +19,14 @@ import {BTreeNode} from "./"; // forward import
 
 /** @hidden */
 export class BTreeLeaf<K, V, U> extends BTreePage<K, V, U> {
-  /** @hidden */
-  readonly slots!: ReadonlyArray<[K, V]>;
-
   constructor(slots: ReadonlyArray<[K, V]>, fold: U | undefined) {
     super();
-    Object.defineProperty(this, "slots", {
-      value: slots,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "fold", {
-      value: fold,
-      enumerable: true,
-    });
+    this.slots = slots;
+    this.fold = fold;
   }
+
+  /** @hidden */
+  readonly slots: ReadonlyArray<[K, V]>;
 
   override get arity(): number {
     return this.slots.length;
@@ -46,7 +40,7 @@ export class BTreeLeaf<K, V, U> extends BTreePage<K, V, U> {
     return this.slots.length === 0;
   }
 
-  override readonly fold!: U | undefined;
+  override readonly fold: U | undefined;
 
   override minKey(): K {
     return this.slots[0]![0];

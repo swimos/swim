@@ -12,27 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyOutputSettings, OutputSettings, Output} from "@swim/codec";
 import {Text} from "./Text";
 
 /** @hidden */
 export class TextOutput extends Output<Text> {
-  /** @hidden */
-  readonly string!: string;
-
   constructor(string: string, settings: OutputSettings) {
     super();
-    Object.defineProperty(this, "string", {
-      value: string,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    this.string = string;
+    this.settings = settings;
   }
+
+  /** @hidden */
+  readonly string: string;
 
   override isCont(): boolean {
     return true;
@@ -70,11 +63,7 @@ export class TextOutput extends Output<Text> {
         token = "\ufffd";
       }
     }
-    Object.defineProperty(this, "string", {
-      value: this.string + token,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).string += token;
     return this;
   }
 
@@ -82,11 +71,7 @@ export class TextOutput extends Output<Text> {
 
   override withSettings(settings: AnyOutputSettings): Output<Text> {
     settings = OutputSettings.fromAny(settings);
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).settings = settings;
     return this;
   }
 

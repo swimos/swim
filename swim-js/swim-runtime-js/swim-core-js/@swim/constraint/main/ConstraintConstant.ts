@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
 import {ConstraintMap} from "./ConstraintMap";
 import {AnyConstraintExpression, ConstraintExpression} from "./ConstraintExpression";
@@ -21,10 +22,7 @@ import type {ConstraintVariable} from "./ConstraintVariable";
 /** @hidden */
 export class ConstraintConstant implements ConstraintTerm, Debug {
   constructor(constant: number) {
-    Object.defineProperty(this, "constant", {
-      value: constant,
-      enumerable: true,
-    });
+    this.constant = constant;
   }
 
   isConstant(): boolean {
@@ -43,7 +41,7 @@ export class ConstraintConstant implements ConstraintTerm, Debug {
     return new ConstraintMap<ConstraintVariable, number>();
   }
 
-  readonly constant!: number;
+  readonly constant: number;
 
   plus(that: AnyConstraintExpression): ConstraintExpression {
     that = ConstraintExpression.fromAny(that);
@@ -89,9 +87,4 @@ export class ConstraintConstant implements ConstraintTerm, Debug {
     return Format.debug(this);
   }
 }
-
-Object.defineProperty(ConstraintExpression, "zero", {
-  value: new ConstraintConstant(0),
-  enumerable: true,
-  configurable: true,
-});
+(ConstraintExpression as Mutable<typeof ConstraintExpression>).zero = new ConstraintConstant(0);

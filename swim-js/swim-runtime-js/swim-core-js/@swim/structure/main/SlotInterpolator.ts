@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {Slot} from "./Slot";
 import type {Value} from "./Value";
@@ -38,14 +39,8 @@ export const SlotInterpolator = function (y0: Slot, y1: Slot): SlotInterpolator 
     return Slot.of(key, value);
   } as SlotInterpolator;
   Object.setPrototypeOf(interpolator, SlotInterpolator.prototype);
-  Object.defineProperty(interpolator, "keyInterpolator", {
-    value: y0.key.interpolateTo(y1.key),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "valueInterpolator", {
-    value: y0.value.interpolateTo(y1.value),
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).keyInterpolator = y0.key.interpolateTo(y1.key);
+  (interpolator as Mutable<typeof interpolator>).valueInterpolator = y0.value.interpolateTo(y1.value);
   return interpolator;
 } as {
   (y0: Slot, y1: Slot): SlotInterpolator;

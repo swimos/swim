@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "../interpolate/Interpolator";
 import {LinearDomain} from "./LinearDomain";
 import {LinearRange} from "./LinearRange";
@@ -39,14 +40,8 @@ export const LinearScaleInterpolator = function (s0: LinearScale, s1: LinearScal
     return LinearScale(domain, range);
   } as Interpolator<LinearScale>;
   Object.setPrototypeOf(interpolator, LinearScaleInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: s0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: s1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = s0;
+  (interpolator as Mutable<typeof interpolator>)[1] = s1;
   return interpolator;
 } as {
   (s0: LinearScale, s1: LinearScale): Interpolator<LinearScale>;

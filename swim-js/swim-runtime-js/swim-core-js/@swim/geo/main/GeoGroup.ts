@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent, Equals, Lazy, Arrays} from "@swim/util";
+import {Lazy, Equivalent, Equals, Mutable, Arrays} from "@swim/util";
 import {Debug, Format, Output} from "@swim/codec";
 import {R2Shape, R2Group} from "@swim/math";
 import type {GeoProjection} from "./GeoProjection";
@@ -22,22 +22,15 @@ import {GeoBox} from "./GeoBox";
 export class GeoGroup<S extends GeoShape = GeoShape> extends GeoShape implements Equals, Equivalent, Debug {
   constructor(shapes: ReadonlyArray<S>) {
     super();
-    Object.defineProperty(this, "shapes", {
-      value: shapes,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "boundingBox", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.shapes = shapes;
+    this.boundingBox = null;
   }
 
   isDefined(): boolean {
     return this.shapes.length !== 0;
   }
 
-  readonly shapes!: ReadonlyArray<S>;
+  readonly shapes: ReadonlyArray<S>;
 
   override get lngMin(): number {
     return this.bounds.lngMin;
@@ -80,7 +73,7 @@ export class GeoGroup<S extends GeoShape = GeoShape> extends GeoShape implements
   }
 
   /** @hidden */
-  readonly boundingBox!: GeoBox | null;
+  readonly boundingBox: GeoBox | null;
 
   override get bounds(): GeoBox {
     let boundingBox = this.boundingBox;
@@ -98,11 +91,7 @@ export class GeoGroup<S extends GeoShape = GeoShape> extends GeoShape implements
         latMax = Math.max(shape.latMax, latMax);
       }
       boundingBox = new GeoBox(lngMin, latMin, lngMax, latMax);
-      Object.defineProperty(this, "boundingBox", {
-        value: boundingBox,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).boundingBox = boundingBox;
     }
     return boundingBox;
   }

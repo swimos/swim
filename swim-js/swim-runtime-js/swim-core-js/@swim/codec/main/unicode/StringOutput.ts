@@ -12,27 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyOutputSettings, OutputSettings} from "../output/OutputSettings";
 import {Output} from "../output/Output";
 
 /** @hidden */
 export class StringOutput extends Output<string> {
-  /** @hidden */
-  readonly string!: string;
-
   constructor(string: string, settings: OutputSettings) {
     super();
-    Object.defineProperty(this, "string", {
-      value: string,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    this.string = string;
+    this.settings = settings;
   }
+
+  /** @hidden */
+  readonly string: string;
 
   override isCont(): boolean {
     return true;
@@ -70,41 +63,23 @@ export class StringOutput extends Output<string> {
         token = "\ufffd";
       }
     }
-    Object.defineProperty(this, "string", {
-      value: this.string + token,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).string += token;
     return this;
   }
 
   override writeln(string?: string): Output<string> {
-    if (string === void 0) {
-      Object.defineProperty(this, "string", {
-        value: this.string.concat(this.settings.lineSeparator),
-        enumerable: true,
-        configurable: true,
-      });
-      return this;
-    } else {
-      Object.defineProperty(this, "string", {
-        value: this.string.concat(string).concat(this.settings.lineSeparator),
-        enumerable: true,
-        configurable: true,
-      });
-      return this;
+    if (string !== void 0) {
+      (this as Mutable<this>).string = this.string.concat(string);
     }
+    (this as Mutable<this>).string = this.string.concat(this.settings.lineSeparator);
+    return this;
   }
 
-  override readonly settings!: OutputSettings;
+  override readonly settings: OutputSettings;
 
   override withSettings(settings: AnyOutputSettings): Output<string> {
     settings = OutputSettings.fromAny(settings);
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).settings = settings;
     return this;
   }
 

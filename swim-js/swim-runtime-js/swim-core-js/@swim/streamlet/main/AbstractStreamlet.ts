@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {InletType, InletOptions, Inlet} from "./Inlet";
 import type {OutletType, OutletOptions, Outlet} from "./Outlet";
 import type {InoutletType, InoutletOptions, Inoutlet} from "./Inoutlet";
@@ -71,45 +72,25 @@ export interface StreamletPrototype {
 
 export abstract class AbstractStreamlet<I = unknown, O = I> implements GenericStreamlet<I, O> {
   constructor(scope: StreamletScope<O> | null = null) {
-    Object.defineProperty(this, "streamletScope", {
-      value: scope,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "streamletContext", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "version", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
+    this.streamletScope = scope;
+    this.streamletContext = null;
+    this.version = -1;
   }
 
-  readonly streamletScope!: StreamletScope<O> | null;
+  readonly streamletScope: StreamletScope<O> | null;
 
   setStreamletScope(scope: StreamletScope<O> | null): void {
-    Object.defineProperty(this, "streamletScope", {
-      value: scope,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).streamletScope = scope;
   }
 
-  readonly streamletContext!: StreamletContext | null;
+  readonly streamletContext: StreamletContext | null;
 
   setStreamletContext(context: StreamletContext | null): void {
-    Object.defineProperty(this, "streamletContext", {
-      value: context,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).streamletContext = context;
   }
 
   /** @hidden */
-  readonly version!: number;
+  readonly version: number;
 
   inlet(key: string): Inlet<I> | null;
   inlet<I2 extends I>(): Inlet<I2>;
@@ -156,11 +137,7 @@ export abstract class AbstractStreamlet<I = unknown, O = I> implements GenericSt
   decohere(): void {
     if (this.version >= 0) {
       this.willDecohere();
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = -1;
       this.onDecohere();
       this.onDecohereOutlets();
       this.didDecohere();
@@ -170,11 +147,7 @@ export abstract class AbstractStreamlet<I = unknown, O = I> implements GenericSt
   recohere(version: number): void {
     if (this.version < 0) {
       this.willRecohere(version);
-      Object.defineProperty(this, "version", {
-        value: version,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = version;
       this.onRecohereInlets(version);
       this.onRecohere(version);
       this.onRecohereOutlets(version);

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "./Interpolator";
 
 /** @hidden */
@@ -43,10 +44,7 @@ export const ArrayInterpolator = function <Y>(y0: ReadonlyArray<Y>, y1: Readonly
   for (let i = 0; i < interpolatorCount; i += 1) {
     interpolators[i] = Interpolator(y0[i]!, y1[i]!);
   }
-  Object.defineProperty(interpolator, "interpolators", {
-    value: interpolators,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).interpolators = interpolators;
   return interpolator;
 } as {
   <Y>(y0: ReadonlyArray<Y>, y1: ReadonlyArray<Y>): ArrayInterpolator<Y>;

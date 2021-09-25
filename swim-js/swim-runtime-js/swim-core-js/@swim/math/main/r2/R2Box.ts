@@ -34,22 +34,10 @@ export interface R2BoxInit {
 export class R2Box extends R2Shape implements Interpolate<R2Box>, HashCode, Equivalent, Debug {
   constructor(xMin: number, yMin: number, xMax: number, yMax: number) {
     super();
-    Object.defineProperty(this, "xMin", {
-      value: xMin,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "yMin", {
-      value: yMin,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "xMax", {
-      value: xMax,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "yMax", {
-      value: yMax,
-      enumerable: true,
-    });
+    this.xMin = xMin;
+    this.yMin = yMin;
+    this.xMax = xMax;
+    this.yMax = yMax;
   }
 
   isDefined(): boolean {
@@ -57,13 +45,13 @@ export class R2Box extends R2Shape implements Interpolate<R2Box>, HashCode, Equi
         && isFinite(this.xMax) && isFinite(this.yMax);
   }
 
-  override readonly xMin!: number;
+  override readonly xMin: number;
 
-  override readonly yMin!: number;
+  override readonly yMin: number;
 
-  override readonly xMax!: number;
+  override readonly xMax: number;
 
-  override readonly yMax!: number;
+  override readonly yMax: number;
 
   get x(): number {
     return this.xMin;

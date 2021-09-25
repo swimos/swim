@@ -21,45 +21,27 @@ import type {Base64} from "./Base64";
 /** @hidden */
 export class Base64Parser<O> extends Parser<O> {
   /** @hidden */
-  readonly base64!: Base64;
+  readonly base64: Base64;
   /** @hidden */
-  readonly output!: Output<O>;
+  readonly output: Output<O>;
   /** @hidden */
-  readonly p!: number;
+  readonly p: number;
   /** @hidden */
-  readonly q!: number;
+  readonly q: number;
   /** @hidden */
-  readonly r!: number;
+  readonly r: number;
   /** @hidden */
-  readonly step!: number;
+  readonly step: number;
 
   constructor(base64: Base64, output: Output<O>, p: number = 0, q: number = 0,
               r: number = 0, step: number = 1) {
     super();
-    Object.defineProperty(this, "base64", {
-      value: base64,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "output", {
-      value: output,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "p", {
-      value: p,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "q", {
-      value: q,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "r", {
-      value: r,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "step", {
-      value: step,
-      enumerable: true,
-    });
+    this.base64 = base64;
+    this.output = output;
+    this.p = p;
+    this.q = q;
+    this.r = r;
+    this.step = step;
   }
 
   override feed(input: Input): Parser<O> {

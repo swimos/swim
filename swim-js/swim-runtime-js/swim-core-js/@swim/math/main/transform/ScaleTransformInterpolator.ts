@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {ScaleTransform} from "./ScaleTransform";
 
@@ -25,14 +26,8 @@ export const ScaleTransformInterpolator = function (f0: ScaleTransform, f1: Scal
     return new ScaleTransform(x, y);
   } as Interpolator<ScaleTransform>;
   Object.setPrototypeOf(interpolator, ScaleTransformInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: f0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: f1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = f0;
+  (interpolator as Mutable<typeof interpolator>)[1] = f1;
   return interpolator;
 } as {
   (f0: ScaleTransform, f1: ScaleTransform): Interpolator<ScaleTransform>;

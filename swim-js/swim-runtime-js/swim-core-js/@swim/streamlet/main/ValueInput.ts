@@ -12,20 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AbstractOutlet} from "./AbstractOutlet";
 
 export class ValueInput<O> extends AbstractOutlet<O> {
   constructor(state?: O) {
     super();
-    Object.defineProperty(this, "state", {
-      value: state,
-      enumerable: true,
-      configurable: true,
-    });
+    this.state = state;
   }
 
   /** @hidden */
-  readonly state!: O | undefined;
+  readonly state: O | undefined;
 
   override get(): O | undefined {
     return this.state;
@@ -34,11 +31,7 @@ export class ValueInput<O> extends AbstractOutlet<O> {
   set(newState: O | undefined): O | undefined {
     const oldState = this.state;
     if (oldState !== newState) {
-      Object.defineProperty(this, "state", {
-        value: newState,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).state = newState;
       this.decohereInput();
     }
     return oldState;

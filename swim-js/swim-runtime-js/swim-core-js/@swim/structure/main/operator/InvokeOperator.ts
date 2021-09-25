@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Numbers, Constructors} from "@swim/util";
+import {Mutable, Murmur3, Numbers, Constructors} from "@swim/util";
 import type {Output} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item} from "../Item";
@@ -25,33 +25,19 @@ import {AnyInterpreter, Interpreter} from "../"; // forward import
 export class InvokeOperator extends Operator {
   constructor(func: Value, args: Value) {
     super();
-    Object.defineProperty(this, "func", {
-      value: func,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "args", {
-      value: args.commit(),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "state", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.func = func;
+    this.args = args.commit();
+    this.state = void 0;
   }
 
-  readonly func!: Value;
+  readonly func: Value;
 
-  readonly args!: Value;
+  readonly args: Value;
 
-  readonly state!: unknown;
+  readonly state: unknown;
 
   setState(state: unknown): void {
-    Object.defineProperty(this, "state", {
-      value: state,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).state = state;
   }
 
   override isConstant(): boolean {

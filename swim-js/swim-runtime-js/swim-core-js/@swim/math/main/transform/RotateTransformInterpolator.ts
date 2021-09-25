@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {Angle} from "../angle/Angle";
 import {RotateTransform} from "./RotateTransform";
@@ -25,14 +26,9 @@ export const RotateTransformInterpolator = function (f0: RotateTransform, f1: Ro
     return new RotateTransform(a);
   } as Interpolator<RotateTransform>;
   Object.setPrototypeOf(interpolator, RotateTransformInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: f0.angle.units === f1.angle.units ? f0 : new RotateTransform(f0.angle.to(f1.angle.units)),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: f1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = f0.angle.units === f1.angle.units
+                                                    ? f0 : new RotateTransform(f0.angle.to(f1.angle.units));
+  (interpolator as Mutable<typeof interpolator>)[1] = f1;
   return interpolator;
 } as {
   (f0: RotateTransform, f1: RotateTransform): Interpolator<RotateTransform>;

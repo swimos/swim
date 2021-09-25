@@ -24,24 +24,18 @@ export type AnyNum = Num | number;
 export class Num extends Value {
   private constructor(value: number, flags?: number ) {
     super();
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: flags !== void 0 ? flags : 0,
-      enumerable: true,
-    });
+    this.value = value;
+    this.flags = flags !== void 0 ? flags : 0;
   }
 
   override isConstant(): boolean {
     return true;
   }
 
-  readonly value!: number;
+  readonly value: number;
 
   /** @hidden */
-  readonly flags!: number;
+  readonly flags: number;
 
   isNaN(): boolean {
     return isNaN(this.value);

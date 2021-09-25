@@ -12,22 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {WatchValueFunction} from "../function";
-import {WatchValueOperator} from "./WatchValueOperator";
-
-export class WatchValueCombinator<I> extends WatchValueOperator<I> {
-  constructor(func: WatchValueFunction<I>) {
-    super();
-    this.func = func;
-  }
-
-  /** @hidden */
-  readonly func: WatchValueFunction<I>;
-
-  override evaluate(value: I | undefined): void {
-    if (value !== void 0) {
-      const func = this.func;
-      return func(value);
-    }
-  }
-}
+export type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};

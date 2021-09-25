@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {ConstraintKey} from "./ConstraintKey";
 import type {Constraint} from "./Constraint";
 import type {ConstraintSolver} from "./ConstraintSolver";
@@ -44,13 +45,10 @@ export const ConstraintSymbol = {} as {
 /** @hidden */
 export class ConstraintSlack implements ConstraintSymbol {
   constructor() {
-    Object.defineProperty(this, "id", {
-      value: ConstraintKey.nextId(),
-      enumerable: true,
-    });
+    this.id = ConstraintKey.nextId();
   }
 
-  readonly id!: number;
+  readonly id: number;
 
   isExternal(): boolean {
     return false;
@@ -80,13 +78,10 @@ export class ConstraintSlack implements ConstraintSymbol {
 /** @hidden */
 export class ConstraintDummy implements ConstraintSymbol {
   constructor() {
-    Object.defineProperty(this, "id", {
-      value: ConstraintKey.nextId(),
-      enumerable: true,
-    });
+    this.id = ConstraintKey.nextId();
   }
 
-  readonly id!: number;
+  readonly id: number;
 
   isExternal(): boolean {
     return false;
@@ -116,13 +111,10 @@ export class ConstraintDummy implements ConstraintSymbol {
 /** @hidden */
 export class ConstraintError implements ConstraintSymbol {
   constructor() {
-    Object.defineProperty(this, "id", {
-      value: ConstraintKey.nextId(),
-      enumerable: true,
-    });
+    this.id = ConstraintKey.nextId();
   }
 
-  readonly id!: number;
+  readonly id: number;
 
   isExternal(): boolean {
     return false;
@@ -179,8 +171,4 @@ export class ConstraintInvalid implements ConstraintSymbol {
     // nop
   }
 }
-Object.defineProperty(ConstraintSymbol, "invalid", {
-  value: new ConstraintInvalid(),
-  enumerable: true,
-  configurable: true,
-});
+(ConstraintSymbol as Mutable<typeof ConstraintSymbol>).invalid = new ConstraintInvalid();

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {AnyValue, Value} from "@swim/structure";
 import {AnyUri, Uri, UriCache} from "@swim/uri";
@@ -38,60 +39,26 @@ import {HostOptions, Host} from "./Host";
 export abstract class RemoteHost extends Host {
   constructor(context: HostContext, hostUri: Uri, options: HostOptions = {}) {
     super();
-    Object.defineProperty(this, "context", {
-      value: context,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "hostUri", {
-      value: hostUri,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "options", {
-      value: options,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "authenticated", {
-      value: false,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "session", {
-      value: Value.absent(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "sendBuffer", {
-      value: [],
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "downlinks", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "downlinkCount", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "uriCache", {
-      value: new UriCache(hostUri),
-      enumerable: true,
-      configurable: true,
-    });
+    this.context = context;
+    this.hostUri = hostUri;
+    this.options = options;
+    this.authenticated = false;
+    this.session = Value.absent();
+    this.sendBuffer = [];
+    this.downlinks = new BTree();
+    this.downlinkCount = 0;
+    this.uriCache = new UriCache(hostUri);
     this.reconnectTimer = 0;
     this.reconnectTimeout = 0;
     this.idleTimer = 0;
   }
 
   /** @hidden */
-  readonly context!: HostContext;
+  readonly context: HostContext;
 
-  override readonly hostUri!: Uri;
+  override readonly hostUri: Uri;
 
-  readonly options!: HostOptions;
+  readonly options: HostOptions;
 
   get credentials(): Value {
     return this.options.credentials ?? Value.absent();
@@ -116,29 +83,29 @@ export abstract class RemoteHost extends Host {
   abstract override isConnected(): boolean;
 
   /** @hidden */
-  readonly authenticated!: boolean;
+  readonly authenticated: boolean;
 
   override isAuthenticated(): boolean {
     return this.authenticated;
   }
 
-  override readonly session!: Value;
+  override readonly session: Value;
 
   /** @hidden */
-  readonly sendBuffer!: Envelope[];
+  readonly sendBuffer: Envelope[];
 
   /** @hidden */
-  readonly downlinks!: BTree<Uri, BTree<Uri, HostDownlink>>;
+  readonly downlinks: BTree<Uri, BTree<Uri, HostDownlink>>;
 
   /** @hidden */
-  readonly downlinkCount!: number;
+  readonly downlinkCount: number;
 
   isIdle(): boolean {
     return this.sendBuffer.length === 0 && this.downlinkCount === 0;
   }
 
   /** @hidden */
-  readonly uriCache!: UriCache;
+  readonly uriCache: UriCache;
 
   override resolve(relative: AnyUri): Uri {
     return this.uriCache.resolve(relative);
@@ -177,11 +144,7 @@ export abstract class RemoteHost extends Host {
       throw new Error("duplicate downlink");
     }
     nodeDownlinks.set(laneUri, downlink);
-    Object.defineProperty(this, "downlinkCount", {
-      value: this.downlinkCount + 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).downlinkCount += 1;
     downlink.openUp(this);
     if (this.isConnected()) {
       downlink.hostDidConnect(this);
@@ -205,11 +168,7 @@ export abstract class RemoteHost extends Host {
     const nodeDownlinks = this.downlinks.get(nodeUri);
     if (nodeDownlinks !== void 0) {
       if (nodeDownlinks.get(laneUri)) {
-        Object.defineProperty(this, "downlinkCount", {
-          value: this.downlinkCount - 1,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).downlinkCount -= 1;
         nodeDownlinks.delete(laneUri);
         if (nodeDownlinks.isEmpty()) {
           this.downlinks.delete(nodeUri);
@@ -334,16 +293,8 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onAuthedResponse(response: AuthedResponse): void {
-    Object.defineProperty(this, "authenticated", {
-      value: true,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "session", {
-      value: response.body,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).authenticated = true;
+    (this as Mutable<this>).session = response.body;
     this.context.hostDidAuthenticate(response.body, this);
   }
 
@@ -352,16 +303,8 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onDeauthedResponse(response: DeauthedResponse): void {
-    Object.defineProperty(this, "authenticated", {
-      value: false,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "session", {
-      value: Value.absent(),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).authenticated = false;
+    (this as Mutable<this>).session = Value.absent();
     this.context.hostDidDeauthenticate(response.body, this);
   }
 
@@ -389,16 +332,8 @@ export abstract class RemoteHost extends Host {
   }
 
   protected onDisconnect(): void {
-    Object.defineProperty(this, "authenticated", {
-      value: false,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "session", {
-      value: Value.absent(),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).authenticated = false;
+    (this as Mutable<this>).session = Value.absent();
     this.context.hostDidDisconnect(this);
     this.downlinks.forEach(function (nodeUri: Uri, nodeDownlinks: BTree<Uri, HostDownlink>): void {
       nodeDownlinks.forEach(function (laneUri: Uri, downlink: HostDownlink): void {

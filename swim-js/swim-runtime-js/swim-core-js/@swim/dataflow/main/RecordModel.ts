@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Cursor} from "@swim/util";
+import type {Mutable, Cursor} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {AnyItem, Item, Field, Slot, AnyValue, Value, Record, AnyText, Text, AnyNum, MathModule} from "@swim/structure";
 import {KeyEffect, MapOutlet} from "@swim/streamlet";
@@ -29,23 +29,15 @@ export class RecordModel extends AbstractRecordOutlet {
     if (state === void 0) {
       state = Record.create();
     }
-    Object.defineProperty(this, "state", {
-      value: state,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "fieldUpdaters", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
+    this.state = state;
+    this.fieldUpdaters = new BTree();
   }
 
   /** @hidden */
-  readonly state!: Record;
+  readonly state: Record;
 
   /** @hidden */
-  readonly fieldUpdaters!: BTree<Value, RecordFieldUpdater>;
+  readonly fieldUpdaters: BTree<Value, RecordFieldUpdater>;
 
   override isEmpty(): boolean {
     return this.state.isEmpty();
@@ -153,11 +145,7 @@ export class RecordModel extends AbstractRecordOutlet {
     const valueInput = Dataflow.compile(expr, this);
     fieldUpdater.bindInput(valueInput);
     // TODO: clean up existing field updater
-    Object.defineProperty(this, "fieldUpdaters", {
-      value: this.fieldUpdaters.updated(key, fieldUpdater),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).fieldUpdaters = this.fieldUpdaters.updated(key, fieldUpdater);
   }
 
   override set(key: AnyValue, newValue: AnyValue): this {
@@ -298,11 +286,7 @@ export class RecordModel extends AbstractRecordOutlet {
   override disconnectInputs(): void {
     const oldFieldUpdaters = this.fieldUpdaters;
     if (!oldFieldUpdaters.isEmpty()) {
-      Object.defineProperty(this, "fieldUpdaters", {
-        value: new BTree(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).fieldUpdaters = new BTree();
       oldFieldUpdaters.forEach(function (key: Value, inlet: RecordFieldUpdater): void {
         inlet.disconnectInputs();
       }, this);

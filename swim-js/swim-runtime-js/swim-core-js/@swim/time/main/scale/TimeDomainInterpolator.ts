@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {DateTime} from "../DateTime";
 import {TimeDomain} from "./TimeDomain";
@@ -29,14 +30,8 @@ export const TimeDomainInterpolator = function (x0: TimeDomain, x1: TimeDomain):
                       new DateTime(x01.time + u * (x11.time - x01.time), u === 0 ? x01.zone : x11.zone));
   } as Interpolator<TimeDomain>;
   Object.setPrototypeOf(interpolator, TimeDomainInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: x0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: x1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = x0;
+  (interpolator as Mutable<typeof interpolator>)[1] = x1;
   return interpolator;
 } as {
   (x0: TimeDomain, x1: TimeDomain): Interpolator<TimeDomain>;

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import {AnyValue, Value} from "@swim/structure";
 import type {AnyUri, Uri} from "@swim/uri";
 import type {Host} from "../host/Host";
@@ -38,38 +38,23 @@ import type {
 
 export abstract class BaseRef implements DownlinkOwner, WarpRef {
   constructor(context: RefContext) {
-    Object.defineProperty(this, "context", {
-      value: context,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "host", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "downlinks", {
-      value: [],
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "observers", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    this.context = context;
+    this.host = null;
+    this.downlinks = [];
+    this.observers = Arrays.empty;
   }
 
   /** @hidden */
-  readonly context!: RefContext;
+  readonly context: RefContext;
 
   /** @hidden */
-  readonly host!: Host | null;
+  readonly host: Host | null;
 
   /** @hidden */
-  readonly downlinks!: Downlink[];
+  readonly downlinks: Downlink[];
 
   /** @hidden */
-  readonly observers!: ReadonlyArray<WarpObserver>;
+  readonly observers: ReadonlyArray<WarpObserver>;
 
   abstract readonly hostUri: Uri;
 
@@ -143,22 +128,14 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
   /** @hidden */
   closeUp(): void {
     const downlinks = this.downlinks;
-    Object.defineProperty(this, "downlinks", {
-      value: [],
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).downlinks = [];
     for (let i = 0, n = downlinks.length; i < n; i += 1) {
       downlinks[i]!.close();
     }
   }
 
   observe(observer: WarpObserver): this {
-    Object.defineProperty(this, "observers", {
-      value: Arrays.inserted(observer, this.observers),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).observers = Arrays.inserted(observer, this.observers);
     return this;
   }
 
@@ -185,17 +162,9 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
           for (let j = i + 1; j < n; j += 1) {
             newObservers[j - 1] = oldObservers[j]!;
           }
-          Object.defineProperty(this, "observers", {
-            value: newObservers,
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).observers = newObservers;
         } else {
-          Object.defineProperty(this, "observers", {
-            value: Arrays.empty,
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).observers = Arrays.empty;
         }
         break;
       }
@@ -225,11 +194,7 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
 
   /** @hidden */
   hostDidConnect(host: Host): void {
-    Object.defineProperty(this, "host", {
-      value: host,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).host = host;
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;
@@ -263,11 +228,7 @@ export abstract class BaseRef implements DownlinkOwner, WarpRef {
 
   /** @hidden */
   hostDidDisconnect(host: Host): void {
-    Object.defineProperty(this, "host", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).host = null;
     const observers = this.observers;
     for (let i = 0, n = observers.length; i < n; i += 1) {
       const observer = observers[i]!;

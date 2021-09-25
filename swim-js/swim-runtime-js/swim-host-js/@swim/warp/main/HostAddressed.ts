@@ -27,10 +27,7 @@ export interface HostAddressedConstructor<E extends HostAddressed<E>> {
 export abstract class HostAddressed<E extends HostAddressed<E>> extends Envelope {
   constructor(body: Value) {
     super();
-    Object.defineProperty(this, "body", {
-      value: body,
-      enumerable: true,
-    });
+    this.body = body;
   }
 
   override get node(): Uri {
@@ -49,7 +46,7 @@ export abstract class HostAddressed<E extends HostAddressed<E>> extends Envelope
     return this as unknown as E;
   }
 
-  override readonly body!: Value;
+  override readonly body: Value;
 
   override withBody(body: AnyValue): E {
     body = Value.fromAny(body);

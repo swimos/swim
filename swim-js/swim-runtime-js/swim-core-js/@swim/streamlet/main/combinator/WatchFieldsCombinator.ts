@@ -18,14 +18,11 @@ import {WatchFieldsOperator} from "./WatchFieldsOperator";
 export class WatchFieldsCombinator<K, V, O> extends WatchFieldsOperator<K, V, O> {
   constructor(func: WatchFieldsFunction<K, V>) {
     super();
-    Object.defineProperty(this, "func", {
-      value: func,
-      enumerable: true,
-    });
+    this.func = func;
   }
 
   /** @hidden */
-  readonly func!: WatchFieldsFunction<K, V>;
+  readonly func: WatchFieldsFunction<K, V>;
 
   override evaluate(key: K, value: V | undefined): void {
     if (value !== void 0) {

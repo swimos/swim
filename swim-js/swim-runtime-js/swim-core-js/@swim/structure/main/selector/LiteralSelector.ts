@@ -21,19 +21,13 @@ import {AnyInterpreter, Interpreter} from "../"; // forward import
 export class LiteralSelector extends Selector {
   constructor(item: Item, then: Selector) {
     super();
-    Object.defineProperty(this, "item", {
-      value: item.commit(),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "then", {
-      value: then,
-      enumerable: true,
-    });
+    this.item = item.commit();
+    this.then = then;
   }
 
-  readonly item!: Item;
+  readonly item: Item;
 
-  override readonly then!: Selector;
+  override readonly then: Selector;
 
   override forSelected<T>(interpreter: Interpreter,
                           callback: (interpreter: Interpreter) => T | undefined): T | undefined;

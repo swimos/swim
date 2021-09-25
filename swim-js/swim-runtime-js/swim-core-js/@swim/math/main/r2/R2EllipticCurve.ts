@@ -24,49 +24,28 @@ export class R2EllipticCurve extends R2Curve implements Debug {
   constructor(cx: number, cy: number, rx: number, ry: number,
               phi: number, a0: number, da: number) {
     super();
-    Object.defineProperty(this, "cx", {
-      value: cx,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "cy", {
-      value: cy,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "rx", {
-      value: rx,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "ry", {
-      value: ry,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "phi", {
-      value: phi,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "a0", {
-      value: a0,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "da", {
-      value: da,
-      enumerable: true,
-    });
+    this.cx = cx;
+    this.cy = cy;
+    this.rx = rx;
+    this.ry = ry;
+    this.phi = phi;
+    this.a0 = a0;
+    this.da = da;
   }
 
-  readonly cx!: number;
+  readonly cx: number;
 
-  readonly cy!: number;
+  readonly cy: number;
 
-  readonly rx!: number;
+  readonly rx: number;
 
-  readonly ry!: number;
+  readonly ry: number;
 
-  readonly phi!: number;
+  readonly phi: number;
 
-  readonly a0!: number;
+  readonly a0: number;
 
-  readonly da!: number;
+  readonly da: number;
 
   override get xMin(): number {
     return this.cx - Math.max(this.rx, this.ry);

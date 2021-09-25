@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {Item} from "../Item";
 import {ConditionalOperator} from "./ConditionalOperator";
@@ -41,18 +42,9 @@ export const ConditionalOperatorInterpolator = function (y0: ConditionalOperator
     return new ConditionalOperator(ifTerm, thenTerm, elseTerm);
   } as ConditionalOperatorInterpolator;
   Object.setPrototypeOf(interpolator, ConditionalOperatorInterpolator.prototype);
-  Object.defineProperty(interpolator, "ifTermInterpolator", {
-    value: y0.ifTerm.interpolateTo(y1.ifTerm),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "thenTermInterpolator", {
-    value: y0.thenTerm.interpolateTo(y1.thenTerm),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "elseTermInterpolator", {
-    value: y0.elseTerm.interpolateTo(y1.elseTerm),
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).ifTermInterpolator = y0.ifTerm.interpolateTo(y1.ifTerm);
+  (interpolator as Mutable<typeof interpolator>).thenTermInterpolator = y0.thenTerm.interpolateTo(y1.thenTerm);
+  (interpolator as Mutable<typeof interpolator>).elseTermInterpolator = y0.elseTerm.interpolateTo(y1.elseTerm);
   return interpolator;
 } as {
   (y0: ConditionalOperator, y1: ConditionalOperator): ConditionalOperatorInterpolator;

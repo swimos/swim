@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent} from "@swim/util";
+import {Equivalent, Mutable} from "@swim/util";
 import {Mapping, Interpolate, Interpolator, LinearRange, ContinuousScale} from "@swim/mapping";
 import {AnyDateTime, DateTime} from "../DateTime";
 import {TimeDomain} from "./TimeDomain";
@@ -53,14 +53,8 @@ export const TimeScale = function (domain: TimeDomain, range: LinearRange): Time
     return scale.range(scale.domain(x));
   } as TimeScale;
   Object.setPrototypeOf(scale, TimeScale.prototype);
-  Object.defineProperty(scale, "domain", {
-    value: domain,
-    enumerable: true,
-  });
-  Object.defineProperty(scale, "range", {
-    value: range,
-    enumerable: true,
-  });
+  (scale as Mutable<typeof scale>).domain = domain;
+  (scale as Mutable<typeof scale>).range = range;
   return scale;
 } as {
   (domain: TimeDomain, range: LinearRange): TimeScale;

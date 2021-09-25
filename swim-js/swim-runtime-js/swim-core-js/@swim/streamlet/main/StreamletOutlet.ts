@@ -24,13 +24,10 @@ import {AbstractOutlet} from "./AbstractOutlet";
 export class StreamletOutlet<O> extends AbstractOutlet<O> {
   constructor(streamlet: Streamlet<unknown, O>) {
     super();
-    Object.defineProperty(this, "streamlet", {
-      value: streamlet,
-      enumerable: true,
-    });
+    this.streamlet = streamlet;
   }
 
-  readonly streamlet!: Streamlet<unknown, O>;
+  readonly streamlet: Streamlet<unknown, O>;
 
   override get(): O | undefined {
     const streamlet = this.streamlet as GenericStreamlet<unknown, O>;

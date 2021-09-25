@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {Item} from "../Item";
 import {Operator} from "./Operator";
@@ -45,18 +46,9 @@ export const BinaryOperatorInterpolator = function (y0: BinaryOperator, y1: Bina
     return Operator.binary(operand1, interpolator.operator, operand2);
   } as BinaryOperatorInterpolator;
   Object.setPrototypeOf(interpolator, BinaryOperatorInterpolator.prototype);
-  Object.defineProperty(interpolator, "operand1Interpolator", {
-    value: y0.operand1.interpolateTo(y1.operand1),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "operator", {
-    value: operator,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "operand2Interpolator", {
-    value: y0.operand2.interpolateTo(y1.operand2),
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).operand1Interpolator = y0.operand1.interpolateTo(y1.operand1);
+  (interpolator as Mutable<typeof interpolator>).operator = operator;
+  (interpolator as Mutable<typeof interpolator>).operand2Interpolator = y0.operand2.interpolateTo(y1.operand2);
   return interpolator;
 } as {
   (y0: BinaryOperator, y1: BinaryOperator): BinaryOperatorInterpolator;

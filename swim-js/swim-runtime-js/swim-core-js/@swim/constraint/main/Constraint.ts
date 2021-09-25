@@ -22,37 +22,22 @@ import type {ConstraintScope} from "./ConstraintScope";
 export class Constraint implements ConstraintKey, Debug {
   constructor(scope: ConstraintScope, expression: ConstraintExpression,
               relation: ConstraintRelation, strength: ConstraintStrength) {
-    Object.defineProperty(this, "id", {
-      value: ConstraintKey.nextId(),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "scope", {
-      value: scope,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "expression", {
-      value: expression,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "relation", {
-      value: relation,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "strength", {
-      value: strength,
-      enumerable: true,
-    });
+    this.id = ConstraintKey.nextId();
+    this.scope = scope;
+    this.expression = expression;
+    this.relation = relation;
+    this.strength = strength;
   }
 
-  readonly id!: number;
+  readonly id: number;
 
-  readonly scope!: ConstraintScope;
+  readonly scope: ConstraintScope;
 
-  readonly expression!: ConstraintExpression;
+  readonly expression: ConstraintExpression;
 
-  readonly relation!: ConstraintRelation;
+  readonly relation: ConstraintRelation;
 
-  readonly strength!: ConstraintStrength;
+  readonly strength: ConstraintStrength;
 
   isConstrained(): boolean {
     return this.scope.hasConstraint(this);

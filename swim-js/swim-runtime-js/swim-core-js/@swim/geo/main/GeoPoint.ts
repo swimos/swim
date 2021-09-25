@@ -35,23 +35,17 @@ export type GeoPointTuple = [number, number];
 export class GeoPoint extends GeoShape implements Interpolate<GeoPoint>, HashCode, Equivalent, Debug {
   constructor(lng: number, lat: number) {
     super();
-    Object.defineProperty(this, "lng", {
-      value: lng,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "lat", {
-      value: lat,
-      enumerable: true,
-    });
+    this.lng = lng;
+    this.lat = lat;
   }
 
   isDefined(): boolean {
     return isFinite(this.lng) && isFinite(this.lat);
   }
 
-  readonly lng!: number;
+  readonly lng: number;
 
-  readonly lat!: number;
+  readonly lat: number;
 
   override get lngMin(): number {
     return this.lng;

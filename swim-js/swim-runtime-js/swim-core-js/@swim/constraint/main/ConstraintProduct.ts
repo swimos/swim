@@ -21,23 +21,17 @@ import type {ConstraintVariable} from "./ConstraintVariable";
 /** @hidden */
 export class ConstraintProduct implements ConstraintTerm, Debug {
   constructor(coefficient: number, variable: ConstraintVariable) {
-    Object.defineProperty(this, "coefficient", {
-      value: coefficient,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "variable", {
-      value: variable,
-      enumerable: true,
-    });
+    this.coefficient = coefficient;
+    this.variable = variable;
   }
 
   isConstant(): boolean {
     return false;
   }
 
-  readonly coefficient!: number;
+  readonly coefficient: number;
 
-  readonly variable!: ConstraintVariable;
+  readonly variable: ConstraintVariable;
 
   get terms(): ConstraintMap<ConstraintVariable, number> {
     const terms = new ConstraintMap<ConstraintVariable, number>();

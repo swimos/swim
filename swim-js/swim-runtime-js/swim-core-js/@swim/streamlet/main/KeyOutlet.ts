@@ -18,19 +18,13 @@ import {AbstractOutlet} from "./AbstractOutlet";
 export class KeyOutlet<K, V> extends AbstractOutlet<V> {
   constructor(input: MapOutlet<K, V, unknown>, key: K) {
     super();
-    Object.defineProperty(this, "input", {
-      value: input,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "key", {
-      value: key,
-      enumerable: true,
-    });
+    this.input = input;
+    this.key = key;
   }
 
-  readonly input!: MapOutlet<K, V, unknown>;
+  readonly input: MapOutlet<K, V, unknown>;
 
-  readonly key!: K;
+  readonly key: K;
 
   override get(): V | undefined {
     return this.input.get(this.key);

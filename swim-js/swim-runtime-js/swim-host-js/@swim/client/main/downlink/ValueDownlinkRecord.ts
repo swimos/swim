@@ -20,14 +20,11 @@ import type {ValueDownlinkObserver, ValueDownlink} from "./ValueDownlink";
 export class ValueDownlinkRecord extends DownlinkRecord implements ValueDownlinkObserver<Value, AnyValue> {
   constructor(downlink: ValueDownlink<Value, AnyValue>) {
     super();
-    Object.defineProperty(this, "downlink", {
-      value: downlink,
-      enumerable: true,
-    });
+    this.downlink = downlink;
     downlink.observe(this);
   }
 
-  override readonly downlink!: ValueDownlink<Value, AnyValue>;
+  override readonly downlink: ValueDownlink<Value, AnyValue>;
 
   override isEmpty(): boolean {
     const value = this.downlink.get();

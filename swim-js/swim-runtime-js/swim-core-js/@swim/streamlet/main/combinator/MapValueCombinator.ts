@@ -18,14 +18,11 @@ import {MapValueOperator} from "./MapValueOperator";
 export class MapValueCombinator<I, O> extends MapValueOperator<I, O> {
   constructor(func: MapValueFunction<I, O>) {
     super();
-    Object.defineProperty(this, "func", {
-      value: func,
-      enumerable: true,
-    });
+    this.func = func;
   }
 
   /** @hidden */
-  readonly func!: MapValueFunction<I, O>;
+  readonly func: MapValueFunction<I, O>;
 
   override evaluate(value: I | undefined): O | undefined {
     if (value !== void 0) {

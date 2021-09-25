@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
+
 export interface ConstraintKey {
   readonly id: number;
 }
@@ -23,18 +25,10 @@ export const ConstraintKey = {} as {
   nextId(): number;
 };
 
-Object.defineProperty(ConstraintKey, "idCount", {
-  value: 0,
-  enumerable: true,
-  configurable: true,
-});
+(ConstraintKey as Mutable<typeof ConstraintKey>).idCount = 0;
 
 ConstraintKey.nextId = function (): number {
   const nextId = ConstraintKey.idCount + 1;
-  Object.defineProperty(ConstraintKey, "idCount", {
-    value: nextId,
-    enumerable: true,
-    configurable: true,
-  });
+  (ConstraintKey as Mutable<typeof ConstraintKey>).idCount = nextId;
   return nextId;
 };

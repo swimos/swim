@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Values} from "@swim/util";
+import {Mutable, Values} from "@swim/util";
 import {Mapping} from "./Mapping";
 import {Range} from "../"; // forward import
 import {LinearDomain} from "../"; // forward import
@@ -45,14 +45,8 @@ export const Domain = function <X>(x0: X, x1: X): Domain<X> {
     return Values.equal(x, domain[1]) ? 1 : 0;
   } as Domain<X>;
   Object.setPrototypeOf(domain, Domain.prototype);
-  Object.defineProperty(domain, 0, {
-    value: x0,
-    enumerable: true,
-  });
-  Object.defineProperty(domain, 1, {
-    value: x1,
-    enumerable: true,
-  });
+  (domain as Mutable<typeof domain>)[0] = x0;
+  (domain as Mutable<typeof domain>)[1] = x1;
   return domain;
 } as {
   <X>(x0: X, x1: X): Domain<X>;

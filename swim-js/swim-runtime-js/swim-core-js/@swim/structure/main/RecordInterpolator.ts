@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {Item} from "./Item";
 import {Record} from "./Record";
@@ -45,10 +46,7 @@ export const RecordInterpolator = function (y0: Record, y1: Record): RecordInter
   for (let i = 0; i < interpolatorCount; i += 1) {
     interpolators[i] = y0.getItem(i)!.interpolateTo(y1.getItem(i)!);
   }
-  Object.defineProperty(interpolator, "interpolators", {
-    value: interpolators,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).interpolators = interpolators;
   return interpolator;
 } as {
   (y0: Record, y1: Record): RecordInterpolator;

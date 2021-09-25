@@ -26,19 +26,13 @@ import {Interpreter} from "../"; // forward import
 export class LambdaFunc extends Func {
   constructor(bindings: Value, template: Value) {
     super();
-    Object.defineProperty(this, "bindings", {
-      value: bindings,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "template", {
-      value: template,
-      enumerable: true,
-    });
+    this.bindings = bindings;
+    this.template = template;
   }
 
-  readonly bindings!: Value;
+  readonly bindings: Value;
 
-  readonly template!: Value;
+  readonly template: Value;
 
   override get precedence(): number {
     return 1;

@@ -21,19 +21,13 @@ import {AnyInterpreter, Interpreter} from "../"; // forward import
 export class FilterSelector extends Selector {
   constructor(predicate: Selector, then: Selector) {
     super();
-    Object.defineProperty(this, "predicate", {
-      value: predicate,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "then", {
-      value: then,
-      enumerable: true,
-    });
+    this.predicate = predicate;
+    this.then = then;
   }
 
-  readonly predicate!: Selector;
+  readonly predicate: Selector;
 
-  override readonly then!: Selector;
+  override readonly then: Selector;
 
   override forSelected<T>(interpreter: Interpreter,
                           callback: (interpreter: Interpreter) => T | undefined): T | undefined;

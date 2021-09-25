@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {AffineTransform} from "./AffineTransform";
 
@@ -31,14 +32,8 @@ export const AffineTransformInterpolator = function (f0: AffineTransform, f1: Af
   } as Interpolator<AffineTransform>;
   Object.setPrototypeOf(interpolator, AffineTransformInterpolator.prototype);
   // TODO: decompose matrices
-  Object.defineProperty(interpolator, 0, {
-    value: f0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: f1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = f0;
+  (interpolator as Mutable<typeof interpolator>)[1] = f1;
   return interpolator;
 } as {
   (f0: AffineTransform, f1: AffineTransform): Interpolator<AffineTransform>;

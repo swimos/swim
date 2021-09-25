@@ -21,10 +21,7 @@ export type AnyUriPort = UriPort | number | string;
 export class UriPort implements HashCode, Compare, Debug, Display {
   /** @hidden */
   constructor(portNumber: number) {
-    Object.defineProperty(this, "number", {
-      value: portNumber,
-      enumerable: true,
-    });
+    this.number = portNumber;
   }
 
   isDefined(): boolean {

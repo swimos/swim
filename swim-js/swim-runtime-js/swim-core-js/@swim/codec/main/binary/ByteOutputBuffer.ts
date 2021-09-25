@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {OutputException} from "../output/OutputException";
 import {AnyOutputSettings, OutputSettings} from "../output/OutputSettings";
 import {OutputBuffer} from "../output/OutputBuffer";
@@ -19,40 +20,21 @@ import {OutputBufferError} from "../output/OutputBufferError";
 
 /** @hidden */
 export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
-  /** @hidden */
-  readonly array!: Uint8Array;
-  /** @hidden */
-  readonly part!: boolean;
-
   constructor(array: Uint8Array, index: number, limit: number,
               part: boolean, settings: OutputSettings) {
     super();
-    Object.defineProperty(this, "array", {
-      value: array,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "index", {
-      value: index,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "limit", {
-      value: limit,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "part", {
-      value: part,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    this.array = array;
+    this.index = index;
+    this.limit = limit;
+    this.part = part;
+    this.settings = settings;
   }
+
+  /** @hidden */
+  readonly array: Uint8Array;
+
+  /** @hidden */
+  readonly part: boolean;
 
   override isCont(): boolean {
     return this.index < this.limit;
@@ -75,38 +57,26 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
   }
 
   override asPart(part: boolean): OutputBuffer<Uint8Array> {
-    Object.defineProperty(this, "part", {
-      value: part,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).part = part;
     return this;
   }
 
-  readonly index!: number;
+  readonly index: number;
 
   override withIndex(index: number): OutputBuffer<Uint8Array> {
     if (0 <= index && index <= this.limit) {
-      Object.defineProperty(this, "index", {
-        value: index,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).index = index;
       return this;
     } else {
       return new OutputBufferError(new OutputException("invalid index"), this.settings);
     }
   }
 
-  readonly limit!: number;
+  readonly limit: number;
 
   override withLimit(limit: number): OutputBuffer<Uint8Array> {
     if (0 <= limit && limit <= this.array.length) {
-      Object.defineProperty(this, "limit", {
-        value: limit,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).limit = limit;
       return this;
     } else {
       return new OutputBufferError(new OutputException("invalid limit"), this.settings);
@@ -146,11 +116,7 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
       const index = this.index;
       if (index < this.limit) {
         this.array[index] = token;
-        Object.defineProperty(this, "index", {
-          value: index + 1,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).index += 1;
         return this;
       } else {
         return new OutputBufferError(new OutputException("full"), this.settings);
@@ -167,11 +133,7 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
   override step(offset: number): OutputBuffer<Uint8Array> {
     const index = this.index + offset;
     if (0 <= index && index <= this.limit) {
-      Object.defineProperty(this, "index", {
-        value: index,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).index = index;
       return this;
     } else {
       return new OutputBufferError(new OutputException("invalid step"), this.settings);
@@ -182,15 +144,11 @@ export class ByteOutputBuffer extends OutputBuffer<Uint8Array> {
     return new Uint8Array(this.array.buffer, 0, this.index);
   }
 
-  override readonly settings!: OutputSettings;
+  override readonly settings: OutputSettings;
 
   override withSettings(settings: AnyOutputSettings): OutputBuffer<Uint8Array> {
     settings = OutputSettings.fromAny(settings);
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).settings = settings;
     return this;
   }
 

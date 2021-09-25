@@ -19,15 +19,11 @@ import {AbstractMapInletOutlet} from "../AbstractMapInletOutlet";
 export abstract class ReduceFieldsOperator<K, V, I, O> extends AbstractMapInletOutlet<K, V, I, O> {
   constructor() {
     super();
-    Object.defineProperty(this, "state", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
+    this.state = new BTree();
   }
 
   /** @hidden */
-  readonly state!: BTree<K, V, O>;
+  readonly state: BTree<K, V, O>;
 
   override get(): O | undefined {
     return this.state.reduced(this.identity, this.accumulate.bind(this), this.combine.bind(this));

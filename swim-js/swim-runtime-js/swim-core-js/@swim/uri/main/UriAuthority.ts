@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HashCode, Compare, Lazy, Strings} from "@swim/util";
+import {Lazy, HashCode, Compare, Mutable, Strings} from "@swim/util";
 import {Output, Format, Debug, Display} from "@swim/codec";
 import {Uri} from "./Uri";
 import {AnyUriUser, UriUserInit, UriUser} from "./"; // forward import
@@ -30,35 +30,18 @@ export interface UriAuthorityInit extends UriUserInit {
 export class UriAuthority implements HashCode, Compare, Debug, Display {
   /** @hidden */
   constructor(user: UriUser, host: UriHost, port: UriPort) {
-    Object.defineProperty(this, "user", {
-      value: user,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "host", {
-      value: host,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "port", {
-      value: port,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "hashValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.user = user;
+    this.host = host;
+    this.port = port;
+    this.hashValue = void 0;
+    this.stringValue = void 0;
   }
 
   isDefined(): boolean {
     return this.user.isDefined() || this.host.isDefined() || this.port.isDefined();
   }
 
-  readonly user!: UriUser;
+  readonly user: UriUser;
 
   withUser(user: AnyUriUser): UriAuthority {
     user = UriUser.fromAny(user);
@@ -97,7 +80,7 @@ export class UriAuthority implements HashCode, Compare, Debug, Display {
     return this.withUser(this.user.withPassword(password));
   }
 
-  readonly host!: UriHost;
+  readonly host: UriHost;
 
   withHost(host: AnyUriHost): UriAuthority {
     host = UriHost.fromAny(host);
@@ -144,7 +127,7 @@ export class UriAuthority implements HashCode, Compare, Debug, Display {
     return this.withHost(UriHost.ipv6(hostIPv5));
   }
 
-  readonly port!: UriPort;
+  readonly port: UriPort;
 
   withPort(port: AnyUriPort): UriAuthority {
     port = UriPort.fromAny(port);
@@ -209,17 +192,13 @@ export class UriAuthority implements HashCode, Compare, Debug, Display {
   }
 
   /** @hidden */
-  readonly hashValue!: number | undefined;
+  readonly hashValue: number | undefined;
 
   hashCode(): number {
     let hashValue = this.hashValue;
     if (hashValue === void 0) {
       hashValue = Strings.hash(this.toString());
-      Object.defineProperty(this, "hashValue", {
-        value: hashValue,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).hashValue = hashValue;
     }
     return hashValue;
   }
@@ -254,17 +233,13 @@ export class UriAuthority implements HashCode, Compare, Debug, Display {
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       stringValue = Format.display(this);
-      Object.defineProperty(this, "stringValue", {
-        value: stringValue,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = stringValue;
     }
     return stringValue;
   }

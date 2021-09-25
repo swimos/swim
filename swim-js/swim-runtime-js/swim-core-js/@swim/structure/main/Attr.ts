@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Numbers, Constructors} from "@swim/util";
+import {Mutable, Murmur3, Numbers, Constructors} from "@swim/util";
 import type {Output} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {AnyItem, Item} from "./Item";
@@ -36,20 +36,9 @@ import {AnyInterpreter, Interpreter} from "./"; // forward import
 export class Attr extends Field {
   constructor(key: Text, value: Value, flags?: number) {
     super();
-    Object.defineProperty(this, "key", {
-      value: key,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: flags !== void 0 ? flags : 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.key = key;
+    this.value = value;
+    this.flags = flags !== void 0 ? flags : 0;
   }
 
   override isConstant(): boolean {
@@ -60,23 +49,19 @@ export class Attr extends Field {
     return this.key.value;
   }
 
-  override readonly key!: Text;
+  override readonly key: Text;
 
-  override readonly value!: Value;
+  override readonly value: Value;
 
   /** @hidden */
-  readonly flags!: number;
+  readonly flags: number;
 
   override setValue(newValue: Value): Value {
     if ((this.flags & Field.ImmutableFlag) !== 0) {
       throw new Error("immutable");
     }
     const oldValue = this.value;
-    Object.defineProperty(this, "value", {
-      value: newValue,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).value = newValue;
     return oldValue;
   }
 
@@ -323,17 +308,7 @@ export class Attr extends Field {
   }
 
   override alias(): void {
-    if ((this.flags & Field.ImmutableFlag) === 0) {
-      Object.defineProperty(this, "flags", {
-        value: this.flags | Field.ImmutableFlag,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "value", {
-        value: this.value,
-        enumerable: true,
-      });
-    }
+    (this as Mutable<this>).flags |= Field.ImmutableFlag;
   }
 
   override branch(): Attr {
@@ -349,17 +324,7 @@ export class Attr extends Field {
   }
 
   override commit(): this {
-    if ((this.flags & Field.ImmutableFlag) === 0) {
-      Object.defineProperty(this, "flags", {
-        value: this.flags | Field.ImmutableFlag,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "value", {
-        value: this.value,
-        enumerable: true,
-      });
-    }
+    (this as Mutable<this>).flags |= Field.ImmutableFlag;
     this.value.commit();
     return this;
   }

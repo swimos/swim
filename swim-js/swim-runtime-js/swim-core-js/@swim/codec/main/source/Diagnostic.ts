@@ -30,66 +30,42 @@ import {Base10} from "../number/Base10";
 export class Diagnostic implements Display {
   constructor(input: Input, tag: Tag, severity: Severity, message: string | undefined,
               note: string | undefined, cause: Diagnostic | null) {
-    Object.defineProperty(this, "input", {
-      value: input,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "tag", {
-      value: tag,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "severity", {
-      value: severity,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "message", {
-      value: message,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "note", {
-      value: note,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "cause", {
-      value: cause,
-      enumerable: true,
-      configurable: true,
-    });
+    this.input = input;
+    this.tag = tag;
+    this.severity = severity;
+    this.message = message;
+    this.note = note;
+    this.cause = cause;
   }
 
   /** @hidden */
-  readonly input!: Input;
+  readonly input: Input;
 
   /**
    * The location in the `input` to which this diagnostic is attached.
    */
-  readonly tag!: Tag;
+  readonly tag: Tag;
 
   /**
    * The level of importance of this diagnostic.
    */
-  readonly severity!: Severity;
+  readonly severity: Severity;
 
   /**
    * The help message that describes this diagnostic.
    */
-  readonly message!: string | undefined;
+  readonly message: string | undefined;
 
   /**
    * An informative comment on the source context to which this diagnostic is attached.
    */
-  readonly note!: string | undefined;
+  readonly note: string | undefined;
 
   /**
    * The `Diagnostic` cause of this diagnostic, forming a linked chain of
    * diagnostics, or `null` if this diagnostic has no cause.
    */
-  readonly cause!: Diagnostic | null;
+  readonly cause: Diagnostic | null;
 
   private lineDigits(): number {
     let digits = Base10.countDigits(this.tag.end.line);

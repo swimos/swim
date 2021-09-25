@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent} from "@swim/util";
+import {Equivalent, Mutable} from "@swim/util";
 import {ConstraintMap} from "./ConstraintMap";
 import {ConstraintSymbol, ConstraintSlack, ConstraintError, ConstraintDummy} from "./ConstraintSymbol";
 import {AnyConstraintExpression, ConstraintExpression} from "./ConstraintExpression";
@@ -39,58 +39,35 @@ export interface ConstraintVariableBinding {
 
 export class ConstraintSolver implements ConstraintScope {
   constructor() {
-    Object.defineProperty(this, "constraints", {
-      value: new ConstraintMap(),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "constraintVariables", {
-      value: new ConstraintMap(),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "rows", {
-      value: new ConstraintMap(),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "infeasible", {
-      value: [],
-      enumerable: true,
-    });
-    Object.defineProperty(this, "objective", {
-      value: new ConstraintRow(this, null, new ConstraintMap(), 0),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "artificial", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "invalidated", {
-      value: new ConstraintMap(),
-      enumerable: true,
-      configurable: true,
-    });
+    this.constraints = new ConstraintMap();
+    this.constraintVariables = new ConstraintMap();
+    this.rows = new ConstraintMap();
+    this.infeasible = [];
+    this.objective = new ConstraintRow(this, null, new ConstraintMap(), 0);
+    this.artificial = null;
+    this.invalidated = new ConstraintMap();
   }
 
   /** @hidden */
-  readonly constraints!: ConstraintMap<Constraint, ConstraintTag>;
+  readonly constraints: ConstraintMap<Constraint, ConstraintTag>;
 
   /** @hidden */
-  readonly constraintVariables!: ConstraintMap<ConstraintVariable, ConstraintVariableBinding>;
+  readonly constraintVariables: ConstraintMap<ConstraintVariable, ConstraintVariableBinding>;
 
   /** @hidden */
-  readonly rows!: ConstraintMap<ConstraintSymbol, ConstraintRow>;
+  readonly rows: ConstraintMap<ConstraintSymbol, ConstraintRow>;
 
   /** @hidden */
-  readonly infeasible!: ConstraintSymbol[];
+  readonly infeasible: ConstraintSymbol[];
 
   /** @hidden */
-  readonly objective!: ConstraintRow;
+  readonly objective: ConstraintRow;
 
   /** @hidden */
-  readonly artificial!: ConstraintRow | null;
+  readonly artificial: ConstraintRow | null;
 
   /** @hidden */
-  readonly invalidated!: ConstraintMap<ConstraintSymbol, ConstraintRow | null>;
+  readonly invalidated: ConstraintMap<ConstraintSymbol, ConstraintRow | null>;
 
   constraint(lhs: AnyConstraintExpression, relation: ConstraintRelation,
              rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint {
@@ -381,11 +358,7 @@ export class ConstraintSolver implements ConstraintScope {
   updateSolution(): void {
     const invalidated = this.invalidated;
     if (!invalidated.isEmpty()) {
-      Object.defineProperty(this, "invalidated", {
-        value: new ConstraintMap(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).invalidated = new ConstraintMap();
       for (let i = 0, n = invalidated.size; i < n; i += 1) {
         const symbol = invalidated.getEntry(i)![0];
         const row = this.rows.get(symbol);
@@ -502,21 +475,13 @@ export class ConstraintSolver implements ConstraintScope {
     // Create and add the artificial variable to the tableau.
     const artificial = new ConstraintSlack();
     this.rows.set(artificial, row.clone());
-    Object.defineProperty(this, "artificial", {
-      value: row.clone(),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).artificial = row.clone();
 
     // Optimize the artificial objective. This is successful
     // only if the artificial objective is optimized to zero.
     this.optimize(this.artificial!);
     const success = Math.abs(this.artificial!.constant) < Equivalent.Epsilon;
-    Object.defineProperty(this, "artificial", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).artificial = null;
 
     // If the artificial variable is basic, pivot the row so that
     // it becomes non-basic. If the row is constant, exit early.

@@ -18,17 +18,13 @@
 import {Diagnostic} from "../source/Diagnostic";
 
 export class ParserException extends Error {
-  readonly diagnostic!: Diagnostic | null;
-
   constructor(message?: Diagnostic | string) {
     super(message instanceof Diagnostic ? message.message : message);
     Object.setPrototypeOf(this, ParserException.prototype);
-    Object.defineProperty(this, "diagnostic", {
-      value: message instanceof Diagnostic ? message : null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.diagnostic = message instanceof Diagnostic ? message : null;
   }
+
+  readonly diagnostic: Diagnostic | null;
 
   override toString(): string {
     if (this.diagnostic !== null) {

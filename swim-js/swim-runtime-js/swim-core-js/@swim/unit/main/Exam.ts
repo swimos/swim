@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Values, Assert} from "@swim/util";
+import {Mutable, Values, Assert} from "@swim/util";
 import {TestException} from "./TestException";
 import type {TestOptions} from "./Test";
 import type {Spec} from "./Spec";
@@ -29,53 +29,37 @@ export type ExamStatus = "passing" | "failing" | "pending";
 
 export class Exam implements Assert {
   constructor(report: Report, spec: Spec, name: string, options: TestOptions) {
-    Object.defineProperty(this, "report", {
-      value: report,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "spec", {
-      value: spec,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "name", {
-      value: name,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "options", {
-      value: options,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "status", {
-      value: "passing",
-      enumerable: true,
-      configurable: true,
-    });
+    this.report = report;
+    this.spec = spec;
+    this.name = name;
+    this.options = options;
+    this.status = "passing";
   }
 
   /**
    * The unit test `Report` to which this `Exam` sends results.
    */
-  readonly report!: Report;
+  readonly report: Report;
 
   /**
    * The `Spec` that created this `Exam`.
    */
-  readonly spec!: Spec;
+  readonly spec: Spec;
 
   /**
    * The name of the test that this `Exam` is evaluating.
    */
-  readonly name!: string;
+  readonly name: string;
 
   /**
    * Returns the options that govern the behavior of this `Exam`.
    */
-  readonly options!: TestOptions;
+  readonly options: TestOptions;
 
   /**
    * Returns the current `Passing`/`Failing`/`Pending` status of this `Exam`.
    */
-  readonly status!: ExamStatus;
+  readonly status: ExamStatus;
 
   /**
    * Makes a comment about the circumstances of the test case.
@@ -92,17 +76,9 @@ export class Exam implements Assert {
    */
   proove(proof: Proof): void {
     if (!proof.isValid()) {
-      Object.defineProperty(this, "status", {
-        value: "failing",
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).status = "failing";
     } else if (proof.isPending()) {
-      Object.defineProperty(this, "status", {
-        value: "pending",
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).status = "pending";
     }
     if (typeof this.spec.onProof === "function") {
       this.spec.onProof(this.report, this, proof);

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator, LinearRange} from "@swim/mapping";
 import {DateTime} from "../DateTime";
 import {TimeDomain} from "./TimeDomain";
@@ -40,14 +41,8 @@ export const TimeScaleInterpolator = function (s0: TimeScale, s1: TimeScale): In
     return TimeScale(domain, range);
   } as Interpolator<TimeScale>;
   Object.setPrototypeOf(interpolator, TimeScaleInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: s0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: s1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = s0;
+  (interpolator as Mutable<typeof interpolator>)[1] = s1;
   return interpolator;
 } as {
   (s0: TimeScale, s1: TimeScale): Interpolator<TimeScale>;

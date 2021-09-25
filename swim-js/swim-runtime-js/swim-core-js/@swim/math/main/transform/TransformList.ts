@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Constructors} from "@swim/util";
+import {Mutable, Murmur3, Constructors} from "@swim/util";
 import type {Output} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item, Value, Record} from "@swim/structure";
@@ -25,18 +25,11 @@ import {TransformListInterpolator} from "../"; // forward import
 export class TransformList extends Transform {
   constructor(transforms: ReadonlyArray<Transform>) {
     super();
-    Object.defineProperty(this, "transforms", {
-      value: transforms,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.transforms = transforms;
+    this.stringValue = void 0;
   }
 
-  readonly transforms!: ReadonlyArray<Transform>;
+  readonly transforms: ReadonlyArray<Transform>;
 
   override transform(that: Transform): Transform;
   override transform(x: number, y: number): R2Point;
@@ -219,7 +212,7 @@ export class TransformList extends Transform {
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   override toString(): string {
     let stringValue = this.stringValue;
@@ -235,11 +228,7 @@ export class TransformList extends Transform {
       } else {
         stringValue = "none";
       }
-      Object.defineProperty(this, "stringValue", {
-        value: stringValue,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = stringValue;
     }
     return stringValue;
   }

@@ -28,6 +28,7 @@ export class Bool extends Value {
     });
     Object.defineProperty(this, "hashValue", {
       value: Strings.hash(value ? "true" : "false"),
+      enumerable: true,
     });
   }
 

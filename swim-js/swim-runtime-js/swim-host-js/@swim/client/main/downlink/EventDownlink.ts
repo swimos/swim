@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {AnyValue, Value} from "@swim/structure";
 import type {AnyUri, Uri} from "@swim/uri";
 import type {DownlinkContext} from "./DownlinkContext";
@@ -81,11 +82,7 @@ export class EventDownlink extends Downlink {
       model.addDownlink(this);
       this.context.openDownlink(model);
     }
-    Object.defineProperty(this, "model", {
-      value: model as EventDownlinkModel,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).model = model as EventDownlinkModel;
     if (this.owner !== null) {
       this.owner.addDownlink(this);
     }

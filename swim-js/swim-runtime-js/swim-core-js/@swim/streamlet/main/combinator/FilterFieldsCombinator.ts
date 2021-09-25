@@ -18,14 +18,11 @@ import {FilterFieldsOperator} from "./FilterFieldsOperator";
 export class FilterFieldsCombinator<K, V, I> extends FilterFieldsOperator<K, V, I> {
   constructor(func: FilterFieldsFunction<K, V>) {
     super();
-    Object.defineProperty(this, "func", {
-      value: func,
-      enumerable: true,
-    });
+    this.func = func;
   }
 
   /** @hidden */
-  readonly func!: FilterFieldsFunction<K, V>;
+  readonly func: FilterFieldsFunction<K, V>;
 
   override evaluate(key: K, value: V): boolean {
     const func = this.func;

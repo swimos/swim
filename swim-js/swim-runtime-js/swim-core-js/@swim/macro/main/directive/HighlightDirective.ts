@@ -18,15 +18,12 @@ import type {ProcessorContext} from "../processor/ProcessorContext";
 import {Directive} from "./Directive";
 
 export class HighlightDirective extends Directive {
-  readonly prism!: typeof import("prismjs");
-
   constructor(prism: typeof import("prismjs")) {
     super();
-    Object.defineProperty(this, "prism", {
-      value: prism,
-      enumerable: true,
-    });
+    this.prism = prism;
   }
+
+  readonly prism: typeof import("prismjs");
 
   override evaluate(model: Item, params: Value, context: ProcessorContext): Item {
     const language = params.stringValue();

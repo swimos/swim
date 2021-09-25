@@ -12,23 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Cursor} from "@swim/util";
+import {Mutable, Cursor} from "@swim/util";
 import type {Item} from "./Item";
 import type {Record} from "./Record";
 
 /** @hidden */
 export class RecordCursor extends Cursor<Item> {
-  /** @hidden */
-  readonly record!: Record;
-  /** @hidden */
-  readonly lower!: number;
-  /** @hidden */
-  readonly upper!: number;
-  /** @hidden */
-  readonly index!: number;
-  /** @hidden */
-  readonly direction!: number;
-
   constructor(record: Record, lower?: number, upper?: number, index?: number) {
     super();
     if (lower === void 0) {
@@ -40,40 +29,34 @@ export class RecordCursor extends Cursor<Item> {
     if (index === void 0) {
       index = lower;
     }
-    Object.defineProperty(this, "record", {
-      value: record,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "lower", {
-      value: lower,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "upper", {
-      value: upper,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "index", {
-      value: index,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "direction", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.record = record;
+    this.lower = lower;
+    this.upper = upper;
+    this.index = index;
+    this.direction = 0;
   }
+
+  /** @hidden */
+  readonly record: Record;
+
+  /** @hidden */
+  readonly lower: number;
+
+  /** @hidden */
+  readonly upper: number;
+
+  /** @hidden */
+  readonly index: number;
+
+  /** @hidden */
+  readonly direction: number;
 
   override isEmpty(): boolean {
     return this.index >= this.upper;
   }
 
   override head(): Item {
-    Object.defineProperty(this, "direction", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).direction = 0;
     if (this.index < this.upper) {
       return this.record.getItem(this.index);
     } else {
@@ -82,28 +65,17 @@ export class RecordCursor extends Cursor<Item> {
   }
 
   override step(): void {
-    Object.defineProperty(this, "direction", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
-    if (this.index < this.upper) {
-      Object.defineProperty(this, "index", {
-        value: this.index + 1,
-        enumerable: true,
-        configurable: true,
-      });
+    (this as Mutable<this>).direction = 0;
+    const index = this.index;
+    if (index < this.upper) {
+      (this as Mutable<this>).index = index + 1;
     } else {
       throw new Error("empty");
     }
   }
 
   override skip(count: number): void {
-    Object.defineProperty(this, "index", {
-      value: Math.min(Math.max(this.lower, this.index + count, this.upper)),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).index = Math.min(Math.max(this.lower, this.index + count, this.upper));
   }
 
   override hasNext(): boolean {
@@ -115,25 +87,13 @@ export class RecordCursor extends Cursor<Item> {
   }
 
   override next(): {value?: Item, done: boolean} {
-    Object.defineProperty(this, "direction", {
-      value: 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).direction = 1;
     const index = this.index;
     if (index < this.upper) {
-      Object.defineProperty(this, "index", {
-        value: index + 1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).index = index + 1;
       return {value: this.record.getItem(index), done: this.index === this.upper};
     } else {
-      Object.defineProperty(this, "index", {
-        value: this.upper,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).index = this.upper;
       return {done: true};
     }
   }
@@ -147,25 +107,13 @@ export class RecordCursor extends Cursor<Item> {
   }
 
   override previous(): {value?: Item, done: boolean} {
-    Object.defineProperty(this, "direction", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).direction = -1;
     const index = this.index - 1;
     if (index >= this.lower) {
-      Object.defineProperty(this, "index", {
-        value: index,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).index = index;
       return {value: this.record.getItem(index), done: index === this.lower};
     } else {
-      Object.defineProperty(this, "index", {
-        value: 0,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).index = 0;
       return {done: true};
     }
   }
@@ -179,18 +127,12 @@ export class RecordCursor extends Cursor<Item> {
   }
 
   override delete(): void {
+    let index = this.index;
     if (this.direction > 0) {
-      Object.defineProperty(this, "index", {
-        value: this.index - 1,
-        enumerable: true,
-        configurable: true,
-      });
+      index -= 1;
+      (this as Mutable<this>).index = index;
     }
-    this.record.splice(this.index, 1);
-    Object.defineProperty(this, "direction", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.record.splice(index, 1);
+    (this as Mutable<this>).direction = 0;
   }
 }

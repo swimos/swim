@@ -32,23 +32,17 @@ export type R2PointTuple = [number, number];
 export class R2Point extends R2Shape implements Interpolate<R2Point>, HashCode, Equivalent, Debug {
   constructor(x: number, y: number) {
     super();
-    Object.defineProperty(this, "x", {
-      value: x,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y", {
-      value: y,
-      enumerable: true,
-    });
+    this.x = x;
+    this.y = y;
   }
 
   isDefined(): boolean {
     return isFinite(this.x) && isFinite(this.y);
   }
 
-  readonly x!: number;
+  readonly x: number;
 
-  readonly y!: number;
+  readonly y: number;
 
   override get xMin(): number {
     return this.x;

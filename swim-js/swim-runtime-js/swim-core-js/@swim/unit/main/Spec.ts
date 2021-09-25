@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {TestOptions} from "./Test";
 import type {SpecTest} from "./SpecTest";
 import type {SpecUnit} from "./SpecUnit";
@@ -35,34 +36,22 @@ export interface SpecClass {
  */
 export class Spec {
   constructor() {
-    Object.defineProperty(this, "name", {
-      value: this.constructor.name,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "parent", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.name = this.constructor.name;
+    this.parent = null;
   }
 
   /**
    * The name of this `Spec`; either a custom `name` set via the [[withName]]
    * method, or the name of this spec's constructor function.
    */
-  readonly name!: string;
+  readonly name: string;
 
   /**
    * Sets the name of this `Spec`, and returns `this`.  If `name` is `undefined`,
    * sets this spec's name to the name of its constructor function.
    */
   withName(name: string | undefined): this {
-    Object.defineProperty(this, "name", {
-      value: name !== void 0 ? name : this.constructor.name,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).name = name !== void 0 ? name : this.constructor.name;
     return this;
   }
 
@@ -71,15 +60,11 @@ export class Spec {
    * [[UnitFunc child unit factory functions]], or `null` if this is
    * a root spec.
    */
-  readonly parent!: Spec | null;
+  readonly parent: Spec | null;
 
   /** @hidden */
   setParent(parent: Spec | null): void {
-    Object.defineProperty(this, "parent", {
-      value: parent,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).parent = parent;
   }
 
   /**

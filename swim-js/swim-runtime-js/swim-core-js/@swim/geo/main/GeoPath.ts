@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent, Equals, Arrays} from "@swim/util";
+import {Equivalent, Equals, Mutable, Arrays} from "@swim/util";
 import {Debug, Format, Output} from "@swim/codec";
 import {R2Spline, R2Path} from "@swim/math";
 import type {GeoProjection} from "./GeoProjection";
@@ -30,22 +30,15 @@ export type GeoPathSplines = ReadonlyArray<AnyGeoSpline>;
 export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
   constructor(splines: ReadonlyArray<GeoSpline>) {
     super();
-    Object.defineProperty(this, "splines", {
-      value: splines,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "boundingBox", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.splines = splines;
+    this.boundingBox = null;
   }
 
   isDefined(): boolean {
     return this.splines.length !== 0;
   }
 
-  readonly splines!: ReadonlyArray<GeoSpline>;
+  readonly splines: ReadonlyArray<GeoSpline>;
 
   override get lngMin(): number {
     return this.bounds.lngMin;
@@ -172,7 +165,7 @@ export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
   }
 
   /** @hidden */
-  readonly boundingBox!: GeoBox | null;
+  readonly boundingBox: GeoBox | null;
 
   override get bounds(): GeoBox {
     let boundingBox = this.boundingBox;
@@ -190,11 +183,7 @@ export class GeoPath extends GeoShape implements Equals, Equivalent, Debug {
         latMax = Math.max(spline.latMax, latMax);
       }
       boundingBox = new GeoBox(lngMin, latMin, lngMax, latMax);
-      Object.defineProperty(this, "boundingBox", {
-        value: boundingBox,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).boundingBox = boundingBox;
     }
     return boundingBox;
   }

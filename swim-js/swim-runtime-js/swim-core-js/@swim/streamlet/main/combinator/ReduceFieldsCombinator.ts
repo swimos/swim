@@ -18,28 +18,19 @@ export class ReduceFieldsCombinator<K, V, I, O> extends ReduceFieldsOperator<K, 
   constructor(identity: O, accumulator: (result: O, element: V) => O,
               combiner: (result: O, result2: O) => O) {
     super();
-    Object.defineProperty(this, "identity", {
-      value: identity,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "accumulator", {
-      value: accumulator,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "combiner", {
-      value: combiner,
-      enumerable: true,
-    });
+    this.identity = identity;
+    this.accumulator = accumulator;
+    this.combiner = combiner;
   }
 
   override get(): O {
     return this.state.reduced(this.identity, this.accumulator, this.combiner);
   }
 
-  override readonly identity!: O;
+  override readonly identity: O;
 
   /** @hidden */
-  readonly accumulator!: (result: O, element: V) => O;
+  readonly accumulator: (result: O, element: V) => O;
 
   override accumulate(result: O, value: V): O {
     const accumulator = this.accumulator;
@@ -47,7 +38,7 @@ export class ReduceFieldsCombinator<K, V, I, O> extends ReduceFieldsOperator<K, 
   }
 
   /** @hidden */
-  readonly combiner!: (result: O, result2: O) => O;
+  readonly combiner: (result: O, result2: O) => O;
 
   override combine(result: O, value: O): O {
     const combiner = this.combiner;

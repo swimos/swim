@@ -17,18 +17,7 @@ import type {STreePage} from "./STreePage";
 
 /** @hidden */
 export abstract class STreeContext<V, I> {
-  get pageSplitSize(): number {
-    return 32;
-  }
-
-  set pageSplitSize(pageSplitSize: number) {
-    Object.defineProperty(this, "pageSplitSize", {
-      value: pageSplitSize,
-      configurable: true,
-      enumerable: true,
-      writable: true,
-    });
-  }
+  pageSplitSize: number = 32;
 
   identify(value: V): I {
     const id = new Uint8Array(6);

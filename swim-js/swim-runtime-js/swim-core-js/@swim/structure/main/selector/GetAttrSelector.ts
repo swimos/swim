@@ -25,19 +25,13 @@ import {AnyInterpreter, Interpreter} from "../"; // forward import
 export class GetAttrSelector extends Selector {
   constructor(key: Text, then: Selector) {
     super();
-    Object.defineProperty(this, "item", {
-      value: key,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "then", {
-      value: then,
-      enumerable: true,
-    });
+    this.item = key;
+    this.then = then;
   }
 
-  readonly item!: Text;
+  readonly item: Text;
 
-  override readonly then!: Selector;
+  override readonly then: Selector;
 
   override forSelected<T>(interpreter: Interpreter,
                           callback: (interpreter: Interpreter) => T | undefined): T | undefined;

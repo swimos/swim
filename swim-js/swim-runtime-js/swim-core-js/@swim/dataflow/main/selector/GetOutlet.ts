@@ -19,19 +19,13 @@ import {AbstractOutlet, OutletInlet, OutletMapInlet} from "@swim/streamlet";
 export class GetOutlet extends AbstractOutlet<Value> {
   constructor() {
     super();
-    Object.defineProperty(this, "keyInlet", {
-      value: new OutletInlet<Value>(this),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "mapInlet", {
-      value: new OutletMapInlet<Value, Value, unknown>(this),
-      enumerable: true,
-    });
+    this.keyInlet = new OutletInlet<Value>(this);
+    this.mapInlet = new OutletMapInlet<Value, Value, unknown>(this);
   }
 
-  readonly keyInlet!: OutletInlet<Value>;
+  readonly keyInlet: OutletInlet<Value>;
 
-  readonly mapInlet!: OutletMapInlet<Value, Value, unknown>;
+  readonly mapInlet: OutletMapInlet<Value, Value, unknown>;
 
   override get(): Value {
     const keyInput = this.keyInlet.input;

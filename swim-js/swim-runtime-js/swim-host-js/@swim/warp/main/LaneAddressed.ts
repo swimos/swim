@@ -27,35 +27,26 @@ export interface LaneAddressedConstructor<E extends LaneAddressed<E>> {
 export abstract class LaneAddressed<E extends LaneAddressed<E>> extends Envelope {
   constructor(node: Uri, lane: Uri, body: Value) {
     super();
-    Object.defineProperty(this, "node", {
-      value: node,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "lane", {
-      value: lane,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "body", {
-      value: body,
-      enumerable: true,
-    });
+    this.node = node;
+    this.lane = lane;
+    this.body = body;
   }
 
-  override readonly node!: Uri;
+  override readonly node: Uri;
 
   override withNode(node: AnyUri): E {
     node = Uri.fromAny(node);
     return this.copy(node as Uri, this.lane, this.body);
   }
 
-  override readonly lane!: Uri;
+  override readonly lane: Uri;
 
   override withLane(lane: AnyUri): E {
     lane = Uri.fromAny(lane);
     return this.copy(this.node, lane as Uri, this.body);
   }
 
-  override readonly body!: Value;
+  override readonly body: Value;
 
   override withBody(body: AnyValue): E {
     body = Value.fromAny(body);

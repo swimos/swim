@@ -19,13 +19,10 @@ import {Directive} from "./Directive";
 export class ExpandDirective extends Directive {
   constructor(template: Item) {
     super();
-    Object.defineProperty(this, "template", {
-      value: template,
-      enumerable: true,
-    });
+    this.template = template;
   }
 
-  readonly template!: Item;
+  readonly template: Item;
 
   override evaluate(model: Item, params: Value, context: ProcessorContext): Item {
     return this.expand(this.template, model, params, context);

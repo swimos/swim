@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent} from "@swim/util";
+import {Equivalent, Mutable} from "@swim/util";
 import type {Interpolate} from "../interpolate/Interpolate";
 import type {Interpolator} from "../interpolate/Interpolator";
 import {LinearDomain} from "./LinearDomain";
@@ -55,14 +55,8 @@ export const LinearScale = function (domain: LinearDomain, range: LinearRange): 
     return scale.range(scale.domain(x));
   } as LinearScale;
   Object.setPrototypeOf(scale, LinearScale.prototype);
-  Object.defineProperty(scale, "domain", {
-    value: domain,
-    enumerable: true,
-  });
-  Object.defineProperty(scale, "range", {
-    value: range,
-    enumerable: true,
-  });
+  (scale as Mutable<typeof scale>).domain = domain;
+  (scale as Mutable<typeof scale>).range = range;
   return scale;
 } as {
   (domain: LinearDomain, range: LinearRange): LinearScale;

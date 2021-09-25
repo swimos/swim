@@ -18,26 +18,17 @@ import {Inlet, AbstractOutlet, OutletInlet} from "@swim/streamlet";
 export class InvokeOutlet extends AbstractOutlet<Value> {
   constructor(scope: Record) {
     super();
-    Object.defineProperty(this, "scope", {
-      value: scope,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "funcInlet", {
-      value: new OutletInlet<Value>(this),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "argsInlet", {
-      value: new OutletInlet<Value>(this),
-      enumerable: true,
-    });
+    this.scope = scope;
+    this.funcInlet = new OutletInlet<Value>(this);
+    this.argsInlet = new OutletInlet<Value>(this);
   }
 
   /** @hidden */
-  readonly scope!: Record;
+  readonly scope: Record;
 
-  readonly funcInlet!: Inlet<Value>;
+  readonly funcInlet: Inlet<Value>;
 
-  readonly argsInlet!: Inlet<Value>;
+  readonly argsInlet: Inlet<Value>;
 
   override get(): Value {
     const funcInput = this.funcInlet.input;

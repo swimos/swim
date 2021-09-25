@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {Attr} from "./Attr";
 import type {Value} from "./Value";
@@ -39,14 +40,8 @@ export const AttrInterpolator = function (y0: Attr, y1: Attr): AttrInterpolator 
     return Attr.of(key, value);
   } as AttrInterpolator;
   Object.setPrototypeOf(interpolator, AttrInterpolator.prototype);
-  Object.defineProperty(interpolator, "keyInterpolator", {
-    value: y0.key.interpolateTo(y1.key),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "valueInterpolator", {
-    value: y0.value.interpolateTo(y1.value),
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).keyInterpolator = y0.key.interpolateTo(y1.key);
+  (interpolator as Mutable<typeof interpolator>).valueInterpolator = y0.value.interpolateTo(y1.value);
   return interpolator;
 } as {
   (y0: Attr, y1: Attr): AttrInterpolator;

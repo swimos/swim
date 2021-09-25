@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {Angle} from "./Angle";
 
@@ -23,14 +24,8 @@ export const AngleInterpolator = function (a0: Angle, a1: Angle): Interpolator<A
     return Angle.create(a0.value + u * (a1.value - a0.value), a1.units);
   } as Interpolator<Angle>;
   Object.setPrototypeOf(interpolator, AngleInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: a0.to(a1.units),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: a1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = a0.to(a1.units);
+  (interpolator as Mutable<typeof interpolator>)[1] = a1;
   return interpolator;
 } as {
   (a0: Angle, a1: Angle): Interpolator<Angle>;

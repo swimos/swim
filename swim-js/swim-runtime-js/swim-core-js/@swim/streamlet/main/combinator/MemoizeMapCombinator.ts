@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Iterator} from "@swim/util";
+import type {Mutable, Iterator} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {KeyEffect} from "../KeyEffect";
 import type {MapOutlet} from "../MapOutlet";
@@ -21,23 +21,15 @@ import {AbstractMapInoutlet} from "../AbstractMapInoutlet";
 export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V, IO, IO> {
   constructor() {
     super();
-    Object.defineProperty(this, "state", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "cache", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
+    this.state = void 0;
+    this.cache = new BTree();
   }
 
   /** @hidden */
-  readonly state!: IO | undefined;
+  readonly state: IO | undefined;
 
   /** @hidden */
-  readonly cache!: BTree<K, V>;
+  readonly cache: BTree<K, V>;
 
   override has(key: K): boolean {
     return this.cache.has(key);
@@ -51,11 +43,7 @@ export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
       const input = this.input;
       if (state === void 0 && input !== null) {
         state = input.get();
-        Object.defineProperty(this, "state", {
-          value: state,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).state = state;
       }
       return state;
     } else {
@@ -73,34 +61,18 @@ export class MemoizeMapCombinator<K, V, IO> extends AbstractMapInoutlet<K, V, V,
       if (input !== null) {
         const value = input.get(key);
         if (value !== void 0) {
-          Object.defineProperty(this, "cache", {
-            value: this.cache.updated(key, value),
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).cache = this.cache.updated(key, value);
         } else {
-          Object.defineProperty(this, "cache", {
-            value: this.cache.removed(key),
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).cache = this.cache.removed(key);
         }
       }
     } else if (effect === KeyEffect.Remove) {
-      Object.defineProperty(this, "cache", {
-        value: this.cache.removed(key),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).cache = this.cache.removed(key);
     }
   }
 
   protected override onRecohere(version: number): void {
-    Object.defineProperty(this, "state", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).state = void 0;
   }
 
   override memoize(): MapOutlet<K, V, IO> {

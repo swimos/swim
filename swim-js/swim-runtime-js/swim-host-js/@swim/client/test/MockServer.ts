@@ -14,36 +14,26 @@
 
 import * as http from "http";
 import * as ws from "ws";
+import type {Mutable} from "@swim/util";
 import {AnyUri, Uri} from "@swim/uri";
 import {Envelope} from "@swim/warp";
 import {WarpClient} from "@swim/client";
 
 export class MockServer {
-  constructor(hostUri: AnyUri = "ws://localhost:5619", client: WarpClient = new WarpClient()) {
-    Object.defineProperty(this, "hostUri", {
-      value: Uri.fromAny(hostUri),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "client", {
-      value: client,
-      enumerable: true,
-    });
+  constructor(hostUri?: AnyUri, client?: WarpClient) {
+    if (hostUri === void 0) {
+      hostUri = "ws://localhost:5619";
+    }
+    if (client === void 0) {
+      client = new WarpClient();
+    }
 
-    Object.defineProperty(this, "httpServer", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "wsServer", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "socket", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.hostUri = Uri.fromAny(hostUri);
+    this.client = client;
+
+    this.httpServer = null;
+    this.wsServer = null;
+    this.socket = null;
 
     this.onOpen = this.onOpen.bind(this);
     this.onMessage = this.onMessage.bind(this);
@@ -51,18 +41,18 @@ export class MockServer {
     this.onError = this.onError.bind(this);
   }
 
-  readonly hostUri!: Uri;
+  readonly hostUri: Uri;
 
-  readonly client!: WarpClient;
-
-  /** @hidden */
-  readonly httpServer!: http.Server | null;
+  readonly client: WarpClient;
 
   /** @hidden */
-  readonly wsServer!: ws.Server | null;
+  readonly httpServer: http.Server | null;
 
   /** @hidden */
-  readonly socket!: ws | null;
+  readonly wsServer: ws.Server | null;
+
+  /** @hidden */
+  readonly socket: ws | null;
 
   resolve(relative: AnyUri): Uri {
     relative = Uri.fromAny(relative);
@@ -80,11 +70,7 @@ export class MockServer {
     const socket = this.socket;
     if (socket !== null) {
       socket.close();
-      Object.defineProperty(this, "socket", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).socket = null;
     }
   }
 
@@ -93,19 +79,11 @@ export class MockServer {
                     reject: (reason?: unknown) => void) => void): Promise<T | void> {
     return new Promise((resolve: (result?: T) => void, reject: (reason?: unknown) => void): void => {
         const httpServer = http.createServer();
-        Object.defineProperty(this, "httpServer", {
-          value: httpServer,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).httpServer = httpServer;
         httpServer.listen(this.hostUri.portNumber, (): void => {
           try {
             const wsServer = new ws.Server({port: void 0, server: httpServer});
-            Object.defineProperty(this, "wsServer", {
-              value: wsServer,
-              enumerable: true,
-              configurable: true,
-            });
+            (this as Mutable<this>).wsServer = wsServer;
             wsServer.on("connection", this.onOpen);
             callback(this, this.client, resolve, reject);
           } catch (error) {
@@ -133,30 +111,18 @@ export class MockServer {
     const socket = this.socket;
     if (socket !== null) {
       socket.terminate();
-      Object.defineProperty(this, "socket", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).socket = null;
     }
     const wsServer = this.wsServer;
     if (wsServer !== null) {
       wsServer.close();
-      Object.defineProperty(this, "wsServer", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).wsServer = null;
     }
     const httpServer = this.httpServer;
     if (httpServer !== null) {
       return new Promise((resolve: () => void, reject: (reason: unknown) => void): void => {
         httpServer.close((): void => {
-          Object.defineProperty(this, "httpServer", {
-            value: null,
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).httpServer = null;
           resolve();
         });
       });
@@ -169,11 +135,7 @@ export class MockServer {
     socket.onmessage = this.onMessage;
     socket.onclose = this.onClose;
     socket.onerror = this.onError;
-    Object.defineProperty(this, "socket", {
-      value: socket,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).socket = socket;
   }
 
   onMessage(message: { data: ws.Data; type: string; target: ws }): void {
@@ -191,19 +153,15 @@ export class MockServer {
       socket.onmessage = void 0 as any;
       socket.onclose = void 0 as any;
       socket.onerror = void 0 as any;
-      Object.defineProperty(this, "socket", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).socket = null;
     }
   }
 
   onError(): void {
-    // stub
+    // hook
   }
 
   onEnvelope(envelope: Envelope): void {
-    // stub
+    // hook
   }
 }

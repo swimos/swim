@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Domain, Interpolate, Interpolator} from "@swim/mapping";
 import {AnyDateTime, DateTime} from "../DateTime";
 import {TimeDomainInterpolator} from "./"; // forward import
@@ -44,14 +45,8 @@ export const TimeDomain = function (x0: DateTime, x1: DateTime): TimeDomain {
     return dt !== 0 ? (t.time - t0) / dt : 0;
   } as TimeDomain;
   Object.setPrototypeOf(domain, TimeDomain.prototype);
-  Object.defineProperty(domain, 0, {
-    value: x0,
-    enumerable: true,
-  });
-  Object.defineProperty(domain, 1, {
-    value: x1,
-    enumerable: true,
-  });
+  (domain as Mutable<typeof domain>)[0] = x0;
+  (domain as Mutable<typeof domain>)[1] = x1;
   return domain;
 } as {
   (x0: DateTime, x1: DateTime): TimeDomain;

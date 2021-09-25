@@ -26,25 +26,16 @@ import {NodeRef} from "./NodeRef";
 export class LaneRef extends BaseRef {
   constructor(context: RefContext, hostUri: Uri, nodeUri: Uri, laneUri: Uri) {
     super(context);
-    Object.defineProperty(this, "hostUri", {
-      value: hostUri,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "nodeUri", {
-      value: nodeUri,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "laneUri", {
-      value: laneUri,
-      enumerable: true,
-    });
+    this.hostUri = hostUri;
+    this.nodeUri = nodeUri;
+    this.laneUri = laneUri;
   }
 
-  override readonly hostUri!: Uri;
+  override readonly hostUri: Uri;
 
-  readonly nodeUri!: Uri;
+  readonly nodeUri: Uri;
 
-  readonly laneUri!: Uri;
+  readonly laneUri: Uri;
 
   override hostRef(hostUri: AnyUri): HostRef {
     hostUri = Uri.fromAny(hostUri);

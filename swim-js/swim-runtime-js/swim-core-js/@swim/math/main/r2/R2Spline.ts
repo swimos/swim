@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import {
   Debug,
   Format,
@@ -34,30 +34,16 @@ import {R2Box} from "../"; // forward import
 export class R2Spline extends R2Curve implements Debug {
   constructor(curves: ReadonlyArray<R2Curve>, closed: boolean) {
     super();
-    Object.defineProperty(this, "curves", {
-      value: curves,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "closed", {
-      value: closed,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "boundingBox", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "pathString", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.curves = curves;
+    this.closed = closed;
+    this.boundingBox = null;
+    this.pathString = void 0;
   }
 
-  readonly curves!: ReadonlyArray<R2Curve>;
+  readonly curves: ReadonlyArray<R2Curve>;
 
   /** @hidden */
-  readonly closed!: boolean;
+  readonly closed: boolean;
 
   isDefined(): boolean {
     return this.curves.length !== 0;
@@ -194,7 +180,7 @@ export class R2Spline extends R2Curve implements Debug {
   }
 
   /** @hidden */
-  readonly boundingBox!: R2Box | null;
+  readonly boundingBox: R2Box | null;
 
   override get bounds(): R2Box {
     let boundingBox = this.boundingBox;
@@ -212,11 +198,7 @@ export class R2Spline extends R2Curve implements Debug {
         yMax = Math.max(curve.yMax, yMax);
       }
       boundingBox = new R2Box(xMin, yMin, xMax, yMax);
-      Object.defineProperty(this, "boundingBox", {
-        value: boundingBox,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).boundingBox = boundingBox;
     }
     return boundingBox;
   }
@@ -281,7 +263,7 @@ export class R2Spline extends R2Curve implements Debug {
   }
 
   /** @hidden */
-  readonly pathString!: string | undefined;
+  readonly pathString: string | undefined;
 
   override toPathString(outputSettings?: AnyOutputSettings): string {
     let pathString: string | undefined;
@@ -290,11 +272,7 @@ export class R2Spline extends R2Curve implements Debug {
       this.writePath(output);
       pathString = output.bind();
       if (outputSettings === void 0) {
-        Object.defineProperty(this, "pathString", {
-          value: pathString,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).pathString = pathString;
       }
     }
     return pathString;

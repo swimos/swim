@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
+
 export type AnyConstraintStrength = ConstraintStrength | ConstraintStrengthInit;
 
 export type ConstraintStrengthInit = "required" | "strong" | "medium" | "weak";
@@ -30,35 +32,11 @@ export const ConstraintStrength = {} as {
   fromAny(strength: AnyConstraintStrength): ConstraintStrength;
 };
 
-Object.defineProperty(ConstraintStrength, "Required", {
-  value: 1001001000,
-  enumerable: true,
-  configurable: true,
-});
-
-Object.defineProperty(ConstraintStrength, "Strong", {
-  value: 1000000,
-  enumerable: true,
-  configurable: true,
-});
-
-Object.defineProperty(ConstraintStrength, "Medium", {
-  value: 1000,
-  enumerable: true,
-  configurable: true,
-});
-
-Object.defineProperty(ConstraintStrength, "Weak", {
-  value: 1,
-  enumerable: true,
-  configurable: true,
-});
-
-Object.defineProperty(ConstraintStrength, "Unbound", {
-  value: -1,
-  enumerable: true,
-  configurable: true,
-});
+(ConstraintStrength as Mutable<typeof ConstraintStrength>).Required = 1001001000;
+(ConstraintStrength as Mutable<typeof ConstraintStrength>).Strong = 1000000;
+(ConstraintStrength as Mutable<typeof ConstraintStrength>).Medium = 1000;
+(ConstraintStrength as Mutable<typeof ConstraintStrength>).Weak = 1;
+(ConstraintStrength as Mutable<typeof ConstraintStrength>).Unbound = -1;
 
 ConstraintStrength.clip = function (strength: ConstraintStrength): ConstraintStrength {
   return Math.min(Math.max(0, strength), ConstraintStrength.Required);

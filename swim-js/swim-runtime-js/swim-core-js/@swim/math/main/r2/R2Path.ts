@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent, Equals, Arrays} from "@swim/util";
+import {Equals, Equivalent, Mutable, Arrays} from "@swim/util";
 import {
   Debug,
   Format,
@@ -38,23 +38,12 @@ export type AnyR2Path = R2Path | string;
 export class R2Path extends R2Shape implements Equals, Equivalent, Debug {
   constructor(splines: ReadonlyArray<R2Spline>) {
     super();
-    Object.defineProperty(this, "splines", {
-      value: splines,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "boundingBox", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "pathString", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.splines = splines;
+    this.boundingBox = null;
+    this.pathString = void 0;
   }
 
-  readonly splines!: ReadonlyArray<R2Spline>;
+  readonly splines: ReadonlyArray<R2Spline>;
 
   isDefined(): boolean {
     return this.splines.length !== 0;
@@ -185,7 +174,7 @@ export class R2Path extends R2Shape implements Equals, Equivalent, Debug {
   }
 
   /** @hidden */
-  readonly boundingBox!: R2Box | null;
+  readonly boundingBox: R2Box | null;
 
   override get bounds(): R2Box {
     let boundingBox = this.boundingBox;
@@ -203,11 +192,7 @@ export class R2Path extends R2Shape implements Equals, Equivalent, Debug {
         yMax = Math.max(spline.yMax, yMax);
       }
       boundingBox = new R2Box(xMin, yMin, xMax, yMax);
-      Object.defineProperty(this, "boundingBox", {
-        value: boundingBox,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).boundingBox = boundingBox;
     }
     return boundingBox;
   }
@@ -242,7 +227,7 @@ export class R2Path extends R2Shape implements Equals, Equivalent, Debug {
   }
 
   /** @hidden */
-  readonly pathString!: string | undefined;
+  readonly pathString: string | undefined;
 
   toPathString(outputSettings?: AnyOutputSettings): string {
     let pathString: string | undefined;
@@ -251,11 +236,7 @@ export class R2Path extends R2Shape implements Equals, Equivalent, Debug {
       this.writePath(output);
       pathString = output.bind();
       if (outputSettings === void 0) {
-        Object.defineProperty(this, "pathString", {
-          value: pathString,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).pathString = pathString;
       }
     }
     return pathString;

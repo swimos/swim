@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Mark} from "../source/Mark";
 import {InputException} from "../input/InputException";
 import {AnyInputSettings, InputSettings} from "../input/InputSettings";
@@ -20,57 +21,28 @@ import {InputError} from "../input/InputError";
 
 /** @hidden */
 export class StringInput extends Input {
-  /** @hidden */
-  readonly string!: string;
-  /** @hidden */
-  readonly index!: number;
-  /** @hidden */
-  readonly part!: boolean;
-
   constructor(string: string, id: string | undefined, offset: number,
               line: number, column: number, settings: InputSettings,
               index: number, part: boolean) {
     super();
-    Object.defineProperty(this, "string", {
-      value: string,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "index", {
-      value: index,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "part", {
-      value: part,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "id", {
-      value: id,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "offset", {
-      value: offset,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "line", {
-      value: line,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "column", {
-      value: column,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    this.string = string;
+    this.index = index;
+    this.part = part;
+    this.id = id;
+    this.offset = offset;
+    this.line = line;
+    this.column = column;
+    this.settings = settings;
   }
+
+  /** @hidden */
+  readonly string: string;
+
+  /** @hidden */
+  readonly index: number;
+
+  /** @hidden */
+  readonly part: boolean;
 
   override isCont(): boolean {
     return this.index < this.string.length;
@@ -93,11 +65,7 @@ export class StringInput extends Input {
   }
 
   override asPart(part: boolean): Input {
-    Object.defineProperty(this, "part", {
-      value: part,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).part = part;
     return this;
   }
 
@@ -120,33 +88,13 @@ export class StringInput extends Input {
     const index = this.index;
     if (index < string.length) {
       const c = string.codePointAt(index);
-      Object.defineProperty(this, "index", {
-        value: string.offsetByCodePoints(index, 1),
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "offset", {
-        value: this.offset + (this.index - index),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).index = string.offsetByCodePoints(index, 1);
+      (this as Mutable<this>).offset += this.index - index;
       if (c === 10/*'\n'*/) {
-        Object.defineProperty(this, "line", {
-          value: this.line + 1,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "column", {
-          value: 1,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).line += 1;
+        (this as Mutable<this>).column = 1;
       } else {
-        Object.defineProperty(this, "column", {
-          value: this.column + 1,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).column += 1;
       }
       return this;
     } else {
@@ -159,64 +107,28 @@ export class StringInput extends Input {
     if (mark !== void 0) {
       const index = this.index + (mark.offset - this.offset);
       if (0 <= index && index <= this.string.length) {
-        Object.defineProperty(this, "index", {
-          value: index,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "offset", {
-          value: mark.offset,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "line", {
-          value: mark.line,
-          enumerable: true,
-          configurable: true,
-        });
-        Object.defineProperty(this, "column", {
-          value: mark.column,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).index = index;
+        (this as Mutable<this>).offset = mark.offset;
+        (this as Mutable<this>).line = mark.line;
+        (this as Mutable<this>).column = mark.column;
         return this;
       } else {
         const error = new InputException("invalid seek to " + mark);
         return new InputError(error, this.id, this.mark, this.settings);
       }
     } else {
-      Object.defineProperty(this, "index", {
-        value: 0,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "offset", {
-        value: 0,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "line", {
-        value: 1,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "column", {
-        value: 1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).index = 0;
+      (this as Mutable<this>).offset = 0;
+      (this as Mutable<this>).line = 1;
+      (this as Mutable<this>).column = 1;
       return this;
     }
   }
 
-  readonly id!: string | undefined;
+  readonly id: string | undefined;
 
   override withId(id: string | undefined): Input {
-    Object.defineProperty(this, "id", {
-      value: id,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).id = id;
     return this;
   }
 
@@ -225,39 +137,23 @@ export class StringInput extends Input {
   }
 
   override withMark(mark: Mark): Input {
-    Object.defineProperty(this, "offset", {
-      value: mark.offset,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "line", {
-      value: mark.line,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "column", {
-      value: mark.column,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).offset = mark.offset;
+    (this as Mutable<this>).line = mark.line;
+    (this as Mutable<this>).column = mark.column;
     return this;
   }
 
-  override readonly offset!: number;
+  override readonly offset: number;
 
-  override readonly line!: number;
+  override readonly line: number;
 
-  override readonly column!: number;
+  override readonly column: number;
 
-  override readonly settings!: InputSettings;
+  override readonly settings: InputSettings;
 
   override withSettings(settings: AnyInputSettings): Input {
     settings = InputSettings.fromAny(settings);
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).settings = settings;
     return this;
   }
 

@@ -20,20 +20,14 @@ import {Form} from "./Form";
 export class TagForm<T, U = never> extends Form<T, U> {
   constructor(form: Form<T, U>, tag: string) {
     super();
-    Object.defineProperty(this, "form", {
-      value: form,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "tag", {
-      value: tag,
-      enumerable: true,
-    });
+    this.form = form;
+    this.tag = tag;
   }
 
   /** @hidden */
-  readonly form!: Form<T, U>;
+  readonly form: Form<T, U>;
 
-  override readonly tag!: string;
+  override readonly tag: string;
 
   override withTag(tag: string | undefined): Form<T, U> {
      if (tag !== void 0 && tag !== this.tag) {

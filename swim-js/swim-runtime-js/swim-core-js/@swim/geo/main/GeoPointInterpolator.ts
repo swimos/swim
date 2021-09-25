@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {GeoPoint} from "./GeoPoint";
 
@@ -54,14 +55,8 @@ export const GeoPointInterpolator = function (p0: GeoPoint, p1: GeoPoint): Inter
     return new GeoPoint(lng, lat);
   } as Interpolator<GeoPoint>;
   Object.setPrototypeOf(interpolator, GeoPointInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: p0.normalized(),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: p1.normalized(),
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = p0.normalized();
+  (interpolator as Mutable<typeof interpolator>)[1] = p1.normalized();
   return interpolator;
 } as {
   (p0: GeoPoint, p1: GeoPoint): Interpolator<GeoPoint>;

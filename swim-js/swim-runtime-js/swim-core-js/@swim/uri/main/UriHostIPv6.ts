@@ -21,18 +21,10 @@ export class UriHostIPv6 extends UriHost {
   /** @hidden */
   constructor(address: string) {
     super();
-    Object.defineProperty(this, "address", {
-      value: address,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.address = address;
   }
 
-  override readonly address!: string;
+  override readonly address: string;
 
   override get ipv6(): string {
     return this.address;
@@ -45,30 +37,13 @@ export class UriHostIPv6 extends UriHost {
   }
 
   override display<T>(output: Output<T>): Output<T> {
-    const stringValue = this.stringValue;
-    if (stringValue !== void 0) {
-      output = output.write(stringValue);
-    } else {
-      output = output.write(91/*'['*/);
-      output = Uri.writeHostLiteral(output, this.address);
-      output = output.write(93/*']'*/);
-    }
+    output = output.write(91/*'['*/);
+    output = Uri.writeHostLiteral(output, this.address);
+    output = output.write(93/*']'*/);
     return output;
   }
 
-  /** @hidden */
-  readonly stringValue!: string | undefined;
-
   override toString(): string {
-    let stringValue = this.stringValue;
-    if (stringValue === void 0) {
-      stringValue = "[" + this.address + "]";
-      Object.defineProperty(this, "stringValue", {
-        value: stringValue,
-        enumerable: true,
-        configurable: true,
-      });
-    }
-    return stringValue;
+    return "[" + this.address + "]";
   }
 }

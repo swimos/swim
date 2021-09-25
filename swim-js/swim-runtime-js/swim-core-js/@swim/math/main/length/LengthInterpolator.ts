@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {Length} from "./Length";
 
@@ -23,14 +24,8 @@ export const LengthInterpolator = function (l0: Length, l1: Length): Interpolato
     return Length.create(l0.value + u * (l1.value - l0.value), l1.units);
   } as Interpolator<Length>;
   Object.setPrototypeOf(interpolator, LengthInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: l0.to(l1.units),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: l1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = l0.to(l1.units);
+  (interpolator as Mutable<typeof interpolator>)[1] = l1;
   return interpolator;
 } as {
   (l0: Length, l1: Length): Interpolator<Length>;

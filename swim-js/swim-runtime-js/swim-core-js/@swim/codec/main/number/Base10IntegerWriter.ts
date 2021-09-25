@@ -20,32 +20,20 @@ import {Base10} from "./Base10";
 /** @hidden */
 export class Base10IntegerWriter extends Writer {
   /** @hidden */
-  readonly value!: unknown;
+  readonly value: unknown;
   /** @hidden */
-  readonly input!: number;
+  readonly input: number;
   /** @hidden */
-  readonly index!: number;
+  readonly index: number;
   /** @hidden */
-  readonly step!: number;
+  readonly step: number;
 
   constructor(value: unknown, input: number, index: number = 0, step: number = 1) {
     super();
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "input", {
-      value: input,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "index", {
-      value: index,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "step", {
-      value: step,
-      enumerable: true,
-    });
+    this.value = value;
+    this.input = input;
+    this.index = index;
+    this.step = step;
   }
 
   override pull(output: Output): Writer {

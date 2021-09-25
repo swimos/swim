@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {R2Circle} from "./R2Circle";
 
@@ -26,14 +27,8 @@ export const R2CircleInterpolator = function (s0: R2Circle, s1: R2Circle): Inter
     return new R2Circle(cx, cy, r);
   } as Interpolator<R2Circle>;
   Object.setPrototypeOf(interpolator, R2CircleInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: s0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: s1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = s0;
+  (interpolator as Mutable<typeof interpolator>)[1] = s1;
   return interpolator;
 } as {
   (s0: R2Circle, s1: R2Circle): Interpolator<R2Circle>;

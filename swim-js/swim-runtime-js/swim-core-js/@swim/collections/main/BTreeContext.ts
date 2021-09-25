@@ -17,18 +17,7 @@ import type {BTreePage} from "./BTreePage";
 
 /** @hidden */
 export abstract class BTreeContext<K, V> {
-  get pageSplitSize(): number {
-    return 32;
-  }
-
-  set pageSplitSize(pageSplitSize: number) {
-    Object.defineProperty(this, "pageSplitSize", {
-      value: pageSplitSize,
-      configurable: true,
-      enumerable: true,
-      writable: true,
-    });
-  }
+  pageSplitSize: number = 32;
 
   compare(x: K, y: K): number {
     return Values.compare(x, y);

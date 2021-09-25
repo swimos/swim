@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {OutputException} from "../output/OutputException";
 import type {AnyOutputSettings, OutputSettings} from "../output/OutputSettings";
 import {Output} from "../output/Output";
@@ -20,9 +21,9 @@ import {UtfErrorMode} from "./UtfErrorMode";
 /** @hidden */
 export class Utf8EncodedOutput<T> extends Output<T> {
   /** @hidden */
-  readonly output!: Output<T>;
+  readonly output: Output<T>;
   /** @hidden */
-  readonly errorMode!: UtfErrorMode;
+  readonly errorMode: UtfErrorMode;
   /** @hidden */
   c2: number;
   /** @hidden */
@@ -35,16 +36,8 @@ export class Utf8EncodedOutput<T> extends Output<T> {
   constructor(output: Output<T>, errorMode: UtfErrorMode, c2: number,
               c3: number, c4: number, index: number) {
     super();
-    Object.defineProperty(this, "output", {
-      value: output,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "errorMode", {
-      value: errorMode,
-      enumerable: true,
-      configurable: true,
-    });
+    this.output = output;
+    this.errorMode = errorMode;
     this.c2 = c2;
     this.c3 = c3;
     this.c4 = c4;
@@ -72,11 +65,7 @@ export class Utf8EncodedOutput<T> extends Output<T> {
   }
 
   override asPart(part: boolean): Output<T> {
-    Object.defineProperty(this, "output", {
-      value: this.output.asPart(part),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).output = this.output.asPart(part);
     return this;
   }
 
@@ -135,11 +124,7 @@ export class Utf8EncodedOutput<T> extends Output<T> {
           case 3: output = output.write(c4); this.c4 = 0; break;
           default: throw new Error("unreachable");
         }
-        Object.defineProperty(this, "output", {
-          value: output,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).output = output;
         index += 1;
       } while (index < 4 && output.isCont());
       if (index < 4) {
@@ -151,19 +136,11 @@ export class Utf8EncodedOutput<T> extends Output<T> {
         }
         this.c4 = c4;
       }
-      Object.defineProperty(this, "output", {
-        value: output,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).output = output;
       this.index = index;
       return this;
     } else if (typeof token === "string") {
-      Object.defineProperty(this, "output", {
-        value: this.output.write(token),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).output = this.output.write(token);
       return this;
     } else {
       throw new TypeError("" + token);
@@ -186,11 +163,7 @@ export class Utf8EncodedOutput<T> extends Output<T> {
         return Output.error(new OutputException("unable to flush buffered code units"));
       }
     }
-    Object.defineProperty(this, "output", {
-      value: output,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).output = output;
     this.index = index;
     return this;
   }
@@ -200,11 +173,7 @@ export class Utf8EncodedOutput<T> extends Output<T> {
   }
 
   override withSettings(settings: AnyOutputSettings): Output<T> {
-    Object.defineProperty(this, "output", {
-      value: this.output.withSettings(settings),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).output = this.output.withSettings(settings);
     return this;
   }
 

@@ -20,13 +20,10 @@ import type {ListDownlink} from "./ListDownlink";
 export class ListDownlinkRecord extends DownlinkRecord {
   constructor(downlink: ListDownlink<Value, AnyValue>) {
     super();
-    Object.defineProperty(this, "downlink", {
-      value: downlink,
-      enumerable: true,
-    });
+    this.downlink = downlink;
   }
 
-  override readonly downlink!: ListDownlink<Value, AnyValue>;
+  override readonly downlink: ListDownlink<Value, AnyValue>;
 
   override isEmpty(): boolean {
     return this.downlink.isEmpty();

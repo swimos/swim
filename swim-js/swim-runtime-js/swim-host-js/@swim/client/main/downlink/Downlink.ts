@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Arrays} from "@swim/util";
+import {Lazy, Mutable, Arrays} from "@swim/util";
 import {AnyUri, Uri} from "@swim/uri";
 import {Item, Attr, AnyValue, Value, Record, Form} from "@swim/structure";
 import type {
@@ -110,87 +110,51 @@ export abstract class Downlink {
       observer.didClose = init.didClose ?? observer.didClose;
       observer.didFail = init.didFail ?? observer.didFail;
     }
-    Object.defineProperty(this, "context", {
-      value: context,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "owner", {
-      value: owner,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "ownHostUri", {
-      value: hostUri,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "ownNodeUri", {
-      value: nodeUri,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "ownLaneUri", {
-      value: laneUri,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "ownPrio", {
-      value: prio,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "ownRate", {
-      value: rate,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "ownBody", {
-      value: body,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "flags", {
-      value: flags,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "model", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "observers", {
-      value: observers,
-      enumerable: true,
-      configurable: true,
-    });
+    this.context = context;
+    this.owner = owner;
+    this.ownHostUri = hostUri;
+    this.ownNodeUri = nodeUri;
+    this.ownLaneUri = laneUri;
+    this.ownPrio = prio;
+    this.ownRate = rate;
+    this.ownBody = body;
+    this.flags = flags;
+    this.model = null;
+    this.observers = observers;
   }
 
   /** @hidden */
-  readonly context!: DownlinkContext;
+  readonly context: DownlinkContext;
 
   /** @hidden */
-  readonly owner!: DownlinkOwner | null;
+  readonly owner: DownlinkOwner | null;
   
   /** @hidden */
-  readonly ownHostUri!: Uri;
+  readonly ownHostUri: Uri;
   
   /** @hidden */
-  readonly ownNodeUri!: Uri;
+  readonly ownNodeUri: Uri;
   
   /** @hidden */
-  readonly ownLaneUri!: Uri;
+  readonly ownLaneUri: Uri;
   
   /** @hidden */
-  readonly ownPrio!: number;
+  readonly ownPrio: number;
   
   /** @hidden */
-  readonly ownRate!: number;
+  readonly ownRate: number;
   
   /** @hidden */
-  readonly ownBody!: Value;
+  readonly ownBody: Value;
 
   /** @hidden */
-  readonly flags!: number;
+  readonly flags: number;
 
   /** @hidden */
-  readonly model!: DownlinkModel | null;
+  readonly model: DownlinkModel | null;
 
   /** @hidden */
-  readonly observers!: ReadonlyArray<DownlinkObserver>;
+  readonly observers: ReadonlyArray<DownlinkObserver>;
 
   abstract readonly type: DownlinkType;
 
@@ -293,11 +257,7 @@ export abstract class Downlink {
   }
 
   observe(observer: DownlinkObserver): this {
-    Object.defineProperty(this, "observers", {
-      value: Arrays.inserted(observer, this.observers),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).observers = Arrays.inserted(observer, this.observers);
     return this;
   }
 
@@ -324,17 +284,9 @@ export abstract class Downlink {
           for (let j = i + 1; j < n; j += 1) {
             newObservers[j - 1] = oldObservers[j]!;
           }
-          Object.defineProperty(this, "observers", {
-            value: newObservers,
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).observers = newObservers;
         } else {
-          Object.defineProperty(this, "observers", {
-            value: Arrays.empty,
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).observers = Arrays.empty;
         }
         break;
       }

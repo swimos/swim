@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Cursor, Map} from "@swim/util";
+import type {Mutable, Cursor, Map} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {KeyEffect} from "./KeyEffect";
 import {AbstractMapOutlet} from "./AbstractMapOutlet";
@@ -23,24 +23,16 @@ export class MapInput<K, V> extends AbstractMapOutlet<K, V, Map<K, V>> {
     if (state === void 0) {
       state = new BTree();
     }
-    Object.defineProperty(this, "state", {
-      value: state,
-      enumerable: true,
-      configurable: true,
-    });
+    this.state = state;
     let effects = this.effects;
     state.forEach(function (key: K): void {
       effects = effects.updated(key, KeyEffect.Update);
     }, this);
-    Object.defineProperty(this, "effects", {
-      value: effects,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).effects = effects;
   }
 
   /** @hidden */
-  readonly state!: BTree<K, V>;
+  readonly state: BTree<K, V>;
 
   override has(key: K): boolean {
     return this.state.has(key);
@@ -60,11 +52,7 @@ export class MapInput<K, V> extends AbstractMapOutlet<K, V, Map<K, V>> {
     const oldState = this.state;
     const oldValue = oldState.get(key);
     if (oldValue !== newValue) {
-      Object.defineProperty(this, "state", {
-        value: oldState.updated(key, newValue),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).state = oldState.updated(key, newValue);
       this.decohereInputKey(key, KeyEffect.Update);
     }
     return oldValue;
@@ -74,11 +62,7 @@ export class MapInput<K, V> extends AbstractMapOutlet<K, V, Map<K, V>> {
     const oldState = this.state;
     const newState = oldState.removed(key);
     if (oldState !== newState) {
-      Object.defineProperty(this, "state", {
-        value: newState,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).state = newState;
       this.decohereInputKey(key, KeyEffect.Remove);
     }
     return this;

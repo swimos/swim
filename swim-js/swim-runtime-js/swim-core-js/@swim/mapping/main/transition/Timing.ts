@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Values} from "@swim/util";
+import {Mutable, Values} from "@swim/util";
 import {Domain} from "../mapping/Domain";
 import {Interpolator} from "../interpolate/Interpolator";
 import {AnyEasing, Easing} from "../"; // forward import
@@ -61,18 +61,9 @@ export const Timing = function (easing: Easing, t0: number, t1: number): Timing 
     return timing.easing(Math.min(Math.max(0, (t - t0) / (t1 - t0)), 1));
   } as Timing;
   Object.setPrototypeOf(timing, Timing.prototype);
-  Object.defineProperty(timing, "easing", {
-    value: easing,
-    enumerable: true,
-  });
-  Object.defineProperty(timing, 0, {
-    value: t0,
-    enumerable: true,
-  });
-  Object.defineProperty(timing, 1, {
-    value: t1,
-    enumerable: true,
-  });
+  (timing as Mutable<typeof timing>).easing = easing;
+  (timing as Mutable<typeof timing>)[0] = t0;
+  (timing as Mutable<typeof timing>)[1] = t1;
   return timing;
 } as {
   (easing: Easing, t0: number, t1: number): Timing;

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays, Iterator, Cursor} from "@swim/util";
+import {Mutable, Arrays, Iterator, Cursor} from "@swim/util";
 import {BTree} from "@swim/collections";
 import type {Inlet} from "./Inlet";
 import type {Outlet} from "./Outlet";
@@ -25,46 +25,26 @@ import type {MapInoutlet} from "./MapInoutlet";
 
 export abstract class AbstractMapInoutlet<K, VI, VO, I, O> implements MapInoutlet<K, VI, VO, I, O> {
   constructor() {
-    Object.defineProperty(this, "input", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "effects", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "outlets", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "version", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
+    this.input = null;
+    this.effects = new BTree();
+    this.outlets = new BTree();
+    this.outputs = Arrays.empty;
+    this.version = -1;
   }
 
-  readonly input!: MapOutlet<K, VI, I> | null;
+  readonly input: MapOutlet<K, VI, I> | null;
 
   /** @hidden */
-  readonly effects!: BTree<K, KeyEffect>;
+  readonly effects: BTree<K, KeyEffect>;
 
   /** @hidden */
-  readonly outlets!: BTree<K, KeyOutlet<K, VO>>;
+  readonly outlets: BTree<K, KeyOutlet<K, VO>>;
 
   /** @hidden */
-  readonly outputs!: ReadonlyArray<Inlet<O>>;
+  readonly outputs: ReadonlyArray<Inlet<O>>;
 
   /** @hidden */
-  readonly version!: number;
+  readonly version: number;
 
   bindInput(newInput: MapOutlet<K, VI, I>): void {
     if (!MapOutlet.is(newInput)) {
@@ -75,11 +55,7 @@ export abstract class AbstractMapInoutlet<K, VI, VO, I, O> implements MapInoutle
       if (oldInput !== null) {
         oldInput.unbindOutput(this);
       }
-      Object.defineProperty(this, "input", {
-        value: newInput,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = newInput;
       if (newInput !== null) {
         newInput.bindOutput(this);
       }
@@ -90,11 +66,7 @@ export abstract class AbstractMapInoutlet<K, VI, VO, I, O> implements MapInoutle
     const oldInput = this.input;
     if (oldInput !== null) {
       oldInput.unbindOutput(this);
-      Object.defineProperty(this, "input", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = null;
     }
   }
 
@@ -102,11 +74,7 @@ export abstract class AbstractMapInoutlet<K, VI, VO, I, O> implements MapInoutle
     const oldInput = this.input;
     if (oldInput !== null) {
       oldInput.unbindOutput(this);
-      Object.defineProperty(this, "input", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = null;
       oldInput.disconnectInputs();
     }
   }
@@ -124,11 +92,7 @@ export abstract class AbstractMapInoutlet<K, VI, VO, I, O> implements MapInoutle
     let outlet = oldOutlets.get(key);
     if (outlet === void 0) {
       outlet = new KeyOutlet(this, key);
-      Object.defineProperty(this, "outlets", {
-        value: oldOutlets.updated(key, outlet),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).outlets = oldOutlets.updated(key, outlet);
     }
     return outlet;
   }
@@ -138,39 +102,23 @@ export abstract class AbstractMapInoutlet<K, VI, VO, I, O> implements MapInoutle
   }
 
   bindOutput(output: Inlet<O>): void {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.inserted(output, this.outputs),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.inserted(output, this.outputs);
   }
 
   unbindOutput(output: Inlet<O>): void {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.removed(output, this.outputs),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.removed(output, this.outputs);
   }
 
   unbindOutputs(): void {
     const oldOutlets = this.outlets;
     if (oldOutlets.isEmpty()) {
-      Object.defineProperty(this, "outlets", {
-        value: new BTree(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).outlets = new BTree();
       oldOutlets.forEach(function (key: K, keyOutlet: KeyOutlet<K, VO>) {
         keyOutlet.unbindOutputs();
       }, this);
     }
     const oldOutputs = this.outputs;
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.empty;
     for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
       const output = oldOutputs[i]!;
       output.unbindInput();
@@ -180,21 +128,13 @@ export abstract class AbstractMapInoutlet<K, VI, VO, I, O> implements MapInoutle
   disconnectOutputs(): void {
     const oldOutlets = this.outlets;
     if (oldOutlets.isEmpty()) {
-      Object.defineProperty(this, "outlets", {
-        value: new BTree(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).outlets = new BTree();
       oldOutlets.forEach(function (key: K, keyOutlet: KeyOutlet<K, VO>) {
         keyOutlet.disconnectOutputs();
       }, this);
     }
     const oldOutputs = this.outputs;
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.empty;
     for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
       const output = oldOutputs[i]!;
       output.unbindInput();
@@ -214,16 +154,8 @@ export abstract class AbstractMapInoutlet<K, VI, VO, I, O> implements MapInoutle
     const oldEffects = this.effects;
     if (oldEffects.get(key) !== effect) {
       this.willDecohereKey(key, effect);
-      Object.defineProperty(this, "effects", {
-        value: oldEffects.updated(key, effect),
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).effects = oldEffects.updated(key, effect);
+      (this as Mutable<this>).version = -1;
       this.onDecohereKey(key, effect);
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {
@@ -253,11 +185,7 @@ export abstract class AbstractMapInoutlet<K, VI, VO, I, O> implements MapInoutle
   decohere(): void {
     if (this.version >= 0) {
       this.willDecohere();
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = -1;
       this.onDecohere();
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {
@@ -285,11 +213,7 @@ export abstract class AbstractMapInoutlet<K, VI, VO, I, O> implements MapInoutle
       const effect = oldEffects.get(key);
       if (effect !== void 0) {
         this.willRecohereKey(key, effect, version);
-        Object.defineProperty(this, "effects", {
-          value: oldEffects.removed(key),
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).effects = oldEffects.removed(key);
         if (this.input !== null) {
           this.input.recohereInputKey(key, version);
         }
@@ -324,11 +248,7 @@ export abstract class AbstractMapInoutlet<K, VI, VO, I, O> implements MapInoutle
       this.effects.forEach(function (key: K): void {
         this.recohereKey(key, version);
       }, this);
-      Object.defineProperty(this, "version", {
-        value: version,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = version;
       this.onRecohere(version);
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {

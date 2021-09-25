@@ -21,14 +21,11 @@ import type {MapDownlinkObserver, MapDownlink} from "./MapDownlink";
 export class MapDownlinkRecord extends DownlinkRecord implements MapDownlinkObserver<Value, Value, AnyValue, AnyValue> {
   constructor(downlink: MapDownlink<Value, Value, AnyValue, AnyValue>) {
     super();
-    Object.defineProperty(this, "downlink", {
-      value: downlink,
-      enumerable: true,
-    });
+    this.downlink = downlink;
     downlink.observe(this);
   }
 
-  override readonly downlink!: MapDownlink<Value, Value, AnyValue, AnyValue>;
+  override readonly downlink: MapDownlink<Value, Value, AnyValue, AnyValue>;
 
   override isEmpty(): boolean {
     return this.downlink.isEmpty();

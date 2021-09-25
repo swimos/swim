@@ -26,48 +26,32 @@ export class Mark extends Tag {
   /** @hidden */
   constructor(offset: number, line: number, column: number, note: string | undefined) {
     super();
-    Object.defineProperty(this, "offset", {
-      value: offset,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "line", {
-      value: line,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "column", {
-      value: column,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "note", {
-      value: note,
-      enumerable: true,
-      configurable: true,
-    });
+    this.offset = offset;
+    this.line = line;
+    this.column = column;
+    this.note = note;
   }
 
   /**
    * The zero-based byte offset of this position.
    */
-  readonly offset!: number;
+  readonly offset: number;
 
   /**
    * The one-based line number of this position.
    */
-  readonly line!: number;
+  readonly line: number;
 
   /**
    * The one-based column number of this position.
    */
-  readonly column!: number;
+  readonly column: number;
 
   /**
    * The note attached to the marked position, or `null` if this position has
    * no attached note.
    */
-  readonly note!: string | undefined;
+  readonly note: string | undefined;
 
   withNote(note: string | undefined): Mark {
     if (this.note !== note) {

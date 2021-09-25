@@ -20,39 +20,24 @@ import type {Base16} from "./Base16";
 /** @hidden */
 export class Base16Writer extends Writer {
   /** @hidden */
-  readonly base16!: Base16;
+  readonly base16: Base16;
   /** @hidden */
-  readonly value!: unknown;
+  readonly value: unknown;
   /** @hidden */
-  readonly input!: Uint8Array | null;
+  readonly input: Uint8Array | null;
   /** @hidden */
-  readonly index!: number;
+  readonly index: number;
   /** @hidden */
-  readonly step!: number;
+  readonly step: number;
 
   constructor(base16: Base16, value: unknown, input: Uint8Array | null,
               index: number = 0, step: number = 1) {
     super();
-    Object.defineProperty(this, "base16", {
-      value: base16,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "input", {
-      value: input,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "index", {
-      value: index,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "step", {
-      value: step,
-      enumerable: true,
-    });
+    this.base16 = base16;
+    this.value = value;
+    this.input = input;
+    this.index = index;
+    this.step = step;
   }
 
   override feed(value: unknown): Writer {

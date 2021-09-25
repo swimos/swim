@@ -215,9 +215,6 @@ export abstract class Base64 {
 
 /** @hidden */
 class Base64Standard extends Base64 {
-  /** @hidden */
-  readonly padded!: boolean;
-
   constructor(padded: boolean) {
     super();
     Object.defineProperty(this, "padded", {
@@ -229,6 +226,9 @@ class Base64Standard extends Base64 {
   get alphabet(): string {
     return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   }
+
+  /** @hidden */
+  readonly padded!: boolean;
 
   isPadded(): boolean {
     return this.padded;
@@ -252,9 +252,6 @@ class Base64Standard extends Base64 {
 
 /** @hidden */
 class Base64Url extends Base64 {
-  /** @hidden */
-  readonly padded!: boolean;
-
   constructor(padded: boolean) {
     super();
     Object.defineProperty(this, "padded", {
@@ -266,6 +263,9 @@ class Base64Url extends Base64 {
   get alphabet(): string {
     return "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
   }
+
+  /** @hidden */
+  readonly padded!: boolean;
 
   isPadded(): boolean {
     return this.padded;

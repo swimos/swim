@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {BTree} from "@swim/collections";
 import type {KeyEffect} from "./KeyEffect";
 import type {MapInlet} from "./MapInlet";
@@ -19,30 +20,18 @@ import {MapOutlet} from "./MapOutlet";
 
 export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
   constructor() {
-    Object.defineProperty(this, "input", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "effects", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "version", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
+    this.input = null;
+    this.effects = new BTree();
+    this.version = -1;
   }
 
-  readonly input!: MapOutlet<K, V, O> | null;
+  readonly input: MapOutlet<K, V, O> | null;
 
   /** @hidden */
-  readonly effects!: BTree<K, KeyEffect>;
+  readonly effects: BTree<K, KeyEffect>;
 
   /** @hidden */
-  readonly version!: number;
+  readonly version: number;
 
   bindInput(newInput: MapOutlet<K, V, O> | null): void {
     if (!MapOutlet.is(newInput)) {
@@ -53,11 +42,7 @@ export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
       if (oldInput !== null) {
         oldInput.unbindOutput(this);
       }
-      Object.defineProperty(this, "input", {
-        value: newInput,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = newInput;
       if (newInput !== null) {
         newInput.bindOutput(this);
       }
@@ -68,11 +53,7 @@ export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
     const oldInput = this.input;
     if (oldInput !== null) {
       oldInput.unbindOutput(this);
-      Object.defineProperty(this, "input", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = null;
     }
   }
 
@@ -80,11 +61,7 @@ export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
     const oldInput = this.input;
     if (oldInput !== null) {
       oldInput.unbindOutput(this);
-      Object.defineProperty(this, "input", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = null;
       oldInput.disconnectInputs();
     }
   }
@@ -97,16 +74,8 @@ export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
     const oldEffects = this.effects;
     if (oldEffects.get(key) !== effect) {
       this.willDecohereOutputKey(key, effect);
-      Object.defineProperty(this, "effects", {
-        value: oldEffects.updated(key, effect),
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).effects = oldEffects.updated(key, effect);
+      (this as Mutable<this>).version = -1;
       this.onDecohereOutputKey(key, effect);
       this.didDecohereOutputKey(key, effect);
     }
@@ -115,11 +84,7 @@ export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
   decohereOutput(): void {
     if (this.version >= 0) {
       this.willDecohereOutput();
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = -1;
       this.onDecohereOutput();
       this.didDecohereOutput();
     }
@@ -131,11 +96,7 @@ export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
       const effect = oldEffects.get(key);
       if (effect !== void 0) {
         this.willRecohereOutputKey(key, effect, version);
-        Object.defineProperty(this, "effects", {
-          value: oldEffects.removed(key),
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).effects = oldEffects.removed(key);
         if (this.input !== null) {
           this.input.recohereInputKey(key, version);
         }
@@ -151,11 +112,7 @@ export abstract class AbstractMapInlet<K, V, O> implements MapInlet<K, V, O> {
       this.effects.forEach(function (key: K): void {
         this.recohereOutputKey(key, version);
       }, this);
-      Object.defineProperty(this, "version", {
-        value: version,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = version;
       this.onRecohereOutput(version);
       this.didRecohereOutput(version);
     }

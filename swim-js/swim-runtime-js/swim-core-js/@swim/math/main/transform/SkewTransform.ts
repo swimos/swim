@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Constructors} from "@swim/util";
+import {Mutable, Murmur3, Constructors} from "@swim/util";
 import {Output, Parser, Diagnostic, Unicode} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item, Value, Record} from "@swim/structure";
@@ -27,24 +27,14 @@ import {AffineTransform} from "../"; // forward import
 export class SkewTransform extends Transform {
   constructor(x: Angle, y: Angle) {
     super();
-    Object.defineProperty(this, "x", {
-      value: x,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y", {
-      value: y,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.x = x;
+    this.y = y;
+    this.stringValue = void 0;
   }
 
-  readonly x!: Angle;
+  readonly x: Angle;
 
-  readonly y!: Angle;
+  readonly y: Angle;
 
   override transform(that: Transform): Transform;
   override transform(x: number, y: number): R2Point;
@@ -143,7 +133,7 @@ export class SkewTransform extends Transform {
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   override toString(): string {
     let stringValue = this.stringValue;
@@ -155,11 +145,7 @@ export class SkewTransform extends Transform {
       } else {
         stringValue = "skew(" + this.x + "," + this.y + ")";
       }
-      Object.defineProperty(this, "stringValue", {
-        value: stringValue,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = stringValue;
     }
     return stringValue;
   }

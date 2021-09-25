@@ -24,13 +24,10 @@ import {AbstractMapInlet} from "./AbstractMapInlet";
 export class OutletMapInlet<K, V, O> extends AbstractMapInlet<K, V, O> {
   constructor(outlet: Outlet<unknown>) {
     super();
-    Object.defineProperty(this, "outlet", {
-      value: outlet,
-      enumerable: true,
-    });
+    this.outlet = outlet;
   }
 
-  readonly outlet!: Outlet<unknown>;
+  readonly outlet: Outlet<unknown>;
 
   protected override onDecohereOutputKey(key: K, effect: KeyEffect): void {
     this.outlet.decohereInput();

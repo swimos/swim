@@ -23,13 +23,10 @@ import {AbstractInlet} from "./AbstractInlet";
 export class OutletInlet<I> extends AbstractInlet<I> {
   constructor(outlet: Outlet<unknown>) {
     super();
-    Object.defineProperty(this, "outlet", {
-      value: outlet,
-      enumerable: true,
-    });
+    this.outlet = outlet;
   }
 
-  readonly outlet!: Outlet<unknown>;
+  readonly outlet: Outlet<unknown>;
 
   protected override onDecohereOutput(): void {
     this.outlet.decohereInput();

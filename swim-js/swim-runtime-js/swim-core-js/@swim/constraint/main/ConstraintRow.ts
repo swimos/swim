@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent} from "@swim/util";
+import {Equivalent, Mutable} from "@swim/util";
 import type {ConstraintMap} from "./ConstraintMap";
 import {ConstraintSymbol, ConstraintDummy} from "./ConstraintSymbol";
 import type {ConstraintSolver} from "./ConstraintSolver";
@@ -21,52 +21,30 @@ import type {ConstraintSolver} from "./ConstraintSolver";
 export class ConstraintRow {
   constructor(solver: ConstraintSolver, symbol: ConstraintSymbol | null,
               cells: ConstraintMap<ConstraintSymbol, number>, constant: number) {
-    Object.defineProperty(this, "solver", {
-      value: solver,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "symbol", {
-      value: symbol,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "cells", {
-      value: cells,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "constant", {
-      value: constant,
-      enumerable: true,
-      configurable: true,
-    });
+    this.solver = solver;
+    this.symbol = symbol;
+    this.cells = cells;
+    this.constant = constant;
   }
 
-  readonly solver!: ConstraintSolver;
+  readonly solver: ConstraintSolver;
 
-  readonly symbol!: ConstraintSymbol | null;
+  readonly symbol: ConstraintSymbol | null;
 
   /** @hidden */
   setSymbol(symbol: ConstraintSymbol | null): void {
-    Object.defineProperty(this, "symbol", {
-      value: symbol,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).symbol = symbol;
     this.invalidate();
   }
 
-  readonly cells!: ConstraintMap<ConstraintSymbol, number>;
+  readonly cells: ConstraintMap<ConstraintSymbol, number>;
 
-  readonly constant!: number;
+  readonly constant: number;
 
   /** @hidden */
   setConstant(constant: number): void {
     if (this.constant !== constant) {
-      Object.defineProperty(this, "constant", {
-        value: constant,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).constant = constant;
       this.invalidate();
     }
   }

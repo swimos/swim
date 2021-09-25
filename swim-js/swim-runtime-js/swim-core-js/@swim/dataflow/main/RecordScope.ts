@@ -21,6 +21,7 @@ export class RecordScope extends RecordModel {
     super(state);
     Object.defineProperty(this, "streamletScope", {
       value: scope,
+      writable: true,
       enumerable: true,
       configurable: true,
     });

@@ -19,10 +19,7 @@ import {Form} from "./Form";
 export class UnitForm<T, U = never> extends Form<T, U> {
   constructor(form: Form<T, U>, unit: T | undefined) {
     super();
-    Object.defineProperty(this, "form", {
-      value: form,
-      enumerable: true,
-    });
+    this.form = form;
     Object.defineProperty(this, "unit", {
       value: unit,
       enumerable: true,
@@ -30,9 +27,9 @@ export class UnitForm<T, U = never> extends Form<T, U> {
   }
 
   /** @hidden */
-  readonly form!: Form<T, U>;
+  readonly form: Form<T, U>;
 
-  override readonly tag!: string | undefined; // // getter defined below to work around useDefineForClassFields lunacy
+  override readonly tag: string | undefined; // // getter defined below to work around useDefineForClassFields lunacy
 
   override withTag(tag: string | undefined): Form<T, U> {
     if (tag !== this.tag) {

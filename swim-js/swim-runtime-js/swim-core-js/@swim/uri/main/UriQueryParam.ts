@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Output, Format} from "@swim/codec";
 import {UriQuery} from "./UriQuery";
 
@@ -19,32 +20,18 @@ import {UriQuery} from "./UriQuery";
 export class UriQueryParam extends UriQuery {
   constructor(key: string | undefined, value: string, tail: UriQuery) {
     super();
-    Object.defineProperty(this, "key", {
-      value: key,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "rest", {
-      value: tail,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.key = key;
+    this.value = value;
+    this.rest = tail;
+    this.stringValue = void 0;
   }
 
-  override readonly key!: string | undefined;
+  override readonly key: string | undefined;
 
-  override readonly value!: string;
+  override readonly value: string;
 
   /** @hidden */
-  readonly rest!: UriQuery;
+  readonly rest: UriQuery;
 
   override isDefined(): boolean {
     return true;
@@ -64,11 +51,7 @@ export class UriQueryParam extends UriQuery {
 
   /** @hidden */
   override setTail(tail: UriQuery): void {
-    Object.defineProperty(this, "rest", {
-      value: tail,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).rest = tail;
   }
 
   /** @hidden */
@@ -93,17 +76,13 @@ export class UriQueryParam extends UriQuery {
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   override toString(): string {
     let stringValue = this.stringValue;
     if (stringValue === void 0) {
       stringValue = Format.display(this);
-      Object.defineProperty(this, "stringValue", {
-        value: stringValue,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = stringValue;
     }
     return stringValue;
   }

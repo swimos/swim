@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays, Cursor, Map, OrderedMap} from "@swim/util";
+import {Mutable, Arrays, Cursor, Map, OrderedMap} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {AnyValue, Value, Form, ValueCursor, ValueEntryCursor} from "@swim/structure";
 import {Inlet, Outlet, KeyEffect, MapInlet, MapOutlet, MapOutletCombinators, KeyOutlet} from "@swim/streamlet";
@@ -74,44 +74,14 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
       keyForm = init.keyForm !== void 0 ? init.keyForm : keyForm;
       valueForm = init.valueForm !== void 0 ? init.valueForm : valueForm;
     }
-    Object.defineProperty(this, "ownKeyForm", {
-      value: keyForm !== void 0 ? keyForm : Form.forValue() as unknown as Form<K, KU>,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "ownValueForm", {
-      value: valueForm !== void 0 ? valueForm : Form.forValue() as unknown as Form<V, VU>,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "state0", {
-      value: state0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "input", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "effects", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "outlets", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "version", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
+    this.ownKeyForm = keyForm !== void 0 ? keyForm : Form.forValue() as unknown as Form<K, KU>;
+    this.ownValueForm = valueForm !== void 0 ? valueForm : Form.forValue() as unknown as Form<V, VU>;
+    this.state0 = state0;
+    this.input = null;
+    this.effects = new BTree();
+    this.outlets = new BTree();
+    this.outputs = Arrays.empty;
+    this.version = -1;
   }
 
   /** @hidden */
@@ -121,13 +91,13 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
   override readonly observers!: ReadonlyArray<MapDownlinkObserver<K, V, KU, VU>>;
 
   /** @hidden */
-  readonly ownKeyForm!: Form<K, KU>;
+  readonly ownKeyForm: Form<K, KU>;
 
   /** @hidden */
-  readonly ownValueForm!: Form<V, VU>;
+  readonly ownValueForm: Form<V, VU>;
 
   /** @hidden */
-  readonly state0!: BTree<Value, Value> | null;
+  readonly state0: BTree<Value, Value> | null;
 
   override get type(): DownlinkType {
     return "map";
@@ -644,22 +614,14 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
         throw new Error("downlink type mismatch");
       }
       model.addDownlink(this);
-      Object.defineProperty(this, "model", {
-        value: model as MapDownlinkModel,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).model = model as MapDownlinkModel;
       setTimeout(this.didAliasModel.bind(this));
     } else {
       model = new MapDownlinkModel(this.context, hostUri, nodeUri, laneUri, this.ownPrio,
                                    this.ownRate, this.ownBody, this.state0 ?? void 0);
       model.addDownlink(this);
       this.context.openDownlink(model);
-      Object.defineProperty(this, "model", {
-        value: model as MapDownlinkModel,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).model = model as MapDownlinkModel;
     }
     if (this.owner !== null) {
       this.owner.addDownlink(this);
@@ -671,19 +633,19 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     return this.keys();
   }
 
-  readonly input!: MapOutlet<K, V, Map<K, V>> | null;
+  readonly input: MapOutlet<K, V, Map<K, V>> | null;
 
   /** @hidden */
-  readonly effects!: BTree<K, KeyEffect>;
+  readonly effects: BTree<K, KeyEffect>;
 
   /** @hidden */
-  readonly outlets!: BTree<K, KeyOutlet<K, V>>;
+  readonly outlets: BTree<K, KeyOutlet<K, V>>;
 
   /** @hidden */
-  readonly outputs!: ReadonlyArray<Inlet<MapDownlink<K, V, KU, VU>>>;
+  readonly outputs: ReadonlyArray<Inlet<MapDownlink<K, V, KU, VU>>>;
 
   /** @hidden */
-  readonly version!: number;
+  readonly version: number;
 
   bindInput(newInput: MapOutlet<K, V, Map<K, V>>): void {
     if (!MapOutlet.is(newInput)) {
@@ -694,11 +656,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
       if (oldInput !== null) {
         oldInput.unbindOutput(this);
       }
-      Object.defineProperty(this, "input", {
-        value: newInput,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = newInput;
       if (newInput !== null) {
         newInput.bindOutput(this);
       }
@@ -709,11 +667,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     const oldInput = this.input;
     if (oldInput !== null) {
       oldInput.unbindOutput(this);
-      Object.defineProperty(this, "input", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = null;
     }
   }
 
@@ -721,11 +675,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     const oldInput = this.input;
     if (oldInput !== null) {
       oldInput.unbindOutput(this);
-      Object.defineProperty(this, "input", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).input = null;
       oldInput.disconnectInputs();
     }
   }
@@ -735,11 +685,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     let outlet = oldOutlets.get(key);
     if (outlet === void 0) {
       outlet = new KeyOutlet<K, V>(this, key);
-      Object.defineProperty(this, "outlets", {
-        value: oldOutlets.updated(key, outlet),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).outlets = oldOutlets.updated(key, outlet);
     }
     return outlet;
   }
@@ -749,39 +695,23 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
   }
 
   bindOutput(output: Inlet<MapDownlink<K, V, KU, VU>>): void {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.inserted(output, this.outputs),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.inserted(output, this.outputs);
   }
 
   unbindOutput(output: Inlet<MapDownlink<K, V, KU, VU>>): void {
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.removed(output, this.outputs),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.removed(output, this.outputs);
   }
 
   unbindOutputs(): void {
     const oldOutlets = this.outlets;
     if (oldOutlets.isEmpty()) {
-      Object.defineProperty(this, "outlets", {
-        value: new BTree(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).outlets = new BTree();
       oldOutlets.forEach(function (key: K, keyOutlet: KeyOutlet<K, V>) {
         keyOutlet.unbindOutputs();
       }, this);
     }
     const oldOutputs = this.outputs;
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.empty;
     for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
       const output = oldOutputs[i]!;
       output.unbindInput();
@@ -791,21 +721,13 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
   disconnectOutputs(): void {
     const oldOutlets = this.outlets;
     if (oldOutlets.isEmpty()) {
-      Object.defineProperty(this, "outlets", {
-        value: new BTree(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).outlets = new BTree();
       oldOutlets.forEach(function (key: K, keyOutlet: KeyOutlet<K, V>) {
         keyOutlet.disconnectOutputs();
       }, this);
     }
     const oldOutputs = this.outputs;
-    Object.defineProperty(this, "outputs", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).outputs = Arrays.empty;
     for (let i = 0, n = oldOutputs.length; i < n; i += 1) {
       const output = oldOutputs[i]!;
       output.unbindInput();
@@ -825,16 +747,8 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
     const oldEffects = this.effects;
     if (oldEffects.get(key) !== effect) {
       this.willDecohereKey(key, effect);
-      Object.defineProperty(this, "effects", {
-        value: oldEffects.updated(key, effect),
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).effects = oldEffects.updated(key, effect);
+      (this as Mutable<this>).version = -1;
       this.onDecohereKey(key, effect);
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {
@@ -864,11 +778,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
   decohere(): void {
     if (this.version >= 0) {
       this.willDecohere();
-      Object.defineProperty(this, "version", {
-        value: -1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = -1;
       this.onDecohere();
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {
@@ -896,11 +806,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
       const effect = oldEffects.get(key);
       if (effect !== void 0) {
         this.willRecohereKey(key, effect, version);
-        Object.defineProperty(this, "effects", {
-          value: oldEffects.removed(key),
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).effects = oldEffects.removed(key);
         if (this.input !== null) {
           this.input.recohereInputKey(key, version);
         }
@@ -935,11 +841,7 @@ export class MapDownlink<K, V, KU = never, VU = never> extends Downlink implemen
       this.effects.forEach(function (key: K): void {
         this.recohereKey(key, version);
       }, this);
-      Object.defineProperty(this, "version", {
-        value: version,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).version = version;
       this.onRecohere(version);
       const outputs = this.outputs;
       for (let i = 0, n = outputs.length; i < n; i += 1) {

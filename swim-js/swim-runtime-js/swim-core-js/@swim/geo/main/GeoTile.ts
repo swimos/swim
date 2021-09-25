@@ -34,25 +34,16 @@ export type GeoTileTuple = [number, number, number];
 export class GeoTile extends GeoShape implements HashCode, Equivalent, Debug {
   constructor(x: number, y: number, z: number) {
     super();
-    Object.defineProperty(this, "x", {
-      value: x,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y", {
-      value: y,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "z", {
-      value: z,
-      enumerable: true,
-    });
+    this.x = x;
+    this.y = y;
+    this.z = z;
   }
 
-  readonly x!: number;
+  readonly x: number;
 
-  readonly y!: number;
+  readonly y: number;
 
-  readonly z!: number;
+  readonly z: number;
 
   override get lngMin(): number {
     return GeoTile.unprojectX(this.x / (1 << this.z));

@@ -21,17 +21,14 @@ export type AnyUriScheme = UriScheme | string;
 export class UriScheme implements HashCode, Compare, Debug, Display {
   /** @hidden */
   constructor(name: string) {
-    Object.defineProperty(this, "name", {
-      value: name,
-      enumerable: true,
-    });
+    this.name = name;
   }
 
   isDefined(): boolean {
     return this.name.length !== 0;
   }
 
-  readonly name!: string;
+  readonly name: string;
 
   toAny(): string | undefined {
     return this.name.length !== 0 ? this.name : void 0;

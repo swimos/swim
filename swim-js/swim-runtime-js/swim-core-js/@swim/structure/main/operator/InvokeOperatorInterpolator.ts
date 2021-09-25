@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {Item} from "../Item";
 import {InvokeOperator} from "./InvokeOperator";
@@ -38,14 +39,8 @@ export const InvokeOperatorInterpolator = function (y0: InvokeOperator, y1: Invo
     return new InvokeOperator(func, args);
   } as InvokeOperatorInterpolator;
   Object.setPrototypeOf(interpolator, InvokeOperatorInterpolator.prototype);
-  Object.defineProperty(interpolator, "funcInterpolator", {
-    value: y0.func.interpolateTo(y1.func),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "argsInterpolator", {
-    value: y0.args.interpolateTo(y1.args),
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).funcInterpolator = y0.func.interpolateTo(y1.func);
+  (interpolator as Mutable<typeof interpolator>).argsInterpolator = y0.args.interpolateTo(y1.args);
   return interpolator;
 } as {
   (y0: InvokeOperator, y1: InvokeOperator): InvokeOperatorInterpolator;

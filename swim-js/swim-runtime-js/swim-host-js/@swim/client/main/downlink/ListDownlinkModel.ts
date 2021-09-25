@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Cursor} from "@swim/util";
+import type {Mutable, Cursor} from "@swim/util";
 import {STree} from "@swim/collections";
 import {Attr, Value, Record} from "@swim/structure";
 import type {Uri} from "@swim/uri";
@@ -28,17 +28,13 @@ export class ListDownlinkModel extends DownlinkModel {
   constructor(context: DownlinkContext, hostUri: Uri, nodeUri: Uri, laneUri: Uri,
               prio?: number, rate?: number, body?: Value, state: STree<Value, Value> = new STree()) {
     super(context, hostUri, nodeUri, laneUri, prio, rate, body);
-    Object.defineProperty(this, "state", {
-      value: state,
-      enumerable: true,
-      configurable: true,
-    });
+    this.state = state;
   }
 
   override readonly views!: ReadonlyArray<ListDownlink<unknown>>;
 
   /** @hidden */
-  readonly state!: STree<Value, Value>;
+  readonly state: STree<Value, Value>;
 
   override get type(): DownlinkType {
     return "list";
@@ -251,11 +247,7 @@ export class ListDownlinkModel extends DownlinkModel {
   }
 
   setState(state: STree<Value, Value>): void {
-    Object.defineProperty(this, "state", {
-      value: state,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).state = state;
   }
 
   override onEventMessage(message: EventMessage, host: Host): void {

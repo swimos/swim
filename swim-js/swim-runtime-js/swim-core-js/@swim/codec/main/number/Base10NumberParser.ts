@@ -21,32 +21,20 @@ import {Unicode} from "../unicode/Unicode";
 /** @hidden */
 export class Base10NumberParser extends Parser<number> {
   /** @hidden */
-  readonly sign!: number;
+  readonly sign: number;
   /** @hidden */
-  readonly value!: number;
+  readonly value: number;
   /** @hidden */
-  readonly mode!: number;
+  readonly mode: number;
   /** @hidden */
-  readonly step!: number;
+  readonly step: number;
 
   constructor(sign: number = 1, value: number = 0, mode: number = 2, step: number = 1) {
     super();
-    Object.defineProperty(this, "sign", {
-      value: sign,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "mode", {
-      value: mode,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "step", {
-      value: step,
-      enumerable: true,
-    });
+    this.sign = sign;
+    this.value = value;
+    this.mode = mode;
+    this.step = step;
   }
 
   override feed(input: Input): Parser<number> {
@@ -140,26 +128,17 @@ export class Base10NumberParser extends Parser<number> {
 /** @hidden */
 class Base10DecimalParser extends Parser<number> {
   /** @hidden */
-  readonly output!: Output<string>;
+  readonly output: Output<string>;
   /** @hidden */
-  readonly mode!: number;
+  readonly mode: number;
   /** @hidden */
-  readonly step!: number;
+  readonly step: number;
 
   constructor(output: Output<string>, mode: number = 2, step: number = 1) {
     super();
-    Object.defineProperty(this, "output", {
-      value: output,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "mode", {
-      value: mode,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "step", {
-      value: step,
-      enumerable: true,
-    });
+    this.output = output;
+    this.mode = mode;
+    this.step = step;
   }
 
   override feed(input: Input): Parser<number> {

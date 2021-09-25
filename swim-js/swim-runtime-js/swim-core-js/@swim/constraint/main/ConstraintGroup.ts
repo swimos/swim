@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyConstraintExpression, ConstraintExpression} from "./ConstraintExpression";
 import type {ConstraintRelation} from "./ConstraintRelation";
 import {AnyConstraintStrength, ConstraintStrength} from "./ConstraintStrength";
@@ -20,22 +21,12 @@ import type {ConstraintScope} from "./ConstraintScope";
 
 export class ConstraintGroup {
   constructor(scope: ConstraintScope) {
-    Object.defineProperty(this, "scope", {
-      value: scope,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "constraints", {
-      value: [],
-      enumerable: true,
-    });
-    Object.defineProperty(this, "constrained", {
-      value: false,
-      enumerable: true,
-      configurable: true,
-    });
+    this.scope = scope;
+    this.constraints = [];
+    this.constrained = false;
   }
 
-  readonly scope!: ConstraintScope;
+  readonly scope: ConstraintScope;
 
   constraint(lhs: AnyConstraintExpression, relation: ConstraintRelation,
              rhs?: AnyConstraintExpression, strength?: AnyConstraintStrength): Constraint {
@@ -54,7 +45,7 @@ export class ConstraintGroup {
     return constraint;
   }
 
-  readonly constraints!: ReadonlyArray<Constraint>;
+  readonly constraints: ReadonlyArray<Constraint>;
 
   hasConstraint(constraint: Constraint): boolean {
     const constraints = this.constraints;
@@ -97,7 +88,7 @@ export class ConstraintGroup {
   }
 
   /** @hidden */
-  readonly constrained!: boolean;
+  readonly constrained: boolean;
 
   isConstrained(): boolean {
     return this.constrained;
@@ -105,18 +96,10 @@ export class ConstraintGroup {
 
   constrain(constrained: boolean = true): this {
     if (constrained && !this.constrained) {
-      Object.defineProperty(this, "constrained", {
-        value: true,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).constrained = true;
       this.enableConstraints();
     } else if (!constrained && this.constrained) {
-      Object.defineProperty(this, "constrained", {
-        value: false,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).constrained = false;
       this.disableConstraints();
     }
     return this;

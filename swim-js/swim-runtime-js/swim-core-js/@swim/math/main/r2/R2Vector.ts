@@ -26,23 +26,17 @@ export interface R2VectorInit {
 
 export class R2Vector implements Interpolate<R2Vector>, HashCode, Equivalent, Debug {
   constructor(x: number, y: number) {
-    Object.defineProperty(this, "x", {
-      value: x,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y", {
-      value: y,
-      enumerable: true,
-    });
+    this.x = x;
+    this.y = y;
   }
 
   isDefined(): boolean {
     return isFinite(this.x) && isFinite(this.y);
   }
 
-  readonly x!: number;
+  readonly x: number;
 
-  readonly y!: number;
+  readonly y: number;
 
   plus(that: AnyR2Vector): R2Vector {
     return new R2Vector(this.x + that.x, this.y + that.y);

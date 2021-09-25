@@ -19,16 +19,13 @@ import {STreeNode} from "./"; // forward import
 
 /** @hidden */
 export class STreeLeaf<V, I> extends STreePage<V, I> {
-  /** @hidden */
-  readonly slots!: ReadonlyArray<[I, V]>;
-
   constructor(slots: ReadonlyArray<[I, V]>) {
     super();
-    Object.defineProperty(this, "slots", {
-      value: slots,
-      enumerable: true,
-    });
+    this.slots = slots;
   }
+
+  /** @hidden */
+  readonly slots: ReadonlyArray<[I, V]>;
 
   override get arity(): number {
     return this.slots.length;

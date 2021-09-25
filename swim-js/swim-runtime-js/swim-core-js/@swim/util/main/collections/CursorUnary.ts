@@ -16,21 +16,17 @@ import {Cursor} from "./Cursor";
 
 /** @hidden */
 export class CursorUnary<T> extends Cursor<T> {
-  /** @hidden */
-  readonly value!: T;
-  /** @hidden */
-  index!: number;
-
   constructor(value: T) {
     super();
-    Object.defineProperty(this, "value", {
-      value: value,
-    });
-    Object.defineProperty(this, "index", {
-      value: 0,
-      configurable: true,
-    });
+    this.value = value;
+    this.index = 0;
   }
+
+  /** @hidden */
+  readonly value: T;
+
+  /** @hidden */
+  index: number;
 
   override isEmpty(): boolean {
     return this.index !== 0;
@@ -46,10 +42,7 @@ export class CursorUnary<T> extends Cursor<T> {
 
   override step(): void {
     if (this.index === 0) {
-      Object.defineProperty(this, "index", {
-        value: 1,
-        configurable: true,
-      });
+      this.index = 1;
     } else {
       throw new Error("empty");
     }
@@ -69,10 +62,7 @@ export class CursorUnary<T> extends Cursor<T> {
 
   override next(): {value?: T, done: boolean} {
     if (this.index === 0) {
-      Object.defineProperty(this, "index", {
-        value: 1,
-        configurable: true,
-      });
+      this.index = 1;
       return {value: this.value, done: true};
     } else {
       return {done: true};
@@ -89,10 +79,7 @@ export class CursorUnary<T> extends Cursor<T> {
 
   override previous(): {value?: T, done: boolean} {
     if (this.index === 1) {
-      Object.defineProperty(this, "index", {
-        value: 0,
-        configurable: true,
-      });
+      this.index = 0;
       return {value: this.value, done: true};
     } else {
       return {done: true};

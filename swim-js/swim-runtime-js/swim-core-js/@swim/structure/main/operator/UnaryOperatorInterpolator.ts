@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {Item} from "../Item";
 import {Operator} from "./Operator";
@@ -42,14 +43,8 @@ export const UnaryOperatorInterpolator = function (y0: UnaryOperator, y1: UnaryO
     return Operator.unary(interpolator.operator, operand);
   } as UnaryOperatorInterpolator;
   Object.setPrototypeOf(interpolator, UnaryOperatorInterpolator.prototype);
-  Object.defineProperty(interpolator, "operator", {
-    value: operator,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "operandInterpolator", {
-    value: y0.operand.interpolateTo(y1.operand),
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).operator = operator;
+  (interpolator as Mutable<typeof interpolator>).operandInterpolator = y0.operand.interpolateTo(y1.operand);
   return interpolator;
 } as {
   (y0: UnaryOperator, y1: UnaryOperator): UnaryOperatorInterpolator;

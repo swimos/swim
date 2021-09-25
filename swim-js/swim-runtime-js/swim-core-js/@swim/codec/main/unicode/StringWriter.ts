@@ -19,26 +19,17 @@ import {Writer} from "../writer/Writer";
 /** @hidden */
 export class StringWriter extends Writer<unknown, unknown> {
   /** @hidden */
-  readonly value!: unknown;
+  readonly value: unknown;
   /** @hidden */
-  readonly input!: string;
+  readonly input: string;
   /** @hidden */
-  readonly index!: number;
+  readonly index: number;
 
   constructor(value: unknown, input: string, index: number = 0) {
     super();
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "input", {
-      value: input,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "index", {
-      value: index,
-      enumerable: true,
-    });
+    this.value = value;
+    this.input = input;
+    this.index = index;
   }
 
   override feed(input: unknown): Writer<unknown, unknown> {

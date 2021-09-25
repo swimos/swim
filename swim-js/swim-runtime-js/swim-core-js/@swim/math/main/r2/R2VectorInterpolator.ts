@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {R2Vector} from "./R2Vector";
 
@@ -25,14 +26,8 @@ export const R2VectorInterpolator = function (v0: R2Vector, v1: R2Vector): Inter
     return new R2Vector(x, y);
   } as Interpolator<R2Vector>;
   Object.setPrototypeOf(interpolator, R2VectorInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: v0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: v1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = v0;
+  (interpolator as Mutable<typeof interpolator>)[1] = v1;
   return interpolator;
 } as {
   (v0: R2Vector, v1: R2Vector): Interpolator<R2Vector>;

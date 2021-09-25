@@ -18,25 +18,16 @@ import {Inlet, AbstractOutlet, OutletInlet} from "@swim/streamlet";
 export class ConditionalOutlet extends AbstractOutlet<Value> {
   constructor() {
     super();
-    Object.defineProperty(this, "ifInlet", {
-      value: new OutletInlet<Value>(this),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "thenInlet", {
-      value: new OutletInlet<Value>(this),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "elseInlet", {
-      value: new OutletInlet<Value>(this),
-      enumerable: true,
-    });
+    this.ifInlet = new OutletInlet<Value>(this);
+    this.thenInlet = new OutletInlet<Value>(this);
+    this.elseInlet = new OutletInlet<Value>(this);
   }
 
-  readonly ifInlet!: Inlet<Value>;
+  readonly ifInlet: Inlet<Value>;
 
-  readonly thenInlet!: Inlet<Value>;
+  readonly thenInlet: Inlet<Value>;
 
-  readonly elseInlet!: Inlet<Value>;
+  readonly elseInlet: Inlet<Value>;
 
   override get(): Value {
     const ifInput = this.ifInlet.input;

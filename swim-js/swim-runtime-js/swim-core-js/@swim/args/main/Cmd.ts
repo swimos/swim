@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Arrays} from "@swim/util";
+import {Mutable, Equals, Arrays} from "@swim/util";
 import {Output, Debug, Format, Unicode} from "@swim/codec";
 import {AnyOpt, Opt} from "./Opt";
 import {AnyArg, Arg} from "./Arg";
@@ -34,62 +34,28 @@ export interface CmdInit {
 export class Cmd implements Equals, Debug {
   constructor(id: string, name: string, desc: string | undefined, opts: Opt[],
               args: Arg[], cmds: Cmd[], exec: ExecCmd | null, base: Cmd | null) {
-    Object.defineProperty(this, "id", {
-      value: id,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "name", {
-      value: name,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "desc", {
-      value: desc,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "opts", {
-      value: opts,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "args", {
-      value: args,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "cmds", {
-      value: cmds,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "exec", {
-      value: exec,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "base", {
-      value: base,
-      enumerable: true,
-      configurable: true,
-    });
+    this.id = id;
+    this.name = name;
+    this.desc = desc;
+    this.opts = opts;
+    this.args = args;
+    this.cmds = cmds;
+    this.exec = exec;
+    this.base = base;
   }
 
-  readonly id!: string;
+  readonly id: string;
 
-  readonly name!: string;
+  readonly name: string;
 
-  readonly desc!: string | undefined;
+  readonly desc: string | undefined;
 
   withDesc(desc: string | undefined): this {
-    Object.defineProperty(this, "desc", {
-      value: desc,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).desc = desc;
     return this;
   }
 
-  readonly opts!: ReadonlyArray<Opt>;
+  readonly opts: ReadonlyArray<Opt>;
 
   withOpt(opt: AnyOpt): this {
     opt = Opt.fromAny(opt);
@@ -97,7 +63,7 @@ export class Cmd implements Equals, Debug {
     return this;
   }
 
-  readonly args!: ReadonlyArray<Arg>;
+  readonly args: ReadonlyArray<Arg>;
 
   withArg(arg: AnyArg): this {
     arg = Arg.fromAny(arg);
@@ -105,7 +71,7 @@ export class Cmd implements Equals, Debug {
     return this;
   }
 
-  readonly cmds!: ReadonlyArray<Cmd>;
+  readonly cmds: ReadonlyArray<Cmd>;
 
   withCmd(cmd: AnyCmd): this {
     cmd = Cmd.fromAny(cmd);
@@ -205,25 +171,17 @@ export class Cmd implements Equals, Debug {
     return this;
   }
 
-  readonly exec!: ExecCmd | null;
+  readonly exec: ExecCmd | null;
 
   onExec(exec: ExecCmd | null): this {
-    Object.defineProperty(this, "exec", {
-      value: exec,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).exec = exec;
     return this;
   }
 
-  readonly base!: Cmd | null;
+  readonly base: Cmd | null;
 
   withBase(base: Cmd | null): this {
-    Object.defineProperty(this, "base", {
-      value: base,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).base = base;
     return this;
   }
 

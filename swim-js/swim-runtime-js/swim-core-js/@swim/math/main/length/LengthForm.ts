@@ -19,17 +19,14 @@ import {LengthUnits, AnyLength, Length} from "./Length";
 export class LengthForm extends Form<Length, AnyLength> {
   constructor(defaultUnits: LengthUnits | undefined, unit: Length | undefined) {
     super();
-    Object.defineProperty(this, "defaultUnits", {
-      value: defaultUnits,
-      enumerable: true,
-    });
+    this.defaultUnits = defaultUnits;
     Object.defineProperty(this, "unit", {
       value: unit,
       enumerable: true,
     });
   }
 
-  readonly defaultUnits!: LengthUnits | undefined;
+  readonly defaultUnits: LengthUnits | undefined;
 
   override readonly unit!: Length | undefined;
 

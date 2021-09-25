@@ -24,36 +24,27 @@ import type {Report} from "./Report";
  */
 export class SpecUnit {
   constructor(name: string, func: UnitFunc, options: UnitOptions) {
-    Object.defineProperty(this, "name", {
-      value: name,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "func", {
-      value: func,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "options", {
-      value: options,
-      enumerable: true,
-    });
+    this.name = name;
+    this.func = func;
+    this.options = options;
   }
 
   /**
    * The name of this `SpecUnit`–typically the name of the factory function
    * that instantiates its child specs.
    */
-  readonly name!: string;
+  readonly name: string;
 
   /**
    * The factory function used to instantiate child specs to be executed by
    * the test unit.
    */
-  readonly func!: UnitFunc;
+  readonly func: UnitFunc;
 
   /**
    * The options that govern the execution of this test unit.
    */
-  readonly options!: UnitOptions;
+  readonly options: UnitOptions;
 
   /**
    * Lifecycle callback invoked before the execution of each child spec

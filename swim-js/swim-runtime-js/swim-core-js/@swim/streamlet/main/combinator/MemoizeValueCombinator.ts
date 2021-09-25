@@ -12,21 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {Outlet} from "../Outlet";
 import {AbstractInoutlet} from "../AbstractInoutlet";
 
 export class MemoizeValueCombinator<IO> extends AbstractInoutlet<IO, IO> {
   constructor() {
     super();
-    Object.defineProperty(this, "state", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.state = void 0;
   }
 
   /** @hidden */
-  readonly state!: IO | undefined;
+  readonly state: IO | undefined;
 
   override get(): IO | undefined {
     return this.state;
@@ -35,11 +32,7 @@ export class MemoizeValueCombinator<IO> extends AbstractInoutlet<IO, IO> {
   protected override onRecohere(version: number): void {
     const input = this.input;
     if (input !== null) {
-      Object.defineProperty(this, "state", {
-        value: input.get(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).state = input.get();
     }
   }
 

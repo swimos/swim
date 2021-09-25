@@ -21,13 +21,10 @@ export class UriHostName extends UriHost {
   /** @hidden */
   constructor(address: string) {
     super();
-    Object.defineProperty(this, "address", {
-      value: address,
-      enumerable: true,
-    });
+    this.address = address;
   }
 
-  override readonly address!: string;
+  override readonly address: string;
 
   override get name(): string {
     return this.address;

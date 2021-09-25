@@ -12,27 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyOutputSettings, OutputSettings, Output} from "@swim/codec";
 import type {Data} from "./Data";
 
 /** @hidden */
 export class DataOutput extends Output<Data> {
-  /** @hidden */
-  readonly data!: Data;
-
   constructor(data: Data, settings: OutputSettings) {
     super();
-    Object.defineProperty(this, "data", {
-      value: data,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    this.data = data;
+    this.settings = settings;
   }
+
+  /** @hidden */
+  readonly data: Data;
 
   override isCont(): boolean {
     return true;
@@ -71,15 +64,11 @@ export class DataOutput extends Output<Data> {
     throw new TypeError("" + string);
   }
 
-  override readonly settings!: OutputSettings;
+  override readonly settings: OutputSettings;
 
   override withSettings(settings: AnyOutputSettings): Output<Data> {
     settings = OutputSettings.fromAny(settings);
-    Object.defineProperty(this, "settings", {
-      value: settings,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).settings = settings;
     return this;
   }
 

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {OutputException} from "../output/OutputException";
 import type {AnyOutputSettings, OutputSettings} from "../output/OutputSettings";
 import {Output} from "../output/Output";
@@ -22,9 +23,9 @@ import {Base16} from "../number/Base16";
 /** @hidden */
 export class Utf8DecodedOutput<T> extends Output<T> {
   /** @hidden */
-  readonly output!: Output<T>;
+  readonly output: Output<T>;
   /** @hidden */
-  readonly errorMode!: UtfErrorMode;
+  readonly errorMode: UtfErrorMode;
   /** @hidden */
   c1: number;
   /** @hidden */
@@ -37,16 +38,8 @@ export class Utf8DecodedOutput<T> extends Output<T> {
   constructor(output: Output<T>, errorMode: UtfErrorMode,
               c1: number, c2: number, c3: number, have: number) {
     super();
-    Object.defineProperty(this, "output", {
-      value: output,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "errorMode", {
-      value: errorMode,
-      enumerable: true,
-      configurable: true,
-    });
+    this.output = output;
+    this.errorMode = errorMode;
     this.c1 = c1;
     this.c2 = c2;
     this.c3 = c3;
@@ -74,11 +67,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
   }
 
   override asPart(part: boolean): Output<T> {
-    Object.defineProperty(this, "output", {
-      value: this.output.asPart(part),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).output = this.output.asPart(part);
     return this;
   }
 
@@ -116,19 +105,11 @@ export class Utf8DecodedOutput<T> extends Output<T> {
       if (c1 === 0 && this.errorMode.isNonZero()) { // invalid NUL byte
         return Output.error(new OutputException("unexpected NUL byte"));
       } else if (c1 >= 0 && c1 <= 0x7f) { // U+0000..U+007F
-        Object.defineProperty(this, "output", {
-          value: this.output.write(c1),
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).output = this.output.write(c1);
         this.have = 0;
       } else if (c1 >= 0xc2 && c1 <= 0xf4) {
         if (c1 >= 0xc2 && c1 <= 0xdf && c2 >= 0x80 && c2 <= 0xbf) { // U+0080..U+07FF
-          Object.defineProperty(this, "output", {
-            value: this.output.write((c1 & 0x1f) << 6 | c2 & 0x3f),
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).output = this.output.write((c1 & 0x1f) << 6 | c2 & 0x3f);
           this.c1 = -1;
           this.have = 0;
         } else if (c1 === 0xe0 && c2 >= 0xa0 && c2 <= 0xbf // U+0800..U+0FFF
@@ -136,11 +117,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
                 || c1 === 0xed && c2 >= 0x80 && c2 <= 0x9f // U+D000..U+D7FF
                 || c1 >= 0xee && c1 <= 0xef && c2 >= 0x80 && c2 <= 0xbf) { // U+E000..U+FFFF
           if (c3 >= 0x80 && c3 <= 0xbf) {
-            Object.defineProperty(this, "output", {
-              value: this.output.write((c1 & 0x0f) << 12 | (c2 & 0x3f) << 6 | c3 & 0x3f),
-              enumerable: true,
-              configurable: true,
-            });
+            (this as Mutable<this>).output = this.output.write((c1 & 0x0f) << 12 | (c2 & 0x3f) << 6 | c3 & 0x3f);
             this.c1 = -1;
             this.c2 = -1;
             this.have = 0;
@@ -148,11 +125,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
             if (this.errorMode.isFatal()) {
               return Output.error(new OutputException(Utf8DecodedOutput.invalid(c1, c2, c3)));
             }
-            Object.defineProperty(this, "output", {
-              value: this.output.write(this.errorMode.replacementChar),
-              enumerable: true,
-              configurable: true,
-            });
+            (this as Mutable<this>).output = this.output.write(this.errorMode.replacementChar);
             this.c1 = c3;
             this.c2 = -1;
             this.have = 1;
@@ -168,11 +141,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
           if (c3 >= 0x80 && c3 <= 0xbf) {
             if (c4 >= 0x80 && c4 <= 0xbf) {
               this.have = 4;
-              Object.defineProperty(this, "output", {
-                value: this.output.write((c1 & 0x07) << 18 | (c2 & 0x3f) << 12 | (c3 & 0x3f) << 6 | c4 & 0x3f),
-                enumerable: true,
-                configurable: true,
-              });
+              (this as Mutable<this>).output = this.output.write((c1 & 0x07) << 18 | (c2 & 0x3f) << 12 | (c3 & 0x3f) << 6 | c4 & 0x3f);
               this.c1 = -1;
               this.c2 = -1;
               this.c3 = -1;
@@ -181,11 +150,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
               if (this.errorMode.isFatal()) {
                 return Output.error(new OutputException(Utf8DecodedOutput.invalid(c1, c2, c3, c4)));
               }
-              Object.defineProperty(this, "output", {
-                value: this.output.write(this.errorMode.replacementChar),
-                enumerable: true,
-                configurable: true,
-              });
+              (this as Mutable<this>).output = this.output.write(this.errorMode.replacementChar);
               this.c1 = c4;
               this.c2 = -1;
               this.c3 = -1;
@@ -200,11 +165,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
             if (this.errorMode.isFatal()) {
               return Output.error(new OutputException(Utf8DecodedOutput.invalid(c1, c2, c3)));
             }
-            Object.defineProperty(this, "output", {
-              value: this.output.write(this.errorMode.replacementChar),
-              enumerable: true,
-              configurable: true,
-            });
+            (this as Mutable<this>).output = this.output.write(this.errorMode.replacementChar);
             this.c1 = c3;
             this.c2 = -1;
             this.have = 1;
@@ -218,11 +179,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
           if (this.errorMode.isFatal()) {
             return Output.error(new OutputException(Utf8DecodedOutput.invalid(c1, c2)));
           }
-          Object.defineProperty(this, "output", {
-            value: this.output.write(this.errorMode.replacementChar),
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).output = this.output.write(this.errorMode.replacementChar);
           this.c1 = c2;
           this.have = 1;
         } else if (token < 0 || this.output.isDone()) { // incomplete c2
@@ -235,11 +192,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
         if (this.errorMode.isFatal()) {
           return Output.error(new OutputException(Utf8DecodedOutput.invalid(c1)));
         }
-        Object.defineProperty(this, "output", {
-          value: this.output.write(this.errorMode.replacementChar),
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).output = this.output.write(this.errorMode.replacementChar);
         this.have = 0;
       }
       if (this.output.isError()) {
@@ -247,11 +200,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
       }
       return this;
     } else if (typeof token === "string") {
-      Object.defineProperty(this, "output", {
-        value: this.output.write(token),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).output = this.output.write(token);
       return this;
     } else {
       throw new TypeError("" + token);
@@ -283,11 +232,7 @@ export class Utf8DecodedOutput<T> extends Output<T> {
   }
 
   override withSettings(settings: AnyOutputSettings): Output<T> {
-    Object.defineProperty(this, "output", {
-      value: this.output.withSettings(settings),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).output = this.output.withSettings(settings);
     return this;
   }
 

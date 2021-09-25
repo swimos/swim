@@ -16,16 +16,13 @@ import {Cursor} from "@swim/util";
 
 /** @hidden */
 export class ValuesCursor<K, V> extends Cursor<V> {
-  /** @hidden */
-  readonly cursor!: Cursor<[K, V]>;
-
   constructor(cursor: Cursor<[K, V]>) {
     super();
-    Object.defineProperty(this, "cursor", {
-      value: cursor,
-      enumerable: true,
-    });
+    this.cursor = cursor;
   }
+
+  /** @hidden */
+  readonly cursor: Cursor<[K, V]>;
 
   override isEmpty(): boolean {
     return this.cursor.isEmpty();

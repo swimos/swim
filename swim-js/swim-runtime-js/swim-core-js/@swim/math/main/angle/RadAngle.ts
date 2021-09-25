@@ -19,13 +19,10 @@ import {AngleUnits, Angle} from "./Angle";
 export class RadAngle extends Angle {
   constructor(value: number) {
     super();
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-    });
+    this.value = value;
   }
 
-  override readonly value!: number;
+  override readonly value: number;
 
   override get units(): AngleUnits {
     return "rad";
