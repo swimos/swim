@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import type {AnyTiming} from "@swim/mapping";
 import type {
   AnyConstraintExpression,
@@ -175,15 +175,8 @@ function CssRuleConstructor<V extends CssContext>(this: CssRule<V>, owner: V, ru
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "animationTracks", {
-    value: Arrays.empty,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).animationTracks = Arrays.empty;
   return this;
 }
 
@@ -207,11 +200,7 @@ CssRule.prototype.trackWillStartAnimating = function (track: AnimationTrack): vo
   const oldTracks = this.animationTracks;
   const newTracks = Arrays.inserted(track, oldTracks);
   if (oldTracks !== newTracks) {
-    Object.defineProperty(this, "animationTracks", {
-      value: newTracks,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).animationTracks = newTracks;
     if (oldTracks.length === 0) {
       this.owner.trackWillStartAnimating(this);
       this.owner.trackDidStartAnimating(this);
@@ -231,11 +220,7 @@ CssRule.prototype.trackDidStopAnimating = function (track: AnimationTrack): void
   const oldTracks = this.animationTracks;
   const newTracks = Arrays.removed(track, oldTracks);
   if (oldTracks !== newTracks) {
-    Object.defineProperty(this, "animationTracks", {
-      value: newTracks,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).animationTracks = newTracks;
     if (newTracks.length === 0) {
       this.owner.trackWillStopAnimating(this);
       this.owner.trackDidStopAnimating(this);
@@ -348,11 +333,7 @@ CssRule.define = function <V extends CssContext, I>(descriptor: CssRuleDescripto
       if (_this.initRule !== void 0) {
         rule = _this.initRule(rule);
       }
-      Object.defineProperty(_this, "rule", {
-        value: rule,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).rule = rule;
       return _this;
     } as unknown as CssRuleConstructor<V, I>;
 

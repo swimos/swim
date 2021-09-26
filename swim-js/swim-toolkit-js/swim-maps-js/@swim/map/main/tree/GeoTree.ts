@@ -22,79 +22,43 @@ export class GeoTree {
               southWest: GeoTree | null, northWest: GeoTree | null,
               southEast: GeoTree | null, northEast: GeoTree | null,
               views: ReadonlyArray<GeoView>, size: number) {
-    Object.defineProperty(this, "depth", {
-      value: depth,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "maxDepth", {
-      value: maxDepth,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "density", {
-      value: density,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "geoFrame", {
-      value: geoFrame,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "geoBounds", {
-      value: geoBounds,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "geoCenter", {
-      value: geoCenter,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "southWest", {
-      value: southWest,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "northWest", {
-      value: northWest,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "southEast", {
-      value: southEast,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "northEast", {
-      value: northEast,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "views", {
-      value: views,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "size", {
-      value: size,
-      enumerable: true,
-    });
+    this.depth = depth;
+    this.maxDepth = maxDepth;
+    this.density = density;
+    this.geoFrame = geoFrame;
+    this.geoBounds = geoBounds;
+    this.geoCenter = geoCenter;
+    this.southWest = southWest;
+    this.northWest = northWest;
+    this.southEast = southEast;
+    this.northEast = northEast;
+    this.views = views;
+    this.size = size;
   }
 
-  readonly depth!: number;
+  readonly depth: number;
 
-  readonly maxDepth!: number;
+  readonly maxDepth: number;
 
-  readonly density!: number
+  readonly density: number
 
-  readonly geoFrame!: GeoBox;
+  readonly geoFrame: GeoBox;
 
-  readonly geoBounds!: GeoBox;
+  readonly geoBounds: GeoBox;
 
-  readonly geoCenter!: GeoPoint;
+  readonly geoCenter: GeoPoint;
 
-  readonly southWest!: GeoTree | null;
+  readonly southWest: GeoTree | null;
 
-  readonly northWest!: GeoTree | null;
+  readonly northWest: GeoTree | null;
 
-  readonly southEast!: GeoTree | null;
+  readonly southEast: GeoTree | null;
 
-  readonly northEast!: GeoTree | null;
+  readonly northEast: GeoTree | null;
 
-  readonly views!: ReadonlyArray<GeoView>;
+  readonly views: ReadonlyArray<GeoView>;
 
-  readonly size!: number;
+  readonly size: number;
 
   isEmpty(): boolean {
     return this.size === 0;

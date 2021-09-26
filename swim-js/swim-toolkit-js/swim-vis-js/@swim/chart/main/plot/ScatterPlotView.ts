@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Values} from "@swim/util";
+import {Equals, Mutable, Values} from "@swim/util";
 import {Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/mapping";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
@@ -35,30 +35,11 @@ export interface ScatterPlotViewInit<X, Y> extends PlotViewInit<X, Y> {
 export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotView<X, Y> {
   constructor() {
     super();
-    Object.defineProperty(this, "dataPointFasteners", {
-      value: [],
-      enumerable: true,
-    });
-    Object.defineProperty(this, "xDataDomain", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "yDataDomain", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "xDataRange", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "yDataRange", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.dataPointFasteners = [];
+    this.xDataDomain = null;
+    this.yDataDomain = null;
+    this.xDataRange = null;
+    this.yDataRange = null;
   }
 
   override initView(init: ScatterPlotViewInit<X, Y>): void {
@@ -289,17 +270,13 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   })
   readonly yRangePadding!: ViewProperty<this, readonly [number, number]>
 
-  readonly xDataDomain!: Domain<X> | null;
+  readonly xDataDomain: Domain<X> | null;
 
   protected setXDataDomain(newXDataDomain: Domain<X> | null): void {
     const oldXDataDomain = this.xDataDomain;
     if (!Equals(newXDataDomain, oldXDataDomain)) {
       this.willSetXDataDomain(newXDataDomain, oldXDataDomain);
-      Object.defineProperty(this, "xDataDomain", {
-        value: newXDataDomain,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).xDataDomain = newXDataDomain;
       this.onSetXDataDomain(newXDataDomain, oldXDataDomain);
       this.didSetXDataDomain(newXDataDomain, oldXDataDomain);
     }
@@ -345,17 +322,13 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     this.setXDataDomain(xDataDomain);
   }
 
-  readonly yDataDomain!: Domain<Y> | null;
+  readonly yDataDomain: Domain<Y> | null;
 
   protected setYDataDomain(newYDataDomain: Domain<Y> | null): void {
     const oldYDataDomain = this.yDataDomain;
     if (!Equals(newYDataDomain, oldYDataDomain)) {
       this.willSetYDataDomain(newYDataDomain, oldYDataDomain);
-      Object.defineProperty(this, "yDataDomain", {
-        value: newYDataDomain,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).yDataDomain = newYDataDomain;
       this.onSetYDataDomain(newYDataDomain, oldYDataDomain);
       this.didSetYDataDomain(newYDataDomain, oldYDataDomain);
     }
@@ -409,14 +382,10 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     this.setYDataDomain(yDataDomain);
   }
 
-  readonly xDataRange!: Range<number> | null;
+  readonly xDataRange: Range<number> | null;
 
   protected setXDataRange(xDataRange: Range<number> | null): void {
-    Object.defineProperty(this, "xDataRange", {
-      value: xDataRange,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).xDataRange = xDataRange;
   }
 
   protected updateXDataRange(): void {
@@ -431,14 +400,10 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
     }
   }
 
-  readonly yDataRange!: Range<number> | null;
+  readonly yDataRange: Range<number> | null;
 
   protected setYDataRange(yDataRange: Range<number> | null): void {
-    Object.defineProperty(this, "yDataRange", {
-      value: yDataRange,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).yDataRange = yDataRange;
   }
 
   protected updateYDataRange(): void {
@@ -605,7 +570,7 @@ export abstract class ScatterPlotView<X, Y> extends LayerView implements PlotVie
   }
 
   /** @hidden */
-  readonly dataPointFasteners!: ReadonlyArray<ViewFastener<this, DataPointView<X, Y>>>;
+  readonly dataPointFasteners: ReadonlyArray<ViewFastener<this, DataPointView<X, Y>>>;
 
   /** @hidden */
   protected mountDataPointFasteners(): void {

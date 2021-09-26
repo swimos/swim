@@ -14,7 +14,7 @@
 
 /// <reference types="arcgis-js-api"/>
 
-import {Equivalent} from "@swim/util";
+import {Equivalent, Mutable} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
@@ -29,12 +29,10 @@ import type {EsriMapViewObserver} from "./EsriMapViewObserver";
 export class EsriMapView extends EsriView {
   constructor(map: __esri.MapView) {
     super();
-    Object.defineProperty(this, "map", {
-      value: map,
-      enumerable: true,
-    });
+    this.map = map;
     Object.defineProperty(this, "geoViewport", {
       value: EsriMapViewport.create(map),
+      writable: true,
       enumerable: true,
       configurable: true,
     });
@@ -44,7 +42,7 @@ export class EsriMapView extends EsriView {
 
   override readonly viewObservers!: ReadonlyArray<EsriMapViewObserver>;
 
-  override readonly map!: __esri.MapView;
+  override readonly map: __esri.MapView;
 
   protected initMap(map: __esri.MapView): void {
     map.watch("extent", this.onMapRender);
@@ -81,11 +79,7 @@ export class EsriMapView extends EsriView {
     const newGeoViewport = EsriMapViewport.create(this.map);
     if (!newGeoViewport.equals(oldGeoViewport)) {
       this.willSetGeoViewport(newGeoViewport, oldGeoViewport);
-      Object.defineProperty(this, "geoViewport", {
-        value: newGeoViewport,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).geoViewport = newGeoViewport;
       this.onSetGeoViewport(newGeoViewport, oldGeoViewport);
       this.didSetGeoViewport(newGeoViewport, oldGeoViewport);
       return true;

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Equivalent, Arrays, Values} from "@swim/util";
+import {Equals, Equivalent, Mutable, Arrays, Values} from "@swim/util";
 import {
   Domain,
   Range,
@@ -80,45 +80,14 @@ export interface ScaledViewInit<X, Y> extends GraphicsViewInit {
 export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView<X, Y> {
   constructor() {
     super();
-    Object.defineProperty(this, "scaledFlags", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "scaledFasteners", {
-      value: [],
-      enumerable: true,
-    });
-    Object.defineProperty(this, "xDataDomain", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "yDataDomain", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "xDataRange", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "yDataRange", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "xDataDomainPadded", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "yDataDomainPadded", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.scaledFlags = 0;
+    this.scaledFasteners = [];
+    this.xDataDomain = null;
+    this.yDataDomain = null;
+    this.xDataRange = null;
+    this.yDataRange = null;
+    this.xDataDomainPadded = null;
+    this.yDataDomainPadded = null;
   }
 
   override initView(init: ScaledViewInit<X, Y>): void {
@@ -203,15 +172,11 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   override readonly viewObservers!: ReadonlyArray<ScaledViewObserver<X, Y>>;
 
   /** @hidden */
-  readonly scaledFlags!: ScaledFlags;
+  readonly scaledFlags: ScaledFlags;
 
   /** @hidden */
   setScaledFlags(scaledFlags: ScaledFlags): void {
-    Object.defineProperty(this, "scaledFlags", {
-      value: scaledFlags,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).scaledFlags = scaledFlags;
   }
 
   protected willSetXScale(newXScale: ContinuousScale<X, number> | null, oldXScale: ContinuousScale<X, number> | null): void {
@@ -414,17 +379,13 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  readonly xDataDomain!: Domain<X> | null;
+  readonly xDataDomain: Domain<X> | null;
 
   protected setXDataDomain(newXDataDomain: Domain<X> | null): void {
     const oldXDataDomain = this.xDataDomain;
     if (!Equals(newXDataDomain, oldXDataDomain)) {
       this.willSetXDataDomain(newXDataDomain, oldXDataDomain);
-      Object.defineProperty(this, "xDataDomain", {
-        value: newXDataDomain,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).xDataDomain = newXDataDomain;
       this.onSetXDataDomain(newXDataDomain, oldXDataDomain);
       this.didSetXDataDomain(newXDataDomain, oldXDataDomain);
     }
@@ -471,17 +432,13 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.setXDataDomain(xDataDomain);
   }
 
-  readonly yDataDomain!: Domain<Y> | null;
+  readonly yDataDomain: Domain<Y> | null;
 
   protected setYDataDomain(newYDataDomain: Domain<Y> | null): void {
     const oldYDataDomain = this.yDataDomain;
     if (!Equals(newYDataDomain, oldYDataDomain)) {
       this.willSetYDataDomain(newYDataDomain, oldYDataDomain);
-      Object.defineProperty(this, "yDataDomain", {
-        value: newYDataDomain,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).yDataDomain = newYDataDomain;
       this.onSetYDataDomain(newYDataDomain, oldYDataDomain);
       this.didSetYDataDomain(newYDataDomain, oldYDataDomain);
     }
@@ -528,14 +485,10 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.setYDataDomain(yDataDomain);
   }
 
-  readonly xDataRange!: Range<number> | null;
+  readonly xDataRange: Range<number> | null;
 
   protected setXDataRange(xDataRange: Range<number> | null): void {
-    Object.defineProperty(this, "xDataRange", {
-      value: xDataRange,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).xDataRange = xDataRange;
   }
 
   protected updateXDataRange(): void {
@@ -550,14 +503,10 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  readonly yDataRange!: Range<number> | null;
+  readonly yDataRange: Range<number> | null;
 
   protected setYDataRange(yDataRange: Range<number> | null): void {
-    Object.defineProperty(this, "yDataRange", {
-      value: yDataRange,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).yDataRange = yDataRange;
   }
 
   protected updateYDataRange(): void {
@@ -572,14 +521,10 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     }
   }
 
-  readonly xDataDomainPadded!: Domain<X> | null;
+  readonly xDataDomainPadded: Domain<X> | null;
 
   protected setXDataDomainPadded(xDataDomainPadded: Domain<X> | null): void {
-    Object.defineProperty(this, "xDataDomainPadded", {
-      value: xDataDomainPadded,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).xDataDomainPadded = xDataDomainPadded;
   }
 
   protected updateXDataDomainPadded(): void {
@@ -602,14 +547,10 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
     this.setXDataDomainPadded(xDataDomainPadded);
   }
 
-  readonly yDataDomainPadded!: Domain<Y> | null;
+  readonly yDataDomainPadded: Domain<Y> | null;
 
   protected setYDataDomainPadded(yDataDomainPadded: Domain<Y> | null): void {
-    Object.defineProperty(this, "yDataDomainPadded", {
-      value: yDataDomainPadded,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).yDataDomainPadded = yDataDomainPadded;
   }
 
   protected updateYDataDomainPadded(): void {
@@ -1163,7 +1104,7 @@ export abstract class ScaledView<X, Y> extends LayerView implements ScaledXYView
   }
 
   /** @hidden */
-  readonly scaledFasteners!: ReadonlyArray<ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>>;
+  readonly scaledFasteners: ReadonlyArray<ViewFastener<this, ScaledXView<X> | ScaledYView<Y>>>;
 
   /** @hidden */
   protected mountScaledFasteners(): void {

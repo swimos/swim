@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {FromAny} from "@swim/util";
+import {FromAny, Mutable} from "@swim/util";
 import type {AnyTiming, Timing} from "@swim/mapping";
 import {AnyLength, Length, AnyTransform, Transform} from "@swim/math";
 import {FontFamily, AnyColor, Color, AnyBoxShadow, BoxShadow} from "@swim/style";
@@ -206,15 +206,8 @@ function StyleAnimatorConstructor<V extends StyleContext, T, U>(this: StyleAnima
       configurable: true,
     });
   }
-  Object.defineProperty(_this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(_this, "priority", {
-    value: void 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (_this as Mutable<typeof _this>).owner = owner;
+  (_this as Mutable<typeof _this>).priority = void 0;
   return _this;
 }
 
@@ -258,11 +251,7 @@ Object.defineProperty(StyleAnimator.prototype, "propertyValue", {
 });
 
 StyleAnimator.prototype.setPriority = function (this: StyleAnimator<StyleContext, unknown>, priority: string | undefined): void {
-  Object.defineProperty(this, "priority", {
-    value: priority,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).priority = priority;
   const value = this.value;
   if (this.isDefined(value)) {
     const propertyNames = this.propertyNames;
@@ -505,30 +494,14 @@ StyleAnimator.define = function <V extends StyleContext, T, U, I>(descriptor: St
       ownState = _this.fromAny(state);
     }
     if (ownState !== void 0) {
-      Object.defineProperty(_this, "ownValue", {
-        value: ownState,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(_this, "ownState", {
-        value: ownState,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownValue = ownState;
+      (_this as Mutable<typeof _this>).ownState = ownState;
     }
     if (look !== void 0) {
-      Object.defineProperty(_this, "ownLook", {
-        value: look,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownLook = look;
     }
     if (precedence !== void 0) {
-      Object.defineProperty(_this, "precedence", {
-        value: precedence,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).precedence = precedence;
     }
     return _this;
   } as unknown as StyleAnimatorConstructor<V, T, U, I>;

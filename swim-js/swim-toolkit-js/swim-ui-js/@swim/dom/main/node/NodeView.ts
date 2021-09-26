@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import type {AnyTiming} from "@swim/mapping";
 import type {ConstraintVariable, Constraint} from "@swim/constraint";
 import {R2Box, Transform} from "@swim/math";
@@ -55,55 +55,16 @@ export interface NodeViewConstructor<V extends NodeView = NodeView> {
 export class NodeView extends View {
   constructor(node: Node) {
     super();
-    Object.defineProperty(this, "key", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "node", {
-      value: node,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "childViewMap", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "viewServices", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "viewProperties", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "viewAnimators", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "viewFasteners", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "gestures", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "constraints", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "constraintVariables", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    this.node = node;
+    this.key = void 0;
+    this.childViewMap = null;
+    this.viewServices = null;
+    this.viewProperties = null;
+    this.viewAnimators = null;
+    this.viewFasteners = null;
+    this.gestures = null;
+    this.constraints = Arrays.empty;
+    this.constraintVariables = Arrays.empty;
     (node as ViewNode).view = this;
   }
 
@@ -114,7 +75,7 @@ export class NodeView extends View {
     }
   }
 
-  readonly node!: Node;
+  readonly node: Node;
 
   override readonly viewObservers!: ReadonlyArray<NodeViewObserver>;
 
@@ -144,15 +105,11 @@ export class NodeView extends View {
     return result;
   }
 
-  override readonly key!: string | undefined;
+  override readonly key: string | undefined;
 
   /** @hidden */
   override setKey(key: string | undefined): void {
-    Object.defineProperty(this, "key", {
-      value: key,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).key = key;
   }
 
   override get parentView(): View | null {
@@ -303,7 +260,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  readonly childViewMap!: {[key: string]: View | undefined} | null;
+  readonly childViewMap: {[key: string]: View | undefined} | null;
 
   override getChildView(key: string): View | null {
     const childViewMap = this.childViewMap;
@@ -376,11 +333,7 @@ export class NodeView extends View {
       let childViewMap = this.childViewMap;
       if (childViewMap === null) {
         childViewMap = {};
-        Object.defineProperty(this, "childViewMap", {
-          value: childViewMap,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).childViewMap = childViewMap;
       }
       childViewMap[key] = childView;
     }
@@ -1300,7 +1253,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  readonly viewServices!: {[serviceName: string]: ViewService<View, unknown> | undefined} | null;
+  readonly viewServices: {[serviceName: string]: ViewService<View, unknown> | undefined} | null;
 
   override hasViewService(serviceName: string): boolean {
     const viewServices = this.viewServices;
@@ -1322,11 +1275,7 @@ export class NodeView extends View {
     let viewServices = this.viewServices;
     if (viewServices === null) {
       viewServices = {};
-      Object.defineProperty(this, "viewServices", {
-        value: viewServices,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).viewServices = viewServices;
     }
     const oldViewService = viewServices[serviceName];
     if (oldViewService !== void 0 && this.isMounted()) {
@@ -1361,7 +1310,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  readonly viewProperties!: {[propertyName: string]: ViewProperty<View, unknown> | undefined} | null;
+  readonly viewProperties: {[propertyName: string]: ViewProperty<View, unknown> | undefined} | null;
 
   override hasViewProperty(propertyName: string): boolean {
     const viewProperties = this.viewProperties;
@@ -1383,11 +1332,7 @@ export class NodeView extends View {
     let viewProperties = this.viewProperties;
     if (viewProperties === null) {
       viewProperties = {};
-      Object.defineProperty(this, "viewProperties", {
-        value: viewProperties,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).viewProperties = viewProperties;
     }
     const oldViewProperty = viewProperties[propertyName];
     if (oldViewProperty !== void 0 && this.isMounted()) {
@@ -1431,7 +1376,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  readonly viewAnimators!: {[animatorName: string]: ViewAnimator<View, unknown> | undefined} | null;
+  readonly viewAnimators: {[animatorName: string]: ViewAnimator<View, unknown> | undefined} | null;
 
   override hasViewAnimator(animatorName: string): boolean {
     const viewAnimators = this.viewAnimators;
@@ -1453,11 +1398,7 @@ export class NodeView extends View {
     let viewAnimators = this.viewAnimators;
     if (viewAnimators === null) {
       viewAnimators = {};
-      Object.defineProperty(this, "viewAnimators", {
-        value: viewAnimators,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).viewAnimators = viewAnimators;
     }
     const oldViewAnimator = viewAnimators[animatorName];
     if (oldViewAnimator !== void 0 && this.isMounted()) {
@@ -1492,7 +1433,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  readonly viewFasteners!: {[fastenerName: string]: ViewFastener<View, View> | undefined} | null;
+  readonly viewFasteners: {[fastenerName: string]: ViewFastener<View, View> | undefined} | null;
 
   override hasViewFastener(fastenerName: string): boolean {
     const viewFasteners = this.viewFasteners;
@@ -1514,11 +1455,7 @@ export class NodeView extends View {
     let viewFasteners = this.viewFasteners;
     if (viewFasteners === null) {
       viewFasteners = {};
-      Object.defineProperty(this, "viewFasteners", {
-        value: viewFasteners,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).viewFasteners = viewFasteners;
     }
     const oldViewFastener = viewFasteners[fastenerName];
     if (oldViewFastener !== void 0 && this.isMounted()) {
@@ -1575,7 +1512,7 @@ export class NodeView extends View {
   }
 
   /** @hidden */
-  readonly gestures!: {[gestureName: string]: Gesture<View, View> | undefined} | null;
+  readonly gestures: {[gestureName: string]: Gesture<View, View> | undefined} | null;
 
   override hasGesture(gestureName: string): boolean {
     const gestures = this.gestures;
@@ -1597,11 +1534,7 @@ export class NodeView extends View {
     let gestures = this.gestures;
     if (gestures === null) {
       gestures = {};
-      Object.defineProperty(this, "gestures", {
-        value: gestures,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).gestures = gestures;
     }
     const oldGesture = gestures[gestureName];
     if (oldGesture !== void 0 && this.isMounted()) {
@@ -1658,7 +1591,7 @@ export class NodeView extends View {
     }
   }
 
-  readonly constraints!: ReadonlyArray<Constraint>;
+  readonly constraints: ReadonlyArray<Constraint>;
 
   override hasConstraint(constraint: Constraint): boolean {
     return this.constraints.indexOf(constraint) >= 0;
@@ -1668,11 +1601,7 @@ export class NodeView extends View {
     const oldConstraints = this.constraints;
     const newConstraints = Arrays.inserted(constraint, oldConstraints);
     if (oldConstraints !== newConstraints) {
-      Object.defineProperty(this, "constraints", {
-        value: newConstraints,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).constraints = newConstraints;
       this.activateConstraint(constraint);
     }
   }
@@ -1682,15 +1611,11 @@ export class NodeView extends View {
     const newConstraints = Arrays.removed(constraint, oldConstraints);
     if (oldConstraints !== newConstraints) {
       this.deactivateConstraint(constraint);
-      Object.defineProperty(this, "constraints", {
-        value: newConstraints,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).constraints = newConstraints;
     }
   }
 
-  readonly constraintVariables!: ReadonlyArray<ConstraintVariable>;
+  readonly constraintVariables: ReadonlyArray<ConstraintVariable>;
 
   override hasConstraintVariable(constraintVariable: ConstraintVariable): boolean {
     return this.constraintVariables.indexOf(constraintVariable) >= 0;
@@ -1700,11 +1625,7 @@ export class NodeView extends View {
     const oldConstraintVariables = this.constraintVariables;
     const newConstraintVariables = Arrays.inserted(constraintVariable, oldConstraintVariables);
     if (oldConstraintVariables !== newConstraintVariables) {
-      Object.defineProperty(this, "constraintVariables", {
-        value: newConstraintVariables,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).constraintVariables = newConstraintVariables;
       this.activateConstraintVariable(constraintVariable);
     }
   }
@@ -1714,11 +1635,7 @@ export class NodeView extends View {
     const newConstraintVariables = Arrays.removed(constraintVariable, oldConstraintVariables);
     if (oldConstraintVariables !== newConstraintVariables) {
       this.deactivateConstraintVariable(constraintVariable);
-      Object.defineProperty(this, "constraintVariables", {
-        value: newConstraintVariables,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).constraintVariables = newConstraintVariables;
     }
   }
 

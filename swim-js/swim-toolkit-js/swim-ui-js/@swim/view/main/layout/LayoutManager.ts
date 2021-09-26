@@ -21,13 +21,10 @@ import type {LayoutManagerObserver} from "./LayoutManagerObserver";
 export class LayoutManager<V extends View = View> extends ViewManager<V> {
   constructor() {
     super();
-    Object.defineProperty(this, "solver", {
-      value: this.createSolver(),
-      enumerable: true,
-    });
+    this.solver = this.createSolver();
   }
 
-  readonly solver!: ConstraintSolver;
+  readonly solver: ConstraintSolver;
 
   /** @hidden */
   protected createSolver(): ConstraintSolver {

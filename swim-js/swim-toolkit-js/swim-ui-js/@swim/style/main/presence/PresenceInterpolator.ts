@@ -12,30 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {Presence} from "./Presence";
 
 /** @hidden */
-export const PresenceInterpolator = function (d0: Presence, d1: Presence): Interpolator<Presence> {
+export const PresenceInterpolator = function (p0: Presence, p1: Presence): Interpolator<Presence> {
   const interpolator = function (u: number): Presence {
-    const d0 = interpolator[0];
-    const d1 = interpolator[1];
-    const phase = d0.phase + u * (d1.phase - d0.phase);
-    const direction = u !== 1 ? d0.direction : 0;
+    const p0 = interpolator[0];
+    const p1 = interpolator[1];
+    const phase = p0.phase + u * (p1.phase - p0.phase);
+    const direction = u !== 1 ? p0.direction : 0;
     return Presence.create(phase, direction);
   } as Interpolator<Presence>;
   Object.setPrototypeOf(interpolator, PresenceInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: d0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: d1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = p0;
+  (interpolator as Mutable<typeof interpolator>)[1] = p1;
   return interpolator;
 } as {
-  (d0: Presence, d1: Presence): Interpolator<Presence>;
+  (p0: Presence, p1: Presence): Interpolator<Presence>;
 
   /** @hidden */
   prototype: Interpolator<Presence>;

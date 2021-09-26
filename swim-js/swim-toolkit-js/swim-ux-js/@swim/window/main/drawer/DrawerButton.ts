@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy} from "@swim/util";
+import {Lazy, Mutable} from "@swim/util";
 import {Graphics, VectorIcon} from "@swim/graphics";
 import {IconButton} from "@swim/button";
 import type {DrawerView} from "./DrawerView";
@@ -20,11 +20,7 @@ import type {DrawerView} from "./DrawerView";
 export class DrawerButton extends IconButton {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "drawerView", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.drawerView = null;
     this.initIcon();
   }
 
@@ -37,14 +33,10 @@ export class DrawerButton extends IconButton {
     this.pushIcon(DrawerButton.hamburgerIcon);
   }
 
-  readonly drawerView!: DrawerView | null;
+  readonly drawerView: DrawerView | null;
 
   setDrawerView(drawerView: DrawerView | null): void {
-    Object.defineProperty(this, "drawerView", {
-      value: drawerView,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).drawerView = drawerView;
   }
 
   protected override onClick(event: MouseEvent): void {

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import {Value} from "@swim/structure";
 import {Uri} from "@swim/uri";
 import type {EventDownlinkObserver, EventDownlink, WarpRef} from "@swim/client";
@@ -112,46 +113,22 @@ ModelEventDownlink.define = function <M extends ModelDownlinkContext, V, VU, I>(
   const _constructor = function DecoratedModelEventDownlink(this: ModelDownlink<M>, owner: M, downlinkName: string | undefined): ModelEventDownlink<M> {
     const _this: ModelEventDownlink<M> = _super!.call(this, owner, downlinkName) || this;
     if (hostUri !== void 0) {
-      Object.defineProperty(_this, "ownHostUri", {
-        value: hostUri as Uri,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownHostUri = hostUri as Uri;
     }
     if (nodeUri !== void 0) {
-      Object.defineProperty(_this, "ownNodeUri", {
-        value: nodeUri as Uri,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownNodeUri = nodeUri as Uri;
     }
     if (laneUri !== void 0) {
-      Object.defineProperty(_this, "ownLaneUri", {
-        value: laneUri as Uri,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownLaneUri = laneUri as Uri;
     }
     if (prio !== void 0) {
-      Object.defineProperty(_this, "ownPrio", {
-        value: prio as number,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownPrio = prio as number;
     }
     if (rate !== void 0) {
-      Object.defineProperty(_this, "ownRate", {
-        value: rate as number,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownRate = rate as number;
     }
     if (body !== void 0) {
-      Object.defineProperty(_this, "ownBody", {
-        value: body as Value,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownBody = body as Value;
     }
     return _this;
   } as unknown as ModelEventDownlinkConstructor<M, I>;

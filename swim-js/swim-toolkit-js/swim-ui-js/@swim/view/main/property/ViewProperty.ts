@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Equals, FromAny} from "@swim/util";
+import {Equals, FromAny, Mutable} from "@swim/util";
 import {MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewFlags, ViewPrecedence, View} from "../View";
 import {StringViewProperty} from "../"; // forward import
@@ -251,40 +251,13 @@ function ViewPropertyConstructor<V extends View, T, U>(this: ViewProperty<V, T, 
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "inherit", {
-    value: false,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "superProperty", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "subProperties", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "precedence", {
-    value: View.Intrinsic,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "propertyFlags", {
-    value: ViewProperty.UpdatedFlag,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "ownState", {
-    value: void 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).inherit = false;
+  (this as Mutable<typeof this>).superProperty = null;
+  (this as Mutable<typeof this>).subProperties = null;
+  (this as Mutable<typeof this>).precedence = View.Intrinsic;
+  (this as Mutable<typeof this>).propertyFlags = ViewProperty.UpdatedFlag;
+  (this as Mutable<typeof this>).ownState = void 0 as unknown as T;
   return this;
 }
 
@@ -295,11 +268,7 @@ function ViewPropertyDecoratorFactory<V extends View, T, U>(descriptor: ViewProp
 ViewProperty.prototype.setInherit = function (this: ViewProperty<View, unknown>, inherit: string | boolean): void {
   if (this.inherit !== inherit) {
     this.unbindSuperProperty();
-    Object.defineProperty(this, "inherit", {
-      value: inherit,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).inherit = inherit;
     this.bindSuperProperty();
   }
 };
@@ -340,11 +309,7 @@ ViewProperty.prototype.bindSuperProperty = function (this: ViewProperty<View, un
     while (superView !== null) {
       const superProperty = superView.getLazyViewProperty(superName);
       if (superProperty !== null) {
-        Object.defineProperty(this, "superProperty", {
-          value: superProperty,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<typeof this>).superProperty = superProperty;
         superProperty.addSubProperty(this);
         if ((this.propertyFlags & ViewProperty.OverrideFlag) === 0 && superProperty.precedence >= this.precedence) {
           this.setPropertyFlags(this.propertyFlags | ViewProperty.InheritedFlag);
@@ -362,11 +327,7 @@ ViewProperty.prototype.unbindSuperProperty = function (this: ViewProperty<View, 
   const superProperty = this.superProperty;
   if (superProperty !== null) {
     superProperty.removeSubProperty(this);
-    Object.defineProperty(this, "superProperty", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).superProperty = null;
     this.setPropertyFlags(this.propertyFlags & ~ViewProperty.InheritedFlag);
   }
 };
@@ -375,11 +336,7 @@ ViewProperty.prototype.addSubProperty = function <T>(this: ViewProperty<View, T>
   let subProperties = this.subProperties;
   if (subProperties === null) {
     subProperties = [];
-    Object.defineProperty(this, "subProperties", {
-      value: subProperties,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).subProperties = subProperties;
   }
   subProperties.push(subProperty);
 };
@@ -443,11 +400,7 @@ ViewProperty.prototype.setOwnState = function <T, U>(this: ViewProperty<View, T,
   const oldState = this.state;
   if (!this.equalState(newState, oldState)) {
     this.willSetState(newState, oldState);
-    Object.defineProperty(this, "ownState", {
-      value: newState,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).ownState = newState;
     this.setPropertyFlags(this.propertyFlags | ViewProperty.UpdatedFlag);
     this.onSetState(newState, oldState);
     this.updateSubProperties(newState, oldState);
@@ -478,11 +431,7 @@ ViewProperty.prototype.setPrecedence = function (this: ViewProperty<View, unknow
   const oldPrecedence = this.precedence;
   if (newPrecedence !== oldPrecedence) {
     this.willSetPrecedence(newPrecedence, oldPrecedence);
-    Object.defineProperty(this, "precedence", {
-      value: newPrecedence,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).precedence = newPrecedence;
     this.onSetPrecedence(newPrecedence, oldPrecedence);
     this.didSetPrecedence(newPrecedence, oldPrecedence);
   }
@@ -506,11 +455,7 @@ ViewProperty.prototype.didSetPrecedence = function (this: ViewProperty<View, unk
 };
 
 ViewProperty.prototype.setPropertyFlags = function (this: ViewProperty<View, unknown>, propertyFlags: ViewPropertyFlags): void {
-  Object.defineProperty(this, "propertyFlags", {
-    value: propertyFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).propertyFlags = propertyFlags;
 };
 
 ViewProperty.prototype.isUpdated = function (this: ViewProperty<View, unknown>): boolean {
@@ -680,25 +625,13 @@ ViewProperty.define = function <V extends View, T, U, I>(descriptor: ViewPropert
       ownState = _this.fromAny(state);
     }
     if (ownState !== void 0) {
-      Object.defineProperty(_this, "ownState", {
-        value: ownState,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownState = ownState;
     }
     if (precedence !== void 0) {
-      Object.defineProperty(_this, "precedence", {
-        value: precedence,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).precedence = precedence;
     }
     if (inherit !== void 0) {
-      Object.defineProperty(_this, "inherit", {
-        value: inherit,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).inherit = inherit;
     }
     return _this;
   } as unknown as ViewPropertyConstructor<V, T, U, I>;

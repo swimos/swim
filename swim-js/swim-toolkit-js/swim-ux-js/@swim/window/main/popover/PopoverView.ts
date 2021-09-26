@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {AnyLength, Length, AnyR2Box, R2Box} from "@swim/math";
 import {Color} from "@swim/style";
@@ -45,31 +45,11 @@ export interface PopoverViewInit extends HtmlViewInit {
 export class PopoverView extends HtmlView implements Modal {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "sourceFrame", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "displayState", {
-      value: PopoverView.HiddenState,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "modality", {
-      value: false,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "allowedPlacement", {
-      value: ["top", "bottom", "right", "left"],
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "currentPlacement", {
-      value: "none",
-      enumerable: true,
-      configurable: true,
-    });
+    this.sourceFrame = null;
+    this.displayState = PopoverView.HiddenState;
+    this.modality = false;
+    this.allowedPlacement = ["top", "bottom", "right", "left"];
+    this.currentPlacement = "none";
     this.onClick = this.onClick.bind(this);
     this.initArrow();
   }
@@ -113,15 +93,11 @@ export class PopoverView extends HtmlView implements Modal {
   }
 
   /** @hidden */
-  readonly displayState!: number;
+  readonly displayState: number;
 
   /** @hidden */
   setDisplayState(displayState: number): void {
-    Object.defineProperty(this, "displayState", {
-      value: displayState,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).displayState = displayState;
   }
 
   /** @hidden */
@@ -265,7 +241,7 @@ export class PopoverView extends HtmlView implements Modal {
     }
   }
 
-  readonly modality!: boolean | number;
+  readonly modality: boolean | number;
 
   showModal(options: ModalOptions, timing?: AnyTiming | boolean): void {
     if (this.isHidden()) {
@@ -275,11 +251,7 @@ export class PopoverView extends HtmlView implements Modal {
         timing = Timing.fromAny(timing);
       }
       if (options.modal !== void 0) {
-        Object.defineProperty(this, "modality", {
-          value: options.modal,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).modality = options.modal;
       }
       this.setDisplayState(PopoverView.ShowState);
       if (timing !== false) {
@@ -370,7 +342,7 @@ export class PopoverView extends HtmlView implements Modal {
   }
 
   /** @hidden */
-  readonly allowedPlacement!: PopoverPlacement[];
+  readonly allowedPlacement: PopoverPlacement[];
 
   placement(): ReadonlyArray<PopoverPlacement>;
   placement(placement: ReadonlyArray<PopoverPlacement>): this;
@@ -388,7 +360,7 @@ export class PopoverView extends HtmlView implements Modal {
   }
 
   /** @hidden */
-  readonly currentPlacement!: PopoverPlacement;
+  readonly currentPlacement: PopoverPlacement;
 
   @ViewProperty<PopoverView, R2Box | null, AnyR2Box | null>({
     type: R2Box,
@@ -476,7 +448,7 @@ export class PopoverView extends HtmlView implements Modal {
   }
 
   /** @hidden */
-  readonly sourceFrame!: R2Box | null;
+  readonly sourceFrame: R2Box | null;
 
   place(force: boolean = false): PopoverPlacement {
     const sourceView = this.source.view;
@@ -484,11 +456,7 @@ export class PopoverView extends HtmlView implements Modal {
     const newSourceFrame = sourceView !== null ? sourceView.popoverFrame : null;
     if (newSourceFrame !== null && this.allowedPlacement.length !== 0 &&
         (force || !newSourceFrame.equals(oldSourceFrame))) {
-      Object.defineProperty(this, "newSourceFrame", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).sourceFrame = null;
       const placement = this.placePopover(sourceView!, newSourceFrame);
       const arrow = this.getChildView("arrow");
       if (arrow instanceof HtmlView) {
@@ -721,11 +689,7 @@ export class PopoverView extends HtmlView implements Modal {
       this.didPlacePopover(placement!);
     }
 
-    Object.defineProperty(this, "currentPlacement", {
-      value: placement,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).currentPlacement = placement;
     return placement;
   }
 

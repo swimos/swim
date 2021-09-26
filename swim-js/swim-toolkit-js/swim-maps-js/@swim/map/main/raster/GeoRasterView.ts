@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
@@ -45,21 +46,14 @@ export interface GeoRasterViewInit extends GeoViewInit {
 export class GeoRasterView extends GeoLayerView {
   constructor() {
     super();
-    Object.defineProperty(this, "canvas", {
-      value: this.createCanvas(),
-      enumerable: true,
-      configurable: true,
-    });
+    this.canvas = this.createCanvas();
     Object.defineProperty(this, "renderer", {
       value: this.createRenderer(),
+      writable: true,
       enumerable: true,
       configurable: true,
     });
-    Object.defineProperty(this, "ownRasterFrame", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.ownRasterFrame = null;
   }
 
   override initView(init: GeoRasterViewInit): void {
@@ -161,7 +155,7 @@ export class GeoRasterView extends GeoLayerView {
   }
 
   /** @hidden */
-  readonly canvas!: HTMLCanvasElement;
+  readonly canvas: HTMLCanvasElement;
 
   get compositor(): GraphicsRenderer | null {
     const parentView = this.parentView;
@@ -178,11 +172,7 @@ export class GeoRasterView extends GeoLayerView {
     if (typeof renderer === "string") {
       renderer = this.createRenderer(renderer as GraphicsRendererType);
     }
-    Object.defineProperty(this, "renderer", {
-      value: renderer,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).renderer = renderer;
     this.requireUpdate(View.NeedsRender | View.NeedsComposite);
   }
 
@@ -318,7 +308,7 @@ export class GeoRasterView extends GeoLayerView {
   declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
   /** @hidden */
-  readonly ownRasterFrame!: R2Box | null;
+  readonly ownRasterFrame: R2Box | null;
 
   get rasterFrame(): R2Box {
     let rasterFrame = this.ownRasterFrame;
@@ -330,11 +320,7 @@ export class GeoRasterView extends GeoLayerView {
 
   /** @hidden */
   setRasterFrame(rasterFrame: R2Box | null): void {
-    Object.defineProperty(this, "ownRasterFrame", {
-      value: rasterFrame,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).ownRasterFrame = rasterFrame;
   }
 
   protected deriveRasterFrame(): R2Box {

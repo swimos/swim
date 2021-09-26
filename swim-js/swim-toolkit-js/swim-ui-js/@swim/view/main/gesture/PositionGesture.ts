@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import {View} from "../View";
 import type {ViewObserverType} from "../ViewObserver";
 import type {GestureInputType} from "./GestureInput";
@@ -283,16 +284,8 @@ __extends(PositionGesture, Gesture);
 
 function PositionGestureConstructor<G extends GestureContext, V extends View>(this: PositionGesture<G, V>, owner: G, gestureName: string | undefined): PositionGesture<G, V> {
   const _this: PositionGesture<G, V> = (Gesture as Function).call(this, owner, gestureName) || this;
-  Object.defineProperty(_this, "hoverCount", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(_this, "pressCount", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (_this as Mutable<typeof _this>).hoverCount = 0;
+  (_this as Mutable<typeof _this>).pressCount = 0;
   return _this;
 }
 
@@ -340,16 +333,8 @@ PositionGesture.prototype.clearInput = function (this: PositionGesture<GestureCo
 
 PositionGesture.prototype.clearInputs = function (this: PositionGesture<GestureContext, View>): void {
   Gesture.prototype.clearInputs.call(this);
-  Object.defineProperty(this, "hoverCount", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "pressCount", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).hoverCount = 0;
+  (this as Mutable<typeof this>).pressCount = 0;
 };
 
 PositionGesture.prototype.isHovering = function (this: PositionGesture<GestureContext, View>): boolean {
@@ -396,11 +381,7 @@ PositionGesture.prototype.beginHover = function (this: PositionGesture<GestureCo
   if (!input.hovering) {
     this.willBeginHover(input, event);
     input.hovering = true;
-    Object.defineProperty(this, "hoverCount", {
-      value: this.hoverCount + 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).hoverCount += 1;
     this.onBeginHover(input, event);
     this.didBeginHover(input, event);
     if (this.hoverCount === 1) {
@@ -425,11 +406,7 @@ PositionGesture.prototype.endHover = function (this: PositionGesture<GestureCont
   if (input.hovering) {
     this.willEndHover(input, event);
     input.hovering = false;
-    Object.defineProperty(this, "hoverCount", {
-      value: this.hoverCount - 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).hoverCount -= 1;
     this.onEndHover(input, event);
     this.didEndHover(input, event);
     if (this.hoverCount === 0) {
@@ -500,11 +477,7 @@ PositionGesture.prototype.beginPress = function (this: PositionGesture<GestureCo
     if (allowPress) {
       input.pressing = true;
       input.defaultPrevented = false;
-      Object.defineProperty(this, "pressCount", {
-        value: this.pressCount + 1,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).pressCount += 1;
       this.onBeginPress(input, event);
       input.setHoldTimer(this.longPress.bind(this, input));
       this.didBeginPress(input, event);
@@ -557,11 +530,7 @@ PositionGesture.prototype.endPress = function (this: PositionGesture<GestureCont
   if (input.pressing) {
     this.willEndPress(input, event);
     input.pressing = false;
-    Object.defineProperty(this, "pressCount", {
-      value: this.pressCount - 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).pressCount -= 1;
     this.onEndPress(input, event);
     this.didEndPress(input, event);
     if (this.pressCount === 0) {
@@ -588,11 +557,7 @@ PositionGesture.prototype.cancelPress = function (this: PositionGesture<GestureC
   if (input.pressing) {
     this.willCancelPress(input, event);
     input.pressing = false;
-    Object.defineProperty(this, "pressCount", {
-      value: this.pressCount - 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).pressCount -= 1;
     this.onCancelPress(input, event);
     this.didCancelPress(input, event);
     if (this.pressCount === 0) {

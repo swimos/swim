@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {GeoPoint, GeoBox, GeoProjection} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewFlags, View, ViewAnimator} from "@swim/view";
@@ -26,16 +27,8 @@ export interface GeoTreeViewInit extends GeoViewInit {
 export class GeoTreeView extends GeoView {
   constructor(geoFrame?: GeoBox, depth?: number, maxDepth?: number, density?: number) {
     super();
-    Object.defineProperty(this, "root", {
-      value: GeoTree.empty(geoFrame, depth, maxDepth, density),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "childViewMap", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.root = GeoTree.empty(geoFrame, depth, maxDepth, density);
+    this.childViewMap = null;
   }
 
   override initView(init: GeoTreeViewInit): void {
@@ -46,7 +39,7 @@ export class GeoTreeView extends GeoView {
   }
 
   /** @hidden */
-  readonly root!: GeoTree;
+  readonly root: GeoTree;
 
   override get childViewCount(): number {
     return this.root.size;
@@ -115,7 +108,7 @@ export class GeoTreeView extends GeoView {
   }
 
   /** @hidden */
-  readonly childViewMap!: {[key: string]: GeoView | undefined} | null;
+  readonly childViewMap: {[key: string]: GeoView | undefined} | null;
 
   override getChildView(key: string): GeoView | null {
     const childViewMap = this.childViewMap;
@@ -142,11 +135,7 @@ export class GeoTreeView extends GeoView {
       oldChildView.setParentView(null, this);
       this.removeChildViewMap(oldChildView);
       const oldGeoBounds = this.root.geoBounds;
-      Object.defineProperty(this, "root", {
-        value: this.root.removed(oldChildView, oldChildGeoBounds),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).root = this.root.removed(oldChildView, oldChildGeoBounds);
       const newGeoBounds = this.root.geoBounds;
       if (!newGeoBounds.equals(oldGeoBounds)) {
         this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
@@ -159,11 +148,7 @@ export class GeoTreeView extends GeoView {
       const newChildGeoBounds = newChildView.geoBounds;
       newChildView.setKey(key);
       const oldGeoBounds = this.root.geoBounds;
-      Object.defineProperty(this, "root", {
-        value: this.root.inserted(newChildView, newChildGeoBounds),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).root = this.root.inserted(newChildView, newChildGeoBounds);
       const newGeoBounds = this.root.geoBounds;
       if (!newGeoBounds.equals(oldGeoBounds)) {
         this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
@@ -184,11 +169,7 @@ export class GeoTreeView extends GeoView {
       let childViewMap = this.childViewMap;
       if (childViewMap === null) {
         childViewMap = {};
-        Object.defineProperty(this, "childViewMap", {
-          value: childViewMap,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).childViewMap = childViewMap;
       }
       childViewMap[key] = childView;
     }
@@ -217,11 +198,7 @@ export class GeoTreeView extends GeoView {
     const childViewBounds = childView.geoBounds;
     this.willInsertChildView(childView, null);
     const oldGeoBounds = this.root.geoBounds;
-    Object.defineProperty(this, "root", {
-      value: this.root.inserted(childView, childViewBounds),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).root = this.root.inserted(childView, childViewBounds);
     const newGeoBounds = this.root.geoBounds;
     if (!newGeoBounds.equals(oldGeoBounds)) {
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
@@ -245,11 +222,7 @@ export class GeoTreeView extends GeoView {
     const childViewBounds = childView.geoBounds;
     this.willInsertChildView(childView, null);
     const oldGeoBounds = this.root.geoBounds;
-    Object.defineProperty(this, "root", {
-      value: this.root.inserted(childView, childViewBounds),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).root = this.root.inserted(childView, childViewBounds);
     const newGeoBounds = this.root.geoBounds;
     if (!newGeoBounds.equals(oldGeoBounds)) {
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
@@ -279,11 +252,7 @@ export class GeoTreeView extends GeoView {
     const childViewBounds = childView.geoBounds;
     this.willInsertChildView(childView, targetView);
     const oldGeoBounds = this.root.geoBounds;
-    Object.defineProperty(this, "root", {
-      value: this.root.inserted(childView, childViewBounds),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).root = this.root.inserted(childView, childViewBounds);
     const newGeoBounds = this.root.geoBounds;
     if (!newGeoBounds.equals(oldGeoBounds)) {
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
@@ -318,11 +287,7 @@ export class GeoTreeView extends GeoView {
     childView.setParentView(null, this);
     this.removeChildViewMap(childView);
     const oldGeoBounds = this.root.geoBounds;
-    Object.defineProperty(this, "root", {
-      value: this.root.removed(childView, childViewBounds),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).root = this.root.removed(childView, childViewBounds);
     const newGeoBounds = this.root.geoBounds;
     if (!newGeoBounds.equals(oldGeoBounds)) {
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
@@ -452,11 +417,7 @@ export class GeoTreeView extends GeoView {
 
   override onSetChildViewGeoBounds(childView: GeoView, newChildViewGeoBounds: GeoBox, oldChildViewGeoBounds: GeoBox): void {
     const oldGeoBounds = this.root.geoBounds;
-    Object.defineProperty(this, "root", {
-      value: this.root.moved(childView, newChildViewGeoBounds, oldChildViewGeoBounds),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).root = this.root.moved(childView, newChildViewGeoBounds, oldChildViewGeoBounds);
     const newGeoBounds = this.root.geoBounds;
     if (!newGeoBounds.equals(oldGeoBounds)) {
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);

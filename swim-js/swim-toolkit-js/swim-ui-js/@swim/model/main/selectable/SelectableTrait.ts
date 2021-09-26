@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {GenericTrait} from "../generic/GenericTrait";
 import {SelectionOptions, SelectionManager} from "../selection/SelectionManager";
 import {SelectionService} from "../service/SelectionService";
@@ -21,17 +22,13 @@ import type {SelectableTraitObserver} from "./SelectableTraitObserver";
 export class SelectableTrait extends GenericTrait {
   constructor() {
     super();
-    Object.defineProperty(this, "selected", {
-      value: false,
-      enumerable: true,
-      configurable: true,
-    });
+    this.selected = false;
   }
 
   override readonly traitObservers!: ReadonlyArray<SelectableTraitObserver>;
 
   /** @hidden */
-  readonly selected!: boolean;
+  readonly selected: boolean;
 
   isSelected(): boolean {
     return this.selected;
@@ -39,11 +36,7 @@ export class SelectableTrait extends GenericTrait {
 
   select(options?: SelectionOptions | null): void {
     if (!this.selected) {
-      Object.defineProperty(this, "selected", {
-        value: true,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).selected = true;
       if (this.isMounted()) {
         const selectionManager = this.selectionService.manager;
         if (selectionManager !== void 0 && selectionManager !== null) {
@@ -66,11 +59,7 @@ export class SelectableTrait extends GenericTrait {
 
   /** @hidden */
   onSelect(options: SelectionOptions | null): void {
-    Object.defineProperty(this, "selected", {
-      value: true,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).selected = true;
   }
 
   /** @hidden */
@@ -86,11 +75,7 @@ export class SelectableTrait extends GenericTrait {
 
   unselect(): void {
     if (this.selected) {
-      Object.defineProperty(this, "selected", {
-        value: false,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).selected = false;
       if (this.isMounted()) {
         const selectionManager = this.selectionService.manager;
         if (selectionManager !== void 0 && selectionManager !== null) {
@@ -113,11 +98,7 @@ export class SelectableTrait extends GenericTrait {
 
   /** @hidden */
   onUnselect(): void {
-    Object.defineProperty(this, "selected", {
-      value: false,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).selected = false;
   }
 
   /** @hidden */

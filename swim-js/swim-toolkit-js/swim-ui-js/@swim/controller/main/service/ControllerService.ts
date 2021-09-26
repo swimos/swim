@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import {Controller} from "../Controller";
 import {ControllerManager} from "../manager/ControllerManager";
 import type {ControllerManagerObserverType} from "../manager/ControllerManagerObserver";
@@ -175,30 +176,11 @@ function ControllerServiceConstructor<C extends Controller, T>(this: ControllerS
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "inherit", {
-    value: true,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "serviceFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "superService", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "manager", {
-    value: void 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).inherit = true;
+  (this as Mutable<typeof this>).serviceFlags = 0;
+  (this as Mutable<typeof this>).superService = null;
+  (this as Mutable<typeof this>).manager = void 0 as unknown as T;
   return this;
 }
 
@@ -209,11 +191,7 @@ function ControllerServiceDecoratorFactory<C extends Controller, T>(descriptor: 
 ControllerService.prototype.setInherit = function (this: ControllerService<Controller, unknown>, inherit: string | boolean): void {
   if (this.inherit !== inherit) {
     this.unbindSuperService();
-    Object.defineProperty(this, "inherit", {
-      value: inherit,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).inherit = inherit;
     this.bindSuperService();
   }
 };
@@ -223,11 +201,7 @@ ControllerService.prototype.isInherited = function (this: ControllerService<Cont
 };
 
 ControllerService.prototype.setServiceFlags = function (this: ControllerService<Controller, unknown>, serviceFlags: ControllerServiceFlags): void {
-  Object.defineProperty(this, "serviceFlags", {
-    value: serviceFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).serviceFlags = serviceFlags;
 };
 
 Object.defineProperty(ControllerService.prototype, "superName", {
@@ -265,37 +239,21 @@ ControllerService.prototype.bindSuperService = function (this: ControllerService
       }
       break;
     } while (true);
-    Object.defineProperty(this, "superService", {
-      value: superService,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).superService = superService;
   }
   if (this.manager === void 0 || this.manager === null) {
     if (superService !== null) {
       this.setServiceFlags(this.serviceFlags | ControllerService.InheritedFlag);
-      Object.defineProperty(this, "manager", {
-        value: superService.manager,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).manager = superService.manager;
     } else {
       this.setServiceFlags(this.serviceFlags & ~ControllerService.InheritedFlag);
-      Object.defineProperty(this, "manager", {
-        value: this.initManager(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).manager = this.initManager();
     }
   }
 };
 
 ControllerService.prototype.unbindSuperService = function (this: ControllerService<Controller, unknown>): void {
-  Object.defineProperty(this, "superService", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).superService = null;
   this.setServiceFlags(this.serviceFlags & ~ControllerService.InheritedFlag);
 };
 
@@ -429,18 +387,10 @@ ControllerService.define = function <C extends Controller, T, I>(descriptor: Con
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, serviceName) || _this;
     if (manager !== void 0) {
-      Object.defineProperty(_this, "manager", {
-        value: manager,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).manager = manager;
     }
     if (inherit !== void 0) {
-      Object.defineProperty(_this, "inherit", {
-        value: inherit,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).inherit = inherit;
     }
     return _this;
   } as unknown as ControllerServiceConstructor<C, T, I>;

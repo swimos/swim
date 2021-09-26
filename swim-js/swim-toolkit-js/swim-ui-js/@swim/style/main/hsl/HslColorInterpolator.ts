@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {HslColor} from "./HslColor";
 
@@ -27,14 +28,8 @@ export const HslColorInterpolator = function (c0: HslColor, c1: HslColor): Inter
     return new HslColor(h, s, l, a);
   } as Interpolator<HslColor>;
   Object.setPrototypeOf(interpolator, HslColorInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: c0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: c1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = c0;
+  (interpolator as Mutable<typeof interpolator>)[1] = c1;
   return interpolator;
 } as {
   (c0: HslColor, c1: HslColor): Interpolator<HslColor>;

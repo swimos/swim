@@ -47,14 +47,8 @@ import type {TableControllerObserver} from "./TableControllerObserver";
 export class TableController extends CompositeController {
   constructor() {
     super();
-    Object.defineProperty(this, "colFasteners", {
-      value: [],
-      enumerable: true,
-    });
-    Object.defineProperty(this, "rowFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.colFasteners = [];
+    this.rowFasteners = [];
   }
 
   override readonly controllerObservers!: ReadonlyArray<TableControllerObserver>;
@@ -927,7 +921,7 @@ export class TableController extends CompositeController {
   }
 
   /** @hidden */
-  readonly colFasteners!: ReadonlyArray<ControllerFastener<this, ColController>>;
+  readonly colFasteners: ReadonlyArray<ControllerFastener<this, ColController>>;
 
   protected getColFastener(colTrait: ColTrait): ControllerFastener<this, ColController> | null {
     const colFasteners = this.colFasteners;
@@ -2038,7 +2032,7 @@ export class TableController extends CompositeController {
   }
 
   /** @hidden */
-  readonly rowFasteners!: ReadonlyArray<ControllerFastener<this, RowController>>;
+  readonly rowFasteners: ReadonlyArray<ControllerFastener<this, RowController>>;
 
   protected getRowFastener(rowTrait: RowTrait): ControllerFastener<this, RowController> | null {
     const rowFasteners = this.rowFasteners;

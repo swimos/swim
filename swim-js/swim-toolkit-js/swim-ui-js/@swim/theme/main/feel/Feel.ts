@@ -17,15 +17,11 @@ import type {Look} from "../look/Look";
 import {FeelVector} from "./FeelVector";
 
 export abstract class Feel implements Mood {
-  readonly name!: string;
-
   constructor(name: string) {
-    Object.defineProperty(this, "name", {
-      value: name,
-      configurable: true,
-      enumerable: true,
-    });
+    this.name = name;
   }
+
+  readonly name: string;
 
   abstract combine<T>(look: Look<T, any>, combination: T | undefined,
                       value: T, weight?: number): T;

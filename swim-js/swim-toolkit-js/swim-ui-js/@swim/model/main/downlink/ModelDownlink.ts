@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Equals, Arrays} from "@swim/util";
+import {Equals, Mutable, Arrays} from "@swim/util";
 import {AnyValue, Value, Form} from "@swim/structure";
 import {AnyUri, Uri} from "@swim/uri";
 import type {DownlinkType, DownlinkObserver, Downlink, WarpRef} from "@swim/client";
@@ -332,60 +332,17 @@ function ModelDownlinkConstructor<M extends ModelDownlinkContext>(this: ModelDow
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "downlink", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "downlinkFlags", {
-    value: ModelDownlink.PendingFlag,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "downlinkConsumers", {
-    value: Arrays.empty,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "ownWarp", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "ownHostUri", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "ownNodeUri", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "ownLaneUri", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "ownPrio", {
-    value: void 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "ownRate", {
-    value: void 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "ownBody", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).downlink = null;
+  (this as Mutable<typeof this>).downlinkFlags = ModelDownlink.PendingFlag;
+  (this as Mutable<typeof this>).downlinkConsumers = Arrays.empty;
+  (this as Mutable<typeof this>).ownWarp = null;
+  (this as Mutable<typeof this>).ownHostUri = null;
+  (this as Mutable<typeof this>).ownNodeUri = null;
+  (this as Mutable<typeof this>).ownLaneUri = null;
+  (this as Mutable<typeof this>).ownPrio = void 0;
+  (this as Mutable<typeof this>).ownRate = void 0;
+  (this as Mutable<typeof this>).ownBody = null;
   return this;
 }
 
@@ -394,11 +351,7 @@ function ModelDownlinkDecoratorFactory<M extends ModelDownlinkContext>(descripto
 }
 
 ModelDownlink.prototype.setDownlinkFlags = function (this: ModelDownlink<ModelDownlinkContext>, downlinkFlags: ModelDownlinkFlags): void {
-  Object.defineProperty(this, "downlinkFlags", {
-    value: downlinkFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).downlinkFlags = downlinkFlags;
 };
 
 ModelDownlink.prototype.isConsuming = function (this: ModelDownlink<ModelDownlinkContext>): boolean {
@@ -452,11 +405,7 @@ ModelDownlink.prototype.addDownlinkConsumer = function (this: ModelDownlink<Mode
   const newDownlinkConsumers = Arrays.inserted(downlinkConsumer, oldDownlinkConsumers);
   if (oldDownlinkConsumers !== newDownlinkConsumers) {
     this.willAddDownlinkConsumer(downlinkConsumer);
-    Object.defineProperty(this, "downlinkConsumers", {
-      value: newDownlinkConsumers,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).downlinkConsumers = newDownlinkConsumers;
     this.onAddDownlinkConsumer(downlinkConsumer);
     this.didAddDownlinkConsumer(downlinkConsumer);
     if (oldDownlinkConsumers.length === 0) {
@@ -482,11 +431,7 @@ ModelDownlink.prototype.removeDownlinkConsumer = function (this: ModelDownlink<M
   const newDownlinkConsumers = Arrays.removed(downlinkConsumer, oldDownlinkConsumers);
   if (oldDownlinkConsumers !== newDownlinkConsumers) {
     this.willRemoveDownlinkConsumer(downlinkConsumer);
-    Object.defineProperty(this, "downlinkConsumers", {
-      value: newDownlinkConsumers,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).downlinkConsumers = newDownlinkConsumers;
     this.onRemoveDownlinkConsumer(downlinkConsumer);
     this.didRemoveDownlinkConsumer(downlinkConsumer);
     if (newDownlinkConsumers.length === 0) {
@@ -511,15 +456,8 @@ ModelDownlink.prototype.warp = function (this: ModelDownlink<ModelDownlinkContex
   if (warp === void 0) {
     return this.ownWarp;
   } else {
-    if (warp === null) {
-      warp = void 0;
-    }
     if (this.ownWarp !== warp) {
-      Object.defineProperty(this, "ownWarp", {
-        value: warp,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).ownWarp = warp;
       this.relink();
     }
     return this;
@@ -534,11 +472,7 @@ ModelDownlink.prototype.hostUri = function (this: ModelDownlink<ModelDownlinkCon
       hostUri = this.initHostUri !== void 0 ? this.initHostUri() : null;
       if (hostUri !== null) {
         hostUri = Uri.fromAny(hostUri);
-        Object.defineProperty(this, "ownHostUri", {
-          value: hostUri as Uri,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<typeof this>).ownHostUri = hostUri as Uri;
       }
       return hostUri as Uri | null;
     }
@@ -547,11 +481,7 @@ ModelDownlink.prototype.hostUri = function (this: ModelDownlink<ModelDownlinkCon
       hostUri = Uri.fromAny(hostUri);
     }
     if (!Equals(this.ownHostUri, hostUri)) {
-      Object.defineProperty(this, "ownHostUri", {
-        value: hostUri as Uri | null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).ownHostUri = hostUri as Uri | null;
       this.relink();
     }
     return this;
@@ -566,11 +496,7 @@ ModelDownlink.prototype.nodeUri = function (this: ModelDownlink<ModelDownlinkCon
       nodeUri = this.initNodeUri !== void 0 ? this.initNodeUri() : null;
       if (nodeUri !== null) {
         nodeUri = Uri.fromAny(nodeUri);
-        Object.defineProperty(this, "ownNodeUri", {
-          value: nodeUri as Uri,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<typeof this>).ownNodeUri = nodeUri as Uri;
       }
       return nodeUri as Uri | null;
     }
@@ -579,11 +505,7 @@ ModelDownlink.prototype.nodeUri = function (this: ModelDownlink<ModelDownlinkCon
       nodeUri = Uri.fromAny(nodeUri);
     }
     if (!Equals(this.ownNodeUri, nodeUri)) {
-      Object.defineProperty(this, "ownNodeUri", {
-        value: nodeUri as Uri | null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).ownNodeUri = nodeUri as Uri | null;
       this.relink();
     }
     return this;
@@ -598,11 +520,7 @@ ModelDownlink.prototype.laneUri = function (this: ModelDownlink<ModelDownlinkCon
       laneUri = this.initLaneUri !== void 0 ? this.initLaneUri() : null;
       if (laneUri !== null) {
         laneUri = Uri.fromAny(laneUri);
-        Object.defineProperty(this, "ownLaneUri", {
-          value: laneUri as Uri,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<typeof this>).ownLaneUri = laneUri as Uri;
       }
       return laneUri as Uri | null;
     }
@@ -611,11 +529,7 @@ ModelDownlink.prototype.laneUri = function (this: ModelDownlink<ModelDownlinkCon
       laneUri = Uri.fromAny(laneUri);
     }
     if (!Equals(this.ownLaneUri, laneUri)) {
-      Object.defineProperty(this, "ownLaneUri", {
-        value: laneUri as Uri | null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).ownLaneUri = laneUri as Uri | null;
       this.relink();
     }
     return this;
@@ -629,21 +543,13 @@ ModelDownlink.prototype.prio = function (this: ModelDownlink<ModelDownlinkContex
     } else {
       prio = this.initPrio !== void 0 ? this.initPrio() : void 0;
       if (prio !== void 0) {
-        Object.defineProperty(this, "ownPrio", {
-          value: prio,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<typeof this>).ownPrio = prio;
       }
       return prio;
     }
   } else {
     if (this.ownPrio !== prio) {
-      Object.defineProperty(this, "ownPrio", {
-        value: prio,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).ownPrio = prio;
       this.relink();
     }
     return this;
@@ -657,21 +563,13 @@ ModelDownlink.prototype.rate = function (this: ModelDownlink<ModelDownlinkContex
     } else {
       rate = this.initRate !== void 0 ? this.initRate() : void 0;
       if (rate !== void 0) {
-        Object.defineProperty(this, "ownRate", {
-          value: rate,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<typeof this>).ownRate = rate;
       }
       return rate;
     }
   } else {
     if (this.ownRate !== rate) {
-      Object.defineProperty(this, "ownRate", {
-        value: rate,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).ownRate = rate;
       this.relink();
     }
     return this;
@@ -686,11 +584,7 @@ ModelDownlink.prototype.body = function (this: ModelDownlink<ModelDownlinkContex
       body = this.initBody !== void 0 ? this.initBody() : null;
       if (body !== null) {
         body = Value.fromAny(body);
-        Object.defineProperty(this, "ownBody", {
-          value: body,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<typeof this>).ownBody = body;
       }
       return body;
     }
@@ -699,11 +593,7 @@ ModelDownlink.prototype.body = function (this: ModelDownlink<ModelDownlinkContex
       body = Value.fromAny(body);
     }
     if (!Equals(this.ownBody, body)) {
-      Object.defineProperty(this, "ownBody", {
-        value: body,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).ownBody = body;
       this.relink();
     }
     return this;
@@ -725,11 +615,7 @@ ModelDownlink.prototype.link = function (this: ModelDownlink<ModelDownlinkContex
       downlink = this.initDownlink(downlink);
     }
     downlink = downlink.observe(this as DownlinkObserver);
-    Object.defineProperty(this, "downlink", {
-      value: downlink.open(),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).downlink = downlink.open();
     this.setDownlinkFlags(this.downlinkFlags & ~ModelDownlink.PendingFlag);
   }
 };
@@ -738,11 +624,7 @@ ModelDownlink.prototype.unlink = function (this: ModelDownlink<ModelDownlinkCont
   const downlink = this.downlink;
   if (downlink !== null) {
     downlink.close();
-    Object.defineProperty(this, "downlink", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).downlink = null;
     this.setDownlinkFlags(this.downlinkFlags | ModelDownlink.PendingFlag);
   }
 };
@@ -875,46 +757,22 @@ ModelDownlink.define = function <M extends ModelDownlinkContext, I>(descriptor: 
     const _constructor = function DecoratedModelDownlink(this: ModelDownlink<M>, owner: M, downlinkName: string | undefined): ModelDownlink<M> {
       const _this: ModelDownlink<M> = _super!.call(this, owner, downlinkName) || this;
       if (hostUri !== void 0) {
-        Object.defineProperty(_this, "ownHostUri", {
-          value: hostUri as Uri,
-          enumerable: true,
-          configurable: true,
-        });
+        (_this as Mutable<typeof _this>).ownHostUri = hostUri as Uri;
       }
       if (nodeUri !== void 0) {
-        Object.defineProperty(_this, "ownNodeUri", {
-          value: nodeUri as Uri,
-          enumerable: true,
-          configurable: true,
-        });
+        (_this as Mutable<typeof _this>).ownNodeUri = nodeUri as Uri;
       }
       if (laneUri !== void 0) {
-        Object.defineProperty(_this, "ownLaneUri", {
-          value: laneUri as Uri,
-          enumerable: true,
-          configurable: true,
-        });
+        (_this as Mutable<typeof _this>).ownLaneUri = laneUri as Uri;
       }
       if (prio !== void 0) {
-        Object.defineProperty(_this, "ownPrio", {
-          value: prio as number,
-          enumerable: true,
-          configurable: true,
-        });
+        (_this as Mutable<typeof _this>).ownPrio = prio as number;
       }
       if (rate !== void 0) {
-        Object.defineProperty(_this, "ownRate", {
-          value: rate as number,
-          enumerable: true,
-          configurable: true,
-        });
+        (_this as Mutable<typeof _this>).ownRate = rate as number;
       }
       if (body !== void 0) {
-        Object.defineProperty(_this, "ownBody", {
-          value: body as Value,
-          enumerable: true,
-          configurable: true,
-        });
+        (_this as Mutable<typeof _this>).ownBody = body as Value;
       }
       return _this;
     } as unknown as ModelDownlinkConstructor<M, I>;

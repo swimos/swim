@@ -25,21 +25,15 @@ export type LookVectorUpdates<T> = ReadonlyArray<[Feel, T | undefined]>;
 export class LookVector<T> implements Equals, Debug {
   constructor(array: ReadonlyArray<[Feel, T]>,
               index: {readonly [name: string]: number | undefined}) {
-    Object.defineProperty(this, "array", {
-      value: array,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "index", {
-      value: index,
-      enumerable: true,
-    });
+    this.array = array;
+    this.index = index;
   }
 
   /** @hidden */
-  readonly array!: ReadonlyArray<[Feel, T]>;
+  readonly array: ReadonlyArray<[Feel, T]>;
 
   /** @hidden */
-  readonly index!: {readonly [name: string]: number | undefined};
+  readonly index: {readonly [name: string]: number | undefined};
 
   get size(): number {
     return this.array.length;

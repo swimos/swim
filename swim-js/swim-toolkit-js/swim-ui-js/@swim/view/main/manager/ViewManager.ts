@@ -12,22 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import type {View} from "../View";
 import type {ViewManagerObserverType, ViewManagerObserver} from "./ViewManagerObserver";
 
 export abstract class ViewManager<V extends View = View> {
   constructor() {
-    Object.defineProperty(this, "rootViews", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "viewManagerObservers", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    this.rootViews = Arrays.empty;
+    this.viewManagerObservers = Arrays.empty;
   }
 
   readonly viewManagerObservers!: ReadonlyArray<ViewManagerObserver>;
@@ -37,11 +29,7 @@ export abstract class ViewManager<V extends View = View> {
     const newViewManagerObservers = Arrays.inserted(viewManagerObserver, oldViewManagerObservers);
     if (oldViewManagerObservers !== newViewManagerObservers) {
       this.willAddViewManagerObserver(viewManagerObserver);
-      Object.defineProperty(this, "viewManagerObservers", {
-        value: newViewManagerObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).viewManagerObservers = newViewManagerObservers;
       this.onAddViewManagerObserver(viewManagerObserver);
       this.didAddViewManagerObserver(viewManagerObserver);
     }
@@ -64,11 +52,7 @@ export abstract class ViewManager<V extends View = View> {
     const newViewManagerObservers = Arrays.removed(viewManagerObserver, oldViewManagerObservers);
     if (oldViewManagerObservers !== newViewManagerObservers) {
       this.willRemoveViewManagerObserver(viewManagerObserver);
-      Object.defineProperty(this, "viewManagerObservers", {
-        value: newViewManagerObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).viewManagerObservers = newViewManagerObservers;
       this.onRemoveViewManagerObserver(viewManagerObserver);
       this.didRemoveViewManagerObserver(viewManagerObserver);
     }
@@ -175,11 +159,7 @@ export abstract class ViewManager<V extends View = View> {
         this.willAttach();
       }
       this.willInsertRootView(rootView);
-      Object.defineProperty(this, "rootViews", {
-        value: newRootViews,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).rootViews = newRootViews;
       if (needsAttach) {
         this.onAttach();
       }
@@ -224,11 +204,7 @@ export abstract class ViewManager<V extends View = View> {
         this.willDetach();
       }
       this.willRemoveRootView(rootView);
-      Object.defineProperty(this, "rootViews", {
-        value: newRootViews,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).rootViews = newRootViews;
       if (needsDetach) {
         this.onDetach();
       }

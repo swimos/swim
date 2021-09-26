@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import type {
   AnyConstraintExpression,
@@ -37,29 +37,15 @@ export interface StyleSheetContext extends AnimationTimeline, ConstraintScope {
 
 export class StyleSheet implements AnimationTrack, CssContext {
   constructor(owner: StyleSheetContext, stylesheet?: CSSStyleSheet) {
-    Object.defineProperty(this, "owner", {
-      value: owner,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stylesheet", {
-      value: stylesheet !== void 0 ? stylesheet : this.createStylesheet(),
-      enumerable: true,
-    });
-    Object.defineProperty(this, "cssRules", {
-      value: {},
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "animationTracks", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    this.owner = owner;
+    this.stylesheet = stylesheet !== void 0 ? stylesheet : this.createStylesheet();
+    this.cssRules = {};
+    this.animationTracks = Arrays.empty;
   }
 
-  readonly owner!: StyleSheetContext;
+  readonly owner: StyleSheetContext;
 
-  readonly stylesheet!: CSSStyleSheet;
+  readonly stylesheet: CSSStyleSheet;
 
   protected createStylesheet(): CSSStyleSheet {
     return new CSSStyleSheet();
@@ -78,7 +64,7 @@ export class StyleSheet implements AnimationTrack, CssContext {
   }
 
   /** @hidden */
-  readonly cssRules!: {[ruleName: string]: CssRule<StyleSheet> | undefined};
+  readonly cssRules: {[ruleName: string]: CssRule<StyleSheet> | undefined};
 
   hasCssRule(ruleName: string): boolean {
     return this.cssRules[ruleName] !== void 0;
@@ -151,17 +137,13 @@ export class StyleSheet implements AnimationTrack, CssContext {
   }
 
   /** @hidden */
-  readonly animationTracks!: ReadonlyArray<AnimationTrack>;
+  readonly animationTracks: ReadonlyArray<AnimationTrack>;
 
   trackWillStartAnimating(track: AnimationTrack): void {
     const oldTracks = this.animationTracks;
     const newTracks = Arrays.inserted(track, oldTracks);
     if (oldTracks !== newTracks) {
-      Object.defineProperty(this, "animationTracks", {
-        value: newTracks,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).animationTracks = newTracks;
       if (oldTracks.length === 0) {
         this.owner.trackWillStartAnimating(this);
         this.owner.trackDidStartAnimating(this);
@@ -181,11 +163,7 @@ export class StyleSheet implements AnimationTrack, CssContext {
     const oldTracks = this.animationTracks;
     const newTracks = Arrays.removed(track, oldTracks);
     if (oldTracks !== newTracks) {
-      Object.defineProperty(this, "animationTracks", {
-        value: newTracks,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).animationTracks = newTracks;
       if (newTracks.length === 0) {
         this.owner.trackWillStopAnimating(this);
         this.owner.trackDidStopAnimating(this);

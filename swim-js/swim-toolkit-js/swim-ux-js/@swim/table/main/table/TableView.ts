@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
 import {Look, Feel} from "@swim/theme";
@@ -39,20 +40,9 @@ import type {TableViewObserver} from "./TableViewObserver";
 export class TableView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "rowFasteners", {
-      value: [],
-      enumerable: true,
-    });
-    Object.defineProperty(this, "visibleViews", {
-      value: [],
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "visibleFrame", {
-      value: new R2Box(0, 0, window.innerWidth, window.innerHeight),
-      enumerable: true,
-      configurable: true,
-    });
+    this.rowFasteners = [];
+    this.visibleViews = [];
+    this.visibleFrame = new R2Box(0, 0, window.innerWidth, window.innerHeight);
     this.initTable();
   }
 
@@ -533,7 +523,7 @@ export class TableView extends HtmlView {
   }
 
   /** @hidden */
-  readonly rowFasteners!: ReadonlyArray<ViewFastener<this, RowView>>;
+  readonly rowFasteners: ReadonlyArray<ViewFastener<this, RowView>>;
 
   /** @hidden */
   protected mountRowFasteners(): void {
@@ -574,10 +564,10 @@ export class TableView extends HtmlView {
   }
 
   /** @hidden */
-  readonly visibleViews!: ReadonlyArray<View>;
+  readonly visibleViews: ReadonlyArray<View>;
 
   /** @hidden */
-  readonly visibleFrame!: R2Box;
+  readonly visibleFrame: R2Box;
 
   protected detectVisibleFrame(viewContext: ViewContext): R2Box {
     const xBleed = 0;
@@ -680,12 +670,8 @@ export class TableView extends HtmlView {
     visibleViews.length = 0;
 
     const visibleFrame = this.detectVisibleFrame(Object.getPrototypeOf(viewContext));
-    (viewContext as any).visibleFrame = visibleFrame;
-    Object.defineProperty(this, "visibleFrame", {
-      value: visibleFrame,
-      enumerable: true,
-      configurable: true,
-    });
+    (viewContext as Mutable<ViewContextType<this>>).visibleFrame = visibleFrame;
+    (this as Mutable<this>).visibleFrame = visibleFrame;
 
     type self = this;
     function scrollChildView(this: self, childView: View, processFlags: ViewFlags,
@@ -757,12 +743,8 @@ export class TableView extends HtmlView {
     visibleViews.length = 0;
 
     const visibleFrame = this.detectVisibleFrame(Object.getPrototypeOf(viewContext));
-    (viewContext as any).visibleFrame = visibleFrame;
-    Object.defineProperty(this, "visibleFrame", {
-      value: visibleFrame,
-      enumerable: true,
-      configurable: true,
-    });
+    (viewContext as Mutable<ViewContextType<this>>).visibleFrame = visibleFrame;
+    (this as Mutable<this>).visibleFrame = visibleFrame;
 
     let yValue = 0;
     let yState = 0;

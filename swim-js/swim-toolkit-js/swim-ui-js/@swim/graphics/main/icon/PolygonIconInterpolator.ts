@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals} from "@swim/util";
+import {Equals, Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {Angle} from "@swim/math";
 import type {Color} from "@swim/style";
@@ -54,26 +54,11 @@ export const PolygonIconInterpolator = function (i0: PolygonIcon, i1: PolygonIco
     return new PolygonIcon(sides, rotation, fillColor, fillLook, moodModifier);
   } as PolygonIconInterpolator;
   Object.setPrototypeOf(interpolator, PolygonIconInterpolator.prototype);
-  Object.defineProperty(interpolator, "sides", {
-    value: i1.sides,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "rotationInterpolator", {
-    value: i0.rotation.interpolateTo(i1.rotation),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "fillColorInterpolator", {
-    value: Interpolator(i0.fillColor, i1.fillColor),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "fillLook", {
-    value: i1.fillLook,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "moodModifier", {
-    value: i1.moodModifier,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).sides = i1.sides;
+  (interpolator as Mutable<typeof interpolator>).rotationInterpolator = i0.rotation.interpolateTo(i1.rotation);
+  (interpolator as Mutable<typeof interpolator>).fillColorInterpolator = Interpolator(i0.fillColor, i1.fillColor);
+  (interpolator as Mutable<typeof interpolator>).fillLook = i1.fillLook;
+  (interpolator as Mutable<typeof interpolator>).moodModifier = i1.moodModifier;
   return interpolator;
 } as {
   (i0: PolygonIcon, i1: PolygonIcon): PolygonIconInterpolator;

@@ -19,14 +19,11 @@ import {StorageManager} from "./StorageManager";
 export class WebStorageManager<C extends Controller = Controller> extends StorageManager<C> {
   constructor(storage: Storage) {
     super();
-    Object.defineProperty(this, "storage", {
-      value: storage,
-      enumerable: true,
-    });
+    this.storage = storage;
     this.onStorage = this.onStorage.bind(this);
   }
 
-  readonly storage!: Storage;
+  readonly storage: Storage;
 
   override get(key: string): string | undefined {
     const value = this.storage.getItem(key);

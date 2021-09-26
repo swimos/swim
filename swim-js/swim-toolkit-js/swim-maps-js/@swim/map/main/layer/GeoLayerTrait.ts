@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {GeoBox} from "@swim/geo";
 import {Model, TraitModelType, Trait, TraitFastener} from "@swim/model";
 import {GeoTrait} from "../geo/GeoTrait";
@@ -20,30 +21,19 @@ import type {GeoLayerTraitObserver} from "./GeoLayerTraitObserver";
 export class GeoLayerTrait extends GeoTrait {
   constructor() {
     super();
-    Object.defineProperty(this, "geoBounds", {
-      value: GeoBox.globe(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "featureFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.geoBounds = GeoBox.globe();
+    this.featureFasteners = [];
   }
 
   override readonly traitObservers!: ReadonlyArray<GeoLayerTraitObserver>;
 
-  override readonly geoBounds!: GeoBox;
+  override readonly geoBounds: GeoBox;
 
   setGeoBounds(newGeoBounds: GeoBox): void {
     const oldGeoBounds = this.geoBounds;
     if (!newGeoBounds.equals(oldGeoBounds)) {
       this.willSetGeoBounds(newGeoBounds, oldGeoBounds);
-      Object.defineProperty(this, "geoBounds", {
-        value: newGeoBounds,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).geoBounds = newGeoBounds;
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
       this.didSetGeoBounds(newGeoBounds, oldGeoBounds);
     }
@@ -176,7 +166,7 @@ export class GeoLayerTrait extends GeoTrait {
   }
 
   /** @hidden */
-  readonly featureFasteners!: ReadonlyArray<TraitFastener<this, GeoTrait>>;
+  readonly featureFasteners: ReadonlyArray<TraitFastener<this, GeoTrait>>;
 
   /** @hidden */
   protected mountFeatureFasteners(): void {

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {R2Box} from "@swim/math";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {GraphicsView} from "../graphics/GraphicsView";
@@ -19,18 +20,11 @@ import {GraphicsView} from "../graphics/GraphicsView";
 export class LayerView extends GraphicsView {
   constructor() {
     super();
-    Object.defineProperty(this, "childViews", {
-      value: [],
-      enumerable: true,
-    });
-    Object.defineProperty(this, "childViewMap", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.childViews = [];
+    this.childViewMap = null;
   }
 
-  override readonly childViews!: ReadonlyArray<View>;
+  override readonly childViews: ReadonlyArray<View>;
 
   override get childViewCount(): number {
     return this.childViews.length;
@@ -80,7 +74,7 @@ export class LayerView extends GraphicsView {
   }
 
   /** @hidden */
-  readonly childViewMap!: {[key: string]: View | undefined} | null;
+  readonly childViewMap: {[key: string]: View | undefined} | null;
 
   override getChildView(key: string): View | null {
     const childViewMap = this.childViewMap;
@@ -143,11 +137,7 @@ export class LayerView extends GraphicsView {
       let childViewMap = this.childViewMap;
       if (childViewMap === null) {
         childViewMap = {};
-        Object.defineProperty(this, "childViewMap", {
-          value: childViewMap,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).childViewMap = childViewMap;
       }
       childViewMap[key] = childView;
     }

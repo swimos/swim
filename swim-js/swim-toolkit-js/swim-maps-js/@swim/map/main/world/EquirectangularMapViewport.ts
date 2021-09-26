@@ -19,14 +19,10 @@ import {WorldMapViewport} from "./WorldMapViewport";
 export class EquirectangularMapViewport extends WorldMapViewport {
   constructor(viewFrame: R2Box) {
     super();
-    Object.defineProperty(this, "viewFrame", {
-      value: viewFrame,
-      enumerable: true,
-      configurable: true,
-    });
+    this.viewFrame = viewFrame;
   }
 
-  override readonly viewFrame!: R2Box;
+  override readonly viewFrame: R2Box;
 
   override withViewFrame(viewFrame: R2Box): WorldMapViewport {
     let xMin = viewFrame.xMin;

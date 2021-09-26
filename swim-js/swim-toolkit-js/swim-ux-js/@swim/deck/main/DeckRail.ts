@@ -30,37 +30,22 @@ export interface DeckRailInit {
 export class DeckRail implements Equals, Equivalent, Debug {
   constructor(width: Length | null, left: Length | null, right: Length | null,
               spacing: Length | null, posts: ReadonlyArray<DeckPost>) {
-    Object.defineProperty(this, "width", {
-      value: width,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "left", {
-      value: left,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "right", {
-      value: right,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "spacing", {
-      value: spacing,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "posts", {
-      value: posts,
-      enumerable: true,
-    });
+    this.width = width;
+    this.left = left;
+    this.right = right;
+    this.spacing = spacing;
+    this.posts = posts;
   }
 
-  readonly width!: Length | null;
+  readonly width: Length | null;
 
-  readonly left!: Length | null;
+  readonly left: Length | null;
 
-  readonly right!: Length | null;
+  readonly right: Length | null;
 
-  readonly spacing!: Length | null;
+  readonly spacing: Length | null;
 
-  readonly posts!: ReadonlyArray<DeckPost>;
+  readonly posts: ReadonlyArray<DeckPost>;
 
   lookupPost(key: string): number | undefined {
     const posts = this.posts;

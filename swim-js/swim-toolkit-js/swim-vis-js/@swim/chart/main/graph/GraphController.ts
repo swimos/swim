@@ -31,10 +31,7 @@ import type {GraphControllerObserver} from "./GraphControllerObserver";
 export class GraphController<X, Y> extends CompositeController {
   constructor() {
     super();
-    Object.defineProperty(this, "plotFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.plotFasteners = [];
   }
 
   override readonly controllerObservers!: ReadonlyArray<GraphControllerObserver<X, Y>>;
@@ -879,7 +876,7 @@ export class GraphController<X, Y> extends CompositeController {
   }
 
   /** @hidden */
-  readonly plotFasteners!: ReadonlyArray<ControllerFastener<this, PlotController<X, Y>>>;
+  readonly plotFasteners: ReadonlyArray<ControllerFastener<this, PlotController<X, Y>>>;
 
   protected getPlotFastener(plotTrait: PlotTrait<X, Y>): ControllerFastener<this, PlotController<X, Y>> | null {
     const plotFasteners = this.plotFasteners;

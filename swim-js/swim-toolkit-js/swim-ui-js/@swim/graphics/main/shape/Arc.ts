@@ -37,41 +37,17 @@ export interface ArcInit {
 export class Arc implements Graphics, Equals, Debug {
   constructor(center: R2Point, innerRadius: Length, outerRadius: Length, startAngle: Angle,
               sweepAngle: Angle, padAngle: Angle, padRadius: Length | null, cornerRadius: Length) {
-    Object.defineProperty(this, "center", {
-      value: center,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "innerRadius", {
-      value: innerRadius,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "outerRadius", {
-      value: outerRadius,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "startAngle", {
-      value: startAngle,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "sweepAngle", {
-      value: sweepAngle,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "padAngle", {
-      value: padAngle,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "padRadius", {
-      value: padRadius,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "cornerRadius", {
-      value: cornerRadius,
-      enumerable: true,
-    });
+    this.center = center;
+    this.innerRadius = innerRadius;
+    this.outerRadius = outerRadius;
+    this.startAngle = startAngle;
+    this.sweepAngle = sweepAngle;
+    this.padAngle = padAngle;
+    this.padRadius = padRadius;
+    this.cornerRadius = cornerRadius;
   }
 
-  readonly center!: R2Point;
+  readonly center: R2Point;
 
   withCenter(center: AnyR2Point): Arc {
     center = R2Point.fromAny(center);
@@ -83,7 +59,7 @@ export class Arc implements Graphics, Equals, Debug {
     }
   }
 
-  readonly innerRadius!: Length;
+  readonly innerRadius: Length;
 
   withInnerRadius(innerRadius: AnyLength): Arc {
     innerRadius = Length.fromAny(innerRadius);
@@ -95,7 +71,7 @@ export class Arc implements Graphics, Equals, Debug {
     }
   }
 
-  readonly outerRadius!: Length;
+  readonly outerRadius: Length;
 
   withOuterRadius(outerRadius: AnyLength): Arc {
     outerRadius = Length.fromAny(outerRadius);
@@ -107,7 +83,7 @@ export class Arc implements Graphics, Equals, Debug {
     }
   }
 
-  readonly startAngle!: Angle;
+  readonly startAngle: Angle;
 
   withStartAngle(startAngle: AnyAngle): Arc {
     startAngle = Angle.fromAny(startAngle);
@@ -119,7 +95,7 @@ export class Arc implements Graphics, Equals, Debug {
     }
   }
 
-  readonly sweepAngle!: Angle;
+  readonly sweepAngle: Angle;
 
   withSweepAngle(sweepAngle: AnyAngle): Arc {
     sweepAngle = Angle.fromAny(sweepAngle);
@@ -131,7 +107,7 @@ export class Arc implements Graphics, Equals, Debug {
     }
   }
 
-  readonly padAngle!: Angle;
+  readonly padAngle: Angle;
 
   withPadAngle(padAngle: AnyAngle): Arc {
     padAngle = Angle.fromAny(padAngle);
@@ -143,7 +119,7 @@ export class Arc implements Graphics, Equals, Debug {
     }
   }
 
-  readonly padRadius!: Length | null;
+  readonly padRadius: Length | null;
 
   withPadRadius(padRadius: AnyLength | null): Arc {
     if (padRadius !== null) {
@@ -157,7 +133,7 @@ export class Arc implements Graphics, Equals, Debug {
     }
   }
 
-  readonly cornerRadius!: Length;
+  readonly cornerRadius: Length;
 
   withCornerRadius(cornerRadius: AnyLength): Arc {
     cornerRadius = Length.fromAny(cornerRadius);

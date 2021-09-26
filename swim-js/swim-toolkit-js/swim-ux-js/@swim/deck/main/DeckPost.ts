@@ -31,53 +31,32 @@ export interface DeckPostInit {
 export class DeckPost implements Equals, Equivalent, Debug {
   constructor(key: string, grow: number, shrink: number, basis: Length,
               width: Length | null, left: Length | null, right: Length | null) {
-    Object.defineProperty(this, "key", {
-      value: key,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "grow", {
-      value: grow,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "shrink", {
-      value: shrink,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "basis", {
-      value: basis,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "width", {
-      value: width,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "left", {
-      value: left,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "right", {
-      value: right,
-      enumerable: true,
-    });
+    this.key = key;
+    this.grow = grow;
+    this.shrink = shrink;
+    this.basis = basis;
+    this.width = width;
+    this.left = left;
+    this.right = right;
   }
 
-  readonly key!: string;
+  readonly key: string;
 
-  readonly grow!: number;
+  readonly grow: number;
 
   withGrow(grow: number): DeckPost {
     return this.copy(this.key, grow, this.shrink, this.basis,
                      this.width, this.left, this.right);
   }
 
-  readonly shrink!: number;
+  readonly shrink: number;
 
   withShrink(shrink: number): DeckPost {
     return this.copy(this.key, this.grow, shrink, this.basis,
                      this.width, this.left, this.right);
   }
 
-  readonly basis!: Length;
+  readonly basis: Length;
 
   withBasis(basis: AnyLength): DeckPost {
     basis = Length.fromAny(basis);
@@ -85,11 +64,11 @@ export class DeckPost implements Equals, Equivalent, Debug {
                      this.width, this.left, this.right);
   }
 
-  readonly width!: Length | null;
+  readonly width: Length | null;
 
-  readonly left!: Length | null;
+  readonly left: Length | null;
 
-  readonly right!: Length | null;
+  readonly right: Length | null;
 
   resized(width: AnyLength | null, left: AnyLength | null, right: AnyLength | null): DeckPost {
     if (width !== null) {

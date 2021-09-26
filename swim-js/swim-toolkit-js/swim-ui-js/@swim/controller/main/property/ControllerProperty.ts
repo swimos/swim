@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Equals, FromAny} from "@swim/util";
+import {Equals, FromAny, Mutable} from "@swim/util";
 import {ControllerFlags, ControllerPrecedence, Controller} from "../Controller";
 import {StringControllerProperty} from "../"; // forward import
 import {BooleanControllerProperty} from "../"; // forward import
@@ -246,40 +246,13 @@ function ControllerPropertyConstructor<C extends Controller, T, U>(this: Control
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "inherit", {
-    value: false,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "superProperty", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "subProperties", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "precedence", {
-    value: Controller.Intrinsic,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "propertyFlags", {
-    value: ControllerProperty.UpdatedFlag,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "ownState", {
-    value: void 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).inherit = false;
+  (this as Mutable<typeof this>).superProperty = null;
+  (this as Mutable<typeof this>).subProperties = null;
+  (this as Mutable<typeof this>).precedence = Controller.Intrinsic;
+  (this as Mutable<typeof this>).propertyFlags = ControllerProperty.UpdatedFlag;
+  (this as Mutable<typeof this>).ownState = void 0 as unknown as T;
   return this;
 }
 
@@ -290,11 +263,7 @@ function ControllerPropertyDecoratorFactory<C extends Controller, T, U>(descript
 ControllerProperty.prototype.setInherit = function (this: ControllerProperty<Controller, unknown>, inherit: string | boolean): void {
   if (this.inherit !== inherit) {
     this.unbindSuperProperty();
-    Object.defineProperty(this, "inherit", {
-      value: inherit,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).inherit = inherit;
     this.bindSuperProperty();
   }
 };
@@ -335,11 +304,7 @@ ControllerProperty.prototype.bindSuperProperty = function (this: ControllerPrope
     while (superController !== null) {
       const superProperty = superController.getLazyControllerProperty(superName);
       if (superProperty !== null) {
-        Object.defineProperty(this, "superProperty", {
-          value: superProperty,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<typeof this>).superProperty = superProperty;
         superProperty.addSubProperty(this);
         if ((this.propertyFlags & ControllerProperty.OverrideFlag) === 0 && superProperty.precedence >= this.precedence) {
           this.setPropertyFlags(this.propertyFlags | ControllerProperty.InheritedFlag);
@@ -357,11 +322,7 @@ ControllerProperty.prototype.unbindSuperProperty = function (this: ControllerPro
   const superProperty = this.superProperty;
   if (superProperty !== null) {
     superProperty.removeSubProperty(this);
-    Object.defineProperty(this, "superProperty", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).superProperty = null;
     this.setPropertyFlags(this.propertyFlags & ~ControllerProperty.InheritedFlag);
   }
 };
@@ -370,11 +331,7 @@ ControllerProperty.prototype.addSubProperty = function <T>(this: ControllerPrope
   let subProperties = this.subProperties;
   if (subProperties === null) {
     subProperties = [];
-    Object.defineProperty(this, "subProperties", {
-      value: subProperties,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).subProperties = subProperties;
   }
   subProperties.push(subProperty);
 };
@@ -438,11 +395,7 @@ ControllerProperty.prototype.setOwnState = function <T, U>(this: ControllerPrope
   const oldState = this.state;
   if (!this.equalState(newState, oldState)) {
     this.willSetState(newState, oldState);
-    Object.defineProperty(this, "ownState", {
-      value: newState,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).ownState = newState;
     this.setPropertyFlags(this.propertyFlags | ControllerProperty.UpdatedFlag);
     this.onSetState(newState, oldState);
     this.updateSubProperties(newState, oldState);
@@ -473,11 +426,7 @@ ControllerProperty.prototype.setPrecedence = function (this: ControllerProperty<
   const oldPrecedence = this.precedence;
   if (newPrecedence !== oldPrecedence) {
     this.willSetPrecedence(newPrecedence, oldPrecedence);
-    Object.defineProperty(this, "precedence", {
-      value: newPrecedence,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).precedence = newPrecedence;
     this.onSetPrecedence(newPrecedence, oldPrecedence);
     this.didSetPrecedence(newPrecedence, oldPrecedence);
   }
@@ -501,11 +450,7 @@ ControllerProperty.prototype.didSetPrecedence = function (this: ControllerProper
 };
 
 ControllerProperty.prototype.setPropertyFlags = function (this: ControllerProperty<Controller, unknown>, propertyFlags: ControllerPropertyFlags): void {
-  Object.defineProperty(this, "propertyFlags", {
-    value: propertyFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).propertyFlags = propertyFlags;
 };
 
 ControllerProperty.prototype.isUpdated = function (this: ControllerProperty<Controller, unknown>): boolean {
@@ -675,25 +620,13 @@ ControllerProperty.define = function <C extends Controller, T, U, I>(descriptor:
       ownState = _this.fromAny(state);
     }
     if (ownState !== void 0) {
-      Object.defineProperty(_this, "ownState", {
-        value: ownState,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownState = ownState;
     }
     if (precedence !== void 0) {
-      Object.defineProperty(_this, "precedence", {
-        value: precedence,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).precedence = precedence;
     }
     if (inherit !== void 0) {
-      Object.defineProperty(_this, "inherit", {
-        value: inherit,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).inherit = inherit;
     }
     return _this;
   } as unknown as ControllerPropertyConstructor<C, T, U, I>;

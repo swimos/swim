@@ -262,17 +262,7 @@ export class GeoPointView extends GeoLayerView {
     super.onProject(viewContext);
     if (this.viewPoint.takesPrecedence(View.Intrinsic)) {
       const viewPoint = viewContext.geoViewport.project(this.geoPoint.getValue());
-      //this.viewPoint.setState(viewPoint, View.Intrinsic);
-      Object.defineProperty(this.viewPoint, "ownValue", {
-        value: viewPoint,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this.viewPoint, "ownState", {
-        value: viewPoint,
-        enumerable: true,
-        configurable: true,
-      });
+      this.viewPoint.setIntermediateValue(viewPoint, viewPoint);
     }
   }
 

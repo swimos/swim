@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {FontStyle} from "./FontStyle";
 import type {FontVariant} from "./FontVariant";
@@ -63,34 +64,13 @@ export function FontInterpolator(y0: Font, y1: Font): FontInterpolator {
     return new Font(style, variant, weight, stretch, size, height, family);
   } as FontInterpolator;
   Object.setPrototypeOf(interpolator, FontInterpolator.prototype);
-  Object.defineProperty(interpolator, "styleInterpolator", {
-    value: Interpolator(y0.style, y1.style),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "variantInterpolator", {
-    value: Interpolator(y0.variant, y1.variant),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "weightInterpolator", {
-    value: Interpolator(y0.weight, y1.weight),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "stretchInterpolator", {
-    value: Interpolator(y0.stretch, y1.stretch),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "sizeInterpolator", {
-    value: Interpolator(y0.size, y1.size),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "heightInterpolator", {
-    value: Interpolator(y0.height, y1.height),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "familyInterpolator", {
-    value: Interpolator(y0.family, y1.family),
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).styleInterpolator = Interpolator(y0.style, y1.style);
+  (interpolator as Mutable<typeof interpolator>).variantInterpolator = Interpolator(y0.variant, y1.variant);
+  (interpolator as Mutable<typeof interpolator>).weightInterpolator = Interpolator(y0.weight, y1.weight);
+  (interpolator as Mutable<typeof interpolator>).stretchInterpolator = Interpolator(y0.stretch, y1.stretch);
+  (interpolator as Mutable<typeof interpolator>).sizeInterpolator = Interpolator(y0.size, y1.size);
+  (interpolator as Mutable<typeof interpolator>).heightInterpolator = Interpolator(y0.height, y1.height);
+  (interpolator as Mutable<typeof interpolator>).familyInterpolator = Interpolator(y0.family, y1.family);
   return interpolator;
 }
 __extends(FontInterpolator, Interpolator);

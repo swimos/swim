@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {FromAny} from "@swim/util";
+import {FromAny, Mutable} from "@swim/util";
 import {Model} from "../Model";
 import {Trait} from "../Trait";
 import type {TraitObserverType} from "../TraitObserver";
@@ -181,25 +181,10 @@ function ModelTraitConstructor<M extends Model, S extends Trait, U>(this: ModelT
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "fastenerFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "key", {
-    value: key,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "trait", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).fastenerFlags = 0;
+  (this as Mutable<typeof this>).key = key;
+  (this as Mutable<typeof this>).trait = null;
   return this;
 }
 
@@ -208,11 +193,7 @@ function ModelTraitDecoratorFactory<M extends Model, S extends Trait, U>(descrip
 }
 
 ModelTrait.prototype.setFastenerFlags = function (this: ModelTrait<Model, Trait>, fastenerFlags: ModelTraitFlags): void {
-  Object.defineProperty(this, "fastenerFlags", {
-    value: fastenerFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).fastenerFlags = fastenerFlags;
 };
 
 ModelTrait.prototype.getTrait = function <S extends Trait>(this: ModelTrait<Model, S>): S {
@@ -249,11 +230,7 @@ ModelTrait.prototype.doSetTrait = function <S extends Trait>(this: ModelTrait<Mo
     if (oldTrait !== null) {
       this.detachTrait(oldTrait);
     }
-    Object.defineProperty(this, "trait", {
-      value: newTrait,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).trait = newTrait;
     if (newTrait !== null) {
       this.attachTrait(newTrait);
     }

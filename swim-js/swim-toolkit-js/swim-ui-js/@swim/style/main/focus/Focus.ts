@@ -26,17 +26,11 @@ export interface FocusInit {
 
 export class Focus implements Interpolate<Focus>, HashCode, Equivalent, Debug {
   constructor(phase: number, direction: number) {
-    Object.defineProperty(this, "phase", {
-      value: phase,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "direction", {
-      value: direction,
-      enumerable: true,
-    });
+    this.phase = phase;
+    this.direction = direction;
   }
 
-  readonly phase!: number;
+  readonly phase: number;
 
   withPhase(phase: number): Focus {
     if (phase !== this.phase) {
@@ -46,7 +40,7 @@ export class Focus implements Interpolate<Focus>, HashCode, Equivalent, Debug {
     }
   }
 
-  readonly direction!: number;
+  readonly direction: number;
 
   withDirection(direction: number): Focus {
     if (direction !== this.direction) {

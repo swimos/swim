@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import {Model} from "../Model";
 import {TraitModelType, TraitContextType, Trait} from "../Trait";
 import type {TraitObserverType} from "../TraitObserver";
@@ -28,46 +28,14 @@ import type {ModelDownlink} from "../downlink/ModelDownlink";
 export class GenericTrait extends Trait {
   constructor() {
     super();
-    Object.defineProperty(this, "model", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "key", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "traitConsumers", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "traitServices", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "traitProperties", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "traitModels", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "traitFasteners", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "traitDownlinks", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.model = null;
+    this.key = void 0;
+    this.traitConsumers = Arrays.empty;
+    this.traitServices = null;
+    this.traitProperties = null;
+    this.traitModels = null;
+    this.traitFasteners = null;
+    this.traitDownlinks = null;
   }
 
   protected willObserve<T>(callback: (this: this, traitObserver: TraitObserverType<this>) => T | void): T | undefined {
@@ -96,18 +64,14 @@ export class GenericTrait extends Trait {
     return result;
   }
 
-  override readonly key!: string | undefined;
+  override readonly key: string | undefined;
 
   /** @hidden */
   override setKey(key: string | undefined): void {
-    Object.defineProperty(this, "key", {
-      value: key,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).key = key;
   }
 
-  override readonly model!: Model | null;
+  override readonly model: Model | null;
 
   /** @hidden */
   override setModel(newModel: TraitModelType<this> | null, oldModel: TraitModelType<this> | null): void {
@@ -115,11 +79,7 @@ export class GenericTrait extends Trait {
     if (oldModel !== null) {
       this.detachModel(oldModel);
     }
-    Object.defineProperty(this, "model", {
-      value: newModel,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).model = newModel;
     this.onSetModel(newModel, oldModel);
     if (newModel !== null) {
       this.attachModel(newModel);
@@ -249,18 +209,14 @@ export class GenericTrait extends Trait {
     this.reconcileTraitDownlinks();
   }
 
-  override readonly traitConsumers!: ReadonlyArray<TraitConsumer>;
+  override readonly traitConsumers: ReadonlyArray<TraitConsumer>;
 
   override addTraitConsumer(traitConsumer: TraitConsumerType<this>): void {
     const oldTraitConsumers = this.traitConsumers;
     const newTraitConsumers = Arrays.inserted(traitConsumer, oldTraitConsumers);
     if (oldTraitConsumers !== newTraitConsumers) {
       this.willAddTraitConsumer(traitConsumer);
-      Object.defineProperty(this, "traitConsumers", {
-        value: newTraitConsumers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).traitConsumers = newTraitConsumers;
       this.onAddTraitConsumer(traitConsumer);
       this.didAddTraitConsumer(traitConsumer);
       if (oldTraitConsumers.length === 0 && this.isMounted()) {
@@ -276,17 +232,13 @@ export class GenericTrait extends Trait {
 
   override removeTraitConsumer(traitConsumer: TraitConsumerType<this>): void {
     const oldTraitConsumers = this.traitConsumers;
-    const newTraitCnsumers = Arrays.removed(traitConsumer, oldTraitConsumers);
-    if (oldTraitConsumers !== newTraitCnsumers) {
+    const newTraitConsumers = Arrays.removed(traitConsumer, oldTraitConsumers);
+    if (oldTraitConsumers !== newTraitConsumers) {
       this.willRemoveTraitConsumer(traitConsumer);
-      Object.defineProperty(this, "traitConsumers", {
-        value: newTraitCnsumers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).traitConsumers = newTraitConsumers;
       this.onRemoveTraitConsumer(traitConsumer);
       this.didRemoveTraitConsumer(traitConsumer);
-      if (newTraitCnsumers.length === 0) {
+      if (newTraitConsumers.length === 0) {
         this.stopConsuming();
       }
     }
@@ -298,7 +250,7 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  readonly traitServices!: {[serviceName: string]: TraitService<Trait, unknown> | undefined} | null;
+  readonly traitServices: {[serviceName: string]: TraitService<Trait, unknown> | undefined} | null;
 
   override hasTraitService(serviceName: string): boolean {
     const traitServices = this.traitServices;
@@ -320,11 +272,7 @@ export class GenericTrait extends Trait {
     let traitServices = this.traitServices;
     if (traitServices === null) {
       traitServices = {};
-      Object.defineProperty(this, "traitServices", {
-        value: traitServices,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).traitServices = traitServices;
     }
     const oldTraitService = traitServices[serviceName];
     if (oldTraitService !== void 0 && this.isMounted()) {
@@ -378,7 +326,7 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  readonly traitProperties!: {[propertyName: string]: TraitProperty<Trait, unknown> | undefined} | null;
+  readonly traitProperties: {[propertyName: string]: TraitProperty<Trait, unknown> | undefined} | null;
 
   override hasTraitProperty(propertyName: string): boolean {
     const traitProperties = this.traitProperties;
@@ -400,11 +348,7 @@ export class GenericTrait extends Trait {
     let traitProperties = this.traitProperties;
     if (traitProperties === null) {
       traitProperties = {};
-      Object.defineProperty(this, "traitProperties", {
-        value: traitProperties,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).traitProperties = traitProperties;
     }
     const oldTraitProperty = traitProperties[propertyName];
     if (oldTraitProperty !== void 0 && this.isMounted()) {
@@ -448,7 +392,7 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  readonly traitModels!: {[fastenerName: string]: TraitModel<Trait, Model> | undefined} | null;
+  readonly traitModels: {[fastenerName: string]: TraitModel<Trait, Model> | undefined} | null;
 
   override hasTraitModel(fastenerName: string): boolean {
     const traitModels = this.traitModels;
@@ -470,11 +414,7 @@ export class GenericTrait extends Trait {
     let traitModels = this.traitModels;
     if (traitModels === null) {
       traitModels = {};
-      Object.defineProperty(this, "traitModels", {
-        value: traitModels,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).traitModels = traitModels;
     }
     const oldTraitModel = traitModels[fastenerName];
     if (oldTraitModel !== void 0 && this.isMounted()) {
@@ -543,7 +483,7 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  readonly traitFasteners!: {[fastenerName: string]: TraitFastener<Trait, Trait> | undefined} | null;
+  readonly traitFasteners: {[fastenerName: string]: TraitFastener<Trait, Trait> | undefined} | null;
 
   override hasTraitFastener(fastenerName: string): boolean {
     const traitFasteners = this.traitFasteners;
@@ -565,11 +505,7 @@ export class GenericTrait extends Trait {
     let traitFasteners = this.traitFasteners;
     if (traitFasteners === null) {
       traitFasteners = {};
-      Object.defineProperty(this, "traitFasteners", {
-        value: traitFasteners,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).traitFasteners = traitFasteners;
     }
     const oldTraitFastener = traitFasteners[fastenerName];
     if (oldTraitFastener !== void 0 && this.isMounted()) {
@@ -638,7 +574,7 @@ export class GenericTrait extends Trait {
   }
 
   /** @hidden */
-  readonly traitDownlinks!: {[downlinkName: string]: ModelDownlink<Trait> | undefined} | null;
+  readonly traitDownlinks: {[downlinkName: string]: ModelDownlink<Trait> | undefined} | null;
 
   override hasModelDownlink(downlinkName: string): boolean {
     const traitDownlinks = this.traitDownlinks;
@@ -660,11 +596,7 @@ export class GenericTrait extends Trait {
     let traitDownlinks = this.traitDownlinks;
     if (traitDownlinks === null) {
       traitDownlinks = {};
-      Object.defineProperty(this, "traitDownlinks", {
-        value: traitDownlinks,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).traitDownlinks = traitDownlinks;
     }
     const oldTraitDownlink = traitDownlinks[downlinkName];
     if (oldTraitDownlink !== void 0 && this.isMounted()) {

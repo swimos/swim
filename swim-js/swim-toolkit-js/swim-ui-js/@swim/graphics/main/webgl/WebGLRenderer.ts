@@ -18,19 +18,11 @@ import type {WebGLContext} from "./WebGLContext";
 export class WebGLRenderer extends GraphicsRenderer {
   constructor(context: WebGLContext, pixelRatio?: number) {
     super();
-    Object.defineProperty(this, "context", {
-      value: context,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "pixelRatio", {
-      value: pixelRatio !== void 0 ? pixelRatio : window.devicePixelRatio || 1,
-      enumerable: true,
-      configurable: true,
-    });
+    this.context = context;
+    this.pixelRatio = pixelRatio !== void 0 ? pixelRatio : window.devicePixelRatio || 1;
   }
 
-  readonly context!: WebGLContext;
+  readonly context: WebGLContext;
 
-  readonly pixelRatio!: number;
+  readonly pixelRatio: number;
 }

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {Length, Angle, Transform} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
@@ -35,11 +36,7 @@ export type FloatingButtonType = "regular" | "mini";
 export class FloatingButton extends ButtonMembrane {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "buttonType", {
-      value: "regular",
-      enumerable: true,
-      configurable: true,
-    });
+    this.buttonType = "regular";
     this.iconCount = 0;
     this.icon = null;
     this.initButton();
@@ -65,15 +62,11 @@ export class FloatingButton extends ButtonMembrane {
     this.cursor.setState("pointer", View.Intrinsic);
   }
 
-  readonly buttonType!: FloatingButtonType;
+  readonly buttonType: FloatingButtonType;
 
   setButtonType(buttonType: FloatingButtonType): void {
     if (this.buttonType !== buttonType) {
-      Object.defineProperty(this, "buttonType", {
-        value: buttonType,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).buttonType = buttonType;
       if (buttonType === "regular") {
         this.width.setState(56, View.Intrinsic);
         this.height.setState(56, View.Intrinsic);

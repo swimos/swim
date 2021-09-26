@@ -34,10 +34,7 @@ import type {HeaderViewObserver} from "./HeaderViewObserver";
 export class HeaderView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "colFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.colFasteners = [];
     this.initHeader();
   }
 
@@ -209,7 +206,7 @@ export class HeaderView extends HtmlView {
   }
 
   /** @hidden */
-  readonly colFasteners!: ReadonlyArray<ViewFastener<this, ColView>>;
+  readonly colFasteners: ReadonlyArray<ViewFastener<this, ColView>>;
 
   /** @hidden */
   protected mountColFasteners(): void {

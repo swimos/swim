@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {FromAny} from "@swim/util";
+import {FromAny, Mutable} from "@swim/util";
 import {Controller} from "../Controller";
 import type {ControllerObserverType} from "../ControllerObserver";
 
@@ -180,25 +180,10 @@ function ControllerFastenerConstructor<C extends Controller, S extends Controlle
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "fastenerFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "key", {
-    value: key,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "controller", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).fastenerFlags = 0;
+  (this as Mutable<typeof this>).key = key;
+  (this as Mutable<typeof this>).controller = null;
   return this;
 }
 
@@ -207,11 +192,7 @@ function ControllerFastenerDecoratorFactory<C extends Controller, S extends Cont
 }
 
 ControllerFastener.prototype.setFastenerFlags = function (this: ControllerFastener<Controller, Controller>, fastenerFlags: ControllerFastenerFlags): void {
-  Object.defineProperty(this, "fastenerFlags", {
-    value: fastenerFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).fastenerFlags = fastenerFlags;
 };
 
 ControllerFastener.prototype.getController = function <S extends Controller>(this: ControllerFastener<Controller, S>): S {
@@ -248,11 +229,7 @@ ControllerFastener.prototype.doSetController = function <S extends Controller>(t
     if (oldController !== null) {
       this.detachController(oldController);
     }
-    Object.defineProperty(this, "controller", {
-      value: newController,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).controller = newController;
     if (newController !== null) {
       this.attachController(newController);
     }

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import type {WarpRef} from "@swim/client";
 import type {ModelContextType} from "./ModelContext";
 import type {ModelFlags, ModelClass, Model} from "./Model";
@@ -78,32 +78,23 @@ export interface TraitClass<R extends Trait = Trait> extends Function {
 export abstract class Trait implements ModelDownlinkContext {
   constructor() {
     this.traitFlags = 0;
-    Object.defineProperty(this, "traitObservers", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    this.traitObservers = Arrays.empty;
   }
 
-  readonly traitFlags!: TraitFlags;
+  readonly traitFlags: TraitFlags;
 
   setTraitFlags(traitFlags: TraitFlags): void {
-    // Object.defineProperty is too expensive for traitFlags
-    (this as any).traitFlags = traitFlags;
+    (this as Mutable<this>).traitFlags = traitFlags;
   }
 
-  readonly traitObservers!: ReadonlyArray<TraitObserver>;
+  readonly traitObservers: ReadonlyArray<TraitObserver>;
 
   addTraitObserver(traitObserver: TraitObserverType<this>): void {
     const oldTraitObservers = this.traitObservers;
     const newTraitObservers = Arrays.inserted(traitObserver, oldTraitObservers);
     if (oldTraitObservers !== newTraitObservers) {
       this.willAddTraitObserver(traitObserver);
-      Object.defineProperty(this, "traitObservers", {
-        value: newTraitObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).traitObservers = newTraitObservers;
       this.onAddTraitObserver(traitObserver);
       this.didAddTraitObserver(traitObserver);
     }
@@ -126,11 +117,7 @@ export abstract class Trait implements ModelDownlinkContext {
     const newTraitObservers = Arrays.removed(traitObserver, oldTraitObservers);
     if (oldTraitObservers !== newTraitObservers) {
       this.willRemoveTraitObserver(traitObserver);
-      Object.defineProperty(this, "traitObservers", {
-        value: newTraitObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).traitObservers = newTraitObservers;
       this.onRemoveTraitObserver(traitObserver);
       this.didRemoveTraitObserver(traitObserver);
     }

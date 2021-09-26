@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {Look} from "../look/Look";
 import {FeelVector} from "./FeelVector";
@@ -60,14 +60,8 @@ export function FeelVectorInterpolator(v0: FeelVector, v1: FeelVector): FeelVect
       interpolators.push([look, interpolator]);
     }
   });
-  Object.defineProperty(interpolator, "interpolators", {
-    value: interpolators,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "index", {
-    value: index,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).interpolators = interpolators;
+  (interpolator as Mutable<typeof interpolator>).index = index;
   return interpolator;
 }
 __extends(FeelVectorInterpolator, Interpolator);

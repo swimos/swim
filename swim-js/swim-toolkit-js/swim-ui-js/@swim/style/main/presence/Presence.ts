@@ -26,17 +26,11 @@ export interface PresenceInit {
 
 export class Presence implements Interpolate<Presence>, HashCode, Equivalent, Debug {
   constructor(phase: number, direction: number) {
-    Object.defineProperty(this, "phase", {
-      value: phase,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "direction", {
-      value: direction,
-      enumerable: true,
-    });
+    this.phase = phase;
+    this.direction = direction;
   }
 
-  readonly phase!: number;
+  readonly phase: number;
 
   withPhase(phase: number): Presence {
     if (phase !== this.phase) {
@@ -46,7 +40,7 @@ export class Presence implements Interpolate<Presence>, HashCode, Equivalent, De
     }
   }
 
-  readonly direction!: number;
+  readonly direction: number;
 
   withDirection(direction: number): Presence {
     if (direction !== this.direction) {

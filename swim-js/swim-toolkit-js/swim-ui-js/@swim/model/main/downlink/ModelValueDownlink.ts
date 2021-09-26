@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import {AnyValue, Value, Form} from "@swim/structure";
 import {Uri} from "@swim/uri";
 import type {ValueDownlinkObserver, ValueDownlink, WarpRef} from "@swim/client";
@@ -94,11 +95,7 @@ __extends(ModelValueDownlink, ModelDownlink);
 
 function ModelValueDownlinkConstructor<M extends ModelDownlinkContext, V, VU>(this: ModelValueDownlink<M, V, VU>, owner: M, downlinkName: string | undefined): ModelValueDownlink<M, V, VU> {
   const _this: ModelValueDownlink<M, V, VU> = (ModelDownlink as Function).call(this, owner, downlinkName) || this;
-  Object.defineProperty(_this, "ownValueForm", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (_this as Mutable<typeof _this>).ownValueForm = null;
   return _this;
 }
 
@@ -111,11 +108,7 @@ ModelValueDownlink.prototype.valueForm = function <V, VU>(this: ModelValueDownli
     return this.ownValueForm;
   } else {
     if (this.ownValueForm !== valueForm) {
-      Object.defineProperty(this, "ownValueForm", {
-        value: valueForm,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).ownValueForm = valueForm;
       this.relink();
     }
     return this;
@@ -176,53 +169,25 @@ ModelValueDownlink.define = function <M extends ModelDownlinkContext, V, VU, I>(
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, downlinkName) || _this;
     if (valueForm !== void 0) {
-      Object.defineProperty(_this, "ownValueForm", {
-        value: valueForm,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownValueForm = valueForm;
     }
     if (hostUri !== void 0) {
-      Object.defineProperty(_this, "ownHostUri", {
-        value: hostUri as Uri,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownHostUri = hostUri as Uri;
     }
     if (nodeUri !== void 0) {
-      Object.defineProperty(_this, "ownNodeUri", {
-        value: nodeUri as Uri,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownNodeUri = nodeUri as Uri;
     }
     if (laneUri !== void 0) {
-      Object.defineProperty(_this, "ownLaneUri", {
-        value: laneUri as Uri,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownLaneUri = laneUri as Uri;
     }
     if (prio !== void 0) {
-      Object.defineProperty(_this, "ownPrio", {
-        value: prio as number,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownPrio = prio as number;
     }
     if (rate !== void 0) {
-      Object.defineProperty(_this, "ownRate", {
-        value: rate as number,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownRate = rate as number;
     }
     if (body !== void 0) {
-      Object.defineProperty(_this, "ownBody", {
-        value: body as Value,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownBody = body as Value;
     }
     return _this;
   } as unknown as ModelValueDownlinkConstructor<M, V, VU, I>;

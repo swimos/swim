@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import type {ViewContext} from "../ViewContext";
 import {View} from "../View";
 import type {ViewObserverType} from "../ViewObserver";
@@ -282,14 +283,10 @@ __extends(MomentumGesture, PositionGesture);
 
 function MomentumGestureConstructor<G extends GestureContext, V extends View>(this: MomentumGesture<G, V>, owner: G, gestureName: string | undefined): MomentumGesture<G, V> {
   const _this: MomentumGesture<G, V> = (PositionGesture as Function).call(this, owner, gestureName) || this;
-  Object.defineProperty(this, "coastCount", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  this.hysteresis = MomentumGesture.hysteresis;
-  this.acceleration = MomentumGesture.acceleration;
-  this.velocityMax = MomentumGesture.velocityMax;
+  (_this as Mutable<typeof _this>).coastCount = 0;
+  _this.hysteresis = MomentumGesture.hysteresis;
+  _this.acceleration = MomentumGesture.acceleration;
+  _this.velocityMax = MomentumGesture.velocityMax;
   return _this;
 }
 
@@ -316,11 +313,7 @@ MomentumGesture.prototype.clearInput = function (this: MomentumGesture<GestureCo
 
 MomentumGesture.prototype.clearInputs = function (this: MomentumGesture<GestureContext, View>): void {
   PositionGesture.prototype.clearInputs.call(this);
-  Object.defineProperty(this, "coastCount", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).coastCount = 0;
 };
 
 MomentumGesture.prototype.viewWillAnimate = function (this: MomentumGesture<GestureContext, View>, viewContext: ViewContext): void {
@@ -490,11 +483,7 @@ MomentumGesture.prototype.beginCoast = function (this: MomentumGesture<GestureCo
       }
       if (allowCoast) {
         input.coasting = true;
-        Object.defineProperty(this, "coastCount", {
-          value: this.coastCount + 1,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<typeof this>).coastCount += 1;
         this.onBeginCoast(input, event);
         this.didBeginCoast(input, event);
         if (this.coastCount === 1) {
@@ -526,11 +515,7 @@ MomentumGesture.prototype.endCoast = function (this: MomentumGesture<GestureCont
   if (input.coasting) {
     this.willEndCoast(input, event);
     input.coasting = false;
-    Object.defineProperty(this, "coastCount", {
-      value: this.coastCount - 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).coastCount -= 1;
     this.onEndCoast(input, event);
     this.didEndCoast(input, event);
     if (this.coastCount === 0) {
@@ -640,13 +625,13 @@ MomentumGesture.define = function <G extends GestureContext, V extends View, I>(
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, gestureName) || _this;
     if (hysteresis !== void 0) {
-      this.hysteresis = hysteresis;
+      _this.hysteresis = hysteresis;
     }
     if (acceleration !== void 0) {
-      this.acceleration = acceleration;
+      _this.acceleration = acceleration;
     }
     if (velocityMax !== void 0) {
-      this.velocityMax = velocityMax;
+      _this.velocityMax = velocityMax;
     }
     return _this;
   } as unknown as MomentumGestureConstructor<G, V, I>;

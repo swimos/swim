@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals} from "@swim/util";
+import {Equals, Mutable} from "@swim/util";
 import {AnyTiming, Timing, Easing, Interpolator} from "@swim/mapping";
 import type {Look} from "@swim/theme";
 import {ViewPrecedence, View} from "../View";
@@ -22,41 +22,13 @@ export type AnimatorFlags = number;
 
 export abstract class Animator<T> implements AnimationTrack {
   constructor() {
-    Object.defineProperty(this, "ownValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "ownState", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "ownLook", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "timing", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "interpolator", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "precedence", {
-      value: View.Intrinsic,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "animatorFlags", {
-      value: Animator.UpdatedFlag,
-      enumerable: true,
-      configurable: true,
-    });
+    this.ownValue = void 0 as unknown as T;
+    this.ownState = void 0 as unknown as T;
+    this.ownLook = null;
+    this.timing = null;
+    this.interpolator = null;
+    this.precedence = View.Intrinsic;
+    this.animatorFlags = Animator.UpdatedFlag;
   }
 
   isDefined(value: T): boolean {
@@ -64,7 +36,7 @@ export abstract class Animator<T> implements AnimationTrack {
   }
 
   /** @hidden */
-  readonly ownValue!: T;
+  readonly ownValue: T;
 
   get value(): T {
     return this.ownValue;
@@ -92,11 +64,7 @@ export abstract class Animator<T> implements AnimationTrack {
     }
     if (!this.equalState(newValue, oldValue)) {
       this.willSetValue(newValue, oldValue!);
-      Object.defineProperty(this, "ownValue", {
-        value: newValue,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).ownValue = newValue;
       this.setAnimatorFlags(this.animatorFlags | Animator.UpdatedFlag);
       this.onSetValue(newValue, oldValue!);
       this.didSetValue(newValue, oldValue!);
@@ -121,21 +89,9 @@ export abstract class Animator<T> implements AnimationTrack {
     const stateChanged = arguments.length > 1 && !this.equalState(newState!, oldState);
     if (stateChanged) {
       this.willSetState(newState!, oldState!);
-      Object.defineProperty(this, "ownState", {
-        value: newState,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "timing", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(this, "interpolator", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).ownState = newState!;
+      (this as Mutable<this>).timing = null;
+      (this as Mutable<this>).interpolator = null;
       this.onSetState(newState!, oldState!);
     }
     this.setValue(newValue);
@@ -149,7 +105,7 @@ export abstract class Animator<T> implements AnimationTrack {
   }
 
   /** @hidden */
-  readonly ownState!: T;
+  readonly ownState: T;
 
   get state(): T {
     return this.ownState;
@@ -212,21 +168,9 @@ export abstract class Animator<T> implements AnimationTrack {
   /** @hidden */
   setImmediateState(newState: T, oldState: T): void {
     this.willSetState(newState, oldState);
-    Object.defineProperty(this, "ownState", {
-      value: newState,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "timing", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "interpolator", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).ownState = newState;
+    (this as Mutable<this>).timing = null;
+    (this as Mutable<this>).interpolator = null;
     this.onSetState(newState, oldState);
     this.setValue(newState);
     this.didSetState(newState, oldState);
@@ -239,21 +183,9 @@ export abstract class Animator<T> implements AnimationTrack {
   /** @hidden */
   setAnimatedState(newState: T, oldState: T, timing: Timing): void {
     this.willSetState(newState, oldState);
-    Object.defineProperty(this, "ownState", {
-      value: newState,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "timing", {
-      value: timing,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "interpolator", {
-      value: Interpolator(this.value, newState),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).ownState = newState;
+    (this as Mutable<this>).timing = timing;
+    (this as Mutable<this>).interpolator = Interpolator(this.value, newState);
     if ((this.animatorFlags & Animator.AnimatingFlag) !== 0) {
       this.setAnimatorFlags(this.animatorFlags | (Animator.DivergedFlag | Animator.InterruptFlag));
     } else {
@@ -277,7 +209,7 @@ export abstract class Animator<T> implements AnimationTrack {
   }
 
   /** @hidden */
-  readonly ownLook!: Look<T> | null;
+  readonly ownLook: Look<T> | null;
 
   get look(): Look<T> | null {
     return this.ownLook;
@@ -309,11 +241,7 @@ export abstract class Animator<T> implements AnimationTrack {
         timing = Timing.fromAny(timing);
       }
       this.willSetLook(newLook, oldLook, timing as Timing | boolean);
-      Object.defineProperty(this, "ownLook", {
-        value: newLook,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).ownLook = newLook;
       this.onSetLook(newLook, oldLook, timing as Timing | boolean);
       this.didSetLook(newLook, oldLook, timing as Timing | boolean);
     }
@@ -331,28 +259,24 @@ export abstract class Animator<T> implements AnimationTrack {
     // hook
   }
 
-  readonly timing!: Timing | null;
+  readonly timing: Timing | null;
 
-  readonly interpolator!: Interpolator<T> | null;
+  readonly interpolator: Interpolator<T> | null;
 
-  takesPrecedence(precedence: ViewPrecedence): boolean {
-    return precedence >= this.precedence;
-  }
-
-  readonly precedence!: ViewPrecedence;
+  readonly precedence: ViewPrecedence;
 
   setPrecedence(newPrecedence: ViewPrecedence): void {
     const oldPrecedence = this.precedence;
     if (newPrecedence !== oldPrecedence) {
       this.willSetPrecedence(newPrecedence, oldPrecedence);
-      Object.defineProperty(this, "precedence", {
-        value: newPrecedence,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).precedence = newPrecedence;
       this.onSetPrecedence(newPrecedence, oldPrecedence);
       this.didSetPrecedence(newPrecedence, oldPrecedence);
     }
+  }
+
+  takesPrecedence(precedence: ViewPrecedence): boolean {
+    return precedence >= this.precedence;
   }
 
   /** @hidden */
@@ -371,15 +295,11 @@ export abstract class Animator<T> implements AnimationTrack {
   }
 
   /** @hidden */
-  readonly animatorFlags!: AnimatorFlags;
+  readonly animatorFlags: AnimatorFlags;
 
   /** @hidden */
   setAnimatorFlags(animatorFlags: AnimatorFlags): void {
-    Object.defineProperty(this, "animatorFlags", {
-      value: animatorFlags,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).animatorFlags = animatorFlags;
   }
 
   /**
@@ -470,20 +390,12 @@ export abstract class Animator<T> implements AnimationTrack {
       let timing = this.timing;
       if (timing === null) {
         timing = Easing.linear.withDomain(t, t);
-        Object.defineProperty(this, "timing", {
-          value: timing,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).timing = timing;
       }
       let interpolator = this.interpolator;
       if (interpolator === null) {
         interpolator = Interpolator(oldValue, this.state);
-        Object.defineProperty(this, "interpolator", {
-          value: interpolator,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).interpolator = interpolator;
       }
 
       if ((this.animatorFlags & Animator.InterruptFlag) !== 0) {
@@ -498,11 +410,7 @@ export abstract class Animator<T> implements AnimationTrack {
         } else {
           timing = timing.withDomain(t - timing.duration, t);
         }
-        Object.defineProperty(this, "timing", {
-          value: timing,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).timing = timing;
         this.onBegin(oldValue);
       }
 
@@ -512,11 +420,7 @@ export abstract class Animator<T> implements AnimationTrack {
 
       if (u >= 1) {
         this.stopAnimating();
-        Object.defineProperty(this, "interpolator", {
-          value: null,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).interpolator = null;
         this.onEnd(newValue);
       }
     }

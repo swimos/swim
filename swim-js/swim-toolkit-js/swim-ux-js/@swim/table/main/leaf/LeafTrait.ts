@@ -27,10 +27,7 @@ import type {LeafTraitObserver} from "./LeafTraitObserver";
 export class LeafTrait extends GenericTrait {
   constructor() {
     super();
-    Object.defineProperty(this, "cellFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.cellFasteners = [];
   }
 
   override readonly traitObservers!: ReadonlyArray<LeafTraitObserver>;
@@ -161,7 +158,7 @@ export class LeafTrait extends GenericTrait {
   }
 
   /** @hidden */
-  readonly cellFasteners!: ReadonlyArray<TraitFastener<this, CellTrait>>;
+  readonly cellFasteners: ReadonlyArray<TraitFastener<this, CellTrait>>;
 
   /** @hidden */
   protected mountCellFasteners(): void {

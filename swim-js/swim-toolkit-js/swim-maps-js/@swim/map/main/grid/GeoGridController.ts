@@ -31,19 +31,13 @@ import type {GeoGridControllerObserver} from "./GeoGridControllerObserver";
 export class GeoGridController extends GeoLayerController {
   constructor(geoTile: GeoTile) {
     super();
-    Object.defineProperty(this, "geoTile", {
-      value: geoTile,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "tileFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.geoTile = geoTile;
+    this.tileFasteners = [];
   }
 
   override readonly controllerObservers!: ReadonlyArray<GeoGridControllerObserver>;
 
-  readonly geoTile!: GeoTile;
+  readonly geoTile: GeoTile;
 
   protected override initGeoTrait(geoTrait: GeoGridTrait): void {
     super.initGeoTrait(geoTrait);
@@ -461,7 +455,7 @@ export class GeoGridController extends GeoLayerController {
   }
 
   /** @hidden */
-  readonly tileFasteners!: ReadonlyArray<ControllerFastener<this, GeoGridController>>;
+  readonly tileFasteners: ReadonlyArray<ControllerFastener<this, GeoGridController>>;
 
   protected getTileFastener(tileTrait: GeoGridTrait): ControllerFastener<this, GeoGridController> | null {
     const tileFasteners = this.tileFasteners;

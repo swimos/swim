@@ -12,30 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {Focus} from "./Focus";
 
 /** @hidden */
-export const FocusInterpolator = function (d0: Focus, d1: Focus): Interpolator<Focus> {
+export const FocusInterpolator = function (f0: Focus, f1: Focus): Interpolator<Focus> {
   const interpolator = function (u: number): Focus {
-    const d0 = interpolator[0];
-    const d1 = interpolator[1];
-    const phase = d0.phase + u * (d1.phase - d0.phase);
-    const direction = u !== 1 ? d0.direction : 0;
+    const f0 = interpolator[0];
+    const f1 = interpolator[1];
+    const phase = f0.phase + u * (f1.phase - f0.phase);
+    const direction = u !== 1 ? f0.direction : 0;
     return Focus.create(phase, direction);
   } as Interpolator<Focus>;
   Object.setPrototypeOf(interpolator, FocusInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: d0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: d1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = f0;
+  (interpolator as Mutable<typeof interpolator>)[1] = f1;
   return interpolator;
 } as {
-  (d0: Focus, d1: Focus): Interpolator<Focus>;
+  (f0: Focus, f1: Focus): Interpolator<Focus>;
 
   /** @hidden */
   prototype: Interpolator<Focus>;

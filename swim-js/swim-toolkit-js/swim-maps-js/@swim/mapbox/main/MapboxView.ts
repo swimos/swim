@@ -14,7 +14,7 @@
 
 /// <reference types="mapbox-gl"/>
 
-import {Equivalent} from "@swim/util";
+import {Equivalent, Mutable} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
@@ -28,12 +28,10 @@ import type {MapboxViewObserver} from "./MapboxViewObserver";
 export class MapboxView extends MapView {
   constructor(map: mapboxgl.Map) {
     super();
-    Object.defineProperty(this, "map", {
-      value: map,
-      enumerable: true,
-    });
+    this.map = map;
     Object.defineProperty(this, "geoViewport", {
       value: MapboxViewport.create(map),
+      writable: true,
       enumerable: true,
       configurable: true,
     });
@@ -45,7 +43,7 @@ export class MapboxView extends MapView {
 
   override readonly viewObservers!: ReadonlyArray<MapboxViewObserver>;
 
-  readonly map!: mapboxgl.Map;
+  readonly map: mapboxgl.Map;
 
   protected initMap(map: mapboxgl.Map): void {
     map.on("render", this.onMapRender);
@@ -84,11 +82,7 @@ export class MapboxView extends MapView {
     const newGeoViewport = MapboxViewport.create(this.map);
     if (!newGeoViewport.equals(oldGeoViewport)) {
       this.willSetGeoViewport(newGeoViewport, oldGeoViewport);
-      Object.defineProperty(this, "geoViewport", {
-        value: newGeoViewport,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).geoViewport = newGeoViewport;
       this.onSetGeoViewport(newGeoViewport, oldGeoViewport);
       this.didSetGeoViewport(newGeoViewport, oldGeoViewport);
       return true;

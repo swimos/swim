@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {ControllerContextType} from "../ControllerContext";
 import {ControllerFlags, Controller} from "../Controller";
 import {GenericController} from "./GenericController";
@@ -19,18 +20,11 @@ import {GenericController} from "./GenericController";
 export class CompositeController extends GenericController {
   constructor() {
     super();
-    Object.defineProperty(this, "childControllers", {
-      value: [],
-      enumerable: true,
-    });
-    Object.defineProperty(this, "childControllerMap", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.childControllers = [];
+    this.childControllerMap = null;
   }
 
-  override readonly childControllers!: ReadonlyArray<Controller>;
+  override readonly childControllers: ReadonlyArray<Controller>;
 
   override get childControllerCount(): number {
     return this.childControllers.length;
@@ -80,7 +74,7 @@ export class CompositeController extends GenericController {
   }
 
   /** @hidden */
-  readonly childControllerMap!: {[key: string]: Controller | undefined} | null;
+  readonly childControllerMap: {[key: string]: Controller | undefined} | null;
 
   override getChildController(key: string): Controller | null {
     const childControllerMap = this.childControllerMap;
@@ -140,11 +134,7 @@ export class CompositeController extends GenericController {
       let childControllerMap = this.childControllerMap;
       if (childControllerMap === null) {
         childControllerMap = {};
-        Object.defineProperty(this, "childControllerMap", {
-          value: childControllerMap,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).childControllerMap = childControllerMap;
       }
       childControllerMap[key] = childController;
     }

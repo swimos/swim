@@ -22,43 +22,25 @@ import type {GeoViewport} from "@swim/map";
 export class MapboxViewport implements GeoViewport, Equals {
   constructor(map: mapboxgl.Map, geoFrame: GeoBox, geoCenter: GeoPoint,
               zoom: number, heading: number, tilt: number) {
-    Object.defineProperty(this, "map", {
-      value: map,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "geoFrame", {
-      value: geoFrame,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "geoCenter", {
-      value: geoCenter,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "zoom", {
-      value: zoom,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "heading", {
-      value: heading,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "tilt", {
-      value: tilt,
-      enumerable: true,
-    });
+    this.map = map;
+    this.geoFrame = geoFrame;
+    this.geoCenter = geoCenter;
+    this.zoom = zoom;
+    this.heading = heading;
+    this.tilt = tilt;
   }
 
-  readonly map!: mapboxgl.Map;
+  readonly map: mapboxgl.Map;
 
-  readonly geoFrame!: GeoBox;
+  readonly geoFrame: GeoBox;
 
-  readonly geoCenter!: GeoPoint;
+  readonly geoCenter: GeoPoint;
 
-  readonly zoom!: number;
+  readonly zoom: number;
 
-  readonly heading!: number;
+  readonly heading: number;
 
-  readonly tilt!: number;
+  readonly tilt: number;
 
   project(geoPoint: AnyGeoPoint): R2Point;
   project(lng: number, lat: number): R2Point;

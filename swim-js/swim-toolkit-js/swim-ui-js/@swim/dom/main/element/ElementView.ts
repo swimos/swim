@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {R2Box} from "@swim/math";
 import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix, Theme} from "@swim/theme";
@@ -93,16 +93,8 @@ export interface ElementViewConstructor<V extends ElementView = ElementView> ext
 export class ElementView extends NodeView implements StyleContext {
   constructor(node: Element) {
     super(node);
-    Object.defineProperty(this, "attributeAnimators", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "styleAnimators", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.attributeAnimators = null;
+    this.styleAnimators = null;
     this.initElement(node);
   }
 
@@ -422,7 +414,7 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   /** @hidden */
-  readonly attributeAnimators!: {[animatorName: string]: AttributeAnimator<ElementView, unknown> | undefined} | null;
+  readonly attributeAnimators: {[animatorName: string]: AttributeAnimator<ElementView, unknown> | undefined} | null;
 
   hasAttributeAnimator(animatorName: string): boolean {
     const attributeAnimators = this.attributeAnimators;
@@ -444,11 +436,7 @@ export class ElementView extends NodeView implements StyleContext {
     let attributeAnimators = this.attributeAnimators;
     if (attributeAnimators === null) {
       attributeAnimators = {};
-      Object.defineProperty(this, "attributeAnimators", {
-        value: attributeAnimators,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).attributeAnimators = attributeAnimators;
     }
     const oldAttributedAnimator = attributeAnimators[animatorName];
     if (oldAttributedAnimator !== void 0 && this.isMounted()) {
@@ -565,7 +553,7 @@ export class ElementView extends NodeView implements StyleContext {
   }
 
   /** @hidden */
-  readonly styleAnimators!: {[animatorName: string]: StyleAnimator<ElementView, unknown> | undefined} | null;
+  readonly styleAnimators: {[animatorName: string]: StyleAnimator<ElementView, unknown> | undefined} | null;
 
   hasStyleAnimator(animatorName: string): boolean {
     const styleAnimators = this.styleAnimators;
@@ -587,11 +575,7 @@ export class ElementView extends NodeView implements StyleContext {
     let styleAnimators = this.styleAnimators;
     if (styleAnimators === null) {
       styleAnimators = {};
-      Object.defineProperty(this, "styleAnimators", {
-        value: styleAnimators,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).styleAnimators = styleAnimators;
     }
     const oldStyleAnimator = styleAnimators[animatorName];
     if (oldStyleAnimator !== void 0 && this.isMounted()) {

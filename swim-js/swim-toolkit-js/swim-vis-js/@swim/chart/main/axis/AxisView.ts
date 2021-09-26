@@ -58,11 +58,7 @@ export interface AxisViewInit<D> extends GraphicsViewInit {
 export abstract class AxisView<D = unknown> extends GraphicsView {
   constructor() {
     super();
-    Object.defineProperty(this, "ticks", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
+    this.ticks = new BTree();
   }
 
   override readonly viewObservers!: ReadonlyArray<AxisViewObserver<D>>;
@@ -366,16 +362,7 @@ export abstract class AxisView<D = unknown> extends GraphicsView {
         const newTick = this.createTickView(tickValue);
         if (newTick !== null) {
           this.insertTick(newTick);
-          Object.defineProperty(newTick.opacity, "ownValue", {
-            value: 0,
-            enumerable: true,
-            configurable: true,
-          });
-          Object.defineProperty(newTick.opacity, "ownState", {
-            value: 0,
-            enumerable: true,
-            configurable: true,
-          });
+          newTick.opacity.setIntermediateValue(0, 0);
           newTick.fadeIn(timing);
         }
       }

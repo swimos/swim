@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {Timing} from "@swim/mapping";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import type {CssRule} from "../css/CssRule";
@@ -25,11 +26,7 @@ export interface StyleViewInit extends HtmlViewInit {
 export class StyleView extends HtmlView implements StyleSheetContext {
   constructor(node: HTMLStyleElement) {
     super(node);
-    Object.defineProperty(this, "sheet", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.sheet = null;
   }
 
   override readonly node!: HTMLStyleElement;
@@ -40,7 +37,7 @@ export class StyleView extends HtmlView implements StyleSheetContext {
     super.initView(init);
   }
 
-  readonly sheet!: StyleSheet | null;
+  readonly sheet: StyleSheet | null;
 
   protected createSheet(): StyleSheet | null {
     const stylesheet = this.node.sheet;
@@ -68,11 +65,7 @@ export class StyleView extends HtmlView implements StyleSheetContext {
   protected override onMount(): void {
     super.onMount();
     const sheet = this.createSheet();
-    Object.defineProperty(this, "sheet", {
-      value: sheet,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).sheet = sheet;
     if (sheet !== null) {
       sheet.mount();
     }
@@ -83,11 +76,7 @@ export class StyleView extends HtmlView implements StyleSheetContext {
     if (sheet !== null) {
       sheet.unmount();
     }
-    Object.defineProperty(this, "sheet", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).sheet = null;
     super.onUnmount();
   }
 

@@ -12,16 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Format} from "@swim/codec";
 import type {DrawingContext} from "../drawing/DrawingContext";
 
 export class PathContext implements DrawingContext {
   constructor() {
-    Object.defineProperty(this, "precision", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
+    this.precision = -1;
     this.x0 = NaN;
     this.y0 = NaN;
     this.x1 = NaN;
@@ -32,11 +29,7 @@ export class PathContext implements DrawingContext {
   readonly precision!: number;
 
   setPrecision(precision: number): void {
-    Object.defineProperty(this, "precision", {
-      value: precision,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).precision = precision;
   }
 
   /** @hidden */

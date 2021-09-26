@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {AnyTiming} from "@swim/mapping";
 import {AnyLength, Length, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
@@ -54,26 +55,10 @@ export interface DataPointViewInit<X, Y> extends GraphicsViewInit {
 export class DataPointView<X, Y> extends LayerView {
   constructor() {
     super();
-    Object.defineProperty(this, "xCoord", {
-      value: NaN,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "yCoord", {
-      value: NaN,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "y2Coord", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "gradientStop", {
-      value: false,
-      enumerable: true,
-      configurable: true,
-    });
+    this.xCoord = NaN;
+    this.yCoord = NaN;
+    this.y2Coord = void 0;
+    this.gradientStop = false;
   }
 
   override initView(init: DataPointViewInit<X, Y>): void {
@@ -83,37 +68,25 @@ export class DataPointView<X, Y> extends LayerView {
 
   override readonly viewObservers!: ReadonlyArray<DataPointViewObserver<X, Y>>;
 
-  readonly xCoord!: number
+  readonly xCoord: number
 
   /** @hidden */
   setXCoord(xCoord: number): void {
-    Object.defineProperty(this, "xCoord", {
-      value: xCoord,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).xCoord = xCoord;
   }
 
-  readonly yCoord!: number
+  readonly yCoord: number
 
   /** @hidden */
   setYCoord(yCoord: number): void {
-    Object.defineProperty(this, "yCoord", {
-      value: yCoord,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).yCoord = yCoord;
   }
 
-  readonly y2Coord!: number | undefined;
+  readonly y2Coord: number | undefined;
 
   /** @hidden */
   setY2Coord(y2Coord: number | undefined): void {
-    Object.defineProperty(this, "y2Coord", {
-      value: y2Coord,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).y2Coord = y2Coord;
   }
 
   protected willSetX(newX: X | undefined, oldX: X | undefined): void {
@@ -464,18 +437,14 @@ export class DataPointView<X, Y> extends LayerView {
   }
 
   /** @hidden */
-  readonly gradientStop!: boolean;
+  readonly gradientStop: boolean;
 
   isGradientStop(): boolean {
     return this.gradientStop;
   }
 
   protected updateGradientStop(): void {
-    Object.defineProperty(this, "gradientStop", {
-      value: this.color.value !== null || this.opacity.value !== void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).gradientStop = this.color.value !== null || this.opacity.value !== void 0;
   }
 
   protected override onLayout(viewContext: ViewContextType<this>): void {

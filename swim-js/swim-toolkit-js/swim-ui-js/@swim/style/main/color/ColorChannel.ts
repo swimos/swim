@@ -15,19 +15,13 @@
 /** @hidden */
 export class ColorChannel {
   constructor(value: number, units?: string) {
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "units", {
-      value: units !== void 0 ? units : "",
-      enumerable: true,
-    });
+    this.value = value;
+    this.units = units !== void 0 ? units : "";
   }
 
-  readonly value!: number;
+  readonly value: number;
 
-  readonly units!: string;
+  readonly units: string;
 
   scale(k: number): number {
     if (this.units === "%") {

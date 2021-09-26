@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {FromAny} from "@swim/util";
+import {FromAny, Mutable} from "@swim/util";
 import {Model, ModelObserverType} from "@swim/model";
 import {Controller} from "../Controller";
 
@@ -169,25 +169,10 @@ function ControllerModelConstructor<C extends Controller, M extends Model, U>(th
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "fastenerFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "key", {
-    value: key,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "model", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).fastenerFlags = 0;
+  (this as Mutable<typeof this>).key = key;
+  (this as Mutable<typeof this>).model = null;
   return this;
 }
 
@@ -196,11 +181,7 @@ function ControllerModelDecoratorFactory<C extends Controller, M extends Model, 
 }
 
 ControllerModel.prototype.setFastenerFlags = function (this: ControllerModel<Controller, Model>, fastenerFlags: ControllerModelFlags): void {
-  Object.defineProperty(this, "fastenerFlags", {
-    value: fastenerFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).fastenerFlags = fastenerFlags;
 };
 
 ControllerModel.prototype.getModel = function <M extends Model>(this: ControllerModel<Controller, M>): M {
@@ -224,11 +205,7 @@ ControllerModel.prototype.setModel = function <M extends Model>(this: Controller
     if (oldModel !== null) {
       this.detachModel(oldModel);
     }
-    Object.defineProperty(this, "model", {
-      value: newModel,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).model = newModel;
     if (newModel !== null) {
       this.attachModel(newModel);
     }

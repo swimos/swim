@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Murmur3, Numbers, Constructors} from "@swim/util";
+import {Lazy, Mutable, Murmur3, Numbers, Constructors} from "@swim/util";
 import type {Output} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item, Value} from "@swim/structure";
@@ -33,27 +33,11 @@ export interface HslColorInit {
 export class HslColor extends Color {
   constructor(h: number, s: number, l: number, a: number = 1) {
     super();
-    Object.defineProperty(this, "h", {
-      value: h,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "s", {
-      value: s,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "l", {
-      value: l,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "a", {
-      value: a,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.h = h;
+    this.s = s;
+    this.l = l;
+    this.a = a;
+    this.stringValue = void 0;
   }
 
   override isDefined(): boolean {
@@ -61,13 +45,13 @@ export class HslColor extends Color {
         && isFinite(this.l) && isFinite(this.a);
   }
 
-  readonly h!: number;
+  readonly h: number;
 
-  readonly s!: number;
+  readonly s: number;
 
-  readonly l!: number;
+  readonly l: number;
 
-  readonly a!: number;
+  readonly a: number;
 
   override alpha(): number;
   override alpha(a: number): HslColor;
@@ -187,7 +171,7 @@ export class HslColor extends Color {
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   override toString(): string {
     let s = this.stringValue;
@@ -206,11 +190,7 @@ export class HslColor extends Color {
         s += a;
       }
       s += ")";
-      Object.defineProperty(this, "stringValue", {
-        value: s,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = s;
     }
     return s;
   }

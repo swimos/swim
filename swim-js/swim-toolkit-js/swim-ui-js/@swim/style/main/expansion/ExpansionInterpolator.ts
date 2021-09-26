@@ -12,30 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {Expansion} from "./Expansion";
 
 /** @hidden */
-export const ExpansionInterpolator = function (d0: Expansion, d1: Expansion): Interpolator<Expansion> {
+export const ExpansionInterpolator = function (e0: Expansion, e1: Expansion): Interpolator<Expansion> {
   const interpolator = function (u: number): Expansion {
-    const d0 = interpolator[0];
-    const d1 = interpolator[1];
-    const phase = d0.phase + u * (d1.phase - d0.phase);
-    const direction = u !== 1 ? d0.direction : 0;
+    const e0 = interpolator[0];
+    const e1 = interpolator[1];
+    const phase = e0.phase + u * (e1.phase - e0.phase);
+    const direction = u !== 1 ? e0.direction : 0;
     return Expansion.create(phase, direction);
   } as Interpolator<Expansion>;
   Object.setPrototypeOf(interpolator, ExpansionInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: d0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: d1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = e0;
+  (interpolator as Mutable<typeof interpolator>)[1] = e1;
   return interpolator;
 } as {
-  (d0: Expansion, d1: Expansion): Interpolator<Expansion>;
+  (e0: Expansion, e1: Expansion): Interpolator<Expansion>;
 
   /** @hidden */
   prototype: Interpolator<Expansion>;

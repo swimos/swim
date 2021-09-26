@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {ModelContextType} from "../ModelContext";
 import {ModelFlags, Model} from "../Model";
 import {GenericModel} from "./GenericModel";
@@ -19,18 +20,11 @@ import {GenericModel} from "./GenericModel";
 export class CompoundModel extends GenericModel {
   constructor() {
     super();
-    Object.defineProperty(this, "childModels", {
-      value: [],
-      enumerable: true,
-    });
-    Object.defineProperty(this, "childModelMap", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.childModels = [];
+    this.childModelMap = null;
   }
 
-  override readonly childModels!: ReadonlyArray<Model>;
+  override readonly childModels: ReadonlyArray<Model>;
 
   override get childModelCount(): number {
     return this.childModels.length;
@@ -80,7 +74,7 @@ export class CompoundModel extends GenericModel {
   }
 
   /** @hidden */
-  readonly childModelMap!: {[key: string]: Model | undefined} | null;
+  readonly childModelMap: {[key: string]: Model | undefined} | null;
 
   override getChildModel(key: string): Model | null {
     const childModelMap = this.childModelMap;
@@ -140,11 +134,7 @@ export class CompoundModel extends GenericModel {
       let childModelMap = this.childModelMap;
       if (childModelMap === null) {
         childModelMap = {};
-        Object.defineProperty(this, "childModelMap", {
-          value: childModelMap,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).childModelMap = childModelMap;
       }
       childModelMap[key] = childModel;
     }

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {FromAny} from "@swim/util";
+import {FromAny, Mutable} from "@swim/util";
 import {ViewFactory, View, ViewObserverType} from "@swim/view";
 import {NodeView} from "@swim/dom";
 import {Controller} from "../Controller";
@@ -170,25 +170,10 @@ function ControllerViewConstructor<C extends Controller, V extends View, U>(this
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "fastenerFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "key", {
-    value: key,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "view", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).fastenerFlags = 0;
+  (this as Mutable<typeof this>).key = key;
+  (this as Mutable<typeof this>).view = null;
   return this;
 }
 
@@ -197,11 +182,7 @@ function ControllerViewDecoratorFactory<C extends Controller, V extends View, U>
 }
 
 ControllerView.prototype.setFastenerFlags = function (this: ControllerView<Controller, View>, fastenerFlags: ControllerViewFlags): void {
-  Object.defineProperty(this, "fastenerFlags", {
-    value: fastenerFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).fastenerFlags = fastenerFlags;
 };
 
 ControllerView.prototype.getView = function <V extends View>(this: ControllerView<Controller, V>): V {
@@ -229,11 +210,7 @@ ControllerView.prototype.setView = function <V extends View>(this: ControllerVie
     if (oldView !== null) {
       this.detachView(oldView);
     }
-    Object.defineProperty(this, "view", {
-      value: newView,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).view = newView;
     if (newView !== null) {
       this.attachView(newView);
     }

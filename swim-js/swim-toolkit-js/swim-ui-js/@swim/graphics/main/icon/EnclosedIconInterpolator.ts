@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals} from "@swim/util";
+import {Equals, Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {MoodMatrix} from "@swim/theme";
 import type {Icon} from "./Icon";
@@ -58,30 +58,12 @@ export const EnclosedIconInterpolator = function (i0: EnclosedIcon, i1: Enclosed
                             outerMoodModifier, innerMoodModifier);
   } as EnclosedIconInterpolator;
   Object.setPrototypeOf(interpolator, EnclosedIconInterpolator.prototype);
-  Object.defineProperty(interpolator, "outerInterpolator", {
-    value: Interpolator(i0.outer, i1.outer),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "innerInterpolator", {
-    value: Interpolator(i0.inner, i1.inner),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "innerScaleInterpolator", {
-    value: Interpolator(i0.innerScale, i1.innerScale),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "moodModifier", {
-    value: i1.moodModifier,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "outerMoodModifier", {
-    value: i1.outerMoodModifier,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "innerMoodModifier", {
-    value: i1.innerMoodModifier,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).outerInterpolator = Interpolator(i0.outer, i1.outer);
+  (interpolator as Mutable<typeof interpolator>).innerInterpolator = Interpolator(i0.inner, i1.inner);
+  (interpolator as Mutable<typeof interpolator>).innerScaleInterpolator = Interpolator(i0.innerScale, i1.innerScale);
+  (interpolator as Mutable<typeof interpolator>).moodModifier = i1.moodModifier;
+  (interpolator as Mutable<typeof interpolator>).outerMoodModifier = i1.outerMoodModifier;
+  (interpolator as Mutable<typeof interpolator>).innerMoodModifier = i1.innerMoodModifier;
   return interpolator;
 } as {
   (i0: EnclosedIcon, i1: EnclosedIcon): EnclosedIconInterpolator;

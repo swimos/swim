@@ -29,38 +29,23 @@ export interface TableLayoutInit {
 
 export class TableLayout implements Equals, Equivalent, Debug {
   constructor(width: Length | null, left: Length | null, right: Length | null,
-              colSpacing: AnyLength | null, cols: ReadonlyArray<ColLayout>) {
-    Object.defineProperty(this, "width", {
-      value: width,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "left", {
-      value: left,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "right", {
-      value: right,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "colSpacing", {
-      value: colSpacing,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "cols", {
-      value: cols,
-      enumerable: true,
-    });
+              colSpacing: Length | null, cols: ReadonlyArray<ColLayout>) {
+    this.width = width;
+    this.left = left;
+    this.right = right;
+    this.colSpacing = colSpacing;
+    this.cols = cols;
   }
 
-  readonly width!: Length | null;
+  readonly width: Length | null;
 
-  readonly left!: Length | null;
+  readonly left: Length | null;
 
-  readonly right!: Length | null;
+  readonly right: Length | null;
 
-  readonly colSpacing!: Length | null;
+  readonly colSpacing: Length | null;
 
-  readonly cols!: ReadonlyArray<ColLayout>;
+  readonly cols: ReadonlyArray<ColLayout>;
 
   getCol(key: string): ColLayout | null {
     const cols = this.cols;

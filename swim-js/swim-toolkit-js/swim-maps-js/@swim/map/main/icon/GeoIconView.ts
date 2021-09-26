@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {Timing} from "@swim/mapping";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
@@ -43,13 +44,10 @@ export interface GeoIconViewInit extends GeoViewInit, IconViewInit {
 export class GeoIconView extends GeoLayerView implements IconView {
   constructor() {
     super();
-    Object.defineProperty(this, "canvas", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "iconBounds", {
-      value: null,
+    this.canvas = null;
+    Object.defineProperty(this, "viewBounds", {
+      value: R2Box.undefined(),
+      writable: true,
       enumerable: true,
       configurable: true,
     });
@@ -69,7 +67,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
   override readonly viewObservers!: ReadonlyArray<GeoIconViewObserver>;
 
   /** @hidden */
-  readonly canvas!: HTMLCanvasElement | null;
+  readonly canvas: HTMLCanvasElement | null;
 
   protected willSetGeoCenter(newGeoCenter: GeoPoint | null, oldGeoCenter: GeoPoint | null): void {
     const viewObservers = this.viewObservers;
@@ -114,19 +112,12 @@ export class GeoIconView extends GeoLayerView implements IconView {
   })
   readonly geoCenter!: ViewAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  protected onSetViewCenter(newViewCenter: R2Point | null, oldViewCenter: R2Point | null): void {
-    Object.defineProperty(this, "iconBounds", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-  }
-
   @ViewAnimator<GeoIconView, R2Point | null, AnyR2Point | null>({
     type: R2Point,
     state: R2Point.undefined(),
+    updateFlags: View.NeedsComposite,
     didSetValue(newViewCenter: R2Point | null, oldViewCenter: R2Point | null): void {
-      this.owner.onSetViewCenter(newViewCenter, oldViewCenter);
+      this.owner.updateViewBounds();
     },
   })
   readonly viewCenter!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
@@ -242,19 +233,6 @@ export class GeoIconView extends GeoLayerView implements IconView {
     }
   }
 
-  protected override onLayout(viewContext: ViewContextType<this>): void {
-    super.onLayout(viewContext);
-    Object.defineProperty(this, "iconBounds", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-  }
-
-  protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
-    // nop
-  }
-
   protected override onRasterize(viewContext: ViewContextType<this>): void {
     super.onRasterize(viewContext);
     const renderer = viewContext.renderer;
@@ -265,15 +243,11 @@ export class GeoIconView extends GeoLayerView implements IconView {
 
   protected rasterizeIcon(renderer: CanvasRenderer, frame: R2Box): void {
     const graphics = this.graphics.value;
-    if (graphics !== null && this.iconBounds !== null) {
+    if (graphics !== null && frame.isDefined()) {
       let canvas = this.canvas;
       if (canvas === null) {
         canvas = document.createElement("canvas");
-        Object.defineProperty(this, "canvas", {
-          value: canvas,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).canvas = canvas;
       }
       const pixelRatio = renderer.pixelRatio;
       const width = frame.width;
@@ -294,11 +268,7 @@ export class GeoIconView extends GeoLayerView implements IconView {
       const iconFrame = new R2Box(0, 0, width, height);
       graphics.render(iconRenderer, iconFrame);
     } else {
-      Object.defineProperty(this, "canvas", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).canvas = null;
     }
   }
 
@@ -317,15 +287,48 @@ export class GeoIconView extends GeoLayerView implements IconView {
     }
   }
 
+  protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
+    // nop
+  }
+
   protected override updateGeoBounds(): void {
     // nop
   }
 
+  override readonly viewBounds!: R2Box;
+
+  protected updateViewBounds(): void {
+    (this as Mutable<GeoIconView>).viewBounds = this.deriveViewBounds();
+  }
+
+  override deriveViewBounds(): R2Box {
+    const viewCenter = this.viewCenter.value;
+    if (viewCenter !== null && viewCenter.isDefined()) {
+      const viewFrame = this.viewFrame;
+      const viewSize = Math.min(viewFrame.width, viewFrame.height);
+      let iconWidthValue: Length | number | null = this.iconWidth.value;
+      iconWidthValue = iconWidthValue instanceof Length ? iconWidthValue.pxValue(viewSize) : viewSize;
+      let iconWidthState: Length | number | null = this.iconWidth.state;
+      iconWidthState = iconWidthState instanceof Length ? iconWidthState.pxValue(viewSize) : viewSize;
+      const iconWidth = Math.max(iconWidthValue, iconWidthState);
+      let iconHeightValue: Length | number | null = this.iconHeight.value;
+      iconHeightValue = iconHeightValue instanceof Length ? iconHeightValue.pxValue(viewSize) : viewSize;
+      let iconHeightState: Length | number | null = this.iconHeight.state;
+      iconHeightState = iconHeightState instanceof Length ? iconHeightState.pxValue(viewSize) : viewSize;
+      const iconHeight = Math.max(iconHeightValue, iconHeightState);
+      const x = viewCenter.x - iconWidth * this.xAlign.getValue();
+      const y = viewCenter.y - iconHeight * this.yAlign.getValue();
+      return new R2Box(x, y, x + iconWidth, y + iconHeight);
+    } else {
+      return R2Box.undefined();
+    }
+  }
+
   override get popoverFrame(): R2Box {
     const viewCenter = this.viewCenter.value;
-    const frame = this.viewFrame;
+    const viewFrame = this.viewFrame;
     if (viewCenter !== null && viewCenter.isDefined()) {
-      const viewSize = Math.min(frame.width, frame.height);
+      const viewSize = Math.min(viewFrame.width, viewFrame.height);
       const inversePageTransform = this.pageTransform.inverse();
       const px = inversePageTransform.transformX(viewCenter.x, viewCenter.y);
       const py = inversePageTransform.transformY(viewCenter.x, viewCenter.y);
@@ -340,11 +343,6 @@ export class GeoIconView extends GeoLayerView implements IconView {
       return this.pageBounds;
     }
   }
-
-  /** @hidden */
-  readonly iconBounds!: R2Box | null;
-
-  declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
 
   protected override hitTest(x: number, y: number, viewContext: ViewContextType<this>): GraphicsView | null {
     const renderer = viewContext.renderer;
@@ -402,38 +400,3 @@ export class GeoIconView extends GeoLayerView implements IconView {
   static override readonly powerFlags: ViewFlags = GeoLayerView.powerFlags | View.NeedsRasterize;
   static override readonly uncullFlags: ViewFlags = GeoLayerView.uncullFlags | View.NeedsRasterize;
 }
-Object.defineProperty(GeoIconView.prototype, "viewBounds", {
-  get(this: GeoIconView): R2Box {
-    let iconBounds = this.iconBounds;
-    if (iconBounds === null) {
-      const viewCenter = this.viewCenter.value;
-      const frame = this.viewFrame;
-      if (viewCenter !== null && viewCenter.isDefined()) {
-        const viewSize = Math.min(frame.width, frame.height);
-        let iconWidthValue: Length | number | null = this.iconWidth.value;
-        iconWidthValue = iconWidthValue instanceof Length ? iconWidthValue.pxValue(viewSize) : viewSize;
-        let iconWidthState: Length | number | null = this.iconWidth.state;
-        iconWidthState = iconWidthState instanceof Length ? iconWidthState.pxValue(viewSize) : viewSize;
-        const iconWidth = Math.max(iconWidthValue, iconWidthState);
-        let iconHeightValue: Length | number | null = this.iconHeight.value;
-        iconHeightValue = iconHeightValue instanceof Length ? iconHeightValue.pxValue(viewSize) : viewSize;
-        let iconHeightState: Length | number | null = this.iconHeight.state;
-        iconHeightState = iconHeightState instanceof Length ? iconHeightState.pxValue(viewSize) : viewSize;
-        const iconHeight = Math.max(iconHeightValue, iconHeightState);
-        const x = viewCenter.x - iconWidth * this.xAlign.getValue();
-        const y = viewCenter.y - iconHeight * this.yAlign.getValue();
-        iconBounds = new R2Box(x, y, x + iconWidth, y + iconHeight);
-        Object.defineProperty(this, "iconBounds", {
-          value: iconBounds,
-          enumerable: true,
-          configurable: true,
-        });
-      } else {
-        iconBounds = this.viewFrame;
-      }
-    }
-    return iconBounds;
-  },
-  enumerable: true,
-  configurable: true,
-});

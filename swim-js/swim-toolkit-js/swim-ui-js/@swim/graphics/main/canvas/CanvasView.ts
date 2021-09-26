@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import {R2Box, Transform} from "@swim/math";
 import {
   ViewContextType,
@@ -78,46 +78,19 @@ export type CanvasFlags = number;
 export class CanvasView extends HtmlView {
   constructor(node: HTMLCanvasElement) {
     super(node);
-    Object.defineProperty(this, "graphicsViews", {
-      value: [],
-      enumerable: true,
-    });
+    this.graphicsViews = [];
     Object.defineProperty(this, "renderer", {
       value: this.createRenderer(),
+      writable: true,
       enumerable: true,
       configurable: true,
     });
-    Object.defineProperty(this, "viewFrame", {
-      value: R2Box.undefined(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "canvasFlags", {
-      value: CanvasView.ClickEventsFlag,
-      enumerable: true,
-      configurable: true,
-    });
-
-    Object.defineProperty(this, "eventNode", {
-      value: node,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "mouse", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "pointers", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "touches", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.viewFrame = R2Box.undefined();
+    this.canvasFlags = CanvasView.ClickEventsFlag,
+    this.eventNode = node;
+    this.mouse = null;
+    this.pointers = null;
+    this.touches = null;
 
     this.onClick = this.onClick.bind(this);
     this.onDblClick = this.onDblClick.bind(this);
@@ -221,7 +194,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  readonly graphicsViews!: ReadonlyArray<GraphicsView>;
+  readonly graphicsViews: ReadonlyArray<GraphicsView>;
 
   override get childViewCount(): number {
     let childViewCount = 0;
@@ -648,11 +621,7 @@ export class CanvasView extends HtmlView {
     if (typeof renderer === "string") {
       renderer = this.createRenderer(renderer as GraphicsRendererType);
     }
-    Object.defineProperty(this, "renderer", {
-      value: renderer,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).renderer = renderer;
     this.resetRenderer();
   }
 
@@ -679,15 +648,11 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  readonly canvasFlags!: number;
+  readonly canvasFlags: number;
 
   /** @hidden */
   setCanvasFlags(canvasFlags: number): void {
-    Object.defineProperty(this, "canvasFlags", {
-      value: canvasFlags,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).canvasFlags = canvasFlags;
   }
 
   protected override onMount(): void {
@@ -1126,7 +1091,7 @@ export class CanvasView extends HtmlView {
   override readonly viewContext!: GraphicsViewContext;
 
   /** @hidden */
-  readonly viewFrame!: R2Box;
+  readonly viewFrame: R2Box;
 
   setViewFrame(viewFrame: R2Box | null): void {
     // nop
@@ -1202,7 +1167,7 @@ export class CanvasView extends HtmlView {
     }
   }
 
-  readonly eventNode!: HTMLElement;
+  readonly eventNode: HTMLElement;
 
   setEventNode(newEventNode: HTMLElement | null): void {
     if (newEventNode === null) {
@@ -1211,11 +1176,7 @@ export class CanvasView extends HtmlView {
     const oldEventNode = this.eventNode;
     if (oldEventNode !== newEventNode) {
       this.detachEvents(oldEventNode);
-      Object.defineProperty(this, "eventNode", {
-        value: newEventNode,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).eventNode = newEventNode;
       this.attachEvents(newEventNode);
     }
   }
@@ -1423,7 +1384,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  readonly mouse!: CanvasViewMouse | null;
+  readonly mouse: CanvasViewMouse | null;
 
   /** @hidden */
   protected updateMouse(mouse: CanvasViewMouse, event: MouseEvent): void {
@@ -1493,11 +1454,7 @@ export class CanvasView extends HtmlView {
     if (mouse === null) {
       this.attachActiveMouseEvents(this.eventNode);
       mouse = {};
-      Object.defineProperty(this, "mouse", {
-        value: mouse,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).mouse = mouse;
     }
     this.updateMouse(mouse, event);
   }
@@ -1506,11 +1463,7 @@ export class CanvasView extends HtmlView {
   protected onMouseLeave(event: MouseEvent): void {
     const mouse = this.mouse;
     if (mouse !== null) {
-      Object.defineProperty(this, "mouse", {
-        value: null,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).mouse = null;
       this.detachActiveMouseEvents(this.eventNode);
     }
   }
@@ -1521,11 +1474,7 @@ export class CanvasView extends HtmlView {
     if (mouse === null) {
       this.attachActiveMouseEvents(this.eventNode);
       mouse = {};
-      Object.defineProperty(this, "mouse", {
-        value: mouse,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).mouse = mouse;
     }
     this.updateMouse(mouse, event);
     this.fireMouseEvent(event);
@@ -1536,11 +1485,7 @@ export class CanvasView extends HtmlView {
     let mouse = this.mouse;
     if (mouse === null) {
       mouse = {};
-      Object.defineProperty(this, "mouse", {
-        value: mouse,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).mouse = mouse;
     }
     this.updateMouse(mouse, event);
     const oldTargetView = mouse.targetView as GraphicsView | undefined;
@@ -1628,7 +1573,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  readonly pointers!: {[id: string]: CanvasViewPointer | undefined} | null;
+  readonly pointers: {[id: string]: CanvasViewPointer | undefined} | null;
 
   /** @hidden */
   protected updatePointer(pointer: CanvasViewPointer, event: PointerEvent): void {
@@ -1674,11 +1619,7 @@ export class CanvasView extends HtmlView {
     let pointers = this.pointers;
     if (pointers === null) {
       pointers = {};
-      Object.defineProperty(this, "pointers", {
-        value: pointers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).pointers = pointers;
     }
     let pointer = pointers[id];
     if (pointer === void 0) {
@@ -1697,11 +1638,7 @@ export class CanvasView extends HtmlView {
     let pointers = this.pointers;
     if (pointers === null) {
       pointers = {};
-      Object.defineProperty(this, "pointers", {
-        value: pointers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).pointers = pointers;
     }
     const pointer = pointers[id];
     if (pointer !== void 0) {
@@ -1721,11 +1658,7 @@ export class CanvasView extends HtmlView {
     let pointers = this.pointers;
     if (pointers === null) {
       pointers = {};
-      Object.defineProperty(this, "pointers", {
-        value: pointers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).pointers = pointers;
     }
     let pointer = pointers[id];
     if (pointer === void 0) {
@@ -1745,11 +1678,7 @@ export class CanvasView extends HtmlView {
     let pointers = this.pointers;
     if (pointers === null) {
       pointers = {};
-      Object.defineProperty(this, "pointers", {
-        value: pointers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).pointers = pointers;
     }
     let pointer = pointers[id];
     if (pointer === void 0) {
@@ -1776,11 +1705,7 @@ export class CanvasView extends HtmlView {
     let pointers = this.pointers;
     if (pointers === null) {
       pointers = {};
-      Object.defineProperty(this, "pointers", {
-        value: pointers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).pointers = pointers;
     }
     const pointer = pointers[id];
     if (pointer !== void 0) {
@@ -1804,11 +1729,7 @@ export class CanvasView extends HtmlView {
     let pointers = this.pointers;
     if (pointers === null) {
       pointers = {};
-      Object.defineProperty(this, "pointers", {
-        value: pointers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).pointers = pointers;
     }
     const pointer = pointers[id];
     if (pointer !== void 0) {
@@ -1888,7 +1809,7 @@ export class CanvasView extends HtmlView {
   }
 
   /** @hidden */
-  readonly touches!: {[id: string]: CanvasViewTouch | undefined} | null;
+  readonly touches: {[id: string]: CanvasViewTouch | undefined} | null;
 
   /** @hidden */
   protected updateTouch(touch: CanvasViewTouch, event: Touch): void {
@@ -1947,11 +1868,7 @@ export class CanvasView extends HtmlView {
     let touches = this.touches;
     if (touches === null) {
       touches = {};
-      Object.defineProperty(this, "touches", {
-        value: touches,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).touches = touches;
     }
     const changedTouches = event.changedTouches;
     for (let i = 0, n = changedTouches.length; i < n; i += 1) {
@@ -1992,11 +1909,7 @@ export class CanvasView extends HtmlView {
     let touches = this.touches;
     if (touches === null) {
       touches = {};
-      Object.defineProperty(this, "touches", {
-        value: touches,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).touches = touches;
     }
     const changedTouches = event.changedTouches;
     for (let i = 0, n = changedTouches.length; i < n; i += 1) {
@@ -2021,11 +1934,7 @@ export class CanvasView extends HtmlView {
     let touches = this.touches;
     if (touches === null) {
       touches = {};
-      Object.defineProperty(this, "touches", {
-        value: touches,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).touches = touches;
     }
     const changedTouches = event.changedTouches;
     const n = changedTouches.length;
@@ -2059,11 +1968,7 @@ export class CanvasView extends HtmlView {
     let touches = this.touches;
     if (touches === null) {
       touches = {};
-      Object.defineProperty(this, "touches", {
-        value: touches,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).touches = touches;
     }
     const changedTouches = event.changedTouches;
     const n = changedTouches.length;
@@ -2118,11 +2023,7 @@ export class CanvasView extends HtmlView {
       height = Math.floor(canvas.height);
       pixelRatio = 1;
     }
-    Object.defineProperty(this, "viewFrame", {
-      value: new R2Box(0, 0, width, height),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).viewFrame = new R2Box(0, 0, width, height);
   }
 
   clearCanvas(): void {

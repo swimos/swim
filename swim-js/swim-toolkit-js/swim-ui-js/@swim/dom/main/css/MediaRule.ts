@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {CssContext} from "./CssContext";
@@ -104,11 +105,7 @@ __extends(MediaRule, CssRule);
 
 function MediaRuleConstructor<V extends CssContext>(this: MediaRule<V>, owner: V, ruleName: string | undefined): MediaRule<V> {
   const _this: MediaRule<V> = (CssRule as Function).call(this, owner, ruleName) || this;
-  Object.defineProperty(_this, "cssRules", {
-    value: {},
-    enumerable: true,
-    configurable: true,
-  });
+  (_this as Mutable<typeof _this>).cssRules = {};
   return _this;
 }
 
@@ -210,11 +207,7 @@ MediaRule.define = function <V extends CssContext, I>(descriptor: MediaRuleDescr
     if (_this.initRule !== void 0) {
       rule = _this.initRule(rule);
     }
-    Object.defineProperty(_this, "rule", {
-      value: rule,
-      enumerable: true,
-      configurable: true,
-    });
+    (_this as Mutable<typeof _this>).rule = rule;
     return _this;
   } as unknown as MediaRuleConstructor<V, I>;
 

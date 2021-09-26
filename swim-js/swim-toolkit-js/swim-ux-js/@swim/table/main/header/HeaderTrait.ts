@@ -27,10 +27,7 @@ import type {HeaderTraitObserver} from "./HeaderTraitObserver";
 export class HeaderTrait extends GenericTrait {
   constructor() {
     super();
-    Object.defineProperty(this, "colFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.colFasteners = [];
   }
 
   override readonly traitObservers!: ReadonlyArray<HeaderTraitObserver>;
@@ -166,7 +163,7 @@ export class HeaderTrait extends GenericTrait {
   }
 
   /** @hidden */
-  readonly colFasteners!: ReadonlyArray<TraitFastener<this, ColTrait>>;
+  readonly colFasteners: ReadonlyArray<TraitFastener<this, ColTrait>>;
 
   /** @hidden */
   protected mountColFasteners(): void {

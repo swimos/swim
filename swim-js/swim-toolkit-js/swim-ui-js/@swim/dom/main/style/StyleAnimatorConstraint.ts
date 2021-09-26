@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {FromAny} from "@swim/util";
+import {FromAny, Mutable} from "@swim/util";
 import type {AnyTiming} from "@swim/mapping";
 import {
   ConstraintKey,
@@ -184,20 +184,9 @@ __extends(StyleAnimatorConstraint, StyleAnimator);
 
 function StyleAnimatorConstraintConstructor<V extends StyleContext, T, U>(this: StyleAnimatorConstraint<V, T, U>, owner: V, animatorName: string): StyleAnimatorConstraint<V, T, U> {
   const _this: StyleAnimatorConstraint<V, T, U> = (StyleAnimator as Function).call(this, owner, animatorName) || this;
-  Object.defineProperty(_this, "id", {
-    value: ConstraintKey.nextId(),
-    enumerable: true,
-  });
-  Object.defineProperty(_this, "strength", {
-    value: ConstraintStrength.Strong,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(_this, "conditionCount", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (_this as Mutable<typeof _this>).id = ConstraintKey.nextId();
+  (_this as Mutable<typeof _this>).strength = ConstraintStrength.Strong;
+  (_this as Mutable<typeof _this>).conditionCount = 0;
   return _this;
 }
 
@@ -340,28 +329,16 @@ StyleAnimatorConstraint.prototype.constrain = function (this: StyleAnimatorConst
 };
 
 StyleAnimatorConstraint.prototype.addConstraintCondition = function (this: StyleAnimatorConstraint<StyleContext, unknown>, constraint: Constraint, solver: ConstraintSolver): void {
-  const oldConditionCount = this.conditionCount;
-  const newConditionCount = oldConditionCount + 1;
-  Object.defineProperty(this, "conditionCount", {
-    value: newConditionCount,
-    enumerable: true,
-    configurable: true,
-  });
-  if (!this.isConstrained() && oldConditionCount === 0 && this.isMounted()) {
+  (this as Mutable<typeof this>).conditionCount += 1;
+  if (!this.isConstrained() && this.conditionCount === 1 && this.isMounted()) {
     this.startConstraining();
     this.updateConstraintVariable();
   }
 };
 
 StyleAnimatorConstraint.prototype.removeConstraintCondition = function (this: StyleAnimatorConstraint<StyleContext, unknown>, constraint: Constraint, solver: ConstraintSolver): void {
-  const oldConditionCount = this.conditionCount;
-  const newConditionCount = oldConditionCount - 1;
-  Object.defineProperty(this, "conditionCount", {
-    value: newConditionCount,
-    enumerable: true,
-    configurable: true,
-  });
-  if (!this.isConstrained() && newConditionCount === 0 && this.isMounted()) {
+  (this as Mutable<typeof this>).conditionCount -= 1;
+  if (!this.isConstrained() && this.conditionCount === 0 && this.isMounted()) {
     this.stopConstraining();
   }
 };
@@ -491,37 +468,17 @@ StyleAnimatorConstraint.define = function <V extends StyleContext, T, U, I>(desc
       ownState = _this.fromAny(state);
     }
     if (ownState !== void 0) {
-      Object.defineProperty(_this, "ownValue", {
-        value: ownState,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(_this, "ownState", {
-        value: ownState,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownValue = ownState;
+      (_this as Mutable<typeof _this>).ownState = ownState;
     }
     if (look !== void 0) {
-      Object.defineProperty(_this, "ownLook", {
-        value: look,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownLook = look;
     }
     if (strength !== void 0) {
-      Object.defineProperty(_this, "strength", {
-        value: strength,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).strength = strength;
     }
     if (precedence !== void 0) {
-      Object.defineProperty(_this, "precedence", {
-        value: precedence,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).precedence = precedence;
     }
     if (constrain === true) {
       _this.constrain();

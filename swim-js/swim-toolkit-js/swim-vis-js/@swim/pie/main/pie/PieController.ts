@@ -33,10 +33,7 @@ import type {PieControllerObserver} from "./PieControllerObserver";
 export class PieController extends CompositeController {
   constructor() {
     super();
-    Object.defineProperty(this, "sliceFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.sliceFasteners = [];
   }
 
   override readonly controllerObservers!: ReadonlyArray<PieControllerObserver>;
@@ -743,7 +740,7 @@ export class PieController extends CompositeController {
   }
 
   /** @hidden */
-  readonly sliceFasteners!: ReadonlyArray<ControllerFastener<this, SliceController>>;
+  readonly sliceFasteners: ReadonlyArray<ControllerFastener<this, SliceController>>;
 
   protected getSliceFastener(sliceTrait: SliceTrait): ControllerFastener<this, SliceController> | null {
     const sliceFasteners = this.sliceFasteners;

@@ -30,31 +30,16 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
   constructor(path: R2Path, fillRule: PaintingFillRule, fillColor: Color | null,
               fillLook: Look<Color> | null, moodModifier: MoodMatrix | null) {
     super();
-    Object.defineProperty(this, "path", {
-      value: path,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "fillRule", {
-      value: fillRule,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "fillColor", {
-      value: fillColor,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "fillLook", {
-      value: fillLook,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "moodModifier", {
-      value: moodModifier,
-      enumerable: true,
-    });
+    this.path = path;
+    this.fillRule = fillRule;
+    this.fillColor = fillColor;
+    this.fillLook = fillLook;
+    this.moodModifier = moodModifier;
   }
 
-  readonly path!: R2Path;
+  readonly path: R2Path;
 
-  readonly fillRule!: PaintingFillRule;
+  readonly fillRule: PaintingFillRule;
 
   withFillRule(fillRule: PaintingFillRule): VectorIcon {
     if (Equals(this.fillRule, fillRule)) {
@@ -65,7 +50,7 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
     }
   }
 
-  override readonly fillColor!: Color | null;
+  override readonly fillColor: Color | null;
 
   override withFillColor(fillColor: Color | null): VectorIcon {
     if (Equals(this.fillColor, fillColor)) {
@@ -76,7 +61,7 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
     }
   }
 
-  override readonly fillLook!: Look<Color> | null;
+  override readonly fillLook: Look<Color> | null;
 
   override withFillLook(fillLook: Look<Color> | null): VectorIcon {
     if (this.fillLook === fillLook) {
@@ -87,7 +72,7 @@ export class VectorIcon extends FilledIcon implements Interpolate<VectorIcon>, E
     }
   }
 
-  override readonly moodModifier!: MoodMatrix | null;
+  override readonly moodModifier: MoodMatrix | null;
 
   override withMoodModifier(moodModifier: MoodMatrix | null): VectorIcon {
     if (Equals(this.moodModifier, moodModifier)) {

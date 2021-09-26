@@ -30,33 +30,18 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
   constructor(sides: number, rotation: Angle, fillColor: Color | null,
               fillLook: Look<Color> | null, moodModifier: MoodMatrix | null) {
     super();
-    Object.defineProperty(this, "sides", {
-      value: sides,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "rotation", {
-      value: rotation,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "fillColor", {
-      value: fillColor,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "fillLook", {
-      value: fillLook,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "moodModifier", {
-      value: moodModifier,
-      enumerable: true,
-    });
+    this.sides = sides;
+    this.rotation = rotation;
+    this.fillColor = fillColor;
+    this.fillLook = fillLook;
+    this.moodModifier = moodModifier;
   }
 
-  readonly sides!: number;
+  readonly sides: number;
 
-  readonly rotation!: Angle;
+  readonly rotation: Angle;
 
-  override readonly fillColor!: Color | null;
+  override readonly fillColor: Color | null;
 
   override withFillColor(fillColor: Color | null): PolygonIcon {
     if (Equals(this.fillColor, fillColor)) {
@@ -67,7 +52,7 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
     }
   }
 
-  override readonly fillLook!: Look<Color> | null;
+  override readonly fillLook: Look<Color> | null;
 
   override withFillLook(fillLook: Look<Color> | null): PolygonIcon {
     if (this.fillLook === fillLook) {
@@ -78,7 +63,7 @@ export class PolygonIcon extends FilledIcon implements Interpolate<PolygonIcon>,
     }
   }
 
-  override readonly moodModifier!: MoodMatrix | null;
+  override readonly moodModifier: MoodMatrix | null;
 
   override withMoodModifier(moodModifier: MoodMatrix | null): PolygonIcon {
     if (Equals(this.moodModifier, moodModifier)) {

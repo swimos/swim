@@ -56,10 +56,7 @@ export interface GaugeViewInit extends GraphicsViewInit {
 export class GaugeView extends LayerView {
   constructor() {
     super();
-    Object.defineProperty(this, "dialFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.dialFasteners = [];
   }
 
   override initView(init: GaugeViewInit): void {
@@ -403,7 +400,7 @@ export class GaugeView extends LayerView {
   }
 
   /** @hidden */
-  readonly dialFasteners!: ReadonlyArray<ViewFastener<this, DialView>>;
+  readonly dialFasteners: ReadonlyArray<ViewFastener<this, DialView>>;
 
   /** @hidden */
   protected mountDialFasteners(): void {

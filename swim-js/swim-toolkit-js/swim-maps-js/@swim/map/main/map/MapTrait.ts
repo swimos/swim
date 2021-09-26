@@ -21,10 +21,7 @@ import type {MapTraitObserver} from "./MapTraitObserver";
 export class MapTrait extends GeoTrait {
   constructor() {
     super();
-    Object.defineProperty(this, "layerFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.layerFasteners = [];
   }
 
   override readonly traitObservers!: ReadonlyArray<MapTraitObserver>;
@@ -173,7 +170,7 @@ export class MapTrait extends GeoTrait {
   }
 
   /** @hidden */
-  readonly layerFasteners!: ReadonlyArray<TraitFastener<this, GeoTrait>>;
+  readonly layerFasteners: ReadonlyArray<TraitFastener<this, GeoTrait>>;
 
   /** @hidden */
   protected mountLayerFasteners(): void {

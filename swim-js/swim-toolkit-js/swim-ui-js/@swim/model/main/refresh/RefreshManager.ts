@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy} from "@swim/util";
+import {Lazy, Mutable} from "@swim/util";
 import {ModelFlags, Model} from "../Model";
 import {ModelManager} from "../manager/ModelManager";
 import type {RefreshContext} from "./RefreshContext";
@@ -21,16 +21,8 @@ import type {RefreshManagerObserver} from "./RefreshManagerObserver";
 export class RefreshManager<M extends Model = Model> extends ModelManager<M> {
   constructor() {
     super();
-    Object.defineProperty(this, "modelContext", {
-      value: this.initModelContext(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "rootFlags", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.modelContext = this.initModelContext();
+    this.rootFlags = 0;
     this.analyzeTimer = 0;
     this.refreshTimer = 0;
     this.updateDelay = RefreshManager.MinUpdateDelay;
@@ -40,7 +32,7 @@ export class RefreshManager<M extends Model = Model> extends ModelManager<M> {
     this.onVisibilityChange = this.onVisibilityChange.bind(this);
   }
 
-  readonly modelContext!: RefreshContext;
+  readonly modelContext: RefreshContext;
 
   protected initModelContext(): RefreshContext {
     return {
@@ -97,15 +89,11 @@ export class RefreshManager<M extends Model = Model> extends ModelManager<M> {
     rootModel.cascadeUnpower();
   }
 
-  readonly rootFlags!: ModelFlags;
+  readonly rootFlags: ModelFlags;
 
   /** @hidden */
   setRootFlags(rootFlags: ModelFlags): void {
-    Object.defineProperty(this, "rootFlags", {
-      value: rootFlags,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).rootFlags = rootFlags;
   }
 
   /** @hidden */

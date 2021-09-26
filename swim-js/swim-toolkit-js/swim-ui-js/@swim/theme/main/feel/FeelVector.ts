@@ -27,21 +27,15 @@ export type FeelVectorUpdates = ReadonlyArray<[Look<unknown>, unknown | undefine
 export class FeelVector implements Interpolate<FeelVector>, Equals, Debug {
   constructor(array: ReadonlyArray<[Look<unknown>, unknown]>,
               index: {readonly [name: string]: number | undefined}) {
-    Object.defineProperty(this, "array", {
-      value: array,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "index", {
-      value: index,
-      enumerable: true,
-    });
+    this.array = array;
+    this.index = index;
   }
 
   /** @hidden */
-  readonly array!: ReadonlyArray<[Look<unknown>, unknown]>;
+  readonly array: ReadonlyArray<[Look<unknown>, unknown]>;
 
   /** @hidden */
-  readonly index!: {readonly [name: string]: number | undefined};
+  readonly index: {readonly [name: string]: number | undefined};
 
   get size(): number {
     return this.array.length;

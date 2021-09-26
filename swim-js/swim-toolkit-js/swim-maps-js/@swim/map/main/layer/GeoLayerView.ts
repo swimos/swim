@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {R2Box} from "@swim/math";
 import {GeoBox} from "@swim/geo";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
@@ -21,23 +22,17 @@ import {GeoView} from "../geo/GeoView";
 export class GeoLayerView extends GeoView {
   constructor() {
     super();
-    Object.defineProperty(this, "childViews", {
-      value: [],
-      enumerable: true,
-    });
-    Object.defineProperty(this, "childViewMap", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.childViews = [];
+    this.childViewMap = null;
     Object.defineProperty(this, "geoBounds", {
       value: GeoBox.undefined(),
+      writable: true,
       enumerable: true,
       configurable: true,
     });
   }
 
-  override readonly childViews!: ReadonlyArray<View>;
+  override readonly childViews: ReadonlyArray<View>;
 
   override get childViewCount(): number {
     return this.childViews.length;
@@ -87,7 +82,7 @@ export class GeoLayerView extends GeoView {
   }
 
   /** @hidden */
-  readonly childViewMap!: {[key: string]: View | undefined} | null;
+  readonly childViewMap: {[key: string]: View | undefined} | null;
 
   override getChildView(key: string): View | null {
     const childViewMap = this.childViewMap;
@@ -150,11 +145,7 @@ export class GeoLayerView extends GeoView {
       let childViewMap = this.childViewMap;
       if (childViewMap === null) {
         childViewMap = {};
-        Object.defineProperty(this, "childViewMap", {
-          value: childViewMap,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).childViewMap = childViewMap;
       }
       childViewMap[key] = childView;
     }
@@ -410,11 +401,7 @@ export class GeoLayerView extends GeoView {
     const oldGeoBounds = this.geoBounds;
     if (!oldGeoBounds.equals(newGeoBounds)) {
       this.willSetGeoBounds(newGeoBounds, oldGeoBounds);
-      Object.defineProperty(this, "geoBounds", {
-        value: newGeoBounds,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).geoBounds = newGeoBounds;
       this.onSetGeoBounds(newGeoBounds, oldGeoBounds);
       this.didSetGeoBounds(newGeoBounds, oldGeoBounds);
     }

@@ -23,10 +23,7 @@ export type PieTitleFunction = (pieTrait: PieTrait) => GraphicsView | string | n
 export class PieTrait extends GenericTrait {
   constructor() {
     super();
-    Object.defineProperty(this, "sliceFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.sliceFasteners = [];
   }
 
   override readonly traitObservers!: ReadonlyArray<PieTraitObserver>;
@@ -170,7 +167,7 @@ export class PieTrait extends GenericTrait {
   }
 
   /** @hidden */
-  readonly sliceFasteners!: ReadonlyArray<TraitFastener<this, SliceTrait>>;
+  readonly sliceFasteners: ReadonlyArray<TraitFastener<this, SliceTrait>>;
 
   /** @hidden */
   protected mountSliceFasteners(): void {

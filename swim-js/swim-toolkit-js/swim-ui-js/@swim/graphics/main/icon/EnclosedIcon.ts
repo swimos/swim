@@ -29,33 +29,15 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
   constructor(outer: Icon | null, inner: Icon | null, innerScale: number, moodModifier: MoodMatrix | null,
               outerMoodModifier: MoodMatrix | null, innerMoodModifier: MoodMatrix | null) {
     super();
-    Object.defineProperty(this, "outer", {
-      value: outer,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "inner", {
-      value: inner,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "innerScale", {
-      value: innerScale,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "moodModifier", {
-      value: moodModifier,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "outerMoodModifier", {
-      value: outerMoodModifier,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "innerMoodModifier", {
-      value: innerMoodModifier,
-      enumerable: true,
-    });
+    this.outer = outer;
+    this.inner = inner;
+    this.innerScale = innerScale;
+    this.moodModifier = moodModifier;
+    this.outerMoodModifier = outerMoodModifier;
+    this.innerMoodModifier = innerMoodModifier;
   }
 
-  readonly outer!: Icon | null;
+  readonly outer: Icon | null;
 
   withOuter(outer: Icon | null): EnclosedIcon {
     if (this.outer === outer) {
@@ -66,7 +48,7 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
     }
   }
 
-  readonly inner!: Icon | null;
+  readonly inner: Icon | null;
 
   withInner(inner: Icon | null): EnclosedIcon {
     if (this.inner === inner) {
@@ -77,7 +59,7 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
     }
   }
 
-  readonly innerScale!: number;
+  readonly innerScale: number;
 
   withInnerScale(innerScale: number): EnclosedIcon {
     if (this.innerScale === innerScale) {
@@ -88,7 +70,7 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
     }
   }
 
-  override readonly moodModifier!: MoodMatrix | null;
+  override readonly moodModifier: MoodMatrix | null;
 
   override withMoodModifier(moodModifier: MoodMatrix | null): EnclosedIcon {
     if (Equals(this.moodModifier, moodModifier)) {
@@ -113,7 +95,7 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
   }
 
   /** @hidden */
-  readonly outerMoodModifier!: MoodMatrix | null;
+  readonly outerMoodModifier: MoodMatrix | null;
 
   withOuterMoodModifier(outerMoodModifier: MoodMatrix | null): EnclosedIcon {
     if (Equals(this.outerMoodModifier, outerMoodModifier)) {
@@ -138,7 +120,7 @@ export class EnclosedIcon extends Icon implements Interpolate<EnclosedIcon>, Equ
   }
 
   /** @hidden */
-  readonly innerMoodModifier!: MoodMatrix | null;
+  readonly innerMoodModifier: MoodMatrix | null;
 
   withInnerMoodModifier(innerMoodModifier: MoodMatrix | null): EnclosedIcon {
     if (Equals(this.innerMoodModifier, innerMoodModifier)) {

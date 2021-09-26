@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {
   AnyConstraintExpression,
@@ -127,53 +127,36 @@ export interface ViewClass<V extends View = View> extends Function {
 export abstract class View implements AnimationTimeline, ConstraintScope, GestureContext {
   constructor() {
     this.viewFlags = 0;
-    Object.defineProperty(this, "viewObservers", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "viewObserverCache", {
-      value: {},
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "animationTracks", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    this.viewObservers = Arrays.empty;
+    this.viewObserverCache = {};
+    this.animationTracks = Arrays.empty;
   }
 
   initView(init: ViewInit): void {
     // hook
   }
 
-  readonly viewFlags!: ViewFlags;
+  readonly viewFlags: ViewFlags;
 
   setViewFlags(viewFlags: ViewFlags): void {
-    // Object.defineProperty is too expensive for viewFlags
-    (this as any).viewFlags = viewFlags;
+    (this as Mutable<this>).viewFlags = viewFlags;
   }
 
-  readonly viewObservers!: ReadonlyArray<ViewObserver>;
+  readonly viewObservers: ReadonlyArray<ViewObserver>;
 
   addViewObserver(viewObserver: ViewObserverType<this>): void {
     const oldViewObservers = this.viewObservers;
     const newViewObservers = Arrays.inserted(viewObserver, oldViewObservers);
     if (oldViewObservers !== newViewObservers) {
       this.willAddViewObserver(viewObserver);
-      Object.defineProperty(this, "viewObservers", {
-        value: newViewObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).viewObservers = newViewObservers;
       this.onAddViewObserver(viewObserver);
       this.didAddViewObserver(viewObserver);
     }
   }
 
   /** @hidden */
-  readonly viewObserverCache!: ViewObserverCache<this>;
+  readonly viewObserverCache: ViewObserverCache<this>;
 
   protected willAddViewObserver(viewObserver: ViewObserverType<this>): void {
     // hook
@@ -221,11 +204,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
     const newViewObservers = Arrays.removed(viewObserver, oldViewObservers);
     if (oldViewObservers !== newViewObservers) {
       this.willRemoveViewObserver(viewObserver);
-      Object.defineProperty(this, "viewObservers", {
-        value: newViewObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).viewObservers = newViewObservers;
       this.onRemoveViewObserver(viewObserver);
       this.didRemoveViewObserver(viewObserver);
     }
@@ -1075,11 +1054,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   readonly animationTracks!: ReadonlyArray<AnimationTrack>;
 
   trackWillStartAnimating(track: AnimationTrack): void {
-    Object.defineProperty(this, "animationTracks", {
-      value: Arrays.inserted(track, this.animationTracks),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).animationTracks = Arrays.inserted(track, this.animationTracks);
     if (!this.isCulled()) {
       this.requireUpdate(View.NeedsAnimate);
     }
@@ -1094,11 +1069,7 @@ export abstract class View implements AnimationTimeline, ConstraintScope, Gestur
   }
 
   trackDidStopAnimating(track: AnimationTrack): void {
-    Object.defineProperty(this, "animationTracks", {
-      value: Arrays.removed(track, this.animationTracks),
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).animationTracks = Arrays.removed(track, this.animationTracks);
   }
 
   abstract hasViewFastener(fastenerName: string): boolean;

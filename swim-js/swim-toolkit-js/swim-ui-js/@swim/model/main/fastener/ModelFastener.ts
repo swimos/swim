@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {FromAny} from "@swim/util";
+import {FromAny, Mutable} from "@swim/util";
 import {Model} from "../Model";
 import type {ModelObserverType} from "../ModelObserver";
 
@@ -180,25 +180,10 @@ function ModelFastenerConstructor<M extends Model, S extends Model, U>(this: Mod
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "fastenerFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "key", {
-    value: key,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "model", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).fastenerFlags = 0;
+  (this as Mutable<typeof this>).key = key;
+  (this as Mutable<typeof this>).model = null;
   return this;
 }
 
@@ -207,11 +192,7 @@ function ModelFastenerDecoratorFactory<M extends Model, S extends Model, U>(desc
 }
 
 ModelFastener.prototype.setFastenerFlags = function (this: ModelFastener<Model, Model>, fastenerFlags: ModelFastenerFlags): void {
-  Object.defineProperty(this, "fastenerFlags", {
-    value: fastenerFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).fastenerFlags = fastenerFlags;
 };
 
 ModelFastener.prototype.getModel = function <S extends Model>(this: ModelFastener<Model, S>): S {
@@ -248,11 +229,7 @@ ModelFastener.prototype.doSetModel = function <S extends Model>(this: ModelFaste
     if (oldModel !== null) {
       this.detachModel(oldModel);
     }
-    Object.defineProperty(this, "model", {
-      value: newModel,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).model = newModel;
     if (newModel !== null) {
       this.attachModel(newModel);
     }

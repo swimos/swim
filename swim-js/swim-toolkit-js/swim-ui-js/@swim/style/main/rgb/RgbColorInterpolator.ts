@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import {RgbColor} from "./RgbColor";
 
@@ -27,14 +28,8 @@ export const RgbColorInterpolator = function (c0: RgbColor, c1: RgbColor): Inter
     return new RgbColor(r, g, b, a);
   } as Interpolator<RgbColor>;
   Object.setPrototypeOf(interpolator, RgbColorInterpolator.prototype);
-  Object.defineProperty(interpolator, 0, {
-    value: c0,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, 1, {
-    value: c1,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>)[0] = c0;
+  (interpolator as Mutable<typeof interpolator>)[1] = c1;
   return interpolator;
 } as {
   (c0: RgbColor, c1: RgbColor): Interpolator<RgbColor>;

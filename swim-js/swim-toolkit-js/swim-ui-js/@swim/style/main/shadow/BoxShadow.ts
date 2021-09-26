@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Equivalent, Lazy} from "@swim/util";
+import {Lazy, Equals, Equivalent, Mutable} from "@swim/util";
 import {Parser, Diagnostic, Unicode} from "@swim/codec";
 import type {Interpolate, Interpolator} from "@swim/mapping";
 import {Item, Value, Text, Form} from "@swim/structure";
@@ -36,42 +36,17 @@ export interface BoxShadowInit {
 export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
   constructor(inset: boolean, offsetX: Length, offsetY: Length, blurRadius: Length,
               spreadRadius: Length, color: Color, next: BoxShadow | null) {
-    Object.defineProperty(this, "inset", {
-      value: inset,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "offsetX", {
-      value: offsetX,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "offsetY", {
-      value: offsetY,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "blurRadius", {
-      value: blurRadius,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "spreadRadius", {
-      value: spreadRadius,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "color", {
-      value: color,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "next", {
-      value: next,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.inset = inset;
+    this.offsetX = offsetX;
+    this.offsetY = offsetY;
+    this.blurRadius = blurRadius;
+    this.spreadRadius = spreadRadius;
+    this.color = color;
+    this.next = next;
+    this.stringValue = void 0;
   }
 
-  readonly inset!: boolean;
+  readonly inset: boolean;
 
   withInset(inset: boolean): BoxShadow {
     if (inset === this.inset) {
@@ -82,7 +57,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     }
   }
 
-  readonly offsetX!: Length;
+  readonly offsetX: Length;
 
   withOffsetX(offsetX: AnyLength): BoxShadow {
     offsetX = Length.fromAny(offsetX);
@@ -94,7 +69,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     }
   }
 
-  readonly offsetY!: Length;
+  readonly offsetY: Length;
 
   withOffsetY(offsetY: AnyLength): BoxShadow {
     offsetY = Length.fromAny(offsetY);
@@ -106,7 +81,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     }
   }
 
-  readonly blurRadius!: Length;
+  readonly blurRadius: Length;
 
   withBlurRadius(blurRadius: AnyLength): BoxShadow {
     blurRadius = Length.fromAny(blurRadius);
@@ -118,7 +93,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     }
   }
 
-  readonly spreadRadius!: Length;
+  readonly spreadRadius: Length;
 
   withSpreadRadius(spreadRadius: AnyLength): BoxShadow {
     spreadRadius = Length.fromAny(spreadRadius);
@@ -130,7 +105,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     }
   }
 
-  readonly color!: Color;
+  readonly color: Color;
 
   withColor(color: AnyColor): BoxShadow {
     color = Color.fromAny(color);
@@ -142,7 +117,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
     }
   }
 
-  readonly next!: BoxShadow | null;
+  readonly next: BoxShadow | null;
 
   and(value: AnyBoxShadow): BoxShadow;
   and(offsetX: AnyLength, offsetY: AnyLength, color: AnyColor): BoxShadow;
@@ -202,7 +177,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   toString(): string {
     let s = this.stringValue;
@@ -225,11 +200,7 @@ export class BoxShadow implements Interpolate<BoxShadow>, Equals, Equivalent {
         s += ", ";
         s += this.next.toString();
       }
-      Object.defineProperty(this, "stringValue", {
-        value: s,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = s;
     }
     return s;
   }

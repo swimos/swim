@@ -25,16 +25,8 @@ export type DataPointLabelFunction<X, Y> = (dataPointTrait: DataPointTrait<X, Y>
 export class DataPointTrait<X, Y> extends GenericTrait {
   constructor(x: X, y: Y) {
     super();
-    Object.defineProperty(this.x, "ownState", {
-      value: x,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this.y, "ownState", {
-      value: y,
-      enumerable: true,
-      configurable: true,
-    });
+    this.x.setState(x);
+    this.y.setState(y);
   }
 
   override readonly traitObservers!: ReadonlyArray<DataPointTraitObserver<X, Y>>;

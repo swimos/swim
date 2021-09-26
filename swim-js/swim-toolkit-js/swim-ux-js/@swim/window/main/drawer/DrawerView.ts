@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {AnyLength, Length} from "@swim/math";
 import {AnyPresence, Presence, AnyExpansion, Expansion} from "@swim/style";
@@ -44,11 +45,7 @@ export interface DrawerViewInit extends HtmlViewInit {
 export class DrawerView extends HtmlView implements Modal {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "modality", {
-      value: true,
-      enumerable: true,
-      configurable: true,
-    });
+    this.modality = true;
     this.initDrawer();
   }
 
@@ -475,15 +472,11 @@ export class DrawerView extends HtmlView implements Modal {
     return this.slide.modalState!;
   }
 
-  readonly modality!: boolean | number;
+  readonly modality: boolean | number;
 
   showModal(options: ModalOptions, timing?: AnyTiming | boolean): void {
     if (options.modal !== void 0) {
-      Object.defineProperty(this, "modality", {
-        value: options.modal,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).modality = options.modal;
     }
     this.present(timing);
   }

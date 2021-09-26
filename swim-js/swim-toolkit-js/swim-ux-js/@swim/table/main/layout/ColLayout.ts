@@ -37,61 +37,27 @@ export interface ColLayoutInit {
 export class ColLayout implements Equals, Equivalent, Debug {
   constructor(key: string, grow: number, shrink: number, basis: Length,
               optional: boolean, persistent: boolean, textColor: Look<Color> | Color | null,
-              width: Length | null, left: Length | null, right: Length | null,
-              hidden: boolean) {
-    Object.defineProperty(this, "key", {
-      value: key,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "grow", {
-      value: grow,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "shrink", {
-      value: shrink,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "basis", {
-      value: basis,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "optional", {
-      value: optional,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "persistent", {
-      value: persistent,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "textColor", {
-      value: textColor,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "width", {
-      value: width,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "left", {
-      value: left,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "right", {
-      value: right,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "hidden", {
-      value: hidden,
-      enumerable: true,
-    });
+              width: Length | null, left: Length | null, right: Length | null, hidden: boolean) {
+    this.key = key;
+    this.grow = grow;
+    this.shrink = shrink;
+    this.basis = basis;
+    this.optional = optional;
+    this.persistent = persistent;
+    this.textColor = textColor;
+    this.width = width;
+    this.left = left;
+    this.right = right;
+    this.hidden = hidden;
   }
 
-  readonly key!: string;
+  readonly key: string;
 
-  readonly grow!: number;
+  readonly grow: number;
 
-  readonly shrink!: number;
+  readonly shrink: number;
 
-  readonly basis!: Length;
+  readonly basis: Length;
 
   withFlex(grow: number, shrink: number, basis?: AnyLength): ColLayout {
     if (basis !== void 0) {
@@ -103,21 +69,21 @@ export class ColLayout implements Equals, Equivalent, Debug {
                      this.textColor, this.width, this.left, this.right, this.hidden);
   }
 
-  readonly optional!: boolean;
+  readonly optional: boolean;
 
   asOptional(optional: boolean): ColLayout {
     return this.copy(this.key, this.grow, this.shrink, this.basis, optional, this.persistent,
                      this.textColor, this.width, this.left, this.right, this.hidden);
   }
 
-  readonly persistent!: boolean;
+  readonly persistent: boolean;
 
   asPersistent(persistent: boolean): ColLayout {
     return this.copy(this.key, this.grow, this.shrink, this.basis, this.optional, persistent,
                      this.textColor, this.width, this.left, this.right, this.hidden);
   }
 
-  readonly textColor!: Look<Color> | Color | null;
+  readonly textColor: Look<Color> | Color | null;
 
   withTextColor(textColor: Look<Color> | AnyColor | null): ColLayout {
     if (textColor !== null && !(textColor instanceof Look)) {
@@ -127,13 +93,13 @@ export class ColLayout implements Equals, Equivalent, Debug {
                      textColor, this.width, this.left, this.right, this.hidden);
   }
 
-  readonly width!: Length | null;
+  readonly width: Length | null;
 
-  readonly left!: Length | null;
+  readonly left: Length | null;
 
-  readonly right!: Length | null;
+  readonly right: Length | null;
 
-  readonly hidden!: boolean;
+  readonly hidden: boolean;
 
   asHidden(hidden: boolean): ColLayout {
     return this.copy(this.key, this.grow, this.shrink, this.basis, this.optional, this.persistent,

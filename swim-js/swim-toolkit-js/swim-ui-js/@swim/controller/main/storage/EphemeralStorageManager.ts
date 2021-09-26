@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {Controller} from "../Controller";
 import {StorageManager} from "./StorageManager";
 
@@ -21,14 +22,10 @@ export class EphemeralStorageManager<C extends Controller = Controller> extends 
     if (storage === void 0) {
       storage = {};
     }
-    Object.defineProperty(this, "storage", {
-      value: storage,
-      enumerable: true,
-      configurable: true,
-    });
+    this.storage = storage;
   }
 
-  readonly storage!: {[key: string]: string | undefined};
+  readonly storage: {[key: string]: string | undefined};
 
   override get(key: string): string | undefined {
     return this.storage[key];
@@ -51,11 +48,7 @@ export class EphemeralStorageManager<C extends Controller = Controller> extends 
 
   override clear(): void {
     this.willClear();
-    Object.defineProperty(this, "storage", {
-      value: {},
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).storage = {};
     this.onClear();
     this.didClear();
   }

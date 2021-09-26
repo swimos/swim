@@ -25,14 +25,10 @@ export interface SelectionOptions {
 export class SelectionManager<M extends Model = Model> extends ModelManager<M> {
   constructor() {
     super();
-    Object.defineProperty(this, "selections", {
-      value: [],
-      enumerable: true,
-      configurable: true,
-    });
+    this.selections = [];
   }
 
-  readonly selections!: ReadonlyArray<Model>;
+  readonly selections: ReadonlyArray<Model>;
 
   isSelected(model: Model): boolean {
     return this.selections.indexOf(model) >= 0;

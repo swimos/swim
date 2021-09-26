@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyTiming, Timing, Easing} from "@swim/mapping";
-import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box, R2Circle} from "@swim/math";
+import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
 import {Look, Mood} from "@swim/theme";
@@ -36,6 +37,12 @@ export interface GeoRippleOptions {
 export class GeoRippleView extends GeoLayerView implements StrokeView {
   constructor() {
     super();
+    Object.defineProperty(this, "viewBounds", {
+      value: R2Box.undefined(),
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
     this.setViewFlags(this.viewFlags | View.UnboundedFlag);
   }
 
@@ -84,21 +91,19 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
   })
   readonly geoCenter!: ViewAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ViewAnimator({type: R2Point, state: R2Point.undefined()})
+  @ViewAnimator<GeoRippleView, R2Point | null, AnyR2Point | null>({
+    type: R2Point,
+    state: R2Point.undefined(),
+    updateFlags: View.NeedsRender,
+    didSetValue(newViewCenter: R2Point | null, oldViewCenter: R2Point | null): void {
+      this.owner.updateViewBounds();
+    },
+  })
   readonly viewCenter!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
-
-  protected onSetRadius(newRadius: Length | null, oldRadius: Length | null): void {
-    if (this.isMounted()) {
-      this.projectRipple(this.viewContext as ViewContextType<this>);
-    }
-  }
 
   @ViewAnimator<GeoRippleView, Length, AnyLength>({
     type: Length,
     state: Length.zero(),
-    didSetValue(newRadius: Length | null, oldRadius: Length | null): void {
-      this.owner.onSetRadius(newRadius, oldRadius);
-    },
     onEnd() {
       this.owner.source.setView(null);
       this.owner.remove();
@@ -153,18 +158,6 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
                        : null;
       this.viewCenter.setValue(viewCenter);
     }
-    const viewFrame = this.viewFrame;
-    const size = Math.min(viewFrame.width, viewFrame.height);
-    const r = this.radius.getValue().pxValue(size);
-    const p0 = this.viewCenter.value;
-    const p1 = this.viewCenter.state;
-    if (p0 !== null && p1 !== null && (
-        viewFrame.intersectsCircle(new R2Circle(p0.x, p0.y, r)) ||
-        viewFrame.intersectsSegment(new R2Segment(p0.x, p0.y, p1.x, p1.y)))) {
-      this.setCulled(false);
-    } else {
-      this.setCulled(true);
-    }
   }
 
   protected override onRender(viewContext: ViewContextType<this>): void {
@@ -199,11 +192,28 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
     }
   }
 
+  protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
+    // nop
+  }
+
   protected override updateGeoBounds(): void {
     // nop
   }
 
-  declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
+  override readonly viewBounds!: R2Box;
+
+  protected updateViewBounds(): void {
+    (this as Mutable<GeoRippleView>).viewBounds = this.deriveViewBounds();
+  }
+
+  override deriveViewBounds(): R2Box {
+    const viewCenter = this.viewCenter.value;
+    if (viewCenter !== null && viewCenter.isDefined()) {
+      return viewCenter.bounds;
+    } else {
+      return R2Box.undefined();
+    }
+  }
 
   ripple(options?: GeoRippleOptions): this {
     let source: GeoView | null;
@@ -287,15 +297,3 @@ export class GeoRippleView extends GeoLayerView implements StrokeView {
     return new GeoRippleView();
   }
 }
-Object.defineProperty(GeoRippleView.prototype, "viewBounds", {
-  get(this: GeoRippleView): R2Box {
-    const viewCenter = this.viewCenter.value;
-    if (viewCenter !== null && viewCenter.isDefined()) {
-      return viewCenter.bounds;
-    } else {
-      return this.viewFrame;
-    }
-  },
-  enumerable: true,
-  configurable: true,
-});

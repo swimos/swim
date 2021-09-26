@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {FromAny} from "@swim/util";
+import {FromAny, Mutable} from "@swim/util";
 import type {AnyTiming, Timing} from "@swim/mapping";
 import {AnyLength, Length, AnyAngle, Angle, AnyTransform, Transform} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color, AnyFocus, Focus, AnyPresence, Presence, AnyExpansion, Expansion} from "@swim/style";
@@ -243,25 +243,10 @@ function ViewAnimatorConstructor<V extends View, T, U>(this: ViewAnimator<V, T, 
       configurable: true,
     });
   }
-  Object.defineProperty(_this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(_this, "inherit", {
-    value: false,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(_this, "superAnimator", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(_this, "subAnimators", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (_this as Mutable<typeof _this>).owner = owner;
+  (_this as Mutable<typeof _this>).inherit = false;
+  (_this as Mutable<typeof _this>).superAnimator = null;
+  (_this as Mutable<typeof _this>).subAnimators = null;
   return _this;
 }
 
@@ -272,11 +257,7 @@ function ViewAnimatorDecoratorFactory<V extends View, T, U>(descriptor: ViewAnim
 ViewAnimator.prototype.setInherit = function (this: ViewAnimator<View, unknown>, inherit: string | boolean): void {
   if (this.inherit !== inherit) {
     this.unbindSuperAnimator();
-    Object.defineProperty(this, "inherit", {
-      value: inherit,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).inherit = inherit;
     this.bindSuperAnimator();
   }
 };
@@ -292,11 +273,7 @@ ViewAnimator.prototype.setInherited = function (this: ViewAnimator<View, unknown
       this.setAnimatorFlags(this.animatorFlags & ~Animator.OverrideFlag | Animator.InheritedFlag);
       this.setOwnLook(superAnimator.look);
       if (this.look === null) {
-        Object.defineProperty(this, "ownState", {
-          value: superAnimator.state,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<typeof this>).ownState = superAnimator.state;
         this.setValue(superAnimator.value, this.value);
         if (superAnimator.isAnimating()) {
           this.startAnimating();
@@ -329,21 +306,13 @@ ViewAnimator.prototype.bindSuperAnimator = function (this: ViewAnimator<View, un
     while (superView !== null) {
       const superAnimator = superView.getLazyViewAnimator(superName);
       if (superAnimator !== null) {
-        Object.defineProperty(this, "superAnimator", {
-          value: superAnimator,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<typeof this>).superAnimator = superAnimator;
         superAnimator.addSubAnimator(this);
         if ((this.animatorFlags & Animator.OverrideFlag) === 0 && superAnimator.precedence >= this.precedence) {
           this.setAnimatorFlags(this.animatorFlags | Animator.InheritedFlag);
           this.setOwnLook(superAnimator.look);
           if (this.look === null) {
-            Object.defineProperty(this, "ownState", {
-              value: superAnimator.state,
-              enumerable: true,
-              configurable: true,
-            });
+            (this as Mutable<typeof this>).ownState = superAnimator.state;
             this.setValue(superAnimator.value, this.value);
             if (superAnimator.isAnimating()) {
               this.startAnimating();
@@ -363,11 +332,7 @@ ViewAnimator.prototype.unbindSuperAnimator = function (this: ViewAnimator<View, 
   const superAnimator = this.superAnimator;
   if (superAnimator !== null) {
     superAnimator.removeSubAnimator(this);
-    Object.defineProperty(this, "superAnimator", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).superAnimator = null;
     this.setAnimatorFlags(this.animatorFlags & ~Animator.InheritedFlag);
   }
 };
@@ -376,11 +341,7 @@ ViewAnimator.prototype.addSubAnimator = function <T>(this: ViewAnimator<View, T>
   let subAnimators = this.subAnimators;
   if (subAnimators === null) {
     subAnimators = [];
-    Object.defineProperty(this, "subAnimators", {
-      value: subAnimators,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).subAnimators = subAnimators;
   }
   subAnimators.push(subAnimator);
 };
@@ -520,11 +481,7 @@ ViewAnimator.prototype.onAnimateInherited = function (this: ViewAnimator<View, u
     if (this.look !== null) {
       Animator.prototype.onAnimate.call(this, t);
     } else {
-      Object.defineProperty(this, "ownState", {
-        value: superAnimator.state,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).ownState = superAnimator.state;
       this.setValue(superAnimator.value, this.value);
       if (!superAnimator.isAnimating()) {
         this.stopAnimating();
@@ -692,37 +649,17 @@ ViewAnimator.define = function <V extends View, T, U, I>(descriptor: ViewAnimato
       ownState = _this.fromAny(state);
     }
     if (ownState !== void 0) {
-      Object.defineProperty(_this, "ownValue", {
-        value: ownState,
-        enumerable: true,
-        configurable: true,
-      });
-      Object.defineProperty(_this, "ownState", {
-        value: ownState,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownValue = ownState;
+      (_this as Mutable<typeof _this>).ownState = ownState;
     }
     if (look !== void 0) {
-      Object.defineProperty(_this, "ownLook", {
-        value: look,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownLook = look;
     }
     if (precedence !== void 0) {
-      Object.defineProperty(_this, "precedence", {
-        value: precedence,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).precedence = precedence;
     }
     if (inherit !== void 0) {
-      Object.defineProperty(_this, "inherit", {
-        value: inherit,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).inherit = inherit;
     }
     return _this;
   } as unknown as ViewAnimatorConstructor<V, T, U, I>

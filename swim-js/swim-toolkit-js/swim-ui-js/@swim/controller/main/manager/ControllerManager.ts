@@ -12,22 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import type {Controller} from "../Controller";
 import type {ControllerManagerObserverType, ControllerManagerObserver} from "./ControllerManagerObserver";
 
 export abstract class ControllerManager<C extends Controller = Controller> {
   constructor() {
-    Object.defineProperty(this, "rootControllers", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "controllerManagerObservers", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    this.rootControllers = Arrays.empty;
+    this.controllerManagerObservers = Arrays.empty;
   }
 
   readonly controllerManagerObservers!: ReadonlyArray<ControllerManagerObserver>;
@@ -37,11 +29,7 @@ export abstract class ControllerManager<C extends Controller = Controller> {
     const newControllerManagerObservers = Arrays.inserted(controllerManagerObserver, oldControllerManagerObservers);
     if (oldControllerManagerObservers !== newControllerManagerObservers) {
       this.willAddControllerManagerObserver(controllerManagerObserver);
-      Object.defineProperty(this, "controllerManagerObservers", {
-        value: newControllerManagerObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).controllerManagerObservers = newControllerManagerObservers;
       this.onAddControllerManagerObserver(controllerManagerObserver);
       this.didAddControllerManagerObserver(controllerManagerObserver);
     }
@@ -64,11 +52,7 @@ export abstract class ControllerManager<C extends Controller = Controller> {
     const newControllerManagerObservers = Arrays.removed(controllerManagerObserver, oldControllerManagerObservers);
     if (oldControllerManagerObservers !== newControllerManagerObservers) {
       this.willRemoveControllerManagerObserver(controllerManagerObserver);
-      Object.defineProperty(this, "controllerManagerObservers", {
-        value: newControllerManagerObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).controllerManagerObservers = newControllerManagerObservers;
       this.onRemoveControllerManagerObserver(controllerManagerObserver);
       this.didRemoveControllerManagerObserver(controllerManagerObserver);
     }
@@ -164,7 +148,7 @@ export abstract class ControllerManager<C extends Controller = Controller> {
     }
   }
 
-  readonly rootControllers!: ReadonlyArray<C>;
+  readonly rootControllers: ReadonlyArray<C>;
 
   insertRootController(rootController: C): void {
     const oldRootControllers = this.rootControllers;
@@ -175,11 +159,7 @@ export abstract class ControllerManager<C extends Controller = Controller> {
         this.willAttach();
       }
       this.willInsertRootController(rootController);
-      Object.defineProperty(this, "rootControllers", {
-        value: newRootControllers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).rootControllers = newRootControllers;
       if (needsAttach) {
         this.onAttach();
       }
@@ -224,11 +204,7 @@ export abstract class ControllerManager<C extends Controller = Controller> {
         this.willDetach();
       }
       this.willRemoveRootController(rootController);
-      Object.defineProperty(this, "rootControllers", {
-        value: newRootControllers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).rootControllers = newRootControllers;
       if (needsDetach) {
         this.onDetach();
       }

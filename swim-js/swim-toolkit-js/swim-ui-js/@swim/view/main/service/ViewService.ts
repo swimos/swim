@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import {View} from "../View";
 import {ViewManager} from "../manager/ViewManager";
 import type {ViewManagerObserverType} from "../manager/ViewManagerObserver";
@@ -181,30 +182,11 @@ function ViewServiceConstructor<V extends View, T>(this: ViewService<V, T>, owne
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "inherit", {
-    value: true,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "serviceFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "superService", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "manager", {
-    value: void 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).inherit = true;
+  (this as Mutable<typeof this>).serviceFlags = 0;
+  (this as Mutable<typeof this>).superService = null;
+  (this as Mutable<typeof this>).manager = void 0 as unknown as T;
   return this;
 }
 
@@ -215,11 +197,7 @@ function ViewServiceDecoratorFactory<V extends View, T>(descriptor: ViewServiceD
 ViewService.prototype.setInherit = function (this: ViewService<View, unknown>, inherit: string | boolean): void {
   if (this.inherit !== inherit) {
     this.unbindSuperService();
-    Object.defineProperty(this, "inherit", {
-      value: inherit,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).inherit = inherit;
     this.bindSuperService();
   }
 };
@@ -229,11 +207,7 @@ ViewService.prototype.isInherited = function (this: ViewService<View, unknown>):
 };
 
 ViewService.prototype.setServiceFlags = function (this: ViewService<View, unknown>, serviceFlags: ViewServiceFlags): void {
-  Object.defineProperty(this, "serviceFlags", {
-    value: serviceFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).serviceFlags = serviceFlags;
 };
 
 Object.defineProperty(ViewService.prototype, "superName", {
@@ -271,37 +245,21 @@ ViewService.prototype.bindSuperService = function (this: ViewService<View, unkno
       }
       break;
     } while (true);
-    Object.defineProperty(this, "superService", {
-      value: superService,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).superService = superService;
   }
   if (this.manager === void 0 || this.manager === null) {
     if (superService !== null) {
       this.setServiceFlags(this.serviceFlags | ViewService.InheritedFlag);
-      Object.defineProperty(this, "manager", {
-        value: superService.manager,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).manager = superService.manager;
     } else {
       this.setServiceFlags(this.serviceFlags & ~ViewService.InheritedFlag);
-      Object.defineProperty(this, "manager", {
-        value: this.initManager(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).manager = this.initManager();
     }
   }
 };
 
 ViewService.prototype.unbindSuperService = function (this: ViewService<View, unknown>): void {
-  Object.defineProperty(this, "superService", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).superService = null;
   this.setServiceFlags(this.serviceFlags & ~ViewService.InheritedFlag);
 };
 
@@ -431,18 +389,10 @@ ViewService.define = function <V extends View, T, I>(descriptor: ViewServiceDesc
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, serviceName) || _this;
     if (manager !== void 0) {
-      Object.defineProperty(_this, "manager", {
-        value: manager,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).manager = manager;
     }
     if (inherit !== void 0) {
-      Object.defineProperty(_this, "inherit", {
-        value: inherit,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).inherit = inherit;
     }
     return _this;
   } as unknown as ViewServiceConstructor<V, T, I>;

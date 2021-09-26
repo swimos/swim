@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {FromAny} from "@swim/util";
+import {FromAny, Mutable} from "@swim/util";
 import type {Model} from "../Model";
 import {Trait} from "../Trait";
 import type {TraitObserverType} from "../TraitObserver";
@@ -181,25 +181,10 @@ function TraitFastenerConstructor<R extends Trait, S extends Trait, U>(this: Tra
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "fastenerFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "key", {
-    value: key,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "trait", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).fastenerFlags = 0;
+  (this as Mutable<typeof this>).key = key;
+  (this as Mutable<typeof this>).trait = null;
   return this;
 }
 
@@ -208,11 +193,7 @@ function TraitFastenerDecoratorFactory<R extends Trait, S extends Trait, U>(desc
 }
 
 TraitFastener.prototype.setFastenerFlags = function (this: TraitFastener<Trait, Trait>, fastenerFlags: TraitFastenerFlags): void {
-  Object.defineProperty(this, "fastenerFlags", {
-    value: fastenerFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).fastenerFlags = fastenerFlags;
 };
 
 TraitFastener.prototype.getTrait = function <S extends Trait>(this: TraitFastener<Trait, S>): S {
@@ -250,11 +231,7 @@ TraitFastener.prototype.doSetTrait = function <S extends Trait>(this: TraitFaste
     if (oldTrait !== null) {
       this.detachTrait(oldTrait);
     }
-    Object.defineProperty(this, "trait", {
-      value: newTrait,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).trait = newTrait;
     if (newTrait !== null) {
       this.attachTrait(newTrait);
     }

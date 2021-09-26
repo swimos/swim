@@ -26,35 +26,23 @@ export class ThemeMatrix implements Equals, Debug {
               rowIndex: {readonly [name: string]: number | undefined},
               colArray: ReadonlyArray<[Feel, FeelVector]>,
               colIndex: {readonly [name: string]: number | undefined}) {
-    Object.defineProperty(this, "rowArray", {
-      value: rowArray,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "rowIndex", {
-      value: rowIndex,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "colArray", {
-      value: colArray,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "colIndex", {
-      value: colIndex,
-      enumerable: true,
-    });
+    this.rowArray = rowArray;
+    this.rowIndex = rowIndex;
+    this.colArray = colArray;
+    this.colIndex = colIndex;
   }
 
   /** @hidden */
-  readonly rowArray!: ReadonlyArray<[Look<unknown>, LookVector<unknown>]>;
+  readonly rowArray: ReadonlyArray<[Look<unknown>, LookVector<unknown>]>;
 
   /** @hidden */
-  readonly rowIndex!: {readonly [name: string]: number | undefined};
+  readonly rowIndex: {readonly [name: string]: number | undefined};
 
   /** @hidden */
-  readonly colArray!: ReadonlyArray<[Feel, FeelVector]>;
+  readonly colArray: ReadonlyArray<[Feel, FeelVector]>;
 
   /** @hidden */
-  readonly colIndex!: {readonly [name: string]: number | undefined};
+  readonly colIndex: {readonly [name: string]: number | undefined};
 
   get rowCount(): number {
     return this.rowArray.length;

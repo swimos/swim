@@ -32,25 +32,13 @@ export interface RectInit {
 
 export class Rect implements Graphics, Equals, Debug {
   constructor(x: Length, y: Length, width: Length, height: Length) {
-    Object.defineProperty(this, "x", {
-      value: x,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "y", {
-      value: y,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "width", {
-      value: width,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "height", {
-      value: height,
-      enumerable: true,
-    });
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
   }
 
-  readonly x!: Length;
+  readonly x: Length;
 
   withX(x: AnyLength): Rect {
     x = Length.fromAny(x);
@@ -61,7 +49,7 @@ export class Rect implements Graphics, Equals, Debug {
     }
   }
 
-  readonly y!: Length;
+  readonly y: Length;
 
   withY(y: AnyLength): Rect {
     y = Length.fromAny(y);
@@ -72,7 +60,7 @@ export class Rect implements Graphics, Equals, Debug {
     }
   }
 
-  readonly width!: Length;
+  readonly width: Length;
 
   withWidth(width: AnyLength): Rect {
     width = Length.fromAny(width);
@@ -83,7 +71,7 @@ export class Rect implements Graphics, Equals, Debug {
     }
   }
 
-  readonly height!: Length;
+  readonly height: Length;
 
   withHeight(height: AnyLength): Rect {
     height = Length.fromAny(height);

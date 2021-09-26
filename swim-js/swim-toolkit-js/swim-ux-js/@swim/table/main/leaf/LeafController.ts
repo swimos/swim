@@ -36,10 +36,7 @@ import type {LeafControllerObserver} from "./LeafControllerObserver";
 export class LeafController extends CompositeController {
   constructor() {
     super();
-    Object.defineProperty(this, "cellFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.cellFasteners = [];
   }
 
   override readonly controllerObservers!: ReadonlyArray<LeafControllerObserver>;
@@ -801,7 +798,7 @@ export class LeafController extends CompositeController {
   }
 
   /** @hidden */
-  readonly cellFasteners!: ReadonlyArray<ControllerFastener<this, CellController>>;
+  readonly cellFasteners: ReadonlyArray<ControllerFastener<this, CellController>>;
 
   protected getCellFastener(cellTrait: CellTrait): ControllerFastener<this, CellController> | null {
     const cellFasteners = this.cellFasteners;

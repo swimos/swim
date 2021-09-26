@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy} from "@swim/util";
+import {Lazy, Mutable} from "@swim/util";
 import type {ViewContext} from "../ViewContext";
 import {ViewFlags, View} from "../View";
 import {ViewManager} from "../manager/ViewManager";
@@ -22,11 +22,7 @@ import type {DisplayManagerObserver} from "./DisplayManagerObserver";
 export class DisplayManager<V extends View = View> extends ViewManager<V> {
   constructor() {
     super();
-    Object.defineProperty(this, "rootFlags", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.rootFlags = 0;
     this.processTimer = 0;
     this.displayFrame = 0;
     this.updateDelay = DisplayManager.MinUpdateDelay;
@@ -84,15 +80,11 @@ export class DisplayManager<V extends View = View> extends ViewManager<V> {
     rootView.cascadeUnpower();
   }
 
-  readonly rootFlags!: ViewFlags;
+  readonly rootFlags: ViewFlags;
 
   /** @hidden */
   setRootFlags(rootFlags: ViewFlags): void {
-    Object.defineProperty(this, "rootFlags", {
-      value: rootFlags,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).rootFlags = rootFlags;
   }
 
   /** @hidden */

@@ -33,10 +33,7 @@ import type {GaugeControllerObserver} from "./GaugeControllerObserver";
 export class GaugeController extends CompositeController {
   constructor() {
     super();
-    Object.defineProperty(this, "dialFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.dialFasteners = [];
   }
 
   override readonly controllerObservers!: ReadonlyArray<GaugeControllerObserver>;
@@ -769,7 +766,7 @@ export class GaugeController extends CompositeController {
   }
 
   /** @hidden */
-  readonly dialFasteners!: ReadonlyArray<ControllerFastener<this, DialController>>;
+  readonly dialFasteners: ReadonlyArray<ControllerFastener<this, DialController>>;
 
   protected getDialastener(dialTrait: DialTrait): ControllerFastener<this, DialController> | null {
     const dialFasteners = this.dialFasteners;

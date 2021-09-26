@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Values} from "@swim/util";
+import {Equals, Mutable, Values} from "@swim/util";
 import {Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/mapping";
 import {BTree} from "@swim/collections";
 import type {R2Box} from "@swim/math";
@@ -41,36 +41,12 @@ export interface SeriesPlotViewInit<X, Y> extends PlotViewInit<X, Y> {
 export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotView<X, Y> {
   constructor() {
     super();
-    Object.defineProperty(this, "dataPointFasteners", {
-      value: new BTree(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "xDataDomain", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "yDataDomain", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "xDataRange", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "yDataRange", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "gradientStops", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.dataPointFasteners = new BTree();
+    this.xDataDomain = null;
+    this.yDataDomain = null;
+    this.xDataRange = null;
+    this.yDataRange = null;
+    this.gradientStops = 0;
   }
 
   override initView(init: SeriesPlotViewInit<X, Y>): void {
@@ -308,17 +284,13 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   })
   readonly yRangePadding!: ViewProperty<this, readonly [number, number]>
 
-  readonly xDataDomain!: Domain<X> | null;
+  readonly xDataDomain: Domain<X> | null;
 
   protected setXDataDomain(newXDataDomain: Domain<X> | null): void {
     const oldXDataDomain = this.xDataDomain;
     if (!Equals(newXDataDomain, oldXDataDomain)) {
       this.willSetXDataDomain(newXDataDomain, oldXDataDomain);
-      Object.defineProperty(this, "xDataDomain", {
-        value: newXDataDomain,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).xDataDomain = newXDataDomain;
       this.onSetXDataDomain(newXDataDomain, oldXDataDomain);
       this.didSetXDataDomain(newXDataDomain, oldXDataDomain);
     }
@@ -363,17 +335,13 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     this.setXDataDomain(xDataDomain);
   }
 
-  readonly yDataDomain!: Domain<Y> | null;
+  readonly yDataDomain: Domain<Y> | null;
 
   protected setYDataDomain(newYDataDomain: Domain<Y> | null): void {
     const oldYDataDomain = this.yDataDomain;
     if (!Equals(newYDataDomain, oldYDataDomain)) {
       this.willSetYDataDomain(newYDataDomain, oldYDataDomain);
-      Object.defineProperty(this, "yDataDomain", {
-        value: newYDataDomain,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).yDataDomain = newYDataDomain;
       this.onSetYDataDomain(newYDataDomain, oldYDataDomain);
       this.didSetYDataDomain(newYDataDomain, oldYDataDomain);
     }
@@ -427,14 +395,10 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     this.setYDataDomain(yDataDomain);
   }
 
-  readonly xDataRange!: Range<number> | null;
+  readonly xDataRange: Range<number> | null;
 
   protected setXDataRange(xDataRange: Range<number> | null): void {
-    Object.defineProperty(this, "xDataRange", {
-      value: xDataRange,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).xDataRange = xDataRange;
   }
 
   protected updateXDataRange(): void {
@@ -449,14 +413,10 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
     }
   }
 
-  readonly yDataRange!: Range<number> | null;
+  readonly yDataRange: Range<number> | null;
 
   protected setYDataRange(yDataRange: Range<number> | null): void {
-    Object.defineProperty(this, "yDataRange", {
-      value: yDataRange,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).yDataRange = yDataRange;
   }
 
   protected updateYDataRange(): void {
@@ -472,7 +432,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   }
 
   /** @hidden */
-  readonly gradientStops!: number;
+  readonly gradientStops: number;
 
   insertDataPoint(dataPointView: AnyDataPointView<X, Y>, targetView: View | null = null): void {
     dataPointView = DataPointView.fromAny(dataPointView);
@@ -635,7 +595,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
   }
 
   /** @hidden */
-  readonly dataPointFasteners!: BTree<X, ViewFastener<this, DataPointView<X, Y>>>;
+  readonly dataPointFasteners: BTree<X, ViewFastener<this, DataPointView<X, Y>>>;
 
   /** @hidden */
   getDataPointFastener(x: X): ViewFastener<this, DataPointView<X, Y>> | null {
@@ -941,11 +901,7 @@ export abstract class SeriesPlotView<X, Y> extends GraphicsView implements PlotV
 
     this.setXDataDomain(point0 !== null ? Domain<X>(xDataDomainMin!, xDataDomainMax!) : null);
     this.setYDataDomain(point0 !== null ? Domain<Y>(yDataDomainMin!, yDataDomainMax!) : null);
-    Object.defineProperty(this, "gradientStops", {
-      value: gradientStops,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).gradientStops = gradientStops;
   }
 
   protected override didRender(viewContext: ViewContextType<this>): void {

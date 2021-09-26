@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Objects} from "@swim/util";
+import {Lazy, Mutable, Objects} from "@swim/util";
 import type {Uri} from "@swim/uri";
 import {Controller} from "../Controller";
 import {ControllerManager} from "../manager/ControllerManager";
@@ -22,16 +22,12 @@ import type {HistoryManagerObserver} from "./HistoryManagerObserver";
 export class HistoryManager<C extends Controller = Controller> extends ControllerManager<C> {
   constructor() {
     super();
-    Object.defineProperty(this, "historyState", {
-      value: HistoryState.current(),
-      enumerable: true,
-      configurable: true,
-    });
+    this.historyState = HistoryState.current();
     this.popHistory = this.popHistory.bind(this);
   }
 
   /** @hidden */
-  readonly historyState!: HistoryState;
+  readonly historyState: HistoryState;
 
   get historyUri(): Uri {
     return HistoryState.toUri(this.historyState);
@@ -42,11 +38,7 @@ export class HistoryManager<C extends Controller = Controller> extends Controlle
     const newState = HistoryState.updated(deltaState, HistoryState.cloned(oldState));
     const newUri = HistoryState.toUri(newState);
     this.willPushHistory(newState, oldState);
-    Object.defineProperty(this, "historyState", {
-      value: newState,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).historyState = newState;
     window.history.pushState(newState.ephemeral, "", newUri.toString());
     this.onPushHistory(newState, oldState);
     this.didPushHistory(newState, oldState);
@@ -85,11 +77,7 @@ export class HistoryManager<C extends Controller = Controller> extends Controlle
     if (!Objects.equal(oldState, newState)) {
       const newUri = HistoryState.toUri(newState);
       this.willReplaceHistory(newState, oldState);
-      Object.defineProperty(this, "historyState", {
-        value: newState,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).historyState = newState;
       window.history.replaceState(newState.ephemeral, "", newUri.toString());
       this.onReplaceHistory(newState, oldState);
       this.didReplaceHistory(newState, oldState);
@@ -132,11 +120,7 @@ export class HistoryManager<C extends Controller = Controller> extends Controlle
     const oldState = HistoryState.current();
     const newState = HistoryState.updated(deltaState, oldState);
     this.willPopHistory(newState, oldState);
-    Object.defineProperty(this, "historyState", {
-      value: newState,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).historyState = newState;
     this.onPopHistory(newState, oldState);
     this.didPopHistory(newState, oldState);
   }

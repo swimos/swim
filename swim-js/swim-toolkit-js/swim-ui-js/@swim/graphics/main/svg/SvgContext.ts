@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {View} from "@swim/view";
 import {ViewNode, SvgView} from "@swim/dom";
 import {PathContext} from "../path/PathContext";
@@ -19,49 +20,25 @@ import type {PaintingFillRule, PaintingContext} from "../painting/PaintingContex
 
 export class SvgContext implements PaintingContext {
   constructor(view: SvgView) {
-    Object.defineProperty(this, "view", {
-      value: view,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "precision", {
-      value: -1,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "pathContext", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "pathView", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "pathFlags", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.view = view;
+    this.precision = -1;
+    this.pathContext = null;
+    this.pathView = null;
+    this.pathFlags = 0;
     this.fillStyle = "";
     this.strokeStyle = "";
   }
 
-  readonly view!: SvgView;
+  readonly view: SvgView;
 
-  readonly precision!: number;
+  readonly precision: number;
 
   setPrecision(precision: number): void {
-    Object.defineProperty(this, "precision", {
-      value: precision,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).precision = precision;
   }
 
   /** @hidden */
-  readonly pathContext!: PathContext;
+  readonly pathContext: PathContext | null;
 
   protected getPathContext(): PathContext {
     const pathContext = this.pathContext;
@@ -75,11 +52,7 @@ export class SvgContext implements PaintingContext {
     let pathContext = this.pathContext;
     if (pathContext === null) {
       pathContext = this.createPathContext();
-      Object.defineProperty(this, "pathContext", {
-        value: pathContext,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).pathContext = pathContext;
       if (this.pathView === null || this.pathFlags !== 0) {
         this.finalizePath();
         const pathView = this.nextPathView();
@@ -97,15 +70,11 @@ export class SvgContext implements PaintingContext {
   }
 
   /** @hidden */
-  readonly pathView!: SvgView | null;
+  readonly pathView: SvgView | null;
 
   /** @hidden */
   setPathView(pathView: SvgView | null): void {
-    Object.defineProperty(this, "pathView", {
-      value: pathView,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).pathView = pathView;
   }
 
   /** @hidden */
@@ -158,15 +127,11 @@ export class SvgContext implements PaintingContext {
   }
 
   /** @hidden */
-  readonly pathFlags!: number;
+  readonly pathFlags: number;
 
   /** @hidden */
   setPathFlags(pathFlags: number): void {
-    Object.defineProperty(this, "pathFlags", {
-      value: pathFlags,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).pathFlags = pathFlags;
   }
 
   fillStyle: string | CanvasGradient | CanvasPattern;
@@ -174,11 +139,7 @@ export class SvgContext implements PaintingContext {
   strokeStyle: string | CanvasGradient | CanvasPattern;
 
   beginPath(): void {
-    Object.defineProperty(this, "pathContext", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).pathContext = null;
   }
 
   moveTo(x: number, y: number): void {
@@ -303,11 +264,7 @@ export class SvgContext implements PaintingContext {
     if (pathView !== null) {
       let nextNode = pathView.node.nextSibling;
       if (pathView.fill.state === null && pathView.stroke.state === null) {
-        Object.defineProperty(this, "pathView", {
-          value: null,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).pathView = null;
         pathView.remove();
       }
       pathView = null;

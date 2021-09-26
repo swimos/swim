@@ -12,36 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import type {Model} from "../Model";
 import type {ModelManagerObserverType, ModelManagerObserver} from "./ModelManagerObserver";
 
 export abstract class ModelManager<M extends Model = Model> {
   constructor() {
-    Object.defineProperty(this, "rootModels", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "modelManagerObservers", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    this.rootModels = Arrays.empty;
+    this.modelManagerObservers = Arrays.empty;
   }
 
-  readonly modelManagerObservers!: ReadonlyArray<ModelManagerObserver>;
+  readonly modelManagerObservers: ReadonlyArray<ModelManagerObserver>;
 
   addModelManagerObserver(modelManagerObserver: ModelManagerObserverType<this>): void {
     const oldModelManagerObservers = this.modelManagerObservers;
     const newModelManagerObservers = Arrays.inserted(modelManagerObserver, oldModelManagerObservers);
     if (oldModelManagerObservers !== newModelManagerObservers) {
       this.willAddModelManagerObserver(modelManagerObserver);
-      Object.defineProperty(this, "modelManagerObservers", {
-        value: newModelManagerObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).modelManagerObservers = newModelManagerObservers;
       this.onAddModelManagerObserver(modelManagerObserver);
       this.didAddModelManagerObserver(modelManagerObserver);
     }
@@ -64,11 +52,7 @@ export abstract class ModelManager<M extends Model = Model> {
     const newModelManagerObservers = Arrays.removed(modelManagerObserver, oldModelManagerObservers);
     if (oldModelManagerObservers !== newModelManagerObservers) {
       this.willRemoveModelManagerObserver(modelManagerObserver);
-      Object.defineProperty(this, "modelManagerObservers", {
-        value: newModelManagerObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).modelManagerObservers = newModelManagerObservers;
       this.onRemoveModelManagerObserver(modelManagerObserver);
       this.didRemoveModelManagerObserver(modelManagerObserver);
     }
@@ -164,7 +148,7 @@ export abstract class ModelManager<M extends Model = Model> {
     }
   }
 
-  readonly rootModels!: ReadonlyArray<M>;
+  readonly rootModels: ReadonlyArray<M>;
 
   insertRootModel(rootModel: M): void {
     const oldRootModels = this.rootModels;
@@ -175,11 +159,7 @@ export abstract class ModelManager<M extends Model = Model> {
         this.willAttach();
       }
       this.willInsertRootModel(rootModel);
-      Object.defineProperty(this, "rootModels", {
-        value: newRootModels,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).rootModels = newRootModels;
       if (needsAttach) {
         this.onAttach();
       }
@@ -224,11 +204,7 @@ export abstract class ModelManager<M extends Model = Model> {
         this.willDetach();
       }
       this.willRemoveRootModel(rootModel);
-      Object.defineProperty(this, "rootModels", {
-        value: newRootModels,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).rootModels = newRootModels;
       if (needsDetach) {
         this.onDetach();
       }

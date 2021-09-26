@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {FromAny, Arrays} from "@swim/util";
+import {FromAny, Mutable, Arrays} from "@swim/util";
 import {
   AnyConstraintExpression,
   ConstraintExpression,
@@ -233,35 +233,12 @@ function ViewFastenerConstructor<V extends View, S extends View, U>(this: ViewFa
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "fastenerFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "key", {
-    value: key,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "view", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "constraints", {
-    value: Arrays.empty,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "constraintVariables", {
-    value: Arrays.empty,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).fastenerFlags = 0;
+  (this as Mutable<typeof this>).key = key;
+  (this as Mutable<typeof this>).view = null;
+  (this as Mutable<typeof this>).constraints = Arrays.empty;
+  (this as Mutable<typeof this>).constraintVariables = Arrays.empty;
   return this;
 }
 
@@ -270,11 +247,7 @@ function ViewFastenerDecoratorFactory<V extends View, S extends View, U>(descrip
 }
 
 ViewFastener.prototype.setFastenerFlags = function (this: ViewFastener<View, View>, fastenerFlags: ViewFastenerFlags): void {
-  Object.defineProperty(this, "fastenerFlags", {
-    value: fastenerFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).fastenerFlags = fastenerFlags;
 };
 
 ViewFastener.prototype.getView = function <S extends View>(this: ViewFastener<View, S>): S {
@@ -312,11 +285,7 @@ ViewFastener.prototype.doSetView = function <S extends View>(this: ViewFastener<
     if (oldView !== null) {
       this.detachView(oldView);
     }
-    Object.defineProperty(this, "view", {
-      value: newView,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).view = newView;
     if (newView !== null) {
       this.attachView(newView);
     }
@@ -374,11 +343,7 @@ ViewFastener.prototype.addConstraint = function (this: ViewFastener<View, View>,
   const oldConstraints = this.constraints;
   const newConstraints = Arrays.inserted(constraint, oldConstraints);
   if (oldConstraints !== newConstraints) {
-    Object.defineProperty(this, "constraints", {
-      value: newConstraints,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).constraints = newConstraints;
     this.activateConstraint(constraint);
   }
 };
@@ -388,11 +353,7 @@ ViewFastener.prototype.removeConstraint = function (this: ViewFastener<View, Vie
   const newConstraints = Arrays.removed(constraint, oldConstraints);
   if (oldConstraints !== newConstraints) {
     this.deactivateConstraint(constraint);
-    Object.defineProperty(this, "constraints", {
-      value: newConstraints,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).constraints = newConstraints;
   }
 };
 
@@ -424,11 +385,7 @@ ViewFastener.prototype.addConstraintVariable = function (this: ViewFastener<View
   const oldConstraintVariables = this.constraintVariables;
   const newConstraintVariables = Arrays.inserted(constraintVariable, oldConstraintVariables);
   if (oldConstraintVariables !== newConstraintVariables) {
-    Object.defineProperty(this, "constraintVariables", {
-      value: newConstraintVariables,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).constraintVariables = newConstraintVariables;
     this.activateConstraintVariable(constraintVariable);
   }
 };
@@ -438,11 +395,7 @@ ViewFastener.prototype.removeConstraintVariable = function (this: ViewFastener<V
   const newConstraintVariables = Arrays.removed(constraintVariable, oldConstraintVariables);
   if (oldConstraintVariables !== newConstraintVariables) {
     this.deactivateConstraintVariable(constraintVariable);
-    Object.defineProperty(this, "constraintVariables", {
-      value: newConstraintVariables,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).constraintVariables = newConstraintVariables;
   }
 };
 

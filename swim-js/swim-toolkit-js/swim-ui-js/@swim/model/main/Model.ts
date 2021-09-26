@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import type {WarpRef} from "@swim/client";
 import type {ModelContextType, ModelContext} from "./ModelContext";
 import type {ModelObserverType, ModelObserver} from "./ModelObserver";
@@ -78,46 +78,29 @@ export interface ModelClass<M extends Model = Model> extends Function {
 export abstract class Model implements ModelDownlinkContext {
   constructor() {
     this.modelFlags = 0;
-    Object.defineProperty(this, "modelObservers", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "traits", {
-      value: [],
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "traitMap", {
-      value: {},
-      enumerable: true,
-      configurable: true,
-    });
+    this.modelObservers = Arrays.empty;
+    this.traits = [];
+    this.traitMap = {};
   }
 
   initModel(init: ModelInit): void {
     // hook
   }
 
-  readonly modelFlags!: ModelFlags;
+  readonly modelFlags: ModelFlags;
 
   setModelFlags(modelFlags: ModelFlags): void {
-    // Object.defineProperty is too expensive for modelFlags
-    (this as any).modelFlags = modelFlags;
+    (this as Mutable<this>).modelFlags = modelFlags;
   }
 
-  readonly modelObservers!: ReadonlyArray<ModelObserver>;
+  readonly modelObservers: ReadonlyArray<ModelObserver>;
 
   addModelObserver(modelObserver: ModelObserverType<this>): void {
     const oldModelObservers = this.modelObservers;
     const newModelObservers = Arrays.inserted(modelObserver, oldModelObservers);
     if (oldModelObservers !== newModelObservers) {
       this.willAddModelObserver(modelObserver);
-      Object.defineProperty(this, "modelObservers", {
-        value: newModelObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).modelObservers = newModelObservers;
       this.onAddModelObserver(modelObserver);
       this.didAddModelObserver(modelObserver);
     }
@@ -140,11 +123,7 @@ export abstract class Model implements ModelDownlinkContext {
     const newModelObservers = Arrays.removed(modelObserver, oldModelObservers);
     if (oldModelObservers !== newModelObservers) {
       this.willRemoveModelObserver(modelObserver);
-      Object.defineProperty(this, "modelObservers", {
-        value: newModelObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).modelObservers = newModelObservers;
       this.onRemoveModelObserver(modelObserver);
       this.didRemoveModelObserver(modelObserver);
     }
@@ -383,10 +362,10 @@ export abstract class Model implements ModelDownlinkContext {
     return this.traits.length;
   }
 
-  readonly traits!: ReadonlyArray<Trait>;
+  readonly traits: ReadonlyArray<Trait>;
 
   /** @hidden */
-  readonly traitMap!: {[traitName: string]: Trait | undefined};
+  readonly traitMap: {[traitName: string]: Trait | undefined};
 
   firstTrait(): Trait | null {
     const traits = this.traits;

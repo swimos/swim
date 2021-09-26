@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {Length} from "@swim/math";
 import type {Color} from "../color/Color";
@@ -58,34 +59,13 @@ export function BoxShadowInterpolator(y0: BoxShadow, y1: BoxShadow): BoxShadowIn
     return new BoxShadow(inset, offsetX, offsetY, blurRadius, spreadRadius, color, next);
   } as BoxShadowInterpolator;
   Object.setPrototypeOf(interpolator, BoxShadowInterpolator.prototype);
-  Object.defineProperty(interpolator, "insetInterpolator", {
-    value: Interpolator(y0.inset, y1.inset),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "offsetXInterpolator", {
-    value: Interpolator(y0.offsetX, y1.offsetX),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "offsetYInterpolator", {
-    value: Interpolator(y0.offsetY, y1.offsetY),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "blurRadiusInterpolator", {
-    value: Interpolator(y0.blurRadius, y1.blurRadius),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "spreadRadiusInterpolator", {
-    value: Interpolator(y0.spreadRadius, y1.spreadRadius),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "colorInterpolator", {
-    value: Interpolator(y0.color, y1.color),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "nextInterpolator", {
-    value: Interpolator(y0.next, y1.next),
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).insetInterpolator = Interpolator(y0.inset, y1.inset);
+  (interpolator as Mutable<typeof interpolator>).offsetXInterpolator = y0.offsetX.interpolateTo(y1.offsetX);
+  (interpolator as Mutable<typeof interpolator>).offsetYInterpolator = y0.offsetY.interpolateTo(y1.offsetY);
+  (interpolator as Mutable<typeof interpolator>).blurRadiusInterpolator = y0.blurRadius.interpolateTo(y1.blurRadius);
+  (interpolator as Mutable<typeof interpolator>).spreadRadiusInterpolator = y0.spreadRadius.interpolateTo(y1.spreadRadius);
+  (interpolator as Mutable<typeof interpolator>).colorInterpolator = y0.color.interpolateTo(y1.color);
+  (interpolator as Mutable<typeof interpolator>).nextInterpolator = Interpolator(y0.next, y1.next);
   return interpolator;
 }
 __extends(BoxShadowInterpolator, Interpolator);

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {Timing} from "@swim/mapping";
 import {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
@@ -64,26 +65,10 @@ export interface TickViewInit<D> extends GraphicsViewInit {
 export abstract class TickView<D> extends LayerView {
   constructor(value: D) {
     super();
-    Object.defineProperty(this, "value", {
-      value: value,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "offset", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "tickState", {
-      value: TickState.Excluded,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "preserved", {
-      value: true,
-      enumerable: true,
-      configurable: true,
-    });
+    this.value = value;
+    this.offset = 0;
+    this.tickState = TickState.Excluded;
+    this.preserved = true;
   }
 
   override initView(init: TickViewInit<D>): void {
@@ -124,22 +109,18 @@ export abstract class TickView<D> extends LayerView {
 
   abstract readonly orientation: TickOrientation;
 
-  readonly value!: D;
+  readonly value: D;
 
   /** @hidden */
-  readonly offset!: number;
+  readonly offset: number;
 
   /** @hidden */
   setOffset(offset: number): void {
-    Object.defineProperty(this, "offset", {
-      value: offset,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).offset = offset;
   }
 
   /** @hidden */
-  readonly tickState!: TickState;
+  readonly tickState: TickState;
 
   @ViewAnimator({type: R2Point, state: R2Point.origin()})
   readonly anchor!: ViewAnimator<this, R2Point, AnyR2Point>;
@@ -239,7 +220,7 @@ export abstract class TickView<D> extends LayerView {
   readonly label!: ViewFastener<this, GraphicsView, AnyTextRunView>;
 
   /** @hidden */
-  readonly preserved!: boolean;
+  readonly preserved: boolean;
 
   preserve(): boolean;
   preserve(preserve: boolean): this;
@@ -247,11 +228,7 @@ export abstract class TickView<D> extends LayerView {
     if (preserve === void 0) {
       return this.preserved;
     } else {
-      Object.defineProperty(this, "preserved", {
-        value: preserve,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).preserved = preserve;
       return this;
     }
   }
@@ -259,22 +236,14 @@ export abstract class TickView<D> extends LayerView {
   fadeIn(timing?: Timing | boolean): void {
     if (this.tickState === TickState.Excluded || this.tickState === TickState.Leaving) {
       this.opacity.setState(1, timing);
-      Object.defineProperty(this, "tickState", {
-        value: TickState.Entering,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).tickState = TickState.Entering;
     }
   }
 
   fadeOut(timing?: Timing | boolean): void {
     if (this.tickState === TickState.Entering || this.tickState === TickState.Included) {
       this.opacity.setState(0, timing);
-      Object.defineProperty(this, "tickState", {
-        value: TickState.Leaving,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).tickState = TickState.Leaving;
     }
   }
 

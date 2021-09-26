@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {Length} from "@swim/math";
 import type {Color} from "../color/Color";
@@ -42,18 +43,9 @@ export const ColorStopInterpolator = function (y0: ColorStop, y1: ColorStop): Co
     return new ColorStop(color, stop, hint);
   } as ColorStopInterpolator;
   Object.setPrototypeOf(interpolator, ColorStopInterpolator.prototype);
-  Object.defineProperty(interpolator, "colorInterpolator", {
-    value: y0.color.interpolateTo(y1.color),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "stopInterpolator", {
-    value: Interpolator(y0.stop, y1.stop),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "hintInterpolator", {
-    value: Interpolator(y0.hint, y1.hint),
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).colorInterpolator = y0.color.interpolateTo(y1.color);
+  (interpolator as Mutable<typeof interpolator>).stopInterpolator = Interpolator(y0.stop, y1.stop);
+  (interpolator as Mutable<typeof interpolator>).hintInterpolator = Interpolator(y0.hint, y1.hint);
   return interpolator;
 } as {
   (y0: ColorStop, y1: ColorStop): ColorStopInterpolator;

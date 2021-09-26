@@ -14,7 +14,7 @@
 
 /// <reference types="google.maps"/>
 
-import {Equivalent, Lazy} from "@swim/util";
+import {Lazy, Equivalent, Mutable} from "@swim/util";
 import type {AnyTiming} from "@swim/mapping";
 import {GeoPoint} from "@swim/geo";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
@@ -27,16 +27,11 @@ import type {GoogleMapViewObserver} from "./GoogleMapViewObserver";
 export class GoogleMapView extends MapView {
   constructor(map: google.maps.Map) {
     super();
-    Object.defineProperty(this, "map", {
-      value: map,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "mapOverlay", {
-      value: this.createMapOverlay(map),
-      enumerable: true,
-    });
+    this.map = map;
+    this.mapOverlay = this.createMapOverlay(map);
     Object.defineProperty(this, "geoViewport", {
       value: GoogleMapViewport.create(this.map, this.mapOverlay.getProjection()),
+      writable: true,
       enumerable: true,
       configurable: true,
     });
@@ -47,13 +42,13 @@ export class GoogleMapView extends MapView {
 
   override readonly viewObservers!: ReadonlyArray<GoogleMapViewObserver>;
 
-  readonly map!: google.maps.Map;
+  readonly map: google.maps.Map;
 
   protected initMap(map: google.maps.Map): void {
     map.addListener("idle", this.onMapIdle);
   }
 
-  readonly mapOverlay!: google.maps.OverlayView;
+  readonly mapOverlay: google.maps.OverlayView;
 
   protected createMapOverlay(map: google.maps.Map): google.maps.OverlayView {
     const mapOverlay = new GoogleMapView.MapOverlay(this);
@@ -67,13 +62,9 @@ export class GoogleMapView extends MapView {
     return class GoogleMapOverlayView extends google.maps.OverlayView {
       constructor(owner: GoogleMapView) {
         super();
-        Object.defineProperty(this, "owner", {
-          value: owner,
-          enumerable: true,
-          configurable: true,
-        });
+        this.owner = owner;
       }
-      readonly owner!: GoogleMapView;
+      readonly owner: GoogleMapView;
       override onAdd(): void {
         const containerView = this.owner.container.view;
         if (containerView !== null) {
@@ -121,11 +112,7 @@ export class GoogleMapView extends MapView {
     const newGeoViewport = GoogleMapViewport.create(this.map, this.mapOverlay.getProjection());
     if (!newGeoViewport.equals(oldGeoViewport)) {
       this.willSetGeoViewport(newGeoViewport, oldGeoViewport);
-      Object.defineProperty(this, "geoViewport", {
-        value: newGeoViewport,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).geoViewport = newGeoViewport;
       this.onSetGeoViewport(newGeoViewport, oldGeoViewport);
       this.didSetGeoViewport(newGeoViewport, oldGeoViewport);
       return true;
@@ -135,7 +122,7 @@ export class GoogleMapView extends MapView {
 
   protected override willProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     if ((this.viewFlags & View.NeedsProject) !== 0 && this.updateGeoViewport()) {
-      (viewContext as any).geoViewport = this.geoViewport;
+      (viewContext as Mutable<ViewContextType<this>>).geoViewport = this.geoViewport;
     }
     super.willProcess(processFlags, viewContext);
   }

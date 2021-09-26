@@ -18,17 +18,18 @@ import {GeoLayerView} from "../layer/GeoLayerView";
 export class GeoGridView extends GeoLayerView {
   constructor(geoTile: GeoTile) {
     super();
-    Object.defineProperty(this, "geoTile", {
-      value: geoTile,
-      enumerable: true,
-    });
+    this.geoTile = geoTile;
     Object.defineProperty(this, "geoBounds", {
       value: geoTile.bounds,
+      writable: true,
       enumerable: true,
+      configurable: true,
     });
   }
 
-  readonly geoTile!: GeoTile;
+  readonly geoTile: GeoTile;
+
+  override readonly geoBounds!: GeoBox;
 
   protected override setGeoBounds(newGeoBounds: GeoBox): void {
     // immutable

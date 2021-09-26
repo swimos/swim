@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {ToStyleString, ToCssValue} from "@swim/style";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
@@ -124,11 +125,7 @@ StyleMap.define(StyleRule.prototype);
 
 function StyleRuleConstructor<V extends CssContext>(this: StyleRule<V>, owner: V, ruleName: string | undefined): StyleRule<V> {
   const _this: StyleRule<V> = (CssRule as Function).call(this, owner, ruleName) || this;
-  Object.defineProperty(_this, "styleAnimators", {
-    value: {},
-    enumerable: true,
-    configurable: true,
-  });
+  (_this as Mutable<typeof _this>).styleAnimators = {};
   return _this;
 }
 
@@ -322,11 +319,7 @@ StyleRule.define = function <V extends CssContext, I>(descriptor: StyleRuleDescr
     if (_this.initRule !== void 0) {
       rule = _this.initRule(rule);
     }
-    Object.defineProperty(_this, "rule", {
-      value: rule,
-      enumerable: true,
-      configurable: true,
-    });
+    (_this as Mutable<typeof _this>).rule = rule;
     if (style !== void 0) {
       StyleMap.init(_this, style);
     }

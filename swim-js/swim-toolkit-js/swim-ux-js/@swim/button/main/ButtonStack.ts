@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy} from "@swim/util";
+import {Lazy, Mutable} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {Length} from "@swim/math";
 import {Expansion} from "@swim/style";
@@ -37,11 +37,7 @@ import type {ButtonStackObserver} from "./ButtonStackObserver";
 export class ButtonStack extends HtmlView implements Modal {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "stackHeight", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.stackHeight = 0;
     this.onClick = this.onClick.bind(this);
     this.onContextMenu = this.onContextMenu.bind(this);
     this.initButtonStack();
@@ -69,7 +65,7 @@ export class ButtonStack extends HtmlView implements Modal {
   override readonly viewObservers!: ReadonlyArray<ButtonStackObserver>;
 
   /** @hidden */
-  readonly stackHeight!: number;
+  readonly stackHeight: number;
 
   protected createButton(): HtmlView | null {
     return FloatingButton.create();
@@ -293,11 +289,7 @@ export class ButtonStack extends HtmlView implements Modal {
         zIndex -= 1;
       }
     }
-    Object.defineProperty(this, "stackHeight", {
-      value: stackHeight,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).stackHeight = stackHeight;
   }
 
   protected override onInsertChildView(childView: View, targetView: View | null): void {

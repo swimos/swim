@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Murmur3, Numbers, Constructors} from "@swim/util";
+import {Lazy, Mutable, Murmur3, Numbers, Constructors} from "@swim/util";
 import {Output, Base16} from "@swim/codec";
 import type {Interpolator} from "@swim/mapping";
 import {Item, Value} from "@swim/structure";
@@ -32,27 +32,11 @@ export interface RgbColorInit {
 export class RgbColor extends Color {
   constructor(r: number, g: number, b: number, a: number = 1) {
     super();
-    Object.defineProperty(this, "r", {
-      value: r,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "g", {
-      value: g,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "b", {
-      value: b,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "a", {
-      value: a,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.r = r;
+    this.g = g;
+    this.b = b;
+    this.a = a;
+    this.stringValue = void 0;
   }
 
   override isDefined(): boolean {
@@ -60,13 +44,13 @@ export class RgbColor extends Color {
         && isFinite(this.b) && isFinite(this.a);
   }
 
-  readonly r!: number;
+  readonly r: number;
 
-  readonly g!: number;
+  readonly g: number;
 
-  readonly b!: number;
+  readonly b: number;
 
-  readonly a!: number;
+  readonly a: number;
 
   override alpha(): number;
   override alpha(a: number): RgbColor;
@@ -208,7 +192,7 @@ export class RgbColor extends Color {
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   override toString(): string {
     let s = this.stringValue;
@@ -231,11 +215,7 @@ export class RgbColor extends Color {
         }
         s += ")";
       }
-      Object.defineProperty(this, "stringValue", {
-        value: s,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = s;
     }
     return s;
   }

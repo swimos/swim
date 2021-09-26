@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {AnyLength, Length} from "@swim/math";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
@@ -23,11 +24,7 @@ export type ButtonGlowState = "ready" | "glowing" | "pulsing" | "fading";
 export class ButtonGlow extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "glowState", {
-      value: "ready",
-      enumerable: true,
-      configurable: true,
-    });
+    this.glowState = "ready";
     this.glowTimer = 0;
     this.initGlow();
   }
@@ -44,7 +41,7 @@ export class ButtonGlow extends HtmlView {
     this.pointerEvents.setState("none", View.Intrinsic);
   }
 
-  readonly glowState!: ButtonGlowState;
+  readonly glowState: ButtonGlowState;
 
   /** @hidden */
   glowTimer: number;
@@ -88,11 +85,7 @@ export class ButtonGlow extends HtmlView {
   }
 
   protected override onUnmount(): void {
-    Object.defineProperty(this, "glowState", {
-      value: "ready",
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).glowState = "ready";
     this.cancelGlow();
     this.remove();
     super.onUnmount();
@@ -147,11 +140,7 @@ export class ButtonGlow extends HtmlView {
             this.height.setState(2 * r, View.Intrinsic);
             this.didGlow();
           }
-          Object.defineProperty(this, "glowState", {
-            value: "glowing",
-            enumerable: true,
-            configurable: true,
-          });
+          (this as Mutable<this>).glowState = "glowing";
         }
       }
     }
@@ -189,11 +178,7 @@ export class ButtonGlow extends HtmlView {
         this.opacity.setState(0, View.Intrinsic);
         this.didPulse();
       }
-      Object.defineProperty(this, "glowState", {
-        value: "pulsing",
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).glowState = "pulsing";
     }
   }
 
@@ -223,11 +208,7 @@ export class ButtonGlow extends HtmlView {
         this.didFade();
       }
     }
-    Object.defineProperty(this, "glowState", {
-      value: "fading",
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).glowState = "fading";
   }
 
   protected willFade(): void {

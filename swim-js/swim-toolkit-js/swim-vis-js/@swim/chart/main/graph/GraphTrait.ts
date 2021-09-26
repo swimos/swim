@@ -19,10 +19,7 @@ import type {GraphTraitObserver} from "./GraphTraitObserver";
 export class GraphTrait<X, Y> extends GenericTrait {
   constructor() {
     super();
-    Object.defineProperty(this, "plotFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.plotFasteners = [];
   }
 
   override readonly traitObservers!: ReadonlyArray<GraphTraitObserver<X, Y>>;
@@ -130,7 +127,7 @@ export class GraphTrait<X, Y> extends GenericTrait {
   }
 
   /** @hidden */
-  readonly plotFasteners!: ReadonlyArray<TraitFastener<this, PlotTrait<X, Y>>>;
+  readonly plotFasteners: ReadonlyArray<TraitFastener<this, PlotTrait<X, Y>>>;
 
   /** @hidden */
   protected mountPlotFasteners(): void {

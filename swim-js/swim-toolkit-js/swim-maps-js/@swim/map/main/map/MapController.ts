@@ -37,10 +37,7 @@ import type {MapControllerObserver} from "./MapControllerObserver";
 export abstract class MapController extends CompositeController {
   constructor() {
     super();
-    Object.defineProperty(this, "layerFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.layerFasteners = [];
   }
 
   override readonly controllerObservers!: ReadonlyArray<MapControllerObserver>;
@@ -699,7 +696,7 @@ export abstract class MapController extends CompositeController {
   }
 
   /** @hidden */
-  readonly layerFasteners!: ReadonlyArray<ControllerFastener<this, GeoController>>;
+  readonly layerFasteners: ReadonlyArray<ControllerFastener<this, GeoController>>;
 
   protected getLayerFastener(layerTrait: GeoTrait): ControllerFastener<this, GeoController> | null {
     const layerFasteners = this.layerFasteners;

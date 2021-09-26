@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";
@@ -21,11 +22,7 @@ import {StyleAnimator, HtmlView} from "@swim/dom";
 export class ScrimView extends HtmlView implements ModalManagerObserver {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "displayState", {
-      value: ScrimView.HiddenState,
-      enumerable: true,
-      configurable: true,
-    });
+    this.displayState = ScrimView.HiddenState;
     this.onClick = this.onClick.bind(this);
     if (typeof PointerEvent !== "undefined") {
       this.onSyntheticClick = this.onSyntheticClick.bind(this);
@@ -55,15 +52,11 @@ export class ScrimView extends HtmlView implements ModalManagerObserver {
   }
 
   /** @hidden */
-  readonly displayState!: number;
+  readonly displayState: number;
 
   /** @hidden */
   setDisplayState(displayState: number): void {
-    Object.defineProperty(this, "displayState", {
-      value: displayState,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).displayState = displayState;
   }
 
   @StyleAnimator<ScrimView, Color | null, AnyColor | null>({

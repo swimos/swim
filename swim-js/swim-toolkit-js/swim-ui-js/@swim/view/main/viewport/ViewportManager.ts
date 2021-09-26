@@ -24,11 +24,7 @@ import type {ViewportManagerObserver} from "./ViewportManagerObserver";
 export class ViewportManager<V extends View = View> extends ViewManager<V> {
   constructor() {
     super();
-    Object.defineProperty(this, "viewContext", {
-      value: this.initViewContext(),
-      enumerable: true,
-      configurable: true,
-    });
+    this.viewContext = this.initViewContext();
     this.viewportResizeTimer = 0;
     this.reorientationTimer = 0;
 
@@ -40,7 +36,7 @@ export class ViewportManager<V extends View = View> extends ViewManager<V> {
     this.throttleReorientation = this.throttleReorientation.bind(this);
   }
 
-  readonly viewContext!: ViewportContext;
+  readonly viewContext: ViewportContext;
 
   protected initViewContext(): ViewportContext {
     return {

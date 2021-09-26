@@ -14,6 +14,7 @@
 
 /// <reference types="leaflet"/>
 
+import type {Mutable} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
@@ -27,12 +28,10 @@ import type {LeafletViewObserver} from "./LeafletViewObserver";
 export class LeafletView extends MapView {
   constructor(map: L.Map) {
     super();
-    Object.defineProperty(this, "map", {
-      value: map,
-      enumerable: true,
-    });
+    this.map = map;
     Object.defineProperty(this, "geoViewport", {
       value: LeafletViewport.create(map),
+      writable: true,
       enumerable: true,
       configurable: true,
     });
@@ -44,7 +43,7 @@ export class LeafletView extends MapView {
 
   override readonly viewObservers!: ReadonlyArray<LeafletViewObserver>;
 
-  readonly map!: L.Map;
+  readonly map: L.Map;
 
   protected initMap(map: L.Map): void {
     map.on("move", this.onMapRender);
@@ -83,11 +82,7 @@ export class LeafletView extends MapView {
     const newGeoViewport = LeafletViewport.create(this.map);
     if (!newGeoViewport.equals(oldGeoViewport)) {
       this.willSetGeoViewport(newGeoViewport, oldGeoViewport);
-      Object.defineProperty(this, "geoViewport", {
-        value: newGeoViewport,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).geoViewport = newGeoViewport;
       this.onSetGeoViewport(newGeoViewport, oldGeoViewport);
       this.didSetGeoViewport(newGeoViewport, oldGeoViewport);
       return true;

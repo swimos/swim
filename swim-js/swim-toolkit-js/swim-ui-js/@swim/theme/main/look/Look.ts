@@ -21,15 +21,11 @@ import type {Mood} from "../mood/Mood";
 import type {MoodVector} from "../mood/MoodVector";
 
 export abstract class Look<T, U = never> implements Mood {
-  readonly name!: string;
-
   constructor(name: string) {
-    Object.defineProperty(this, "name", {
-      value: name,
-      configurable: true,
-      enumerable: true,
-    });
+    this.name = name;
   }
+
+  readonly name: string;
 
   add(a: LookVector<T>, b: LookVector<T>): LookVector<T> {
     const aArray = a.array;

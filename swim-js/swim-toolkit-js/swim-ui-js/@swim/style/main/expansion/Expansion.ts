@@ -26,17 +26,11 @@ export interface ExpansionInit {
 
 export class Expansion implements Interpolate<Expansion>, HashCode, Equivalent, Debug {
   constructor(phase: number, direction: number) {
-    Object.defineProperty(this, "phase", {
-      value: phase,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "direction", {
-      value: direction,
-      enumerable: true,
-    });
+    this.phase = phase;
+    this.direction = direction;
   }
 
-  readonly phase!: number;
+  readonly phase: number;
 
   withPhase(phase: number): Expansion {
     if (phase !== this.phase) {
@@ -46,7 +40,7 @@ export class Expansion implements Interpolate<Expansion>, HashCode, Equivalent, 
     }
   }
 
-  readonly direction!: number;
+  readonly direction: number;
 
   withDirection(direction: number): Expansion {
     if (direction !== this.direction) {

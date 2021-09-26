@@ -24,14 +24,8 @@ import type {TableTraitObserver} from "./TableTraitObserver";
 export class TableTrait extends GenericTrait {
   constructor() {
     super();
-    Object.defineProperty(this, "colFasteners", {
-      value: [],
-      enumerable: true,
-    });
-    Object.defineProperty(this, "rowFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.colFasteners = [];
+    this.rowFasteners = [];
   }
 
   override readonly traitObservers!: ReadonlyArray<TableTraitObserver>;
@@ -284,7 +278,7 @@ export class TableTrait extends GenericTrait {
   }
 
   /** @hidden */
-  readonly colFasteners!: ReadonlyArray<TraitFastener<this, ColTrait>>;
+  readonly colFasteners: ReadonlyArray<TraitFastener<this, ColTrait>>;
 
   /** @hidden */
   protected mountColFasteners(): void {
@@ -429,7 +423,7 @@ export class TableTrait extends GenericTrait {
   }
 
   /** @hidden */
-  readonly rowFasteners!: ReadonlyArray<TraitFastener<this, RowTrait>>;
+  readonly rowFasteners: ReadonlyArray<TraitFastener<this, RowTrait>>;
 
   /** @hidden */
   protected mountRowFasteners(): void {

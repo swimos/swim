@@ -19,14 +19,10 @@ import type {PathContext} from "./PathContext";
 export class PathRenderer extends DrawingRenderer {
   constructor(context: PathContext) {
     super();
-    Object.defineProperty(this, "context", {
-      value: context,
-      enumerable: true,
-      configurable: true,
-    });
+    this.context = context;
   }
 
-  readonly context!: PathContext;
+  readonly context: PathContext;
 
   override get transform(): Transform {
     return Transform.identity();

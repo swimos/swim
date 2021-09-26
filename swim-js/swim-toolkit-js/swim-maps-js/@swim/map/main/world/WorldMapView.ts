@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {AnyTiming} from "@swim/mapping";
 import {R2Box} from "@swim/math";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
@@ -28,6 +29,7 @@ export class WorldMapView extends MapView {
     super();
     Object.defineProperty(this, "geoViewport", {
       value: geoViewport,
+      writable: true,
       enumerable: true,
       configurable: true,
     });
@@ -66,11 +68,7 @@ export class WorldMapView extends MapView {
     const newGeoViewport = oldGeoViewport.withViewFrame(this.viewFrame);
     if (!newGeoViewport.equals(oldGeoViewport)) {
       this.willSetGeoViewport(newGeoViewport, oldGeoViewport);
-      Object.defineProperty(this, "geoViewport", {
-        value: newGeoViewport,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).geoViewport = newGeoViewport;
       this.onSetGeoViewport(newGeoViewport, oldGeoViewport);
       this.didSetGeoViewport(newGeoViewport, oldGeoViewport);
       return true;
@@ -81,7 +79,7 @@ export class WorldMapView extends MapView {
   protected override willProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     if ((processFlags & View.NeedsProject) !== 0) {
       this.updateGeoViewport();
-      (viewContext as any).geoViewport = this.geoViewport;
+      (viewContext as Mutable<ViewContextType<this>>).geoViewport = this.geoViewport;
     }
     super.willProcess(processFlags, viewContext);
   }

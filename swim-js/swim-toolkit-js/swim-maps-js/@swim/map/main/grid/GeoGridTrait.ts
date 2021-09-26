@@ -20,25 +20,16 @@ import type {GeoGridTraitObserver} from "./GeoGridTraitObserver";
 export class GeoGridTrait extends GeoLayerTrait {
   constructor(geoTile: GeoTile) {
     super();
-    Object.defineProperty(this, "geoTile", {
-      value: geoTile,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "geoBounds", {
-      value: geoTile.bounds,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "tileFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.geoTile = geoTile;
+    this.geoBounds = geoTile.bounds;
+    this.tileFasteners = [];
   }
 
   override readonly traitObservers!: ReadonlyArray<GeoGridTraitObserver>;
 
-  readonly geoTile!: GeoTile;
+  readonly geoTile: GeoTile;
 
-  override readonly geoBounds!: GeoBox;
+  override readonly geoBounds: GeoBox;
 
   override setGeoBounds(newGeoBounds: GeoBox): void {
     // immutable
@@ -143,7 +134,7 @@ export class GeoGridTrait extends GeoLayerTrait {
   }
 
   /** @hidden */
-  readonly tileFasteners!: ReadonlyArray<TraitFastener<this, GeoGridTrait>>;
+  readonly tileFasteners: ReadonlyArray<TraitFastener<this, GeoGridTrait>>;
 
   /** @hidden */
   protected mountTileFasteners(): void {

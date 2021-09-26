@@ -55,10 +55,7 @@ export interface PieViewInit extends GraphicsViewInit {
 export class PieView extends LayerView {
   constructor() {
     super();
-    Object.defineProperty(this, "sliceFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.sliceFasteners = [];
   }
 
   override initView(init: PieViewInit): void {
@@ -400,7 +397,7 @@ export class PieView extends LayerView {
   }
 
   /** @hidden */
-  readonly sliceFasteners!: ReadonlyArray<ViewFastener<this, SliceView>>;
+  readonly sliceFasteners: ReadonlyArray<ViewFastener<this, SliceView>>;
 
   /** @hidden */
   protected mountSliceFasteners(): void {

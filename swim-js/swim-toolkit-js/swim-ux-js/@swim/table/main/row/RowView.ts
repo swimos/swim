@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
 import {Look} from "@swim/theme";
@@ -39,11 +40,7 @@ import {TableView} from "../"; // forward reference
 export class RowView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "visibleFrame", {
-      value: new R2Box(0, 0, window.innerWidth, window.innerHeight),
-      enumerable: true,
-      configurable: true,
-    });
+    this.visibleFrame = new R2Box(0, 0, window.innerWidth, window.innerHeight);
     this.initRow();
   }
 
@@ -632,12 +629,8 @@ export class RowView extends HtmlView {
   protected override onProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     super.onProcess(processFlags, viewContext);
     const visibleFrame = this.detectVisibleFrame(Object.getPrototypeOf(viewContext));
-    Object.defineProperty(this, "visibleFrame", {
-      value: visibleFrame,
-      enumerable: true,
-      configurable: true,
-    });
-    (viewContext as any).visibleFrame = this.visibleFrame;
+    (this as Mutable<this>).visibleFrame = visibleFrame;
+    (viewContext as Mutable<ViewContextType<this>>).visibleFrame = this.visibleFrame;
   }
 
   protected override needsProcess(processFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {
@@ -650,12 +643,8 @@ export class RowView extends HtmlView {
   protected override onDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): void {
     super.onDisplay(displayFlags, viewContext);
     const visibleFrame = this.detectVisibleFrame(Object.getPrototypeOf(viewContext));
-    Object.defineProperty(this, "visibleFrame", {
-      value: visibleFrame,
-      enumerable: true,
-      configurable: true,
-    });
-    (viewContext as any).visibleFrame = this.visibleFrame;
+    (this as Mutable<this>).visibleFrame = visibleFrame;
+    (viewContext as Mutable<ViewContextType<this>>).visibleFrame = this.visibleFrame;
   }
 
   protected override onLayout(viewContext: ViewContextType<this>): void {

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import type {Model} from "../Model";
 import {Trait} from "../Trait";
 import {ModelManager} from "../manager/ModelManager";
@@ -158,30 +159,11 @@ function TraitServiceConstructor<R extends Trait, T>(this: TraitService<R, T>, o
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "modelService", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "inherit", {
-    value: true,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "serviceFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "manager", {
-    value: void 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).modelService = null;
+  (this as Mutable<typeof this>).inherit = true;
+  (this as Mutable<typeof this>).serviceFlags = 0;
+  (this as Mutable<typeof this>).manager = void 0 as unknown as T;
   return this;
 }
 
@@ -195,11 +177,7 @@ TraitService.prototype.createModelService = function <T>(this: TraitService<Trai
     const model = this.owner.model;
     if (model !== null) {
       const modelService = new modelServiceConstructor(model, this.name);
-      Object.defineProperty(modelService, "inherit", {
-        value: this.inherit,
-        enumerable: true,
-        configurable: true,
-      });
+      (modelService as Mutable<typeof modelService>).inherit = this.inherit;
       modelService.setServiceFlags(this.serviceFlags);
       return modelService;
     } else {
@@ -218,23 +196,11 @@ TraitService.prototype.bindModelService = function (this: TraitService<Trait, un
       modelService = this.createModelService();
       model.setModelService(this.name, modelService);
     }
-    Object.defineProperty(this, "modelService", {
-      value: modelService,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).modelService = modelService;
     modelService.addTraitService(this);
-    Object.defineProperty(this, "inherit", {
-      value: modelService.inherit,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).inherit = modelService.inherit;
     this.setServiceFlags(modelService.serviceFlags);
-    Object.defineProperty(this, "manager", {
-      value: modelService.manager,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).manager = modelService.manager;
   }
 };
 
@@ -242,11 +208,7 @@ TraitService.prototype.unbindModelService = function (this: TraitService<Trait, 
   const modelService = this.modelService;
   if (modelService !== null) {
     modelService.removeTraitService(this);
-    Object.defineProperty(this, "modelService", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).modelService = null;
   }
 };
 
@@ -255,11 +217,7 @@ TraitService.prototype.setInherit = function (this: TraitService<Trait, unknown>
   if (modelService !== null) {
     modelService.setInherit(inherit);
   } else {
-    Object.defineProperty(this, "inherit", {
-      value: inherit,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).inherit = inherit;
   }
 };
 
@@ -268,11 +226,7 @@ TraitService.prototype.isInherited = function (this: TraitService<Trait, unknown
 };
 
 TraitService.prototype.setServiceFlags = function (this: TraitService<Trait, unknown>, serviceFlags: ModelServiceFlags): void {
-  Object.defineProperty(this, "serviceFlags", {
-    value: serviceFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).serviceFlags = serviceFlags;
 };
 
 Object.defineProperty(TraitService.prototype, "superName", {
@@ -367,18 +321,10 @@ TraitService.define = function <R extends Trait, T, I>(descriptor: TraitServiceD
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, serviceName) || _this;
     if (manager !== void 0) {
-      Object.defineProperty(_this, "manager", {
-        value: manager,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).manager = manager;
     }
     if (inherit !== void 0) {
-      Object.defineProperty(_this, "inherit", {
-        value: inherit,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).inherit = inherit;
     }
     return _this;
   } as unknown as TraitServiceConstructor<R, T, I>;

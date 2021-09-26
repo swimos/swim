@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import {View} from "../View";
 import type {ViewObserverType} from "../ViewObserver";
 import {GestureInputType, GestureInput} from "./GestureInput";
@@ -193,30 +194,11 @@ function GestureConstructor<G extends GestureContext, V extends View>(this: Gest
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "gestureFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "view", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "inputs", {
-    value: {},
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "inputCount", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).gestureFlags = 0;
+  (this as Mutable<typeof this>).view = null;
+  (this as Mutable<typeof this>).inputs = {};
+  (this as Mutable<typeof this>).inputCount = 0;
   return this;
 }
 
@@ -225,11 +207,7 @@ function GestureDecoratorFactory<G extends GestureContext, V extends View>(descr
 }
 
 Gesture.prototype.setGestureFlags = function (this: Gesture<GestureContext, View>, gestureFlags: GestureFlags): void {
-  Object.defineProperty(this, "gestureFlags", {
-    value: gestureFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).gestureFlags = gestureFlags;
 };
 
 Gesture.prototype.getView = function <V extends View>(this: Gesture<GestureContext, V>): V {
@@ -250,11 +228,7 @@ Gesture.prototype.setView = function <V extends View>(this: Gesture<GestureConte
     if (oldView !== null) {
       this.detachView(oldView);
     }
-    Object.defineProperty(this, "view", {
-      value: newView,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).view = newView;
     if (newView !== null) {
       this.attachView(newView);
     }
@@ -322,11 +296,7 @@ Gesture.prototype.getOrCreateInput = function (this: Gesture<GestureContext, Vie
   if (input === void 0) {
     input = this.createInput(inputId, inputType, isPrimary, x, y, t);
     inputs[inputId] = input;
-    Object.defineProperty(this, "inputCount", {
-      value: this.inputCount + 1,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).inputCount += 1;
   }
   return input;
 };
@@ -334,24 +304,12 @@ Gesture.prototype.getOrCreateInput = function (this: Gesture<GestureContext, Vie
 Gesture.prototype.clearInput = function (this: Gesture<GestureContext, View>, input: GestureInput): void {
   const inputs = this.inputs as {[inputId: string]: GestureInput | undefined};
   delete inputs[input.inputId];
-  Object.defineProperty(this, "inputCount", {
-    value: this.inputCount - 1,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).inputCount -= 1;
 };
 
 Gesture.prototype.clearInputs = function (this: Gesture<GestureContext, View>): void {
-  Object.defineProperty(this, "inputs", {
-    value: {},
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "inputCount", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).inputs = {};
+  (this as Mutable<typeof this>).inputCount = 0;
 };
 
 Gesture.prototype.viewWillUnmount = function (this: Gesture<GestureContext, View>, view: View): void {

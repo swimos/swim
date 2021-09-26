@@ -36,33 +36,15 @@ export class TextRun implements Graphics, Equals, Debug {
   constructor(text: string, font: Font | null, textAlign: CanvasTextAlign | null,
               textBaseline: CanvasTextBaseline | null, textOrigin: R2Point | null,
               textColor: Color | null) {
-    Object.defineProperty(this, "text", {
-      value: text,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "font", {
-      value: font,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "textAlign", {
-      value: textAlign,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "textBaseline", {
-      value: textBaseline,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "textOrigin", {
-      value: textOrigin,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "textColor", {
-      value: textColor,
-      enumerable: true,
-    });
+    this.text = text;
+    this.font = font;
+    this.textAlign = textAlign;
+    this.textBaseline = textBaseline;
+    this.textOrigin = textOrigin;
+    this.textColor = textColor;
   }
 
-  readonly text!: string;
+  readonly text: string;
 
   withText(text: string): TextRun {
     if (this.text === text) {
@@ -73,7 +55,7 @@ export class TextRun implements Graphics, Equals, Debug {
     }
   }
 
-  readonly font!: Font | null;
+  readonly font: Font | null;
 
   withFont(font: AnyFont | null): TextRun {
     if (font !== null) {
@@ -87,7 +69,7 @@ export class TextRun implements Graphics, Equals, Debug {
     }
   }
 
-  readonly textAlign!: CanvasTextAlign | null;
+  readonly textAlign: CanvasTextAlign | null;
 
   withTextAlign(textAlign: CanvasTextAlign | null): TextRun {
     if (this.textAlign === textAlign) {
@@ -98,7 +80,7 @@ export class TextRun implements Graphics, Equals, Debug {
     }
   }
 
-  readonly textBaseline!: CanvasTextBaseline | null;
+  readonly textBaseline: CanvasTextBaseline | null;
 
   withTextBaseline(textBaseline: CanvasTextBaseline | null): TextRun {
     if (this.textBaseline === textBaseline) {
@@ -109,7 +91,7 @@ export class TextRun implements Graphics, Equals, Debug {
     }
   }
 
-  readonly textOrigin!: R2Point | null;
+  readonly textOrigin: R2Point | null;
 
   withTextOrigin(textOrigin: AnyR2Point | null): TextRun | null {
     if (textOrigin !== null) {
@@ -123,7 +105,7 @@ export class TextRun implements Graphics, Equals, Debug {
     }
   }
 
-  readonly textColor!: Color | null;
+  readonly textColor: Color | null;
 
   withTextColor(textColor: AnyColor | null): TextRun {
     if (textColor !== null) {

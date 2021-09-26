@@ -33,10 +33,7 @@ import type {DataSetControllerObserver} from "./DataSetControllerObserver";
 export class DataSetController<X, Y> extends CompositeController {
   constructor() {
     super();
-    Object.defineProperty(this, "dataPointFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.dataPointFasteners = [];
   }
 
   override readonly controllerObservers!: ReadonlyArray<DataSetControllerObserver<X, Y>>;
@@ -654,7 +651,7 @@ export class DataSetController<X, Y> extends CompositeController {
   }
 
   /** @hidden */
-  readonly dataPointFasteners!: ReadonlyArray<ControllerFastener<this, DataPointController<X, Y>>>;
+  readonly dataPointFasteners: ReadonlyArray<ControllerFastener<this, DataPointController<X, Y>>>;
 
   protected getDataPointFastener(dataPointTrait: DataPointTrait<X, Y>): ControllerFastener<this, DataPointController<X, Y>> | null {
     const dataPointFasteners = this.dataPointFasteners;

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy} from "@swim/util";
+import {Lazy, Mutable} from "@swim/util";
 import {ControllerFlags, Controller} from "../Controller";
 import {ControllerManager} from "../manager/ControllerManager";
 import type {ExecuteContext} from "./ExecuteContext";
@@ -21,16 +21,8 @@ import type {ExecuteManagerObserver} from "./ExecuteManagerObserver";
 export class ExecuteManager<C extends Controller = Controller> extends ControllerManager<C> {
   constructor() {
     super();
-    Object.defineProperty(this, "controllerContext", {
-      value: this.initControllerContext(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "rootFlags", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.controllerContext = this.initControllerContext();
+    this.rootFlags = 0;
     this.compileTimer = 0;
     this.executeTimer = 0;
     this.updateDelay = ExecuteManager.MinUpdateDelay;
@@ -40,7 +32,7 @@ export class ExecuteManager<C extends Controller = Controller> extends Controlle
     this.onVisibilityChange = this.onVisibilityChange.bind(this);
   }
 
-  readonly controllerContext!: ExecuteContext;
+  readonly controllerContext: ExecuteContext;
 
   protected initControllerContext(): ExecuteContext {
     return {
@@ -97,15 +89,11 @@ export class ExecuteManager<C extends Controller = Controller> extends Controlle
     rootController.cascadeUnpower();
   }
 
-  readonly rootFlags!: ControllerFlags;
+  readonly rootFlags: ControllerFlags;
 
   /** @hidden */
   setRootFlags(rootFlags: ControllerFlags): void {
-    Object.defineProperty(this, "rootFlags", {
-      value: rootFlags,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).rootFlags = rootFlags;
   }
 
   /** @hidden */

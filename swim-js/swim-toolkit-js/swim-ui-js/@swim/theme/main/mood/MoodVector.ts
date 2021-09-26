@@ -26,21 +26,15 @@ export type MoodVectorUpdates<M extends Mood = Feel> = ReadonlyArray<[M, number 
 export class MoodVector<M extends Mood = Feel> implements Equals, Debug {
   constructor(array: ReadonlyArray<[M, number]>,
               index: {readonly [name: string]: number | undefined}) {
-    Object.defineProperty(this, "array", {
-      value: array,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "index", {
-      value: index,
-      enumerable: true,
-    });
+    this.array = array;
+    this.index = index;
   }
 
   /** @hidden */
-  readonly array!: ReadonlyArray<[M, number]>;
+  readonly array: ReadonlyArray<[M, number]>;
 
   /** @hidden */
-  readonly index!: {readonly [name: string]: number | undefined};
+  readonly index: {readonly [name: string]: number | undefined};
 
   get size(): number {
     return this.array.length;

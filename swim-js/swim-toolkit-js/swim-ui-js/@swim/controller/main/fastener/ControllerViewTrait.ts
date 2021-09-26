@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {FromAny} from "@swim/util";
+import {FromAny, Mutable} from "@swim/util";
 import {Model, Trait, TraitObserverType} from "@swim/model";
 import {ViewFactory, View, ViewObserverType} from "@swim/view";
 import {NodeView} from "@swim/dom";
@@ -215,35 +215,12 @@ function ControllerViewTraitConstructor<C extends Controller, V extends View, R 
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "fastenerFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "viewKey", {
-    value: viewKey,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "view", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "traitKey", {
-    value: traitKey,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "trait", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).fastenerFlags = 0;
+  (this as Mutable<typeof this>).viewKey = viewKey;
+  (this as Mutable<typeof this>).view = null;
+  (this as Mutable<typeof this>).traitKey = traitKey;
+  (this as Mutable<typeof this>).trait = null;
   return this;
 }
 
@@ -252,11 +229,7 @@ function ControllerViewTraitDecoratorFactory<C extends Controller, V extends Vie
 }
 
 ControllerViewTrait.prototype.setFastenerFlags = function (this: ControllerViewTrait<Controller, View, Trait>, fastenerFlags: ControllerViewTraitFlags): void {
-  Object.defineProperty(this, "fastenerFlags", {
-    value: fastenerFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).fastenerFlags = fastenerFlags;
 };
 
 ControllerViewTrait.prototype.getView = function <V extends View>(this: ControllerViewTrait<Controller, V, Trait>): V {
@@ -284,11 +257,7 @@ ControllerViewTrait.prototype.setView = function <V extends View>(this: Controll
     if (oldView !== null) {
       this.detachView(oldView);
     }
-    Object.defineProperty(this, "view", {
-      value: newView,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).view = newView;
     if (newView !== null) {
       this.attachView(newView);
     }
@@ -404,11 +373,7 @@ ControllerViewTrait.prototype.setTrait = function <R extends Trait>(this: Contro
     if (oldTrait !== null) {
       this.detachTrait(oldTrait);
     }
-    Object.defineProperty(this, "trait", {
-      value: newTrait,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).trait = newTrait;
     if (newTrait !== null) {
       this.attachTrait(newTrait);
     }

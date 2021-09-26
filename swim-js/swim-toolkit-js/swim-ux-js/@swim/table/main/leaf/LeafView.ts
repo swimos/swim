@@ -38,10 +38,7 @@ import type {LeafViewObserver} from "./LeafViewObserver";
 export class LeafView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "cellFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.cellFasteners = [];
     this.initLeaf();
   }
 
@@ -328,7 +325,7 @@ export class LeafView extends HtmlView {
   }
 
   /** @hidden */
-  readonly cellFasteners!: ReadonlyArray<ViewFastener<this, CellView>>;
+  readonly cellFasteners: ReadonlyArray<ViewFastener<this, CellView>>;
 
   /** @hidden */
   protected mountCellFasteners(): void {

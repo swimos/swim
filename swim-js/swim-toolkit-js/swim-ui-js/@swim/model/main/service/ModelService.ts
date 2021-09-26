@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import {Model} from "../Model";
 import type {Trait} from "../Trait";
 import {ModelManager} from "../manager/ModelManager";
@@ -187,35 +187,12 @@ function ModelServiceConstructor<M extends Model, T>(this: ModelService<M, T>, o
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "inherit", {
-    value: true,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "serviceFlags", {
-    value: 0,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "superService", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "traitServices", {
-    value: Arrays.empty,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "manager", {
-    value: void 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).inherit = true;
+  (this as Mutable<typeof this>).serviceFlags = 0;
+  (this as Mutable<typeof this>).superService = null;
+  (this as Mutable<typeof this>).traitServices = Arrays.empty;
+  (this as Mutable<typeof this>).manager = void 0 as unknown as T;
   return this;
 }
 
@@ -226,11 +203,7 @@ function ModelServiceDecoratorFactory<M extends Model, T>(descriptor: ModelServi
 ModelService.prototype.setInherit = function (this: ModelService<Model, unknown>, inherit: string | boolean): void {
   if (this.inherit !== inherit) {
     this.unbindSuperService();
-    Object.defineProperty(this, "inherit", {
-      value: inherit,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).inherit = inherit;
     this.bindSuperService();
   }
 };
@@ -240,11 +213,7 @@ ModelService.prototype.isInherited = function (this: ModelService<Model, unknown
 };
 
 ModelService.prototype.setServiceFlags = function (this: ModelService<Model, unknown>, serviceFlags: ModelServiceFlags): void {
-  Object.defineProperty(this, "serviceFlags", {
-    value: serviceFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).serviceFlags = serviceFlags;
 };
 
 Object.defineProperty(ModelService.prototype, "superName", {
@@ -282,47 +251,27 @@ ModelService.prototype.bindSuperService = function (this: ModelService<Model, un
       }
       break;
     } while (true);
-    Object.defineProperty(this, "superService", {
-      value: superService,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).superService = superService;
   }
   if (this.manager === void 0 || this.manager === null) {
     if (superService !== null) {
       this.setServiceFlags(this.serviceFlags | ModelService.InheritedFlag);
-      Object.defineProperty(this, "manager", {
-        value: superService.manager,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).manager = superService.manager;
     } else {
       this.setServiceFlags(this.serviceFlags & ~ModelService.InheritedFlag);
-      Object.defineProperty(this, "manager", {
-        value: this.initManager(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<typeof this>).manager = this.initManager();
     }
   }
   const traitServices = this.traitServices;
   for (let i = 0, n = traitServices.length; i < n; i += 1) {
     const traitService = traitServices[i]!;
     traitService.setServiceFlags(traitService.serviceFlags & ~ModelService.InheritedFlag | (this.serviceFlags & ModelService.InheritedFlag));
-    Object.defineProperty(traitService, "manager", {
-      value: this.manager,
-      enumerable: true,
-      configurable: true,
-    });
+    (traitService as Mutable<typeof traitService>).manager = this.manager;
   }
 };
 
 ModelService.prototype.unbindSuperService = function (this: ModelService<Model, unknown>): void {
-  Object.defineProperty(this, "superService", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).superService = null;
   this.setServiceFlags(this.serviceFlags & ~ModelService.InheritedFlag);
   const traitServices = this.traitServices;
   for (let i = 0, n = traitServices.length; i < n; i += 1) {
@@ -332,19 +281,11 @@ ModelService.prototype.unbindSuperService = function (this: ModelService<Model, 
 };
 
 ModelService.prototype.addTraitService = function <T>(this: ModelService<Model, T>, traitService: TraitService<Trait, T>): void {
-  Object.defineProperty(this, "traitServices", {
-    value: Arrays.inserted(traitService, this.traitServices),
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).traitServices = Arrays.inserted(traitService, this.traitServices);
 };
 
 ModelService.prototype.removeTraitService = function <T>(this: ModelService<Model, T>, traitService: TraitService<Trait, T>): void {
-  Object.defineProperty(this, "traitServices", {
-    value: Arrays.removed(traitService, this.traitServices),
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).traitServices = Arrays.removed(traitService, this.traitServices);
 };
 
 Object.defineProperty(ModelService.prototype, "superManager", {
@@ -469,18 +410,10 @@ ModelService.define = function <M extends Model, T, I>(descriptor: ModelServiceD
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, serviceName) || _this;
     if (manager !== void 0) {
-      Object.defineProperty(_this, "manager", {
-        value: manager,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).manager = manager;
     }
     if (inherit !== void 0) {
-      Object.defineProperty(_this, "inherit", {
-        value: inherit,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).inherit = inherit;
     }
     return _this;
   } as unknown as ModelServiceConstructor<M, T, I>;

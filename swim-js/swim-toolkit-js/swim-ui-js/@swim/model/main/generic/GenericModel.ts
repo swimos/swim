@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import type {ModelContextType, ModelContext} from "../ModelContext";
 import {ModelFlags, Model} from "../Model";
 import type {ModelObserverType} from "../ModelObserver";
@@ -28,46 +28,14 @@ import type {ModelDownlink} from "../downlink/ModelDownlink";
 export abstract class GenericModel extends Model {
   constructor() {
     super();
-    Object.defineProperty(this, "key", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "parentModel", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "modelConsumers", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "modelServices", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "modelProperties", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "modelFasteners", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "modelTraits", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "modelDownlinks", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.key = void 0;
+    this.parentModel = null;
+    this.modelConsumers = Arrays.empty;
+    this.modelServices = null;
+    this.modelProperties = null;
+    this.modelFasteners = null;
+    this.modelTraits = null;
+    this.modelDownlinks = null;
   }
 
   protected willObserve<T>(callback: (this: this, modelObserver: ModelObserverType<this>) => T | void): T | undefined {
@@ -96,18 +64,14 @@ export abstract class GenericModel extends Model {
     return result;
   }
 
-  override readonly key!: string | undefined;
+  override readonly key: string | undefined;
 
   /** @hidden */
   override setKey(key: string | undefined): void {
-    Object.defineProperty(this, "key", {
-      value: key,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).key = key;
   }
 
-  override readonly parentModel!: Model | null;
+  override readonly parentModel: Model | null;
 
   /** @hidden */
   override setParentModel(newParentModel: Model | null, oldParentModel: Model | null): void {
@@ -115,11 +79,7 @@ export abstract class GenericModel extends Model {
     if (oldParentModel !== null) {
       this.detachParentModel(oldParentModel);
     }
-    Object.defineProperty(this, "parentModel", {
-      value: newParentModel,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).parentModel = newParentModel;
     if (newParentModel !== null) {
       this.attachParentModel(newParentModel);
     }
@@ -536,18 +496,14 @@ export abstract class GenericModel extends Model {
     this.reconcileModelDownlinks();
   }
 
-  override readonly modelConsumers!: ReadonlyArray<ModelConsumer>;
+  override readonly modelConsumers: ReadonlyArray<ModelConsumer>;
 
   override addModelConsumer(modelConsumer: ModelConsumerType<this>): void {
     const oldModelConsumers = this.modelConsumers;
     const newModelConsumers = Arrays.inserted(modelConsumer, oldModelConsumers);
     if (oldModelConsumers !== newModelConsumers) {
       this.willAddModelConsumer(modelConsumer);
-      Object.defineProperty(this, "modelConsumers", {
-        value: newModelConsumers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).modelConsumers = newModelConsumers;
       this.onAddModelConsumer(modelConsumer);
       this.didAddModelConsumer(modelConsumer);
       if (oldModelConsumers.length === 0 && this.isMounted()) {
@@ -566,11 +522,7 @@ export abstract class GenericModel extends Model {
     const newModelConsumers = Arrays.removed(modelConsumer, oldModelConsumers);
     if (oldModelConsumers !== newModelConsumers) {
       this.willRemoveModelConsumer(modelConsumer);
-      Object.defineProperty(this, "modelConsumers", {
-        value: newModelConsumers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).modelConsumers = newModelConsumers;
       this.onRemoveModelConsumer(modelConsumer);
       this.didRemoveModelConsumer(modelConsumer);
       if (newModelConsumers.length === 0) {
@@ -585,7 +537,7 @@ export abstract class GenericModel extends Model {
   }
 
   /** @hidden */
-  readonly modelServices!: {[serviceName: string]: ModelService<Model, unknown> | undefined} | null;
+  readonly modelServices: {[serviceName: string]: ModelService<Model, unknown> | undefined} | null;
 
   override hasModelService(serviceName: string): boolean {
     const modelServices = this.modelServices;
@@ -607,11 +559,7 @@ export abstract class GenericModel extends Model {
     let modelServices = this.modelServices;
     if (modelServices === null) {
       modelServices = {};
-      Object.defineProperty(this, "modelServices", {
-        value: modelServices,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).modelServices = modelServices;
     }
     const oldModelService = modelServices[serviceName];
     if (oldModelService !== void 0 && this.isMounted()) {
@@ -646,7 +594,7 @@ export abstract class GenericModel extends Model {
   }
 
   /** @hidden */
-  readonly modelProperties!: {[propertyName: string]: ModelProperty<Model, unknown> | undefined} | null;
+  readonly modelProperties: {[propertyName: string]: ModelProperty<Model, unknown> | undefined} | null;
 
   override hasModelProperty(propertyName: string): boolean {
     const modelProperties = this.modelProperties;
@@ -668,11 +616,7 @@ export abstract class GenericModel extends Model {
     let modelProperties = this.modelProperties;
     if (modelProperties === null) {
       modelProperties = {};
-      Object.defineProperty(this, "modelProperties", {
-        value: modelProperties,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).modelProperties = modelProperties;
     }
     const oldModelProperty = modelProperties[propertyName];
     if (oldModelProperty !== void 0 && this.isMounted()) {
@@ -716,7 +660,7 @@ export abstract class GenericModel extends Model {
   }
 
   /** @hidden */
-  readonly modelFasteners!: {[fastenerName: string]: ModelFastener<Model, Model> | undefined} | null;
+  readonly modelFasteners: {[fastenerName: string]: ModelFastener<Model, Model> | undefined} | null;
 
   override hasModelFastener(fastenerName: string): boolean {
     const modelFasteners = this.modelFasteners;
@@ -738,11 +682,7 @@ export abstract class GenericModel extends Model {
     let modelFasteners = this.modelFasteners;
     if (modelFasteners === null) {
       modelFasteners = {};
-      Object.defineProperty(this, "modelFasteners", {
-        value: modelFasteners,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).modelFasteners = modelFasteners;
     }
     const oldModelFastener = modelFasteners[fastenerName];
     if (oldModelFastener !== void 0 && this.isMounted()) {
@@ -799,7 +739,7 @@ export abstract class GenericModel extends Model {
   }
 
   /** @hidden */
-  readonly modelTraits!: {[fastenerName: string]: ModelTrait<Model, Trait> | undefined} | null;
+  readonly modelTraits: {[fastenerName: string]: ModelTrait<Model, Trait> | undefined} | null;
 
   override hasModelTrait(fastenerName: string): boolean {
     const modelTraits = this.modelTraits;
@@ -821,11 +761,7 @@ export abstract class GenericModel extends Model {
     let modelTraits = this.modelTraits;
     if (modelTraits === null) {
       modelTraits = {};
-      Object.defineProperty(this, "modelTraits", {
-        value: modelTraits,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).modelTraits = modelTraits;
     }
     const oldModelTrait = modelTraits[fastenerName];
     if (oldModelTrait !== void 0 && this.isMounted()) {
@@ -882,7 +818,7 @@ export abstract class GenericModel extends Model {
   }
 
   /** @hidden */
-  readonly modelDownlinks!: {[downlinkName: string]: ModelDownlink<Model> | undefined} | null;
+  readonly modelDownlinks: {[downlinkName: string]: ModelDownlink<Model> | undefined} | null;
 
   override hasModelDownlink(downlinkName: string): boolean {
     const modelDownlinks = this.modelDownlinks;
@@ -904,11 +840,7 @@ export abstract class GenericModel extends Model {
     let modelDownlinks = this.modelDownlinks;
     if (modelDownlinks === null) {
       modelDownlinks = {};
-      Object.defineProperty(this, "modelDownlinks", {
-        value: modelDownlinks,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).modelDownlinks = modelDownlinks;
     }
     const oldModelDownlink = modelDownlinks[downlinkName];
     if (oldModelDownlink !== void 0 && this.isMounted()) {

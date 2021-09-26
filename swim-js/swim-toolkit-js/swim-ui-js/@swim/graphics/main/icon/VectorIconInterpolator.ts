@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals} from "@swim/util";
+import {Equals, Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {R2Path} from "@swim/math";
 import type {Color} from "@swim/style";
@@ -55,26 +55,11 @@ export const VectorIconInterpolator = function (i0: VectorIcon, i1: VectorIcon):
     return new VectorIcon(path, fillRule, fillColor, fillLook, moodModifier);
   } as VectorIconInterpolator;
   Object.setPrototypeOf(interpolator, VectorIconInterpolator.prototype);
-  Object.defineProperty(interpolator, "path", {
-    value: i1.path,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "fillRule", {
-    value: i1.fillRule,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "fillColorInterpolator", {
-    value: Interpolator(i0.fillColor, i1.fillColor),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "fillLook", {
-    value: i1.fillLook,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "moodModifier", {
-    value: i1.moodModifier,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).path = i1.path;
+  (interpolator as Mutable<typeof interpolator>).fillRule = i1.fillRule;
+  (interpolator as Mutable<typeof interpolator>).fillColorInterpolator = Interpolator(i0.fillColor, i1.fillColor);
+  (interpolator as Mutable<typeof interpolator>).fillLook = i1.fillLook;
+  (interpolator as Mutable<typeof interpolator>).moodModifier = i1.moodModifier;
   return interpolator;
 } as {
   (i0: VectorIcon, i1: VectorIcon): VectorIconInterpolator;

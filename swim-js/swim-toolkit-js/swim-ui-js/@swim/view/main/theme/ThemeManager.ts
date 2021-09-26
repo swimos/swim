@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy} from "@swim/util";
+import {Lazy, Mutable} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {Look, Mood, MoodVector, Theme, ThemeMatrix} from "@swim/theme";
 import {View} from "../View";
@@ -23,30 +23,18 @@ import type {ThemeManagerObserver} from "./ThemeManagerObserver";
 export class ThemeManager<V extends View = View> extends ViewManager<V> {
   constructor() {
     super();
-    Object.defineProperty(this, "mood", {
-      value: this.initMood(),
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "theme", {
-      value: this.initTheme(),
-      enumerable: true,
-      configurable: true,
-    });
+    this.mood = this.initMood();
+    this.theme = this.initTheme();
   }
 
-  readonly mood!: MoodVector;
+  readonly mood: MoodVector;
 
   protected initMood(): MoodVector {
     return Mood.default;
   }
 
   setMood(mood: MoodVector): void {
-    Object.defineProperty(this, "mood", {
-      value: mood,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).mood = mood;
     this.applyTheme(this.theme, mood);
     const rootViews = this.rootViews;
     for (let i = 0, n = rootViews.length; i < n; i += 1) {
@@ -58,7 +46,7 @@ export class ThemeManager<V extends View = View> extends ViewManager<V> {
     }
   }
 
-  readonly theme!: ThemeMatrix;
+  readonly theme: ThemeMatrix;
 
   protected initTheme(): ThemeMatrix {
     const viewport = Viewport.detect();
@@ -71,11 +59,7 @@ export class ThemeManager<V extends View = View> extends ViewManager<V> {
   }
 
   setTheme(theme: ThemeMatrix): void {
-    Object.defineProperty(this, "theme", {
-      value: theme,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).theme = theme;
     this.applyTheme(theme, this.mood);
     const rootViews = this.rootViews;
     for (let i = 0, n = rootViews.length; i < n; i += 1) {

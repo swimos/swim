@@ -23,10 +23,7 @@ export type GaugeTitleFunction = (gaugeTrait: GaugeTrait) => GraphicsView | stri
 export class GaugeTrait extends GenericTrait {
   constructor() {
     super();
-    Object.defineProperty(this, "dialFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.dialFasteners = [];
   }
 
   override readonly traitObservers!: ReadonlyArray<GaugeTraitObserver>;
@@ -170,7 +167,7 @@ export class GaugeTrait extends GenericTrait {
   }
 
   /** @hidden */
-  readonly dialFasteners!: ReadonlyArray<TraitFastener<this, DialTrait>>;
+  readonly dialFasteners: ReadonlyArray<TraitFastener<this, DialTrait>>;
 
   /** @hidden */
   protected mountDialFasteners(): void {

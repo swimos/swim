@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent, Equals, Lazy, Values} from "@swim/util";
+import {Lazy, Equals, Equivalent, Mutable, Values} from "@swim/util";
 import {Output, Parser, Debug, Diagnostic, Unicode} from "@swim/codec";
 import type {Interpolate, Interpolator} from "@swim/mapping";
 import type {Value, Form} from "@swim/structure";
@@ -44,42 +44,17 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
               weight: FontWeight | undefined, stretch: FontStretch | undefined,
               size: FontSize | null, height: LineHeight | null,
               family: FontFamily | ReadonlyArray<FontFamily>) {
-    Object.defineProperty(this, "style", {
-      value: style,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "variant", {
-      value: variant,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "weight", {
-      value: weight,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stretch", {
-      value: stretch,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "size", {
-      value: size,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "height", {
-      value: height,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "family", {
-      value: family,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.style = style;
+    this.variant = variant;
+    this.weight = weight;
+    this.stretch = stretch;
+    this.size = size;
+    this.height = height;
+    this.family = family;
+    this.stringValue = void 0;
   }
 
-  readonly style!: FontStyle | undefined;
+  readonly style: FontStyle | undefined;
 
   withStyle(style: FontStyle | undefined): Font {
     if (style === this.style) {
@@ -90,7 +65,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     }
   }
 
-  readonly variant!: FontVariant | undefined;
+  readonly variant: FontVariant | undefined;
 
   withVariant(variant: FontVariant | undefined): Font {
     if (variant === this.variant) {
@@ -101,7 +76,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     }
   }
 
-  readonly weight!: FontWeight | undefined;
+  readonly weight: FontWeight | undefined;
 
   withWeight(weight: FontWeight | undefined): Font {
     if (weight === this.weight) {
@@ -112,7 +87,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     }
   }
 
-  readonly stretch!: FontStretch | undefined;
+  readonly stretch: FontStretch | undefined;
 
   withStretch(stretch: FontStretch | undefined): Font {
     if (stretch === this.stretch) {
@@ -123,7 +98,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     }
   }
 
-  readonly size!: FontSize | null;
+  readonly size: FontSize | null;
 
   withSize(size: AnyFontSize | null): Font{
     if (size !== null) {
@@ -137,7 +112,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     }
   }
 
-  readonly height!: LineHeight | null;
+  readonly height: LineHeight | null;
 
   withHeight(height: AnyLineHeight | null): Font {
     if (height !== null) {
@@ -151,7 +126,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
     }
   }
 
-  readonly family!: FontFamily | ReadonlyArray<FontFamily>;
+  readonly family: FontFamily | ReadonlyArray<FontFamily>;
 
   withFamily(family: FontFamily | ReadonlyArray<FontFamily>): Font {
     if (Array.isArray(family) && family.length === 1) {
@@ -246,7 +221,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
   }
 
   /* @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   toString(): string {
     let s = this.stringValue;
@@ -298,11 +273,7 @@ export class Font implements Interpolate<Font>, Equals, Equivalent, Debug {
           s += FontFamily.format(this.family[i]);
         }
       }
-      Object.defineProperty(this, "stringValue", {
-        value: s,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = s;
     }
     return s;
   }

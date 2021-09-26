@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Equals, FromAny} from "@swim/util";
+import {Equals, FromAny, Mutable} from "@swim/util";
 import {ModelFlags, ModelPrecedence, Model} from "../Model";
 import {Trait} from "../Trait";
 import {StringTraitProperty} from "../"; // forward import
@@ -248,40 +248,13 @@ function TraitPropertyConstructor<R extends Trait, T, U>(this: TraitProperty<R, 
       configurable: true,
     });
   }
-  Object.defineProperty(this, "owner", {
-    value: owner,
-    enumerable: true,
-  });
-  Object.defineProperty(this, "inherit", {
-    value: false,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "superProperty", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "subProperties", {
-    value: null,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "precedence", {
-    value: Model.Intrinsic,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "propertyFlags", {
-    value: TraitProperty.UpdatedFlag,
-    enumerable: true,
-    configurable: true,
-  });
-  Object.defineProperty(this, "ownState", {
-    value: void 0,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).owner = owner;
+  (this as Mutable<typeof this>).inherit = false;
+  (this as Mutable<typeof this>).superProperty = null;
+  (this as Mutable<typeof this>).subProperties = null;
+  (this as Mutable<typeof this>).precedence = Model.Intrinsic;
+  (this as Mutable<typeof this>).propertyFlags = TraitProperty.UpdatedFlag;
+  (this as Mutable<typeof this>).ownState = void 0 as unknown as T;
   return this;
 }
 
@@ -292,11 +265,7 @@ function TraitPropertyDecoratorFactory<R extends Trait, T, U>(descriptor: TraitP
 TraitProperty.prototype.setInherit = function (this: TraitProperty<Trait, unknown>, inherit: string | boolean): void {
   if (this.inherit !== inherit) {
     this.unbindSuperProperty();
-    Object.defineProperty(this, "inherit", {
-      value: inherit,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).inherit = inherit;
     this.bindSuperProperty();
   }
 };
@@ -342,11 +311,7 @@ TraitProperty.prototype.bindSuperProperty = function (this: TraitProperty<Trait,
       const superTrait = this.getSuperTrait(superModel);
       const superProperty = superTrait !== null ? superTrait.getLazyTraitProperty(superName) : null;
       if (superProperty !== null) {
-        Object.defineProperty(this, "superProperty", {
-          value: superProperty,
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<typeof this>).superProperty = superProperty;
         superProperty.addSubProperty(this);
         if ((this.propertyFlags & TraitProperty.OverrideFlag) === 0 && superProperty.precedence >= this.precedence) {
           this.setPropertyFlags(this.propertyFlags | TraitProperty.InheritedFlag);
@@ -364,11 +329,7 @@ TraitProperty.prototype.unbindSuperProperty = function (this: TraitProperty<Trai
   const superProperty = this.superProperty;
   if (superProperty !== null) {
     superProperty.removeSubProperty(this);
-    Object.defineProperty(this, "superProperty", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).superProperty = null;
     this.setPropertyFlags(this.propertyFlags & ~TraitProperty.InheritedFlag);
   }
 };
@@ -377,11 +338,7 @@ TraitProperty.prototype.addSubProperty = function <T>(this: TraitProperty<Trait,
   let subProperties = this.subProperties;
   if (subProperties === null) {
     subProperties = [];
-    Object.defineProperty(this, "subProperties", {
-      value: subProperties,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).subProperties = subProperties;
   }
   subProperties.push(subProperty);
 };
@@ -445,11 +402,7 @@ TraitProperty.prototype.setOwnState = function <T, U>(this: TraitProperty<Trait,
   const oldState = this.state;
   if (!Equals(newState, oldState)) {
     this.willSetState(newState, oldState);
-    Object.defineProperty(this, "ownState", {
-      value: newState,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).ownState = newState;
     this.setPropertyFlags(this.propertyFlags | TraitProperty.UpdatedFlag);
     this.onSetState(newState, oldState);
     this.updateSubProperties(newState, oldState);
@@ -480,11 +433,7 @@ TraitProperty.prototype.setPrecedence = function (this: TraitProperty<Trait, unk
   const oldPrecedence = this.precedence;
   if (newPrecedence !== oldPrecedence) {
     this.willSetPrecedence(newPrecedence, oldPrecedence);
-    Object.defineProperty(this, "precedence", {
-      value: newPrecedence,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).precedence = newPrecedence;
     this.onSetPrecedence(newPrecedence, oldPrecedence);
     this.didSetPrecedence(newPrecedence, oldPrecedence);
   }
@@ -508,11 +457,7 @@ TraitProperty.prototype.didSetPrecedence = function (this: TraitProperty<Trait, 
 };
 
 TraitProperty.prototype.setPropertyFlags = function (this: TraitProperty<Trait, unknown>, propertyFlags: TraitPropertyFlags): void {
-  Object.defineProperty(this, "propertyFlags", {
-    value: propertyFlags,
-    enumerable: true,
-    configurable: true,
-  });
+  (this as Mutable<typeof this>).propertyFlags = propertyFlags;
 };
 
 TraitProperty.prototype.isUpdated = function (this: TraitProperty<Trait, unknown>): boolean {
@@ -678,25 +623,13 @@ TraitProperty.define = function <R extends Trait, T, U, I>(descriptor: TraitProp
       ownState = _this.fromAny(state);
     }
     if (ownState !== void 0) {
-      Object.defineProperty(_this, "ownState", {
-        value: ownState,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).ownState = ownState;
     }
     if (precedence !== void 0) {
-      Object.defineProperty(_this, "precedence", {
-        value: precedence,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).precedence = precedence;
     }
     if (inherit !== void 0) {
-      Object.defineProperty(_this, "inherit", {
-        value: inherit,
-        enumerable: true,
-        configurable: true,
-      });
+      (_this as Mutable<typeof _this>).inherit = inherit;
     }
     return _this;
   } as unknown as TraitPropertyConstructor<R, T, U, I>;

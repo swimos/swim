@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {AnyTiming} from "@swim/mapping";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
@@ -38,13 +39,10 @@ export interface GeoPlotViewInit extends GeoViewInit, StrokeViewInit {
 export class GeoPlotView extends GeoLayerView implements StrokeView {
   constructor() {
     super();
-    Object.defineProperty(this, "gradientStops", {
-      value: 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.gradientStops = 0;
     Object.defineProperty(this, "viewBounds", {
       value: R2Box.undefined(),
+      writable: true,
       enumerable: true,
       configurable: true,
     });
@@ -142,18 +140,10 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
         lngMid /= j;
         latMid /= j;
         this.geoCentroid.setState(new GeoPoint(lngMid, latMid), View.Intrinsic);
-        Object.defineProperty(this, "geoBounds", {
-          value: new GeoBox(lngMin, latMin, lngMax, latMax),
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).geoBounds = new GeoBox(lngMin, latMin, lngMax, latMax);
       } else {
         this.geoCentroid.setState(GeoPoint.origin(), View.Intrinsic);
-        Object.defineProperty(this, "geoBounds", {
-          value: GeoBox.undefined(),
-          enumerable: true,
-          configurable: true,
-        });
+        (this as Mutable<this>).geoBounds = GeoBox.undefined();
       }
       const newGeoBounds = this.geoBounds;
       if (!oldGeoBounds.equals(newGeoBounds)) {
@@ -199,7 +189,7 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
   readonly hitWidth!: ViewProperty<this, number | undefined>;
 
   /** @hidden */
-  readonly gradientStops!: number;
+  readonly gradientStops: number;
 
   protected override onInsertChildView(childView: View, targetView: View | null): void {
     super.onInsertChildView(childView, targetView);
@@ -259,40 +249,20 @@ export class GeoPlotView extends GeoLayerView implements StrokeView {
       lngMid /= pointCount;
       latMid /= pointCount;
       this.geoCentroid.setState(new GeoPoint(lngMid, latMid), View.Intrinsic);
-      Object.defineProperty(this, "geoBounds", {
-        value: new GeoBox(lngMin, latMin, lngMax, latMax),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).geoBounds = new GeoBox(lngMin, latMin, lngMax, latMax);
       xMid /= pointCount;
       yMid /= pointCount;
       this.viewCentroid.setState(new R2Point(xMid, yMid), View.Intrinsic);
-      Object.defineProperty(this, "viewBounds", {
-        value: new R2Box(xMin, yMin, xMax, yMax),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).viewBounds = new R2Box(xMin, yMin, xMax, yMax);
       this.cullGeoFrame(viewContext.geoViewport.geoFrame);
     } else {
       this.geoCentroid.setState(GeoPoint.origin(), View.Intrinsic);
-      Object.defineProperty(this, "geoBounds", {
-        value: GeoBox.undefined(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).geoBounds = GeoBox.undefined();
       this.viewCentroid.setState(R2Point.origin(), View.Intrinsic);
-      Object.defineProperty(this, "viewBounds", {
-        value: R2Box.undefined(),
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).viewBounds = R2Box.undefined();
       this.setCulled(true);
     }
-    Object.defineProperty(this, "gradientStops", {
-      value: gradientStops,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).gradientStops = gradientStops;
     const newGeoBounds = this.geoBounds;
     if (!oldGeoBounds.equals(newGeoBounds)) {
       this.willSetGeoBounds(newGeoBounds, oldGeoBounds);

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Arrays} from "@swim/util";
+import {Mutable, Arrays} from "@swim/util";
 import type {Model, Trait} from "@swim/model";
 import {View, GestureContextPrototype, GestureContext, Gesture} from "@swim/view";
 import type {ControllerContextType, ControllerContext} from "./ControllerContext";
@@ -79,36 +79,27 @@ export interface ControllerClass<C extends Controller = Controller> extends Func
 export abstract class Controller implements GestureContext {
   constructor() {
     this.controllerFlags = 0;
-    Object.defineProperty(this, "controllerObservers", {
-      value: Arrays.empty,
-      enumerable: true,
-      configurable: true,
-    });
+    this.controllerObservers = Arrays.empty;
   }
 
   initController(init: ControllerInit): void {
     // hook
   }
 
-  readonly controllerFlags!: ControllerFlags;
+  readonly controllerFlags: ControllerFlags;
 
   setControllerFlags(controllerFlags: ControllerFlags): void {
-    // Object.defineProperty is too expensive for controllerFlags
-    (this as any).controllerFlags = controllerFlags;
+    (this as Mutable<this>).controllerFlags = controllerFlags;
   }
 
-  readonly controllerObservers!: ReadonlyArray<ControllerObserver>;
+  readonly controllerObservers: ReadonlyArray<ControllerObserver>;
 
   addControllerObserver(controllerObserver: ControllerObserverType<this>): void {
     const oldControllerObservers = this.controllerObservers;
     const newControllerObservers = Arrays.inserted(controllerObserver, oldControllerObservers);
     if (oldControllerObservers !== newControllerObservers) {
       this.willAddControllerObserver(controllerObserver);
-      Object.defineProperty(this, "controllerObservers", {
-        value: newControllerObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).controllerObservers = newControllerObservers;
       this.onAddControllerObserver(controllerObserver);
       this.didAddControllerObserver(controllerObserver);
     }
@@ -131,11 +122,7 @@ export abstract class Controller implements GestureContext {
     const newControllerObservers = Arrays.removed(controllerObserver, oldControllerObservers);
     if (oldControllerObservers !== newControllerObservers) {
       this.willRemoveControllerObserver(controllerObserver);
-      Object.defineProperty(this, "controllerObservers", {
-        value: newControllerObservers,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).controllerObservers = newControllerObservers;
       this.onRemoveControllerObserver(controllerObserver);
       this.didRemoveControllerObserver(controllerObserver);
     }

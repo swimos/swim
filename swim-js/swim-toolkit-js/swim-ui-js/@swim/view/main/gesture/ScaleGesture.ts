@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
+import type {Mutable} from "@swim/util";
 import type {AnyTiming, ContinuousScale} from "@swim/mapping";
 import type {R2Box} from "@swim/math";
 import type {ViewContext} from "../ViewContext";
@@ -264,8 +265,8 @@ __extends(ScaleGesture, MomentumGesture);
 
 function ScaleGestureConstructor<G extends GestureContext, V extends View, X, Y>(this: ScaleGesture<G, V, X, Y>, owner: G, gestureName: string | undefined): ScaleGesture<G, V, X, Y> {
   const _this: ScaleGesture<G, V, X, Y> = (MomentumGesture as Function).call(this, owner, gestureName) || this;
-  this.distanceMin = ScaleGesture.distanceMin;
-  this.setGestureFlags(this.gestureFlags | Gesture.WheelFlag);
+  _this.distanceMin = ScaleGesture.distanceMin;
+  _this.setGestureFlags(_this.gestureFlags | Gesture.WheelFlag);
   return _this;
 }
 
@@ -1078,11 +1079,7 @@ ScaleGesture.prototype.zoom = function <X, Y>(this: ScaleGesture<GestureContext,
 
     inputs.zoom0 = zoom0;
     inputs.zoom1 = zoom1;
-    Object.defineProperty(this, "inputCount", {
-      value: this.inputCount + 2,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<typeof this>).inputCount += 2;
     this.beginCoast(zoom0, event);
     this.beginCoast(zoom1, event);
   }
@@ -1140,22 +1137,22 @@ ScaleGesture.define = function <G extends GestureContext, V extends View, X, Y, 
     Object.setPrototypeOf(_this, this);
     _this = _super!.call(_this, owner, gestureName) || _this;
     if (hysteresis !== void 0) {
-      this.hysteresis = hysteresis;
+      _this.hysteresis = hysteresis;
     }
     if (acceleration !== void 0) {
-      this.acceleration = acceleration;
+      _this.acceleration = acceleration;
     }
     if (velocityMax !== void 0) {
-      this.velocityMax = velocityMax;
+      _this.velocityMax = velocityMax;
     }
     if (distanceMin !== void 0) {
-      this.distanceMin = distanceMin;
+      _this.distanceMin = distanceMin;
     }
     if (preserveAspectRatio !== void 0) {
-      this.preserveAspectRatio = preserveAspectRatio;
+      _this.preserveAspectRatio = preserveAspectRatio;
     }
     if (wheel !== void 0) {
-      this.wheel = wheel;
+      _this.wheel = wheel;
     }
     return _this;
   } as unknown as ScaleGestureConstructor<G, V, X, Y, I>;

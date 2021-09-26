@@ -33,28 +33,19 @@ export type ColorStopTuple = [AnyColor, AnyLength | null];
 
 export class ColorStop implements Interpolate<ColorStop>, Equals, Equivalent {
   constructor(color: Color, stop: Length | null, hint: Length | null) {
-    Object.defineProperty(this, "color", {
-      value: color,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stop", {
-      value: stop,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "hint", {
-      value: hint,
-      enumerable: true,
-    });
+    this.color = color;
+    this.stop = stop;
+    this.hint = hint;
   }
 
-  readonly color!: Color;
+  readonly color: Color;
 
   withColor(color: AnyColor): ColorStop {
     color = Color.fromAny(color);
     return new ColorStop(color, this.stop, this.hint);
   }
 
-  readonly stop!: Length | null;
+  readonly stop: Length | null;
 
   withStop(stop: AnyLength | null): ColorStop {
     if (stop !== null) {
@@ -63,7 +54,7 @@ export class ColorStop implements Interpolate<ColorStop>, Equals, Equivalent {
     return new ColorStop(this.color, stop, this.hint);
   }
 
-  readonly hint!: Length | null
+  readonly hint: Length | null
 
   withHint(hint: AnyLength | null): ColorStop {
     if (hint !== null) {

@@ -29,21 +29,12 @@ import {CircleIconInterpolator} from "../"; // forward import
 export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, Equals, Equivalent, Debug {
   constructor(fillColor: Color | null, fillLook: Look<Color> | null, moodModifier: MoodMatrix | null) {
     super();
-    Object.defineProperty(this, "fillColor", {
-      value: fillColor,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "fillLook", {
-      value: fillLook,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "moodModifier", {
-      value: moodModifier,
-      enumerable: true,
-    });
+    this.fillColor = fillColor;
+    this.fillLook = fillLook;
+    this.moodModifier = moodModifier;
   }
 
-  override readonly fillColor!: Color | null;
+  override readonly fillColor: Color | null;
 
   override withFillColor(fillColor: Color | null): CircleIcon {
     if (Equals(this.fillColor, fillColor)) {
@@ -53,7 +44,7 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
     }
   }
 
-  override readonly fillLook!: Look<Color> | null;
+  override readonly fillLook: Look<Color> | null;
 
   override withFillLook(fillLook: Look<Color> | null): CircleIcon {
     if (this.fillLook === fillLook) {
@@ -63,7 +54,7 @@ export class CircleIcon extends FilledIcon implements Interpolate<CircleIcon>, E
     }
   }
 
-  override readonly moodModifier!: MoodMatrix | null;
+  override readonly moodModifier: MoodMatrix | null;
 
   override withMoodModifier(moodModifier: MoodMatrix | null): CircleIcon {
     if (Equals(this.moodModifier, moodModifier)) {

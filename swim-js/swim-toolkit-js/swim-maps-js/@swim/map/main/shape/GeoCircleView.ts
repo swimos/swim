@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyLength, Length, AnyR2Point, R2Point, R2Segment, R2Box, R2Circle, Transform} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox} from "@swim/geo";
 import {AnyColor, Color} from "@swim/style";
@@ -40,6 +41,16 @@ export interface GeoCircleViewInit extends GeoViewInit, FillViewInit, StrokeView
 }
 
 export class GeoCircleView extends GeoLayerView implements FillView, StrokeView {
+  constructor() {
+    super();
+    Object.defineProperty(this, "viewBounds", {
+      value: R2Box.undefined(),
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
+  }
+
   override initView(init: GeoCircleViewInit): void {
     super.initView(init);
     if (init.geoCenter !== void 0) {
@@ -110,7 +121,14 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
   })
   readonly geoCenter!: ViewAnimator<this, GeoPoint | null, AnyGeoPoint | null>;
 
-  @ViewAnimator({type: R2Point, state: R2Point.undefined()})
+  @ViewAnimator<GeoCircleView, R2Point | null, AnyR2Point | null>({
+    type: R2Point,
+    state: R2Point.undefined(),
+    updateFlags: View.NeedsRender,
+    didSetValue(newViewCenter: R2Point | null, oldViewCenter: R2Point | null): void {
+      this.owner.updateViewBounds();
+    },
+  })
   readonly viewCenter!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
 
   @ViewAnimator({type: Length, state: Length.zero()})
@@ -177,10 +195,6 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     }
   }
 
-  protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
-    // nop
-  }
-
   protected renderCircle(context: CanvasContext, frame: R2Box): void {
     const viewCenter = this.viewCenter.value;
     if (viewCenter !== null && viewCenter.isDefined()) {
@@ -208,6 +222,10 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     }
   }
 
+  protected override renderGeoBounds(viewContext: ViewContextType<this>, outlineColor: Color, outlineWidth: number): void {
+    // nop
+  }
+
   protected override updateGeoBounds(): void {
     // nop
   }
@@ -227,7 +245,24 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     }
   }
 
-  declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
+  override readonly viewBounds!: R2Box;
+
+  protected updateViewBounds(): void {
+    (this as Mutable<GeoCircleView>).viewBounds = this.deriveViewBounds();
+  }
+
+  override deriveViewBounds(): R2Box {
+    const viewCenter = this.viewCenter.value;
+    if (viewCenter !== null && viewCenter.isDefined()) {
+      const viewFrame = this.viewFrame;
+      const size = Math.min(viewFrame.width, viewFrame.height);
+      const radius = this.radius.getValue().pxValue(size);
+      return new R2Box(viewCenter.x - radius, viewCenter.y - radius,
+                       viewCenter.x + radius, viewCenter.y + radius);
+    } else {
+      return R2Box.undefined();
+    }
+  }
 
   override get hitBounds(): R2Box {
     const viewCenter = this.viewCenter.value;
@@ -309,19 +344,3 @@ export class GeoCircleView extends GeoLayerView implements FillView, StrokeView 
     throw new TypeError("" + value);
   }
 }
-Object.defineProperty(GeoCircleView.prototype, "viewBounds", {
-  get(this: GeoCircleView): R2Box {
-    const viewCenter = this.viewCenter.value;
-    const frame = this.viewFrame;
-    if (viewCenter !== null && viewCenter.isDefined()) {
-      const size = Math.min(frame.width, frame.height);
-      const radius = this.radius.getValue().pxValue(size);
-      return new R2Box(viewCenter.x - radius, viewCenter.y - radius,
-                       viewCenter.x + radius, viewCenter.y + radius);
-    } else {
-      return this.viewFrame;
-    }
-  },
-  enumerable: true,
-  configurable: true,
-});

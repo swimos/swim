@@ -19,10 +19,7 @@ import type {DataSetTraitObserver} from "./DataSetTraitObserver";
 export class DataSetTrait<X, Y> extends GenericTrait {
   constructor() {
     super();
-    Object.defineProperty(this, "dataPointFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.dataPointFasteners = [];
   }
 
   override readonly traitObservers!: ReadonlyArray<DataSetTraitObserver<X, Y>>;
@@ -130,7 +127,7 @@ export class DataSetTrait<X, Y> extends GenericTrait {
   }
 
   /** @hidden */
-  readonly dataPointFasteners!: ReadonlyArray<TraitFastener<this, DataPointTrait<X, Y>>>;
+  readonly dataPointFasteners: ReadonlyArray<TraitFastener<this, DataPointTrait<X, Y>>>;
 
   /** @hidden */
   protected mountDataPointFasteners(): void {

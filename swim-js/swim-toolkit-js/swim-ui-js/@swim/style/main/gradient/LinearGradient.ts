@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent, Equals, Arrays, Values} from "@swim/util";
+import {Equals, Equivalent, Mutable, Arrays, Values} from "@swim/util";
 import {Parser, Diagnostic, Unicode} from "@swim/codec";
 import type {Interpolate, Interpolator} from "@swim/mapping";
 import {Angle} from "@swim/math";
@@ -38,22 +38,12 @@ export interface LinearGradientInit {
 
 export class LinearGradient implements Interpolate<LinearGradient>, Equals, Equivalent {
   constructor(angle: LinearGradientAngle, stops: ReadonlyArray<ColorStop>) {
-    Object.defineProperty(this, "angle", {
-      value: angle,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stops", {
-      value: stops,
-      enumerable: true,
-    });
-    Object.defineProperty(this, "stringValue", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
+    this.angle = angle;
+    this.stops = stops;
+    this.stringValue = void 0;
   }
 
-  readonly angle!: LinearGradientAngle;
+  readonly angle: LinearGradientAngle;
 
   withAngle(angle: AnyLinearGradientAngle): LinearGradient {
     if (angle instanceof Angle || typeof angle === "number") {
@@ -62,7 +52,7 @@ export class LinearGradient implements Interpolate<LinearGradient>, Equals, Equi
     return new LinearGradient(angle, this.stops);
   }
 
-  readonly stops!: ReadonlyArray<ColorStop>;
+  readonly stops: ReadonlyArray<ColorStop>;
 
   withStops(stops: ReadonlyArray<AnyColorStop>): LinearGradient {
     const n = stops.length;
@@ -104,7 +94,7 @@ export class LinearGradient implements Interpolate<LinearGradient>, Equals, Equi
   }
 
   /** @hidden */
-  readonly stringValue!: string | undefined;
+  readonly stringValue: string | undefined;
 
   toString(): string {
     let s = this.stringValue;
@@ -129,11 +119,7 @@ export class LinearGradient implements Interpolate<LinearGradient>, Equals, Equi
         s += this.stops[i]!.toString();
       }
       s += ")";
-      Object.defineProperty(this, "stringValue", {
-        value: s,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).stringValue = s;
     }
     return s;
   }

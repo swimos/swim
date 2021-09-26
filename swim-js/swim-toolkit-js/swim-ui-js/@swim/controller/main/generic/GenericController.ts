@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {View, GestureContext, Gesture} from "@swim/view";
 import type {Model, Trait} from "@swim/model";
 import type {ControllerContextType, ControllerContext} from "../ControllerContext";
@@ -28,56 +29,16 @@ import type {ControllerFastener} from "../fastener/ControllerFastener";
 export abstract class GenericController extends Controller {
   constructor() {
     super();
-    Object.defineProperty(this, "key", {
-      value: void 0,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "parentController", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "controllerServices", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "controllerProperties", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "controllerModels", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "controllerTraits", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "controllerViews", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "controllerViewTraits", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "controllerFasteners", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "gestures", {
-      value: null,
-      enumerable: true,
-      configurable: true,
-    });
+    this.key = void 0;
+    this.parentController = null;
+    this.controllerServices = null;
+    this.controllerProperties = null;
+    this.controllerModels = null;
+    this.controllerTraits = null;
+    this.controllerViews = null;
+    this.controllerViewTraits = null;
+    this.controllerFasteners = null;
+    this.gestures = null;
   }
 
   protected willObserve<T>(callback: (this: this, controllerObserver: ControllerObserverType<this>) => T | void): T | undefined {
@@ -106,18 +67,14 @@ export abstract class GenericController extends Controller {
     return result;
   }
 
-  override readonly key!: string | undefined;
+  override readonly key: string | undefined;
 
   /** @hidden */
   override setKey(key: string | undefined): void {
-    Object.defineProperty(this, "key", {
-      value: key,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).key = key;
   }
 
-  override readonly parentController!: Controller | null;
+  override readonly parentController: Controller | null;
 
   /** @hidden */
   override setParentController(newParentController: Controller | null, oldParentController: Controller | null): void {
@@ -125,11 +82,7 @@ export abstract class GenericController extends Controller {
     if (oldParentController !== null) {
       this.detachParentController(oldParentController);
     }
-    Object.defineProperty(this, "parentController", {
-      value: newParentController,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).parentController = newParentController;
     if (newParentController !== null) {
       this.attachParentController(newParentController);
     }
@@ -436,7 +389,7 @@ export abstract class GenericController extends Controller {
   }
 
   /** @hidden */
-  readonly controllerServices!: {[serviceName: string]: ControllerService<Controller, unknown> | undefined} | null;
+  readonly controllerServices: {[serviceName: string]: ControllerService<Controller, unknown> | undefined} | null;
 
   override hasControllerService(serviceName: string): boolean {
     const controllerServices = this.controllerServices;
@@ -458,11 +411,7 @@ export abstract class GenericController extends Controller {
     let controllerServices = this.controllerServices;
     if (controllerServices === null) {
       controllerServices = {};
-      Object.defineProperty(this, "controllerServices", {
-        value: controllerServices,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).controllerServices = controllerServices;
     }
     const oldControllerService = controllerServices[serviceName];
     if (oldControllerService !== void 0 && this.isMounted()) {
@@ -497,7 +446,7 @@ export abstract class GenericController extends Controller {
   }
 
   /** @hidden */
-  readonly controllerProperties!: {[propertyName: string]: ControllerProperty<Controller, unknown> | undefined} | null;
+  readonly controllerProperties: {[propertyName: string]: ControllerProperty<Controller, unknown> | undefined} | null;
 
   override hasControllerProperty(propertyName: string): boolean {
     const controllerProperties = this.controllerProperties;
@@ -519,11 +468,7 @@ export abstract class GenericController extends Controller {
     let controllerProperties = this.controllerProperties;
     if (controllerProperties === null) {
       controllerProperties = {};
-      Object.defineProperty(this, "controllerProperties", {
-        value: controllerProperties,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).controllerProperties = controllerProperties;
     }
     const oldControllerProperty = controllerProperties[propertyName];
     if (oldControllerProperty !== void 0 && this.isMounted()) {
@@ -567,7 +512,7 @@ export abstract class GenericController extends Controller {
   }
 
   /** @hidden */
-  readonly controllerModels!: {[modelName: string]: ControllerModel<Controller, Model> | undefined} | null;
+  readonly controllerModels: {[modelName: string]: ControllerModel<Controller, Model> | undefined} | null;
 
   override hasControllerModel(modelName: string): boolean {
     const controllerModels = this.controllerModels;
@@ -589,11 +534,7 @@ export abstract class GenericController extends Controller {
     let controllerModels = this.controllerModels;
     if (controllerModels === null) {
       controllerModels = {};
-      Object.defineProperty(this, "controllerModels", {
-        value: controllerModels,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).controllerModels = controllerModels;
     }
     const oldControllerModel = controllerModels[modelName];
     if (oldControllerModel !== void 0 && this.isMounted()) {
@@ -628,7 +569,7 @@ export abstract class GenericController extends Controller {
   }
 
   /** @hidden */
-  readonly controllerTraits!: {[traitName: string]: ControllerTrait<Controller, Trait> | undefined} | null;
+  readonly controllerTraits: {[traitName: string]: ControllerTrait<Controller, Trait> | undefined} | null;
 
   override hasControllerTrait(traitName: string): boolean {
     const controllerTraits = this.controllerTraits;
@@ -650,11 +591,7 @@ export abstract class GenericController extends Controller {
     let controllerTraits = this.controllerTraits;
     if (controllerTraits === null) {
       controllerTraits = {};
-      Object.defineProperty(this, "controllerTraits", {
-        value: controllerTraits,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).controllerTraits = controllerTraits;
     }
     const oldControllerTrait = controllerTraits[traitName];
     if (oldControllerTrait !== void 0 && this.isMounted()) {
@@ -689,7 +626,7 @@ export abstract class GenericController extends Controller {
   }
 
   /** @hidden */
-  readonly controllerViews!: {[viewName: string]: ControllerView<Controller, View> | undefined} | null;
+  readonly controllerViews: {[viewName: string]: ControllerView<Controller, View> | undefined} | null;
 
   override hasControllerView(viewName: string): boolean {
     const controllerViews = this.controllerViews;
@@ -711,11 +648,7 @@ export abstract class GenericController extends Controller {
     let controllerViews = this.controllerViews;
     if (controllerViews === null) {
       controllerViews = {};
-      Object.defineProperty(this, "controllerViews", {
-        value: controllerViews,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).controllerViews = controllerViews;
     }
     const oldControllerView = controllerViews[viewName];
     if (oldControllerView !== void 0 && this.isMounted()) {
@@ -750,7 +683,7 @@ export abstract class GenericController extends Controller {
   }
 
   /** @hidden */
-  readonly controllerViewTraits!: {[fastenerName: string]: ControllerViewTrait<Controller, View, Trait> | undefined} | null;
+  readonly controllerViewTraits: {[fastenerName: string]: ControllerViewTrait<Controller, View, Trait> | undefined} | null;
 
   override hasControllerViewTrait(fastenerName: string): boolean {
     const controllerViewTraits = this.controllerViewTraits;
@@ -772,11 +705,7 @@ export abstract class GenericController extends Controller {
     let controllerViewTraits = this.controllerViewTraits;
     if (controllerViewTraits === null) {
       controllerViewTraits = {};
-      Object.defineProperty(this, "controllerViewTraits", {
-        value: controllerViewTraits,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).controllerViewTraits = controllerViewTraits;
     }
     const oldControllerViewTrait = controllerViewTraits[fastenerName];
     if (oldControllerViewTrait !== void 0 && this.isMounted()) {
@@ -811,7 +740,7 @@ export abstract class GenericController extends Controller {
   }
 
   /** @hidden */
-  readonly controllerFasteners!: {[fastenerName: string]: ControllerFastener<Controller, Controller> | undefined} | null;
+  readonly controllerFasteners: {[fastenerName: string]: ControllerFastener<Controller, Controller> | undefined} | null;
 
   override hasControllerFastener(fastenerName: string): boolean {
     const controllerFasteners = this.controllerFasteners;
@@ -833,11 +762,7 @@ export abstract class GenericController extends Controller {
     let controllerFasteners = this.controllerFasteners;
     if (controllerFasteners === null) {
       controllerFasteners = {};
-      Object.defineProperty(this, "controllerFasteners", {
-        value: controllerFasteners,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).controllerFasteners = controllerFasteners;
     }
     const oldControllerFastener = controllerFasteners[fastenerName];
     if (oldControllerFastener !== void 0 && this.isMounted()) {
@@ -894,7 +819,7 @@ export abstract class GenericController extends Controller {
   }
 
   /** @hidden */
-  readonly gestures!: {[gestureName: string]: Gesture<Controller, View> | undefined} | null;
+  readonly gestures: {[gestureName: string]: Gesture<Controller, View> | undefined} | null;
 
   override hasGesture(gestureName: string): boolean {
     const gestures = this.gestures;
@@ -916,11 +841,7 @@ export abstract class GenericController extends Controller {
     let gestures = this.gestures;
     if (gestures === null) {
       gestures = {};
-      Object.defineProperty(this, "gestures", {
-        value: gestures,
-        enumerable: true,
-        configurable: true,
-      });
+      (this as Mutable<this>).gestures = gestures;
     }
     const oldGesture = gestures[gestureName];
     if (oldGesture !== void 0 && this.isMounted()) {

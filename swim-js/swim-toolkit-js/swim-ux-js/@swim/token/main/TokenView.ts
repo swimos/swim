@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyTiming, Timing} from "@swim/mapping";
 import {Length, R2Box} from "@swim/math";
 import type {Color} from "@swim/style";
@@ -38,11 +39,7 @@ export interface TokenViewInit extends HtmlViewInit {
 export class TokenView extends HtmlView {
   constructor(node: HTMLElement) {
     super(node);
-    Object.defineProperty(this, "tokenState", {
-      value: "expanded",
-      enumerable: true,
-      configurable: true,
-    });
+    this.tokenState = "expanded";
     this.onClickHead = this.onClickHead.bind(this);
     this.onClickBody = this.onClickBody.bind(this);
     this.onClickFoot = this.onClickFoot.bind(this);
@@ -125,7 +122,7 @@ export class TokenView extends HtmlView {
     labelView.left.setState(0, View.Intrinsic);
   }
 
-  readonly tokenState!: TokenViewState;
+  readonly tokenState: TokenViewState;
 
   isExpanded(): boolean {
     return this.tokenState === "expanded" || this.tokenState === "expanding";
@@ -666,11 +663,7 @@ export class TokenView extends HtmlView {
   }
 
   protected willExpand(): void {
-    Object.defineProperty(this, "tokenState", {
-      value: "expanding",
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).tokenState = "expanding";
     const labelContainer = this.labelContainer.view;
     if (labelContainer !== null) {
       labelContainer.display.setState("block", View.Intrinsic);
@@ -690,11 +683,7 @@ export class TokenView extends HtmlView {
   }
 
   protected didExpand(): void {
-    Object.defineProperty(this, "tokenState", {
-      value: "expanded",
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).tokenState = "expanded";
     this.requireUpdate(View.NeedsLayout);
 
     const viewObservers = this.viewObservers;
@@ -731,11 +720,7 @@ export class TokenView extends HtmlView {
   }
 
   protected willCollapse(): void {
-    Object.defineProperty(this, "tokenState", {
-      value: "collapsing",
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).tokenState = "collapsing";
 
     const viewObservers = this.viewObservers;
     for (let i = 0, n = viewObservers.length; i < n; i += 1) {
@@ -754,11 +739,7 @@ export class TokenView extends HtmlView {
   }
 
   protected didCollapse(): void {
-    Object.defineProperty(this, "tokenState", {
-      value: "collapsed",
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).tokenState = "collapsed";
     this.requireUpdate(View.NeedsLayout);
 
     const viewObservers = this.viewObservers;

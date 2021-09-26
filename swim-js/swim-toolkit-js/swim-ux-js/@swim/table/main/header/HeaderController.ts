@@ -32,10 +32,7 @@ import type {HeaderControllerObserver} from "./HeaderControllerObserver";
 export class HeaderController extends CompositeController {
   constructor() {
     super();
-    Object.defineProperty(this, "colFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.colFasteners = [];
   }
 
   override readonly controllerObservers!: ReadonlyArray<HeaderControllerObserver>;
@@ -636,7 +633,7 @@ export class HeaderController extends CompositeController {
   }
 
   /** @hidden */
-  readonly colFasteners!: ReadonlyArray<ControllerFastener<this, ColController>>;
+  readonly colFasteners: ReadonlyArray<ControllerFastener<this, ColController>>;
 
   protected getColFastener(colTrait: ColTrait): ControllerFastener<this, ColController> | null {
     const colFasteners = this.colFasteners;

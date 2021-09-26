@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {AnyR2Point, R2Point, R2Box, R2Path} from "@swim/math";
 import {AnyGeoPoint, GeoPoint, GeoBox, AnyGeoPath, GeoPath} from "@swim/geo";
 import {ViewContextType, View, ViewAnimator} from "@swim/view";
@@ -29,6 +30,7 @@ export class GeoPathView extends GeoLayerView {
     super();
     Object.defineProperty(this, "viewBounds", {
       value: R2Box.undefined(),
+      writable: true,
       enumerable: true,
       configurable: true,
     });
@@ -117,11 +119,7 @@ export class GeoPathView extends GeoLayerView {
       this.viewCentroid.setState(viewCentroid, View.Intrinsic);
     }
 
-    Object.defineProperty(this, "viewBounds", {
-      value: viewPath !== null ? viewPath.bounds : this.viewFrame,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).viewBounds = viewPath !== null ? viewPath.bounds : this.viewFrame;
 
     this.cullGeoFrame(viewContext.geoViewport.geoFrame);
   }

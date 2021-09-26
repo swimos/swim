@@ -21,14 +21,10 @@ import type {WarpManagerObserver} from "./WarpManagerObserver";
 export class WarpManager<M extends Model = Model> extends ModelManager<M> {
   constructor(client: WarpClient) {
     super();
-    Object.defineProperty(this, "client", {
-      value: client,
-      enumerable: true,
-      configurable: true,
-    });
+    this.client = client;
   }
 
-  readonly client!: WarpClient;
+  readonly client: WarpClient;
 
   override readonly modelManagerObservers!: ReadonlyArray<WarpManagerObserver>;
 

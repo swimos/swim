@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {ColorStop} from "./ColorStop";
 import {LinearGradientAngle, LinearGradient} from "./LinearGradient";
@@ -43,10 +44,7 @@ export const LinearGradientInterpolator = function (g0: LinearGradient, g1: Line
     return new LinearGradient(angle, stops);
   } as LinearGradientInterpolator;
   Object.setPrototypeOf(interpolator, LinearGradientInterpolator.prototype);
-  Object.defineProperty(interpolator, "angleInterpolator", {
-    value: Interpolator(g0.angle, g1.angle),
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).angleInterpolator = Interpolator(g0.angle, g1.angle);
   const stops0 = g0.stops;
   const stops1 = g1.stops;
   const stopCount = Math.min(stops0.length, stops1.length);
@@ -54,10 +52,7 @@ export const LinearGradientInterpolator = function (g0: LinearGradient, g1: Line
   for (let i = 0; i < stopCount; i += 1) {
     stopInterpolators[i] = stops0[i]!.interpolateTo(stops1[i]!);
   }
-  Object.defineProperty(interpolator, "stopInterpolators", {
-    value: stopInterpolators,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).stopInterpolators = stopInterpolators;
   return interpolator;
 } as {
   (g0: LinearGradient, g1: LinearGradient): LinearGradientInterpolator;

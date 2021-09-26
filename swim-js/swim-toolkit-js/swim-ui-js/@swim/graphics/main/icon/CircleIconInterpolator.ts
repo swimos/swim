@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals} from "@swim/util";
+import {Equals, Mutable} from "@swim/util";
 import {Interpolator} from "@swim/mapping";
 import type {Color} from "@swim/style";
 import type {Look, MoodMatrix} from "@swim/theme";
@@ -45,18 +45,9 @@ export const CircleIconInterpolator = function (i0: CircleIcon, i1: CircleIcon):
     return new CircleIcon(fillColor, fillLook, moodModifier);
   } as CircleIconInterpolator;
   Object.setPrototypeOf(interpolator, CircleIconInterpolator.prototype);
-  Object.defineProperty(interpolator, "fillColorInterpolator", {
-    value: Interpolator(i0.fillColor, i1.fillColor),
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "fillLook", {
-    value: i1.fillLook,
-    enumerable: true,
-  });
-  Object.defineProperty(interpolator, "moodModifier", {
-    value: i1.moodModifier,
-    enumerable: true,
-  });
+  (interpolator as Mutable<typeof interpolator>).fillColorInterpolator = Interpolator(i0.fillColor, i1.fillColor);
+  (interpolator as Mutable<typeof interpolator>).fillLook = i1.fillLook;
+  (interpolator as Mutable<typeof interpolator>).moodModifier = i1.moodModifier;
   return interpolator;
 } as {
   (i0: CircleIcon, i1: CircleIcon): CircleIconInterpolator;

@@ -26,10 +26,7 @@ import type {GeoLayerControllerObserver} from "./GeoLayerControllerObserver";
 export class GeoLayerController extends GeoController {
   constructor() {
     super();
-    Object.defineProperty(this, "featureFasteners", {
-      value: [],
-      enumerable: true,
-    });
+    this.featureFasteners = [];
   }
 
   override readonly controllerObservers!: ReadonlyArray<GeoLayerControllerObserver>;
@@ -555,7 +552,7 @@ export class GeoLayerController extends GeoController {
   }
 
   /** @hidden */
-  readonly featureFasteners!: ReadonlyArray<ControllerFastener<this, GeoController>>;
+  readonly featureFasteners: ReadonlyArray<ControllerFastener<this, GeoController>>;
 
   protected getFeatureFastener(featureTrait: GeoTrait): ControllerFastener<this, GeoController> | null {
     const featureFasteners = this.featureFasteners;

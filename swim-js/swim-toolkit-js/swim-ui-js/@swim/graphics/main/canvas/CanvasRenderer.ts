@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {Mutable} from "@swim/util";
 import type {Transform} from "@swim/math";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import {PaintingRenderer} from "../painting/PaintingRenderer";
@@ -21,48 +22,24 @@ export class CanvasRenderer extends PaintingRenderer {
   constructor(context: CanvasContext, transform: Transform, pixelRatio: number,
               theme: ThemeMatrix | null, mood: MoodVector | null) {
     super();
-    Object.defineProperty(this, "context", {
-      value: context,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "transform", {
-      value: transform,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "pixelRatio", {
-      value: pixelRatio,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "theme", {
-      value: theme,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "mood", {
-      value: mood,
-      enumerable: true,
-      configurable: true,
-    });
+    this.context = context;
+    this.transform = transform;
+    this.pixelRatio = pixelRatio;
+    this.theme = theme;
+    this.mood = mood;
   }
 
-  override readonly context!: CanvasContext;
+  override readonly context: CanvasContext;
 
-  override readonly transform!: Transform;
+  override readonly transform: Transform;
 
   setTransform(transform: Transform): void {
-    Object.defineProperty(this, "transform", {
-      value: transform,
-      enumerable: true,
-      configurable: true,
-    });
+    (this as Mutable<this>).transform = transform;
   }
 
-  override readonly pixelRatio!: number;
+  override readonly pixelRatio: number;
 
-  override readonly theme!: ThemeMatrix | null;
+  override readonly theme: ThemeMatrix | null;
 
-  override readonly mood!: MoodVector | null;
+  override readonly mood: MoodVector | null;
 }

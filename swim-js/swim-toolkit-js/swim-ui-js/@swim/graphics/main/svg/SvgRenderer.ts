@@ -20,24 +20,12 @@ import type {SvgContext} from "./SvgContext";
 export class SvgRenderer extends PaintingRenderer {
   constructor(context: SvgContext, theme: ThemeMatrix | null, mood: MoodVector | null) {
     super();
-    Object.defineProperty(this, "context", {
-      value: context,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "theme", {
-      value: theme,
-      enumerable: true,
-      configurable: true,
-    });
-    Object.defineProperty(this, "mood", {
-      value: mood,
-      enumerable: true,
-      configurable: true,
-    });
+    this.context = context;
+    this.theme = theme;
+    this.mood = mood;
   }
 
-  override readonly context!: SvgContext;
+  override readonly context: SvgContext;
 
   override get transform(): Transform {
     return Transform.identity();
@@ -47,7 +35,7 @@ export class SvgRenderer extends PaintingRenderer {
     return 1;
   }
 
-  override readonly theme!: ThemeMatrix | null;
+  override readonly theme: ThemeMatrix | null;
 
-  override readonly mood!: MoodVector | null;
+  override readonly mood: MoodVector | null;
 }
