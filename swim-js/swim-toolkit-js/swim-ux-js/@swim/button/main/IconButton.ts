@@ -93,7 +93,20 @@ export class IconButton extends ButtonMembrane implements IconView {
   @ViewAnimator({type: Length, state: Length.px(24), updateFlags: View.NeedsLayout})
   readonly iconHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Color, state: null, updateFlags: View.NeedsLayout})
+  @ViewAnimator<IconButton, Color | null, AnyColor | null>({
+    type: Color,
+    state: null,
+    updateFlags: View.NeedsLayout,
+    didSetValue(newIconColor: Color | null, oldIconColor: Color | null): void {
+      if (newIconColor !== null) {
+        const oldGraphics = this.owner.graphics.value;
+        if (oldGraphics instanceof FilledIcon) {
+          const newGraphics = oldGraphics.withFillColor(newIconColor);
+          this.owner.graphics.setOwnState(newGraphics);
+        }
+      }
+    },
+  })
   readonly iconColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   @ViewAnimator({extends: IconViewAnimator, state: null, type: Object, updateFlags: View.NeedsLayout})
@@ -229,18 +242,6 @@ export class IconButton extends ButtonMembrane implements IconView {
   protected override onResize(viewContext: ViewContextType<this>): void {
     super.onResize(viewContext);
     this.requireUpdate(View.NeedsLayout);
-  }
-
-  protected override onAnimate(viewContext: ViewContextType<this>): void {
-    super.onAnimate(viewContext);
-    const iconColor = this.iconColor.takeUpdatedValue();
-    if (iconColor !== void 0 && iconColor !== null) {
-      const oldGraphics = this.graphics.value;
-      if (oldGraphics instanceof FilledIcon) {
-        const newGraphics = oldGraphics.withFillColor(iconColor);
-        this.graphics.setOwnState(newGraphics);
-      }
-    }
   }
 
   protected override needsDisplay(displayFlags: ViewFlags, viewContext: ViewContextType<this>): ViewFlags {

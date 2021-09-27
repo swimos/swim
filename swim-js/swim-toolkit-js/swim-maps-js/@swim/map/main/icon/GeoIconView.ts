@@ -122,19 +122,60 @@ export class GeoIconView extends GeoLayerView implements IconView {
   })
   readonly viewCenter!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite})
+  @ViewAnimator<GeoIconView, number>({
+    type: Number,
+    state: 0.5,
+    updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
+    didSetValue(newXAlign: number, oldXAlign: number): void {
+      this.owner.updateViewBounds();
+    },
+  })
   readonly xAlign!: ViewAnimator<this, number>;
 
-  @ViewAnimator({type: Number, state: 0.5, updateFlags: View.NeedsLayout | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite})
+  @ViewAnimator<GeoIconView, number>({
+    type: Number,
+    state: 0.5,
+    updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
+    didSetValue(newYAlign: number, oldYAlign: number): void {
+      this.owner.updateViewBounds();
+    },
+  })
   readonly yAlign!: ViewAnimator<this, number>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite})
+  @ViewAnimator<GeoIconView, Length | null, AnyLength | null>({
+    type: Length,
+    state: null,
+    updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
+    didSetValue(newIconWidth: Length | null, oldIconWidth: Length | null): void {
+      this.owner.updateViewBounds();
+    },
+  })
   readonly iconWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Length, state: null, updateFlags: View.NeedsLayout | View.NeedsRender | View.NeedsRasterize | View.NeedsComposite})
+  @ViewAnimator<GeoIconView, Length | null, AnyLength | null>({
+    type: Length,
+    state: null,
+    updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
+    didSetValue(newIconHeight: Length | null, oldIconHeight: Length | null): void {
+      this.owner.updateViewBounds();
+    },
+  })
   readonly iconHeight!: ViewAnimator<this, Length | null, AnyLength | null>;
 
-  @ViewAnimator({type: Color, state: null, updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite})
+  @ViewAnimator<GeoIconView, Color | null, AnyColor | null>({
+    type: Color,
+    state: null,
+    updateFlags: View.NeedsRender | View.NeedsRasterize | View.NeedsComposite,
+    didSetValue(newIconColor: Color | null, oldIconColor: Color | null): void {
+      if (newIconColor !== null) {
+        const oldGraphics = this.owner.graphics.value;
+        if (oldGraphics instanceof FilledIcon) {
+          const newGraphics = oldGraphics.withFillColor(newIconColor);
+          this.owner.graphics.setOwnState(newGraphics);
+        }
+      }
+    },
+  })
   readonly iconColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   protected willSetGraphics(newGraphics: Graphics | null, oldGraphic: Graphics | null): void {
@@ -181,18 +222,6 @@ export class GeoIconView extends GeoLayerView implements IconView {
       if (oldGraphics instanceof Icon) {
         const newGraphics = oldGraphics.withTheme(theme, mood);
         this.graphics.setOwnState(newGraphics, oldGraphics.isThemed() ? timing : false);
-      }
-    }
-  }
-
-  protected override onAnimate(viewContext: ViewContextType<this>): void {
-    super.onAnimate(viewContext);
-    const iconColor = this.iconColor.takeUpdatedValue();
-    if (iconColor !== void 0 && iconColor !== null) {
-      const oldGraphics = this.graphics.value;
-      if (oldGraphics instanceof FilledIcon) {
-        const newGraphics = oldGraphics.withFillColor(iconColor);
-        this.graphics.setOwnState(newGraphics);
       }
     }
   }
