@@ -305,8 +305,6 @@ export class GeoRasterView extends GeoLayerView {
 
   override readonly viewContext!: GeoRasterViewContext;
 
-  declare readonly viewBounds: R2Box; // getter defined below to work around useDefineForClassFields lunacy
-
   /** @hidden */
   readonly ownRasterFrame: R2Box | null;
 
@@ -324,7 +322,7 @@ export class GeoRasterView extends GeoLayerView {
   }
 
   protected deriveRasterFrame(): R2Box {
-    return this.viewBounds;
+    return this.deriveViewBounds();
   }
 
   protected createCanvas(): HTMLCanvasElement {
@@ -401,10 +399,3 @@ export class GeoRasterView extends GeoLayerView {
   static override readonly powerFlags: ViewFlags = GeoLayerView.powerFlags | View.NeedsRender | View.NeedsComposite;
   static override readonly uncullFlags: ViewFlags = GeoLayerView.uncullFlags | View.NeedsRender | View.NeedsComposite;
 }
-Object.defineProperty(GeoRasterView.prototype, "viewBounds", {
-  get(this: GeoRasterView): R2Box {
-    return this.deriveViewBounds();
-  },
-  enumerable: true,
-  configurable: true,
-});

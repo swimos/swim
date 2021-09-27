@@ -15,7 +15,7 @@
 import type {AnyTiming} from "@swim/mapping";
 import {AnyR2Point, R2Point} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
-import {ViewContextType, ViewAnimator} from "@swim/view";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
 import {LayerView} from "../layer/LayerView";
 import type {CanvasContext} from "../canvas/CanvasContext";
 import {CanvasRenderer} from "../canvas/CanvasRenderer";
@@ -34,22 +34,22 @@ export class TextRunView extends LayerView implements TypesetView {
     this.setState(init);
   }
 
-  @ViewAnimator({type: String, state: ""})
+  @ViewAnimator({type: String, state: "", updateFlags: View.NeedsRender})
   readonly text!: ViewAnimator<this, string>;
 
-  @ViewAnimator({type: Font, state: null, inherit: true})
+  @ViewAnimator({type: Font, state: null, inherit: true, updateFlags: View.NeedsRender})
   readonly font!: ViewAnimator<this, Font | null, AnyFont | null>;
 
-  @ViewAnimator({type: String, inherit: true})
+  @ViewAnimator({type: String, inherit: true, updateFlags: View.NeedsRender})
   readonly textAlign!: ViewAnimator<this, CanvasTextAlign | undefined>;
 
-  @ViewAnimator({type: String, inherit: true})
+  @ViewAnimator({type: String, inherit: true, updateFlags: View.NeedsRender})
   readonly textBaseline!: ViewAnimator<this, CanvasTextBaseline | undefined>;
 
-  @ViewAnimator({type: R2Point, state: null, inherit: true})
+  @ViewAnimator({type: R2Point, state: null, inherit: true, updateFlags: View.NeedsRender})
   readonly textOrigin!: ViewAnimator<this, R2Point | null, AnyR2Point | null>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true})
+  @ViewAnimator({type: Color, state: null, inherit: true, updateFlags: View.NeedsRender})
   readonly textColor!: ViewAnimator<this, Color | null, AnyColor | null>;
 
   get value(): TextRun {

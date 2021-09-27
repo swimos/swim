@@ -13,6 +13,7 @@
 // limitations under the License.
 
 export {GeoRasterViewContext} from "./GeoRasterViewContext";
+
 export {
   GeoRasterViewInit,
   GeoRasterView,

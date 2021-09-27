@@ -15,7 +15,7 @@
 import type {AnyTiming} from "@swim/mapping";
 import {AnyLength, Length, R2Box} from "@swim/math";
 import {AnyColor, Color} from "@swim/style";
-import {ViewContextType, ViewAnimator} from "@swim/view";
+import {ViewContextType, View, ViewAnimator} from "@swim/view";
 import type {GraphicsView} from "../graphics/GraphicsView";
 import {LayerView} from "../layer/LayerView";
 import type {CanvasContext} from "../canvas/CanvasContext";
@@ -39,25 +39,25 @@ export class RectView extends LayerView implements FillView, StrokeView {
     this.setState(init);
   }
 
-  @ViewAnimator({type: Length, state: Length.zero()})
+  @ViewAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
   readonly x!: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, state: Length.zero()})
+  @ViewAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
   readonly y!: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, state: Length.zero()})
+  @ViewAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
   readonly width!: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Length, state: Length.zero()})
+  @ViewAnimator({type: Length, state: Length.zero(), updateFlags: View.NeedsRender})
   readonly height!: ViewAnimator<this, Length, AnyLength>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true})
+  @ViewAnimator({type: Color, state: null, inherit: true, updateFlags: View.NeedsRender})
   readonly fill!: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Color, state: null, inherit: true})
+  @ViewAnimator({type: Color, state: null, inherit: true, updateFlags: View.NeedsRender})
   readonly stroke!: ViewAnimator<this, Color | null, AnyColor | null>;
 
-  @ViewAnimator({type: Length, state: null, inherit: true})
+  @ViewAnimator({type: Length, state: null, inherit: true, updateFlags: View.NeedsRender})
   readonly strokeWidth!: ViewAnimator<this, Length | null, AnyLength | null>;
 
   get value(): Rect {
