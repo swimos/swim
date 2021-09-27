@@ -90,6 +90,6 @@ const ui = [
 ];
 
 export default {
-  version: "4.0.0-dev.20210927",
+  version: "4.0.0-dev.20210927.1",
   projects: ui,
 };

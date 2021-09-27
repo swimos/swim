@@ -1,6 +1,6 @@
 {
   "name": "@swim/mapping",
-  "version": "4.0.0-dev.20210927",
+  "version": "4.0.0-dev.20210927.1",
   "description": "Functional maps, interpolators, and scales",
   "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js/swim-core-js/@swim/mapping",
   "author": "Chris Sachs <chris@swimos.org>",
@@ -11,6 +11,6 @@
   "module": "lib/main/index.js",
   "types": "lib/main/index.d.ts",
   "dependencies": {
-    "@swim/util": "4.0.0-dev.20210927"
+    "@swim/util": "4.0.0-dev.20210927.1"
   }
 }
