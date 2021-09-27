@@ -1,6 +1,6 @@
 {
   "name": "@swim/runtime",
-  "version": "4.0.0-dev.20210923",
+  "version": "4.0.0-dev.20210927",
   "description": "Swim Runtime",
   "homepage": "https://github.com/swimos/swim/tree/main/swim-js/swim-runtime-js",
   "author": "Chris Sachs <chris@swimos.org>",
