@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Interpolator} from "@swim/mapping";
+import type {Interpolator} from "@swim/util";
 import {AnyItem, Item} from "./Item";
 import {FieldInterpolator} from "./"; // forward import
 import {Attr} from "./"; // forward import

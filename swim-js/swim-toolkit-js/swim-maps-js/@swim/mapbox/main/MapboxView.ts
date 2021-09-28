@@ -14,8 +14,7 @@
 
 /// <reference types="mapbox-gl"/>
 
-import {Equivalent, Mutable} from "@swim/util";
-import {AnyTiming, Timing} from "@swim/mapping";
+import {Equivalent, Mutable, AnyTiming, Timing} from "@swim/util";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";

@@ -12,8 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent, Mutable} from "@swim/util";
-import {Mapping, Interpolate, Interpolator, LinearRange, ContinuousScale} from "@swim/mapping";
+import {
+  Equivalent,
+  Mutable,
+  Mapping,
+  Interpolate,
+  Interpolator,
+  LinearRange,
+  ContinuousScale,
+} from "@swim/util";
 import {AnyDateTime, DateTime} from "../DateTime";
 import {TimeDomain} from "./TimeDomain";
 import {TimeScaleInterpolator} from "./"; // forward import

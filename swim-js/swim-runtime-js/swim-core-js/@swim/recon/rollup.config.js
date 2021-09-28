@@ -13,7 +13,6 @@ const main = {
     globals: {
       "@swim/util": "swim",
       "@swim/codec": "swim",
-      "@swim/mapping": "swim",
       "@swim/structure": "swim",
     },
     sourcemap: true,
@@ -23,7 +22,6 @@ const main = {
   external: [
     "@swim/util",
     "@swim/codec",
-    "@swim/mapping",
     "@swim/structure",
   ],
   plugins: [

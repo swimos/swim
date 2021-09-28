@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Domain, ContinuousScale} from "@swim/mapping";
+import type {Domain, ContinuousScale} from "@swim/util";
 import type {GraphicsViewObserver} from "@swim/graphics";
 import type {ScaledYView} from "./ScaledYView";
 

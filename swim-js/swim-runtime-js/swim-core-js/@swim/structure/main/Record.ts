@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Murmur3, Numbers, Constructors, Cursor, Builder} from "@swim/util";
+import {Murmur3, Numbers, Constructors, Interpolator, Cursor, Builder} from "@swim/util";
 import type {Output} from "@swim/codec";
-import type {Interpolator} from "@swim/mapping";
 import {AnyItem, Item} from "./Item";
 import {Field} from "./Field";
 import {Attr} from "./Attr";

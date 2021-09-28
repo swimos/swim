@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing} from "@swim/mapping";
+import {AnyTiming, Timing} from "@swim/util";
 import {ControllerProperty, ControllerViewTrait, CompositeController} from "@swim/controller";
 import type {GeoView} from "./GeoView";
 import type {GeoTrait} from "./GeoTrait";

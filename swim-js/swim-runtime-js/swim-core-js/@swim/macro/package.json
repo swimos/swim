@@ -18,7 +18,6 @@
     "@swim/util": "4.0.0-dev.20210927.1",
     "@swim/codec": "4.0.0-dev.20210927.1",
     "@swim/args": "4.0.0-dev.20210927.1",
-    "@swim/mapping": "4.0.0-dev.20210927.1",
     "@swim/structure": "4.0.0-dev.20210927.1",
     "@swim/recon": "4.0.0-dev.20210927.1"
   },

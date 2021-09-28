@@ -14,7 +14,6 @@
 
 export * from "@swim/util";
 export * from "@swim/codec";
-export * from "@swim/mapping";
 export * from "@swim/collections";
 export * from "@swim/constraint";
 export * from "@swim/structure";

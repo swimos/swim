@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing, Interpolator} from "@swim/mapping";
+import {AnyTiming, Timing, Interpolator} from "@swim/util";
 import {Look} from "./Look";
 
 export class TimingLook extends Look<Timing, AnyTiming> {

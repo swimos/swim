@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
-import {Range, Interpolate, Interpolator} from "@swim/mapping";
+import {Mutable, Range, Interpolate, Interpolator} from "@swim/util";
 import {DateTime} from "../DateTime";
 import {TimeDomain} from "./"; // forward import
 import {TimeRangeInterpolator} from "./"; // forward import

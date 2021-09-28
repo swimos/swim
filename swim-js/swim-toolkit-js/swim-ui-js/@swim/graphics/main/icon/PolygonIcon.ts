@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Equivalent} from "@swim/util";
+import {Equals, Equivalent, Interpolate, Interpolator} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
-import type {Interpolate, Interpolator} from "@swim/mapping";
 import {AnyAngle, Angle, R2Box} from "@swim/math";
 import type {Color} from "@swim/style";
 import {Look, Feel, MoodVectorUpdates, MoodVector, MoodMatrix, ThemeMatrix} from "@swim/theme";

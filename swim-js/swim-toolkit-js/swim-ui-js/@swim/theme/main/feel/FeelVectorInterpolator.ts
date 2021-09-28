@@ -13,8 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Mutable, Arrays} from "@swim/util";
-import {Interpolator} from "@swim/mapping";
+import {Mutable, Arrays, Interpolator} from "@swim/util";
 import type {Look} from "../look/Look";
 import {FeelVector} from "./FeelVector";
 

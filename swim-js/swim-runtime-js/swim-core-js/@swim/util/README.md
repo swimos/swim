@@ -1,8 +1,8 @@
 # <a href="https://www.swimos.org"><img src="https://docs.swimos.org/readme/breach-marlin-blue-wide.svg"></a> Swim Util Library
 
-The Swim Util library provides interfaces and implementations for ordering,
-equality, hashing, type conversions, iterators, builders, key-value maps,
-caches, and assertions.
+The Swim Util library provides interfaces for ordering, equality, hashing,
+type conversions, functional maps, interpolators, scales, iterators, builders,
+key-value maps, caches, and assertions.
 
 ## Overview
 

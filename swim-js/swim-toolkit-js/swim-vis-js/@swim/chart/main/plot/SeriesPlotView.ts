@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Mutable, Values} from "@swim/util";
-import {Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/mapping";
+import {Equals, Mutable, Values, Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/util";
 import {BTree} from "@swim/collections";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";

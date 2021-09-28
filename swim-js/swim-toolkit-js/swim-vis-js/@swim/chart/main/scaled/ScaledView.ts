@@ -12,8 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Equivalent, Mutable, Arrays, Values} from "@swim/util";
 import {
+  Equals,
+  Equivalent,
+  Mutable,
+  Arrays,
+  Values,
   Domain,
   Range,
   AnyTiming,
@@ -23,7 +27,7 @@ import {
   LinearRange,
   ContinuousScale,
   LinearScale,
-} from "@swim/mapping";
+} from "@swim/util";
 import {DateTime, TimeDomain, TimeScale} from "@swim/time";
 import {
   ViewContextType,

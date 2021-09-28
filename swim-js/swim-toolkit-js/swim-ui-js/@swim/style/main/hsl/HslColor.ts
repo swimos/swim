@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Mutable, Murmur3, Numbers, Constructors} from "@swim/util";
+import {Lazy, Mutable, Murmur3, Numbers, Constructors, Interpolator} from "@swim/util";
 import type {Output} from "@swim/codec";
-import type {Interpolator} from "@swim/mapping";
 import {Item, Value} from "@swim/structure";
 import {AnyAngle, Angle} from "@swim/math";
 import {AnyColor, Color} from "../color/Color";

@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Equals, Equivalent, Mutable} from "@swim/util";
+import {Lazy, Equals, Equivalent, Mutable, Interpolate, Interpolator} from "@swim/util";
 import {Parser, Diagnostic, Unicode} from "@swim/codec";
-import type {Interpolate, Interpolator} from "@swim/mapping";
 import {Item, Value, Text, Form} from "@swim/structure";
 import {AnyLength, Length} from "@swim/math";
 import {AnyColor, Color} from "../color/Color";

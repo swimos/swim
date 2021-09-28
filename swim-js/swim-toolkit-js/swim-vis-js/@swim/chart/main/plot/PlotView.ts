@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Domain, Range, AnyTiming, ContinuousScale} from "@swim/mapping";
+import type {Domain, Range, AnyTiming, ContinuousScale} from "@swim/util";
 import type {AnyFont, AnyColor} from "@swim/style";
 import type {ViewAnimator} from "@swim/view";
 import {GraphicsViewInit, GraphicsView} from "@swim/graphics";

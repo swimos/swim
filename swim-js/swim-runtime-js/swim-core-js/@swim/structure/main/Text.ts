@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Mutable, Numbers, Strings, HashGenCacheSet} from "@swim/util";
+import {Lazy, Mutable, Numbers, Strings, Interpolator, HashGenCacheSet} from "@swim/util";
 import {OutputSettings, Output, Format} from "@swim/codec";
-import type {Interpolator} from "@swim/mapping";
 import {AnyItem, Item} from "./Item";
 import {AnyValue, Value} from "./Value";
 import {Num} from "./"; // forward import

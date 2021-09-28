@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Range, AnyTiming, Timing, Easing, LinearRange} from "@swim/mapping";
+import {Range, AnyTiming, Timing, Easing, LinearRange} from "@swim/util";
 import {AnyLength, Length, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {Look} from "@swim/theme";

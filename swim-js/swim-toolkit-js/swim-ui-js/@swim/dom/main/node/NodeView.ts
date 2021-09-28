@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Arrays} from "@swim/util";
-import type {AnyTiming} from "@swim/mapping";
+import {Mutable, Arrays, AnyTiming} from "@swim/util";
 import type {ConstraintVariable, Constraint} from "@swim/constraint";
 import {R2Box, Transform} from "@swim/math";
 import type {Look, Feel, MoodVectorUpdates, MoodVector} from "@swim/theme";

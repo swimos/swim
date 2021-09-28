@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
-import type {AnyTiming} from "@swim/mapping";
+import type {Mutable, AnyTiming} from "@swim/util";
 import {AnyLength, Length, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";

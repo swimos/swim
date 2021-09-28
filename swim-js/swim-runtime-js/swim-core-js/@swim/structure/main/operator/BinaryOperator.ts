@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Interpolator} from "@swim/mapping";
+import type {Interpolator} from "@swim/util";
 import type {Item} from "../Item";
 import {Operator} from "./Operator";
 import {BinaryOperatorInterpolator} from "../"; // forward import

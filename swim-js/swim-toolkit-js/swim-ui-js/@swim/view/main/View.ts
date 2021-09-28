@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Arrays} from "@swim/util";
-import {AnyTiming, Timing} from "@swim/mapping";
+import {Mutable, Arrays, AnyTiming, Timing} from "@swim/util";
 import {
   AnyConstraintExpression,
   ConstraintExpression,

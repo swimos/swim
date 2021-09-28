@@ -5,7 +5,6 @@
     "paths": {
       "@swim/util": ["../../../../../swim-runtime-js/swim-core-js/@swim/util/main"],
       "@swim/codec": ["../../../../../swim-runtime-js/swim-core-js/@swim/codec/main"],
-      "@swim/mapping": ["../../../../../swim-runtime-js/swim-core-js/@swim/mapping/main"],
       "@swim/structure": ["../../../../../swim-runtime-js/swim-core-js/@swim/structure/main"],
       "@swim/math": ["../../../../../swim-runtime-js/swim-core-js/@swim/math/main"],
       "@swim/time": ["../../../../../swim-runtime-js/swim-core-js/@swim/time/main"]
@@ -15,7 +14,6 @@
   "references": [
     {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/util/main"},
     {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/codec/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/mapping/main"},
     {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/structure/main"},
     {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/math/main"},
     {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/time/main"}

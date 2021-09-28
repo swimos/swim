@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Mutable} from "@swim/util";
-import {AnyTiming, Timing} from "@swim/mapping";
+import {Lazy, Mutable, AnyTiming, Timing} from "@swim/util";
 import {Length} from "@swim/math";
 import {Expansion} from "@swim/style";
 import {Look} from "@swim/theme";

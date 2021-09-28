@@ -6,7 +6,6 @@
     {"path": "./@swim/codec"},
     {"path": "./@swim/args"},
     {"path": "./@swim/unit"},
-    {"path": "./@swim/mapping"},
     {"path": "./@swim/collections"},
     {"path": "./@swim/constraint"},
     {"path": "./@swim/structure"},

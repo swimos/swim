@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import type {AnyTiming, Timing} from "@swim/mapping";
+import type {AnyTiming, Timing} from "@swim/util";
 import {Transform} from "@swim/math";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewFlags, ViewFactory, ViewConstructor, View} from "@swim/view";

@@ -13,8 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import type {Mutable} from "@swim/util";
-import {Interpolator} from "@swim/mapping";
+import {Mutable, Interpolator} from "@swim/util";
 import type {FontStyle} from "./FontStyle";
 import type {FontVariant} from "./FontVariant";
 import type {FontWeight} from "./FontWeight";

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
-import {Interpolator} from "@swim/mapping";
+import {Mutable, Interpolator} from "@swim/util";
 import {GeoBox} from "./GeoBox";
 
 /** @hidden */

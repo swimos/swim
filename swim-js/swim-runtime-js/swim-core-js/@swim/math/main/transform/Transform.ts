@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HashCode, Equivalent, Lazy} from "@swim/util";
+import {Lazy, HashCode, Equivalent, Interpolate, Interpolator} from "@swim/util";
 import {Output, Parser, Debug, Diagnostic, Unicode} from "@swim/codec";
-import type {Interpolate, Interpolator} from "@swim/mapping";
 import type {Value, Form} from "@swim/structure";
 import {AnyLength, Length} from "../length/Length";
 import {PxLength} from "../length/PxLength";

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Mutable} from "@swim/util";
-import {AnyTiming, Timing} from "@swim/mapping";
+import {Lazy, Mutable, AnyTiming, Timing} from "@swim/util";
 import {Look, Mood, MoodVector, Theme, ThemeMatrix} from "@swim/theme";
 import {View} from "../View";
 import {ViewManager} from "../manager/ViewManager";

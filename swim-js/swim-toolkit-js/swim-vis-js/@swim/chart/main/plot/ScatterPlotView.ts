@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import {Equals, Mutable, Values} from "@swim/util";
-import {Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/mapping";
+import {Domain, Range, AnyTiming, LinearRange, ContinuousScale} from "@swim/util";
 import type {R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";
 import {ViewContextType, ViewFlags, View, ViewProperty, ViewAnimator, ViewFastener} from "@swim/view";

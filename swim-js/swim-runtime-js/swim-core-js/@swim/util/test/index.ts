@@ -14,6 +14,9 @@
 
 export * from "./lang";
 export * from "./runtime";
+export * from "./interpolate";
+export * from "./transition";
+export * from "./scale";
 export {UtilSuite} from "./UtilSuite";
 
 import {UtilSuite} from "./UtilSuite";

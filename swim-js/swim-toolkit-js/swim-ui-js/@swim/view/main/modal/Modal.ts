@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {AnyTiming} from "@swim/mapping";
+import type {AnyTiming} from "@swim/util";
 import type {View} from "../View";
 
 export interface ModalOptions {

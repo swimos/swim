@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Mutable} from "@swim/util";
-import {Interpolator} from "@swim/mapping";
+import {Equals, Mutable, Interpolator} from "@swim/util";
 import type {Angle} from "@swim/math";
 import type {Color} from "@swim/style";
 import type {Look, MoodMatrix} from "@swim/theme";

@@ -66,21 +66,6 @@ const core = [
     ],
   },
   {
-    id: "mapping",
-    name: "@swim/mapping",
-    path: "swim-core-js/@swim/mapping",
-    targets: [
-      {
-        id: "main",
-        deps: ["util"],
-      },
-      {
-        id: "test",
-        deps: ["util", "codec", "unit", "mapping"],
-      },
-    ],
-  },
-  {
     id: "collections",
     name: "@swim/collections",
     path: "swim-core-js/@swim/collections",
@@ -117,11 +102,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping"],
+        deps: ["util", "codec"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "mapping", "structure"],
+        deps: ["util", "codec", "unit", "structure"],
       },
     ],
   },
@@ -147,11 +132,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "structure", "streamlet"],
+        deps: ["util", "codec", "collections", "structure", "streamlet"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "mapping", "collections", "structure", "streamlet", "dataflow"],
+        deps: ["util", "codec", "unit", "collections", "structure", "streamlet", "dataflow"],
       },
     ],
   },
@@ -162,11 +147,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "structure"],
+        deps: ["util", "codec", "structure"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "mapping", "structure", "recon"],
+        deps: ["util", "codec", "unit", "structure", "recon"],
       },
     ],
   },
@@ -177,15 +162,15 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "structure", "recon"],
+        deps: ["util", "codec", "structure", "recon"],
       },
       {
         id: "cli",
-        deps: ["util", "codec", "args", "mapping", "structure", "recon", "macro"],
+        deps: ["util", "codec", "args", "structure", "recon", "macro"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "mapping", "structure", "recon", "macro"],
+        deps: ["util", "codec", "unit", "structure", "recon", "macro"],
       },
     ],
   },
@@ -196,11 +181,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "structure"],
+        deps: ["util", "codec", "structure"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "mapping", "structure", "uri"],
+        deps: ["util", "codec", "unit", "structure", "uri"],
       },
     ],
   },
@@ -211,11 +196,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "structure"],
+        deps: ["util", "codec", "structure"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "mapping", "structure", "math"],
+        deps: ["util", "codec", "unit", "structure", "math"],
       },
     ],
   },
@@ -226,11 +211,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "structure", "math"],
+        deps: ["util", "codec", "structure", "math"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "mapping", "structure", "math", "geo"],
+        deps: ["util", "codec", "unit", "structure", "math", "geo"],
       },
     ],
   },
@@ -241,11 +226,11 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "structure"],
+        deps: ["util", "codec", "structure"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "mapping", "structure", "time"],
+        deps: ["util", "codec", "unit", "structure", "time"],
       },
     ],
   },
@@ -258,7 +243,7 @@ const core = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "macro", "uri", "math", "geo", "time"],
+        deps: ["util", "codec", "collections", "constraint", "structure", "streamlet", "dataflow", "recon", "macro", "uri", "math", "geo", "time"],
       },
     ],
   },
@@ -272,11 +257,11 @@ const host = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "structure", "recon", "uri"],
+        deps: ["util", "codec", "structure", "recon", "uri"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "unit", "mapping", "structure", "recon", "uri", "warp"],
+        deps: ["util", "codec", "unit", "structure", "recon", "uri", "warp"],
       },
     ],
   },
@@ -287,11 +272,11 @@ const host = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "mapping", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp"],
+        deps: ["util", "codec", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp"],
       },
       {
         id: "test",
-        deps: ["util", "codec", "collections", "unit", "mapping", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
+        deps: ["util", "codec", "collections", "unit", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
     ],
   },
@@ -302,7 +287,7 @@ const host = [
     targets: [
       {
         id: "main",
-        deps: ["util", "codec", "args", "mapping", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
+        deps: ["util", "codec", "args", "collections", "structure", "streamlet", "dataflow", "recon", "uri", "warp", "client"],
       },
     ],
   },

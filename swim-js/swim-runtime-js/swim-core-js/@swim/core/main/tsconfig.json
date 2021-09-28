@@ -5,7 +5,6 @@
     "paths": {
       "@swim/util": ["../../util/main"],
       "@swim/codec": ["../../codec/main"],
-      "@swim/mapping": ["../../mapping/main"],
       "@swim/collections": ["../../collections/main"],
       "@swim/constraint": ["../../constraint/main"],
       "@swim/structure": ["../../structure/main"],
@@ -22,7 +21,6 @@
   "references": [
     {"path": "../../util/main"},
     {"path": "../../codec/main"},
-    {"path": "../../mapping/main"},
     {"path": "../../collections/main"},
     {"path": "../../constraint/main"},
     {"path": "../../structure/main"},

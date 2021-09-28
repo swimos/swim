@@ -13,8 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import {Mutable, Arrays} from "@swim/util";
-import type {AnyTiming} from "@swim/mapping";
+import {Mutable, Arrays, AnyTiming} from "@swim/util";
 import type {
   AnyConstraintExpression,
   ConstraintVariable,

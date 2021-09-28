@@ -13,8 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import type {Mutable} from "@swim/util";
-import {AnyTiming, Timing} from "@swim/mapping";
+import {Mutable, AnyTiming, Timing} from "@swim/util";
 import {ToStyleString, ToCssValue} from "@swim/style";
 import {Look, Mood, MoodVector, ThemeMatrix} from "@swim/theme";
 import type {StyleAnimator} from "../style/StyleAnimator";

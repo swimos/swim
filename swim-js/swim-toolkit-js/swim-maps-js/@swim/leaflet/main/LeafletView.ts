@@ -14,8 +14,7 @@
 
 /// <reference types="leaflet"/>
 
-import type {Mutable} from "@swim/util";
-import {AnyTiming, Timing} from "@swim/mapping";
+import {Mutable, AnyTiming, Timing} from "@swim/util";
 import {GeoPoint} from "@swim/geo";
 import {Look, Mood} from "@swim/theme";
 import {View} from "@swim/view";

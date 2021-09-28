@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {AnyTiming, Timing, Interpolator} from "@swim/mapping";
+import type {AnyTiming, Timing, Interpolator} from "@swim/util";
 import type {AnyLength, Length} from "@swim/math";
 import type {AnyFont, Font, AnyColor, Color, AnyBoxShadow, BoxShadow} from "@swim/style";
 import {LookVector} from "./LookVector";

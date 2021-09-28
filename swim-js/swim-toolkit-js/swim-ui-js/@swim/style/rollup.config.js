@@ -13,7 +13,6 @@ const main = {
     globals: {
       "@swim/util": "swim",
       "@swim/codec": "swim",
-      "@swim/mapping": "swim",
       "@swim/structure": "swim",
       "@swim/math": "swim",
       "@swim/time": "swim",
@@ -25,7 +24,6 @@ const main = {
   external: [
     "@swim/util",
     "@swim/codec",
-    "@swim/mapping",
     "@swim/structure",
     "@swim/math",
     "@swim/time",

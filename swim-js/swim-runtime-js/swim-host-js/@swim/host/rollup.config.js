@@ -13,7 +13,6 @@ const main = {
     globals: {
       "@swim/util": "swim",
       "@swim/codec": "swim",
-      "@swim/mapping": "swim",
       "@swim/collections": "swim",
       "@swim/structure": "swim",
       "@swim/streamlet": "swim",
@@ -29,7 +28,6 @@ const main = {
   external: [
     "@swim/util",
     "@swim/codec",
-    "@swim/mapping",
     "@swim/collections",
     "@swim/structure",
     "@swim/streamlet",

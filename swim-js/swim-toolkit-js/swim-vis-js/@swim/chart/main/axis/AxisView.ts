@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {AnyTiming, Timing, Easing, ContinuousScale} from "@swim/mapping";
+import {AnyTiming, Timing, Easing, ContinuousScale} from "@swim/util";
 import {BTree} from "@swim/collections";
 import {AnyR2Point, R2Point, R2Box} from "@swim/math";
 import {AnyFont, Font, AnyColor, Color} from "@swim/style";

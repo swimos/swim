@@ -14,8 +14,7 @@
 
 /// <reference types="google.maps"/>
 
-import {Lazy, Equivalent, Mutable} from "@swim/util";
-import type {AnyTiming} from "@swim/mapping";
+import {Lazy, Equivalent, Mutable, AnyTiming} from "@swim/util";
 import {GeoPoint} from "@swim/geo";
 import {ViewContextType, ViewFlags, View} from "@swim/view";
 import {ViewHtml, HtmlView} from "@swim/dom";

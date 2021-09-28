@@ -5,7 +5,6 @@
     "paths": {
       "@swim/util": ["../../../../../swim-runtime-js/swim-core-js/@swim/util/main"],
       "@swim/codec": ["../../../../../swim-runtime-js/swim-core-js/@swim/codec/main"],
-      "@swim/mapping": ["../../../../../swim-runtime-js/swim-core-js/@swim/mapping/main"],
       "@swim/collections": ["../../../../../swim-runtime-js/swim-core-js/@swim/collections/main"],
       "@swim/constraint": ["../../../../../swim-runtime-js/swim-core-js/@swim/constraint/main"],
       "@swim/structure": ["../../../../../swim-runtime-js/swim-core-js/@swim/structure/main"],
@@ -31,7 +30,6 @@
   "references": [
     {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/util/main"},
     {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/codec/main"},
-    {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/mapping/main"},
     {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/collections/main"},
     {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/constraint/main"},
     {"path": "../../../../../swim-runtime-js/swim-core-js/@swim/structure/main"},

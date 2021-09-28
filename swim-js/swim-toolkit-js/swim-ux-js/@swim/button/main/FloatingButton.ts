@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
-import {AnyTiming, Timing} from "@swim/mapping";
+import {Mutable, AnyTiming, Timing} from "@swim/util";
 import {Length, Angle, Transform} from "@swim/math";
 import {AnyExpansion, Expansion} from "@swim/style";
 import {Look, Feel, Mood, MoodVector, ThemeMatrix} from "@swim/theme";

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Domain, Range, AnyTiming, ContinuousScale} from "@swim/mapping";
+import {Domain, Range, AnyTiming, ContinuousScale} from "@swim/util";
 import {View, Animator, ViewAnimator} from "@swim/view";
 import {ScaledView} from "../"; // forward import
 

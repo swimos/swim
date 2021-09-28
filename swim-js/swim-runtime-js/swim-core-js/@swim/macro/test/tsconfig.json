@@ -6,7 +6,6 @@
       "@swim/util": ["../../util/main"],
       "@swim/codec": ["../../codec/main"],
       "@swim/unit": ["../../unit/main"],
-      "@swim/mapping": ["../../mapping/main"],
       "@swim/structure": ["../../structure/main"],
       "@swim/recon": ["../../recon/main"],
       "@swim/macro": ["../../macro/main"]
@@ -16,7 +15,6 @@
     {"path": "../../util/main"},
     {"path": "../../codec/main"},
     {"path": "../../unit/main"},
-    {"path": "../../mapping/main"},
     {"path": "../../structure/main"},
     {"path": "../../recon/main"},
     {"path": "../../macro/main"}

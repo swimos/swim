@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HashCode, Equivalent, Compare, Lazy} from "@swim/util";
+import {Lazy, HashCode, Equivalent, Compare, Interpolate, Interpolator} from "@swim/util";
 import {Output, Parser, Debug, Diagnostic, Unicode} from "@swim/codec";
-import type {Interpolate, Interpolator} from "@swim/mapping";
 import {Attr, Value, Text, Form} from "@swim/structure";
 import {DegAngle} from "../"; // forward import
 import {RadAngle} from "../"; // forward import

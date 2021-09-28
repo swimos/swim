@@ -6,7 +6,6 @@
     {"path": "./swim-core-js/@swim/codec"},
     {"path": "./swim-core-js/@swim/args"},
     {"path": "./swim-core-js/@swim/unit"},
-    {"path": "./swim-core-js/@swim/mapping"},
     {"path": "./swim-core-js/@swim/collections"},
     {"path": "./swim-core-js/@swim/structure"},
     {"path": "./swim-core-js/@swim/streamlet"},

@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Lazy, Numbers, Constructors, Cursor} from "@swim/util";
+import {Lazy, Numbers, Constructors, Cursor, Interpolator} from "@swim/util";
 import type {Output} from "@swim/codec";
-import type {Interpolator} from "@swim/mapping";
 import {AnyItem, Item} from "./Item";
 import {Attr} from "./Attr";
 import {Slot} from "./Slot";

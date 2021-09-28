@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Mutable} from "@swim/util";
-import type {Timing} from "@swim/mapping";
+import type {Mutable, Timing} from "@swim/util";
 import type {MoodVector, ThemeMatrix} from "@swim/theme";
 import type {CssRule} from "../css/CssRule";
 import {StyleSheetContext, StyleSheet} from "../css/StyleSheet";

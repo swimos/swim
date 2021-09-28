@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Lazy, Arrays} from "@swim/util";
+import {Lazy, Equals, Arrays, Interpolate, Interpolator} from "@swim/util";
 import {Debug, Format, Output} from "@swim/codec";
-import type {Interpolate, Interpolator} from "@swim/mapping";
 import type {Look} from "../look/Look";
 import {FeelVectorInterpolator} from "../"; // forward import
 

@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Values} from "@swim/util";
-import type {AnyTiming} from "@swim/mapping";
+import {Equals, Values, AnyTiming} from "@swim/util";
 import {AnyLength, Length, AnyTransform, Transform} from "@swim/math";
 import {
   FontStyle,

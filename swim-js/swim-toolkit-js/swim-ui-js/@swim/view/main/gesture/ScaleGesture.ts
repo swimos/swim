@@ -13,8 +13,7 @@
 // limitations under the License.
 
 import {__extends} from "tslib";
-import type {Mutable} from "@swim/util";
-import type {AnyTiming, ContinuousScale} from "@swim/mapping";
+import type {Mutable, AnyTiming, ContinuousScale} from "@swim/util";
 import type {R2Box} from "@swim/math";
 import type {ViewContext} from "../ViewContext";
 import {View} from "../View";

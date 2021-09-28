@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Mutable, Arrays} from "@swim/util";
-import {AnyTiming, Timing} from "@swim/mapping";
+import {Mutable, Arrays, AnyTiming, Timing} from "@swim/util";
 import {AnyLength, Length, AnyR2Box, R2Box} from "@swim/math";
 import {Color} from "@swim/style";
 import {Look} from "@swim/theme";

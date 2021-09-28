@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Mutable} from "@swim/util";
-import {AnyTiming, Timing, Easing, Interpolator} from "@swim/mapping";
+import {Equals, Mutable, AnyTiming, Timing, Easing, Interpolator} from "@swim/util";
 import type {Look} from "@swim/theme";
 import {ViewPrecedence, View} from "../View";
 import type {AnimationTrack} from "../animation/AnimationTrack";

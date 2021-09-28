@@ -12,9 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equivalent, HashCode, Lazy, Murmur3, Numbers, Constructors} from "@swim/util";
+import {
+  Lazy,
+  Equivalent,
+  HashCode,
+  Murmur3,
+  Numbers,
+  Constructors,
+  Interpolate,
+  Interpolator,
+} from "@swim/util";
 import {Output, Debug, Format} from "@swim/codec";
-import type {Interpolate, Interpolator} from "@swim/mapping";
 import type {R2Point} from "@swim/math";
 import type {GeoProjection} from "./GeoProjection";
 import {AnyGeoShape, GeoShape} from "./GeoShape";

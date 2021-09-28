@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Equals, Equivalent, Mutable, Arrays, Values} from "@swim/util";
+import {Equals, Equivalent, Mutable, Arrays, Values, Interpolate, Interpolator} from "@swim/util";
 import {Parser, Diagnostic, Unicode} from "@swim/codec";
-import type {Interpolate, Interpolator} from "@swim/mapping";
 import {Angle} from "@swim/math";
 import {AnyColorStop, ColorStop} from "./ColorStop";
 import {LinearGradientInterpolator} from "../"; // forward import

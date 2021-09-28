@@ -12,7 +12,6 @@ const main = {
     format: "umd",
     globals: {
       "@swim/util": "swim",
-      "@swim/mapping": "swim",
       "@swim/collections": "swim",
       "@swim/structure": "swim",
       "@swim/streamlet": "swim",
@@ -23,7 +22,6 @@ const main = {
   },
   external: [
     "@swim/util",
-    "@swim/mapping",
     "@swim/collections",
     "@swim/structure",
     "@swim/streamlet",

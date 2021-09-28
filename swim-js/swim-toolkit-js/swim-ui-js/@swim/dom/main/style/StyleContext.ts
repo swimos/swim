@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {AnyTiming} from "@swim/mapping";
+import type {AnyTiming} from "@swim/util";
 import type {ConstraintScope} from "@swim/constraint";
 import type {Look, Feel, MoodVector, ThemeMatrix} from "@swim/theme";
 import type {AnimationTimeline} from "@swim/view";

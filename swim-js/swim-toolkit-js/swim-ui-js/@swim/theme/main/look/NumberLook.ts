@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Interpolator, NumberInterpolator} from "@swim/mapping";
+import {Interpolator, NumberInterpolator} from "@swim/util";
 import {Look} from "./Look";
 
 export class NumberLook extends Look<number> {

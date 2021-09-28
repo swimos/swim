@@ -13,8 +13,7 @@
 // limitations under the License.
 
 import {AnyItem, Item} from "./Item";
-import type {Builder} from "@swim/util";
-import type {Interpolator} from "@swim/mapping";
+import type {Interpolator, Builder} from "@swim/util";
 import type {Field} from "./Field";
 import {Attr} from "./Attr";
 import {Slot} from "./Slot";

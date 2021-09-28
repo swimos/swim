@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {AnyTiming} from "@swim/mapping";
+import type {AnyTiming} from "@swim/util";
 import type {GeoBox} from "@swim/geo";
 import {ViewContextType, ViewFlags, View, ViewFastener} from "@swim/view";
 import {HtmlView} from "@swim/dom";

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {Timing} from "@swim/mapping";
+import type {Timing} from "@swim/util";
 import {AnyExpansion, Expansion} from "@swim/style";
 import {Look, MoodVector, ThemeMatrix} from "@swim/theme";
 import {ViewContextType, View, ViewAnimator, ExpansionViewAnimator} from "@swim/view";

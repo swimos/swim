@@ -23,8 +23,16 @@ export * from "./lang";
 
 export * from "./runtime";
 
+export * from "./mapping";
+
+export * from "./interpolate";
+
+export * from "./transition";
+
+export * from "./scale";
+
 export * from "./collections";
 
-export * from "./assert";
-
 export * from "./cache";
+
+export * from "./assert";

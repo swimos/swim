@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {HashCode, Murmur3, Numbers, Constructors} from "@swim/util";
+import {HashCode, Murmur3, Numbers, Constructors, Interpolate, Interpolator} from "@swim/util";
 import {Debug, Format, Output} from "@swim/codec";
-import type {Interpolate, Interpolator} from "@swim/mapping";
 import {R2Segment} from "@swim/math";
 import type {GeoProjection} from "./GeoProjection";
 import {AnyGeoShape, GeoShape} from "./GeoShape";
